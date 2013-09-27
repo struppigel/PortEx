@@ -1,6 +1,12 @@
 *.class
+.settings
+.classpath
+.project
+data
+*.exe
 
 # Package Files #
 *.jar
 *.war
 *.ear
+/target
