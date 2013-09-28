@@ -18,8 +18,14 @@ public class PELoader {
 		this.file = file;
 	}
 
-	public static PEData loadPE(File file) throws IOException {
-		return new PELoader(file).loadData();
+	/**
+	 * Loads the basic data for the given PE file
+	 * @param peFile
+	 * @return data of the PE file
+	 * @throws IOException
+	 */
+	public static PEData loadPE(File peFile) throws IOException {
+		return new PELoader(peFile).loadData();
 	}
 
 	private PEData loadData() throws IOException {

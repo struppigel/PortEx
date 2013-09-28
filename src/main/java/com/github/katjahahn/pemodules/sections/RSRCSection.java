@@ -1,4 +1,4 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.pemodules.sections;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
+import com.github.katjahahn.pemodules.PEModule;
 
-public class RSRCSection extends PEModule {
+public class RSRCSection extends PEModule implements PESection {
 
 	private final static String RSRC_DIR_SPEC = "rsrcdirspec";
 	private final static String RSRC_DIR_ENTRY_SPEC = "resourcedirentryspec";

@@ -1,0 +1,7 @@
+40;IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE;DLL can be relocated at load time.
+80;IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY;Code Integrity checks are enforced.
+100;IMAGE_DLL_CHARACTERISTICS_NX_COMPAT;Image is NX compatible.
+400;IMAGE_DLLCHARACTERISTICS_ NO_SEH;Does not use structured exception (SE) handling. No SE handler may be called in this image.
+800;IMAGE_DLLCHARACTERISTICS_ NO_BIND;Do not bind the image.
+2000;IMAGE_DLLCHARACTERISTICS_ WDM_DRIVER;A WDM driver.
+8000;IMAGE_DLLCHARACTERISTICS_ TERMINAL_SERVER_AWARE;Terminal Server aware.

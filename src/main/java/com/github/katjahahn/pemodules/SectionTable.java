@@ -134,5 +134,30 @@ public class SectionTable extends PEModule {
 		}
 		return null;
 	}
+	
+	// TODO not tested and it is almost the same code as getPointerToRawData
+		public Integer getSize(String sectionName) {
+			for (int i = 0; i < numberOfEntries; i++) {
+				byte[] section = Arrays.copyOfRange(sectionTableBytes, i
+						* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
+				if (isSection(sectionName, section)) {
+					return getSizeOfRawData(section);
+				}
+			}
+
+			return null;
+		}
+
+		public Integer getSizeOfRawData(byte[] section) {
+			for (Entry<String, String[]> entry : specification.entrySet()) {
+				if (entry.getKey().equals("SIZE_OF_RAW_DATA")) {
+					String[] specs = entry.getValue();
+					int value = getBytesIntValue(section,
+							Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
+					return value;
+				}
+			}
+			return null;
+		}
 
 }

@@ -1,0 +1,9 @@
+MAGIC_NUMBER;magic number;0;2
+MAJOR_LINKER_VERSION;major linker version;2;1
+MINOR_LINKER_VERSION;minor linker version;3;1
+SIZE_OF_CODE;size of code;4;4
+SIZE_OF_INIT_DATA;size of initialized data;8;4
+SIZE_OF_UNINIT_DATA;size of unitialized data;12;4
+ADDR_OF_ENTRY_POINT;address of entry point;16;4
+BASE_OF_CODE;address of base of code;20;4
+BASE_OF_DATA;address of base of data;24;4

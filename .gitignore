@@ -2,8 +2,9 @@
 .settings
 .classpath
 .project
-data
+/data
 *.exe
+*.dll
 
 # Package Files #
 *.jar

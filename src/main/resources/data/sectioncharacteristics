@@ -1,0 +1,31 @@
+8;IMAGE_SCN_TYPE_NO_PAD;The section should not be padded to the next boundary. DEPRECATED
+20;IMAGE_SCN_CNT_CODE;The section contains executable code.
+40;IMAGE_SCN_CNT_INITIALIZED_DATA;The section contains initialized data.
+80;IMAGE_SCN_CNT_UNINITIALIZED_DATA;The section contains uninitialized data.
+200;IMAGE_SCN_LNK_INFO;The section contains comments or other information. Valid for object files only.
+800;IMAGE_SCN_LNK_REMOVE;The section will not become part of the image. Valid for object files only.
+1000;IMAGE_SCN_LNK_COMDAT;The section contains COMDAT data.
+8000;IMAGE_SCN_GPREL;The section contains data referenced through the global pointer (GP).
+20000;IMAGE_SCN_MEM_16BIT;For ARM machine types, the section contains Thumb code.
+100000;IMAGE_SCN_ALIGN_1BYTES;Align data on a 1-byte boundary. Valid only for object files.
+200000;IMAGE_SCN_ALIGN_2BYTES;Align data on a 2-byte boundary. Valid only for object files.
+300000;IMAGE_SCN_ALIGN_4BYTES;Align data on a 4-byte boundary. Valid only for object files.
+400000;IMAGE_SCN_ALIGN_8BYTES;Align data on a 8-byte boundary. Valid only for object files.
+500000;IMAGE_SCN_ALIGN_16BYTES;Align data on a 16-byte boundary. Valid only for object files.
+600000;IMAGE_SCN_ALIGN_32BYTES;Align data on a 32-byte boundary. Valid only for object files.
+700000;IMAGE_SCN_ALIGN_64BYTES;Align data on a 64-byte boundary. Valid only for object files.
+800000;IMAGE_SCN_ALIGN_128BYTES;Align data on a 128-byte boundary. Valid only for object files.
+900000;IMAGE_SCN_ALIGN_256BYTES;Align data on a 256-byte boundary. Valid only for object files.
+A00000;IMAGE_SCN_ALIGN_512BYTES;Align data on a 512-byte boundary. Valid only for object files.
+B00000;IMAGE_SCN_ALIGN_1024BYTES;Align data on a 1024-byte boundary. Valid only for object files.
+C00000;IMAGE_SCN_ALIGN_2048BYTES;Align data on a 2048-byte boundary. Valid only for object files.
+D00000;IMAGE_SCN_ALIGN_4096BYTES;Align data on a 4096-byte boundary. Valid only for object files.
+E00000;IMAGE_SCN_ALIGN_8192BYTES;Align data on a 8192-byte boundary. Valid only for object files.
+1000000;IMAGE_SCN_LNK_NRELOC_OVFL;The section contains extended relocations.
+2000000;IMAGE_SCN_MEM_DISCARDABLE;The section can be discarded as needed.
+4000000;IMAGE_SCN_MEM_NOT_CACHED;The section cannot be cached.
+8000000;IMAGE_SCN_MEM_NOT_PAGED;The section is not pageable.
+10000000;IMAGE_SCN_MEM_SHARED;The section can be shared in memory.
+20000000;IMAGE_SCN_MEM_EXECUTE;The section can be executed as code.
+80000000;IMAGE_SCN_MEM_READ;The section can be read.
+80000000;IMAGE_SCN_MEM_WRITE;The section can be written to.

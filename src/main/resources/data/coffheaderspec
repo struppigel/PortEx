@@ -1,0 +1,5 @@
+MACHINE;machine type;0;2
+SECTION_NR;number of sections;2;2
+TIME_DATE;time date stamp;4;4
+SIZE_OF_OPT_HEADER;size of optional header;16;2
+CHARACTERISTICS;characteristics;18;2
