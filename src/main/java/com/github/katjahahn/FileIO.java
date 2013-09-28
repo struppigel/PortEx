@@ -1,11 +1,8 @@
 package com.github.katjahahn;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,42 +10,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class FileIO {
-	
+
 	private static final String DELIMITER = ";";
-	private static final String SPEC_DIR = "data/";
-
-	/**
-	 * @param file
-	 *            file to get the bytes from
-	 * @return byte array that represents the given file
-	 * @throws IOException
-	 */
-	public static byte[] getBytesFromFile(File file) throws IOException {
-		byte[] data = null;
-		try (FileInputStream fileInputStream = new FileInputStream(file)) {
-			data = new byte[(int) file.length()];
-			fileInputStream.read(data);
-		}
-		return data;
-	}
-
-	public static List<String> readFile(String filename) throws IOException {
-		List<String> lines = new LinkedList<>();
-		try (BufferedReader reader = Files.newBufferedReader(
-				new File(filename).toPath(), StandardCharsets.UTF_8)) {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				lines.add(line);
-			}
-			return lines;
-		}
-	}
+	private static final String SPEC_DIR = "/data/";
 
 	public static Map<String, String[]> readMap(String filename)
 			throws IOException {
 		Map<String, String[]> map = new TreeMap<>();
-		try (BufferedReader reader = Files.newBufferedReader(
-				new File(SPEC_DIR + filename).toPath(), StandardCharsets.UTF_8)) {
+		try (InputStreamReader isr = new InputStreamReader(
+				FileIO.class.getResourceAsStream(SPEC_DIR + filename));
+				BufferedReader reader = new BufferedReader(isr)) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] values = line.split(DELIMITER);
@@ -57,12 +28,12 @@ public class FileIO {
 			return map;
 		}
 	}
-	
-	public static List<String[]> readArray(String filename)
-			throws IOException {
+
+	public static List<String[]> readArray(String filename) throws IOException {
 		List<String[]> list = new LinkedList<>();
-		try (BufferedReader reader = Files.newBufferedReader(
-				new File(SPEC_DIR + filename).toPath(), StandardCharsets.UTF_8)) {
+		try (InputStreamReader isr = new InputStreamReader(
+				FileIO.class.getResourceAsStream(SPEC_DIR + filename));
+				BufferedReader reader = new BufferedReader(isr)) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] values = line.split(DELIMITER);
