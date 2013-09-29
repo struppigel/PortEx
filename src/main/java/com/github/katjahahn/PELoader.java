@@ -3,9 +3,12 @@ package com.github.katjahahn;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Date;
+import java.util.List;
 
 import com.github.katjahahn.pemodules.COFFFileHeader;
 import com.github.katjahahn.pemodules.MSDOSHeader;
+import com.github.katjahahn.pemodules.MachineType;
 import com.github.katjahahn.pemodules.OptionalHeader;
 import com.github.katjahahn.pemodules.PEData;
 import com.github.katjahahn.pemodules.SectionTable;
@@ -77,11 +80,28 @@ public class PELoader {
 
 	public static void main(String[] args) {
 		try {
-			PEData data = loadPE(new File(args[0]));
-			System.out.println("PE offset: "
-					+ data.getMSDOSHeader().getPEOffset());
-			System.out.println("PE signature found: yes");
-			System.out.println(data.getSectionTable().getInfo());
+			//load the PE file data
+			PEData data = PELoader.loadPE(new File(args[0]));
+			
+			//get various data from coff file header
+			COFFFileHeader coff = data.getCOFFFileHeader();
+			MachineType machine = coff.getMachineType();
+			Date date = coff.getTimeDate();
+			int numberOfSections = coff.getNumberOfSections();
+			int optionalHeaderSize = coff.getSizeOfOptionalHeader();
+			System.out.println("machine type: " + COFFFileHeader.getDescription(machine));
+			System.out.println("number of sections: " + coff.getNumberOfSections());
+			System.out.println("size of optional header: " + coff.getSizeOfOptionalHeader());
+			System.out.println("time date stamp: " + date);
+		
+			List<String> characteristics = coff.getCharacteristicsDescriptions();
+			System.out.println("characteristics: ");
+			for(String characteristic : characteristics) {
+				System.out.println("\t* " + characteristic);
+			}
+			
+			//print all available information of the coff file header
+			System.out.println(coff.getInfo());
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}

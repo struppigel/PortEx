@@ -30,7 +30,6 @@ public class OptionalHeader extends PEModule {
 	private int rvaNumber;
 
 	public OptionalHeader(byte[] headerbytes) {
-		// TODO set rvaNumber, magicnumber in constructor
 		this.headerbytes = headerbytes;
 		try {
 			Map<String, String[]> standardSpec = FileIO.readMap(STANDARD_SPEC);
@@ -38,7 +37,7 @@ public class OptionalHeader extends PEModule {
 			List<String[]> datadirSpec = FileIO.readArray(DATA_DIR_SPEC);
 
 			this.magicNumber = getMagicNumber(standardSpec);
-			
+
 			loadStandardFields(standardSpec);
 			loadWindowsSpecificFields(windowsSpec);
 			loadDataDirectories(datadirSpec);
@@ -46,46 +45,46 @@ public class OptionalHeader extends PEModule {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public List<DataDirEntry> getDataDirEntries() {
 		return new LinkedList<>(dataDirEntries);
 	}
-	
+
 	public List<StandardEntry> getWindowsSpecificFields() {
 		return new LinkedList<>(windowsFields);
 	}
-	
+
 	public List<StandardEntry> getStandardFields() {
 		return new LinkedList<>(standardFields);
 	}
-	
+
 	public DataDirEntry getDataDirEntry(String fieldname) {
-		for(DataDirEntry entry : dataDirEntries) {
-			if(entry.fieldName.equals(fieldname)) {
+		for (DataDirEntry entry : dataDirEntries) {
+			if (entry.fieldName.equals(fieldname)) {
 				return entry;
 			}
 		}
 		return null;
 	}
-	
+
 	public StandardEntry getStandardFieldEntry(String key) {
-		for(StandardEntry entry : standardFields) {
-			if(entry.key.equals(key)) {
+		for (StandardEntry entry : standardFields) {
+			if (entry.key.equals(key)) {
 				return entry;
 			}
 		}
 		return null;
 	}
-	
+
 	public StandardEntry getWindowsFieldEntry(String key) {
-		for(StandardEntry entry : windowsFields) {
-			if(entry.key.equals(key)) {
+		for (StandardEntry entry : windowsFields) {
+			if (entry.key.equals(key)) {
 				return entry;
 			}
 		}
 		return null;
 	}
-	
+
 	private void loadStandardFields(Map<String, String[]> standardSpec) {
 		standardFields = new LinkedList<>();
 		int description = 0;
@@ -168,10 +167,11 @@ public class OptionalHeader extends PEModule {
 
 	@Override
 	public String getInfo() {
-		return "Standard fields" + NEWLINE + "..............." + NEWLINE
-				+ NEWLINE + getStandardFieldsInfo() + NEWLINE
-				+ "Windows specific fields" + NEWLINE
-				+ "......................." + NEWLINE + NEWLINE
+		return "---------------" + NEWLINE + "Optional Header" + NEWLINE
+				+ "---------------" + NEWLINE + NEWLINE + "Standard fields"
+				+ NEWLINE + "..............." + NEWLINE + NEWLINE
+				+ getStandardFieldsInfo() + NEWLINE + "Windows specific fields"
+				+ NEWLINE + "......................." + NEWLINE + NEWLINE
 				+ getWindowsSpecificInfo() + NEWLINE + "Data directories"
 				+ NEWLINE + "................" + NEWLINE + NEWLINE
 				+ "virtual_address/size" + NEWLINE + NEWLINE + getDataDirInfo();
@@ -285,6 +285,6 @@ public class OptionalHeader extends PEModule {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return "ERROR, no subsystem description for value: " + value;
+		return null;
 	}
 }

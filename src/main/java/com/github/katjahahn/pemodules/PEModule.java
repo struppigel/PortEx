@@ -2,6 +2,8 @@ package com.github.katjahahn.pemodules;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.github.katjahahn.FileIO;
@@ -11,7 +13,30 @@ public abstract class PEModule {
 	public static final String NEWLINE = System.getProperty("line.separator");
 
 	public abstract String getInfo();
+	
+	protected static List<String> getCharacteristicsDescriptions(long value, String filename) {
+		List<String> characteristics = new LinkedList<>();
+		try { 
+			Map<String, String[]> map = FileIO.readMap(filename);
+			for (String maskStr : map.keySet()) {
+				try {
+					long mask = Long.parseLong(maskStr, 16);
+					if ((value & mask) != 0) {
+						characteristics.add(map.get(maskStr)[1]);
+					}
+				} catch (NumberFormatException e) {
+					System.err.println("ERROR. number format mismatch in file "
+							+ filename + NEWLINE);
+					System.err.println("value: " + maskStr + NEWLINE);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return characteristics;
+	}
 
+	//TODO turn to static
 	protected String getCharacteristics(long value, String filename) {
 		StringBuilder b = new StringBuilder();
 		try {

@@ -2,6 +2,8 @@ package com.github.katjahahn.pemodules;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,44 +15,61 @@ public class COFFFileHeader extends PEModule {
 	public static final int HEADER_SIZE = 20;
 
 	private final byte[] headerbytes;
-	private Map<String, String[]> specification;
+	private List<StandardEntry> data;
 
 	public COFFFileHeader(byte[] headerbytes) {
 		assert headerbytes.length == HEADER_SIZE;
 		this.headerbytes = headerbytes;
 		try {
-			specification = FileIO.readMap(COFF_SPEC_FILE);
+			Map<String, String[]> specification = FileIO
+					.readMap(COFF_SPEC_FILE);
+			loadData(specification);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void loadData(Map<String, String[]> specification) {
+		data = new LinkedList<>();
+		int description = 0;
+		int offset = 1;
+		int length = 2;
+		for (Entry<String, String[]> entry : specification.entrySet()) {
+
+			String[] specs = entry.getValue();
+			int value = getBytesIntValue(headerbytes,
+					Integer.parseInt(specs[offset]),
+					Integer.parseInt(specs[length]));
+			String key = entry.getKey();
+			data.add(new StandardEntry(key, specs[description], value));
 		}
 	}
 
 	@Override
 	public String getInfo() {
 		StringBuilder b = new StringBuilder();
-		for (Entry<String, String[]> entry : specification.entrySet()) {
+		for (StandardEntry entry : data) {
 
-			String[] specs = entry.getValue();
-			int value = getBytesIntValue(headerbytes, Integer.parseInt(specs[1]),
-					Integer.parseInt(specs[2]));
-			String key = entry.getKey();
+			int value = entry.value;
+			String key = entry.key;
+			String description = entry.description;
 			if (key.equals("CHARACTERISTICS")) {
-				b.append(NEWLINE + specs[0] + ": " + NEWLINE);
+				b.append(NEWLINE + description + ": " + NEWLINE);
 				b.append(getCharacteristics(value, "characteristics") + NEWLINE);
 			} else if (key.equals("TIME_DATE")) {
-				b.append(specs[0] + ": ");
-				b.append(getTimeDate(value) + NEWLINE);
+				b.append(description + ": ");
+				b.append(convertToDate(value) + NEWLINE);
 			} else if (key.equals("MACHINE")) {
-				b.append(specs[0] + ": ");
-				b.append(getMachineType(value) + NEWLINE);
+				b.append(description + ": ");
+				b.append(getMachineTypeString(value) + NEWLINE);
 			} else {
-				b.append(specs[0] + ": " + value + NEWLINE);
+				b.append(description + ": " + value + NEWLINE);
 			}
 		}
 		return b.toString();
 	}
 
-	private String getMachineType(int value) {
+	private String getMachineTypeString(int value) {
 		try {
 			Map<String, String[]> map = FileIO.readMap("machinetype");
 			String key = Integer.toHexString(value);
@@ -61,19 +80,71 @@ public class COFFFileHeader extends PEModule {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return "ERROR: couldn't match type to value " + value;
+		throw new IllegalArgumentException("couldn't match type to value "
+				+ value);
 	}
 
-	private Date getTimeDate(int seconds) {
+	private Date convertToDate(int seconds) {
 		long millis = (long) seconds * 1000;
 		return new Date(millis);
 	}
-	
+
 	public int get(String key) {
-		String[] specs = specification.get(key);
-		int value = getBytesIntValue(headerbytes, Integer.parseInt(specs[1]),
-				Integer.parseInt(specs[2]));
-		return value;
+		for (StandardEntry entry : data) {
+			if (entry.key.equals(key)) {
+				return entry.value;
+			}
+		}
+		throw new IllegalArgumentException("invalid key");
+	}
+
+	public static String getDescription(MachineType machine) {
+		int description = 1;
+		int keyString = 0;
+		try {
+			Map<String, String[]> map = FileIO.readMap("machinetype");
+			for (String[] entry : map.values()) {
+				if (entry[keyString].equals(machine.getKey())) {
+					return entry[description];
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null; // this should never happen
+	}
+	
+	public String getMachineDescription() {
+		return getDescription(getMachineType());
+	}
+	
+	public int getCharacteristics() {
+		return get("CHARACTERISTICS");
+	}
+	
+	public List<String> getCharacteristicsDescriptions() {
+		return PEModule.getCharacteristicsDescriptions(getCharacteristics(), "characteristics");
+	}
+
+	public MachineType getMachineType() {
+		int value = get("MACHINE");
+		try {
+			Map<String, String[]> map = FileIO.readMap("machinetype");
+			String hexKey = Integer.toHexString(value);
+			String[] ret = map.get(hexKey);
+			if (ret != null) {
+				String type = ret[0].substring("IMAGE_FILE_MACHINE_".length());
+				return MachineType.valueOf(type);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		throw new IllegalArgumentException("couldn't match type to value "
+				+ value);
+	}
+
+	public Date getTimeDate() {
+		return convertToDate(get("TIME_DATE"));
 	}
 
 	public int getSizeOfOptionalHeader() {
