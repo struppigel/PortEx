@@ -8,9 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
-import com.github.katjahahn.pemodules.PEModule;
 
-public class RSRCSection extends PEModule implements PESection {
+public class RSRCSection extends PESection {
 
 	private final static String RSRC_DIR_SPEC = "rsrcdirspec";
 	private final static String RSRC_DIR_ENTRY_SPEC = "resourcedirentryspec";
@@ -21,13 +20,10 @@ public class RSRCSection extends PEModule implements PESection {
 	private Map<String, String[]> resourceDirEntrySpec;
 	private Map<String, String[]> resourceDataEntrySpec;
 	private final byte[] rsrcbytes;
-	private final byte[] filebytes;
 	private final int virtualAddress;
-	private final boolean lastEntryWasDataEntryRVA = false;
 
-	public RSRCSection(byte[] rsrcbytes, byte[] filebytes, int virtualAddress) {
+	public RSRCSection(byte[] rsrcbytes, int virtualAddress) {
 		this.rsrcbytes = rsrcbytes;
-		this.filebytes = filebytes;
 		this.virtualAddress = virtualAddress;
 		try {
 			rsrcDirSpec = FileIO.readMap(RSRC_DIR_SPEC);

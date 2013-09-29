@@ -68,19 +68,20 @@ public class COFFFileHeader extends PEModule {
 		long millis = (long) seconds * 1000;
 		return new Date(millis);
 	}
-
-	public int getSizeOfOptionalHeader() {
-		String[] specs = specification.get("SIZE_OF_OPT_HEADER");
+	
+	public int get(String key) {
+		String[] specs = specification.get(key);
 		int value = getBytesIntValue(headerbytes, Integer.parseInt(specs[1]),
 				Integer.parseInt(specs[2]));
 		return value;
 	}
 
+	public int getSizeOfOptionalHeader() {
+		return get("SIZE_OF_OPT_HEADER");
+	}
+
 	public int getNumberOfSections() {
-		String[] specs = specification.get("SECTION_NR");
-		int value = getBytesIntValue(headerbytes, Integer.parseInt(specs[1]),
-				Integer.parseInt(specs[2]));
-		return value;
+		return get("SECTION_NR");
 	}
 
 }

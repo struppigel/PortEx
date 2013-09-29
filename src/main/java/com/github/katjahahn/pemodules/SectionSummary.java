@@ -61,7 +61,7 @@ public class SectionSummary extends PEModule {
 			long pointer = table.getPointerToRawData(".rsrc");
 			byte[] rsrcbytes = Arrays.copyOfRange(filebytes, (int) pointer,
 					filebytes.length);
-			rsrc = new RSRCSection(rsrcbytes, filebytes, virtualRSRCAddress);
+			rsrc = new RSRCSection(rsrcbytes, virtualRSRCAddress);
 			return ".rsrc section" + NEWLINE + "............." + NEWLINE
 					+ NEWLINE + rsrc.getInfo();
 		}

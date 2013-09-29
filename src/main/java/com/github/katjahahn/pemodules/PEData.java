@@ -1,5 +1,6 @@
 package com.github.katjahahn.pemodules;
 
+
 public class PEData extends PEModule {
 	
 	private final MSDOSHeader msdos;

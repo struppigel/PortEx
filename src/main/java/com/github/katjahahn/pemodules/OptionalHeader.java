@@ -1,6 +1,7 @@
 package com.github.katjahahn.pemodules;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,47 +10,102 @@ import com.github.katjahahn.FileIO;
 
 public class OptionalHeader extends PEModule {
 
+	/* spec location */
 	private static final String STANDARD_SPEC = "optionalheaderstandardspec";
 	private static final String WINDOWS_SPEC = "optionalheaderwinspec";
 	private static final String DATA_DIR_SPEC = "datadirectoriesspec";
 
-	/* Magic number values */
+	/* magic number values */
 	private static final int PE32 = 0x10B;
 	private static final int PE32_PLUS = 0x20B;
 	private static final int ROM = 0x107;
 
+	/* extracted file data */
+	private List<DataDirEntry> dataDirEntries;
+	private List<StandardEntry> standardFields;
+	private List<StandardEntry> windowsFields;
+
 	private final byte[] headerbytes;
-	private Map<String, String[]> standardSpec;
-	private Map<String, String[]> windowsSpec;
-	private List<String[]> datadirSpec;
 	private int magicNumber;
 	private int rvaNumber;
 
 	public OptionalHeader(byte[] headerbytes) {
+		// TODO set rvaNumber, magicnumber in constructor
 		this.headerbytes = headerbytes;
 		try {
-			standardSpec = FileIO.readMap(STANDARD_SPEC);
-			windowsSpec = FileIO.readMap(WINDOWS_SPEC);
-			datadirSpec = FileIO.readArray(DATA_DIR_SPEC);
+			Map<String, String[]> standardSpec = FileIO.readMap(STANDARD_SPEC);
+			Map<String, String[]> windowsSpec = FileIO.readMap(WINDOWS_SPEC);
+			List<String[]> datadirSpec = FileIO.readArray(DATA_DIR_SPEC);
+
+			this.magicNumber = getMagicNumber(standardSpec);
+			
+			loadStandardFields(standardSpec);
+			loadWindowsSpecificFields(windowsSpec);
+			loadDataDirectories(datadirSpec);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public List<DataDirEntry> getDataDirEntries() {
+		return new LinkedList<>(dataDirEntries);
+	}
+	
+	public List<StandardEntry> getWindowsSpecificFields() {
+		return new LinkedList<>(windowsFields);
+	}
+	
+	public List<StandardEntry> getStandardFields() {
+		return new LinkedList<>(standardFields);
+	}
+	
+	public DataDirEntry getDataDirEntry(String fieldname) {
+		for(DataDirEntry entry : dataDirEntries) {
+			if(entry.fieldName.equals(fieldname)) {
+				return entry;
+			}
+		}
+		return null;
+	}
+	
+	public StandardEntry getStandardFieldEntry(String key) {
+		for(StandardEntry entry : standardFields) {
+			if(entry.key.equals(key)) {
+				return entry;
+			}
+		}
+		return null;
+	}
+	
+	public StandardEntry getWindowsFieldEntry(String key) {
+		for(StandardEntry entry : windowsFields) {
+			if(entry.key.equals(key)) {
+				return entry;
+			}
+		}
+		return null;
+	}
+	
+	private void loadStandardFields(Map<String, String[]> standardSpec) {
+		standardFields = new LinkedList<>();
+		int description = 0;
+		int offset = 1;
+		int length = 2;
 
-	@Override
-	public String getInfo() {
-		return "Standard fields" + NEWLINE + "..............." + NEWLINE
-				+ NEWLINE + getStandardFields() + NEWLINE
-				+ "Windows specific fields" + NEWLINE
-				+ "......................." + NEWLINE + NEWLINE
-				+ getWindowsSpecificFields() + NEWLINE + "Data directories"
-				+ NEWLINE + "................" + NEWLINE + NEWLINE
-				+ "virtual_address/size" + NEWLINE + NEWLINE
-				+ getDataDirectories();
+		for (Entry<String, String[]> entry : standardSpec.entrySet()) {
+			String[] specs = entry.getValue();
+			int value = getBytesIntValue(headerbytes,
+					Integer.parseInt(specs[offset]),
+					Integer.parseInt(specs[length]));
+			String key = entry.getKey();
+			standardFields
+					.add(new StandardEntry(key, specs[description], value));
+		}
+
 	}
 
-	private String getDataDirectories() {
-		StringBuilder b = new StringBuilder();
+	private void loadDataDirectories(List<String[]> datadirSpec) {
+		dataDirEntries = new LinkedList<>();
 		final int description = 0;
 		int offset;
 		int length = 3;
@@ -59,8 +115,9 @@ public class OptionalHeader extends PEModule {
 		} else if (magicNumber == PE32_PLUS) {
 			offset = 2;
 		} else {
-			return "no fields";
+			return; // no fields
 		}
+
 		int counter = 0;
 		for (String[] specs : datadirSpec) {
 			if (counter >= rvaNumber) {
@@ -72,10 +129,60 @@ public class OptionalHeader extends PEModule {
 			if (value != 0) {
 				int address = value & 0xFF00 >> 8;
 				int size = value & 0x00FF;
-				b.append(specs[description] + ": " + address + "(0x"
-						+ Integer.toHexString(address) + ")/" + size + NEWLINE);
+				dataDirEntries.add(new DataDirEntry(specs[description],
+						address, size));
 			}
 			counter++;
+		}
+	}
+
+	private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec) {
+		windowsFields = new LinkedList<StandardEntry>();
+		int offsetLoc;
+		int lengthLoc;
+		final int description = 0;
+
+		if (magicNumber == PE32) {
+			offsetLoc = 1;
+			lengthLoc = 3;
+		} else if (magicNumber == PE32_PLUS) {
+			offsetLoc = 2;
+			lengthLoc = 4;
+		} else {
+			return; // no fields
+		}
+
+		for (Entry<String, String[]> entry : windowsSpec.entrySet()) {
+			String[] specs = entry.getValue();
+			int value = getBytesIntValue(headerbytes,
+					Integer.parseInt(specs[offsetLoc]),
+					Integer.parseInt(specs[lengthLoc]));
+			String key = entry.getKey();
+			windowsFields
+					.add(new StandardEntry(key, specs[description], value));
+			if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
+				this.rvaNumber = value;
+			}
+		}
+	}
+
+	@Override
+	public String getInfo() {
+		return "Standard fields" + NEWLINE + "..............." + NEWLINE
+				+ NEWLINE + getStandardFieldsInfo() + NEWLINE
+				+ "Windows specific fields" + NEWLINE
+				+ "......................." + NEWLINE + NEWLINE
+				+ getWindowsSpecificInfo() + NEWLINE + "Data directories"
+				+ NEWLINE + "................" + NEWLINE + NEWLINE
+				+ "virtual_address/size" + NEWLINE + NEWLINE + getDataDirInfo();
+	}
+
+	private String getDataDirInfo() {
+		StringBuilder b = new StringBuilder();
+		for (DataDirEntry entry : dataDirEntries) {
+			b.append(entry.fieldName + ": " + entry.virtualAddress + "(0x"
+					+ Integer.toHexString(entry.virtualAddress) + ")/"
+					+ entry.size + NEWLINE);
 		}
 		return b.toString();
 	}
@@ -86,47 +193,27 @@ public class OptionalHeader extends PEModule {
 	 * 
 	 * @return string with windows specific fields
 	 */
-	private String getWindowsSpecificFields() {
-
-		final int description = 0;
-		int offset;
-		int length;
-
-		if (magicNumber == PE32) {
-			offset = 1;
-			length = 3;
-		} else if (magicNumber == PE32_PLUS) {
-			offset = 2;
-			length = 4;
-		} else {
-			return "no fields";
-		}
-		return buildWindowsFieldsString(description, offset, length);
-	}
-
-	private String buildWindowsFieldsString(final int description, int offset,
-			int length) {
+	private String getWindowsSpecificInfo() {
 		StringBuilder b = new StringBuilder();
-		for (Entry<String, String[]> entry : windowsSpec.entrySet()) {
-			String[] specs = entry.getValue();
-			int value = getBytesIntValue(headerbytes,
-					Integer.parseInt(specs[offset]),
-					Integer.parseInt(specs[length]));
-			String key = entry.getKey();
+		for (StandardEntry entry : windowsFields) {
+			int value = entry.value;
+			String key = entry.key;
+			String description = entry.description;
 			if (key.equals("IMAGE_BASE")) {
-				b.append(specs[description] + ": " + value + " (0x"
+				b.append(description + ": " + value + " (0x"
 						+ Integer.toHexString(value) + "), "
 						+ getImageBaseDescription(value) + NEWLINE);
 			} else if (key.equals("SUBSYSTEM")) {
-				b.append(specs[description] + ": "
-						+ getSubsystemDescription(value) + NEWLINE);
+				b.append(description + ": " + getSubsystemDescription(value)
+						+ NEWLINE);
 			} else if (key.equals("DLL_CHARACTERISTICS")) {
-				b.append(NEWLINE + specs[description] + ": " + NEWLINE);
-				b.append(getCharacteristics(value, "dllcharacteristics") + NEWLINE);
+				b.append(NEWLINE + description + ": " + NEWLINE);
+				b.append(getCharacteristics(value, "dllcharacteristics")
+						+ NEWLINE);
 			}
 
 			else {
-				b.append(specs[description] + ": " + value + " (0x"
+				b.append(description + ": " + value + " (0x"
 						+ Integer.toHexString(value) + ")" + NEWLINE);
 				if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
 					rvaNumber = value;
@@ -136,36 +223,29 @@ public class OptionalHeader extends PEModule {
 		return b.toString();
 	}
 
-	private String getStandardFields() {
+	private String getStandardFieldsInfo() {
 		StringBuilder b = new StringBuilder();
-		int description = 0;
-		int offset = 1;
-		int length = 2;
-		for (Entry<String, String[]> entry : standardSpec.entrySet()) {
-
-			String[] specs = entry.getValue();
-			int value = getBytesIntValue(headerbytes,
-					Integer.parseInt(specs[offset]),
-					Integer.parseInt(specs[length]));
-			String key = entry.getKey();
+		for (StandardEntry entry : standardFields) {
+			int value = entry.value;
+			String key = entry.key;
+			String description = entry.description;
 			if (key.equals("MAGIC_NUMBER")) {
-				b.append(specs[description] + ": " + value + " --> "
+				b.append(description + ": " + value + " --> "
 						+ getMagicNumberString(value) + NEWLINE);
 			} else if (key.equals("BASE_OF_DATA")) {
-				this.magicNumber = getMagicNumber();
 				if (magicNumber == PE32) {
-					b.append(specs[description] + ": " + value + " (0x"
+					b.append(description + ": " + value + " (0x"
 							+ Integer.toHexString(value) + ")" + NEWLINE);
 				}
 			} else {
-				b.append(specs[description] + ": " + value + " (0x"
+				b.append(description + ": " + value + " (0x"
 						+ Integer.toHexString(value) + ")" + NEWLINE);
 			}
 		}
 		return b.toString();
 	}
 
-	private int getMagicNumber() {
+	private int getMagicNumber(Map<String, String[]> standardSpec) {
 		int offset = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[1]);
 		int length = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[2]);
 		return getBytesIntValue(headerbytes, offset, length);
@@ -180,7 +260,8 @@ public class OptionalHeader extends PEModule {
 		case ROM:
 			return "ROM image";
 		default:
-			return "ERROR, unable to recognize magic number";
+			throw new IllegalArgumentException(
+					"unable to recognize magic number");
 		}
 	}
 
