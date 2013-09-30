@@ -11,8 +11,13 @@ import com.github.katjahahn.FileIO;
 
 public class MSDOSHeader extends PEModule {
 
+	// Note: This is only the formatted header by now. The actual header may be
+	// larger, containing optional values.
+	public static final int FORMATTED_HEADER_SIZE = 28;
+	
+	private static final int PARAGRAPH_SIZE = 16;
+
 	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
-	public static final int HEADER_SIZE = 28;
 	private static final String specification = "msdosheaderspec";
 	private static Map<String, StandardEntry> headerData;
 
@@ -21,24 +26,30 @@ public class MSDOSHeader extends PEModule {
 			loadHeaderData(headerbytes);
 		}
 	}
+	
+	//TODO verify
+	public int getHeaderSize() {
+		return get("HEADER_PARAGRAPHS").value * PARAGRAPH_SIZE;
+	}
 
 	private boolean hasSignature(byte[] headerbytes) {
-		if(headerbytes.length < 28) {
-			throw new IllegalArgumentException("not enough headerbytes for MS DOS Header");
+		if (headerbytes.length < 28) {
+			throw new IllegalArgumentException(
+					"not enough headerbytes for MS DOS Header");
 		} else {
-			for(int i = 0; i < MZ_SIGNATURE.length; i++) {
-				if(MZ_SIGNATURE[i] != headerbytes[i]) {
+			for (int i = 0; i < MZ_SIGNATURE.length; i++) {
+				if (MZ_SIGNATURE[i] != headerbytes[i]) {
 					return false;
 				}
 			}
 			return true;
 		}
 	}
-	
+
 	public List<StandardEntry> getHeaderEntries() {
 		return new LinkedList<>(headerData.values());
 	}
-	
+
 	public StandardEntry get(String keyString) {
 		return headerData.get(keyString);
 	}

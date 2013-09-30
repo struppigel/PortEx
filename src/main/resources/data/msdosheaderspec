@@ -1,6 +1,6 @@
 SIGNATURE_WORD;0;2;signature word
 LAST_PAGE_SIZE;2;2;last page size
-FILE_PAGES;2;4;file pages
+FILE_PAGES;4;2;file pages
 RELOCATION_ITEMS;6;2;relocation items
 HEADER_PARAGRAPHS;8;2;header paragraphs
 MINALLOC;10;2;minimum number of paragraphs allocated
