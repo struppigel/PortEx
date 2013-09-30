@@ -30,7 +30,7 @@ public class SectionSummary extends PEModule {
 //			b.append(NEWLINE + NEWLINE);
 //		}
 //		return b.toString() + NEWLINE + NEWLINE + getRSRCInfo();
-		return "only .rsrc implemented by now!" + NEWLINE + NEWLINE + getRSRCInfo();
+		return "only .rsrc implemented by now!" + NL + NL + getRSRCInfo();
 	}
 
 	/**
@@ -39,15 +39,16 @@ public class SectionSummary extends PEModule {
 	 * @param sectionName
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String getSectionInfo(String sectionName) {
 		try {
 			long pointer = table.getPointerToRawData(sectionName);
 			long sectionEndPoint = pointer + table.getSize(sectionName);
 			byte[] sectionbytes = Arrays.copyOfRange(filebytes, (int) pointer,
 					(int) sectionEndPoint);
-			return sectionName + " section " + NEWLINE + "............."
-					+ NEWLINE + NEWLINE + new String(sectionbytes, "UTF-8")
-					+ NEWLINE + NEWLINE + "hex dump:" + NEWLINE
+			return sectionName + " section " + NL + "............."
+					+ NL + NL + new String(sectionbytes, "UTF-8")
+					+ NL + NL + "hex dump:" + NL
 					+ convertByteToHex(sectionbytes);
 		} catch (ArrayIndexOutOfBoundsException | IllegalArgumentException
 				| UnsupportedEncodingException e) { // XXX
@@ -62,8 +63,8 @@ public class SectionSummary extends PEModule {
 			byte[] rsrcbytes = Arrays.copyOfRange(filebytes, (int) pointer,
 					filebytes.length);
 			rsrc = new RSRCSection(rsrcbytes, virtualRSRCAddress);
-			return ".rsrc section" + NEWLINE + "............." + NEWLINE
-					+ NEWLINE + rsrc.getInfo();
+			return ".rsrc section" + NL + "............." + NL
+					+ NL + rsrc.getInfo();
 		}
 		return "no .rsrc section";
 	}

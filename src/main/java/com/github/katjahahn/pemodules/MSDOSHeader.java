@@ -1,44 +1,73 @@
 package com.github.katjahahn.pemodules;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import com.github.katjahahn.FileFormatException;
+import com.github.katjahahn.FileIO;
 
 public class MSDOSHeader extends PEModule {
 
-	private static final int PE_OFFSET_LOCATION = 0x3c;
-	private static final byte[] PE_SIG = "PE\0\0".getBytes();
-	public static final int PE_SIG_LENGTH = PE_SIG.length;
-	private int peOffset;
+	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
+	public static final int HEADER_SIZE = 28;
+	private static final String specification = "msdosheaderspec";
+	private static Map<String, StandardEntry> headerData;
 
-	public MSDOSHeader(File file) throws IOException {
-		extractInfo(file);
-	}
-
-	private void extractInfo(File file) throws IOException {
-		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-			raf.seek(PE_OFFSET_LOCATION);
-			peOffset = raf.read();
-			raf.seek(peOffset);
-			byte[] peSigVal = new byte[4];
-			raf.readFully(peSigVal);
-			for (int i = 0; i < PE_SIG.length; i++) {
-				if (peSigVal[i] != PE_SIG[i]) {
-					throw new FileFormatException("given file is no PE file");
-				}
-			}
+	public MSDOSHeader(byte[] headerbytes) {
+		if (hasSignature(headerbytes)) {
+			loadHeaderData(headerbytes);
 		}
 	}
 
-	public int getPEOffset() {
-		return peOffset;
+	private boolean hasSignature(byte[] headerbytes) {
+		if(headerbytes.length < 28) {
+			throw new IllegalArgumentException("not enough headerbytes for MS DOS Header");
+		} else {
+			for(int i = 0; i < MZ_SIGNATURE.length; i++) {
+				if(MZ_SIGNATURE[i] != headerbytes[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	private void loadHeaderData(byte[] headerbytes) {
+		headerData = new HashMap<>();
+		int offsetLoc = 0;
+		int sizeLoc = 1;
+		int descriptionLoc = 2;
+		try {
+			Map<String, String[]> map = FileIO.readMap(specification);
+			for (Entry<String, String[]> entry : map.entrySet()) {
+				String key = entry.getKey();
+				String[] spec = entry.getValue();
+				int value = getBytesIntValue(headerbytes,
+						Integer.parseInt(spec[offsetLoc]),
+						Integer.parseInt(spec[sizeLoc]));
+				headerData.put(key, new StandardEntry(key,
+						spec[descriptionLoc], value));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
 	public String getInfo() {
-		return null;
+		if (headerData == null) {
+			return "No MS DOS Header found!" + NL;
+		} else {
+			StringBuilder b = new StringBuilder("-------------" + NL
+					+ "MS DOS Header" + NL + "-------------" + NL);
+			for (StandardEntry entry : headerData.values()) {
+				b.append(entry.description + ": " + entry.value + " (0x"
+						+ Integer.toHexString(entry.value) + ")" + NL);
+			}
+			return b.toString();
+		}
 	}
 
 }

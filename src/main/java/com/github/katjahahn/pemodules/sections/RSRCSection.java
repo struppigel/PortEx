@@ -42,15 +42,15 @@ public class RSRCSection extends PESection {
 	private String getResourceDirEntriesInfo(byte[] entryBytes,
 			int nameEntries, int idEntries) {
 		StringBuilder b = new StringBuilder();
-		b.append(NEWLINE + "** table entries **" + NEWLINE + NEWLINE);
+		b.append(NL + "** table entries **" + NL + NL);
 		entryBytes = Arrays.copyOfRange(entryBytes, RESOURCE_DIR_OFFSET,
 				entryBytes.length);
 		for (int i = 0; i < nameEntries + idEntries; i++) {
-			b.append("entry number " + (i + 1) + NEWLINE + NEWLINE);
+			b.append("entry number " + (i + 1) + NL + NL);
 			if (i < nameEntries) {
-				b.append(getResourceDirEntryInfo(entryBytes, true) + NEWLINE);
+				b.append(getResourceDirEntryInfo(entryBytes, true) + NL);
 			} else {
-				b.append(getResourceDirEntryInfo(entryBytes, false) + NEWLINE);
+				b.append(getResourceDirEntryInfo(entryBytes, false) + NL);
 			}
 			entryBytes = Arrays.copyOfRange(entryBytes, ENTRY_SIZE,
 					entryBytes.length);
@@ -80,7 +80,7 @@ public class RSRCSection extends PESection {
 						dataEntryRvaDescription, idEntryDescription, specs,
 						value, tableId);
 			} else {
-				b.append(specs[description] + ": " + value + NEWLINE);
+				b.append(specs[description] + ": " + value + NL);
 				tableId = Long.toString(value);
 			}
 		}
@@ -95,17 +95,17 @@ public class RSRCSection extends PESection {
 
 		if (isDataEntryRVA(value)) {
 			b.append(specs[dataEntryRvaDescription] + ": " + value + " (0x"
-					+ Long.toHexString(value) + ")" + NEWLINE);
+					+ Long.toHexString(value) + ")" + NL);
 			byte[] resourceBytes = Arrays.copyOfRange(rsrcbytes, (int) value,
 					rsrcbytes.length);
 			return getResourceDataEntry(resourceBytes);
 		} else {
 			value = removeHighestBit(value);
 			b.append(specs[idEntryDescription] + ": " + value + " (0x"
-					+ Long.toHexString(value) + ")" + NEWLINE);
+					+ Long.toHexString(value) + ")" + NL);
 			byte[] resourceBytes = Arrays.copyOfRange(rsrcbytes,
 					(int) value, rsrcbytes.length);
-			return NEWLINE + getResourceDirTableInfo(resourceBytes, tableId);
+			return NL + getResourceDirTableInfo(resourceBytes, tableId);
 		}
 	}
 
@@ -115,7 +115,7 @@ public class RSRCSection extends PESection {
 		StringBuilder b = new StringBuilder();
 		int pointer = 0;
 		int size = 0;
-		b.append(NEWLINE + "** resource data **" + NEWLINE + NEWLINE);
+		b.append(NL + "** resource data **" + NL + NL);
 		for (Entry<String, String[]> entry : resourceDataEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();
 			String key = entry.getKey();
@@ -128,7 +128,7 @@ public class RSRCSection extends PESection {
 				size = value;
 			}
 			b.append(specs[0] + ": " + value + " (0x"
-					+ Integer.toHexString(value) + ")" + NEWLINE);
+					+ Integer.toHexString(value) + ")" + NL);
 		}
 		if (pointer != 0 && size != 0) {
 			showResource(b, pointer, size);
@@ -139,7 +139,7 @@ public class RSRCSection extends PESection {
 	private void showResource(StringBuilder b, int pointer, int size) {
 		byte[] resource = Arrays.copyOfRange(rsrcbytes, pointer, pointer + size);
 		try {
-			b.append(NEWLINE + NEWLINE + new String(resource, "UTF8").trim() + NEWLINE + NEWLINE);
+			b.append(NL + NL + new String(resource, "UTF8").trim() + NL + NL);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -161,7 +161,7 @@ public class RSRCSection extends PESection {
 		int nameEntries = 0;
 		int idEntries = 0;
 
-		b.append("** table header " + id + " **" + NEWLINE + NEWLINE);
+		b.append("** table header " + id + " **" + NL + NL);
 		for (Entry<String, String[]> entry : rsrcDirSpec.entrySet()) {
 
 			String[] specs = entry.getValue();
@@ -171,9 +171,9 @@ public class RSRCSection extends PESection {
 
 			if (key.equals("TIME_DATE_STAMP")) {
 				b.append(specs[0] + ": ");
-				b.append(getTimeDate(value) + NEWLINE);
+				b.append(getTimeDate(value) + NL);
 			} else {
-				b.append(specs[0] + ": " + value + NEWLINE);
+				b.append(specs[0] + ": " + value + NL);
 			}
 
 			if (key.equals("NR_OF_NAME_ENTRIES")) {

@@ -66,11 +66,11 @@ public class SectionTable extends PEModule {
 		StringBuilder b = new StringBuilder();
 
 		for (int i = 0; i < numberOfEntries; i++) {
-			b.append("entry number " + (i + 1) + ": " + NEWLINE
-					+ "..............." + NEWLINE + NEWLINE);
+			b.append("entry number " + (i + 1) + ": " + NL
+					+ "..............." + NL + NL);
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-			b.append(getNextEntryInfo(section) + NEWLINE);
+			b.append(getNextEntryInfo(section) + NL);
 		}
 
 		return b.toString();
@@ -85,15 +85,15 @@ public class SectionTable extends PEModule {
 					Integer.parseInt(specs[2]));
 			String key = entry.getKey();
 			if (key.equals("CHARACTERISTICS")) {
-				b.append(specs[0] + ": " + NEWLINE
+				b.append(specs[0] + ": " + NL
 						+ getCharacteristics(value, "sectioncharacteristics")
-						+ NEWLINE);
+						+ NL);
 			} else if (key.equals("NAME")) {
-				b.append(specs[0] + ": " + getUTF8String(section) + NEWLINE);
+				b.append(specs[0] + ": " + getUTF8String(section) + NL);
 
 			} else {
 				b.append(specs[0] + ": " + value + " (0x"
-						+ Long.toHexString(value) + ")" + NEWLINE);
+						+ Long.toHexString(value) + ")" + NL);
 			}
 		}
 		return b.toString();

@@ -10,7 +10,7 @@ import com.github.katjahahn.FileIO;
 
 public abstract class PEModule {
 
-	public static final String NEWLINE = System.getProperty("line.separator");
+	public static final String NL = System.getProperty("line.separator");
 
 	public abstract String getInfo();
 	
@@ -26,8 +26,8 @@ public abstract class PEModule {
 					}
 				} catch (NumberFormatException e) {
 					System.err.println("ERROR. number format mismatch in file "
-							+ filename + NEWLINE);
-					System.err.println("value: " + maskStr + NEWLINE);
+							+ filename + NL);
+					System.err.println("value: " + maskStr + NL);
 				}
 			}
 		} catch (IOException e) {
@@ -36,8 +36,7 @@ public abstract class PEModule {
 		return characteristics;
 	}
 
-	//TODO turn to static
-	protected String getCharacteristics(long value, String filename) {
+	protected static String getCharacteristics(long value, String filename) {
 		StringBuilder b = new StringBuilder();
 		try {
 			Map<String, String[]> map = FileIO.readMap(filename);
@@ -45,19 +44,19 @@ public abstract class PEModule {
 				try {
 					long mask = Long.parseLong(maskStr, 16);
 					if ((value & mask) != 0) {
-						b.append("\t* " + map.get(maskStr)[1] + NEWLINE);
+						b.append("\t* " + map.get(maskStr)[1] + NL);
 					}
 				} catch (NumberFormatException e) {
 					b.append("ERROR. number format mismatch in file "
-							+ filename + NEWLINE);
-					b.append("value: " + maskStr + NEWLINE);
+							+ filename + NL);
+					b.append("value: " + maskStr + NL);
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		if (b.length() == 0) {
-			b.append("\t**no characteristics**" + NEWLINE);
+			b.append("\t**no characteristics**" + NL);
 		}
 		return b.toString();
 	}

@@ -1,0 +1,14 @@
+SIGNATURE_WORD;0;2;signature word
+LAST_PAGE_SIZE;2;2;last page size
+FILE_PAGES;2;4;file pages
+RELOCATION_ITEMS;6;2;relocation items
+HEADER_PARAGRAPHS;8;2;header paragraphs
+MINALLOC;10;2;minimum number of paragraphs allocated
+MAXALLOC;12;2;maximum number of paragraphs allocated
+INITIAL_SS;14;2;initial SS value
+INITIAL_SP;16;2;initial SP value
+COMPLEMENTED_CHECKSUM;18;2;complemented checksum
+INITIAL_IP;20;2;initial IP value
+PRE_RELOCATED_INITIAL_CS;22;2;pre-relocated initial CS value
+RELOCATION_TABLE_OFFSET;24;2;relocation table offset
+OVERLAY_NR;26;2;overlay number

@@ -3,20 +3,26 @@ package com.github.katjahahn.pemodules;
 
 public class PEData extends PEModule {
 	
-	private final MSDOSHeader msdos;
+	private final PESignature pesig;
 	private final COFFFileHeader coff;
 	private final OptionalHeader opt;
 	private final SectionTable table;
+	private final MSDOSHeader msdos;
 
-	public PEData(MSDOSHeader msdos, COFFFileHeader coff, OptionalHeader opt, SectionTable table) {
-		this.msdos = msdos;
+	public PEData(MSDOSHeader msdos, PESignature pesig, COFFFileHeader coff, OptionalHeader opt, SectionTable table) {
+		this.pesig = pesig;
 		this.coff = coff;
 		this.opt = opt;
+		this.msdos = msdos;
 		this.table = table;
 	}
 	
 	public MSDOSHeader getMSDOSHeader() {
 		return msdos;
+	}
+	
+	public PESignature getPESignature() {
+		return pesig;
 	}
 	
 	public SectionTable getSectionTable() {

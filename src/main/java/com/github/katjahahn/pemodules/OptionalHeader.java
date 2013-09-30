@@ -167,22 +167,22 @@ public class OptionalHeader extends PEModule {
 
 	@Override
 	public String getInfo() {
-		return "---------------" + NEWLINE + "Optional Header" + NEWLINE
-				+ "---------------" + NEWLINE + NEWLINE + "Standard fields"
-				+ NEWLINE + "..............." + NEWLINE + NEWLINE
-				+ getStandardFieldsInfo() + NEWLINE + "Windows specific fields"
-				+ NEWLINE + "......................." + NEWLINE + NEWLINE
-				+ getWindowsSpecificInfo() + NEWLINE + "Data directories"
-				+ NEWLINE + "................" + NEWLINE + NEWLINE
-				+ "virtual_address/size" + NEWLINE + NEWLINE + getDataDirInfo();
+		return "---------------" + NL + "Optional Header" + NL
+				+ "---------------" + NL + NL + "Standard fields"
+				+ NL + "..............." + NL + NL
+				+ getStandardFieldsInfo() + NL + "Windows specific fields"
+				+ NL + "......................." + NL + NL
+				+ getWindowsSpecificInfo() + NL + "Data directories"
+				+ NL + "................" + NL + NL
+				+ "virtual_address/size" + NL + NL + getDataDirInfo();
 	}
 
-	private String getDataDirInfo() {
+	public String getDataDirInfo() {
 		StringBuilder b = new StringBuilder();
 		for (DataDirEntry entry : dataDirEntries) {
 			b.append(entry.fieldName + ": " + entry.virtualAddress + "(0x"
 					+ Integer.toHexString(entry.virtualAddress) + ")/"
-					+ entry.size + NEWLINE);
+					+ entry.size + NL);
 		}
 		return b.toString();
 	}
@@ -193,7 +193,7 @@ public class OptionalHeader extends PEModule {
 	 * 
 	 * @return string with windows specific fields
 	 */
-	private String getWindowsSpecificInfo() {
+	public String getWindowsSpecificInfo() {
 		StringBuilder b = new StringBuilder();
 		for (StandardEntry entry : windowsFields) {
 			int value = entry.value;
@@ -202,19 +202,19 @@ public class OptionalHeader extends PEModule {
 			if (key.equals("IMAGE_BASE")) {
 				b.append(description + ": " + value + " (0x"
 						+ Integer.toHexString(value) + "), "
-						+ getImageBaseDescription(value) + NEWLINE);
+						+ getImageBaseDescription(value) + NL);
 			} else if (key.equals("SUBSYSTEM")) {
 				b.append(description + ": " + getSubsystemDescription(value)
-						+ NEWLINE);
+						+ NL);
 			} else if (key.equals("DLL_CHARACTERISTICS")) {
-				b.append(NEWLINE + description + ": " + NEWLINE);
+				b.append(NL + description + ": " + NL);
 				b.append(getCharacteristics(value, "dllcharacteristics")
-						+ NEWLINE);
+						+ NL);
 			}
 
 			else {
 				b.append(description + ": " + value + " (0x"
-						+ Integer.toHexString(value) + ")" + NEWLINE);
+						+ Integer.toHexString(value) + ")" + NL);
 				if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
 					rvaNumber = value;
 				}
@@ -223,7 +223,7 @@ public class OptionalHeader extends PEModule {
 		return b.toString();
 	}
 
-	private String getStandardFieldsInfo() {
+	public String getStandardFieldsInfo() {
 		StringBuilder b = new StringBuilder();
 		for (StandardEntry entry : standardFields) {
 			int value = entry.value;
@@ -231,27 +231,27 @@ public class OptionalHeader extends PEModule {
 			String description = entry.description;
 			if (key.equals("MAGIC_NUMBER")) {
 				b.append(description + ": " + value + " --> "
-						+ getMagicNumberString(value) + NEWLINE);
+						+ getMagicNumberString(value) + NL);
 			} else if (key.equals("BASE_OF_DATA")) {
 				if (magicNumber == PE32) {
 					b.append(description + ": " + value + " (0x"
-							+ Integer.toHexString(value) + ")" + NEWLINE);
+							+ Integer.toHexString(value) + ")" + NL);
 				}
 			} else {
 				b.append(description + ": " + value + " (0x"
-						+ Integer.toHexString(value) + ")" + NEWLINE);
+						+ Integer.toHexString(value) + ")" + NL);
 			}
 		}
 		return b.toString();
 	}
 
-	private int getMagicNumber(Map<String, String[]> standardSpec) {
+	public int getMagicNumber(Map<String, String[]> standardSpec) {
 		int offset = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[1]);
 		int length = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[2]);
 		return getBytesIntValue(headerbytes, offset, length);
 	}
 
-	private String getMagicNumberString(int magicNumber) {
+	public static String getMagicNumberString(int magicNumber) {
 		switch (magicNumber) {
 		case PE32:
 			return "PE32, normal executable file";
@@ -265,7 +265,7 @@ public class OptionalHeader extends PEModule {
 		}
 	}
 
-	private String getImageBaseDescription(int value) {
+	public static String getImageBaseDescription(int value) {
 		switch (value) {
 		case 0x10000000:
 			return "DLL default";
@@ -278,7 +278,7 @@ public class OptionalHeader extends PEModule {
 		}
 	}
 
-	private String getSubsystemDescription(int value) {
+	public static String getSubsystemDescription(int value) {
 		try {
 			Map<String, String[]> map = FileIO.readMap("subsystem");
 			return map.get(String.valueOf(value))[1];
