@@ -88,14 +88,14 @@ public class OptionalHeader extends PEModule {
 	private void loadStandardFields(Map<String, String[]> standardSpec) {
 		standardFields = new LinkedList<>();
 		int description = 0;
-		int offset = 1;
-		int length = 2;
+		int offsetLoc = 1;
+		int lengthLoc = 2;
 
 		for (Entry<String, String[]> entry : standardSpec.entrySet()) {
 			String[] specs = entry.getValue();
 			int value = getBytesIntValue(headerbytes,
-					Integer.parseInt(specs[offset]),
-					Integer.parseInt(specs[length]));
+					Integer.parseInt(specs[offsetLoc]),
+					Integer.parseInt(specs[lengthLoc]));
 			String key = entry.getKey();
 			standardFields
 					.add(new StandardEntry(key, specs[description], value));
@@ -106,13 +106,13 @@ public class OptionalHeader extends PEModule {
 	private void loadDataDirectories(List<String[]> datadirSpec) {
 		dataDirEntries = new LinkedList<>();
 		final int description = 0;
-		int offset;
-		int length = 3;
+		int offsetLoc;
+		int length = 4; //the actual length
 
 		if (magicNumber == PE32) {
-			offset = 1;
+			offsetLoc = 1;
 		} else if (magicNumber == PE32_PLUS) {
-			offset = 2;
+			offsetLoc = 2;
 		} else {
 			return; // no fields
 		}
@@ -122,12 +122,13 @@ public class OptionalHeader extends PEModule {
 			if (counter >= rvaNumber) {
 				break;
 			}
-			int value = getBytesIntValue(headerbytes,
-					Integer.parseInt(specs[offset]),
-					Integer.parseInt(specs[length]));
-			if (value != 0) {
-				int address = value & 0xFF00 >> 8;
-				int size = value & 0x00FF;
+			int address = getBytesIntValue(headerbytes,
+					Integer.parseInt(specs[offsetLoc]),
+					length);
+			int size = getBytesIntValue(headerbytes,
+					Integer.parseInt(specs[offsetLoc]) + length,
+					length);
+			if (address != 0) {
 				dataDirEntries.add(new DataDirEntry(specs[description],
 						address, size));
 			}
@@ -168,13 +169,12 @@ public class OptionalHeader extends PEModule {
 	@Override
 	public String getInfo() {
 		return "---------------" + NL + "Optional Header" + NL
-				+ "---------------" + NL + NL + "Standard fields"
-				+ NL + "..............." + NL + NL
-				+ getStandardFieldsInfo() + NL + "Windows specific fields"
-				+ NL + "......................." + NL + NL
-				+ getWindowsSpecificInfo() + NL + "Data directories"
-				+ NL + "................" + NL + NL
-				+ "virtual_address/size" + NL + NL + getDataDirInfo();
+				+ "---------------" + NL + NL + "Standard fields" + NL
+				+ "..............." + NL + NL + getStandardFieldsInfo() + NL
+				+ "Windows specific fields" + NL + "......................."
+				+ NL + NL + getWindowsSpecificInfo() + NL + "Data directories"
+				+ NL + "................" + NL + NL + "virtual_address/size"
+				+ NL + NL + getDataDirInfo();
 	}
 
 	public String getDataDirInfo() {
@@ -182,7 +182,8 @@ public class OptionalHeader extends PEModule {
 		for (DataDirEntry entry : dataDirEntries) {
 			b.append(entry.fieldName + ": " + entry.virtualAddress + "(0x"
 					+ Integer.toHexString(entry.virtualAddress) + ")/"
-					+ entry.size + NL);
+					+ entry.size + "(0x"
+					+ Integer.toHexString(entry.size) + ")" + NL);
 		}
 		return b.toString();
 	}
@@ -208,8 +209,7 @@ public class OptionalHeader extends PEModule {
 						+ NL);
 			} else if (key.equals("DLL_CHARACTERISTICS")) {
 				b.append(NL + description + ": " + NL);
-				b.append(getCharacteristics(value, "dllcharacteristics")
-						+ NL);
+				b.append(getCharacteristics(value, "dllcharacteristics") + NL);
 			}
 
 			else {

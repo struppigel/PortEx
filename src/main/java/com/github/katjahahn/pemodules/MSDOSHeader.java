@@ -2,6 +2,8 @@ package com.github.katjahahn.pemodules;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -31,6 +33,14 @@ public class MSDOSHeader extends PEModule {
 			}
 			return true;
 		}
+	}
+	
+	public List<StandardEntry> getHeaderEntries() {
+		return new LinkedList<>(headerData.values());
+	}
+	
+	public StandardEntry get(String keyString) {
+		return headerData.get(keyString);
 	}
 
 	private void loadHeaderData(byte[] headerbytes) {
