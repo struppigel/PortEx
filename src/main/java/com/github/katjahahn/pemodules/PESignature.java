@@ -20,12 +20,15 @@ public class PESignature extends PEModule {
 	private void extractInfo(File file) throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(PE_OFFSET_LOCATION);
-			peOffset = raf.read();
+			byte[] offsetBytes = new byte[2];
+			raf.readFully(offsetBytes);
+			peOffset = PEModule.bytesToInt(offsetBytes);
 			raf.seek(peOffset);
 			byte[] peSigVal = new byte[4];
 			raf.readFully(peSigVal);
 			for (int i = 0; i < PE_SIG.length; i++) {
 				if (peSigVal[i] != PE_SIG[i]) {
+					System.out.println("");
 					throw new FileFormatException("given file is no PE file");
 				}
 			}
