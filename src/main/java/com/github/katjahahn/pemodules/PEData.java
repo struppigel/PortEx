@@ -1,5 +1,7 @@
 package com.github.katjahahn.pemodules;
 
+import com.github.katjahahn.pemodules.sections.SectionTable;
+
 
 public class PEData extends PEModule {
 	

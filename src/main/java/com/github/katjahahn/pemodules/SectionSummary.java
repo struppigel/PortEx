@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import com.github.katjahahn.pemodules.sections.RSRCSection;
+import com.github.katjahahn.pemodules.sections.SectionTable;
 
 public class SectionSummary extends PEModule {
 

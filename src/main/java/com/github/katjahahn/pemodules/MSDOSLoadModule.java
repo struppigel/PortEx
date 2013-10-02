@@ -21,14 +21,14 @@ public class MSDOSLoadModule extends PEModule {
 		int filePages = header.get("FILE_PAGES").value;
 		int lastPageSize = header.get("LAST_PAGE_SIZE").value;
 		int imageSize = computeImageSize(filePages, lastPageSize);
-		//TODO seems to be too much
+		// XXX loadModulSize seems to be too much, this intermediate solution
+		// uses PE signature as stop
 		@SuppressWarnings("unused")
 		int loadModuleSize = imageSize - headerSize;
-		
+
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(headerSize);
-			//XXX intermediate solution uses PE signature as stop
-//			loadModuleBytes = new byte[loadModuleSize];
+			// loadModuleBytes = new byte[loadModuleSize];
 			int peOffset = new PESignature(file).getPEOffset();
 			loadModuleBytes = new byte[peOffset - headerSize];
 			raf.readFully(loadModuleBytes);
@@ -36,8 +36,8 @@ public class MSDOSLoadModule extends PEModule {
 	}
 
 	private int computeImageSize(int filePages, int lastPageSize) {
-		int imageSize = (filePages - 1) * PAGE_SIZE + lastPageSize;				
-		if(lastPageSize == 0) {
+		int imageSize = (filePages - 1) * PAGE_SIZE + lastPageSize;
+		if (lastPageSize == 0) {
 			imageSize += PAGE_SIZE;
 		}
 		return imageSize;

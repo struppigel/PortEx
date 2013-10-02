@@ -1,17 +1,23 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.pemodules.sections;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
+import com.github.katjahahn.pemodules.PEModule;
+import com.github.katjahahn.pemodules.StandardEntry;
 
 public class SectionTable extends PEModule {
 
 	private final static String SECTION_TABLE_SPEC = "sectiontablespec";
 	public final static int ENTRY_SIZE = 40;
+	
+	public List<SectionTableEntry> sections;
 
 	private final byte[] sectionTableBytes;
 	private final int numberOfEntries;
@@ -22,11 +28,43 @@ public class SectionTable extends PEModule {
 		this.numberOfEntries = numberOfEntries;
 		try {
 			specification = FileIO.readMap(SECTION_TABLE_SPEC);
+			loadSectionEntries();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	private void loadSectionEntries() {
+		sections = new LinkedList<>();
+		
+		for (int i = 0; i < numberOfEntries; i++) {
+			SectionTableEntry sectionEntry = new SectionTableEntry();
+			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
+					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
+			
+			for (Entry<String, String[]> entry : specification.entrySet()) {
+
+				String[] specs = entry.getValue();
+				int value = getBytesIntValue(section, Integer.parseInt(specs[1]),
+						Integer.parseInt(specs[2]));
+				String key = entry.getKey();
+				
+				 if (key.equals("NAME")) {
+					 sectionEntry.setName(getUTF8String(section));
+					 continue;
+				 }
+				
+				sectionEntry.add(new StandardEntry(key, specs[0], value));
+			}
+			sections.add(sectionEntry);
+		}
+	}
+	
+	public List<SectionTableEntry> getSectionEntries() {
+		return new LinkedList<>(sections);
+	}
+
+	//TODO use the sections list
 	public Integer getPointerToRawData(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
@@ -109,7 +147,7 @@ public class SectionTable extends PEModule {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		return "ERROR";
+		return null;
 	}
 
 	public Integer getVirtualAddress(String sectionName) {

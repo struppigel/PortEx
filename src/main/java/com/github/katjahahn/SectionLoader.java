@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import com.github.katjahahn.pemodules.SectionTable;
 import com.github.katjahahn.pemodules.sections.PESection;
 import com.github.katjahahn.pemodules.sections.RSRCSection;
+import com.github.katjahahn.pemodules.sections.SectionTable;
 
 public class SectionLoader {
 
