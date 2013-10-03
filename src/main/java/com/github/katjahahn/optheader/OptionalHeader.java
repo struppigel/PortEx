@@ -1,4 +1,4 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.optheader;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
+import com.github.katjahahn.PEModule;
+import com.github.katjahahn.StandardEntry;
 
 public class OptionalHeader extends PEModule {
 

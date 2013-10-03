@@ -1,4 +1,4 @@
-package com.github.katjahahn.pemodules.sections;
+package com.github.katjahahn.sections;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

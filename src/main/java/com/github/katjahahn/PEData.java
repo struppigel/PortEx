@@ -1,6 +1,9 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn;
 
-import com.github.katjahahn.pemodules.sections.SectionTable;
+import com.github.katjahahn.coffheader.COFFFileHeader;
+import com.github.katjahahn.msdos.MSDOSHeader;
+import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionTable;
 
 
 public class PEData extends PEModule {

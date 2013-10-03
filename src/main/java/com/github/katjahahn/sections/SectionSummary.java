@@ -1,10 +1,9 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.sections;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import com.github.katjahahn.pemodules.sections.RSRCSection;
-import com.github.katjahahn.pemodules.sections.SectionTable;
+import com.github.katjahahn.PEModule;
 
 public class SectionSummary extends PEModule {
 

@@ -1,12 +1,10 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import com.github.katjahahn.FileIO;
 
 public abstract class PEModule {
 

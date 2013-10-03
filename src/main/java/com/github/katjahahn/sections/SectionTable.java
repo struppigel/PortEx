@@ -1,4 +1,4 @@
-package com.github.katjahahn.pemodules.sections;
+package com.github.katjahahn.sections;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
-import com.github.katjahahn.pemodules.PEModule;
-import com.github.katjahahn.pemodules.StandardEntry;
+import com.github.katjahahn.PEModule;
+import com.github.katjahahn.StandardEntry;
 
 public class SectionTable extends PEModule {
 

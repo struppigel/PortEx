@@ -1,10 +1,8 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import com.github.katjahahn.FileFormatException;
 
 public class PESignature extends PEModule {
 

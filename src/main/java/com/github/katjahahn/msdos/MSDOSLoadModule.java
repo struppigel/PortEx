@@ -1,8 +1,11 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.msdos;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
+import com.github.katjahahn.PEModule;
+import com.github.katjahahn.PESignature;
 
 public class MSDOSLoadModule extends PEModule {
 

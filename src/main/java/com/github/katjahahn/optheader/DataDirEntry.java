@@ -1,12 +1,12 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.optheader;
 
-import static com.github.katjahahn.pemodules.PEModule.*;
-import static com.github.katjahahn.pemodules.sections.SectionTableEntryKey.*;
+import static com.github.katjahahn.PEModule.*;
+import static com.github.katjahahn.sections.SectionTableEntryKey.*;
 
 import java.util.List;
 
-import com.github.katjahahn.pemodules.sections.SectionTable;
-import com.github.katjahahn.pemodules.sections.SectionTableEntry;
+import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.SectionTableEntry;
 
 public class DataDirEntry {
 

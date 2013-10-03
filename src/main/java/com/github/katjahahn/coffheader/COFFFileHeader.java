@@ -1,4 +1,6 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.coffheader;
+
+import static com.github.katjahahn.coffheader.COFFHeaderKey.*;
 
 import java.io.IOException;
 import java.util.Date;
@@ -8,6 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
+import com.github.katjahahn.PEModule;
+import com.github.katjahahn.StandardEntry;
 
 public class COFFFileHeader extends PEModule {
 
@@ -90,9 +94,10 @@ public class COFFFileHeader extends PEModule {
 		return new Date(millis);
 	}
 
-	public int get(String key) {
+	public int get(COFFHeaderKey key) {
+		String keyString = key.toString();
 		for (StandardEntry entry : data) {
-			if (entry.key.equals(key)) {
+			if (entry.key.equals(keyString)) {
 				return entry.value;
 			}
 		}
@@ -120,7 +125,7 @@ public class COFFFileHeader extends PEModule {
 	}
 
 	public int getCharacteristics() {
-		return get("CHARACTERISTICS");
+		return get(CHARACTERISTICS);
 	}
 
 	public List<String> getCharacteristicsDescriptions() {
@@ -129,7 +134,7 @@ public class COFFFileHeader extends PEModule {
 	}
 
 	public MachineType getMachineType() {
-		int value = get("MACHINE");
+		int value = get(MACHINE);
 		try {
 			Map<String, String[]> map = FileIO.readMap("machinetype");
 			String hexKey = Integer.toHexString(value);
@@ -146,15 +151,15 @@ public class COFFFileHeader extends PEModule {
 	}
 
 	public Date getTimeDate() {
-		return convertToDate(get("TIME_DATE"));
+		return convertToDate(get(TIME_DATE));
 	}
 
 	public int getSizeOfOptionalHeader() {
-		return get("SIZE_OF_OPT_HEADER");
+		return get(SIZE_OF_OPT_HEADER);
 	}
 
 	public int getNumberOfSections() {
-		return get("SECTION_NR");
+		return get(SECTION_NR);
 	}
 
 }

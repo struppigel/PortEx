@@ -1,6 +1,6 @@
-package com.github.katjahahn.pemodules.sections;
+package com.github.katjahahn.sections;
 
-import com.github.katjahahn.pemodules.PEModule;
+import com.github.katjahahn.PEModule;
 
 public class PESection extends PEModule {
 

@@ -1,8 +1,8 @@
-package com.github.katjahahn.pemodules.sections;
+package com.github.katjahahn.sections;
 
 import java.util.HashMap;
 
-import com.github.katjahahn.pemodules.StandardEntry;
+import com.github.katjahahn.StandardEntry;
 
 public class SectionTableEntry {
 

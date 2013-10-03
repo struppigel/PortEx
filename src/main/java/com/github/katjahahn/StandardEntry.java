@@ -1,4 +1,4 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn;
 
 public class StandardEntry {
 	

@@ -1,4 +1,4 @@
-package com.github.katjahahn.pemodules;
+package com.github.katjahahn.msdos;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
+import com.github.katjahahn.PEModule;
+import com.github.katjahahn.StandardEntry;
 
 public class MSDOSHeader extends PEModule {
 

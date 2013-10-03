@@ -5,13 +5,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
-import com.github.katjahahn.pemodules.COFFFileHeader;
-import com.github.katjahahn.pemodules.DataDirEntry;
-import com.github.katjahahn.pemodules.MSDOSHeader;
-import com.github.katjahahn.pemodules.OptionalHeader;
-import com.github.katjahahn.pemodules.PEData;
-import com.github.katjahahn.pemodules.PESignature;
-import com.github.katjahahn.pemodules.sections.SectionTable;
+import com.github.katjahahn.coffheader.COFFFileHeader;
+import com.github.katjahahn.msdos.MSDOSHeader;
+import com.github.katjahahn.optheader.DataDirEntry;
+import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionTable;
 
 public class PELoader {
 
@@ -103,6 +101,8 @@ public class PELoader {
 					+ entry.getSectionTableEntry(table).getName());
 			System.out.println();
 		}
+		
+		System.out.println(data.getCOFFFileHeader().getInfo());
 		
 	}
 
