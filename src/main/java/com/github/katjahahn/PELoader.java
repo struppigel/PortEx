@@ -103,6 +103,7 @@ public class PELoader {
 		}
 		
 		System.out.println(data.getCOFFFileHeader().getInfo());
+		System.out.println(data.getOptionalHeader().getInfo());
 		
 	}
 

@@ -10,11 +10,15 @@ import com.github.katjahahn.sections.SectionTableEntry;
 
 public class DataDirEntry {
 
-	public String fieldName;
+	public DataDirectoryKey fieldName;
 	public int virtualAddress; // RVA actually, but called like this in spec
 	public int size;
 
 	public DataDirEntry(String fieldName, int virtualAddress, int size) {
+		this(DataDirectoryKey.valueOf(fieldName), virtualAddress, size);
+	}
+	
+	public DataDirEntry(DataDirectoryKey fieldName, int virtualAddress, int size) {
 		this.fieldName = fieldName;
 		this.virtualAddress = virtualAddress;
 		this.size = size;

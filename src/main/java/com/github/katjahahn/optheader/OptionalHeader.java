@@ -60,27 +60,30 @@ public class OptionalHeader extends PEModule {
 		return new LinkedList<>(standardFields);
 	}
 
-	public DataDirEntry getDataDirEntry(String fieldname) {
+	public DataDirEntry getDataDirEntry(DataDirectoryKey key) {
+		String fieldName = key.toString();
 		for (DataDirEntry entry : dataDirEntries) {
-			if (entry.fieldName.equals(fieldname)) {
+			if (entry.fieldName.equals(fieldName)) {
 				return entry;
 			}
 		}
 		return null;
 	}
 
-	public StandardEntry getStandardFieldEntry(String key) {
+	public StandardEntry getStandardFieldEntry(StandardFieldEntryKey key) {
+		String keyString = key.toString();
 		for (StandardEntry entry : standardFields) {
-			if (entry.key.equals(key)) {
+			if (entry.key.equals(keyString)) {
 				return entry;
 			}
 		}
 		return null;
 	}
 
-	public StandardEntry getWindowsFieldEntry(String key) {
+	public StandardEntry getWindowsFieldEntry(WindowsEntryKey key) {
+		String keyString = key.toString();
 		for (StandardEntry entry : windowsFields) {
-			if (entry.key.equals(key)) {
+			if (entry.key.equals(keyString)) {
 				return entry;
 			}
 		}
