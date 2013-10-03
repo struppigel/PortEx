@@ -114,7 +114,7 @@ public abstract class PEModule {
 	 * @param bytes
 	 * @return
 	 */
-	protected static int bytesToInt(byte[] bytes) {
+	public static int bytesToInt(byte[] bytes) {
 		int value = 0;
 		for (int i = 0; i < bytes.length; i++) {
 			int shift = 8 * i;

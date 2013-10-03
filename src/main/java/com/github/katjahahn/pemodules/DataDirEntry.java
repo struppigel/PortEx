@@ -23,6 +23,11 @@ public class DataDirEntry {
 		SectionTableEntry section = getSectionTableEntry(table);
 		int sectionRVA = section.get("VIRTUAL_ADDRESS");
 		int sectionOffset = section.get("POINTER_TO_RAW_DATA");
+		System.out.println("section VA: " + sectionRVA);
+		System.out.println("section size: " + section.get("VIRTUAL_SIZE"));
+		System.out.println("size + VA = " + (sectionRVA + section.get("VIRTUAL_SIZE")));
+		System.out.println("section file offset: " + sectionOffset);
+		System.out.println();
 		return (virtualAddress - sectionRVA) + sectionOffset;
 	}
 
@@ -40,7 +45,7 @@ public class DataDirEntry {
 
 	private boolean rvaIsWithin(int address, int size) {
 		int endpoint = address + size;
-		return virtualAddress >= address && virtualAddress <= endpoint;
+		return virtualAddress >= address && virtualAddress < endpoint;
 	}
 
 	@Override
