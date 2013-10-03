@@ -1,6 +1,7 @@
 package com.github.katjahahn.pemodules;
 
 import static com.github.katjahahn.pemodules.PEModule.*;
+import static com.github.katjahahn.pemodules.sections.SectionTableEntryKey.*;
 
 import java.util.List;
 
@@ -21,21 +22,16 @@ public class DataDirEntry {
 
 	public int getFileOffset(SectionTable table) {
 		SectionTableEntry section = getSectionTableEntry(table);
-		int sectionRVA = section.get("VIRTUAL_ADDRESS");
-		int sectionOffset = section.get("POINTER_TO_RAW_DATA");
-		System.out.println("section VA: " + sectionRVA);
-		System.out.println("section size: " + section.get("VIRTUAL_SIZE"));
-		System.out.println("size + VA = " + (sectionRVA + section.get("VIRTUAL_SIZE")));
-		System.out.println("section file offset: " + sectionOffset);
-		System.out.println();
+		int sectionRVA = section.get(VIRTUAL_ADDRESS);
+		int sectionOffset = section.get(POINTER_TO_RAW_DATA);
 		return (virtualAddress - sectionRVA) + sectionOffset;
 	}
 
 	public SectionTableEntry getSectionTableEntry(SectionTable table) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
-			int vSize = section.get("VIRTUAL_SIZE");
-			int vAddress = section.get("VIRTUAL_ADDRESS");
+			int vSize = section.get(VIRTUAL_SIZE);
+			int vAddress = section.get(VIRTUAL_ADDRESS);
 			if (rvaIsWithin(vAddress, vSize)) {
 				return section;
 			}
