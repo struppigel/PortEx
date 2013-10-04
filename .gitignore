@@ -5,9 +5,10 @@
 /data
 *.exe
 *.dll
-
+dependency-reduced-pom.xml
 # Package Files #
 *.jar
 *.war
 *.ear
 /target
+/bin
