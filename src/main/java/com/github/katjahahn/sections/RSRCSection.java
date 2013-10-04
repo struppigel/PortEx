@@ -23,6 +23,7 @@ public class RSRCSection extends PESection {
 	private final int virtualAddress;
 
 	public RSRCSection(byte[] rsrcbytes, int virtualAddress) {
+		super(rsrcbytes);
 		this.rsrcbytes = rsrcbytes;
 		this.virtualAddress = virtualAddress;
 		try {
