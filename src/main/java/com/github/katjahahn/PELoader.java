@@ -20,7 +20,7 @@ public class PELoader {
 	}
 
 	/**
-	 * Loads the basic data for the given PE file
+	 * Loads the basic data for the given PE file.
 	 * 
 	 * @param peFile
 	 * @return data of the PE file
