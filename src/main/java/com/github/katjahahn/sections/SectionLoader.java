@@ -1,8 +1,13 @@
 package com.github.katjahahn.sections;
+import static com.github.katjahahn.sections.SectionTableEntryKey.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
+
+import com.github.katjahahn.optheader.DataDirEntry;
+import com.github.katjahahn.optheader.DataDirectoryKey;
 
 public class SectionLoader {
 
@@ -52,17 +57,29 @@ public class SectionLoader {
 	 *         section
 	 * @throws IOException
 	 */
-	public RSRCSection getRsrcSection() throws IOException {
-		// TODO don't use the sectionname, the name is just a convention
-		Integer virtualAddress = table.getVirtualAddress(".rsrc");
-		if (virtualAddress != null) {
-			long pointer = table.getPointerToRawData(".rsrc");
-			try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+	public RSRCSection getRsrcSection(List<DataDirEntry> dataDirEntries)
+			throws IOException {
+		DataDirEntry resourceTable = getResourceEntry(dataDirEntries);
+		if (resourceTable != null) {
+			SectionTableEntry rsrcEntry = resourceTable.getSectionTableEntry(table);
+			Integer virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 
-				raf.seek(pointer);
-				byte[] rsrcbytes = new byte[table.getSize(".rsrc")];
-				raf.readFully(rsrcbytes);
-				return new RSRCSection(rsrcbytes, virtualAddress);
+			if (virtualAddress != null) {
+				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
+					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)];
+					raf.readFully(rsrcbytes);
+					return new RSRCSection(rsrcbytes, virtualAddress);
+				}
+			}
+		}
+		return null;
+	}
+
+	private DataDirEntry getResourceEntry(List<DataDirEntry> dataDirEntries) {
+		for (DataDirEntry entry : dataDirEntries) {
+			if (entry.key.equals(DataDirectoryKey.RESOURCE_TABLE)) {
+				return entry;
 			}
 		}
 		return null;

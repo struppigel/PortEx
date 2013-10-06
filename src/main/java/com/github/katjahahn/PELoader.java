@@ -9,6 +9,7 @@ import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
 
 public class PELoader {
@@ -102,9 +103,11 @@ public class PELoader {
 			System.out.println();
 		}
 		
+		SectionLoader loader = new SectionLoader(table, file);
+		
 		System.out.println(data.getCOFFFileHeader().getInfo());
 		System.out.println(data.getOptionalHeader().getInfo());
-		
+		System.out.println(loader.getRsrcSection(dataDirEntries).getInfo());
 	}
 
 }

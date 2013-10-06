@@ -197,5 +197,4 @@ public class SectionTable extends PEModule {
 			}
 			return null;
 		}
-
 }
