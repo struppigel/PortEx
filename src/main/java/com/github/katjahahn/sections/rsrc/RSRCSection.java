@@ -1,4 +1,4 @@
-package com.github.katjahahn.sections;
+package com.github.katjahahn.sections.rsrc;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.FileIO;
+import com.github.katjahahn.sections.PESection;
 
 public class RSRCSection extends PESection {
 
@@ -21,6 +22,7 @@ public class RSRCSection extends PESection {
 	private Map<String, String[]> resourceDataEntrySpec;
 	private final byte[] rsrcbytes;
 	private final int virtualAddress;
+	private ResourceDirectoryTable resourceTree;
 
 	public RSRCSection(byte[] rsrcbytes, int virtualAddress) {
 		super(rsrcbytes);
@@ -30,14 +32,59 @@ public class RSRCSection extends PESection {
 			rsrcDirSpec = FileIO.readMap(RSRC_DIR_SPEC);
 			resourceDirEntrySpec = FileIO.readMap(RSRC_DIR_ENTRY_SPEC);
 			resourceDataEntrySpec = FileIO.readMap(RSRC_DATA_ENTRY_SPEC);
+			loadResources();
 		} catch (NumberFormatException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void loadResources() {
+		// TODO
+		try {
+			resourceTree = new ResourceDirectoryTable(rsrcDirSpec,
+					rsrcbytes, 0, 0);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public String getInfo() {
-		return getResourceDirTableInfo(rsrcbytes, "root");
+		return resourceTree.getInfo();
+//		return getResourceDirTableInfo(rsrcbytes, "root");
+	}
+
+	private String getResourceDirTableInfo(byte[] tableBytes, String id) {
+		StringBuilder b = new StringBuilder();
+		int nameEntries = 0;
+		int idEntries = 0;
+
+		b.append("** table header " + id + " **" + NL + NL);
+		for (Entry<String, String[]> entry : rsrcDirSpec.entrySet()) {
+
+			String[] specs = entry.getValue();
+			int value = getBytesIntValue(tableBytes,
+					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
+			String key = entry.getKey();
+
+			if (key.equals("TIME_DATE_STAMP")) {
+				b.append(specs[0] + ": ");
+				b.append(getTimeDate(value) + NL);
+			} else {
+				b.append(specs[0] + ": " + value + NL);
+			}
+
+			if (key.equals("NR_OF_NAME_ENTRIES")) {
+				nameEntries = value;
+			} else if (key.equals("NR_OF_ID_ENTRIES")) {
+				idEntries = value;
+			}
+		}
+		if (nameEntries != 0 || idEntries != 0) {
+			b.append(getResourceDirEntriesInfo(tableBytes, nameEntries,
+					idEntries));
+		}
+		return b.toString();
 	}
 
 	private String getResourceDirEntriesInfo(byte[] entryBytes,
@@ -104,14 +151,15 @@ public class RSRCSection extends PESection {
 			value = removeHighestBit(value);
 			b.append(specs[idEntryDescription] + ": " + value + " (0x"
 					+ Long.toHexString(value) + ")" + NL);
-			byte[] resourceBytes = Arrays.copyOfRange(rsrcbytes,
-					(int) value, rsrcbytes.length);
+			byte[] resourceBytes = Arrays.copyOfRange(rsrcbytes, (int) value,
+					rsrcbytes.length);
+			System.err.println("resource bytes length " + resourceBytes.length + " table " + tableId);
 			return NL + getResourceDirTableInfo(resourceBytes, tableId);
 		}
 	}
 
-	//TODO resource dir strings
-	
+	// TODO resource dir strings
+
 	private String getResourceDataEntry(byte[] resourceBytes) {
 		StringBuilder b = new StringBuilder();
 		int pointer = 0;
@@ -138,7 +186,8 @@ public class RSRCSection extends PESection {
 	}
 
 	private void showResource(StringBuilder b, int pointer, int size) {
-		byte[] resource = Arrays.copyOfRange(rsrcbytes, pointer, pointer + size);
+		byte[] resource = Arrays
+				.copyOfRange(rsrcbytes, pointer, pointer + size);
 		try {
 			b.append(NL + NL + new String(resource, "UTF8").trim() + NL + NL);
 		} catch (UnsupportedEncodingException e) {
@@ -155,39 +204,6 @@ public class RSRCSection extends PESection {
 	private boolean isDataEntryRVA(long value) {
 		int mask = 1 << 31;
 		return (value & mask) == 0;
-	}
-
-	private String getResourceDirTableInfo(byte[] tableBytes, String id) {
-		StringBuilder b = new StringBuilder();
-		int nameEntries = 0;
-		int idEntries = 0;
-
-		b.append("** table header " + id + " **" + NL + NL);
-		for (Entry<String, String[]> entry : rsrcDirSpec.entrySet()) {
-
-			String[] specs = entry.getValue();
-			int value = getBytesIntValue(tableBytes,
-					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-			String key = entry.getKey();
-
-			if (key.equals("TIME_DATE_STAMP")) {
-				b.append(specs[0] + ": ");
-				b.append(getTimeDate(value) + NL);
-			} else {
-				b.append(specs[0] + ": " + value + NL);
-			}
-
-			if (key.equals("NR_OF_NAME_ENTRIES")) {
-				nameEntries = value;
-			} else if (key.equals("NR_OF_ID_ENTRIES")) {
-				idEntries = value;
-			}
-		}
-		if (nameEntries != 0 || idEntries != 0) {
-			b.append(getResourceDirEntriesInfo(tableBytes, nameEntries,
-					idEntries));
-		}
-		return b.toString();
 	}
 
 	private Date getTimeDate(int seconds) {

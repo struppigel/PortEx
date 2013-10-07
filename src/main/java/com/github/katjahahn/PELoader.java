@@ -94,19 +94,19 @@ public class PELoader {
 		SectionTable table = data.getSectionTable();
 		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
 				.getDataDirEntries();
-		for (DataDirEntry entry : dataDirEntries) {
-			System.out.println(entry);
-			System.out.println("calculated file offset: "
-					+ entry.getFileOffset(table));
-			System.out.println("section name: "
-					+ entry.getSectionTableEntry(table).getName());
-			System.out.println();
-		}
-		
+//		for (DataDirEntry entry : dataDirEntries) {
+//			System.out.println(entry);
+//			System.out.println("calculated file offset: "
+//					+ entry.getFileOffset(table));
+//			System.out.println("section name: "
+//					+ entry.getSectionTableEntry(table).getName());
+//			System.out.println();
+//		}
+//		
 		SectionLoader loader = new SectionLoader(table, file);
-		
-		System.out.println(data.getCOFFFileHeader().getInfo());
-		System.out.println(data.getOptionalHeader().getInfo());
+//		
+//		System.out.println(data.getCOFFFileHeader().getInfo());
+//		System.out.println(data.getOptionalHeader().getInfo());
 		System.out.println(loader.getRsrcSection(dataDirEntries).getInfo());
 	}
 

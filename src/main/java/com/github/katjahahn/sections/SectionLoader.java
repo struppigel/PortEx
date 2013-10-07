@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
+import com.github.katjahahn.sections.rsrc.RSRCSection;
 
 public class SectionLoader {
 
