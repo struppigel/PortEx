@@ -28,10 +28,10 @@ public class ResourceDirectoryEntry extends PEModule {
 		this.entryNr = entryNr;
 		this.parentId = parentId;
 		resourceDirEntrySpec = FileIO.readMap(RSRC_DIR_ENTRY_SPEC);
-		load();
 	}
 
-	private void load() {
+	@Override
+	public void read() throws IOException {
 		int valueOffset = 2;
 		int valueSize = 3;
 

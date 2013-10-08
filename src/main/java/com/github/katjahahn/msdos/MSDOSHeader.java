@@ -23,12 +23,38 @@ public class MSDOSHeader extends PEModule {
 	private static final String specification = "msdosheaderspec";
 	private static Map<String, StandardEntry> headerData;
 
+	private final byte[] headerbytes;
+
 	public MSDOSHeader(byte[] headerbytes) {
-		if (hasSignature(headerbytes)) {
-			loadHeaderData(headerbytes);
-		}
+		this.headerbytes = headerbytes;
 	}
 	
+	@Override
+	public void read() throws IOException {
+		if(!hasSignature(headerbytes)) {
+			throw new IOException("No PE Signature found");
+		}
+		headerData = new HashMap<>();
+		int offsetLoc = 0;
+		int sizeLoc = 1;
+		int descriptionLoc = 2;
+		try {
+			Map<String, String[]> map = FileIO.readMap(specification);
+			for (Entry<String, String[]> entry : map.entrySet()) {
+				String key = entry.getKey();
+				String[] spec = entry.getValue();
+				int value = getBytesIntValue(headerbytes,
+						Integer.parseInt(spec[offsetLoc]),
+						Integer.parseInt(spec[sizeLoc]));
+				headerData.put(key, new StandardEntry(key,
+						spec[descriptionLoc], value));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+	}
+
 	//TODO verify
 	public int getHeaderSize() {
 		return get("HEADER_PARAGRAPHS").value * PARAGRAPH_SIZE;
@@ -54,28 +80,6 @@ public class MSDOSHeader extends PEModule {
 
 	public StandardEntry get(String keyString) {
 		return headerData.get(keyString);
-	}
-
-	private void loadHeaderData(byte[] headerbytes) {
-		headerData = new HashMap<>();
-		int offsetLoc = 0;
-		int sizeLoc = 1;
-		int descriptionLoc = 2;
-		try {
-			Map<String, String[]> map = FileIO.readMap(specification);
-			for (Entry<String, String[]> entry : map.entrySet()) {
-				String key = entry.getKey();
-				String[] spec = entry.getValue();
-				int value = getBytesIntValue(headerbytes,
-						Integer.parseInt(spec[offsetLoc]),
-						Integer.parseInt(spec[sizeLoc]));
-				headerData.put(key, new StandardEntry(key,
-						spec[descriptionLoc], value));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	@Override

@@ -12,6 +12,9 @@ public abstract class PEModule {
 
 	public abstract String getInfo();
 	
+	//TODO replace all load() methods in constructor by this method;
+	public abstract void read() throws IOException;
+	
 	protected static List<String> getCharacteristicsDescriptions(long value, String filename) {
 		List<String> characteristics = new LinkedList<>();
 		try { 

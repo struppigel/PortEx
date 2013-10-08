@@ -32,28 +32,24 @@ public class RSRCSection extends PESection {
 			rsrcDirSpec = FileIO.readMap(RSRC_DIR_SPEC);
 			resourceDirEntrySpec = FileIO.readMap(RSRC_DIR_ENTRY_SPEC);
 			resourceDataEntrySpec = FileIO.readMap(RSRC_DATA_ENTRY_SPEC);
-			loadResources();
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void loadResources() {
-		try {
-			resourceTree = new ResourceDirectoryTable(rsrcDirSpec,
-					rsrcbytes, 0, 0);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	@Override
+	public void read() throws IOException {
+		resourceTree = new ResourceDirectoryTable(rsrcDirSpec, rsrcbytes, 0, 0);
+		resourceTree.read();
 	}
 
 	@Override
 	public String getInfo() {
-//		return getResourceDirTableInfo(rsrcbytes, "root");
+		// return getResourceDirTableInfo(rsrcbytes, "root");
 		return resourceTree.getInfo();
 	}
 
-	//TODO this is obsolete
+	// TODO this is obsolete
 	private String getResourceDirTableInfo(byte[] tableBytes, String id) {
 		StringBuilder b = new StringBuilder();
 		int nameEntries = 0;
@@ -153,7 +149,8 @@ public class RSRCSection extends PESection {
 					+ Long.toHexString(value) + ")" + NL);
 			byte[] resourceBytes = Arrays.copyOfRange(rsrcbytes, (int) value,
 					rsrcbytes.length);
-			System.err.println("resource bytes length " + resourceBytes.length + " table " + tableId);
+			System.err.println("resource bytes length " + resourceBytes.length
+					+ " table " + tableId);
 			return NL + getResourceDirTableInfo(resourceBytes, tableId);
 		}
 	}

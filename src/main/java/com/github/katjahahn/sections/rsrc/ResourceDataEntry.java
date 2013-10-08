@@ -15,17 +15,19 @@ public class ResourceDataEntry extends PEModule {
 	private final static String RSRC_DATA_ENTRY_SPEC = "resourcedataentryspec";
 	private Map<String, String[]> resourceDataEntrySpec;
 	private Map<ResourceDataEntryKey, StandardEntry> data;
+	private byte[] entryBytes;
 
 	public ResourceDataEntry(byte[] entryBytes) {
 		try {
+			this.entryBytes = entryBytes;
 			resourceDataEntrySpec = FileIO.readMap(RSRC_DATA_ENTRY_SPEC);
-			load(entryBytes);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void load(byte[] entryBytes) {
+	@Override
+	public void read() throws IOException {
 		data = new HashMap<>();
 		for (Entry<String, String[]> entry : resourceDataEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();

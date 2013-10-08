@@ -6,7 +6,7 @@ import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
 
 
-public class PEData extends PEModule {
+public class PEData {
 	
 	private final PESignature pesig;
 	private final COFFFileHeader coff;
@@ -40,12 +40,6 @@ public class PEData extends PEModule {
 	
 	public OptionalHeader getOptionalHeader() {
 		return opt;
-	}
-
-	@Override
-	public String getInfo() {
-		//TODO
-		return null;
 	}
 
 }

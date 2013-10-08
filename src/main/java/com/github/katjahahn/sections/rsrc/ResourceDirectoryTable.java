@@ -38,10 +38,10 @@ public class ResourceDirectoryTable extends PEModule {
 		this.tableBytes = tableBytes;
 		this.id = id;
 		this.offset = offset;
-		load();
 	}
-
-	private void load() throws IOException {
+	
+	@Override
+	public void read() throws IOException {
 		data = new HashMap<>();
 		for (Entry<String, String[]> entry : rsrcDirSpec.entrySet()) {
 
@@ -80,8 +80,10 @@ public class ResourceDirectoryTable extends PEModule {
 				try {
 					byte[] resourceBytes = Arrays.copyOfRange(tableBytes,
 							address - offset, tableBytes.length);
-					children.add(new ResourceDirectoryTable(rsrcDirSpec,
-							resourceBytes, childId, address));
+					ResourceDirectoryTable table = new ResourceDirectoryTable(rsrcDirSpec,
+							resourceBytes, childId, address);
+					table.read();
+					children.add(table);
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				}

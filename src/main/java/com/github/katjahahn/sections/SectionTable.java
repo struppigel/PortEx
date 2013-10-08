@@ -28,13 +28,13 @@ public class SectionTable extends PEModule {
 		this.numberOfEntries = numberOfEntries;
 		try {
 			specification = FileIO.readMap(SECTION_TABLE_SPEC);
-			loadSectionEntries();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void loadSectionEntries() {
+	@Override
+	public void read() throws IOException {
 		sections = new LinkedList<>();
 		
 		for (int i = 0; i < numberOfEntries; i++) {

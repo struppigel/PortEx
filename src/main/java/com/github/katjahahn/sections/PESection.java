@@ -1,5 +1,7 @@
 package com.github.katjahahn.sections;
 
+import java.io.IOException;
+
 import com.github.katjahahn.PEModule;
 
 public class PESection extends PEModule {
@@ -19,6 +21,11 @@ public class PESection extends PEModule {
 	@Override
 	public String getInfo() {
 		return null;
+	}
+
+	@Override
+	public void read() throws IOException {
+		
 	}
 
 }

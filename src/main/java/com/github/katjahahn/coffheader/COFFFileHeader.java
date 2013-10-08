@@ -20,20 +20,21 @@ public class COFFFileHeader extends PEModule {
 
 	private final byte[] headerbytes;
 	private List<StandardEntry> data;
+	private Map<String, String[]> specification;
 
 	public COFFFileHeader(byte[] headerbytes) {
 		assert headerbytes.length == HEADER_SIZE;
 		this.headerbytes = headerbytes;
 		try {
-			Map<String, String[]> specification = FileIO
+			specification = FileIO
 					.readMap(COFF_SPEC_FILE);
-			loadData(specification);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void loadData(Map<String, String[]> specification) {
+	@Override
+	public void read() throws IOException {
 		data = new LinkedList<>();
 		int description = 0;
 		int offset = 1;

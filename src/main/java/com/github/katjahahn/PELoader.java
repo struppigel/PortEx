@@ -33,15 +33,20 @@ public class PELoader {
 
 	private PEData loadData() throws IOException {
 		PESignature pesig = new PESignature(file);
+		pesig.read();
 		MSDOSHeader msdos = null;
 		COFFFileHeader coff = null;
 		OptionalHeader opt = null;
 		SectionTable table = null;
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			msdos = loadMSDOSHeader(raf);
+			msdos.read();
 			coff = loadCOFFFileHeader(pesig, raf);
+			coff.read();
 			opt = loadOptionalHeader(pesig, coff, raf);
+			opt.read();
 			table = loadSectionTable(pesig, coff, raf);
+			table.read();
 		}
 		return new PEData(msdos, pesig, coff, opt, table);
 	}
@@ -94,20 +99,22 @@ public class PELoader {
 		SectionTable table = data.getSectionTable();
 		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
 				.getDataDirEntries();
-//		for (DataDirEntry entry : dataDirEntries) {
-//			System.out.println(entry);
-//			System.out.println("calculated file offset: "
-//					+ entry.getFileOffset(table));
-//			System.out.println("section name: "
-//					+ entry.getSectionTableEntry(table).getName());
-//			System.out.println();
-//		}
-//		
+		for (DataDirEntry entry : dataDirEntries) {
+			System.out.println(entry);
+			System.out.println("calculated file offset: "
+					+ entry.getFileOffset(table));
+			System.out.println("section name: "
+					+ entry.getSectionTableEntry(table).getName());
+			System.out.println();
+		}
+	
 		SectionLoader loader = new SectionLoader(table, file);
-//		
-//		System.out.println(data.getCOFFFileHeader().getInfo());
-//		System.out.println(data.getOptionalHeader().getInfo());
-		System.out.println(loader.getRsrcSection(dataDirEntries).getInfo());
+		
+		System.out.println(data.getCOFFFileHeader().getInfo());
+		System.out.println(data.getOptionalHeader().getInfo());
+		System.out.println(data.getMSDOSHeader().getInfo());
+		System.out.println(data.getPESignature().getInfo());
+		System.out.println(loader.loadRsrcSection(dataDirEntries).getInfo());
 	}
 
 }

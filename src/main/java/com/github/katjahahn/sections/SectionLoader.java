@@ -58,7 +58,7 @@ public class SectionLoader {
 	 *         section
 	 * @throws IOException
 	 */
-	public RSRCSection getRsrcSection(List<DataDirEntry> dataDirEntries)
+	public RSRCSection loadRsrcSection(List<DataDirEntry> dataDirEntries)
 			throws IOException {
 		DataDirEntry resourceTable = getResourceEntry(dataDirEntries);
 		if (resourceTable != null) {
@@ -70,7 +70,9 @@ public class SectionLoader {
 					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
 					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)];
 					raf.readFully(rsrcbytes);
-					return new RSRCSection(rsrcbytes, virtualAddress);
+					RSRCSection rsrc = new RSRCSection(rsrcbytes, virtualAddress);
+					rsrc.read();
+					return rsrc;
 				}
 			}
 		}

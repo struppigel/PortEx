@@ -10,12 +10,14 @@ public class PESignature extends PEModule {
 	private static final byte[] PE_SIG = "PE\0\0".getBytes();
 	public static final int PE_SIG_LENGTH = PE_SIG.length;
 	private int peOffset;
+	private final File file;
 
-	public PESignature(File file) throws IOException {
-		extractInfo(file);
+	public PESignature(File file) {
+		this.file = file;
 	}
 
-	private void extractInfo(File file) throws IOException {
+	@Override
+	public void read() throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(PE_OFFSET_LOCATION);
 			byte[] offsetBytes = new byte[2];
@@ -30,7 +32,7 @@ public class PESignature extends PEModule {
 					throw new FileFormatException("given file is no PE file");
 				}
 			}
-		}
+		} 
 	}
 
 	public int getPEOffset() {

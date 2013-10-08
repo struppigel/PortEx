@@ -19,7 +19,8 @@ public class MSDOSLoadModule extends PEModule {
 		this.file = file;
 	}
 
-	public void load() throws IOException {
+	@Override
+	public void read() throws IOException {
 		int headerSize = header.getHeaderSize();
 		int filePages = header.get("FILE_PAGES").value;
 		int lastPageSize = header.get("LAST_PAGE_SIZE").value;
@@ -48,7 +49,7 @@ public class MSDOSLoadModule extends PEModule {
 
 	public byte[] getDump() throws IOException {
 		if (loadModuleBytes == null) {
-			load();
+			read();
 		}
 		return loadModuleBytes;
 	}

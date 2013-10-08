@@ -42,19 +42,19 @@ public class OptionalHeader extends PEModule {
 
 	public OptionalHeader(byte[] headerbytes) {
 		this.headerbytes = headerbytes;
-		try {
-			Map<String, String[]> standardSpec = FileIO.readMap(STANDARD_SPEC);
-			Map<String, String[]> windowsSpec = FileIO.readMap(WINDOWS_SPEC);
-			List<String[]> datadirSpec = FileIO.readArray(DATA_DIR_SPEC);
+	}
 
-			this.magicNumber = readMagicNumber(standardSpec);
+	@Override
+	public void read() throws IOException {
+		Map<String, String[]> standardSpec = FileIO.readMap(STANDARD_SPEC);
+		Map<String, String[]> windowsSpec = FileIO.readMap(WINDOWS_SPEC);
+		List<String[]> datadirSpec = FileIO.readArray(DATA_DIR_SPEC);
 
-			loadStandardFields(standardSpec);
-			loadWindowsSpecificFields(windowsSpec);
-			loadDataDirectories(datadirSpec);
-		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
-		}
+		this.magicNumber = readMagicNumber(standardSpec);
+
+		loadStandardFields(standardSpec);
+		loadWindowsSpecificFields(windowsSpec);
+		loadDataDirectories(datadirSpec);
 	}
 
 	/**
