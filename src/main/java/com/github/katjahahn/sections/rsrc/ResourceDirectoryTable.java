@@ -20,8 +20,11 @@ public class ResourceDirectoryTable extends PEModule {
 	private final Map<String, String[]> rsrcDirSpec;
 	private final byte[] tableBytes;
 
-	private final List<ResourceDirectoryEntry> entries = new ArrayList<>();
+	//TODO put children and dataEntries to DirectoryEntries
+	//XXX this is a mess!
+	private final List<ResourceDirectoryEntry> dirEntries = new ArrayList<>();
 	private final List<ResourceDirectoryTable> children = new ArrayList<>();
+	private final List<ResourceDataEntry> dataEntries = new ArrayList<>();
 
 	private int nameEntries;
 	private int idEntries;
@@ -48,7 +51,7 @@ public class ResourceDirectoryTable extends PEModule {
 			String key = entry.getKey();
 
 			if (key.equals("TIME_DATE_STAMP")) {
-				this.stamp = getTimeDate(value);
+				stamp = getTimeDate(value);
 			}
 
 			if (key.equals("NR_OF_NAME_ENTRIES")) {
@@ -62,13 +65,14 @@ public class ResourceDirectoryTable extends PEModule {
 		}
 		if (nameEntries != 0 || idEntries != 0) {
 			loadResourceDirEntries();
+			loadDataEntries();
 			loadChildren();
 		}
 	}
 
 	private void loadChildren() throws IOException {
 		int childId = id;
-		for (ResourceDirectoryEntry entry : entries) {
+		for (ResourceDirectoryEntry entry : dirEntries) {
 			Integer address = entry.getSubDirRVA();
 
 			if (address != null) {
@@ -79,9 +83,9 @@ public class ResourceDirectoryTable extends PEModule {
 					children.add(new ResourceDirectoryTable(rsrcDirSpec,
 							resourceBytes, childId, address));
 				} catch (IllegalArgumentException e) {
-					System.err.println(e.getMessage() + entry.getInfo());
+					e.printStackTrace();
 				}
-			} 
+			}
 
 		}
 	}
@@ -94,11 +98,22 @@ public class ResourceDirectoryTable extends PEModule {
 			byte[] entryBytes = Arrays
 					.copyOfRange(tableBytes, offset, endpoint);
 			if (i < nameEntries) {
-				entries.add(new ResourceDirectoryEntry(true, entryBytes,
+				dirEntries.add(new ResourceDirectoryEntry(true, entryBytes,
 						entryNr, id));
 			} else {
-				entries.add(new ResourceDirectoryEntry(false, entryBytes,
+				dirEntries.add(new ResourceDirectoryEntry(false, entryBytes,
 						entryNr, id));
+			}
+		}
+	}
+
+	private void loadDataEntries() {
+		for (ResourceDirectoryEntry dirEntry : dirEntries) {
+			Integer rva = dirEntry.getDataEntryRVA();
+			if (rva != null) {
+				byte[] entryBytes = Arrays.copyOfRange(tableBytes,
+						rva - offset, (rva - offset) + ResourceDataEntry.SIZE);
+				dataEntries.add(new ResourceDataEntry(entryBytes));
 			}
 		}
 	}
@@ -108,6 +123,7 @@ public class ResourceDirectoryTable extends PEModule {
 		return new Date(millis);
 	}
 
+	//XXX This is a mess too! Display a nice tree structure or something like that.
 	@Override
 	public String getInfo() {
 		StringBuilder b = new StringBuilder();
@@ -126,12 +142,20 @@ public class ResourceDirectoryTable extends PEModule {
 				b.append(description + ": " + value + NL);
 			}
 		}
-		for (ResourceDirectoryEntry entry : entries) {
+		for (ResourceDirectoryEntry entry : dirEntries) {
 			b.append(entry.getInfo());
 		}
-		for(ResourceDirectoryTable child : children) {
+		for (ResourceDataEntry entry : dataEntries) {
+			b.append(entry.getInfo());
+		}
+		for (ResourceDirectoryTable child : children) {
 			b.append(child.getInfo());
 		}
 		return b.toString();
 	}
+
+	public Date getStamp() {
+		return stamp;
+	}
+
 }

@@ -39,7 +39,6 @@ public class RSRCSection extends PESection {
 	}
 
 	private void loadResources() {
-		// TODO
 		try {
 			resourceTree = new ResourceDirectoryTable(rsrcDirSpec,
 					rsrcbytes, 0, 0);
@@ -50,10 +49,11 @@ public class RSRCSection extends PESection {
 
 	@Override
 	public String getInfo() {
-		return resourceTree.getInfo();
 //		return getResourceDirTableInfo(rsrcbytes, "root");
+		return resourceTree.getInfo();
 	}
 
+	//TODO this is obsolete
 	private String getResourceDirTableInfo(byte[] tableBytes, String id) {
 		StringBuilder b = new StringBuilder();
 		int nameEntries = 0;
