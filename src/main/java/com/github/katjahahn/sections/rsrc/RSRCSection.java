@@ -192,7 +192,11 @@ public class RSRCSection extends PESection {
 		}
 	}
 
-	// TODO this only works for 4 byte numbers, please test this
+	/**
+	 * Only for 4 Byte numbers
+	 * @param value
+	 * @return
+	 */
 	private long removeHighestBit(long value) {
 		long mask = 0x7FFFFFFF;
 		return (value & mask);
