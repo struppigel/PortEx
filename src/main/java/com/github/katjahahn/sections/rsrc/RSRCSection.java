@@ -193,7 +193,7 @@ public class RSRCSection extends PESection {
 	}
 
 	/**
-	 * Only for 4 Byte numbers
+	 * Removes the highest bit of a 4 byte number
 	 * @param value
 	 * @return
 	 */
