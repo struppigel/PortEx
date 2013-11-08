@@ -11,7 +11,7 @@ import com.github.katjahahn.StandardDataEntry
 
 class ImportSection(
     private val idatabytes: Array[Byte],
-    private val virtualAdress: Integer) extends PESection {
+    private val virtualAddress: Int) extends PESection {
 
   private val iLookupTableSpec = FileIO.readMap(I_LOOKUP_TABLE_SPEC).asScala.toMap
   private val hintNameTableSpec = FileIO.readMap(HINT_NAME_TABLE_SPEC).asScala.toMap
@@ -44,8 +44,33 @@ class ImportSection(
       Some(entry)
   }
 
+  //TODO get name from name rva. this code is just for testing
   private def entryDescription(): String = {
-    dirEntries.mkString(NL + NL)
+    def names(): String = {
+      var s = ""
+      for(de <- dirEntries;
+          e  <- de.entries) {
+        if(e.key == "NAME_RVA") {
+          s += getName(e.value) + NL
+          println("get name " + s)
+        }
+      }
+      s
+    } 
+    def getName(value: Int): String = {
+      val offset = value - virtualAddress
+      val nullindex = {
+        var index = 0
+        for(i <- offset until idatabytes.length) {
+          if(idatabytes(i) == '\0') 
+            index = i
+        }
+        index
+      }
+      val namebytes: Array[Byte] = idatabytes.slice(offset, nullindex + 2)
+      new String(namebytes)
+    }
+    dirEntries.mkString(NL + NL) + NL + names()
   }
 
   override def getInfo(): String =
