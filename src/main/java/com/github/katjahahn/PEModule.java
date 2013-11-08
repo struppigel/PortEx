@@ -71,7 +71,7 @@ public abstract class PEModule {
 	 * @param length
 	 * @return
 	 */
-	protected static int getBytesIntValue(byte[] bytes, int offset, int length) {
+	public static int getBytesIntValue(byte[] bytes, int offset, int length) {
 		byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
 		return bytesToInt(value);
 	}
@@ -96,7 +96,7 @@ public abstract class PEModule {
 	 * @param array
 	 * @return
 	 */
-	protected static String convertByteToHex(byte array[]) {
+	public static String convertByteToHex(byte array[]) {
 		StringBuilder buffer = new StringBuilder();
 		for (int i = 0; i < array.length; i++) {
 			if ((array[i] & 0xff) < 0x10) {

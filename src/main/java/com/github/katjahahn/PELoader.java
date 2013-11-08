@@ -3,11 +3,9 @@ package com.github.katjahahn;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
-import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
@@ -97,23 +95,23 @@ public class PELoader {
 		PEData data = PELoader.loadPE(file);
 
 		SectionTable table = data.getSectionTable();
-		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
-				.getDataDirEntries();
-		for (DataDirEntry entry : dataDirEntries) {
-			System.out.println(entry);
-			System.out.println("calculated file offset: "
-					+ entry.getFileOffset(table));
-			System.out.println("section name: "
-					+ entry.getSectionTableEntry(table).getName());
-			System.out.println();
-		}
+//		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
+//				.getDataDirEntries();
+//		for (DataDirEntry entry : dataDirEntries) {
+//			System.out.println(entry);
+//			System.out.println("calculated file offset: "
+//					+ entry.getFileOffset(table));
+//			System.out.println("section name: "
+//					+ entry.getSectionTableEntry(table).getName());
+//			System.out.println();
+//		}
 	
 		SectionLoader loader = new SectionLoader(table, data.getOptionalHeader(), file);
 		
-		System.out.println(data.getCOFFFileHeader().getInfo());
-		System.out.println(data.getOptionalHeader().getInfo());
-		System.out.println(data.getMSDOSHeader().getInfo());
-		System.out.println(data.getPESignature().getInfo());
+//		System.out.println(data.getCOFFFileHeader().getInfo());
+//		System.out.println(data.getOptionalHeader().getInfo());
+//		System.out.println(data.getMSDOSHeader().getInfo());
+//		System.out.println(data.getPESignature().getInfo());
 		System.out.println(loader.loadImportSection().getInfo());
 	}
 
