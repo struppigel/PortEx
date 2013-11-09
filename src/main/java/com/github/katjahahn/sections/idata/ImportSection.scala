@@ -8,15 +8,18 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.StandardDataEntry
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.StandardDataEntry
+import IDataEntryKey._
 
 class ImportSection(
-    private val idatabytes: Array[Byte],
-    private val virtualAddress: Int) extends PESection {
+  private val idatabytes: Array[Byte],
+  private val virtualAddress: Int) extends PESection {
+
+  type IDataEntry = StandardDataEntry[IDataEntryKey.type]
 
   private val iLookupTableSpec = FileIO.readMap(I_LOOKUP_TABLE_SPEC).asScala.toMap
   private val hintNameTableSpec = FileIO.readMap(HINT_NAME_TABLE_SPEC).asScala.toMap
 
-  private var dirEntries = List.empty[StandardDataEntry]
+  private var dirEntries = List.empty[IDataEntry]
 
   override def read(): Unit = {
     var isLastEntry = false
@@ -29,40 +32,37 @@ class ImportSection(
       i += 1
     } while (!isLastEntry)
   }
+  
+  private def readIDirEntries(): Unit = {
+    //TODO recursive implementation of readDirEntry
+  } 
 
-  private def readDirEntry(nr: Int): Option[StandardDataEntry] = {
+  private def readDirEntry(nr: Int): Option[IDataEntry] = {
     val from = nr * ENTRY_SIZE
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
-    def isEmpty(entry: StandardDataEntry): Boolean =
+    def isEmpty(entry: IDataEntry): Boolean =
       entry.entries.forall(e => e.key != "I_LOOKUP_TABLE_RVA" || e.value == 0)
 
-    val entry = new StandardDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
+    val entry = new IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.read()
     if (isEmpty(entry)) None else
       Some(entry)
   }
 
-  //TODO get name from name rva. this code is just for testing
-  private def entryDescription(): String = {
-    def names(): String = {
-      var s = ""
-      for(de <- dirEntries;
-          e  <- de.entries) {
-        if(e.key == "NAME_RVA") {
-          s += getName(e.value) + NL
-          println("get name " + s)
-        }
-      }
-      s
-    } 
+  private def entryDescription(): String =
+    (for (e <- dirEntries) 
+      yield e.getInfo() + NL + "ASCII Name: " + getASCIIName(e) + NL + NL
+    ).mkString
+
+  private def getASCIIName(entry: IDataEntry): String = {
     def getName(value: Int): String = {
       val offset = value - virtualAddress
       val nullindex = {
         var index = 0
-        for(i <- offset until idatabytes.length) {
-          if(idatabytes(i) == '\0') 
+        for (i <- offset until idatabytes.length) {
+          if (idatabytes(i) == '\0')
             index = i
         }
         index
@@ -70,7 +70,7 @@ class ImportSection(
       val namebytes: Array[Byte] = idatabytes.slice(offset, nullindex + 2)
       new String(namebytes)
     }
-    dirEntries.mkString(NL + NL) + NL + names()
+    getName(entry(NAME_RVA))
   }
 
   override def getInfo(): String =

@@ -9,6 +9,7 @@ import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.idata.ImportSection;
 
 public class PELoader {
 
@@ -112,7 +113,8 @@ public class PELoader {
 //		System.out.println(data.getOptionalHeader().getInfo());
 //		System.out.println(data.getMSDOSHeader().getInfo());
 //		System.out.println(data.getPESignature().getInfo());
-		System.out.println(loader.loadImportSection().getInfo());
+		ImportSection idata = loader.loadImportSection();
+		System.out.println(idata.getInfo());
 	}
 
 }

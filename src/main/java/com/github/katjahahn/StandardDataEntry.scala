@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
 
-class StandardDataEntry (
+class StandardDataEntry[K <: Enumeration] (
   private val entrybytes: Array[Byte],
   private val specLocation: String
 		) extends PEModule {
@@ -24,6 +24,16 @@ class StandardDataEntry (
 	  buffer += entry
 	}
     entries = buffer.toList
+  }
+  
+  def apply(key: K#Value): Int = {
+    var i = 0
+    for(e <- entries) {
+      if(e.key == key.toString) {
+        i = e.value
+      }
+    }
+    i
   }
   
   override def getInfo(): String = entries.mkString(NL)
