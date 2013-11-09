@@ -25,15 +25,12 @@ class StandardDataEntry[K <: Enumeration] (
 	}
     entries = buffer.toList
   }
-  
+ 
   def apply(key: K#Value): Int = {
-    var i = 0
-    for(e <- entries) {
-      if(e.key == key.toString) {
-        i = e.value
-      }
+    entries.find(x => x.key == key.toString) match {
+      case Some(e) => e.value 
+      case None => throw new IllegalArgumentException
     }
-    i
   }
   
   override def getInfo(): String = entries.mkString(NL)

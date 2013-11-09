@@ -110,7 +110,7 @@ public class SectionLoader {
 							.get(SIZE_OF_RAW_DATA)];
 					raf.readFully(idatabytes);
 					ImportSection idata = new ImportSection(idatabytes,
-							virtualAddress);
+							virtualAddress, optHeader);
 					idata.read();
 					return idata;
 				}

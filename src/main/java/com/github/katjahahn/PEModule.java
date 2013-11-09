@@ -85,7 +85,7 @@ public abstract class PEModule {
 	 * @param length
 	 * @return
 	 */
-	protected static long getBytesLongValue(byte[] bytes, int offset, int length) {
+	public static long getBytesLongValue(byte[] bytes, int offset, int length) {
 		byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
 		return bytesToLong(value);
 	}
