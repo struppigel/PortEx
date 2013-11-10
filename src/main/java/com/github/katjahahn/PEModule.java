@@ -96,7 +96,7 @@ public abstract class PEModule {
 	 * @param array
 	 * @return
 	 */
-	public static String convertByteToHex(byte array[]) {
+	protected static String convertByteToHex(byte array[]) {
 		StringBuilder buffer = new StringBuilder();
 		for (int i = 0; i < array.length; i++) {
 			if ((array[i] & 0xff) < 0x10) {
@@ -115,7 +115,7 @@ public abstract class PEModule {
 	 * @param bytes
 	 * @return
 	 */
-	public static int bytesToInt(byte[] bytes) {
+	protected static int bytesToInt(byte[] bytes) {
 		int value = 0;
 		for (int i = 0; i < bytes.length; i++) {
 			int shift = 8 * i;

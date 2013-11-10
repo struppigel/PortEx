@@ -3,7 +3,7 @@ package com.github.katjahahn
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
-
+//TODO this is not used at all by now
 class StandardDataEntry[K <: Enumeration] (
   private val entrybytes: Array[Byte],
   private val specLocation: String

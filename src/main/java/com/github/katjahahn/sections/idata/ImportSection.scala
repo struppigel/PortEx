@@ -17,36 +17,35 @@ class ImportSection(
   private val virtualAddress: Int,
   private val optHeader: OptionalHeader) extends PESection {
 
-  type IDataEntry = StandardDataEntry[IDataEntryKey.type]
+//  type IDataEntry = StandardDataEntry[IDataEntryKey.type]
 
-  private val iLookupTableSpec = FileIO.readMap(I_LOOKUP_TABLE_SPEC).asScala.toMap
   private val hintNameTableSpec = FileIO.readMap(HINT_NAME_TABLE_SPEC).asScala.toMap
 
   private var dirEntries = List.empty[IDataEntry]
-  private var lookupTableEntries = List.empty[IDataEntry]
 
   override def read(): Unit = {
-    val offset = readDirEntries()
-    readLookupTableEntries(offset)
+    readDirEntries()
+    readLookupTableEntries()
   }
 
-  //TODO implement for all table entries
-  private def readLookupTableEntries(offset: Int): Unit = {
-    val (mask, length) = optHeader.getMagicNumber match {
-      case PE32 => (0x80000000L, 4)
-      case PE32_PLUS => (0x8000000000000000L, 8)
-      case ROM => throw new IllegalArgumentException
+  private def readLookupTableEntries(): Unit = {
+    for (dirEntry <- dirEntries) {
+      var entry: LookupTableEntry = null
+      var currOffset = dirEntry(I_LOOKUP_TABLE_RVA) - virtualAddress
+      val EntrySize = optHeader.getMagicNumber() match {
+        case PE32 => 32
+        case PE32_PLUS => 64
+        case ROM => throw new IllegalArgumentException
+      }
+      do {
+        entry = LookupTableEntry(idatabytes, currOffset, optHeader.getMagicNumber, virtualAddress)
+        dirEntry.addLookupTableEntry(entry)
+        currOffset += EntrySize
+      } while (entry.isInstanceOf[NullEntry])
     }
-    val value = getBytesLongValue(idatabytes, offset, length)
-    println(idatabytes.slice(offset, offset + length).mkString(" "))
-    val isOrdinal = (value & mask) == 1
-    println("is ord: " + isOrdinal)
-    println(value & 0x7FFFFFFF)
-    val address = value - virtualAddress
-    println(getASCII(address.toInt + 2)) //gets name from hint/name table
   }
 
-  private def readDirEntries(): Int = {
+  private def readDirEntries(): Unit = {
     var isLastEntry = false
     var i = 0
     do {
@@ -56,8 +55,6 @@ class ImportSection(
       }
       i += 1
     } while (!isLastEntry)
-    val offset = i * ENTRY_SIZE
-    offset
   }
 
   private def readDirEntry(nr: Int): Option[IDataEntry] = {
@@ -66,7 +63,7 @@ class ImportSection(
     val entrybytes = idatabytes.slice(from, until)
 
     def isEmpty(entry: IDataEntry): Boolean =
-      entry.entries.forall(e => e.key != "I_LOOKUP_TABLE_RVA" || e.value == 0)
+      entry(I_LOOKUP_TABLE_RVA) == 0
 
     val entry = new IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.read()
@@ -77,16 +74,12 @@ class ImportSection(
   private def entryDescription(): String =
     (for (e <- dirEntries)
       yield e.getInfo() + NL + "ASCII Name: " + getASCIIName(e) + NL + NL).mkString
-      
-  private def getASCII(offset: Int): String = {
-    val nullindex = idatabytes.indexWhere(b => b == 0, offset)
-    new String(idatabytes.slice(offset, nullindex + 2))
-  }
 
   private def getASCIIName(entry: IDataEntry): String = {
     def getName(value: Int): String = {
       val offset = value - virtualAddress
-      getASCII(offset)
+      val nullindex = idatabytes.indexWhere(b => b == 0, offset)
+      new String(idatabytes.slice(offset, nullindex))
     }
     getName(entry(NAME_RVA))
   }
@@ -103,7 +96,6 @@ class ImportSection(
 object ImportSection {
 
   private final val I_DIR_ENTRY_SPEC = "idataentryspec"
-  private final val I_LOOKUP_TABLE_SPEC = "ilookuptablespec"
   private final val HINT_NAME_TABLE_SPEC = "hintnametablespec"
   private final val ENTRY_SIZE = 20
 
