@@ -19,8 +19,6 @@ class ImportSection(
 
 //  type IDataEntry = StandardDataEntry[IDataEntryKey.type]
 
-  private val hintNameTableSpec = FileIO.readMap(HINT_NAME_TABLE_SPEC).asScala.toMap
-
   private var dirEntries = List.empty[IDataEntry]
 
   override def read(): Unit = {
@@ -32,16 +30,16 @@ class ImportSection(
     for (dirEntry <- dirEntries) {
       var entry: LookupTableEntry = null
       var currOffset = dirEntry(I_LOOKUP_TABLE_RVA) - virtualAddress
-      val EntrySize = optHeader.getMagicNumber() match {
-        case PE32 => 32
-        case PE32_PLUS => 64
+      val EntrySize = optHeader.getMagicNumber match {
+        case PE32 => 4
+        case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException
       }
       do {
         entry = LookupTableEntry(idatabytes, currOffset, optHeader.getMagicNumber, virtualAddress)
-        dirEntry.addLookupTableEntry(entry)
+        if(!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         currOffset += EntrySize
-      } while (entry.isInstanceOf[NullEntry])
+      } while (!entry.isInstanceOf[NullEntry])
     }
   }
 
@@ -67,13 +65,14 @@ class ImportSection(
 
     val entry = new IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.read()
+    entry.name = getASCIIName(entry)
     if (isEmpty(entry)) None else
       Some(entry)
   }
 
   private def entryDescription(): String =
     (for (e <- dirEntries)
-      yield e.getInfo() + NL + "ASCII Name: " + getASCIIName(e) + NL + NL).mkString
+      yield e.getInfo() + NL + NL).mkString
 
   private def getASCIIName(entry: IDataEntry): String = {
     def getName(value: Int): String = {
