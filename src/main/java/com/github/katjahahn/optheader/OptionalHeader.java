@@ -284,7 +284,7 @@ public class OptionalHeader extends PEModule {
 				b.append(description + ": " + value + " --> "
 						+ getMagicNumberString(magicNumber) + NL);
 			} else if (key.equals("BASE_OF_DATA")) {
-				if (magicNumber == MagicNumber.PE32) {
+				if (magicNumber == MagicNumber.PE32) { 
 					b.append(description + ": " + value + " (0x"
 							+ Integer.toHexString(value) + ")" + NL);
 				}

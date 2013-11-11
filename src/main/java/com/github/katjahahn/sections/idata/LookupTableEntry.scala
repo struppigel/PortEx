@@ -14,22 +14,16 @@ case class OrdinalEntry(val ordNumber: Int) extends LookupTableEntry {
 }
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry) extends LookupTableEntry {
   override def toString(): String =
-    s"""RVA: $nameRVA (0x${toHexString(nameRVA)})
-    |${hintNameEntry.toString}""".stripMargin
+    s"${hintNameEntry.name} | ${hintNameEntry.hint} | $nameRVA (0x${toHexString(nameRVA)})"
 }
 case class NullEntry() extends LookupTableEntry
 
 object LookupTableEntry {
 
-  def apply(idatabytes: Array[Byte], offset: Int, magic: MagicNumber, virtualAddress: Int): LookupTableEntry = {
-    val (ordFlagMask, length) = magic match {
-      case PE32 => (0x80000000L, 4)
-      case PE32_PLUS => (0x8000000000000000L, 8)
-      case ROM => throw new IllegalArgumentException
-    }
-
-    println(idatabytes.slice(offset, offset + length).mkString(" "))
-    val value = getBytesLongValue(idatabytes, offset, length)
+  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int, virtualAddress: Int): LookupTableEntry = {
+    val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
+    //    println(idatabytes.slice(offset, offset + entrySize).mkString(" "))
+    val value = getBytesLongValue(idatabytes, offset, entrySize)
 
     if (value == 0) {
       NullEntry()
@@ -43,17 +37,17 @@ object LookupTableEntry {
   private def createNameEntry(value: Long, idatabytes: Array[Byte], virtualAddress: Int): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
     val rva = (addrMask & value)
-    println("rva: " + rva)
+    //    println("rva: " + rva)
     val address = (rva - virtualAddress)
-    println("virtual addr: " + virtualAddress)
-    println("address: " + address)
-    println("idata length: " + idatabytes.length)
-    if(address > idatabytes.length) NullEntry()
-    else //TODO allow long values
-//    val hint = getBytesIntValue(idatabytes, address, 2)
-//    val name = getASCII(address + 2, idatabytes)
-//    NameEntry(rva.toInt, new HintNameEntry(hint, name))
-    NameEntry(rva, new HintNameEntry(0, "undef"))
+    //    println("virtual addr: " + virtualAddress)
+    //    println("address: " + address)
+    //    println("idata length: " + idatabytes.length)
+    if (address > idatabytes.length) NullEntry() //TODO remove
+    else {
+      val hint = getBytesIntValue(idatabytes, address.toInt, 2)
+      val name = getASCII(address.toInt + 2, idatabytes)
+      NameEntry(rva.toInt, new HintNameEntry(hint, name))
+    }
   }
 
   private def createOrdEntry(value: Long): OrdinalEntry = {

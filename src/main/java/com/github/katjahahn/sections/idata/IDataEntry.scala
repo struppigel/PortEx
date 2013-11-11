@@ -42,9 +42,11 @@ class IDataEntry(private val entrybytes: Array[Byte],
   override def getInfo(): String = s"""${entries.values.mkString(NL)} 
   |ASCII name: $name
   |
-  |lookup table entries
-  |--------------------
-  |${lookupTableEntries.mkString(NL + NL)}""".stripMargin
+  |lookup table entries for $name
+  |--------------------------------------
+  |Name | Hint | Name RVA
+  |
+  |${lookupTableEntries.mkString(NL)}""".stripMargin
 
   override def toString(): String = getInfo()
 

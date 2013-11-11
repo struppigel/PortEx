@@ -41,7 +41,7 @@ public class PESignature extends PEModule {
 
 	@Override
 	public String getInfo() {
-		return "-------------" + NL + "MS DOS Header" + NL + "-------------"
+		return "-------------" + NL + "PE Signature" + NL + "-------------"
 				+ NL + "pe offset: " + peOffset + NL;
 	}
 

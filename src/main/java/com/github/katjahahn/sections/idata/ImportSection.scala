@@ -17,8 +17,6 @@ class ImportSection(
   private val virtualAddress: Int,
   private val optHeader: OptionalHeader) extends PESection {
 
-//  type IDataEntry = StandardDataEntry[IDataEntryKey.type]
-
   private var dirEntries = List.empty[IDataEntry]
 
   override def read(): Unit = {
@@ -36,7 +34,7 @@ class ImportSection(
         case ROM => throw new IllegalArgumentException
       }
       do {
-        entry = LookupTableEntry(idatabytes, currOffset, optHeader.getMagicNumber, virtualAddress)
+        entry = LookupTableEntry(idatabytes, currOffset, EntrySize, virtualAddress)
         if(!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         currOffset += EntrySize
       } while (!entry.isInstanceOf[NullEntry])
@@ -60,8 +58,11 @@ class ImportSection(
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
+    //TODO this condition is wrong, i read somewhere that the lookup table rva
+    //doesn't have to be specified in which case the IAT RVA would be taken
     def isEmpty(entry: IDataEntry): Boolean =
-      entry(I_LOOKUP_TABLE_RVA) == 0
+//      entry.entries.values.forall(v => v == 0)
+      entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
     val entry = new IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.read()
