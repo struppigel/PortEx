@@ -82,7 +82,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
-	 * Returns the data directory entry for the given key.
+	 * Returns the data directory entry for the given key. //TODO use map
 	 * 
 	 * @param key
 	 * @return the data directory entry for the given key
@@ -97,7 +97,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
-	 * Returns the standard field entry for the given key.
+	 * Returns the standard field entry for the given key. //TODO use map
 	 * 
 	 * @param key
 	 * @return the standard field entry for the given key

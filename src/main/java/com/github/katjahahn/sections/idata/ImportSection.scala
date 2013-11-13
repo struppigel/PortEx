@@ -64,8 +64,7 @@ class ImportSection(
 //      entry.entries.values.forall(v => v == 0)
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
-    val entry = new IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
-    entry.read()
+    val entry = IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.name = getASCIIName(entry)
     if (isEmpty(entry)) None else
       Some(entry)

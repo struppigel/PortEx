@@ -8,32 +8,21 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.sections.idata.IDataEntryKey._
 
-class IDataEntry(private val entrybytes: Array[Byte], 
-    private val specLocation: String) extends PEModule {
+class IDataEntry(private val entrybytes: Array[Byte],
+  private val specification: Map[String, Array[String]],
+  private val entries: Map[IDataEntryKey, StandardEntry]) extends PEModule {
 
-  private val specification = FileIO.readMap(specLocation).asScala.toMap
-
-  var entries: Map[IDataEntryKey, StandardEntry] = Map.empty
-  var lookupTableEntries: List[LookupTableEntry] = Nil
+  private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
 
   def addLookupTableEntry(e: LookupTableEntry): Unit = {
     lookupTableEntries = lookupTableEntries :+ e
   }
 
-  //TODO reuse that read method and use factory to create
-  override def read(): Unit = {
-    val buffer = ListBuffer.empty[StandardEntry]
-    for ((key, specs) <- specification) {
-      val description = specs(0)
-      val offset = Integer.parseInt(specs(1))
-      val size = Integer.parseInt(specs(2))
-      val value = getBytesIntValue(entrybytes, offset, size)
-      val entry = new StandardEntry(key, description, value)
-      buffer += entry
-    }
-    entries = buffer map { t => (IDataEntryKey.withName(t.key), t) } toMap
-  }
+  /**
+   * No use here, because object is used as factory instead
+   */
+  override def read(): Unit = {}
 
   def apply(key: IDataEntryKey): Int = {
     entries(key).value
@@ -49,4 +38,22 @@ class IDataEntry(private val entrybytes: Array[Byte],
 
   override def toString(): String = getInfo()
 
-} 
+}
+
+object IDataEntry {
+
+  def apply(entrybytes: Array[Byte], specLocation: String): IDataEntry = {
+    val specification = FileIO.readMap(specLocation).asScala.toMap
+    val buffer = ListBuffer.empty[StandardEntry]
+    for ((key, specs) <- specification) {
+      val description = specs(0)
+      val offset = Integer.parseInt(specs(1))
+      val size = Integer.parseInt(specs(2))
+      val value = getBytesIntValue(entrybytes, offset, size)
+      val entry = new StandardEntry(key, description, value)
+      buffer += entry
+    }
+    val entries: Map[IDataEntryKey, StandardEntry] = (buffer map { t => (IDataEntryKey.withName(t.key), t) }).toMap;
+    new IDataEntry(entrybytes, specification, entries)
+  }
+}
