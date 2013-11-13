@@ -27,16 +27,16 @@ class ImportSection(
   private def readLookupTableEntries(): Unit = {
     for (dirEntry <- dirEntries) {
       var entry: LookupTableEntry = null
-      var currOffset = dirEntry(I_LOOKUP_TABLE_RVA) - virtualAddress
+      var offset = dirEntry(I_LOOKUP_TABLE_RVA) - virtualAddress
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException
       }
       do {
-        entry = LookupTableEntry(idatabytes, currOffset, EntrySize, virtualAddress)
+        entry = LookupTableEntry(idatabytes, offset, EntrySize, virtualAddress)
         if(!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
-        currOffset += EntrySize
+        offset += EntrySize
       } while (!entry.isInstanceOf[NullEntry])
     }
   }

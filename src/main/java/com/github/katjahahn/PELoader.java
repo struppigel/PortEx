@@ -110,8 +110,8 @@ public class PELoader {
 		SectionLoader loader = new SectionLoader(table, data.getOptionalHeader(), file);
 		
 //		System.out.println(data.getCOFFFileHeader().getInfo());
-		System.out.println(data.getOptionalHeader().getInfo());
-		System.out.println(table.getInfo());
+//		System.out.println(data.getOptionalHeader().getInfo());
+//		System.out.println(table.getInfo());
 //		System.out.println(data.getMSDOSHeader().getInfo());
 //		System.out.println(data.getPESignature().getInfo());
 		ImportSection idata = loader.loadImportSection();

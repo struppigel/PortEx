@@ -21,7 +21,7 @@ public class MSDOSHeader extends PEModule {
 
 	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
 	private static final String specification = "msdosheaderspec";
-	private static Map<String, StandardEntry> headerData;
+	private static Map<String, StandardEntry> headerData = new HashMap<>();
 
 	private final byte[] headerbytes;
 
@@ -34,7 +34,6 @@ public class MSDOSHeader extends PEModule {
 		if(!hasSignature(headerbytes)) {
 			throw new IOException("No PE Signature found");
 		}
-		headerData = new HashMap<>();
 		int offsetLoc = 0;
 		int sizeLoc = 1;
 		int descriptionLoc = 2;

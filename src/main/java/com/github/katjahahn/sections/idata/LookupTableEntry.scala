@@ -14,7 +14,7 @@ case class OrdinalEntry(val ordNumber: Int) extends LookupTableEntry {
 }
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry) extends LookupTableEntry {
   override def toString(): String =
-    s"${hintNameEntry.name} | ${hintNameEntry.hint} | $nameRVA (0x${toHexString(nameRVA)})"
+    s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, RVA: $nameRVA (0x${toHexString(nameRVA)})"
 }
 case class NullEntry() extends LookupTableEntry
 

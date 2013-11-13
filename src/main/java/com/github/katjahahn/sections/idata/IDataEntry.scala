@@ -44,7 +44,6 @@ class IDataEntry(private val entrybytes: Array[Byte],
   |
   |lookup table entries for $name
   |--------------------------------------
-  |Name | Hint | Name RVA
   |
   |${lookupTableEntries.mkString(NL)}""".stripMargin
 

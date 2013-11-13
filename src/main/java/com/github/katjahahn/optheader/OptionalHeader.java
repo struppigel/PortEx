@@ -88,9 +88,8 @@ public class OptionalHeader extends PEModule {
 	 * @return the data directory entry for the given key
 	 */
 	public DataDirEntry getDataDirEntry(DataDirectoryKey key) {
-		String fieldName = key.toString();
 		for (DataDirEntry entry : dataDirEntries) {
-			if (entry.key.equals(fieldName)) {
+			if (entry.key.equals(key)) {
 				return entry;
 			}
 		}
