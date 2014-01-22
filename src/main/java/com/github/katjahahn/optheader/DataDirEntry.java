@@ -49,6 +49,8 @@ public class DataDirEntry {
 	 * Returns the section table entry of the section that the data directory
 	 * entry is pointing to.
 	 * 
+	 *TODO duplicate to Sectionloader getSectionByRVA
+	 * 
 	 * @param table
 	 * @return the section table entry of the section that the data directory
 	 *         entry is pointing to

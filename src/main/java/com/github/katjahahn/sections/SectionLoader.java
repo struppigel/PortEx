@@ -86,6 +86,23 @@ public class SectionLoader {
 		}
 		return null;
 	}
+	
+	public static SectionTableEntry getSectionByRVA(SectionTable table, int rva) {
+		List<SectionTableEntry> sections = table.getSectionEntries();
+		for (SectionTableEntry section : sections) {
+			int vSize = section.get(VIRTUAL_SIZE);
+			int vAddress = section.get(VIRTUAL_ADDRESS);
+			if (rvaIsWithin(vAddress, vSize, rva)) {
+				return section;
+			}
+		}
+		return null;
+	}
+	
+	private static boolean rvaIsWithin(int address, int size, int rva) {
+		int endpoint = address + size;
+		return rva >= address && rva < endpoint;
+	}
 
 	//TODO almost same code as RSRCSection
 	/**

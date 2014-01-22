@@ -337,7 +337,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
-	 * Returns teh description string of the image base.
+	 * Returns the description string of the image base.
 	 * 
 	 * @param value
 	 * @return description string of the image base value
