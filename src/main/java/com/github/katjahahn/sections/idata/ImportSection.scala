@@ -27,7 +27,9 @@ class ImportSection(
   private def readLookupTableEntries(): Unit = {
     for (dirEntry <- dirEntries) {
       var entry: LookupTableEntry = null
-      var offset = dirEntry(I_LOOKUP_TABLE_RVA) - virtualAddress
+      var offset = dirEntry(I_ADDR_TABLE_RVA) - virtualAddress
+      println("va: " + virtualAddress)
+      println("offset: " + offset)
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
