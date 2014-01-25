@@ -17,21 +17,22 @@ import Signature._
 import com.github.katjahahn.sections.SectionTableEntryKey
 
 class SignatureScanner(signatures: List[Signature]) {
+  
   private val longestSigSequence: Int = signatures.foldLeft(0)(
     (i, s) => if (s.signature.length > i) s.signature.length
-    else i)
-  private val epOnlyFalseSigs: SigTree = createSigTree(signatures.filter(_.epOnly == false))
+    		  else i)
+    		  
+  private lazy val epOnlyFalseSigs: SigTree = 
+    createSigTree(signatures.filter(_.epOnly == false))
 
   private def createSigTree(list: List[Signature]): SigTree = {
-    println("creating signature tree")
-    val tree = SigTree()
-    list.foreach(s => tree.insert(s, s.signature.toList))
-    println("done " + tree)
+    var tree = SigTree()
+    list.foreach(s => tree += s)
     tree
   }
   
   /**
-   * @param file the file to be scanned
+   * @param file the PE file to be scanned
    * @return the best match found
    */
   def scan(file: File): String = {
@@ -50,20 +51,18 @@ class SignatureScanner(signatures: List[Signature]) {
     for (m <- matches) yield m.name + " bytes matched: " + bytesMatched(m)
   }
 
-  //TODO this is too slow
   private def findAllEPFalseMatches(file: File, chunkSize: Int): List[Signature] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val matches = ListBuffer[Signature]()
       var i = 0
+      println("longest sig " + longestSigSequence)
       for (chaddr <- 0L to file.length() by (chunkSize - longestSigSequence)) { //TODO test this!
         i = i + 1
-        println("reading chunk " + i + " at address " + chaddr)
+        if (i % 100000 == 0) println("reading chunk " + i + " at address " + chaddr)
         val bytes = Array.fill(chunkSize)(0.toByte)
         raf.seek(chaddr)
         val bytesRead = raf.read(bytes)
-        println("bytesRead: " + bytesRead)
         for (addr <- 0L to (bytesRead - longestSigSequence)) {
-          if (addr % 10000 == 0) println("find matches at addr: " + addr)
           val slicedarr = bytes.slice(addr.toInt, addr.toInt + longestSigSequence)
           matches ++= findAllSigTreeMatches(slicedarr, epOnlyFalseSigs)
         }
@@ -73,7 +72,6 @@ class SignatureScanner(signatures: List[Signature]) {
   }
   
   
-  //TODO implement
   private def findAllSigTreeMatches(bytes: Array[Byte], sigtree: SigTree): List[Signature] = 
     sigtree.findMatches(bytes.toList)
 
@@ -150,6 +148,7 @@ object SignatureScanner {
     new Signature(name, ep_only, sigbytes)
   }
 
+  //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
     val s = SignatureScanner()
     s.scanAll(new File("Holiday_Island.exe")).foreach(println)

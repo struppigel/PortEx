@@ -5,36 +5,26 @@ import PartialFunction._
 
 abstract class SigTree {
 
-  //TODO doesn't work as is
-  
-  def insert(sig: Signature, bytes: List[Option[Byte]]): Unit = {
+  //TODO semantics? return a copy
+  def +(sig: Signature): SigTree = {
+    insert(sig, sig.signature.toList)
+    this
+  }
+
+  private def insert(sig: Signature, bytes: List[Option[Byte]]): Unit = {
     bytes match {
       case b :: bs => this match {
-
-        case Root(c) =>
-          c.find(_.hasValue(b)) match {
-            case Some(child) => child.insert(sig, bs)
-            case None =>
-              val node = Node(MutableList(), b)
-              c += node
-              node.insert(sig, bs)
-          }
-
         case Node(c, v) =>
-          c.find(_.hasValue(b)) match {
-            case Some(child) => child.insert(sig, bs)
-            case None => 
-              val node = Node(MutableList(), b)
-              c += node
-              node.insert(sig, bs)
-          }
-        case _ => throw new IllegalArgumentException("wrong tree component")
+          val op = c.find(_.hasValue(b))
+          val node = op.getOrElse { val n = Node(MutableList(), b); c += n; n }
+          node.insert(sig, bs)
+        case _ => throw new IllegalStateException("wrong tree component")
       }
 
       case Nil =>
         this match {
           case Node(c, v) => c += Leaf(sig)
-          case _ => throw new IllegalArgumentException("wrong tree component")
+          case _ => throw new IllegalStateException("wrong tree component")
         }
     }
   }
@@ -43,11 +33,6 @@ abstract class SigTree {
     bytes match {
 
       case b :: bs => this match {
-        case Root(c) => c.find(_.matchesValue(b)) match {
-          case Some(ch) => ch.findMatches(bs) ::: getLeafSig(c)
-          case None => getLeafSig(c)
-        }
-
         case Node(c, v) => c.find(_.matchesValue(b)) match {
           case Some(ch) => ch.findMatches(bs) ::: getLeafSig(c)
           case None => getLeafSig(c)
@@ -58,17 +43,16 @@ abstract class SigTree {
 
       case Nil => this match {
         case Leaf(s) => List(s)
-        case Root(c) => getLeafSig(c)
-        case Node(c,v) => getLeafSig(c)
+        case Node(c, v) => getLeafSig(c)
       }
     }
   }
-  
+
   private def getLeafSig(list: MutableList[SigTree]): List[Signature] = {
-    val op = list.find(x => x match {case Leaf(s) => true; case _ => false})
+    val op = list.find(cond(_){ case Leaf(s) => true })
     op match {
       case None => Nil
-      case Some(leaf) => leaf match {case Leaf(s) => List(s); case _ => Nil}
+      case Some(leaf) => leaf match { case Leaf(s) => List(s); case _ => Nil }
     }
   }
 
@@ -77,14 +61,10 @@ abstract class SigTree {
 
 }
 
-case class Root(children: MutableList[SigTree]) extends SigTree {
-  override def toString(): String = "root[" + children.mkString(",") + "]"
-}
-
 case class Node(children: MutableList[SigTree], value: Option[Byte]) extends SigTree {
-  
+
   override protected def hasValue(b: Option[Byte]): Boolean = value == b
- 
+
   override protected def matchesValue(b: Byte): Boolean = value match {
     case None => true
     case Some(v) => v == b
@@ -93,12 +73,12 @@ case class Node(children: MutableList[SigTree], value: Option[Byte]) extends Sig
 }
 
 case class Leaf(signature: Signature) extends SigTree {
-  override def toString(): String = signature.name 
+  override def toString(): String = signature.name
 }
 
 object SigTree {
 
-  def apply(): SigTree = Root(MutableList[SigTree]())
+  def apply(): SigTree = Node(MutableList[SigTree](), null)
 
   def main(args: Array[String]): Unit = {
     val tree = SigTree()
@@ -108,12 +88,12 @@ object SigTree {
     val sig = new Signature("first", false, bytes.toArray)
     val sig2 = new Signature("second", false, bytes2.toArray)
     val sig3 = new Signature("third", true, bytes3.toArray)
-    tree.insert(sig, bytes)
-    tree.insert(sig2, bytes2)
-    tree.insert(sig3, bytes3)
+    tree + sig
+    tree + sig2
+    tree + sig3
     println()
     println(tree)
-    println(tree.findMatches(List(1,2).map(_.toByte)))
+    println(tree.findMatches(List(1, 2, 3, 4).map(_.toByte)))
   }
 
 }
