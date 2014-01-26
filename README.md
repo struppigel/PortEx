@@ -11,3 +11,4 @@ So far it supports:
 * Dumping of: MSDOS Load Module, Sections, Overlay
 * Mapping of Data Directory Entries to the corresponding Section
 * Reading Standard Section Formats: Import Section, Resource Section
+* Scan for PEiD userdb signatures
