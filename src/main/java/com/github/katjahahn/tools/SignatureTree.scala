@@ -11,7 +11,7 @@ import PartialFunction._
  *
  */
 
-abstract class SigTree {
+abstract class SignatureTree {
 
   /**
    * Inserts the signature to the tree. Note that the SignatureTree is mutable
@@ -19,7 +19,7 @@ abstract class SigTree {
    * @param sig signature to be inserted
    * @return tree with new signature
    */
-  def +(sig: Signature): SigTree = {
+  def +(sig: Signature): SignatureTree = {
     insert(sig, sig.signature.toList)
     this
   }
@@ -74,12 +74,12 @@ abstract class SigTree {
    * @param list a list that contains nodes and leaves
    * @return all signatures found in the leaves of the list
    */
-  private def collectSignatures(list: MutableList[SigTree]): List[Signature] = {
+  private def collectSignatures(list: MutableList[SignatureTree]): List[Signature] = {
     list.collect({ case Leaf(s) => s }).toList
   }
 
   /**
-   * Returns whether the current SigTree Node (or Leave) has a value that equals b.
+   * Returns whether the current SignatureTree Node (or Leave) has a value that equals b.
    *  A Leave always returns false as it has no value saved.
    *
    * @param b an Option byte
@@ -88,7 +88,7 @@ abstract class SigTree {
   protected def hasValue(b: Option[Byte]): Boolean = false
 
   /**
-   * Returns whether the current SigTree Node (or Leave) has a value that
+   * Returns whether the current SignatureTree Node (or Leave) has a value that
    * matches b (Note: None matches to every Byte).
    * A Leave always returns false as it has no value saved.
    * 
@@ -101,7 +101,7 @@ abstract class SigTree {
 
 }
 
-case class Node(children: MutableList[SigTree], value: Option[Byte]) extends SigTree {
+case class Node(children: MutableList[SignatureTree], value: Option[Byte]) extends SignatureTree {
 
   override protected def hasValue(b: Option[Byte]): Boolean = value == b
 
@@ -112,19 +112,19 @@ case class Node(children: MutableList[SigTree], value: Option[Byte]) extends Sig
   override def toString(): String = value + "[" + children.mkString(",") + "]"
 }
 
-case class Leaf(signature: Signature) extends SigTree {
+case class Leaf(signature: Signature) extends SignatureTree {
   override def toString(): String = signature.name
 }
 
-object SigTree {
+object SignatureTree {
 
   /**
    * Creates an empty SignatureTree
    */
-  def apply(): SigTree = Node(MutableList[SigTree](), null)
+  def apply(): SignatureTree = Node(MutableList[SignatureTree](), null)
 
   def main(args: Array[String]): Unit = {
-    val tree = SigTree()
+    val tree = SignatureTree()
     val bytes = List(Some(1.toByte), None, Some(3.toByte), Some(4.toByte))
     val bytes2 = List(1, 2, 3).map(x => Some(x.toByte))
     val bytes3 = List(6, 7, 8).map(x => Some(x.toByte))

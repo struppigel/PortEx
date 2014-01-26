@@ -25,14 +25,14 @@ class SignatureScanner(signatures: List[Signature]) {
     (i, s) => if (s.signature.length > i) s.signature.length
     else i)
 
-  private lazy val epOnlyFalseSigs: SigTree =
-    createSigTree(signatures.filter(_.epOnly == false))
+  private lazy val epOnlyFalseSigs: SignatureTree =
+    createSignatureTree(signatures.filter(_.epOnly == false))
 
-  private val epOnlySigs: SigTree =
-    createSigTree(signatures.filter(_.epOnly == true))
+  private val epOnlySigs: SignatureTree =
+    createSignatureTree(signatures.filter(_.epOnly == true))
 
-  private def createSigTree(list: List[Signature]): SigTree = {
-    var tree = SigTree()
+  private def createSignatureTree(list: List[Signature]): SignatureTree = {
+    var tree = SignatureTree()
     list.foreach(s => tree += s)
     tree
   }
@@ -143,8 +143,8 @@ object SignatureScanner {
   //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
     val s = SignatureScanner()
-    val file = new File("Minecraft.exe")
-    s.scanAll(file, false).foreach(println)
+    val file = new File("Holiday_Island.exe")
+    s.scanAll(file, true).foreach(println)
     println("length of file: " + file.length())
   }
 
