@@ -13,3 +13,4 @@ dependency-reduced-pom.xml
 /target
 /bin
 .cache
+*.txt
