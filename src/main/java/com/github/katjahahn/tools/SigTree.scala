@@ -44,11 +44,10 @@ abstract class SigTree {
     bytes match {
 
       case b :: bs => this match {
-        case Node(c, v) => c.find(_.matchesValue(b)) match {
-          case Some(ch) => ch.findMatches(bs) ::: getLeafSig(c)
-          case None => getLeafSig(c)
-        }
-
+        case Node(c, v) => 
+          val children = c.filter(_.matchesValue(b)) 
+          children.foldRight(List[Signature]())(
+              (ch, l) => ch.findMatches(bs) ::: l) ::: getLeafSig(c)
         case Leaf(s) => List(s)
       }
 
@@ -89,7 +88,7 @@ object SigTree {
 
   def main(args: Array[String]): Unit = {
     val tree = SigTree()
-    val bytes = List(1, 2, 3, 4).map(x => Some(x.toByte))
+    val bytes = List(Some(1.toByte), None, Some(3.toByte), Some(4.toByte))
     val bytes2 = List(1, 2, 3).map(x => Some(x.toByte))
     val bytes3 = List(6, 7, 8).map(x => Some(x.toByte))
     val sig = new Signature("first", false, bytes.toArray)
@@ -100,7 +99,7 @@ object SigTree {
     tree + sig3
     println()
     println(tree)
-    println(tree.findMatches(List(1, 2, 3, 4).map(_.toByte)))
+    println(tree.findMatches(List(1, 2, 3).map(_.toByte)))
   }
 
 }

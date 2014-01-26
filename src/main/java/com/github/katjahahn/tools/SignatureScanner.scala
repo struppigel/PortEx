@@ -15,28 +15,36 @@ import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.sections.SectionLoader
 import Signature._
 import com.github.katjahahn.sections.SectionTableEntryKey
+import PartialFunction._
 
 class SignatureScanner(signatures: List[Signature]) {
-  
+
+  private val defaultChunkSize = 134217728
+
   private val longestSigSequence: Int = signatures.foldLeft(0)(
     (i, s) => if (s.signature.length > i) s.signature.length
-    		  else i)
-    		  
-  private lazy val epOnlyFalseSigs: SigTree = 
+    else i)
+
+  private lazy val epOnlyFalseSigs: SigTree =
     createSigTree(signatures.filter(_.epOnly == false))
+
+  private val epOnlySigs: SigTree =
+    createSigTree(signatures.filter(_.epOnly == true))
 
   private def createSigTree(list: List[Signature]): SigTree = {
     var tree = SigTree()
     list.foreach(s => tree += s)
     tree
   }
-  
+
   /**
+   * Scans a file for signatures and returns the best match
+   *
    * @param file the PE file to be scanned
    * @return the best match found
    */
-  def scan(file: File): String = {
-    scanAll(file).last
+  def scan(file: File, epOnly: Boolean = false, chunkSize: Int = defaultChunkSize): String = {
+    scanAll(file, epOnly, chunkSize).last
   }
 
   /**
@@ -44,10 +52,11 @@ class SignatureScanner(signatures: List[Signature]) {
    * @param chunkSize default value is 128 MB
    * @return list with all matches found
    */
-  def scanAll(file: File, chunkSize: Int = 134217728): List[String] = {
+  def scanAll(file: File, epOnly: Boolean = true, chunkSize: Int = defaultChunkSize): List[String] = {
     def bytesMatched(sig: Signature): Int =
-      sig.signature.filter(x => x match { case Some(s) => true; case None => false }).length
-    var matches = findAllEPMatches(file) ::: findAllEPFalseMatches(file, chunkSize)
+      sig.signature.filter(cond(_) { case Some(s) => true }).length
+    var matches = findAllEPMatches(file)
+    if (!epOnly) matches ::: findAllEPFalseMatches(file, chunkSize)
     for (m <- matches) yield m.name + " bytes matched: " + bytesMatched(m)
   }
 
@@ -58,50 +67,33 @@ class SignatureScanner(signatures: List[Signature]) {
       println("longest sig " + longestSigSequence)
       for (chaddr <- 0L to file.length() by (chunkSize - longestSigSequence)) { //TODO test this!
         i = i + 1
-        if (i % 100000 == 0) println("reading chunk " + i + " at address " + chaddr)
+        if (i % 10000 == 0) println("reading chunk " + i + " at address " + chaddr)
         val bytes = Array.fill(chunkSize)(0.toByte)
         raf.seek(chaddr)
         val bytesRead = raf.read(bytes)
         for (addr <- 0L to (bytesRead - longestSigSequence)) {
           val slicedarr = bytes.slice(addr.toInt, addr.toInt + longestSigSequence)
-          matches ++= findAllSigTreeMatches(slicedarr, epOnlyFalseSigs)
+          matches ++= epOnlyFalseSigs.findMatches(slicedarr.toList)
         }
       }
       matches.toList
     }
   }
-  
-  
-  private def findAllSigTreeMatches(bytes: Array[Byte], sigtree: SigTree): List[Signature] = 
-    sigtree.findMatches(bytes.toList)
 
   private def findAllEPMatches(file: File): List[Signature] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val data = PELoader.loadPE(file)
       val entryPoint = getEntryPoint(data)
       raf.seek(entryPoint.toLong)
-      var bytes = Array.fill(longestSigSequence)(0.toByte)
+      var bytes = Array.fill(longestSigSequence + 1)(0.toByte)
       val bytesRead = raf.read(bytes)
-      findAllMatches(bytes.slice(0, bytesRead), signatures)
+      epOnlySigs.findMatches(bytes.slice(0, bytesRead).toList)
     }
   }
 
   private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
     try { f(param) } finally { param.close() }
 
-  //replace with findAllSigTreeMatches
-  private def findAllMatches(bytes: Array[Byte], siglist: List[Signature]): List[Signature] = {
-    def matches(sig: Array[Option[Byte]], bytes: Array[Byte]): Boolean = {
-      sig.zip(bytes).forall(tuple =>
-        tuple match {
-          case (None, _) => true
-          case (o, b) => o.get == b
-        })
-    }
-    siglist.filter(s => matches(s.signature, bytes))
-  }
-
-  //TODO test for matches with peid
   private def getEntryPoint(data: PEData): Int = {
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val section = SectionLoader.getSectionByRVA(data.getSectionTable(), rva)
@@ -112,7 +104,7 @@ class SignatureScanner(signatures: List[Signature]) {
 
 object SignatureScanner {
 
-  private val defaultSigs = new File("userdb.txt")
+  private val defaultSigs = new File("testuserdb.txt")
 
   def apply(): SignatureScanner =
     new SignatureScanner(loadSignatures(defaultSigs))
@@ -151,7 +143,9 @@ object SignatureScanner {
   //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
     val s = SignatureScanner()
-    s.scanAll(new File("Holiday_Island.exe")).foreach(println)
+    val file = new File("Minecraft.exe")
+    s.scanAll(file, false).foreach(println)
+    println("length of file: " + file.length())
   }
 
 }
