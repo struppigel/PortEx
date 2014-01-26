@@ -5,7 +5,12 @@ import PartialFunction._
 
 abstract class SigTree {
 
-  //TODO semantics? return a copy
+  /**
+   * Inserts the signature to the tree. Note that the SignatureTree is mutable
+   * 
+   * @param sig signature to be inserted
+   * @return tree with new signature
+   */
   def +(sig: Signature): SigTree = {
     insert(sig, sig.signature.toList)
     this
@@ -29,6 +34,12 @@ abstract class SigTree {
     }
   }
 
+  /**
+   * Collects all signatures that match the given byte sequence.
+   * 
+   * @param bytes the byte sequence to compare with the signatures
+   * @return list of signatures that matches the bytes
+   */
   def findMatches(bytes: List[Byte]): List[Signature] = {
     bytes match {
 
@@ -49,11 +60,7 @@ abstract class SigTree {
   }
 
   private def getLeafSig(list: MutableList[SigTree]): List[Signature] = {
-    val op = list.find(cond(_){ case Leaf(s) => true })
-    op match {
-      case None => Nil
-      case Some(leaf) => leaf match { case Leaf(s) => List(s); case _ => Nil }
-    }
+    list.collect({case Leaf(s) => s}).toList
   }
 
   protected def hasValue(b: Option[Byte]): Boolean = false

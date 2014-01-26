@@ -13,6 +13,14 @@ class Signature(val name: String, val epOnly: Boolean, val signature: Array[Opti
 
 object Signature {
   
+  /**
+   * Converts an array of Option bytes to its hex string representation. None is
+   * converted to "??"
+   * 
+   * @param bytes byte array to be converted
+   * @param sep the character(s) that separates to bytes in the string
+   * @return
+   */
   def bytes2hex(bytes: Array[Option[Byte]], sep: String): String = {
     bytes.foldLeft("")((s, b) => b match {
       case None => s + sep + "??"
@@ -20,6 +28,13 @@ object Signature {
     })
   }
 
+  /**
+   * Converts a hex string representation to an array of option bytes. "??" is
+   * converted to None.
+   * 
+   * @param hex the hex string with ?? indicating unknown byte values
+   * @return an array of option bytes with None indicating unknown values
+   */
   def hex2bytes(hex: String): Array[Option[Byte]] = {
     val arr = hex.replaceAll("[^0-9A-Fa-f?]", "").sliding(2, 2).toArray
     arr.map(str => str match {
