@@ -3,11 +3,19 @@ package com.github.katjahahn.tools
 import scala.collection.mutable.MutableList
 import PartialFunction._
 
+/**
+ * A prefix tree for byte signatures. Provides a fast way to match a byte
+ * sequence to a large number of signatures
+ *
+ * @author Katja Hahn
+ *
+ */
+
 abstract class SigTree {
 
   /**
    * Inserts the signature to the tree. Note that the SignatureTree is mutable
-   * 
+   *
    * @param sig signature to be inserted
    * @return tree with new signature
    */
@@ -36,7 +44,7 @@ abstract class SigTree {
 
   /**
    * Collects all signatures that match the given byte sequence.
-   * 
+   *
    * @param bytes the byte sequence to compare with the signatures
    * @return list of signatures that matches the bytes
    */
@@ -44,25 +52,51 @@ abstract class SigTree {
     bytes match {
 
       case b :: bs => this match {
-        case Node(c, v) => 
-          val children = c.filter(_.matchesValue(b)) 
+        case Node(c, v) =>
+          val children = c.filter(_.matchesValue(b))
           children.foldRight(List[Signature]())(
-              (ch, l) => ch.findMatches(bs) ::: l) ::: getLeafSig(c)
+            (ch, l) => ch.findMatches(bs) ::: l) ::: collectSignatures(c)
         case Leaf(s) => List(s)
       }
 
       case Nil => this match {
         case Leaf(s) => List(s)
-        case Node(c, v) => getLeafSig(c)
+        case Node(c, v) => collectSignatures(c)
       }
     }
   }
 
-  private def getLeafSig(list: MutableList[SigTree]): List[Signature] = {
-    list.collect({case Leaf(s) => s}).toList
+  /**
+   * Collects the signatures of all leaves in the given list.
+   * Actually there should only be one signature in one childrenlist, otherwise
+   * you have two signatures with the same byte sequence.
+   *
+   * @param list a list that contains nodes and leaves
+   * @return all signatures found in the leaves of the list
+   */
+  private def collectSignatures(list: MutableList[SigTree]): List[Signature] = {
+    list.collect({ case Leaf(s) => s }).toList
   }
 
+  /**
+   * Returns whether the current SigTree Node (or Leave) has a value that equals b.
+   *  A Leave always returns false as it has no value saved.
+   *
+   * @param b an Option byte
+   * @return true iff it is a Node and has a value that equals b
+   */
   protected def hasValue(b: Option[Byte]): Boolean = false
+
+  /**
+   * Returns whether the current SigTree Node (or Leave) has a value that
+   * matches b (Note: None matches to every Byte).
+   * A Leave always returns false as it has no value saved.
+   * 
+   * @param b a Byte
+   * @return true if the given byte matches the value in the node; that means 
+   * if the value in the node is a None, it returns true; if the current node is
+   * a Leave it returns false
+   */
   protected def matchesValue(b: Byte): Boolean = false
 
 }
@@ -84,6 +118,9 @@ case class Leaf(signature: Signature) extends SigTree {
 
 object SigTree {
 
+  /**
+   * Creates an empty SignatureTree
+   */
   def apply(): SigTree = Node(MutableList[SigTree](), null)
 
   def main(args: Array[String]): Unit = {
