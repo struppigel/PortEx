@@ -16,16 +16,23 @@ import com.github.katjahahn.sections.SectionLoader
 import Signature._
 import com.github.katjahahn.sections.SectionTableEntryKey
 import PartialFunction._
+import scala.collection.JavaConverters._
 
 /**
  * Scans PE files for compiler and packer signatures.
- * 
+ *
  * @author Katja Hahn
- * 
+ *
  * @constructor Creates a SignatureScanner that uses the signatures applied
  * @param signatures to use for scanning
  */
 class SignatureScanner(signatures: List[Signature]) {
+
+  /**
+   * @constructor Creates a SignatureScanner that uses the signatures applied
+   * @param signatures to use for scanning
+   */
+  def this(signatures: java.util.List[Signature]) = this(signatures.asScala.toList)
 
   private var _chunkSize = 134217728 //default value of 128 MB
 
@@ -55,7 +62,7 @@ class SignatureScanner(signatures: List[Signature]) {
     list.foreach(s => tree += s)
     tree
   }
-
+  
   /**
    * Scans a file for signatures and returns the best match
    *
@@ -123,26 +130,20 @@ class SignatureScanner(signatures: List[Signature]) {
 object SignatureScanner {
 
   private val defaultSigs = new File("userdb.txt")
-  
+
   // This name makes more sense to call from Java
   /**
-   * Loads default signatures (provided by PEiD) and creates a 
+   * Loads default signatures (provided by PEiD) and creates a
    * SignatureScanner that uses these.
-   * 
+   *
    * @return SignatureScanner with default signatures
    */
   def getInstance(): SignatureScanner = apply()
 
   def apply(): SignatureScanner =
-    new SignatureScanner(loadSignatures(defaultSigs))
+    new SignatureScanner(_loadSignatures(defaultSigs))
 
-  /**
-   * Loads a list of signatures from the specified signature file
-   *
-   * @param sigFile file that contains the signatures
-   * @return list containing the loaded signatures
-   */
-  def loadSignatures(sigFile: File): List[Signature] = {
+  def _loadSignatures(sigFile: File): List[Signature] = {
     implicit val codec = Codec("UTF-8")
     //replace malformed input
     codec.onMalformedInput(CodingErrorAction.REPLACE)
@@ -161,6 +162,15 @@ object SignatureScanner {
     }
     sigs.toList
   }
+
+  /**
+   * Loads a list of signatures from the specified signature file
+   *
+   * @param sigFile file that contains the signatures
+   * @return list containing the loaded signatures
+   */
+  def loadSignatures(sigFile: File): java.util.List[Signature] =
+    _loadSignatures(sigFile).asJava
 
   //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {

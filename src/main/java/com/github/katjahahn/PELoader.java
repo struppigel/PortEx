@@ -12,6 +12,8 @@ import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
 import com.github.katjahahn.sections.idata.ImportSection;
+import com.github.katjahahn.tools.Signature;
+import com.github.katjahahn.tools.SignatureScanner;
 
 public class PELoader {
 
@@ -119,6 +121,12 @@ public class PELoader {
 		ImportSection idata = loader.loadImportSection();
 //		System.out.println(loader.loadRsrcSection().getInfo());
 		System.out.println(idata.getInfo());
+		
+		List<Signature> signatures = SignatureScanner.loadSignatures(new File("testuserdb.txt"));
+		SignatureScanner scanner = new SignatureScanner(signatures);
+		scanner.setChunkSize(1024);
+		String result = scanner.scan(new File("Holiday_Island.exe"), true);
+		System.out.println(result);
 	}
 
 }
