@@ -15,6 +15,13 @@ import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.tools.Signature;
 import com.github.katjahahn.tools.SignatureScanner;
 
+/**
+ * Loads PEData of a file. Spares the user of the library to collect every
+ * information necessary.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class PELoader {
 
 	private final File file;
@@ -110,19 +117,21 @@ public class PELoader {
 					+ entry.getSectionTableEntry(table).getName());
 			System.out.println();
 		}
-	
-		SectionLoader loader = new SectionLoader(table, data.getOptionalHeader(), file);
-		
-//		System.out.println(data.getCOFFFileHeader().getInfo());
-//		System.out.println(data.getOptionalHeader().getInfo());
+
+		SectionLoader loader = new SectionLoader(table,
+				data.getOptionalHeader(), file);
+
+		// System.out.println(data.getCOFFFileHeader().getInfo());
+		// System.out.println(data.getOptionalHeader().getInfo());
 		System.out.println(table.getInfo());
-//		System.out.println(data.getMSDOSHeader().getInfo());
-//		System.out.println(data.getPESignature().getInfo());
+		// System.out.println(data.getMSDOSHeader().getInfo());
+		// System.out.println(data.getPESignature().getInfo());
 		ImportSection idata = loader.loadImportSection();
-//		System.out.println(loader.loadRsrcSection().getInfo());
+		// System.out.println(loader.loadRsrcSection().getInfo());
 		System.out.println(idata.getInfo());
-		
-		List<Signature> signatures = SignatureScanner.loadSignatures(new File("testuserdb.txt"));
+
+		List<Signature> signatures = SignatureScanner.loadSignatures(new File(
+				"testuserdb.txt"));
 		SignatureScanner scanner = new SignatureScanner(signatures);
 		scanner.setChunkSize(1024);
 		String result = scanner.scan(new File("Holiday_Island.exe"), true);

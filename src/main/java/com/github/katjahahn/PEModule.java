@@ -6,6 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * TODO extract util class
+ * 
+ * @author Katja Hahn
+ *
+ */
 public abstract class PEModule {
 
 	public static final String NL = System.getProperty("line.separator");

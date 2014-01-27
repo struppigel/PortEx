@@ -5,7 +5,13 @@ import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
 
-
+/**
+ * Data class that collects and holds the main information of a PE file. It is 
+ * usually constructed by the PELoader.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public class PEData {
 	
 	private final PESignature pesig;
