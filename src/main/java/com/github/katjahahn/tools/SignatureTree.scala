@@ -4,13 +4,12 @@ import scala.collection.mutable.MutableList
 import PartialFunction._
 
 /**
- * A prefix tree for byte signatures. Provides a fast way to match a byte
+ * A mutable prefix tree for byte signatures. Provides a fast way to match a byte
  * sequence to a large number of signatures
  *
  * @author Katja Hahn
  *
  */
-
 abstract class SignatureTree {
 
   /**
@@ -24,6 +23,11 @@ abstract class SignatureTree {
     this
   }
 
+  /**
+   * @param sig the signature to be inserted
+   * @param bytes the byte sequence that has to be inserted to the rest of the
+   *        tree
+   */
   private def insert(sig: Signature, bytes: List[Option[Byte]]): Unit = {
     bytes match {
       case b :: bs => this match {
@@ -60,8 +64,8 @@ abstract class SignatureTree {
       }
 
       case Nil => this match {
+      	case Node(c, v) => collectSignatures(c)
         case Leaf(s) => List(s)
-        case Node(c, v) => collectSignatures(c)
       }
     }
   }
@@ -101,7 +105,7 @@ abstract class SignatureTree {
 
 }
 
-case class Node(children: MutableList[SignatureTree], value: Option[Byte]) extends SignatureTree {
+private case class Node(children: MutableList[SignatureTree], value: Option[Byte]) extends SignatureTree {
 
   override protected def hasValue(b: Option[Byte]): Boolean = value == b
 
@@ -112,7 +116,7 @@ case class Node(children: MutableList[SignatureTree], value: Option[Byte]) exten
   override def toString(): String = value + "[" + children.mkString(",") + "]"
 }
 
-case class Leaf(signature: Signature) extends SignatureTree {
+private case class Leaf(signature: Signature) extends SignatureTree {
   override def toString(): String = signature.name
 }
 

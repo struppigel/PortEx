@@ -17,13 +17,32 @@ import Signature._
 import com.github.katjahahn.sections.SectionTableEntryKey
 import PartialFunction._
 
+/**
+ * Scans PE files for compiler and packer signatures.
+ * 
+ * @author Katja Hahn
+ * 
+ * @constructor Creates a SignatureScanner that uses the signatures applied
+ * @param signatures to use for scanning
+ */
 class SignatureScanner(signatures: List[Signature]) {
 
-  private val defaultChunkSize = 134217728
+  private var _chunkSize = 134217728 //default value of 128 MB
+
+  /*
+   * Getter and setter for Java ;)
+   */
+  /**
+   * @return the current chunkSize in bytes
+   */
+  def getChunkSize = _chunkSize
+  /**
+   * @param value the chunkSize in bytes
+   */
+  def setChunkSize(value: Int): Unit = { _chunkSize = value }
 
   private val longestSigSequence: Int = signatures.foldLeft(0)(
-    (i, s) => if (s.signature.length > i) s.signature.length
-    else i)
+    (i, s) => if (s.signature.length > i) s.signature.length else i)
 
   private lazy val epOnlyFalseSigs: SignatureTree =
     createSignatureTree(signatures.filter(_.epOnly == false))
@@ -43,8 +62,8 @@ class SignatureScanner(signatures: List[Signature]) {
    * @param file the PE file to be scanned
    * @return the best match found
    */
-  def scan(file: File, epOnly: Boolean = false, chunkSize: Int = defaultChunkSize): String = {
-    scanAll(file, epOnly, chunkSize).last
+  def scan(file: File, epOnly: Boolean = false): String = {
+    scanAll(file, epOnly).last
   }
 
   /**
@@ -52,11 +71,11 @@ class SignatureScanner(signatures: List[Signature]) {
    * @param chunkSize default value is 128 MB
    * @return list with all matches found
    */
-  def scanAll(file: File, epOnly: Boolean = true, chunkSize: Int = defaultChunkSize): List[String] = {
+  def scanAll(file: File, epOnly: Boolean = true): List[String] = {
     def bytesMatched(sig: Signature): Int =
       sig.signature.filter(cond(_) { case Some(s) => true }).length
     var matches = findAllEPMatches(file)
-    if (!epOnly) matches ::: findAllEPFalseMatches(file, chunkSize)
+    if (!epOnly) matches ::: findAllEPFalseMatches(file, _chunkSize)
     for (m <- matches) yield m.name + " bytes matched: " + bytesMatched(m)
   }
 
@@ -64,7 +83,6 @@ class SignatureScanner(signatures: List[Signature]) {
     using(new RandomAccessFile(file, "r")) { raf =>
       val matches = ListBuffer[Signature]()
       var i = 0
-      println("longest sig " + longestSigSequence)
       for (chaddr <- 0L to file.length() by (chunkSize - longestSigSequence)) { //TODO test this!
         i = i + 1
         if (i % 10000 == 0) println("reading chunk " + i + " at address " + chaddr)
@@ -104,15 +122,25 @@ class SignatureScanner(signatures: List[Signature]) {
 
 object SignatureScanner {
 
-  private val defaultSigs = new File("testuserdb.txt")
+  private val defaultSigs = new File("userdb.txt")
+  
+  // This name makes more sense to call from Java
+  /**
+   * Loads default signatures (provided by PEiD) and creates a 
+   * SignatureScanner that uses these.
+   * 
+   * @return SignatureScanner with default signatures
+   */
+  def getInstance(): SignatureScanner = apply()
 
   def apply(): SignatureScanner =
     new SignatureScanner(loadSignatures(defaultSigs))
 
   /**
-   * Loads a list of signatures from the specified sigFile
+   * Loads a list of signatures from the specified signature file
    *
    * @param sigFile file that contains the signatures
+   * @return list containing the loaded signatures
    */
   def loadSignatures(sigFile: File): List[Signature] = {
     implicit val codec = Codec("UTF-8")
@@ -127,17 +155,11 @@ object SignatureScanner {
       if (line.startsWith("[") && it.hasNext) {
         val line2 = it.next
         if (it.hasNext) {
-          sigs += createSig(line, it.next, line2)
+          sigs += Signature(line, it.next, line2)
         }
       }
     }
     sigs.toList
-  }
-
-  private def createSig(name: String, ep: String, sig: String): Signature = {
-    val ep_only = ep.split("=")(1).trim == "true"
-    val sigbytes = hex2bytes(sig.split("=")(1).trim)
-    new Signature(name, ep_only, sigbytes)
   }
 
   //TODO performance measurement for different chunk sizes
