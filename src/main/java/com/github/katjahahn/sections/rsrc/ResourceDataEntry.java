@@ -1,11 +1,13 @@
 package com.github.katjahahn.sections.rsrc;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.FileIO;
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
@@ -20,7 +22,7 @@ public class ResourceDataEntry extends PEModule {
 	public ResourceDataEntry(byte[] entryBytes) {
 		try {
 			this.entryBytes = entryBytes;
-			resourceDataEntrySpec = FileIO.readMap(RSRC_DATA_ENTRY_SPEC);
+			resourceDataEntrySpec = IOUtil.readMap(RSRC_DATA_ENTRY_SPEC);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

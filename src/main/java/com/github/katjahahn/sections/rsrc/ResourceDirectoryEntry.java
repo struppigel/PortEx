@@ -1,10 +1,12 @@
 package com.github.katjahahn.sections.rsrc;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.FileIO;
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 
 public class ResourceDirectoryEntry extends PEModule {
@@ -27,7 +29,7 @@ public class ResourceDirectoryEntry extends PEModule {
 		this.entryBytes = entryBytes;
 		this.entryNr = entryNr;
 		this.parentId = parentId;
-		resourceDirEntrySpec = FileIO.readMap(RSRC_DIR_ENTRY_SPEC);
+		resourceDirEntrySpec = IOUtil.readMap(RSRC_DIR_ENTRY_SPEC);
 	}
 
 	@Override

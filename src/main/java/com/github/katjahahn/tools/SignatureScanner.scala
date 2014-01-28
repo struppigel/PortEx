@@ -62,15 +62,17 @@ class SignatureScanner(signatures: List[Signature]) {
     list.foreach(s => tree += s)
     tree
   }
-  
+
   /**
    * Scans a file for signatures and returns the best match
    *
    * @param file the PE file to be scanned
-   * @return the best match found
+   * @return the best match found, null if no match was found
    */
   def scan(file: File, epOnly: Boolean = false): String = {
-    scanAll(file, epOnly).last
+    val list = scanAll(file, epOnly)
+    if (list != Nil) list.last
+    else null //for Java
   }
 
   /**
@@ -129,7 +131,7 @@ class SignatureScanner(signatures: List[Signature]) {
 
 object SignatureScanner {
 
-  private val defaultSigs = new File("userdb.txt")
+  private val defaultSigs = new File("userdb2.txt")
 
   // This name makes more sense to call from Java
   /**
@@ -175,8 +177,8 @@ object SignatureScanner {
   //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
     val s = SignatureScanner()
-    val file = new File("Holiday_Island.exe")
-    s.scanAll(file, true).foreach(println)
+    val file = new File("Minecraft.exe")
+    s.scanAll(file, false).foreach(println)
     println("length of file: " + file.length())
   }
 

@@ -1,5 +1,7 @@
 package com.github.katjahahn.msdos;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.FileIO;
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
@@ -38,7 +40,7 @@ public class MSDOSHeader extends PEModule {
 		int sizeLoc = 1;
 		int descriptionLoc = 2;
 		try {
-			Map<String, String[]> map = FileIO.readMap(specification);
+			Map<String, String[]> map = IOUtil.readMap(specification);
 			for (Entry<String, String[]> entry : map.entrySet()) {
 				String key = entry.getKey();
 				String[] spec = entry.getValue();

@@ -1,5 +1,7 @@
 package com.github.katjahahn.sections.rsrc;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -7,7 +9,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.FileIO;
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.sections.PESection;
 
 public class RSRCSection extends PESection {
@@ -29,9 +31,9 @@ public class RSRCSection extends PESection {
 		this.rsrcbytes = rsrcbytes;
 		this.virtualAddress = virtualAddress;
 		try {
-			rsrcDirSpec = FileIO.readMap(RSRC_DIR_SPEC);
-			resourceDirEntrySpec = FileIO.readMap(RSRC_DIR_ENTRY_SPEC);
-			resourceDataEntrySpec = FileIO.readMap(RSRC_DATA_ENTRY_SPEC);
+			rsrcDirSpec = IOUtil.readMap(RSRC_DIR_SPEC);
+			resourceDirEntrySpec = IOUtil.readMap(RSRC_DIR_ENTRY_SPEC);
+			resourceDataEntrySpec = IOUtil.readMap(RSRC_DATA_ENTRY_SPEC);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}

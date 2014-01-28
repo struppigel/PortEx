@@ -3,13 +3,14 @@ package com.github.katjahahn
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
+import com.github.katjahahn.ByteArrayUtil._
 //TODO this is not used at all by now
 class StandardDataEntry[K <: Enumeration] (
   private val entrybytes: Array[Byte],
   private val specLocation: String
 		) extends PEModule {
   
-  private val specification = FileIO.readMap(specLocation).asScala.toMap
+  private val specification = IOUtil.readMap(specLocation).asScala.toMap
   
   var entries : List[StandardEntry] = Nil
   

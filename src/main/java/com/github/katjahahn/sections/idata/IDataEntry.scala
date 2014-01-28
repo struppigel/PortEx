@@ -2,15 +2,16 @@ package com.github.katjahahn.sections.idata
 
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.PEModule
-import com.github.katjahahn.FileIO
+import com.github.katjahahn.IOUtil
 import com.github.katjahahn.StandardEntry
 import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.sections.idata.IDataEntryKey._
+import com.github.katjahahn.ByteArrayUtil._
 
 class IDataEntry(private val entrybytes: Array[Byte],
-  private val specification: Map[String, Array[String]],
-  private val entries: Map[IDataEntryKey, StandardEntry]) extends PEModule {
+    private val specification: Map[String, Array[String]],
+    private val entries: Map[IDataEntryKey, StandardEntry]) extends PEModule {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -43,7 +44,7 @@ class IDataEntry(private val entrybytes: Array[Byte],
 object IDataEntry {
 
   def apply(entrybytes: Array[Byte], specLocation: String): IDataEntry = {
-    val specification = FileIO.readMap(specLocation).asScala.toMap
+    val specification = IOUtil.readMap(specLocation).asScala.toMap
     val buffer = ListBuffer.empty[StandardEntry]
     for ((key, specs) <- specification) {
       val description = specs(0)

@@ -131,10 +131,10 @@ public class PELoader {
 		System.out.println(idata.getInfo());
 
 		List<Signature> signatures = SignatureScanner.loadSignatures(new File(
-				"testuserdb.txt"));
+				"userdb.txt"));
 		SignatureScanner scanner = new SignatureScanner(signatures);
 		scanner.setChunkSize(1024);
-		String result = scanner.scan(new File("Holiday_Island.exe"), true);
+		String result = scanner.scan(new File("WinRar.exe"), true);
 		System.out.println(result);
 	}
 

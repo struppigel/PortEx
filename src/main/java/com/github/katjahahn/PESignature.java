@@ -1,5 +1,7 @@
 package com.github.katjahahn;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -42,7 +44,7 @@ public class PESignature extends PEModule {
 			raf.seek(PE_OFFSET_LOCATION);
 			byte[] offsetBytes = new byte[2];
 			raf.readFully(offsetBytes);
-			peOffset = PEModule.bytesToInt(offsetBytes);
+			peOffset = bytesToInt(offsetBytes);
 			raf.seek(peOffset);
 			byte[] peSigVal = new byte[4];
 			raf.readFully(peSigVal);

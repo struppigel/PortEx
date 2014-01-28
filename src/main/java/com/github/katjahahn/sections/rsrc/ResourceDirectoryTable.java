@@ -1,5 +1,7 @@
 package com.github.katjahahn.sections.rsrc;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;

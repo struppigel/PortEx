@@ -1,5 +1,7 @@
 package com.github.katjahahn.sections;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -8,10 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.FileIO;
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
-
 public class SectionTable extends PEModule {
 
 	private final static String SECTION_TABLE_SPEC = "sectiontablespec";
@@ -27,7 +28,7 @@ public class SectionTable extends PEModule {
 		this.sectionTableBytes = sectionTableBytes;
 		this.numberOfEntries = numberOfEntries;
 		try {
-			specification = FileIO.readMap(SECTION_TABLE_SPEC);
+			specification = IOUtil.readMap(SECTION_TABLE_SPEC);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -124,7 +125,7 @@ public class SectionTable extends PEModule {
 			String key = entry.getKey();
 			if (key.equals("CHARACTERISTICS")) {
 				b.append(specs[0] + ": " + NL
-						+ getCharacteristics(value, "sectioncharacteristics")
+						+ IOUtil.getCharacteristics(value, "sectioncharacteristics")
 						+ NL);
 			} else if (key.equals("NAME")) {
 				b.append(specs[0] + ": " + getUTF8String(section) + NL);

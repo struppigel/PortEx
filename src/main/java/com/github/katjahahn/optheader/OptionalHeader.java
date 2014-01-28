@@ -1,12 +1,14 @@
 package com.github.katjahahn.optheader;
 
+import static com.github.katjahahn.ByteArrayUtil.*;
+
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.FileIO;
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
@@ -46,9 +48,9 @@ public class OptionalHeader extends PEModule {
 
 	@Override
 	public void read() throws IOException {
-		Map<String, String[]> standardSpec = FileIO.readMap(STANDARD_SPEC);
-		Map<String, String[]> windowsSpec = FileIO.readMap(WINDOWS_SPEC);
-		List<String[]> datadirSpec = FileIO.readArray(DATA_DIR_SPEC);
+		Map<String, String[]> standardSpec = IOUtil.readMap(STANDARD_SPEC);
+		Map<String, String[]> windowsSpec = IOUtil.readMap(WINDOWS_SPEC);
+		List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);
 
 		this.magicNumber = readMagicNumber(standardSpec);
 
@@ -255,7 +257,7 @@ public class OptionalHeader extends PEModule {
 						+ NL);
 			} else if (key.equals("DLL_CHARACTERISTICS")) {
 				b.append(NL + description + ": " + NL);
-				b.append(getCharacteristics(value, "dllcharacteristics") + NL);
+				b.append(IOUtil.getCharacteristics(value, "dllcharacteristics") + NL);
 			}
 
 			else {
@@ -363,7 +365,7 @@ public class OptionalHeader extends PEModule {
 	 */
 	public static String getSubsystemDescription(int value) {
 		try {
-			Map<String, String[]> map = FileIO.readMap("subsystem");
+			Map<String, String[]> map = IOUtil.readMap("subsystem");
 			return map.get(String.valueOf(value))[1];
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -6,8 +6,9 @@ import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
 
 /**
- * Data class that collects and holds the main information of a PE file. It is 
- * usually constructed by the PELoader.
+ * Container that collects and holds the main information of a PE file. It is 
+ * usually constructed by the PELoader and returned to the caller as result from
+ * scanning the PE File information.
  * 
  * @author Katja Hahn
  *
@@ -20,6 +21,15 @@ public class PEData {
 	private final SectionTable table;
 	private final MSDOSHeader msdos;
 
+	/**
+	 * @constructor Creates a PEData instance.
+	 * 
+	 * @param msdos the MSDOS Header
+	 * @param pesig The signature of the PE
+	 * @param coff the COFF File Header
+	 * @param opt the Optional Header
+	 * @param table the Section Table
+	 */
 	public PEData(MSDOSHeader msdos, PESignature pesig, COFFFileHeader coff, OptionalHeader opt, SectionTable table) {
 		this.pesig = pesig;
 		this.coff = coff;

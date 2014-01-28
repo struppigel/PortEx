@@ -1,7 +1,7 @@
 package com.github.katjahahn.sections.idata
 
 import com.github.katjahahn.sections.PESection
-import com.github.katjahahn.FileIO
+import com.github.katjahahn.IOUtil
 import ImportSection._
 import com.github.katjahahn.StandardEntry
 import scala.collection.JavaConverters._

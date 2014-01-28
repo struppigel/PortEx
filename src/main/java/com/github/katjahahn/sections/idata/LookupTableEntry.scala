@@ -6,6 +6,7 @@ import com.github.katjahahn.PEModule
 import com.github.katjahahn.PEModule._
 import LookupTableEntry._
 import java.lang.Long.toHexString
+import com.github.katjahahn.ByteArrayUtil._
 
 abstract class LookupTableEntry
 
