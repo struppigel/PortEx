@@ -35,6 +35,17 @@ object Signature {
     val sigbytes = hex2bytes(sig.split("=")(1).trim)
     new Signature(name, ep_only, sigbytes)
   }
+  
+  /**
+   * @param name name of packer or compiler
+   * @param ep epOnly flag
+   * @param sig byte sequence as hex string, uknown bytes are marked as "??"
+   * @return an instance of Signature with the fields applied
+   */
+  def apply(name: String, ep: Boolean, sig: String): Signature = {
+    val sigbytes = hex2bytes(sig)
+    new Signature(name, ep, sigbytes)
+  }
 
   /**
    * Converts an array of Option bytes to its hex string representation. None is
