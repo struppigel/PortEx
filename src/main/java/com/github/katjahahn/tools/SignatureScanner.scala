@@ -28,13 +28,16 @@ import scala.collection.JavaConverters._
  */
 class SignatureScanner(signatures: List[Signature]) {
 
+  type Address = Long
+  type ScanResult = (Signature, Address)
+
   /**
    * @constructor Creates a SignatureScanner that uses the signatures applied
    * @param signatures to use for scanning
    */
   def this(signatures: java.util.List[Signature]) = this(signatures.asScala.toList)
 
-  private var _chunkSize = 134217728 //default value of 128 MB
+  private var _chunkSize = 1024
 
   /*
    * Getter and setter for Java ;)
@@ -77,44 +80,50 @@ class SignatureScanner(signatures: List[Signature]) {
 
   /**
    * @param file the file to be scanned
-   * @param chunkSize default value is 128 MB
-   * @return list with all matches found
+   * @return list of scanresults with all matches found
    */
-  def scanAll(file: File, epOnly: Boolean = true): List[String] = {
-    def bytesMatched(sig: Signature): Int =
-      sig.signature.filter(cond(_) { case Some(s) => true }).length
+  def _scanAll(file: File, epOnly: Boolean = true): List[ScanResult] = { //use from scala
     var matches = findAllEPMatches(file)
-    if (!epOnly) matches ::: findAllEPFalseMatches(file, _chunkSize)
-    for (m <- matches) yield m.name + " bytes matched: " + bytesMatched(m)
+    if (!epOnly) matches = matches ::: findAllEPFalseMatches(file, _chunkSize)
+    matches
   }
 
-  private def findAllEPFalseMatches(file: File, chunkSize: Int): List[Signature] = {
+  /**
+   * @param file the file to be scanned
+   * @return list of strings with all matches found
+   */
+  def scanAll(file: File, epOnly: Boolean = true): List[String] = { //use from Java
+    def bytesMatched(sig: Signature): Int =
+      sig.signature.filter(cond(_) { case Some(s) => true }).length
+    val matches = _scanAll(file, epOnly)
+    for ((m, addr) <- matches)
+      yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr
+  }
+
+  private def findAllEPFalseMatches(file: File, chunkSize: Int): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
-      val matches = ListBuffer[Signature]()
-      var i = 0
-      for (chaddr <- 0L to file.length() by (chunkSize - longestSigSequence)) { //TODO test this!
-        i = i + 1
-        if (i % 10000 == 0) println("reading chunk " + i + " at address " + chaddr)
-        val bytes = Array.fill(chunkSize)(0.toByte)
-        raf.seek(chaddr)
+      val results = ListBuffer[ScanResult]()
+      for (addr <- 0L to file.length()) {
+        val bytes = Array.fill(longestSigSequence + 1)(0.toByte)
+        raf.seek(addr)
         val bytesRead = raf.read(bytes)
-        for (addr <- 0L to (bytesRead - longestSigSequence)) {
-          val slicedarr = bytes.slice(addr.toInt, addr.toInt + longestSigSequence)
-          matches ++= epOnlyFalseSigs.findMatches(slicedarr.toList)
-        }
+        val slicedarr = bytes.slice(0, bytesRead)
+        val matches = epOnlyFalseSigs.findMatches(slicedarr.toList)
+        results ++= matches.map((_, addr))
       }
-      matches.toList
+      results.toList
     }
   }
 
-  private def findAllEPMatches(file: File): List[Signature] = {
+  private def findAllEPMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val data = PELoader.loadPE(file)
       val entryPoint = getEntryPoint(data)
       raf.seek(entryPoint.toLong)
       var bytes = Array.fill(longestSigSequence + 1)(0.toByte)
       val bytesRead = raf.read(bytes)
-      epOnlySigs.findMatches(bytes.slice(0, bytesRead).toList)
+      val matches = epOnlySigs.findMatches(bytes.slice(0, bytesRead).toList)
+      matches.map((_, entryPoint.toLong))
     }
   }
 
@@ -177,7 +186,7 @@ object SignatureScanner {
   //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
     val s = SignatureScanner()
-    val file = new File("Minecraft.exe")
+    val file = new File("WinRar.exe")
     s.scanAll(file, false).foreach(println)
     println("length of file: " + file.length())
   }

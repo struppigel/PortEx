@@ -1,0 +1,23 @@
+[PKZIP Archive File]
+signature = 50 4B 03 04
+ep_only = false
+
+[Jar Manifest]
+signature = 4D 45 54 41 2D 49 4E 46 2F 4D 41 4E 49 46 45 53 54 2E 4D 46
+ep_only = false
+
+[Jar2Exe Products]
+signature = 4A 61 72 32 45 78 65 20 50 72 6F 64 75 63 74 73
+ep_only = false
+
+[java.exe]
+signature = 6a 61 76 61 2e 65 78 65
+ep_only = false
+
+[javaw.exe]
+signature = 6a 61 76 61 77 2e 65 78 65
+ep_only = false
+
+[Jar2Exe Products]
+signature = 45 00 78 00 65 00 63 00 75 00 74 00 69 00 76 00 65 00 20 00 43 00 72 00 65 00 61 00 74 00 65 00 64 00 20 00 62 00 79 00 20 00 4A 00 61 00 72 00 32 00 45 00 78 00 65
+ep_only = false
