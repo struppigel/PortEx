@@ -28,28 +28,11 @@ import scala.collection.JavaConverters._
  */
 class SignatureScanner(signatures: List[Signature]) {
 
-  type Address = Long
-  type ScanResult = (Signature, Address)
-
   /**
    * @constructor Creates a SignatureScanner that uses the signatures applied
    * @param signatures to use for scanning
    */
   def this(signatures: java.util.List[Signature]) = this(signatures.asScala.toList)
-
-  private var _chunkSize = 1024
-
-  /*
-   * Getter and setter for Java ;)
-   */
-  /**
-   * @return the current chunkSize in bytes
-   */
-  def getChunkSize = _chunkSize
-  /**
-   * @param value the chunkSize in bytes
-   */
-  def setChunkSize(value: Int): Unit = { _chunkSize = value }
 
   private val longestSigSequence: Int = signatures.foldLeft(0)(
     (i, s) => if (s.signature.length > i) s.signature.length else i)
@@ -57,7 +40,7 @@ class SignatureScanner(signatures: List[Signature]) {
   private lazy val epOnlyFalseSigs: SignatureTree =
     createSignatureTree(signatures.filter(_.epOnly == false))
 
-  private val epOnlySigs: SignatureTree =
+  private lazy val epOnlySigs: SignatureTree =
     createSignatureTree(signatures.filter(_.epOnly == true))
 
   private def createSignatureTree(list: List[Signature]): SignatureTree = {
@@ -84,7 +67,7 @@ class SignatureScanner(signatures: List[Signature]) {
    */
   def _scanAll(file: File, epOnly: Boolean = true): List[ScanResult] = { //use from scala
     var matches = findAllEPMatches(file)
-    if (!epOnly) matches = matches ::: findAllEPFalseMatches(file, _chunkSize)
+    if (!epOnly) matches = matches ::: findAllEPFalseMatches(file)
     matches
   }
 
@@ -100,7 +83,12 @@ class SignatureScanner(signatures: List[Signature]) {
       yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr
   }
 
-  private def findAllEPFalseMatches(file: File, chunkSize: Int): List[ScanResult] = {
+  /**
+   * Searches for matches in the whole file using ep_only false signatures.
+   *
+   * @param file to search for signatures
+   */
+  private def findAllEPFalseMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
       for (addr <- 0L to file.length()) {
@@ -115,6 +103,12 @@ class SignatureScanner(signatures: List[Signature]) {
     }
   }
 
+  /**
+   * Searches for matches only at the entry point and only using signatures that
+   * are specified to be checked for at ep_only.
+   * 
+   * @param file to search for signatures
+   */
   private def findAllEPMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val data = PELoader.loadPE(file)
@@ -130,6 +124,11 @@ class SignatureScanner(signatures: List[Signature]) {
   private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
     try { f(param) } finally { param.close() }
 
+  /**
+   * Calculates the entry point with the given PE data
+   * 
+   * @param data the pedata result created by a PELoader
+   */
   private def getEntryPoint(data: PEData): Int = {
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val section = SectionLoader.getSectionByRVA(data.getSectionTable(), rva)
@@ -139,6 +138,16 @@ class SignatureScanner(signatures: List[Signature]) {
 }
 
 object SignatureScanner {
+  
+  /**
+   * A file offset/address
+   */
+  type Address = Long
+  
+  /**
+   * a scan result is a signature and the address where it was found
+   */
+  type ScanResult = (Signature, Address)
 
   private val defaultSigs = new File("userdb2.txt")
 
@@ -151,9 +160,21 @@ object SignatureScanner {
    */
   def getInstance(): SignatureScanner = apply()
 
+  /**
+   * Loads default signatures (provided by PEiD) and creates a
+   * SignatureScanner that uses these.
+   *
+   * @return SignatureScanner with default signatures
+   */
   def apply(): SignatureScanner =
     new SignatureScanner(_loadSignatures(defaultSigs))
 
+  /**
+   * Loads the signatures from the given file.
+   * 
+   * @param sigFile the file containing the signatures
+   * @return a list containing the signatures of the file
+   */
   def _loadSignatures(sigFile: File): List[Signature] = {
     implicit val codec = Codec("UTF-8")
     //replace malformed input
