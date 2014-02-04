@@ -1,10 +1,12 @@
 package com.github.katjahahn.tools
 
 import java.io.File
-import java.io.RandomAccessFile
-import scala.collection.mutable.ListBuffer
 import java.io.FileOutputStream
+import java.io.RandomAccessFile
+import java.util.zip.ZipInputStream
 import com.github.katjahahn.tools.SignatureScanner._
+import java.nio.channels.Channels
+import scala.collection.mutable.ListBuffer
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for
@@ -29,6 +31,23 @@ class Jar2ExeScanner(file: File) {
     "[java.exe]" -> "Call to java.exe (strong indication for Java wrapper)",
     "[javaw.exe]" -> "Call to javaw.exe (strong indication for Java wrapper)",
     "[Jar2Exe Products]" -> "File was created by Jar2Exe.com, signature found at")
+
+  def readZipEntries(pos: Long): List[String] = {
+    val raf = new RandomAccessFile(file, "r")
+    val is = Channels.newInputStream(raf.getChannel().position(pos))
+    val zis = new ZipInputStream(is)
+    var entries = new ListBuffer[String]()
+    try {
+      var e = zis.getNextEntry()
+      while (e != null) {
+        entries += e.getName()
+        e = zis.getNextEntry()
+      }
+    } finally {
+      zis.close();
+    }
+    entries.toList
+  }
 
   /**
    * Creates a scan report based on the signatures found.
@@ -84,12 +103,19 @@ class Jar2ExeScanner(file: File) {
 
 }
 
+//TODO jsmooth signatures, launch4j, exe4j
+//determine entry nr of zip and remove these from possible starting addresses
+//check of valid zip file by using readentries
+//get original jar from jsmooth
 object Jar2ExeScanner {
 
   def main(args: Array[String]): Unit = {
-    val scanner = new Jar2ExeScanner(new File("Minecraft.exe"))
-    println(scanner.createReport)
+    val scanner = new Jar2ExeScanner(new File("jsmooth.exe"))
+    //    println(scanner.createReport)
     println("possible jar addresses")
-    println(scanner.getPossibleJarAddresses)
+    var addresses = scanner.getPossibleJarAddresses
+    println(addresses.mkString(", "))
+    println("jar entries at " + addresses(0))
+    scanner.readZipEntries(addresses(0)).foreach(println)
   }
 }
