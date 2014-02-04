@@ -88,7 +88,7 @@ class SignatureScanner(signatures: List[Signature]) {
    *
    * @param file to search for signatures
    */
-  private def findAllEPFalseMatches(file: File): List[ScanResult] = {
+  def findAllEPFalseMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
       for (addr <- 0L to file.length()) {
@@ -109,7 +109,7 @@ class SignatureScanner(signatures: List[Signature]) {
    * 
    * @param file to search for signatures
    */
-  private def findAllEPMatches(file: File): List[ScanResult] = {
+  def findAllEPMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val data = PELoader.loadPE(file)
       val entryPoint = getEntryPoint(data)

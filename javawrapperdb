@@ -21,3 +21,19 @@ ep_only = false
 [Jar2Exe Products]
 signature = 45 00 78 00 65 00 63 00 75 00 74 00 69 00 76 00 65 00 20 00 43 00 72 00 65 00 61 00 74 00 65 00 64 00 20 00 62 00 79 00 20 00 4A 00 61 00 72 00 32 00 45 00 78 00 65
 ep_only = false
+
+[JSmooth]
+signature = 6A 73 6D 6F 6F 74 68
+ep_only = false
+
+[Exe4j]
+signature = 45 58 45 34 4A
+ep_only = false
+
+[Exe4j]
+signature = 65 78 65 34 6A
+ep_only = false
+
+[CAFEBABE]
+signature = CA FE BA BE
+ep_only = false
