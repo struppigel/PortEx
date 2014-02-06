@@ -26,14 +26,15 @@ class Jar2ExeScanner(file: File) {
    */
   lazy val scanResult: List[ScanResult] = scanner.findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
 
-  private val description = Map("[Jar Manifest]" -> "Jar manifest found",
-    "[PKZIP Archive File]" -> "Possible beginning of Jar or ZIP file found (weak indication, you may try to dump jar here)",
-    "[java.exe]" -> "Call to java.exe (strong indication for Java wrapper)",
-    "[javaw.exe]" -> "Call to javaw.exe (strong indication for Java wrapper)",
-    "[Jar2Exe Products]" -> "Jar2Exe.com signature, you can dump jar if not encrypted",
-    "[JSmooth]" -> "JSmooth signature, you can dump the jar",
+  private val description = Map("[Jar Manifest]" -> "Jar manifest (strong indication for embedded jar)",
+    "[PKZIP Archive File]" -> "PZIP Magic Number (weak indication for embedded zip)",
+    "[java.exe]" -> "Call to java.exe (strong indication for java wrapper)",
+    "[javaw.exe]" -> "Call to javaw.exe (strong indication for java wrapper)",
+    "[Jar2Exe Products]" -> "Jar2Exe.com signature",
+    "[JSmooth]" -> "JSmooth signature",
+    "[Launch4j]" -> "Launch4j signature",
     "[Exe4j]" -> "Exe4j signature, search in your temp folder for e4jxxxx.tmp file while application is running",
-    "[CAFEBABE]" -> ".class file signature found, you can dump this .class")
+    "[CAFEBABE]" -> ".class file signature(s) found")
 
   def readZipEntriesAt(pos: Long): List[String] = {
     val raf = new RandomAccessFile(file, "r")
@@ -60,31 +61,67 @@ class Jar2ExeScanner(file: File) {
   def createReport(verbose: Boolean = false): String = {
     if (scanResult.length == 0) return "no indication for java wrapper found"
 
+    val ep = "Entry point: 0x" + scanner.getEntryPoint(file).toHexString + "\n\n"
     var lastName = ""
-
-    (for ((sig, addr) <- scanResult) yield {
+    val sigs = (for ((sig, addr) <- scanResult) yield {
       var str = new StringBuilder()
       if (lastName != sig.name) {
-        str ++= description.getOrElse(sig.name, sig.name) + "\n"
+        str ++= "\t* " + description.getOrElse(sig.name, sig.name) + "\n"
       }
-      if (verbose) str ++= addr.toString + "\n"
+      if (verbose) str ++= "\t\t" + addr.toString + "\n"
       lastName = sig.name
       str
     }).mkString
+
+    val zipAddr = getZipAddresses().map("0x" + _.toHexString)
+    val classAddr = getPossibleClassAddresses.map("0x" + _.toHexString)
+
+    val addresses = if (scanResult.contains("[CAFEBABE]")) {
+      ".class offsets: " + classAddr.mkString(", ") + "\n\n"
+    } else if (zipAddr.length > 0) {
+      "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n\n"
+    } else ""
+
+    "Signatures found:\n" + sigs + "\n" + ep + addresses
   }
 
   /**
-   * @return a list of addresses that might be the beginning of an embedded jar
+   * Determines the offset of the beginning of zip/jar archives within the file.
+   *
+   * It uses the PK ZIP magic number to determine possible addresses and starts to
+   * read for entries there. If there is at least one entry found, the address is
+   * returned.
+   *
+   * @return a list of addresses where a zip/jar with entries was found
    */
-  def getPossibleJarAddresses(): List[Address] =
+  def getZipAddresses(): List[Address] = {
+    val possibleAddr = getPossibleZipAddresses()
+    var entryNr = 0
+    possibleAddr.filter(addr =>
+      if (entryNr == 0) {
+        entryNr += readZipEntriesAt(addr).length
+        true
+      } else {
+        entryNr = entryNr - 1
+        false
+      })
+  }
+
+  /**
+   * @return a list of addresses that might be the beginning of an embedded zip or jar
+   */
+  private def getPossibleZipAddresses(): List[Address] =
     for ((sig, addr) <- scanResult; if sig.name == "[PKZIP Archive File]") yield addr
 
   /**
+   * Returns offsets of the file where the 0xCAFEBABE magic number for Java .class
+   * files was found. You may try to dump these files.
+   *
    * @return a list of addresses that might be the beginning of an embedded jar
    */
   def getPossibleClassAddresses(): List[Address] =
     for ((sig, addr) <- scanResult; if sig.name == "[CAFEBABE]") yield addr
-    
+
   /**
    * Dumps the part of PE file starting at the given address to the given
    * destination path.
@@ -112,19 +149,10 @@ class Jar2ExeScanner(file: File) {
 
 }
 
-//TODO launch4j
-//determine entry nr of zip and remove these from possible starting addresses
-//check of valid zip file by using readentries
-//get original jar from jsmooth
 object Jar2ExeScanner {
 
   def main(args: Array[String]): Unit = {
-    val scanner = new Jar2ExeScanner(new File("minecraft.exe"))
+    val scanner = new Jar2ExeScanner(new File("launch4jexe.exe"))
     println(scanner.createReport())
-    println("possible jar addresses")
-    var addresses = scanner.getPossibleJarAddresses
-    println(addresses.mkString(", "))
-    println("jar entries at " + addresses(0))
-    scanner.readZipEntriesAt(addresses(0)).foreach(println)
   }
 }

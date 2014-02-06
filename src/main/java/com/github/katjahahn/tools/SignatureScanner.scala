@@ -1,22 +1,21 @@
 package com.github.katjahahn.tools
 
 import java.io.File
-import com.sun.org.apache.xalan.internal.xsltc.compiler.StartsWithCall
-import scala.collection.mutable.ListBuffer
-import java.nio.charset.MalformedInputException
-import scala.io.Codec
-import java.nio.charset.CodingErrorAction
-import SignatureScanner._
-import com.github.katjahahn.PELoader
-import com.github.katjahahn.PEData
-import com.github.katjahahn.optheader.StandardFieldEntryKey._
 import java.io.RandomAccessFile
-import com.github.katjahahn.sections.SectionTable
-import com.github.katjahahn.sections.SectionLoader
-import Signature._
-import com.github.katjahahn.sections.SectionTableEntryKey
-import PartialFunction._
+import java.nio.charset.CodingErrorAction
+import scala.PartialFunction._
 import scala.collection.JavaConverters._
+import scala.collection.mutable.{ Map, ListBuffer }
+import scala.io.Codec
+import com.github.katjahahn.PEData
+import com.github.katjahahn.PELoader
+import com.github.katjahahn.optheader.StandardFieldEntryKey._
+import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.sections.SectionTable
+import com.github.katjahahn.sections.SectionTableEntryKey
+import Signature._
+import SignatureScanner._
+import com.github.katjahahn.FileFormatException
 
 /**
  * Scans PE files for compiler and packer signatures.
@@ -106,13 +105,12 @@ class SignatureScanner(signatures: List[Signature]) {
   /**
    * Searches for matches only at the entry point and only using signatures that
    * are specified to be checked for at ep_only.
-   * 
+   *
    * @param file to search for signatures
    */
   def findAllEPMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
-      val data = PELoader.loadPE(file)
-      val entryPoint = getEntryPoint(data)
+      val entryPoint = getEntryPoint(file)
       raf.seek(entryPoint.toLong)
       var bytes = Array.fill(longestSigSequence + 1)(0.toByte)
       val bytesRead = raf.read(bytes)
@@ -126,10 +124,11 @@ class SignatureScanner(signatures: List[Signature]) {
 
   /**
    * Calculates the entry point with the given PE data
-   * 
+   *
    * @param data the pedata result created by a PELoader
    */
-  private def getEntryPoint(data: PEData): Int = {
+  def getEntryPoint(file: File): Int = {
+    val data = PELoader.loadPE(file)
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val section = SectionLoader.getSectionByRVA(data.getSectionTable(), rva)
     val phystovirt = section.get(SectionTableEntryKey.VIRTUAL_ADDRESS) - section.get(SectionTableEntryKey.POINTER_TO_RAW_DATA)
@@ -138,18 +137,29 @@ class SignatureScanner(signatures: List[Signature]) {
 }
 
 object SignatureScanner {
-  
+
   /**
    * A file offset/address
    */
   type Address = Long
-  
+
   /**
    * a scan result is a signature and the address where it was found
    */
   type ScanResult = (Signature, Address)
 
-  private val defaultSigs = new File("userdb2.txt")
+  private val defaultSigs = new File("userdb.txt")
+
+  private val version = """version: 0.1
+    |author: Katja Hahn
+    |last update: 5.Feb 2014""".stripMargin
+
+  private val title = "peiscan v0.1 -- by deque"
+
+  private val usage = """Usage: java -jar peiscan.jar [-s <signaturefile>] [-ep true|false] <PEfile>
+    """.stripMargin
+
+  private type OptionMap = Map[Symbol, String]
 
   // This name makes more sense to call from Java
   /**
@@ -171,7 +181,7 @@ object SignatureScanner {
 
   /**
    * Loads the signatures from the given file.
-   * 
+   *
    * @param sigFile the file containing the signatures
    * @return a list containing the signatures of the file
    */
@@ -206,10 +216,68 @@ object SignatureScanner {
 
   //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
-    val s = SignatureScanner()
-    val file = new File("WinRar.exe")
-    s.scanAll(file, false).foreach(println)
-    println("length of file: " + file.length())
+    invokeCLI(args)
+  }
+
+  private def invokeCLI(args: Array[String]): Unit = {
+    val options = nextOption(Map(), args.toList)
+    println(title)
+    if (args.length == 0 || !options.contains('inputfile)) {
+      println(usage)
+    } else {
+      var eponly = true
+      var signatures = defaultSigs
+      var file = new File(options('inputfile))
+
+      if (options.contains('version)) {
+        println(version)
+      }
+      if (options.contains('signatures)) {
+        signatures = new File(options('signatures))
+      }
+      if (options.contains('eponly)) {
+        eponly = options('eponly) == "true"
+      }
+      doScan(eponly, signatures, file)
+    }
+  }
+
+  private def doScan(eponly: Boolean, sigFile: File, pefile: File): Unit = {
+    if (!sigFile.exists()) {
+      println(sigFile)
+      System.err.println("signature file doesn't exist")
+      return
+    }
+    if (!pefile.exists()) {
+      System.err.println("pe file doesn't exist")
+      return
+    }
+    println("scanning file ...")
+    if(!eponly) println("(this might take a while)")
+    try {
+      val scanner = new SignatureScanner(_loadSignatures(sigFile))
+      val list = scanner.scanAll(pefile, eponly)
+      if (list.length == 0) println("no signature found")
+      else list.foreach(println)
+    } catch {
+      case e: FileFormatException => System.err.println(e.getMessage())
+    }
+  }
+
+  private def nextOption(map: OptionMap, list: List[String]): OptionMap = {
+    list match {
+      case Nil => map
+      case "-s" :: value :: tail =>
+        nextOption(map += ('signatures -> value), tail)
+      case "-ep" :: value :: tail =>
+        nextOption(map += ('eponly -> value), tail)
+      case "-v" :: tail =>
+        nextOption(map += ('version -> ""), tail)
+      case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
+      case option :: tail =>
+        println("Unknown option " + option + "\n" + usage)
+        sys.exit(1)
+    }
   }
 
 }

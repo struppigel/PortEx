@@ -10,6 +10,10 @@ ep_only = false
 signature = 4A 61 72 32 45 78 65 20 50 72 6F 64 75 63 74 73
 ep_only = false
 
+[Launch4j]
+signature = 4C 61 75 6E 63 68 34 6A
+ep_only = false
+
 [java.exe]
 signature = 6a 61 76 61 2e 65 78 65
 ep_only = false
