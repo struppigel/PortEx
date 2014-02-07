@@ -49,24 +49,12 @@ class SignatureScanner(signatures: List[Signature]) {
   }
 
   /**
-   * Scans a file for signatures and returns the best match
-   *
-   * @param file the PE file to be scanned
-   * @return the best match found, null if no match was found
-   */
-  def scan(file: File, epOnly: Boolean = false): String = {
-    val list = scanAll(file, epOnly)
-    if (list != Nil) list.last
-    else null //for Java
-  }
-
-  /**
    * @param file the file to be scanned
    * @return list of scanresults with all matches found
    */
   def _scanAll(file: File, epOnly: Boolean = true): List[ScanResult] = { //use from scala
-    var matches = findAllEPMatches(file)
-    if (!epOnly) matches = matches ::: findAllEPFalseMatches(file)
+    var matches = _findAllEPMatches(file)
+    if (!epOnly) matches = matches ::: _findAllEPFalseMatches(file)
     matches
   }
 
@@ -74,20 +62,29 @@ class SignatureScanner(signatures: List[Signature]) {
    * @param file the file to be scanned
    * @return list of strings with all matches found
    */
-  def scanAll(file: File, epOnly: Boolean = true): List[String] = { //use from Java
+  def scanAll(file: File, epOnly: Boolean = true): java.util.List[String] = { //use from Java
     def bytesMatched(sig: Signature): Int =
       sig.signature.filter(cond(_) { case Some(s) => true }).length
     val matches = _scanAll(file, epOnly)
-    for ((m, addr) <- matches)
-      yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr
+    (for ((m, addr) <- matches)
+      yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
   }
-
+  
+  private def toMatchedSignature(result: ScanResult): MatchedSignature = {
+    val (sig, addr) = result
+    val signature = Signature.bytes2hex(sig.signature, " ")
+    new MatchedSignature(addr, signature, sig.name, sig.epOnly)
+  }
+  
   /**
    * Searches for matches in the whole file using ep_only false signatures.
    *
    * @param file to search for signatures
    */
-  def findAllEPFalseMatches(file: File): List[ScanResult] = {
+  def findAllEPFalseMatches(file: File): java.util.List[MatchedSignature] =
+    _findAllEPFalseMatches(file).map(toMatchedSignature).asJava
+  
+  def _findAllEPFalseMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
       for (addr <- 0L to file.length()) {
@@ -108,7 +105,11 @@ class SignatureScanner(signatures: List[Signature]) {
    *
    * @param file to search for signatures
    */
-  def findAllEPMatches(file: File): List[ScanResult] = {
+  
+  def findAllEPMatches(file: File): java.util.List[MatchedSignature] = 
+    _findAllEPMatches(file).map(toMatchedSignature).asJava
+    
+  def _findAllEPMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val entryPoint = getEntryPoint(file)
       raf.seek(entryPoint.toLong)
@@ -214,7 +215,6 @@ object SignatureScanner {
   def loadSignatures(sigFile: File): java.util.List[Signature] =
     _loadSignatures(sigFile).asJava
 
-  //TODO performance measurement for different chunk sizes
   def main(args: Array[String]): Unit = {
     invokeCLI(args)
   }
@@ -256,7 +256,7 @@ object SignatureScanner {
     if(!eponly) println("(this might take a while)")
     try {
       val scanner = new SignatureScanner(_loadSignatures(sigFile))
-      val list = scanner.scanAll(pefile, eponly)
+      val list = scanner.scanAll(pefile, eponly).asScala
       if (list.length == 0) println("no signature found")
       else list.foreach(println)
     } catch {
