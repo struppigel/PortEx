@@ -15,5 +15,5 @@ dependency-reduced-pom.xml
 .cache
 *.txt
 *.TXT
+project
 *.sbt
-/project
