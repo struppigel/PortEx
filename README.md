@@ -13,3 +13,5 @@ So far it supports:
 * Reading Standard Section Formats: Import Section, Resource Section
 * Scan for PEiD userdb signatures
 * Scan for jar2exe or class2exe wrappers
+
+For more information have a look at https://github.com/katjahahn/PortEx/wiki/Getting-Started
