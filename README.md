@@ -15,7 +15,7 @@ PortEx is written in Java and Scala, but targeted for Java applications.
 * Scan for PEiD userdb signatures
 * Scan for jar2exe or class2exe wrappers
 
-For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki/Getting-Started)
+For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki/Getting-Started) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
 ### Version information
 
