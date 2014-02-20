@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Portex by katjahahn</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Portex</h1>
+        <p class="header">Java library to analyse Portable Executable files with a special focus on malware analysis.</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/katjahahn/PortEx/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/katjahahn/PortEx/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/katjahahn/PortEx">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/katjahahn">katjahahn</a></p>
+
+
+      </header>
+      <section>
+        <h3>
+<a name="welcome-to-portex" class="anchor" href="#welcome-to-portex"><span class="octicon octicon-link"></span></a>Welcome to PortEx</h3>
+
+<p>PortEx is a Java library for statical malware analysis of Portable Executable files.
+PortEx is written in Java and Scala, but targeted for Java applications.</p>
+
+<h3>
+<a name="features-so-far" class="anchor" href="#features-so-far"><span class="octicon octicon-link"></span></a>Features (so far)</h3>
+
+<ul>
+<li>Reading Header information from: MSDOS Header, COFF File Header, Optional Header, Section Table</li>
+<li>Dumping of: MSDOS Load Module, Sections, Overlay, embedded ZIP, JAR or .class files</li>
+<li>Mapping of Data Directory Entries to the corresponding Section</li>
+<li>Reading Standard Section Formats: Import Section, Resource Section</li>
+<li>Scan for PEiD userdb signatures</li>
+<li>Scan for jar2exe or class2exe wrappers</li>
+</ul><p>For more information have a look at <a href="https://github.com/katjahahn/PortEx/wiki/Getting-Started">PortEx Wiki</a></p>
+
+<h3>
+<a name="version" class="anchor" href="#version"><span class="octicon octicon-link"></span></a>Version</h3>
+
+<p>The current version is not even Alpha yet, which is the reason that there are no binaries provided by now. However you can build the current source.</p>
+
+<h3>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Build</h3>
+
+<p>PortEx is build with <a href="http://www.scala-sbt.org">sbt</a></p>
+
+<p>To simply compile the project invoke:</p>
+
+<pre><code>$ sbt compile
+</code></pre>
+
+<p>To create a jar: </p>
+
+<pre><code>$ sbt package
+</code></pre>
+
+<p>For a fat jar:</p>
+
+<pre><code>$ sbt assembly
+</code></pre>
+
+<h3>
+<a name="authors" class="anchor" href="#authors"><span class="octicon octicon-link"></span></a>Authors</h3>
+
+<p><a href="http://katjahahn.github.io/">Katja Hahn</a></p>
+
+<h3>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p><a href="https://github.com/katjahahn/PortEx/blob/master/LICENSE">BSD 2-Clause License</a></p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
