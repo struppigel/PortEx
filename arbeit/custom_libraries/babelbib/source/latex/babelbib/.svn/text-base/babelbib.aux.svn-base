@@ -1,0 +1,123 @@
+\relax 
+\catcode`"\active
+\ifx\hyper@anchor\@undefined
+\global \let \oldcontentsline\contentsline
+\gdef \contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global \let \oldnewlabel\newlabel
+\gdef \newlabel#1#2{\newlabelxx{#1}#2}
+\gdef \newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\let \contentsline\oldcontentsline
+\let \newlabel\oldnewlabel}
+\else
+\global \let \hyper@last\relax 
+\fi
+
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\citation{germbib}
+\citation{babel}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}{section.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Usage}{3}{section.2}}
+\newlabel{sec:usage}{{2}{3}{Usage\relax }{section.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Preparing the \texttt  {bib} files}{4}{section.3}}
+\select@language{ngerman}
+\@writefile{toc}{\select@language{ngerman}}
+\@writefile{lof}{\select@language{ngerman}}
+\@writefile{lot}{\select@language{ngerman}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Available bibliography styles}{5}{section.4}}
+\newlabel{sec:styles}{{4}{5}{Available bibliography styles\relax }{section.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Default values for the fonts in bibliographies. If no value is given, the standard font (normally upright roman) is used.}}{6}{table.1}}
+\newlabel{tab:elements}{{1}{6}{Default values for the fonts in bibliographies. If no value is given, the standard font (normally upright roman) is used}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Customisation of the bibliography's typography}{6}{section.5}}
+\newlabel{sec:typography}{{5}{6}{Customisation of the bibliography's typography\relax }{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Names}{7}{subsection.5.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}URL's}{7}{subsection.5.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}ISBN and ISSN}{7}{subsection.5.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Spaces between forenames}{8}{subsection.5.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Edition numbers}{8}{subsection.5.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Printing of month and year}{9}{subsection.5.6}}
+\bibcite{baeker1998a}{1}
+\bibcite{aurenhammer1996a}{2}
+\bibcite{baeker1998a}{1}
+\bibcite{aurenhammer1996a}{2}
+\bibcite{baeker1998a}{1}
+\bibcite{aurenhammer1996a}{2}
+\select@language{ngerman}
+\@writefile{toc}{\select@language{ngerman}}
+\@writefile{lof}{\select@language{ngerman}}
+\@writefile{lot}{\select@language{ngerman}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\select@language{ngerman}
+\@writefile{toc}{\select@language{ngerman}}
+\@writefile{lof}{\select@language{ngerman}}
+\@writefile{lot}{\select@language{ngerman}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\select@language{ngerman}
+\@writefile{toc}{\select@language{ngerman}}
+\@writefile{lof}{\select@language{ngerman}}
+\@writefile{lot}{\select@language{ngerman}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}How to add new languages}{11}{section.6}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Problems and Incompatibilities}{11}{section.7}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}To Do}{11}{section.8}}
+\bibcite{babel}{1}
+\bibcite{germbib}{2}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}The implementation}{12}{section.9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Headings of the files}{12}{subsection.9.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}The package itself}{13}{subsection.9.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}The language definitions}{25}{subsection.9.3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.1}German}{25}{subsubsection.9.3.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.2}Galician}{29}{subsubsection.9.3.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.3}English}{32}{subsubsection.9.3.3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.4}Italian}{36}{subsubsection.9.3.4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.5}Greek}{39}{subsubsection.9.3.5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.6}Norwegian}{42}{subsubsection.9.3.6}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.7}French}{45}{subsubsection.9.3.7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.8}Russian}{49}{subsubsection.9.3.8}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.9}Spanish}{56}{subsubsection.9.3.9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.10}Danish}{59}{subsubsection.9.3.10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.11}Finnish}{62}{subsubsection.9.3.11}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.12}Esperanto}{65}{subsubsection.9.3.12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.13}Portuguese}{69}{subsubsection.9.3.13}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.14}Dutch}{72}{subsubsection.9.3.14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.15}Swedish}{75}{subsubsection.9.3.15}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.16}Afrikaans}{79}{subsubsection.9.3.16}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.17}Bahasa}{82}{subsubsection.9.3.17}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.3.18}Catalan}{85}{subsubsection.9.3.18}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}{\rmfamily  B\kern -.05em\textsc  {i\kern -.025em b}\kern -.08emT\kern -.1667em\lower .7ex\hbox {E}\kern -.125emX}\ style files}{88}{section.10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}``Normal'' {\rmfamily  B\kern -.05em\textsc  {i\kern -.025em b}\kern -.08emT\kern -.1667em\lower .7ex\hbox {E}\kern -.125emX}\ style files}{88}{subsection.10.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.1.1}Generic code}{88}{subsubsection.10.1.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.1.2}Sorted bibliographies}{118}{subsubsection.10.1.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.1.3}Generic code}{125}{subsubsection.10.1.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}AMS styles}{126}{subsection.10.2}}

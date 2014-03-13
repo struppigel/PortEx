@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE entry SYSTEM "../catalogue.dtd">
+<entry id="babelbib" 
+       datestamp="2009/06/23"
+       modifier="h.harders@tu-bs.de">
+  <about>
+    <name>babelbib</name>
+    <caption>Multilingual bibliographies.</caption>
+    <author>
+      <name>Harald Harders</name>
+      <email>h.harders@tu-bs.de</email>
+    </author>
+    <license type="lppl"/>
+    <version>
+      <number>1.28</number>
+    </version>
+  </about>
+  <description>
+    <abstract>
+      This package enables to generate multilingual bibliographies in
+      cooperation with babel. Two approaches are possible: Each citation
+      may be written in another language, or the whole bibliography can 
+      be typeset in a language chosen by the user.
+      In addition, the package supports commands to change the typography
+      of the bibliographies.
+    </abstract>
+  </description>
+  <distribution>
+    <texlive>latex3</texlive>
+    <ctan>biblio/bibtex/contrib/babelbib</ctan>
+  </distribution>
+</entry>

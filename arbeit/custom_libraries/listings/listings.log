@@ -1,0 +1,130 @@
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2009.6.9)  3 NOV 2009 15:34
+entering extended mode
+ %&-line parsing enabled.
+**listings.ins
+(./listings.ins
+LaTeX2e <2005/12/01>
+Babel <v3.8h> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, german, ngerman, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/docstrip.tex
+\blockLevel=\count79
+\emptyLines=\count80
+\processedLines=\count81
+\commentsRemoved=\count82
+\commentsPassed=\count83
+\codeLinesPassed=\count84
+\TotalprocessedLines=\count85
+\TotalcommentsRemoved=\count86
+\TotalcommentsPassed=\count87
+\TotalcodeLinesPassed=\count88
+\NumberOfFiles=\count89
+\inFile=\read1
+\inputcheck=\read2
+\off@0=\count90
+\off@1=\count91
+\off@2=\count92
+\off@3=\count93
+\off@4=\count94
+\off@5=\count95
+\off@6=\count96
+\off@7=\count97
+\off@8=\count98
+\off@9=\count99
+\off@10=\count100
+\off@11=\count101
+\off@12=\count102
+\off@13=\count103
+\off@14=\count104
+\off@15=\count105
+\@maxfiles=\count106
+\@maxoutfiles=\count107
+
+Utility: `docstrip' 2.5d <2005/07/29>
+English documentation    <1999/03/31>
+
+**********************************************************
+* This program converts documented macro-files into fast *
+* loadable files by stripping off (nearly) all comments! *
+**********************************************************
+
+********************************************************
+* No Configuration file found, using default settings. *
+********************************************************
+
+)
+
+Generating file(s) ./listings.sty ./lstmisc.sty ./lstdoc.sty ./lstdrvrs.ins ./l
+istings.cfg 
+\openout0 = `./listings.sty'.
+
+\openout1 = `./lstmisc.sty'.
+
+\openout2 = `./lstdoc.sty'.
+
+
+Processing file listings.dtx (kernel) -> listings.sty
+                             (misc,0.21) -> lstmisc.sty
+                             (doc) -> lstdoc.sty
+File listings.dtx ended by \endinput.
+Lines  processed: 16515
+Comments removed: 11670
+Comments  passed: 11
+Codelines passed: 4737
+
+\openout0 = `./lstdrvrs.ins'.
+
+\openout1 = `./listings.cfg'.
+
+
+Processing file lstdrvrs.dtx (install) -> lstdrvrs.ins
+                             (config) -> listings.cfg
+File lstdrvrs.dtx ended by \endinput.
+Lines  processed: 6377
+Comments removed: 1553
+Comments  passed: 271
+Codelines passed: 4371
+
+(./lstdrvrs.ins
+
+Generating file(s) ./lstlang1.sty ./lstlang2.sty ./lstlang3.sty 
+\openout0 = `./lstlang1.sty'.
+
+\openout1 = `./lstlang2.sty'.
+
+\openout2 = `./lstlang3.sty'.
+
+
+Processing file lstdrvrs.dtx (lang1) -> lstlang1.sty
+                             (lang2) -> lstlang2.sty
+                             (lang3) -> lstlang3.sty
+File lstdrvrs.dtx ended by \endinput.
+Lines  processed: 6377
+Comments removed: 1553
+Comments  passed: 271
+Codelines passed: 4371
+
+)
+*
+* You probably need to move all created `.sty' and `.cfg'
+* files into a directory searched by TeX.
+*
+* And don't forget to refresh your filename database
+* if your TeX distribution uses such a database.
+*
+Overall statistics:
+Files  processed: 3
+Lines  processed: 29269
+Comments removed: 14776
+Comments  passed: 553
+Codelines passed: 13479
+ ) 
+Here is how much of TeX's memory you used:
+ 388 strings out of 95071
+ 4016 string characters out of 1182704
+ 51929 words of memory out of 1500000
+ 3649 multiletter control sequences out of 10000+50000
+ 3640 words of font info for 14 fonts, out of 1200000 for 2000
+ 28 hyphenation exceptions out of 8191
+ 14i,0n,16p,287b,175s stack positions out of 5000i,500n,6000p,200000b,5000s
+
+No pages of output.

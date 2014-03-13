@@ -1,0 +1,131 @@
+% todonotes.sty
+% ====================
+% Part: Identification
+% ====================
+\ProvidesPackage{todonotes}[2008/05/15]
+
+
+% ==============================
+% Part: The package loading part
+% ==============================
+% Loads the packages that todonotes depends on.
+\RequirePackage{ifthen}
+\RequirePackage{xkeyval}
+\RequirePackage{hyperref}
+\RequirePackage{tikz}
+\RequirePackage{calc}
+
+
+% ==================
+% Part: Initial code
+% ==================
+% Here the default values are set
+\newcommand{\@backgroundcolor}{orange}
+\newcommand{\@bordercolor}{black}
+\newcommand{\@textwidth}{3cm}
+
+
+% ================================
+% Part: The declaration of options
+% ================================
+% In this part the various options for
+% the package are defined.
+
+% Make it possible to disable the functionality
+% of the package. If this option is given, the
+% commands \todo{} and \listoftodos are defined
+% as commands with no effect. (But you can still
+% compile you document with these commands).
+\newif{\ifdisabled}
+\DeclareOptionX{disable}{\disabledtrue}
+
+% The default style behaves bad when compiled
+% with latex (some text placement problems).
+% The dvistyle option, changes the visual behavior
+% to avoid this text placement problem.
+\newif{\ifdviStyle}
+\DeclareOptionX{dvistyle}{\dviStyletrue}
+
+% Make the background color of the notes as
+% an option.
+\define@key{todonotes.sty}%
+{color}{\renewcommand{\@backgroundcolor}{#1}}
+
+% Make the color of the notes box color as
+% an option.
+\define@key{todonotes.sty}%
+{bordercolor}{\renewcommand{\@bordercolor}{#1}}
+
+% Make the text width as an option.
+\define@key{todonotes.sty}%
+{textwidth}{\renewcommand{\@textwidth}{#1}}
+
+% Finally process the given options.
+\ProcessOptionsX
+
+
+% ========================
+% Part: The main code part
+% ========================
+\ifdisabled
+% If the option "disable" was passed to the package
+% define two empty commands.
+\newcommand{\listoftodos}{}
+\newcommand{\todo}{}
+\else
+% Define the list of todos command
+\newcommand{\listoftodos}
+{\section*{Todo list} \@starttoc{tdo}}
+\newcommand{\l@todo}
+{\@dottedtocline{1}{0em}{2.3em}}
+
+% Define styles used by the todo command
+\tikzstyle{notestyle} = [
+draw=\@bordercolor,
+line width=0.5pt,
+ fill=\@backgroundcolor,
+text width = \@textwidth - 1.6 ex - 1pt,
+inner sep = 0.8 ex]
+\tikzstyle{notestyleleft} = [notestyle]
+\tikzstyle{connectstyle} = [
+draw = \@backgroundcolor,
+thick]
+
+% Define the todo command
+\newcommand{\todo}[1]{%
+% Add to todo list
+\addcontentsline{tdo}{todo}{\protect{#1}}%
+%
+% Remember where we are
+\begin{tikzpicture}[remember picture, baseline=-0.75ex]%
+\node [coordinate] (inText) {};%
+\end{tikzpicture}%
+%
+% Make the margin par
+\marginpar {% Draw note in right margin
+\ifdviStyle%
+% Using dviStyle
+\tikz[remember picture] \draw node[notestyle] {}; \\ %
+\begin{minipage}{\@textwidth}%
+#1%
+\end{minipage} \\%
+\tikz[remember picture] \draw node[notestyle] (inNote) {};%
+\begin{tikzpicture}[remember picture, overlay]%
+\draw[connectstyle]%
+ ([yshift=-0.2cm] inText)%
+  -| ([xshift=-0.2cm] inNote.west)%
+  -| (inNote.west);%
+\end{tikzpicture}%
+\else%
+% Using normal style (non dviStyle)
+\tikz[remember picture] \draw node[notestyle] (inNote) {#1};%
+\begin{tikzpicture}[remember picture, overlay]%
+\draw[connectstyle]%
+ ([yshift=-0.2cm] inText)%
+  -| ([xshift=-0.2cm] inNote.west)%
+  -| (inNote.west);%
+\end{tikzpicture}%
+\fi % Ending \ifdviStyle
+}%
+}%
+\fi % Ending \ifdisabled

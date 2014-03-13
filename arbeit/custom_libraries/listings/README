@@ -1,0 +1,13 @@
+Listings package
+Copyright 1996--2004 Carsten Heinz (the package)
+Copyright 1996--2007 individual authors (language drivers)
+Copyright 2006--2007 Brooks Moses (continued maintenance)
+Released under the LaTeX Project Public License 1.3 or later
+
+The `listings' package is a source code printer for LaTeX.
+You can typeset stand alone files as well as listings with
+an environment similar to `verbatim' as well as you can
+print code snippets using a command similar to \verb'.
+Many parameters control the output and if your preferred
+programming language isn't already supported, you can make
+your own definition.

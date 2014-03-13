@@ -18,3 +18,11 @@ dependency-reduced-pom.xml
 project/project/*
 project/target/*
 *~
+*.aux
+# TODO temporary stuff, include later #
+arbeit/.svn
+arbeit/graphics
+arbeit/listings
+arbeit/appendix
+arbeit/dia1
+arbeit/cip.tex

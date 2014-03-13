@@ -1,0 +1,48 @@
+%%
+%% This file generates files required to use the listings package.
+%% At your command prompt write
+%%
+%%     tex listings.ins
+%%
+%%
+%% (w)(c) 1996--1999,2002--2004 Carsten Heinz
+%%
+%% This file is distributed under the terms of the LaTeX Project Public
+%% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+%% Either version 1.3 or, at your option, any later version.
+%%
+\input docstrip
+\preamble
+\endpreamble
+
+\usedir{tex/latex/listings}
+\keepsilent
+\askforoverwritefalse
+
+
+%
+% generate base package
+%
+\generate{
+    \file{listings.sty}{\from{listings.dtx}{kernel}}
+    \file{lstmisc.sty}{\from{listings.dtx}{misc,0.21}}
+    \file{lstdoc.sty}{\from{listings.dtx}{doc}}
+    \file{lstdrvrs.ins}{\from{lstdrvrs.dtx}{install}}
+    \file{listings.cfg}{\from{lstdrvrs.dtx}{config}}
+}
+
+%
+% generate language driver files
+%
+\batchinput{lstdrvrs.ins}
+
+
+\Msg{*}
+\Msg{* You probably need to move all created `.sty' and `.cfg'}
+\Msg{* files into a directory searched by TeX.}
+\Msg{*}
+\Msg{* And don't forget to refresh your filename database}
+\Msg{* if your TeX distribution uses such a database.}
+\Msg{*}
+
+\endbatchfile

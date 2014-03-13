@@ -1,0 +1,15 @@
+% makeindex style file created by LaTeX for document "arbeit" on 2014-3-13
+keyword "\\glossaryentry"
+preamble "\\begin{theglossary}"
+postamble "\n\\end{theglossary}\n"
+group_skip "\\gloskip "
+item_0 "\n\n\\gloitem "
+delim_0 "\n\\glodelim "
+page_compositor "-"
+delim_n "\\delimN "
+delim_r "\\delimR "
+delim_t "\\delimT "
+headings_flag 1
+heading_prefix "\\glogroup"
+symhead_positive "Symbols"
+numhead_positive "Numbers"

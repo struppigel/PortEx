@@ -1,0 +1,42 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{Usage}{}
+\BOOKMARK [1][-]{section.3}{Preparing the bib files}{}
+\BOOKMARK [1][-]{section.4}{Available bibliography styles}{}
+\BOOKMARK [1][-]{section.5}{Customisation of the bibliography's typography}{}
+\BOOKMARK [2][-]{subsection.5.1}{Names}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{URL's}{section.5}
+\BOOKMARK [2][-]{subsection.5.3}{ISBN and ISSN}{section.5}
+\BOOKMARK [2][-]{subsection.5.4}{Spaces between forenames}{section.5}
+\BOOKMARK [2][-]{subsection.5.5}{Edition numbers}{section.5}
+\BOOKMARK [2][-]{subsection.5.6}{Printing of month and year}{section.5}
+\BOOKMARK [1][-]{section.6}{How to add new languages}{}
+\BOOKMARK [1][-]{section.7}{Problems and Incompatibilities}{}
+\BOOKMARK [1][-]{section.8}{To Do}{}
+\BOOKMARK [1][-]{section.9}{The implementation}{}
+\BOOKMARK [2][-]{subsection.9.1}{Headings of the files}{section.9}
+\BOOKMARK [2][-]{subsection.9.2}{The package itself}{section.9}
+\BOOKMARK [2][-]{subsection.9.3}{The language definitions}{section.9}
+\BOOKMARK [3][-]{subsubsection.9.3.1}{German}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.2}{Galician}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.3}{English}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.4}{Italian}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.5}{Greek}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.6}{Norwegian}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.7}{French}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.8}{Russian}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.9}{Spanish}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.10}{Danish}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.11}{Finnish}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.12}{Esperanto}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.13}{Portuguese}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.14}{Dutch}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.15}{Swedish}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.16}{Afrikaans}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.17}{Bahasa}{subsection.9.3}
+\BOOKMARK [3][-]{subsubsection.9.3.18}{Catalan}{subsection.9.3}
+\BOOKMARK [1][-]{section.10}{BibT.7exEX style files}{}
+\BOOKMARK [2][-]{subsection.10.1}{``Normal'' BibT.7exEX style files}{section.10}
+\BOOKMARK [3][-]{subsubsection.10.1.1}{Generic code}{subsection.10.1}
+\BOOKMARK [3][-]{subsubsection.10.1.2}{Sorted bibliographies}{subsection.10.1}
+\BOOKMARK [3][-]{subsubsection.10.1.3}{Generic code}{subsection.10.1}
+\BOOKMARK [2][-]{subsection.10.2}{AMS styles}{section.10}

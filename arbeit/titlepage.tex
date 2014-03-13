@@ -1,0 +1,51 @@
+\thispagestyle{empty}
+
+\newlength{\oldtextwidth}		\setlength{\oldtextwidth}{\textwidth}
+\newlength{\oldmarginparwidth}	\setlength{\oldmarginparwidth}{\marginparwidth}
+\newlength{\oldparskip}			\setlength{\oldparskip}{\parskip}
+\newlength{\oldparindent}		\setlength{\oldparindent}{\parindent}
+\newlength{\oldhoffset}			\setlength{\oldhoffset}{\hoffset}
+
+%\addtolength{\textwidth}{3cm}
+%\setlength{\textwidth}{7in}
+%\addtolength{\marginparwidth}{-1.5cm}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+%\setlength{\hoffset}{-1in}
+
+\begin{titlepage}
+%	\begin{minipage}{0.3\textwidth}
+%		\begin{flushleft}
+%			\includegraphics[width=\textwidth]{ipoque-logo}
+%		\end{flushleft}
+%	\end{minipage}
+	\hfill{}
+	\begin{minipage}{0.3\textwidth}
+		\begin{flushright}
+			\includegraphics[width=\textwidth]{HTWK-Logo}\\[0cm]
+		\end{flushright}
+	\end{minipage}
+	\vspace{1cm}
+	\begin{center}
+		\rule{\textwidth}{1.5pt}\\[0.5cm]
+		{\Huge\bfseries Library for Statical Analysis of PE Malware}\\[0.5cm]
+		\rule{\textwidth}{1.5pt}\\[1cm]
+		{\Large by Katja Hahn}\\[1cm]
+		{\Huge Master Thesis}\\[1cm]
+		%{\Large at}\\[0.5cm]
+		{\Large HTWK Leipzig}\\[0.75cm]
+		{\Large Fakultät Informatik, Mathematik und Naturwissenschaften}\\[2cm]
+	\end{center}
+	\begin{tabbing}
+		Zweitgutachterasdfasdf\=\kill
+		{\bfseries First Assessor}: \>Prof. Dr. rer. nat. habil. Michael Frank (HTWK Leipzig)\\[0cm]
+		{\bfseries Second Assessor}: \>Max Mustermann\\[1cm]
+	\end{tabbing}
+	\centering{Leipzig, September 2014}
+\end{titlepage}
+
+\setlength{\textwidth}{\oldtextwidth}
+\setlength{\marginparwidth}{\oldmarginparwidth}
+\setlength{\parskip}{\oldparskip}
+\setlength{\parindent}{\oldparindent}
+\setlength{\hoffset}{\oldhoffset}
