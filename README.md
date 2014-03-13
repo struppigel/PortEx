@@ -17,7 +17,7 @@ PortEx is written in Java and Scala, but targeted for Java applications.
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki/Getting-Started) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
-### Version information
+### Version Information
 
 The current version is not even Alpha yet, which is the reason that there are no binaries provided by now. However you can build the current source.
 
@@ -43,7 +43,7 @@ For a fat jar:
 $ sbt assembly
 ```
 
-### Authors
+### Author
 [Katja Hahn](http://katjahahn.github.io/)
 
 ### License
