@@ -1,0 +1,28 @@
+1. Introduction                   
+2. Malware Classification 5%
+  - backdoor, botnet, downloader, information stealer, scareware, launcher, rootkit, spammer, worm, virus
+3. Detection by Antivirus Software 5% 
+  --> necessary to understand the hiding mechanisms of malware
+  - heuristics
+4. Malware Obfuscation 15%
+  - how malware hides from users, antivirus software and reverse engineering tools
+  - packer (crypter, binder, compressor, protector)
+5. Malware Analysis 15%
+  - static and dynamic analysis
+  - goals of malware analysis
+  - tools and techniques
+6. Static Analysis Library 30%
+  - explanation of the functionality, implementation and usage
+7. Evaluation
+  - show the quality and correct functionality:
+    - tests with actual malware
+    - library usability, code quality
+8. Comparison to other Tools and Libraries
+8. Summary and Conclusion
+
+--------------------------------------------------------------
+Introduction: 5%
+Theoretical part (chapter 2-5): 40%
+Implementation (chapter 6): 35%
+Evaluation and Comparison (chapter 7-9): 15%
+Conclusion (chapter 9): 5%
