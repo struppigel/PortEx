@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  14 MAR 2014 11:33
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  14 MAR 2014 12:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1099,12 +1099,15 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \tf@lot=\write11
 \openout11 = `arbeit.lot'.
 
- (./arbeit.acn) [3
+ (./arbeit.acn [3
 
-] [4]
+]) [4
+
+] [5]
 \openout2 = `introduction.aux'.
 
- (./introduction.tex
+
+(./introduction.tex
 Chapter 1.
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
@@ -1129,7 +1132,7 @@ l.22
  (./theory.tex
 Chapter 2.
 Package hyperref Info: bookmark level for unknown definition defaults to 0 on i
-nput line 8.
+nput line 4.
 ) [4
 
 
@@ -1173,15 +1176,15 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 173.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 173.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 173.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: C19CAAC8649118251099C2D241DDA925;432.
+(rerunfilecheck)             Checksum: E5EBB4EE5192FEB176FE1FD0379439B3;432.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 173.
  ) 
 Here is how much of TeX's memory you used:
- 20898 strings out of 494979
- 356354 string characters out of 6179171
- 481467 words of memory out of 5000000
- 23372 multiletter control sequences out of 15000+600000
- 56550 words of font info for 247 fonts, out of 8000000 for 9000
+ 20934 strings out of 494979
+ 356639 string characters out of 6179171
+ 481495 words of memory out of 5000000
+ 23383 multiletter control sequences out of 15000+600000
+ 58280 words of font info for 265 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,7n,59p,927b,391s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
@@ -1193,10 +1196,10 @@ t/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmsl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
 amsfonts/cm/cmti10.pfb>
-Output written on arbeit.pdf (15 pages, 162565 bytes).
+Output written on arbeit.pdf (16 pages, 165918 bytes).
 PDF statistics:
- 168 PDF objects out of 1000 (max. 8388607)
- 139 compressed objects within 2 object streams
- 30 named destinations out of 1000 (max. 500000)
+ 178 PDF objects out of 1000 (max. 8388607)
+ 148 compressed objects within 2 object streams
+ 34 named destinations out of 1000 (max. 500000)
  44114 words of extra memory for PDF output out of 51595 (max. 10000000)
 
