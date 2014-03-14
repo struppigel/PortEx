@@ -22,14 +22,6 @@
 %\usepackage{syntonly}
 %\syntaxonly
 
-\usepackage[final,
-	colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,urlcolor=black,
-			% it's actually a bit silly... in order to remove the ugly boxes we first create colored links and then color them black
-	pdfpagelayout=TwoPageRight,					% corresponds to "Show Cover Page During Two-Up" option in acrobat
-	pdftitle={Library for Statical Analysis of PE Malware},
-	pdfauthor={Katja Hahn}
-]{hyperref}
-
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman, english]{babel}
 %\usepackage{bibgerm}							% for german BibTeX styles
@@ -97,6 +89,14 @@
 \clubpenalty10000
 \widowpenalty10000
 
+\usepackage[final,
+	colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,urlcolor=black,
+			% it's actually a bit silly... in order to remove the ugly boxes we first create colored links and then color them black
+	pdfpagelayout=TwoPageRight,					% corresponds to "Show Cover Page During Two-Up" option in acrobat
+	pdftitle={Library for Statical Analysis of PE Malware},
+	pdfauthor={Katja Hahn}
+]{hyperref}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
@@ -121,17 +121,18 @@
 
 \input{glossary}
 %\shorttableofcontents{Inhaltsübersicht}{0}		% short toc with chapters only
-\tableofcontents \newpage	%newpage repairs the wrong counting in table of contents
+\cleardoublepage \phantomsection
+\tableofcontents	%newpage repairs the wrong counting in table of contents
 \pagenumbering{roman}
-\addcontentsline{toc}{chapter}{Abbildungsverzeichnis}
-\listoffigures \newpage
-\addcontentsline{toc}{chapter}{Tabellenverzeichnis}
-\listoftables \newpage
+\listoffigures 
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoftables 
+\addcontentsline{toc}{chapter}{List of Tables}
 %\lstlistoflistings
 
 %\addcontentsline{toc}{chapter}{\glossaryname}
 %\printglossary
-\addcontentsline{toc}{chapter}{\acronymname}
+\addcontentsline{toc}{chapter}{Acronyms}
 \printacronym
 
 \setlength{\parindent}{0pt}
@@ -143,6 +144,7 @@
 \pagenumbering{arabic}
 
 \include{introduction}
+\include{theory}
 \include{cip}
 
 \appendix
@@ -150,6 +152,7 @@
 %\includepdfset{pagecommand={\thispagestyle{headings}}}
 %\includepdf[pages={1,2}, addtotoc={1,chapter,0,Präzisierungen zu den CIP-Reports,chap:app_reports},  scale=0.9]{appendix/cipreports.pdf}  
 
+\cleardoublepage \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
 %\addcontentsline{toc}{chapter}{Index}
 %\printindex\todo{overfull hboxes prüfen und bei Bedarf manuell umbrechen}
@@ -160,11 +163,11 @@
 %\bibliographystyle{natdin}
 \bibliography{references}
 
-Alle Weblinks wurden zuletzt am 21. September 2011 abgerufen.
+%Alle Weblinks wurden zuletzt am 21. September 2011 abgerufen.
 
 \newpage
 \pagestyle{empty}
-\cleardoublepage
+\cleardoublepage \phantomsection
 \include{statement}
 
 \end{document}
