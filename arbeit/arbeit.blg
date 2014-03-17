@@ -3,14 +3,19 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: arbeit.aux
 A level-1 auxiliary file: titlepage.aux
 A level-1 auxiliary file: introduction.aux
-A level-1 auxiliary file: theory.aux
+A level-1 auxiliary file: classification.aux
+A level-1 auxiliary file: av.aux
+A level-1 auxiliary file: hiding.aux
+A level-1 auxiliary file: analysis.aux
+A level-1 auxiliary file: portex.aux
+A level-1 auxiliary file: evaluation.aux
 A level-1 auxiliary file: cip.aux
 The style file: gerplain.bst
 A level-1 auxiliary file: statement.aux
 Database file #1: references.bib
 You've used 1 entry,
             2343 wiz_defined-function locations,
-            552 strings with 4762 characters,
+            557 strings with 4822 characters,
 and the built_in function-call counts, 247 in all, are:
 = -- 21
 > -- 7

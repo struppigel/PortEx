@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  17 MAR 2014 09:06
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  17 MAR 2014 13:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1097,7 +1097,7 @@ LaTeX Info: Redefining \nameref on input line 102.
 \oldparindent=\skip69
 \oldhoffset=\skip70
 
-<graphics/HTWK-Logo.pdf, id=58, 397.485pt x 206.7725pt>
+<graphics/HTWK-Logo.pdf, id=59, 397.485pt x 206.7725pt>
 File: graphics/HTWK-Logo.pdf Graphic file (type pdf)
 
 <use graphics/HTWK-Logo.pdf>
@@ -1133,11 +1133,13 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \tf@lot=\write11
 \openout11 = `arbeit.lot'.
 
- (./arbeit.acn [3
+ [3
 
-]) [4
+] [4
 
-] [5]
+] (./arbeit.acn) [5
+
+] [6]
 \openout2 = `introduction.aux'.
 
 
@@ -1222,7 +1224,7 @@ Chapter 7.
  (./cip.tex
 Chapter 8.
 )
-Overfull \hbox (5.22127pt too wide) in paragraph at lines 5--153
+Overfull \hbox (5.22127pt too wide) in paragraph at lines 5--154
 \T1/aer/m/n/10 (-20) soll mit Hilfe eines Berichtssys-tems er-le-ichtert wer-de
 n. Dazu gehört die Möglichkeit,|
  []
@@ -1233,7 +1235,7 @@ n. Dazu gehört die Möglichkeit,|
 
 ]
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 153.
+ine 154.
 
 
 LaTeX Warning: Marginpar on page 11 moved.
@@ -1255,22 +1257,22 @@ LaTeX Warning: Marginpar on page 11 moved.
 \tf@thm=\write12
 \openout12 = `arbeit.thm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 178.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 178.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 179.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 179.
  (./arbeit.aux
 (./titlepage.aux) (./introduction.aux) (./classification.aux) (./av.aux)
 (./hiding.aux) (./analysis.aux) (./portex.aux) (./evaluation.aux) (./cip.aux)
 (./statement.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 178.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 178.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 179.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 179.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: 02D2D33443547671A4DB4996CB8C9115;722.
+(rerunfilecheck)             Checksum: 27F78868A435D8472A98F93A54F16881;731.
  ) 
 Here is how much of TeX's memory you used:
- 21930 strings out of 494979
- 371149 string characters out of 6179171
- 509467 words of memory out of 5000000
- 24309 multiletter control sequences out of 15000+600000
+ 21933 strings out of 494979
+ 371180 string characters out of 6179171
+ 509461 words of memory out of 5000000
+ 24310 multiletter control sequences out of 15000+600000
  58960 words of font info for 271 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,74p,927b,656s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1283,10 +1285,10 @@ t/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmsl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
 amsfonts/cm/cmti10.pfb>
-Output written on arbeit.pdf (22 pages, 171922 bytes).
+Output written on arbeit.pdf (23 pages, 172003 bytes).
 PDF statistics:
- 233 PDF objects out of 1000 (max. 8388607)
- 197 compressed objects within 2 object streams
- 46 named destinations out of 1000 (max. 500000)
+ 239 PDF objects out of 1000 (max. 8388607)
+ 201 compressed objects within 3 object streams
+ 48 named destinations out of 1000 (max. 500000)
  44154 words of extra memory for PDF output out of 51595 (max. 10000000)
 
