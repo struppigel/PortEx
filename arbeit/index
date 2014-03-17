@@ -4,7 +4,7 @@
 3. Detection by Antivirus Software 5% 
   --> necessary to understand the hiding mechanisms of malware
   - heuristics
-4. Malware Obfuscation 15%
+4. Malware Hiding Techniques 15%
   - how malware hides from users, antivirus software and reverse engineering tools
   - packer (crypter, binder, compressor, protector)
 5. Malware Analysis 15%

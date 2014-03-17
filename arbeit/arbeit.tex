@@ -79,7 +79,7 @@
 \usepackage
 	[draft=false]
 	{microtype}									% some improvements, avoids some overfulls and probably more
-
+\usepackage{csquotes}
 \usepackage{custom_definitions}
 
 %\usepackage{shorttoc}							% for \shorttableofcontents
@@ -144,8 +144,13 @@
 \pagenumbering{arabic}
 
 \include{introduction}
-\include{theory}
-\include{cip}
+\include{classification}
+\include{av}
+\include{hiding}
+\include{analysis}
+\include{portex}
+\include{evaluation}
+\include{cip} \todo{remove}
 
 \appendix
 %\include{dvd}
@@ -155,7 +160,7 @@
 \cleardoublepage \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
 %\addcontentsline{toc}{chapter}{Index}
-%\printindex\todo{overfull hboxes prüfen und bei Bedarf manuell umbrechen}
+%\printindex
 
 \bibliographystyle{gerplain}
 %\bibliographystyle{plain}
