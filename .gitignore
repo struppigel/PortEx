@@ -19,6 +19,7 @@ project/project/*
 project/target/*
 *~
 *.aux
+BinaryCollection/*
 # TODO temporary stuff, include later #
 arbeit/.svn
 arbeit/graphics
