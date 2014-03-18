@@ -54,9 +54,33 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 <p>The current version is not even Alpha yet, which is the reason that there are no binaries provided by now. However you can build the current source.</p>
 
 <h3>
-<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Build</h3>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Building Portex</h3>
+
+<h4>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Requirements</h4>
 
 <p>PortEx is build with <a href="http://www.scala-sbt.org">sbt</a></p>
+<p>You also need <a href="https://maven.apache.org/">Maven</a></p>
+
+<h4>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Setup Third Party Libraries</h4>
+
+<p>(Note: This process will be simplified when PortEx is in Alpha)</p>
+
+<p>Download <a href="https://github.com/kdkanishka/Virustotal-Public-API-V2.0-Client/archive/master.zip">VirusTotalPublic</a></p>
+
+<p>Extract the file and navigate to the <i>Virustotal-Public-API-V2.0-Client-master</i> folder. Build the jar with:</p>
+
+<pre><code>$ mvn clean install -DskipTests
+</code></pre>
+
+<p>Then publish it to your local Maven repository:</p>
+
+<pre><code>$ mvn install:install-file -Dfile=target/VirustotalPublicV2.0.0-1.1-GA.jar -DpomFile=pom.xml
+</code></pre>
+
+<h4>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Compile and Build with sbt</h4>
 
 <p>To simply compile the project invoke:</p>
 
@@ -68,10 +92,26 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 <pre><code>$ sbt package
 </code></pre>
 
-<p>For a fat jar:</p>
+<p>For a fat jar (not recommended):</p>
 
 <pre><code>$ sbt assembly
 </code></pre>
+
+<h4>
+<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Create Eclipse Project</h4>
+
+<p>You can create an eclipse project by using the sbteclipse plugin.
+Add the following line to <i>project/plugins.sbt</i>:</p>
+
+<pre><code>addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.4.0")
+</code></pre>
+
+<p>Generate the project files for Eclipse:</p>
+
+<pre><code>$ sbt eclipse
+</code></pre>
+
+<p>Import the project to Eclipse via the <i>Import Wizard</i>.</p>
 
 <h3>
 <a name="authors" class="anchor" href="#authors"><span class="octicon octicon-link"></span></a>Authors</h3>
