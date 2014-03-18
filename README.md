@@ -25,7 +25,7 @@ The current version is not even Alpha yet, which is the reason that there are no
 
 #### Requirements
 
-PortEx is build with [sbt](http://www.scala-sbt.org)
+PortEx is build with [sbt](http://www.scala-sbt.org)  
 You also need [Maven](https://maven.apache.org/)
 
 #### Setup Third Party Libraries
@@ -37,13 +37,13 @@ Download [VirusTotalPublic](https://github.com/kdkanishka/Virustotal-Public-API-
 Extract the file and navigate to the *Virustotal-Public-API-V2.0-Client-master* folder. Build the jar with:
 
 ```
-mvn clean install -DskipTests
+$ mvn clean install -DskipTests
 ```
 
 Then publish it to your local Maven repository:
 
 ```
-mvn install:install-file -Dfile=target/VirustotalPublicV2.0.0-1.1-GA.jar -DpomFile=pom.xml
+$ mvn install:install-file -Dfile=target/VirustotalPublicV2.0.0-1.1-GA.jar -DpomFile=pom.xml
 ```
 
 #### Compile and Build With sbt
