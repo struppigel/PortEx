@@ -1,21 +1,28 @@
-package com.github.katjahahn.tools
+package com.github.katjahahn.tools.sigscanner
 
 import java.io.File
 import java.io.RandomAccessFile
-import java.nio.charset.CodingErrorAction
+import java.nio.charset.CodingE
+rrorAction
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ Map, ListBuffer }
-import scala.io.Codec
-import com.github.katjahahn.PEData
+import scal
+a.io.Codec
 import com.github.katjahahn.PELoader
 import com.github.katjahahn.optheader.StandardFieldEntryKey._
 import com.github.katjahahn.sections.SectionLoader
-import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.sections.SectionTableEntryKey
 import Signature._
 import SignatureScanner._
-import com.github.katjahahn.FileFormatException
+import com.github.katjahahn.Fimport com.github.katjahahn.tools.sigscanner.MatchedSignature;
+
+ileFormatException
+import com.github.katjahah
+n.tools.MatchedSignature
+import com.github.katjaimport com.github.katjahahn.tools.sigscanner.Signature
+hahn.tools.Signature
+import com.github.katjahahn.tools.SignatureTree
 
 /**
  * Scans PE files for compiler and packer signatures.
@@ -77,7 +84,7 @@ class SignatureScanner(signatures: List[Signature]) {
   }
   
   /**
-   * Searches for matches in the whole file using ep_only false signatures.
+   * Searches for matches in the whole file uscom.github.katjahahn.tools.sigscanner.se signatures.
    *
    * @param file to search for signatures
    */
@@ -101,7 +108,7 @@ class SignatureScanner(signatures: List[Signature]) {
 
   /**
    * Searches for matches only at the entry point and only using signatures that
-   * are specified to be checked for at ep_only.
+   * are specifiecom.github.katjahahn.tools.sigscanner. for at ep_only.
    *
    * @param file to search for signatures
    */

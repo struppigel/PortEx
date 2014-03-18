@@ -1,4 +1,4 @@
-package com.github.katjahahn.tools
+package com.github.katjahahn.tools.sigscanner
 
 import java.io.File
 import java.io.FileOutputStream
@@ -10,6 +10,8 @@ import scala.collection.mutable.ListBuffer
 import java.io.FileNotFoundException
 import java.io.EOFException
 import scala.collection.JavaConverters._
+import com.github.katjahahn.tools.SignatureScanner
+import com.github.katjahahn.tools.sigscanner.SignatureScanner
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for

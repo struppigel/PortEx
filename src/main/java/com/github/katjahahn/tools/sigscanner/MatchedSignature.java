@@ -1,4 +1,4 @@
-package com.github.katjahahn.tools;
+package com.github.katjahahn.tools.sigscanner;
 
 public class MatchedSignature {
 	

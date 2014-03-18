@@ -2,6 +2,7 @@ package com.github.katjahahn.tools
 
 import scala.collection.mutable.MutableList
 import PartialFunction._
+import com.github.katjahahn.tools.sigscanner.Signature
 
 /**
  * A mutable prefix tree for byte signatures. Provides a fast way to match a byte

@@ -1,6 +1,7 @@
-package com.github.katjahahn.tools
+package com.github.katjahahn.tools.sigscanner
 
 import Signature._
+import scala.Array.canBuildFrom
 
 /**
  * @author Katja Hahn
