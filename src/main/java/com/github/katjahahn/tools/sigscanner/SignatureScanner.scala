@@ -2,27 +2,20 @@ package com.github.katjahahn.tools.sigscanner
 
 import java.io.File
 import java.io.RandomAccessFile
-import java.nio.charset.CodingE
-rrorAction
+import java.nio.charset.CodingErrorAction
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ Map, ListBuffer }
-import scal
-a.io.Codec
+import scala.io.Codec
+import com.github.katjahahn.PEData
 import com.github.katjahahn.PELoader
 import com.github.katjahahn.optheader.StandardFieldEntryKey._
 import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.sections.SectionTableEntryKey
 import Signature._
 import SignatureScanner._
-import com.github.katjahahn.Fimport com.github.katjahahn.tools.sigscanner.MatchedSignature;
-
-ileFormatException
-import com.github.katjahah
-n.tools.MatchedSignature
-import com.github.katjaimport com.github.katjahahn.tools.sigscanner.Signature
-hahn.tools.Signature
-import com.github.katjahahn.tools.SignatureTree
+import com.github.katjahahn.FileFormatException
 
 /**
  * Scans PE files for compiler and packer signatures.

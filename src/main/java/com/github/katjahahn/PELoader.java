@@ -9,7 +9,7 @@ import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.tools.Jar2ExeScanner;
+import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every

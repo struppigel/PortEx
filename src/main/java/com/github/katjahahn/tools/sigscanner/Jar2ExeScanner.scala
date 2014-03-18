@@ -4,14 +4,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.util.zip.ZipInputStream
-import com.github.katjahahn.tools.SignatureScanner._
 import java.nio.channels.Channels
 import scala.collection.mutable.ListBuffer
 import java.io.FileNotFoundException
 import java.io.EOFException
 import scala.collection.JavaConverters._
-import com.github.katjahahn.tools.SignatureScanner
-import com.github.katjahahn.tools.sigscanner.SignatureScanner
+import SignatureScanner._
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for
