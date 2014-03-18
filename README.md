@@ -14,6 +14,8 @@ PortEx is written in Java and Scala, but targeted for Java applications.
 * Reading Standard Section Formats: Import Section, Resource Section
 * Scan for PEiD userdb signatures
 * Scan for jar2exe or class2exe wrappers
+* Scan for Unicode and ASCII strings contained in the file
+* Get a Virustotal report
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki/Getting-Started) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
