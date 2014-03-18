@@ -21,9 +21,32 @@ For more information have a look at [PortEx Wiki](https://github.com/katjahahn/P
 
 The current version is not even Alpha yet, which is the reason that there are no binaries provided by now. However you can build the current source.
 
-### Build
+### Building PortEx
+
+#### Requirements
 
 PortEx is build with [sbt](http://www.scala-sbt.org)
+You also need [Maven](https://maven.apache.org/)
+
+#### Setup Third Party Libraries
+
+(Note: This process will be simplified when PortEx is in Alpha)
+
+Download [VirusTotalPublic](https://github.com/kdkanishka/Virustotal-Public-API-V2.0-Client/archive/master.zip)
+
+Extract the file and navigate to the *Virustotal-Public-API-V2.0-Client-master* folder. Build the jar with:
+
+```
+mvn clean install -DskipTests
+```
+
+Then publish it to your local Maven repository:
+
+```
+mvn install:install-file -Dfile=target/VirustotalPublicV2.0.0-1.1-GA.jar -DpomFile=pom.xml
+```
+
+#### Compile and Build With sbt
 
 To simply compile the project invoke:
 
@@ -43,9 +66,10 @@ For a fat jar (not recommended):
 $ sbt assembly
 ```
 
-### Create Eclipse Project
+#### Create Eclipse Project
 
-Add the following line to project/plugins.sbt
+You can create an eclipse project by using the sbteclipse plugin.
+Add the following line to *project/plugins.sbt*:
 
 ```
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.4.0")
@@ -57,7 +81,7 @@ Generate the project files for Eclipse:
 $ sbt eclipse
 ```
 
-Import the project to Eclipse via the Import Wizard.
+Import the project to Eclipse via the *Import Wizard*.
 
 ### Author
 [Katja Hahn](http://katjahahn.github.io/)
