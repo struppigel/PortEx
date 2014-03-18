@@ -37,11 +37,27 @@ To create a jar:
 $ sbt package
 ```
 
-For a fat jar:
+For a fat jar (not recommended):
 
 ```
 $ sbt assembly
 ```
+
+### Create Eclipse Project
+
+Add the following line to project/plugins.sbt
+
+```
+addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.4.0")
+```
+
+Generate the project files for Eclipse:
+
+```
+$ sbt eclipse
+```
+
+Import the project to Eclipse via the Import Wizard.
 
 ### Author
 [Katja Hahn](http://katjahahn.github.io/)
