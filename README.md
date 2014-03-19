@@ -89,4 +89,4 @@ Import the project to Eclipse via the *Import Wizard*.
 [Katja Hahn](http://katjahahn.github.io/)
 
 ### License
-[BSD 2-Clause License](https://github.com/katjahahn/PortEx/blob/master/LICENSE)
+[Apache License, Version 2.0](https://github.com/katjahahn/PortEx/blob/master/LICENSE)
