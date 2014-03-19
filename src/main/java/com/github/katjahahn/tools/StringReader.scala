@@ -19,7 +19,7 @@ import scala.collection.JavaConverters._
 object StringReader {
 
   def main(args: Array[String]): Unit = {
-    println(readStrings(new File("BinaryCollection/Chapter_3L/Lab03-01.exe"), 4))
+    println(readStrings(new File("BinaryCollection/Chapter_3L/Lab03-01.exe"), 4).asScala.mkString("\n"))
   }
 
   /**
@@ -45,15 +45,15 @@ object StringReader {
    */
   private def bytesToASCIIStrings(bytes: Stream[Byte], minLength: Int): List[String] = {
     def isASCIIPrintable(ch: Byte) = ch.toInt >= 32 && ch.toInt < 127
-    var list = ListBuffer.empty[String]
+    val list = ListBuffer.empty[String]
     var stream = bytes
     while (!stream.isEmpty) {
       stream = stream.dropWhile(!isASCIIPrintable(_))
       val el = stream.takeWhile(isASCIIPrintable).map(_.toChar).mkString("");
-      if (el.length() >= minLength) {
+      stream = stream.dropWhile(isASCIIPrintable)
+      if (el.length() >= minLength && stream.iterator.next.toInt == 0) {
         list += el
       }
-      stream = stream.dropWhile(isASCIIPrintable)
     }
     list.toList
   }
@@ -65,6 +65,7 @@ object StringReader {
    * @param minLength the minimum number of characters for a string
    * @return List of the strings found in the byte stream
    */
+  //TODO this is slow!
   private def bytesToUnicodeStrings(bytes: Stream[Byte], minLength: Int): List[String] = {
     def isPrintable(ch: Int): Boolean = ch >= 32 && ch < 127
     var list = ListBuffer.empty[String]

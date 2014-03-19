@@ -1,2 +1,55 @@
-\chapter{Malware Classification} \label{chap:classification}
+\chapter{Malware Taxonomy} \label{chap:classification}
 
+Malware is grouped into different types depending on its behaviour. Usually malware analysts make guesses about the malware's behaviour and shape their further analysis to confirm (or refute) these guesses. This approach helps to speed up the analysis. \cite[\p{3}]{sikorski12}
+
+\begin{definition}[Downloader]
+A \emph{downloader} is a piece of software that downloads other malicious programs. (\cf{} \cite[\p{3}]{sikorski12})
+\end{definition} 
+
+\begin{definition}[Rootkit]
+\emph{Rootkit}  
+\end{definition} 
+
+\begin{definition}[Backdoor]
+A \emph{backdoor} allows access to the system by circumventing the usual access protection mechanisms. (\cf{} \cite[\p{3}]{sikorski12})
+\end{definition} 
+
+The backdoor is used by the attacker or other malicious programs to get access to the system later on.
+
+\begin{definition}[Launcher]
+A \emph{launcher} is a software that executes other malicious programs. (\cf{} \cite[\p{4}]{sikorski12})
+\end{definition} 
+
+A launcher mostly uses unusual techniques for running the malicious program in the hopes of providing stealth.
+
+\begin{definition}[Spam-sending malware]
+A \emph{spam-sending malware} uses the victim's machine to send spam. (\cf{} \cite[\p{4}]{sikorski12})
+\end{definition}
+
+Attackers use this kind of malware to sell their spam-sending services.
+
+\begin{definition}[Information stealer]
+An \emph{information stealer} is a malicous program that reads confidential data from the victim's computer and sends it to the attacker. (\cf{} \cite[\p{4}]{sikorski12})
+\end{definition} 
+
+Examples for information stealers are: keyloggers, sniffers, password hash grabbers \cite[\p{3}]{sikorski12} and also deceptive malware, which makes the user input confidential data by convincing the user that it provides an advantage. An example for the latter is a program that claims to add more money to the user's Paypal account; actually it sends the Paypal credentials the user puts into the program to the attacker's e-mail server.
+
+\begin{definition}[Botnet]
+\emph{botnet}  
+\end{definition} 
+
+\begin{definition}
+\emph{Scareware} tries to make the user pay or buy something by frightening him. (\cf{} \cite[\p{4}]{sikorski12})
+\end{definition} 
+
+\begin{definition}[Virus]
+A \emph{virus} replicates itself by infecting or replacing other programs or modifying references to these programs to point to the virus code instead. A virus possibly mutates itself with new generations. (\cf{} \cite[\p{27, 36}]{szor05})
+\end{definition} 
+
+\begin{definition}[Worm]
+\emph{worm}  
+\end{definition} 
+
+
+
+A typical scareware example is a program that looks like an antivirus scanner and shows the user fake warnings about malicious code found on the system. It tells the user to buy a certain software in order to remove the malicious code.
