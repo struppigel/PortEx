@@ -5,20 +5,45 @@ import java.io.ByteArrayInputStream
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import scala.collection.mutable.ListBuffer
+import scala.collection.JavaConverters._
 
+/**
+ * @author Katja Hahn
+ * 
+ * <pre>
+ * {@code
+ * readStrings(new File("path"), 3);
+ * }
+ * </pre>
+ */
 object StringReader {
 
   def main(args: Array[String]): Unit = {
     println(readStrings(new File("BinaryCollection/Chapter_3L/Lab03-01.exe"), 4))
   }
 
-  def readStrings(file: File, minLength: Int): String = {
+  /**
+   * Reads all 2-byte (Unicode) and 1-byte (ASCII) based character-strings 
+   * contained in the file. Only printable ASCII characters are determined as string.
+   * 
+   * @param file the file that is to be searched for strings
+   * @param minLength the minimum length the strings shall have
+   * @return List containing the Strings found
+   */
+  def readStrings(file: File, minLength: Int): java.util.List[String] = {
     val bis = new BufferedInputStream(new FileInputStream(file))
     val stream = Stream.continually(bis.read).takeWhile(_ != -1).map(_.toByte)
-    (bytesToASCIIStrings(stream, minLength) ::: bytesToUTFStrings(stream, minLength)).mkString("\n")
+    (bytesToASCIIStrings(stream, minLength) ::: bytesToUnicodeStrings(stream, minLength)).asJava
   }
 
-  def bytesToASCIIStrings(bytes: Stream[Byte], minLength: Int): List[String] = {
+  /**
+   * Extracts all ASCII strings found in the stream.
+   * 
+   * @param bytes the byte stream
+   * @param minLength the minimum number of characters for a string
+   * @return List of the strings found in the byte stream
+   */
+  private def bytesToASCIIStrings(bytes: Stream[Byte], minLength: Int): List[String] = {
     def isASCIIPrintable(ch: Byte) = ch.toInt >= 32 && ch.toInt < 127
     var list = ListBuffer.empty[String]
     var stream = bytes
@@ -33,7 +58,14 @@ object StringReader {
     list.toList
   }
 
-  def bytesToUTFStrings(bytes: Stream[Byte], minLength: Int): List[String] = {
+  /**
+   * Extracts all Unicode strings found in the stream.
+   * 
+   * @param bytes the byte stream
+   * @param minLength the minimum number of characters for a string
+   * @return List of the strings found in the byte stream
+   */
+  private def bytesToUnicodeStrings(bytes: Stream[Byte], minLength: Int): List[String] = {
     def isPrintable(ch: Int): Boolean = ch >= 32 && ch < 127
     var list = ListBuffer.empty[String]
     var buffer = ListBuffer.empty[Char]
