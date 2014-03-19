@@ -3,11 +3,13 @@
 \BOOKMARK [0][-]{section*.5}{List of Acronyms}{}% 3
 \BOOKMARK [0][-]{chapter.1}{Introduction}{}% 4
 \BOOKMARK [0][-]{chapter.2}{Malware Taxonomy}{}% 5
-\BOOKMARK [0][-]{chapter.3}{Detection by Antivirus Software}{}% 6
-\BOOKMARK [0][-]{chapter.4}{Malware Hiding Techniques}{}% 7
-\BOOKMARK [0][-]{chapter.5}{Malware Analysis}{}% 8
-\BOOKMARK [1][-]{section.5.1}{Malware Analysis Techniques}{chapter.5}% 9
-\BOOKMARK [0][-]{chapter.6}{Static Analysis Library}{}% 10
-\BOOKMARK [0][-]{chapter.7}{Evaluation}{}% 11
-\BOOKMARK [0][-]{chapter.8}{Das Competence Information Portal}{}% 12
-\BOOKMARK [0][-]{section*.10}{Bibliography}{}% 13
+\BOOKMARK [1][-]{section.2.1}{Behavioural Malware Types}{chapter.2}% 6
+\BOOKMARK [1][-]{section.2.2}{Mass Malware and Targeted Malware}{chapter.2}% 7
+\BOOKMARK [0][-]{chapter.3}{Detection by Antivirus Software}{}% 8
+\BOOKMARK [0][-]{chapter.4}{Malware Hiding Techniques}{}% 9
+\BOOKMARK [0][-]{chapter.5}{Malware Analysis}{}% 10
+\BOOKMARK [1][-]{section.5.1}{Malware Analysis Techniques}{chapter.5}% 11
+\BOOKMARK [0][-]{chapter.6}{Static Analysis Library}{}% 12
+\BOOKMARK [0][-]{chapter.7}{Evaluation}{}% 13
+\BOOKMARK [0][-]{chapter.8}{Das Competence Information Portal}{}% 14
+\BOOKMARK [0][-]{section*.10}{Bibliography}{}% 15
