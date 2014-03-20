@@ -12,6 +12,7 @@ dependency-reduced-pom.xml
 *.ear
 /target
 /bin
+vtapikey
 .cache
 *.txt
 *.TXT

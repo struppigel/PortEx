@@ -100,6 +100,7 @@ object StringReader {
     _readUnicodeStrings(file, minLength).asJava
   }
 
+  //TODO not really tested
   def _readUnicodeStrings(file: File, minLength: Int): List[String] = {
     val strings = new ListBuffer[String]
     var str = new StringBuilder()
