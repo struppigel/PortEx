@@ -21,6 +21,7 @@ project/target/*
 *~
 *.aux
 BinaryCollection/*
+test-output
 # TODO temporary stuff, include later #
 arbeit/.svn
 arbeit/graphics

@@ -18,7 +18,7 @@ public class PESignature extends PEModule {
 	private static final int PE_OFFSET_LOCATION = 0x3c;
 	private static final byte[] PE_SIG = "PE\0\0".getBytes();
 	public static final int PE_SIG_LENGTH = PE_SIG.length;
-	private int peOffset;
+	private int peOffset = -1;
 	private final File file;
 
 	/**
@@ -50,7 +50,7 @@ public class PESignature extends PEModule {
 			raf.readFully(peSigVal);
 			for (int i = 0; i < PE_SIG.length; i++) {
 				if (peSigVal[i] != PE_SIG[i]) {
-					System.out.println("");
+					peOffset = -1;
 					throw new FileFormatException("given file is no PE file");
 				}
 			}
@@ -58,10 +58,10 @@ public class PESignature extends PEModule {
 	}
 
 	/**
-	 * Returns the offset of the PE signature. Returns 0 if file hasn't been
-	 * read yet.
+	 * Returns the offset of the PE signature. Returns -1 if file hasn't been
+	 * read yet or the read file was no PE file.
 	 * 
-	 * @return
+	 * @return offset of PE signature, -1 if file not read or file is no PE
 	 */
 	public int getPEOffset() {
 		return peOffset;
