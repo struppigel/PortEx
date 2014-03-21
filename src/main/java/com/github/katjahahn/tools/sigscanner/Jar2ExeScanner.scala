@@ -10,6 +10,7 @@ import java.io.FileNotFoundException
 import java.io.EOFException
 import scala.collection.JavaConverters._
 import SignatureScanner._
+import java.util.Comparator
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for
@@ -28,6 +29,13 @@ class Jar2ExeScanner(file: File) {
    * A list containing the signatures and addresses where they where found.
    */
   lazy val scanResult: List[ScanResult] = scanner._findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
+  
+  /**
+   * Returns a list with all signature scan result data found in the file.
+   * 
+   * @return list with jar related signatures found in the file
+   */
+  def scan(): java.util.List[MatchedSignature] = scanResult.map(SignatureScanner.toMatchedSignature).asJava
 
   private val description = Map("[Jar Manifest]" -> "Jar manifest (strong indication for embedded jar)",
     "[PKZIP Archive File]" -> "PZIP Magic Number (weak indication for embedded zip)",

@@ -70,12 +70,6 @@ class SignatureScanner(signatures: List[Signature]) {
       yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
   }
   
-  private def toMatchedSignature(result: ScanResult): MatchedSignature = {
-    val (sig, addr) = result
-    val signature = Signature.bytes2hex(sig.signature, " ")
-    new MatchedSignature(addr, signature, sig.name, sig.epOnly)
-  }
-  
   /**
    * Searches for matches in the whole file uscom.github.katjahahn.tools.sigscanner.se signatures.
    *
@@ -214,6 +208,12 @@ object SignatureScanner {
    */
   def loadSignatures(sigFile: File): java.util.List[Signature] =
     _loadSignatures(sigFile).asJava
+    
+  def toMatchedSignature(result: ScanResult): MatchedSignature = {
+    val (sig, addr) = result
+    val signature = Signature.bytes2hex(sig.signature, " ")
+    new MatchedSignature(addr, signature, sig.name, sig.epOnly)
+  }
 
   def main(args: Array[String]): Unit = {
     invokeCLI(args)
