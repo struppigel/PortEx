@@ -3,7 +3,6 @@ package com.github.katjahahn;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
@@ -99,8 +98,8 @@ public class PELoader {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File(args[0]);
-		PEData data = PELoader.loadPE(file);
+//		File file = new File(args[0]);
+//		PEData data = PELoader.loadPE(file);
 
 //		SectionTable table = data.getSectionTable();
 //		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
@@ -131,12 +130,12 @@ public class PELoader {
 		Jar2ExeScanner scanner = new Jar2ExeScanner(new File("launch4jexe.exe"));
 		System.out.println(scanner.createReport());
 
-		List<Long> addresses = scanner.getZipAddresses();
-		int i = 0;
-		for (Long address : addresses) {
-			i++;
-			scanner.dumpAt(address, new File("dumped" + i + ".jar"));
-		}
+//		List<Long> addresses = scanner.getZipAddresses();
+//		int i = 0;
+//		for (Long address : addresses) {
+//			i++;
+//			scanner.dumpAt(address, new File("dumped" + i + ".jar"));
+//		}
 		
 	}
 
