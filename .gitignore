@@ -1,0 +1,15 @@
+arbeit
+.classpath
+.cache
+test-output
+*.txt
+*.TXT
+vtapikey
+target
+bin
+BinaryCollection
+*.exe
+project
+*~
+.settings
+.project
