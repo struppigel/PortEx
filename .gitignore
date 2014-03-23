@@ -4,9 +4,10 @@ codecover
 .classpath
 .project
 /data
+src/main/target/*
+src/main/resources/*
 *.exe
 *.dll
-dependency-reduced-pom.xml
 # Package Files #
 *.jar
 *.war

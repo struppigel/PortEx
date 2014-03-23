@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+ 
+<suite name="TestAll">
+ 
+	<test name="order">
+		<packages>
+			<package name="com.github.katjahahn.*" />
+		</packages>
+	</test>
+ 
+</suite>
