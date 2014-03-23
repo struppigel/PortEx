@@ -1,5 +1,7 @@
 package com.github.katjahahn.sections.rsrc;
 
-public enum ResourceDataEntryKey {
+import com.github.katjahahn.HeaderKey;
+
+public enum ResourceDataEntryKey implements HeaderKey {
 	SIZE, CODEPAGE, DATA_RVA;
 }

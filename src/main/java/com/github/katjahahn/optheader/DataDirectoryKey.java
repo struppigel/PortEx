@@ -1,6 +1,8 @@
 package com.github.katjahahn.optheader;
 
-public enum DataDirectoryKey {
+import com.github.katjahahn.HeaderKey;
+
+public enum DataDirectoryKey implements HeaderKey {
 	EXPORT_TABLE("export table"), IMPORT_TABLE("import table"), 
 	RESOURCE_TABLE("resource table"), EXCEPTION_TABLE("exception table"), 
 	CERTIFICATE_TABLE("certificate table"), BASE_RELOCATION_TABLE("base relocation table"), 

@@ -1,5 +1,7 @@
 package com.github.katjahahn.sections.idata
 
+//TODO implement HeaderKey
+
 object IDataEntryKey extends Enumeration {
   type IDataEntryKey = Value
   val NAME_RVA = Value("NAME_RVA")

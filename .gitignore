@@ -1,4 +1,5 @@
 *.class
+codecover
 .settings
 .classpath
 .project
