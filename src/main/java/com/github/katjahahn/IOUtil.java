@@ -25,8 +25,10 @@ import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
  * Utilities for file IO needed to read maps and arrays from the text files in
  * the data subdirectory of PortEx.
  * 
- * The text files are CSV, where the values are separated by semicolon and a new
- * entry begins on a new line.
+ * The specification text files are CSV, where the values are separated by
+ * semicolon and a new entry begins on a new line.
+ * 
+ * The report files for testing are done with the tool pev.
  * 
  * @author Katja Hahn
  * 
@@ -40,23 +42,62 @@ public class IOUtil {
 	private static final String RESOURCE_DIR = "src/main/resources";
 	private static final String TEST_FILE_DIR = "/testfiles";
 	private static final String TEST_REPORTS_DIR = "/reports";
-	
+
+	/**
+	 * Parses all testfile reports (by pev) and creates TestData instances from
+	 * it.
+	 * 
+	 * @return list with all TestData instances
+	 */
 	public static List<TestData> readTestDataList() {
 		List<TestData> data = new LinkedList<>();
 		File directory = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR).toFile();
-		for(File file : directory.listFiles()) {
-			if(!file.isDirectory()) {
+		for (File file : directory.listFiles()) {
+			if (!file.isDirectory()) {
 				data.add(readTestData(file.getName()));
 			}
 		}
 		return data;
 	}
-	
+
+	/**
+	 * Returns a list with all files in the testfile directory.
+	 * 
+	 * @return all files of the testfile directory
+	 */
 	public static File[] getTestiles() {
 		return Paths.get(RESOURCE_DIR, TEST_FILE_DIR).toFile().listFiles();
 	}
 
-	// TODO implement
+	/**
+	 * Parses the report (by pev) and creates a TestData instance.<y
+	 
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 * 
+	 * TODO implement rest of the data.
+	 * 
+	 * @param filename
+	 * @return
+	 */
 	public static TestData readTestData(String filename) {
 		TestData data = new TestData();
 		data.filename = filename;

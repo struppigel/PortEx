@@ -23,7 +23,7 @@ public class MSDOSHeader extends PEModule {
 
 	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
 	private static final String specification = "msdosheaderspec";
-	private static Map<MSDOSHeaderKey, StandardEntry> headerData = new HashMap<>();
+	private Map<MSDOSHeaderKey, StandardEntry> headerData;
 
 	private final byte[] headerbytes;
 
@@ -36,6 +36,7 @@ public class MSDOSHeader extends PEModule {
 		if(!hasSignature(headerbytes)) {
 			throw new IOException("No PE Signature found");
 		}
+		headerData = new HashMap<>();
 		int offsetLoc = 0;
 		int sizeLoc = 1;
 		int descriptionLoc = 2;
@@ -62,7 +63,7 @@ public class MSDOSHeader extends PEModule {
 	}
 
 	private boolean hasSignature(byte[] headerbytes) {
-		if (headerbytes.length < 28) {
+		if (headerbytes == null || headerbytes.length < 28) {
 			throw new IllegalArgumentException(
 					"not enough headerbytes for MS DOS Header");
 		} else {
