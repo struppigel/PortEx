@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,21 +34,35 @@ import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 public class IOUtil {
 
 	public static final String NL = System.getProperty("line.separator");
-	//TODO system independend path separators
+	// TODO system independend path separators
 	private static final String DELIMITER = ";";
 	private static final String SPEC_DIR = "/data/";
-	private static final String RESOURCE_DIR = "/resources";
-	private static final String TEST_FILE_DIR = "/testfiles/";
-	private static final String TEST_REPORTS_DIR = "/reports/";
+	private static final String RESOURCE_DIR = "src/main/resources";
+	private static final String TEST_FILE_DIR = "/testfiles";
+	private static final String TEST_REPORTS_DIR = "/reports";
+	
+	public static List<TestData> readTestDataList() {
+		List<TestData> data = new LinkedList<>();
+		File directory = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR).toFile();
+		for(File file : directory.listFiles()) {
+			if(!file.isDirectory()) {
+				data.add(readTestData(file.getName()));
+			}
+		}
+		return data;
+	}
+	
+	public static File[] getTestiles() {
+		return Paths.get(RESOURCE_DIR, TEST_FILE_DIR).toFile().listFiles();
+	}
 
 	// TODO implement
 	public static TestData readTestData(String filename) {
 		TestData data = new TestData();
-		File testfile = new File(RESOURCE_DIR + TEST_REPORTS_DIR + filename);
-		System.out.println(testfile.getAbsolutePath());
-		try (InputStreamReader isr = new InputStreamReader(
-				IOUtil.class.getResourceAsStream(testfile.getAbsolutePath()));
-				BufferedReader reader = new BufferedReader(isr)) {
+		data.filename = filename;
+		Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
+		try (BufferedReader reader = Files.newBufferedReader(testfile,
+				Charset.forName("UTF-8"))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("DOS header")) {
@@ -64,9 +82,13 @@ public class IOUtil {
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			String[] split = line.split(":");
-			if (split.length < 2) { continue;}
+			if (split.length < 2) {
+				continue;
+			}
 			MSDOSHeaderKey key = getMSDOSKeyFor(split[0]);
-			if (key == null) { continue;}
+			if (key == null) {
+				continue;
+			}
 			String value = split[1];
 			dos.put(key, value);
 		}
@@ -218,6 +240,7 @@ public class IOUtil {
 		public List<DataDirEntry> datadir;
 		public List<SectionTableEntry> sections;
 		public List<ResourceDataEntry> resources;
+		public String filename;
 	}
 
 }

@@ -4,6 +4,9 @@ import static org.testng.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.testng.annotations.BeforeClass;
@@ -16,31 +19,33 @@ import com.github.katjahahn.PELoader;
 
 public class MSDOSHeaderTest {
 
-	private File testfile;
-	private TestData testdata;
-	private PEData pedata;
+	private List<TestData> testdata;
+	private final Map<String, PEData> pedata = new HashMap<>();
 
-	//TODO test engine that fetches all test files
-	
 	@BeforeClass
 	public void prepare() throws IOException {
-		testfile = new File("src/main/java/resources/testfiles/strings.exe");
-		testdata = IOUtil.readTestData("strings.exe.txt");
-		pedata = PELoader.loadPE(testfile);
+		File[] testfiles = IOUtil.getTestiles();
+		for (File file : testfiles) {
+			pedata.put(file.getName(), PELoader.loadPE(file));
+		}
+		testdata = IOUtil.readTestDataList();
 	}
 
 	@Test
 	public void get() {
-		for (Entry<MSDOSHeaderKey, String> entry : testdata.dos.entrySet()) {
-			MSDOSHeaderKey key = entry.getKey();
-			MSDOSHeader dos = pedata.getMSDOSHeader();
-			int actual = dos.get(key).value;
-			String value = entry.getValue().trim();
-			int expected = convertToInt(value);
-			assertEquals(expected, actual);
+		for(TestData testdatum : testdata) {
+			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+			for (Entry<MSDOSHeaderKey, String> entry : testdatum.dos.entrySet()) {
+				MSDOSHeaderKey key = entry.getKey();
+				MSDOSHeader dos = pedatum.getMSDOSHeader();
+				int actual = dos.get(key).value;
+				String value = entry.getValue().trim();
+				int expected = convertToInt(value);
+				assertEquals(expected, actual);
+			}
 		}
 	}
-	
+
 	private int convertToInt(String value) {
 		if (value.startsWith("0x")) {
 			value = value.replace("0x", "");
