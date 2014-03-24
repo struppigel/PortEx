@@ -1,4 +1,8 @@
 *.class
+filelist
+pevscript.sh
+BinaryCollection
+todo
 codecover
 .settings
 .classpath
@@ -22,7 +26,6 @@ project/project/*
 project/target/*
 *~
 *.aux
-BinaryCollection/*
 test-output
 # TODO temporary stuff, include later #
 arbeit/.svn

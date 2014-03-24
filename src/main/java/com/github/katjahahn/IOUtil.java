@@ -1,13 +1,21 @@
 package com.github.katjahahn;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.github.katjahahn.coffheader.COFFHeaderKey;
+import com.github.katjahahn.msdos.MSDOSHeaderKey;
+import com.github.katjahahn.optheader.DataDirEntry;
+import com.github.katjahahn.sections.SectionTableEntry;
+import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
@@ -20,11 +28,93 @@ import java.util.TreeMap;
  * 
  */
 public class IOUtil {
-	
-	public static final String NL = System.getProperty("line.separator");
 
+	public static final String NL = System.getProperty("line.separator");
+	//TODO system independend path separators
 	private static final String DELIMITER = ";";
 	private static final String SPEC_DIR = "/data/";
+	private static final String RESOURCE_DIR = "/resources";
+	private static final String TEST_FILE_DIR = "/testfiles/";
+	private static final String TEST_REPORTS_DIR = "/reports/";
+
+	// TODO implement
+	public static TestData readTestData(String filename) {
+		TestData data = new TestData();
+		File testfile = new File(RESOURCE_DIR + TEST_REPORTS_DIR + filename);
+		System.out.println(testfile.getAbsolutePath());
+		try (InputStreamReader isr = new InputStreamReader(
+				IOUtil.class.getResourceAsStream(testfile.getAbsolutePath()));
+				BufferedReader reader = new BufferedReader(isr)) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("DOS header")) {
+					data.dos = readDOS(reader);
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return data;
+	}
+
+	private static Map<MSDOSHeaderKey, String> readDOS(BufferedReader reader)
+			throws IOException {
+		Map<MSDOSHeaderKey, String> dos = new HashMap<>();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			String[] split = line.split(":");
+			if (split.length < 2) { continue;}
+			MSDOSHeaderKey key = getMSDOSKeyFor(split[0]);
+			if (key == null) { continue;}
+			String value = split[1];
+			dos.put(key, value);
+		}
+		return dos;
+	}
+
+	private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
+		if (string.contains("Bytes in last page")) {
+			return MSDOSHeaderKey.LAST_PAGE_SIZE;
+		}
+		if (string.contains("Pages in file")) {
+			return MSDOSHeaderKey.FILE_PAGES;
+		}
+		if (string.contains("Relocations")) {
+			return MSDOSHeaderKey.RELOCATION_ITEMS;
+		}
+		if (string.contains("Size of header in paragraphs")) {
+			return MSDOSHeaderKey.HEADER_PARAGRAPHS;
+		}
+		if (string.contains("Minimum extra paragraphs")) {
+			return MSDOSHeaderKey.MINALLOC;
+		}
+		if (string.contains("Maximum extra paragraphs")) {
+			return MSDOSHeaderKey.MAXALLOC;
+		}
+		if (string.contains("SS value")) {
+			return MSDOSHeaderKey.INITIAL_SS;
+		}
+		if (string.contains("IP value")) {
+			return MSDOSHeaderKey.INITIAL_IP;
+		}
+		if (string.contains("SP value")) {
+			return MSDOSHeaderKey.INITIAL_SP;
+		}
+		if (string.contains("CS value")) {
+			return MSDOSHeaderKey.PRE_RELOCATED_INITIAL_CS;
+		}
+		if (string.contains("Address of relocation table")) {
+			return MSDOSHeaderKey.RELOCATION_TABLE_OFFSET;
+		}
+		if (string.contains("Overlay number")) {
+			return MSDOSHeaderKey.OVERLAY_NR;
+		}
+		// TODO: OEM identifier and OEM information missing in MSDOSspec
+		// TODO: not covered in testfiles: complemented_checksum and
+		// signature_word
+		return null;
+	}
 
 	/**
 	 * Reads the specified file into a map. The first value is used as key. The
@@ -71,10 +161,11 @@ public class IOUtil {
 			return list;
 		}
 	}
-	
-	public static List<String> getCharacteristicsDescriptions(long value, String filename) {
+
+	public static List<String> getCharacteristicsDescriptions(long value,
+			String filename) {
 		List<String> characteristics = new LinkedList<>();
-		try { 
+		try {
 			Map<String, String[]> map = readMap(filename);
 			for (String maskStr : map.keySet()) {
 				try {
@@ -117,6 +208,16 @@ public class IOUtil {
 			b.append("\t**no characteristics**" + NL);
 		}
 		return b.toString();
+	}
+
+	public static class TestData {
+
+		public Map<MSDOSHeaderKey, String> dos;
+		public Map<COFFHeaderKey, String> coff;
+		public Map<String, String> opt;
+		public List<DataDirEntry> datadir;
+		public List<SectionTableEntry> sections;
+		public List<ResourceDataEntry> resources;
 	}
 
 }

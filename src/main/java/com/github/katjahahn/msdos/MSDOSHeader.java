@@ -23,7 +23,7 @@ public class MSDOSHeader extends PEModule {
 
 	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
 	private static final String specification = "msdosheaderspec";
-	private static Map<String, StandardEntry> headerData = new HashMap<>();
+	private static Map<MSDOSHeaderKey, StandardEntry> headerData = new HashMap<>();
 
 	private final byte[] headerbytes;
 
@@ -47,7 +47,7 @@ public class MSDOSHeader extends PEModule {
 				int value = getBytesIntValue(headerbytes,
 						Integer.parseInt(spec[offsetLoc]),
 						Integer.parseInt(spec[sizeLoc]));
-				headerData.put(key, new StandardEntry(key,
+				headerData.put(MSDOSHeaderKey.valueOf(key), new StandardEntry(key,
 						spec[descriptionLoc], value));
 			}
 		} catch (IOException e) {
@@ -58,7 +58,7 @@ public class MSDOSHeader extends PEModule {
 
 	//TODO verify
 	public int getHeaderSize() {
-		return get("HEADER_PARAGRAPHS").value * PARAGRAPH_SIZE;
+		return get(MSDOSHeaderKey.HEADER_PARAGRAPHS).value * PARAGRAPH_SIZE;
 	}
 
 	private boolean hasSignature(byte[] headerbytes) {
@@ -79,8 +79,8 @@ public class MSDOSHeader extends PEModule {
 		return new LinkedList<>(headerData.values());
 	}
 
-	public StandardEntry get(String keyString) {
-		return headerData.get(keyString);
+	public StandardEntry get(MSDOSHeaderKey key) {
+		return headerData.get(key);
 	}
 
 	@Override

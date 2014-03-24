@@ -1,5 +1,7 @@
 package com.github.katjahahn.msdos;
 
+import static com.github.katjahahn.msdos.MSDOSHeaderKey.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -22,8 +24,8 @@ public class MSDOSLoadModule extends PEModule {
 	@Override
 	public void read() throws IOException {
 		int headerSize = header.getHeaderSize();
-		int filePages = header.get("FILE_PAGES").value;
-		int lastPageSize = header.get("LAST_PAGE_SIZE").value;
+		int filePages = header.get(FILE_PAGES).value;
+		int lastPageSize = header.get(LAST_PAGE_SIZE).value;
 		int imageSize = computeImageSize(filePages, lastPageSize);
 		// XXX loadModulSize seems to be too much, this intermediate solution
 		// uses PE signature as stop
