@@ -70,28 +70,7 @@ public class IOUtil {
 	}
 
 	/**
-	 * Parses the report (by pev) and creates a TestData instance.<y
-	 
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
+	 * Parses the report (by pev) and creates a TestData instance.
 	 * 
 	 * TODO implement rest of the data.
 	 * 
@@ -109,6 +88,9 @@ public class IOUtil {
 				if (line.contains("DOS header")) {
 					data.dos = readDOS(reader);
 				}
+				if (line.contains("COFF header")) {
+					data.coff = readCOFF(reader);
+				}
 			}
 
 		} catch (IOException e) {
@@ -124,16 +106,60 @@ public class IOUtil {
 		while ((line = reader.readLine()) != null) {
 			String[] split = line.split(":");
 			if (split.length < 2) {
-				continue;
+				break;
 			}
 			MSDOSHeaderKey key = getMSDOSKeyFor(split[0]);
 			if (key == null) {
 				continue;
 			}
-			String value = split[1];
+			String value = split[1].trim();
 			dos.put(key, value);
 		}
 		return dos;
+	}
+	
+	private static Map<COFFHeaderKey, String> readCOFF(BufferedReader reader)
+			throws IOException {
+		Map<COFFHeaderKey, String> coff = new HashMap<>();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			String[] split = line.split(":");
+			if (split.length < 2) {
+				break;
+			}
+			COFFHeaderKey key = getCOFFHeaderKeyFor(split[0]);
+			if (key == null) {
+				continue;
+			}
+			String value = split[1].trim().split("\\s")[0]; //remove everything after whitespace
+			coff.put(key, value);
+		}
+		return coff;
+	}
+
+	private static COFFHeaderKey getCOFFHeaderKeyFor(String string) {
+		if (string.contains("Machine")) {
+			return COFFHeaderKey.MACHINE;
+		}
+		if (string.contains("Number of sections")) {
+			return COFFHeaderKey.SECTION_NR;
+		}
+		if (string.contains("Date/time stamp")) {
+			return COFFHeaderKey.TIME_DATE;
+		}
+		if (string.contains("Symbol table offset")) {
+			return null; // TODO ?
+		}
+		if (string.contains("Number of symbols")) {
+			return null; // TODO ?
+		}
+		if (string.contains("Size of optional header")) {
+			return COFFHeaderKey.SIZE_OF_OPT_HEADER;
+		}
+		if (string.contains("Characteristics")) {
+			return COFFHeaderKey.CHARACTERISTICS;
+		}
+		return null;
 	}
 
 	private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
