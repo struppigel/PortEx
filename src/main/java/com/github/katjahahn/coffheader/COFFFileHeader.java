@@ -76,7 +76,7 @@ public class COFFFileHeader extends PEModule {
 				+ "COFF File Header" + NL + "----------------" + NL);
 		for (StandardEntry entry : data) {
 
-			int value = entry.value;
+			int value = (int) entry.value; //COFF has no 8 Byte values
 			String key = entry.key;
 			String description = entry.description;
 			if (key.equals("CHARACTERISTICS")) {
@@ -133,7 +133,7 @@ public class COFFFileHeader extends PEModule {
 		String keyString = key.toString();
 		for (StandardEntry entry : data) {
 			if (entry.key.equals(keyString)) {
-				return entry.value;
+				return (int) entry.value; //COFF has > 4 Byte values --> enough for int
 			}
 		}
 		throw new IllegalArgumentException("invalid key");

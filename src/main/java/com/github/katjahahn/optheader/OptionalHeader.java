@@ -30,7 +30,7 @@ public class OptionalHeader extends PEModule {
 
 	public static enum MagicNumber {
 		PE32(0x10B), PE32_PLUS(0x20B), ROM(0x107);
-		
+
 		private int value;
 
 		private MagicNumber(int value) {
@@ -138,7 +138,7 @@ public class OptionalHeader extends PEModule {
 
 		for (Entry<String, String[]> entry : standardSpec.entrySet()) {
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(headerbytes,
+			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
 			String key = entry.getKey();
@@ -167,9 +167,9 @@ public class OptionalHeader extends PEModule {
 			if (counter >= rvaNumber) {
 				break;
 			}
-			int address = getBytesIntValue(headerbytes,
+			long address = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]), length);
-			int size = getBytesIntValue(headerbytes,
+			long size = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]) + length, length);
 			if (address != 0) {
 				dataDirEntries.add(new DataDirEntry(specs[description],
@@ -197,14 +197,14 @@ public class OptionalHeader extends PEModule {
 
 		for (Entry<String, String[]> entry : windowsSpec.entrySet()) {
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(headerbytes,
+			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
 			String key = entry.getKey();
 			windowsFields
 					.add(new StandardEntry(key, specs[description], value));
 			if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
-				this.rvaNumber = value;
+				this.rvaNumber = (int) value; //always 4 Bytes
 			}
 		}
 	}
@@ -229,8 +229,8 @@ public class OptionalHeader extends PEModule {
 		StringBuilder b = new StringBuilder();
 		for (DataDirEntry entry : dataDirEntries) {
 			b.append(entry.key + ": " + entry.virtualAddress + "(0x"
-					+ Integer.toHexString(entry.virtualAddress) + ")/"
-					+ entry.size + "(0x" + Integer.toHexString(entry.size)
+					+ Long.toHexString(entry.virtualAddress) + ")/"
+					+ entry.size + "(0x" + Long.toHexString(entry.size)
 					+ ")" + NL);
 		}
 		return b.toString();
@@ -245,26 +245,27 @@ public class OptionalHeader extends PEModule {
 	public String getWindowsSpecificInfo() {
 		StringBuilder b = new StringBuilder();
 		for (StandardEntry entry : windowsFields) {
-			int value = entry.value;
+			long value = entry.value;
 			String key = entry.key;
 			String description = entry.description;
 			if (key.equals("IMAGE_BASE")) {
 				b.append(description + ": " + value + " (0x"
-						+ Integer.toHexString(value) + "), "
+						+ Long.toHexString(value) + "), "
 						+ getImageBaseDescription(value) + NL);
 			} else if (key.equals("SUBSYSTEM")) {
-				b.append(description + ": " + getSubsystemDescription(value)
-						+ NL);
+				b.append(description + ": "
+						+ getSubsystemDescription((int) value) + NL); //subsystem has only 2 Bytes
 			} else if (key.equals("DLL_CHARACTERISTICS")) {
 				b.append(NL + description + ": " + NL);
-				b.append(IOUtil.getCharacteristics(value, "dllcharacteristics") + NL);
+				b.append(IOUtil.getCharacteristics(value, "dllcharacteristics")
+						+ NL);
 			}
 
 			else {
 				b.append(description + ": " + value + " (0x"
-						+ Integer.toHexString(value) + ")" + NL);
+						+ Long.toHexString(value) + ")" + NL);
 				if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
-					rvaNumber = value;
+					rvaNumber = (int) value; //rva nr has always 4 Bytes
 				}
 			}
 		}
@@ -278,20 +279,20 @@ public class OptionalHeader extends PEModule {
 	public String getStandardFieldsInfo() {
 		StringBuilder b = new StringBuilder();
 		for (StandardEntry entry : standardFields) {
-			int value = entry.value;
+			long value = entry.value;
 			String key = entry.key;
 			String description = entry.description;
 			if (key.equals("MAGIC_NUMBER")) {
 				b.append(description + ": " + value + " --> "
 						+ getMagicNumberString(magicNumber) + NL);
 			} else if (key.equals("BASE_OF_DATA")) {
-				if (magicNumber == MagicNumber.PE32) { 
+				if (magicNumber == MagicNumber.PE32) {
 					b.append(description + ": " + value + " (0x"
-							+ Integer.toHexString(value) + ")" + NL);
+							+ Long.toHexString(value) + ")" + NL);
 				}
 			} else {
 				b.append(description + ": " + value + " (0x"
-						+ Integer.toHexString(value) + ")" + NL);
+						+ Long.toHexString(value) + ")" + NL);
 			}
 		}
 		return b.toString();
@@ -344,17 +345,14 @@ public class OptionalHeader extends PEModule {
 	 * @param value
 	 * @return description string of the image base value
 	 */
-	public static String getImageBaseDescription(int value) {
-		switch (value) {
-		case 0x10000000:
+	public static String getImageBaseDescription(long value) {
+		if (value == 0x10000000)
 			return "DLL default";
-		case 0x00010000:
+		if (value == 0x00010000)
 			return "default for Windows CE EXEs";
-		case 0x00400000:
+		if (value == 0x00400000)
 			return "default for Windows NT, 2000, XP, 95, 98 and Me";
-		default:
-			return "no default value";
-		}
+		return "no default value";
 	}
 
 	/**

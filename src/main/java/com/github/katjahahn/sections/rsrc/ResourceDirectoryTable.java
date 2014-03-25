@@ -22,8 +22,8 @@ public class ResourceDirectoryTable extends PEModule {
 	private final Map<String, String[]> rsrcDirSpec;
 	private final byte[] tableBytes;
 
-	//TODO put children and dataEntries to DirectoryEntries
-	//XXX this is a mess!
+	// TODO put children and dataEntries to DirectoryEntries
+	// XXX this is a mess!
 	private final List<ResourceDirectoryEntry> dirEntries = new ArrayList<>();
 	private final List<ResourceDirectoryTable> children = new ArrayList<>();
 	private final List<ResourceDataEntry> dataEntries = new ArrayList<>();
@@ -41,7 +41,7 @@ public class ResourceDirectoryTable extends PEModule {
 		this.id = id;
 		this.offset = offset;
 	}
-	
+
 	@Override
 	public void read() throws IOException {
 		data = new HashMap<>();
@@ -82,8 +82,8 @@ public class ResourceDirectoryTable extends PEModule {
 				try {
 					byte[] resourceBytes = Arrays.copyOfRange(tableBytes,
 							address - offset, tableBytes.length);
-					ResourceDirectoryTable table = new ResourceDirectoryTable(rsrcDirSpec,
-							resourceBytes, childId, address);
+					ResourceDirectoryTable table = new ResourceDirectoryTable(
+							rsrcDirSpec, resourceBytes, childId, address);
 					table.read();
 					children.add(table);
 				} catch (IllegalArgumentException e) {
@@ -127,7 +127,8 @@ public class ResourceDirectoryTable extends PEModule {
 		return new Date(millis);
 	}
 
-	//XXX This is a mess too! Display a nice tree structure or something like that.
+	// XXX This is a mess too! Display a nice tree structure or something like
+	// that.
 	@Override
 	public String getInfo() {
 		StringBuilder b = new StringBuilder();
@@ -135,13 +136,13 @@ public class ResourceDirectoryTable extends PEModule {
 
 		for (StandardEntry entry : data.values()) {
 
-			int value = entry.value;
+			long value = entry.value;
 			String key = entry.key;
 			String description = entry.description;
 
 			if (key.equals("TIME_DATE_STAMP")) {
 				b.append(description + ": ");
-				b.append(getTimeDate(value) + NL);
+				b.append(getTimeDate((int) value) + NL);
 			} else {
 				b.append(description + ": " + value + NL);
 			}

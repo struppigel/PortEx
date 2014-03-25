@@ -11,10 +11,10 @@ import com.github.katjahahn.sections.SectionTableEntry;
 public class DataDirEntry {
 
 	public DataDirectoryKey key;
-	public int virtualAddress; // RVA actually, but called like this in spec
-	public int size;
+	public long virtualAddress; // RVA actually, but called like this in spec
+	public long size;
 
-	public DataDirEntry(String fieldName, int virtualAddress, int size) {
+	public DataDirEntry(String fieldName, long virtualAddress, long size) {
 		for(DataDirectoryKey key: DataDirectoryKey.values()) {
 			if(key.toString().equals(fieldName)) {
 				this.key = key;
@@ -38,10 +38,10 @@ public class DataDirEntry {
 	 * @param table
 	 * @return file offset of data directory
 	 */
-	public int getFileOffset(SectionTable table) {
+	public long getFileOffset(SectionTable table) {
 		SectionTableEntry section = getSectionTableEntry(table);
-		int sectionRVA = section.get(VIRTUAL_ADDRESS);
-		int sectionOffset = section.get(POINTER_TO_RAW_DATA);
+		long sectionRVA = section.get(VIRTUAL_ADDRESS);
+		long sectionOffset = section.get(POINTER_TO_RAW_DATA);
 		return (virtualAddress - sectionRVA) + sectionOffset;
 	}
 
@@ -58,8 +58,8 @@ public class DataDirEntry {
 	public SectionTableEntry getSectionTableEntry(SectionTable table) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
-			int vSize = section.get(VIRTUAL_SIZE);
-			int vAddress = section.get(VIRTUAL_ADDRESS);
+			int vSize = section.get(VIRTUAL_SIZE).intValue();
+			int vAddress = section.get(VIRTUAL_ADDRESS).intValue();
 			if (rvaIsWithin(vAddress, vSize)) {
 				return section;
 			}

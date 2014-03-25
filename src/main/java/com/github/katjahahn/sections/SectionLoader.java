@@ -63,19 +63,21 @@ public class SectionLoader {
 	 *         section
 	 * @throws IOException
 	 */
-	public RSRCSection loadRsrcSection()
-			throws IOException {
-		DataDirEntry resourceTable = getDataDirEntry(optHeader.getDataDirEntries(),
-				DataDirectoryKey.RESOURCE_TABLE);
+	public RSRCSection loadRsrcSection() throws IOException {
+		DataDirEntry resourceTable = getDataDirEntry(
+				optHeader.getDataDirEntries(), DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
 			SectionTableEntry rsrcEntry = resourceTable
 					.getSectionTableEntry(table);
-			Integer virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
+			Integer virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS) != null ? rsrcEntry
+					.get(VIRTUAL_ADDRESS).intValue() : null; // va is always 4
+																// bytes
 
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
-					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)];
+					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
+							.intValue()]; // rawsize is always 4 bytes
 					raf.readFully(rsrcbytes);
 					RSRCSection rsrc = new RSRCSection(rsrcbytes,
 							virtualAddress);
@@ -86,25 +88,27 @@ public class SectionLoader {
 		}
 		return null;
 	}
-	
+
 	public static SectionTableEntry getSectionByRVA(SectionTable table, int rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
-			int vSize = section.get(VIRTUAL_SIZE);
-			int vAddress = section.get(VIRTUAL_ADDRESS);
+			int vSize = section.get(VIRTUAL_SIZE).intValue(); // both values are
+																// always 4
+																// Bytes
+			int vAddress = section.get(VIRTUAL_ADDRESS).intValue();
 			if (rvaIsWithin(vAddress, vSize, rva)) {
 				return section;
 			}
 		}
 		return null;
 	}
-	
+
 	private static boolean rvaIsWithin(int address, int size, int rva) {
 		int endpoint = address + size;
 		return rva >= address && rva < endpoint;
 	}
 
-	//TODO almost same code as RSRCSection
+	// TODO almost same code as RSRCSection
 	/**
 	 * Loads all bytes and information of the import section
 	 * 
@@ -112,19 +116,19 @@ public class SectionLoader {
 	 * @return
 	 * @throws IOException
 	 */
-	public ImportSection loadImportSection()
-			throws IOException {
-		DataDirEntry resourceTable = getDataDirEntry(optHeader.getDataDirEntries(),
-				DataDirectoryKey.IMPORT_TABLE);
+	public ImportSection loadImportSection() throws IOException {
+		DataDirEntry resourceTable = getDataDirEntry(
+				optHeader.getDataDirEntries(), DataDirectoryKey.IMPORT_TABLE);
 		if (resourceTable != null) {
 			SectionTableEntry idataEntry = resourceTable
 					.getSectionTableEntry(table);
-			Integer virtualAddress = idataEntry.get(VIRTUAL_ADDRESS);
+			Integer virtualAddress = idataEntry.get(VIRTUAL_ADDRESS) != null ? idataEntry
+					.get(VIRTUAL_ADDRESS).intValue() : null; //always 4 Bytes
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(idataEntry.get(POINTER_TO_RAW_DATA));
 					byte[] idatabytes = new byte[idataEntry
-							.get(SIZE_OF_RAW_DATA)];
+							.get(SIZE_OF_RAW_DATA).intValue()]; //always 4 Bytes
 					raf.readFully(idatabytes);
 					ImportSection idata = new ImportSection(idatabytes,
 							virtualAddress, optHeader);

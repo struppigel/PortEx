@@ -50,10 +50,10 @@ public class ResourceDataEntry extends PEModule {
 		StringBuilder b = new StringBuilder();
 		b.append(NL + "** resource data **" + NL + NL);
 		for (StandardEntry entry : data.values()) {
-			int value = entry.value;
+			long value = entry.value;
 
 			b.append(entry.description + ": " + value + " (0x"
-					+ Integer.toHexString(value) + ")" + NL);
+					+ Long.toHexString(value) + ")" + NL);
 		}
 		return b.toString();
 	}

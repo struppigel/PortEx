@@ -17,7 +17,7 @@ public class SectionTableEntry {
 		return name;
 	}
 
-	public Integer get(SectionTableEntryKey key) {
+	public Long get(SectionTableEntryKey key) {
 		return entries.get(key).value;
 	}
 

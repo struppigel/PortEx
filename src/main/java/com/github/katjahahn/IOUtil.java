@@ -18,6 +18,8 @@ import java.util.TreeMap;
 import com.github.katjahahn.coffheader.COFFHeaderKey;
 import com.github.katjahahn.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.optheader.DataDirEntry;
+import com.github.katjahahn.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntry;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
@@ -91,6 +93,9 @@ public class IOUtil {
 				if (line.contains("COFF header")) {
 					data.coff = readCOFF(reader);
 				}
+				if (line.contains("Optional (PE) header")) {
+					readOpt(data, reader);
+				}
 			}
 
 		} catch (IOException e) {
@@ -118,6 +123,29 @@ public class IOUtil {
 		return dos;
 	}
 	
+	private static void readOpt(TestData data, BufferedReader reader)
+			throws IOException {
+		String line = null;
+		data.windowsOpt = new HashMap<>();
+		data.standardOpt = new HashMap<>();
+		while ((line = reader.readLine()) != null) {
+			String[] split = line.split(":");
+			if (split.length < 2) {
+				break;
+			}
+			String value = split[1].trim().split("\\s")[0]; //remove everything after whitespace
+			StandardFieldEntryKey sKey = getStandardKeyFor(split[0]);
+			if(sKey == null) {
+				WindowsEntryKey wKey = getWindowsKeyFor(split[0]);
+				if (wKey != null) {
+					data.windowsOpt.put(wKey, value);
+				}
+			} else {
+				data.standardOpt.put(sKey, value);
+			}
+		}
+	}
+	
 	private static Map<COFFHeaderKey, String> readCOFF(BufferedReader reader)
 			throws IOException {
 		Map<COFFHeaderKey, String> coff = new HashMap<>();
@@ -135,74 +163,6 @@ public class IOUtil {
 			coff.put(key, value);
 		}
 		return coff;
-	}
-
-	private static COFFHeaderKey getCOFFHeaderKeyFor(String string) {
-		if (string.contains("Machine")) {
-			return COFFHeaderKey.MACHINE;
-		}
-		if (string.contains("Number of sections")) {
-			return COFFHeaderKey.SECTION_NR;
-		}
-		if (string.contains("Date/time stamp")) {
-			return COFFHeaderKey.TIME_DATE;
-		}
-		if (string.contains("Symbol table offset")) {
-			return null; // TODO ?
-		}
-		if (string.contains("Number of symbols")) {
-			return null; // TODO ?
-		}
-		if (string.contains("Size of optional header")) {
-			return COFFHeaderKey.SIZE_OF_OPT_HEADER;
-		}
-		if (string.contains("Characteristics")) {
-			return COFFHeaderKey.CHARACTERISTICS;
-		}
-		return null;
-	}
-
-	private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
-		if (string.contains("Bytes in last page")) {
-			return MSDOSHeaderKey.LAST_PAGE_SIZE;
-		}
-		if (string.contains("Pages in file")) {
-			return MSDOSHeaderKey.FILE_PAGES;
-		}
-		if (string.contains("Relocations")) {
-			return MSDOSHeaderKey.RELOCATION_ITEMS;
-		}
-		if (string.contains("Size of header in paragraphs")) {
-			return MSDOSHeaderKey.HEADER_PARAGRAPHS;
-		}
-		if (string.contains("Minimum extra paragraphs")) {
-			return MSDOSHeaderKey.MINALLOC;
-		}
-		if (string.contains("Maximum extra paragraphs")) {
-			return MSDOSHeaderKey.MAXALLOC;
-		}
-		if (string.contains("SS value")) {
-			return MSDOSHeaderKey.INITIAL_SS;
-		}
-		if (string.contains("IP value")) {
-			return MSDOSHeaderKey.INITIAL_IP;
-		}
-		if (string.contains("SP value")) {
-			return MSDOSHeaderKey.INITIAL_SP;
-		}
-		if (string.contains("CS value")) {
-			return MSDOSHeaderKey.PRE_RELOCATED_INITIAL_CS;
-		}
-		if (string.contains("Address of relocation table")) {
-			return MSDOSHeaderKey.RELOCATION_TABLE_OFFSET;
-		}
-		if (string.contains("Overlay number")) {
-			return MSDOSHeaderKey.OVERLAY_NR;
-		}
-		// TODO: OEM identifier and OEM information missing in MSDOSspec
-		// TODO: not covered in testfiles: complemented_checksum and
-		// signature_word
-		return null;
 	}
 
 	/**
@@ -299,11 +259,178 @@ public class IOUtil {
 		return b.toString();
 	}
 
+	private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
+		if (string.contains("Bytes in last page")) {
+			return MSDOSHeaderKey.LAST_PAGE_SIZE;
+		}
+		if (string.contains("Pages in file")) {
+			return MSDOSHeaderKey.FILE_PAGES;
+		}
+		if (string.contains("Relocations")) {
+			return MSDOSHeaderKey.RELOCATION_ITEMS;
+		}
+		if (string.contains("Size of header in paragraphs")) {
+			return MSDOSHeaderKey.HEADER_PARAGRAPHS;
+		}
+		if (string.contains("Minimum extra paragraphs")) {
+			return MSDOSHeaderKey.MINALLOC;
+		}
+		if (string.contains("Maximum extra paragraphs")) {
+			return MSDOSHeaderKey.MAXALLOC;
+		}
+		if (string.contains("SS value")) {
+			return MSDOSHeaderKey.INITIAL_SS;
+		}
+		if (string.contains("IP value")) {
+			return MSDOSHeaderKey.INITIAL_IP;
+		}
+		if (string.contains("SP value")) {
+			return MSDOSHeaderKey.INITIAL_SP;
+		}
+		if (string.contains("CS value")) {
+			return MSDOSHeaderKey.PRE_RELOCATED_INITIAL_CS;
+		}
+		if (string.contains("Address of relocation table")) {
+			return MSDOSHeaderKey.RELOCATION_TABLE_OFFSET;
+		}
+		if (string.contains("Overlay number")) {
+			return MSDOSHeaderKey.OVERLAY_NR;
+		}
+		// TODO: OEM identifier and OEM information missing in MSDOSspec
+		// TODO: not covered in testfiles: complemented_checksum and
+		// signature_word
+		return null;
+	}
+
+	private static COFFHeaderKey getCOFFHeaderKeyFor(String string) {
+		if (string.contains("Machine")) {
+			return COFFHeaderKey.MACHINE;
+		}
+		if (string.contains("Number of sections")) {
+			return COFFHeaderKey.SECTION_NR;
+		}
+		if (string.contains("Date/time stamp")) {
+			return COFFHeaderKey.TIME_DATE;
+		}
+		if (string.contains("Symbol table offset")) {
+			return null; // TODO ?
+		}
+		if (string.contains("Number of symbols")) {
+			return null; // TODO ?
+		}
+		if (string.contains("Size of optional header")) {
+			return COFFHeaderKey.SIZE_OF_OPT_HEADER;
+		}
+		if (string.contains("Characteristics")) {
+			return COFFHeaderKey.CHARACTERISTICS;
+		}
+		return null;
+	}
+
+	private static StandardFieldEntryKey getStandardKeyFor(String string) {
+		if (string.contains("Magic number")) {
+			return StandardFieldEntryKey.MAGIC_NUMBER;
+		}
+		if (string.contains("Linker major version")) {
+			return StandardFieldEntryKey.MAJOR_LINKER_VERSION;
+		}
+		if (string.contains("Linker minor version")) {
+			return StandardFieldEntryKey.MINOR_LINKER_VERSION;
+		}
+		if (string.contains("Entry point")) {
+			return StandardFieldEntryKey.ADDR_OF_ENTRY_POINT;
+		}
+		if (string.contains("Address of .code")) {
+			return StandardFieldEntryKey.BASE_OF_CODE;
+		}
+		if (string.contains("Address of .data")) {
+			return StandardFieldEntryKey.BASE_OF_DATA;
+		}
+		if (string.contains("Size of .code")) {
+			return StandardFieldEntryKey.SIZE_OF_CODE;
+		}
+		if (string.contains("Size of .data")) {
+			return StandardFieldEntryKey.SIZE_OF_INIT_DATA;
+		}
+		if (string.contains("Size of .bss")) {
+			return StandardFieldEntryKey.SIZE_OF_UNINIT_DATA;
+		}
+		return null;
+	}
+
+	private static WindowsEntryKey getWindowsKeyFor(String string) {
+			if (string.contains("checksum")) {
+				return WindowsEntryKey.CHECKSUM;
+			}
+			if (string.contains("DLL characteristics")) {
+				return WindowsEntryKey.DLL_CHARACTERISTICS;
+			}
+			if (string.contains("Alignment factor")) {
+				return WindowsEntryKey.FILE_ALIGNMENT;
+			}
+			if (string.contains("Imagebase")) {
+				return WindowsEntryKey.IMAGE_BASE;
+			}
+			if (string.contains("Address of .code")) {
+				return WindowsEntryKey.LOADER_FLAGS;
+			}
+			if (string.contains("Major version of image")) {
+				return WindowsEntryKey.MAJOR_IMAGE_VERSION;
+			}
+			if (string.contains("Major version of required OS")) {
+				return WindowsEntryKey.MAJOR_OS_VERSION;
+			}
+			if (string.contains("Major version of subsystem")) {
+				return WindowsEntryKey.MAJOR_SUBSYSTEM_VERSION;
+			}
+			if (string.contains("Minor version of image")) {
+				return WindowsEntryKey.MINOR_IMAGE_VERSION;
+			}
+			if (string.contains("Minor version of required OS")) {
+				return WindowsEntryKey.MINOR_OS_VERSION;
+			}
+			if (string.contains("Minor version of subsystem")) {
+				return WindowsEntryKey.MINOR_SUBSYSTEM_VERSION;
+			}
+			if (string.contains("Data-dictionary entries")) {
+				return WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES;
+			}
+			if (string.contains("Alignment of sections")) {
+				return WindowsEntryKey.SECTION_ALIGNMENT;
+			}
+			if (string.contains("Size of headers")) {
+				return WindowsEntryKey.SIZE_OF_HEADERS;
+			}
+			if (string.contains("Size of heap space to commit")) {
+				return WindowsEntryKey.SIZE_OF_HEAP_COMMIT;
+			}
+			if (string.contains("Size of heap space to reserve")) {
+				return WindowsEntryKey.SIZE_OF_HEAP_RESERVE;
+			}
+			if (string.contains("Size of image")) {
+				return WindowsEntryKey.SIZE_OF_IMAGE;
+			}
+			if (string.contains("Size of stack to commit")) {
+				return WindowsEntryKey.SIZE_OF_STACK_COMMIT;
+			}
+			if (string.contains("Size of stack to reserve")) {
+				return WindowsEntryKey.SIZE_OF_STACK_RESERVE;
+			}
+			if (string.contains("Subsystem required")) {
+				return WindowsEntryKey.SUBSYSTEM;
+			}
+	//		if (string.contains("")) { TODO missing in report (?)
+	//			return WindowsEntryKey.WIN32_VERSION_VALUE;
+	//		}
+			return null;
+		}
+
 	public static class TestData {
 
 		public Map<MSDOSHeaderKey, String> dos;
 		public Map<COFFHeaderKey, String> coff;
-		public Map<String, String> opt;
+		public Map<StandardFieldEntryKey, String> standardOpt;
+		public Map<WindowsEntryKey, String> windowsOpt;
 		public List<DataDirEntry> datadir;
 		public List<SectionTableEntry> sections;
 		public List<ResourceDataEntry> resources;

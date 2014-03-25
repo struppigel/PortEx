@@ -85,7 +85,7 @@ public class MSDOSHeader extends PEModule {
 	}
 
 	public int get(MSDOSHeaderKey key) {
-		return headerData.get(key).value;
+		return (int) headerData.get(key).value; //no 8 Byte values in MSDOS header
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class MSDOSHeader extends PEModule {
 					+ "MS DOS Header" + NL + "-------------" + NL);
 			for (StandardEntry entry : headerData.values()) {
 				b.append(entry.description + ": " + entry.value + " (0x"
-						+ Integer.toHexString(entry.value) + ")" + NL);
+						+ Long.toHexString(entry.value) + ")" + NL);
 			}
 			return b.toString();
 		}
