@@ -39,7 +39,7 @@ public class MSDOSHeaderTest {
 			for (Entry<MSDOSHeaderKey, String> entry : testdatum.dos.entrySet()) {
 				MSDOSHeaderKey key = entry.getKey();
 				MSDOSHeader dos = pedatum.getMSDOSHeader();
-				int actual = dos.get(key).value;
+				int actual = dos.get(key);
 				String value = entry.getValue().trim();
 				int expected = convertToInt(value);
 				assertEquals(expected, actual);
@@ -85,6 +85,13 @@ public class MSDOSHeaderTest {
 		String noHeaderBytes = new MSDOSHeader(null).getInfo();
 		System.out.println(noHeaderBytes);
 		assertTrue(noHeaderBytes.equals("No MS DOS Header found!" + IOUtil.NL));
+	}
+	
+	@Test
+	public void getHeaderSize() throws IOException {
+		File file = new File("WinRar.exe");
+		int size = PELoader.loadPE(file).getMSDOSHeader().getHeaderSize();
+		assertTrue(size > 0 && size < file.length());
 	}
 	
 	@Test
