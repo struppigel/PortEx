@@ -86,7 +86,7 @@ public class ByteArrayUtil {
 		long value = 0;
 		for (int i = 0; i < bytes.length; i++) {
 			int shift = 8 * i;
-			value += (bytes[i] & 0xFF) << shift;
+			value += (long)(bytes[i] & 0xFF) << shift;
 		}
 		return value;
 	}

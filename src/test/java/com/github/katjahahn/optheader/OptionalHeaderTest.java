@@ -16,13 +16,11 @@ import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.IOUtil.TestData;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
-import com.github.katjahahn.coffheader.COFFFileHeader;
 
 public class OptionalHeaderTest {
 
 	private List<TestData> testdata;
 	private final Map<String, PEData> pedata = new HashMap<>();
-	private COFFFileHeader winRarCoff;
 
 	@BeforeClass
 	public void prepare() throws IOException {
@@ -31,8 +29,6 @@ public class OptionalHeaderTest {
 			pedata.put(file.getName(), PELoader.loadPE(file));
 		}
 		testdata = IOUtil.readTestDataList();
-		winRarCoff = PELoader.loadPE(new File("WinRar.exe"))
-				.getCOFFFileHeader();
 	}
 
 	@Test
@@ -117,13 +113,9 @@ public class OptionalHeaderTest {
 			for (Entry<WindowsEntryKey, String> entry : testdatum.windowsOpt.entrySet()) {
 				WindowsEntryKey key = entry.getKey();
 				OptionalHeader opt = pedatum.getOptionalHeader();
-				System.err.println(testdatum.filename); //TODO look for long conversion error
-				System.err.println("key: " + key);
 				long actual = opt.getWindowsFieldEntry(key).value;
 				String value = entry.getValue().trim();
 				long expected = convertToLong(value);
-				System.out.println("actual: " + Long.toHexString(actual));
-				System.out.println("expected: " + Long.toHexString(expected));
 				assertEquals(actual, expected);
 			}
 		}

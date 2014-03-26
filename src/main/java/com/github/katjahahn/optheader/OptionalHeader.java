@@ -200,6 +200,12 @@ public class OptionalHeader extends PEModule {
 			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
+			//TODO remove
+			if(value == 0x40000001) {
+				System.out.println("offset: " + specs[offsetLoc]);
+				System.out.println("length: " + specs[lengthLoc]);
+			}
+			
 			String key = entry.getKey();
 			windowsFields
 					.add(new StandardEntry(key, specs[description], value));
