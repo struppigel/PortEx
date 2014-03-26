@@ -36,7 +36,7 @@ class ImportSection(
         case ROM => throw new IllegalArgumentException
       }
       do {
-        entry = LookupTableEntry(idatabytes, offset, EntrySize, virtualAddress)
+        entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress)
         if(!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
       } while (!entry.isInstanceOf[NullEntry])
@@ -82,7 +82,7 @@ class ImportSection(
       val nullindex = idatabytes.indexWhere(b => b == 0, offset)
       new String(idatabytes.slice(offset, nullindex))
     }
-    getName(entry(NAME_RVA))
+    getName(entry(NAME_RVA).toInt)
   }
 
   override def getInfo(): String =

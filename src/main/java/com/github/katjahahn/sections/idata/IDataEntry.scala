@@ -25,7 +25,7 @@ class IDataEntry(private val entrybytes: Array[Byte],
    */
   override def read(): Unit = {}
 
-  def apply(key: IDataEntryKey): Int = {
+  def apply(key: IDataEntryKey): Long = {
     entries(key).value
   }
 
@@ -50,7 +50,7 @@ object IDataEntry {
       val description = specs(0)
       val offset = Integer.parseInt(specs(1))
       val size = Integer.parseInt(specs(2))
-      val value = getBytesIntValue(entrybytes, offset, size)
+      val value = getBytesLongValue(entrybytes, offset, size)
       val entry = new StandardEntry(key, description, value)
       buffer += entry
     }

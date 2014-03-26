@@ -27,7 +27,7 @@ class StandardDataEntry[K <: Enumeration] (
     entries = buffer.toList
   }
  
-  def apply(key: K#Value): Int = {
+  def apply(key: K#Value): Long = {
     entries.find(x => x.key == key.toString) match {
       case Some(e) => e.value 
       case None => throw new IllegalArgumentException
