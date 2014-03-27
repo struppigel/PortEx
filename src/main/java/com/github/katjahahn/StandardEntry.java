@@ -15,11 +15,19 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
+import com.github.katjahahn.coffheader.COFFHeaderKey;
+import com.github.katjahahn.msdos.MSDOSHeaderKey;
+import com.github.katjahahn.optheader.DataDirectoryKey;
+import com.github.katjahahn.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.optheader.WindowsEntryKey;
+import com.github.katjahahn.sections.SectionTableEntryKey;
+import com.github.katjahahn.sections.rsrc.ResourceDataEntryKey;
+
 /**
  * A data class for a typical entry of PE Headers
  * 
  * @author Katja Hahn
- *
+ * 
  */
 public class StandardEntry {
 
@@ -38,6 +46,38 @@ public class StandardEntry {
 		this.key = key;
 		this.description = description;
 		this.value = value;
+	}
+
+	/**
+	 * @constructor Creates a standard entry with the values specified.
+	 * 
+	 * @param key
+	 * @param description
+	 * @param value
+	 */
+	public StandardEntry(String key, String description, long value) {
+		this.key = getKeyForString(key);
+		if (key == null) {
+			throw new IllegalArgumentException("illegal key string");
+		}
+		this.description = description;
+		this.value = value;
+	}
+
+	//XXX: This is not maintainable. Get rid of it.
+	private HeaderKey getKeyForString(String str) {
+		HeaderKey[][] keyList = { COFFHeaderKey.values(),
+				MSDOSHeaderKey.values(), StandardFieldEntryKey.values(),
+				WindowsEntryKey.values(), DataDirectoryKey.values(),
+				SectionTableEntryKey.values(), ResourceDataEntryKey.values()};
+		for(HeaderKey[] keyArray : keyList) {
+			for(HeaderKey key : keyArray) {
+				if(key.toString().equalsIgnoreCase(str)) {
+					return key;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

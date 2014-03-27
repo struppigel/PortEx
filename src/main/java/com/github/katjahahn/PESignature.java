@@ -31,8 +31,14 @@ import java.io.RandomAccessFile;
 public class PESignature extends PEModule {
 
 	private static final int PE_OFFSET_LOCATION = 0x3c;
+	
 	private static final byte[] PE_SIG = "PE\0\0".getBytes();
+	
+	/**
+	 * The length of the PE signature is {@value} //TODO javadoc tag is ignored
+	 */
 	public static final int PE_SIG_LENGTH = PE_SIG.length;
+
 	private int peOffset = -1;
 	private final File file;
 
@@ -82,6 +88,9 @@ public class PESignature extends PEModule {
 		return peOffset;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getInfo() {
 		return "-------------" + NL + "PE Signature" + NL + "-------------"

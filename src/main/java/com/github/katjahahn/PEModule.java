@@ -18,12 +18,19 @@ package com.github.katjahahn;
 import java.io.IOException;
 
 /**
+ * Represents a common structure of a PE like certain headers or the section table
+ * 
  * @author Katja Hahn
  *
  */
 public abstract class PEModule {
 
 	public static final String NL = System.getProperty("line.separator");
+	
+	/**
+	 * Returns a description string of the {@link PEModule}.
+	 * @return
+	 */
 	public abstract String getInfo();
 	
 	public abstract void read() throws IOException;

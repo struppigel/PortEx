@@ -43,7 +43,7 @@ class StandardDataEntry[K <: Enumeration] (
   }
  
   def apply(key: K#Value): Long = {
-    entries.find(x => x.key == key.toString) match {
+    entries.find(x => x.key.toString == key.toString) match {
       case Some(e) => e.value 
       case None => throw new IllegalArgumentException
     }

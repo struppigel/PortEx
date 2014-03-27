@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.sections.idata
 
 import scala.collection.mutable.ListBuffer
@@ -25,8 +27,8 @@ import com.github.katjahahn.sections.idata.IDataEntryKey._
 import com.github.katjahahn.ByteArrayUtil._
 
 class IDataEntry(private val entrybytes: Array[Byte],
-    private val specification: Map[String, Array[String]],
-    private val entries: Map[IDataEntryKey, StandardEntry]) extends PEModule {
+  private val specification: Map[String, Array[String]],
+  private val entries: Map[IDataEntryKey, StandardEntry]) extends PEModule {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -69,7 +71,7 @@ object IDataEntry {
       val entry = new StandardEntry(key, description, value)
       buffer += entry
     }
-    val entries: Map[IDataEntryKey, StandardEntry] = (buffer map { t => (IDataEntryKey.withName(t.key), t) }).toMap;
+    val entries: Map[IDataEntryKey, StandardEntry] = (buffer map { t => (t.key.asInstanceOf[IDataEntryKey], t) }).toMap;
     new IDataEntry(entrybytes, specification, entries)
   }
 }
