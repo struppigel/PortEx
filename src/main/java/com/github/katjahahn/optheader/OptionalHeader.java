@@ -105,7 +105,8 @@ public class OptionalHeader extends PEModule {
 	 * Returns the data directory entry for the given key. //TODO use map
 	 * 
 	 * @param key
-	 * @return the data directory entry for the given key
+	 * @return the data directory entry for the given key. null if key doesn't
+	 *         exist.
 	 */
 	public DataDirEntry getDataDirEntry(DataDirectoryKey key) {
 		for (DataDirEntry entry : dataDirEntries) {
@@ -120,7 +121,8 @@ public class OptionalHeader extends PEModule {
 	 * Returns the standard field entry for the given key. //TODO use map
 	 * 
 	 * @param key
-	 * @return the standard field entry for the given key
+	 * @return the standard field entry for the given key, null if key doesn't
+	 *         exist.
 	 */
 	public StandardEntry getStandardFieldEntry(StandardFieldEntryKey key) {
 		for (StandardEntry entry : standardFields) {
@@ -135,7 +137,8 @@ public class OptionalHeader extends PEModule {
 	 * Returns the windows field entry for the given key.
 	 * 
 	 * @param key
-	 * @return the windows field entry for the given key
+	 * @return the windows field entry for the given key, null if key doesn't
+	 *         exist
 	 */
 	public StandardEntry getWindowsFieldEntry(WindowsEntryKey key) {
 		for (StandardEntry entry : windowsFields) {
@@ -220,7 +223,7 @@ public class OptionalHeader extends PEModule {
 			windowsFields
 					.add(new StandardEntry(key, specs[description], value));
 			if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
-				this.rvaNumber = (int) value; //always 4 Bytes
+				this.rvaNumber = (int) value; // always 4 Bytes
 			}
 		}
 	}
@@ -246,8 +249,8 @@ public class OptionalHeader extends PEModule {
 		for (DataDirEntry entry : dataDirEntries) {
 			b.append(entry.key + ": " + entry.virtualAddress + "(0x"
 					+ Long.toHexString(entry.virtualAddress) + ")/"
-					+ entry.size + "(0x" + Long.toHexString(entry.size)
-					+ ")" + NL);
+					+ entry.size + "(0x" + Long.toHexString(entry.size) + ")"
+					+ NL);
 		}
 		return b.toString();
 	}
@@ -270,7 +273,11 @@ public class OptionalHeader extends PEModule {
 						+ getImageBaseDescription(value) + NL);
 			} else if (key.equals(SUBSYSTEM)) {
 				b.append(description + ": "
-						+ getSubsystemDescription((int) value) + NL); //subsystem has only 2 Bytes
+						+ getSubsystemDescription((int) value) + NL); // subsystem
+																		// has
+																		// only
+																		// 2
+																		// Bytes
 			} else if (key.equals(DLL_CHARACTERISTICS)) {
 				b.append(NL + description + ": " + NL);
 				b.append(IOUtil.getCharacteristics(value, "dllcharacteristics")
@@ -281,7 +288,7 @@ public class OptionalHeader extends PEModule {
 				b.append(description + ": " + value + " (0x"
 						+ Long.toHexString(value) + ")" + NL);
 				if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
-					rvaNumber = (int) value; //rva nr has always 4 Bytes
+					rvaNumber = (int) value; // rva nr has always 4 Bytes
 				}
 			}
 		}

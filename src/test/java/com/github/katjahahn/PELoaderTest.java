@@ -15,21 +15,41 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.Test;
+import org.testng.annotations.BeforeSuite;
 
-public class IOUtilTest {
+import com.github.katjahahn.IOUtil.TestData;
 
-	@Test //TODO
-	public void readArray() throws IOException {
-		List<String[]> spec = IOUtil.readArray("msdosheaderspec");
+public class PELoaderTest {
+
+	private static List<TestData> testData;
+	private static final Map<String, PEData> peData = new HashMap<>();
+
+	@BeforeSuite(alwaysRun = true)
+	public static void loadPE() throws IOException {
+		File[] testfiles = IOUtil.getTestiles();
+		for (File file : testfiles) {
+			peData.put(file.getName(), PELoader.loadPE(file));
+		}
+		testData = IOUtil.readTestDataList();
 	}
 
-	@Test //TODO
-	public void readMap() throws IOException {
-		Map<String, String[]> map = IOUtil.readMap("msdosheaderspec");
+	public static List<TestData> getTestData() throws IOException {
+		if (testData == null) {
+			loadPE();
+		}
+		return testData;
+	}
+
+	public static Map<String, PEData> getPEData() throws IOException {
+		if (peData == null) {
+			loadPE();
+		}
+		return peData;
 	}
 }

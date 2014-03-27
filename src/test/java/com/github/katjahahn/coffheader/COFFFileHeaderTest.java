@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Katja Hahn
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.github.katjahahn.coffheader;
 
 import static org.testng.Assert.*;
@@ -14,24 +29,21 @@ import java.util.Map.Entry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.IOUtil.TestData;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
+import com.github.katjahahn.PELoaderTest;
 
 public class COFFFileHeaderTest {
-
-	private List<TestData> testdata;
-	private final Map<String, PEData> pedata = new HashMap<>();
+	
 	private COFFFileHeader winRarCoff;
+	private List<TestData> testdata;
+	private Map<String, PEData> pedata = new HashMap<>();
 
 	@BeforeClass
 	public void prepare() throws IOException {
-		File[] testfiles = IOUtil.getTestiles();
-		for (File file : testfiles) {
-			pedata.put(file.getName(), PELoader.loadPE(file));
-		}
-		testdata = IOUtil.readTestDataList();
+		testdata = PELoaderTest.getTestData();
+		pedata = PELoaderTest.getPEData();
 		winRarCoff = PELoader.loadPE(new File("WinRar.exe"))
 				.getCOFFFileHeader();
 	}
@@ -70,18 +82,19 @@ public class COFFFileHeaderTest {
 	public void getMachineType() {
 		assertEquals(winRarCoff.getMachineType(), MachineType.I386);
 	}
-	
+
 	@Test
 	public void getCharacteristics() {
 		for (TestData testdatum : testdata) {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS).trim();
+			String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS)
+					.trim();
 			int expected = convertToInt(value);
 			int actual = pedatum.getCOFFFileHeader().getCharacteristics();
 			assertEquals(expected, actual);
 		}
 	}
-	
+
 	@Test
 	public void getInfo() {
 		String info = winRarCoff.getInfo();
@@ -94,7 +107,7 @@ public class COFFFileHeaderTest {
 		List<String> description = winRarCoff.getCharacteristicsDescriptions();
 		assertEquals(description.size(), 5);
 	}
-	
+
 	@Test
 	public void getNumberOfSections() {
 		for (TestData testdatum : testdata) {
@@ -111,7 +124,8 @@ public class COFFFileHeaderTest {
 	public void getSizeOfOptionalHeader() {
 		for (TestData testdatum : testdata) {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			String value = testdatum.coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER).trim();
+			String value = testdatum.coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
+					.trim();
 			int expected = convertToInt(value);
 			int actual = pedatum.getCOFFFileHeader().getSizeOfOptionalHeader();
 			assertEquals(expected, actual);
