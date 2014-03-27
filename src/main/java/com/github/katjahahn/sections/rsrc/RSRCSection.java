@@ -42,8 +42,8 @@ public class RSRCSection extends PESection {
 	private ResourceDirectoryTable resourceTree;
 
 	public RSRCSection(byte[] rsrcbytes, int virtualAddress) {
-		super(rsrcbytes);
-		this.rsrcbytes = rsrcbytes;
+		super(rsrcbytes.clone());
+		this.rsrcbytes = rsrcbytes.clone();
 		this.virtualAddress = virtualAddress;
 		try {
 			rsrcDirSpec = IOUtil.readMap(RSRC_DIR_SPEC);

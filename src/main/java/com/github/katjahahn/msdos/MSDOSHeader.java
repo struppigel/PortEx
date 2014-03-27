@@ -48,7 +48,7 @@ public class MSDOSHeader extends PEModule {
 	private final byte[] headerbytes;
 
 	public MSDOSHeader(byte[] headerbytes) {
-		this.headerbytes = headerbytes;
+		this.headerbytes = headerbytes.clone();
 	}
 	
 	@Override

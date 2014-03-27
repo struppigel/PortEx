@@ -26,11 +26,11 @@ public class PESection extends PEModule {
 	protected PESection() {}
 
 	public PESection(byte[] sectionbytes) {
-		this.sectionbytes = sectionbytes;
+		this.sectionbytes = sectionbytes.clone();
 	}
 	
 	public byte[] getDump() {
-		return sectionbytes;
+		return sectionbytes.clone();
 	}
 
 	@Override

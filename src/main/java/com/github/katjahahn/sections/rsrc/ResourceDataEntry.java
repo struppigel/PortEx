@@ -36,7 +36,7 @@ public class ResourceDataEntry extends PEModule {
 
 	public ResourceDataEntry(byte[] entryBytes) {
 		try {
-			this.entryBytes = entryBytes;
+			this.entryBytes = entryBytes.clone();
 			resourceDataEntrySpec = IOUtil.readMap(RSRC_DATA_ENTRY_SPEC);
 		} catch (IOException e) {
 			e.printStackTrace();

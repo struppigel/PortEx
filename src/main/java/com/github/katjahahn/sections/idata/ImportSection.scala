@@ -51,7 +51,7 @@ class ImportSection(
         case ROM => throw new IllegalArgumentException
       }
       do {
-        entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress)
+        entry = LookupTableEntry(idatabytes.clone, offset.toInt, EntrySize, virtualAddress)
         if(!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
       } while (!entry.isInstanceOf[NullEntry])

@@ -67,7 +67,7 @@ public class MSDOSLoadModule extends PEModule {
 		if (loadModuleBytes == null) {
 			read();
 		}
-		return loadModuleBytes;
+		return loadModuleBytes.clone();
 	}
 
 	@Override

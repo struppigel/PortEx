@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools.sigscanner
 
 import java.io.File
@@ -44,10 +46,10 @@ class Jar2ExeScanner(file: File) {
    * A list containing the signatures and addresses where they where found.
    */
   lazy val scanResult: List[ScanResult] = scanner._findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
-  
+
   /**
    * Returns a list with all signature scan result data found in the file.
-   * 
+   *
    * @return list with jar related signatures found in the file
    */
   def scan(): java.util.List[MatchedSignature] = scanResult.map(SignatureScanner.toMatchedSignature).asJava
@@ -64,7 +66,7 @@ class Jar2ExeScanner(file: File) {
 
   def readZipEntriesAt(pos: Long): java.util.List[String] =
     _readZipEntriesAt(pos).asJava
-  
+
   def _readZipEntriesAt(pos: Long): List[String] = {
     val raf = new RandomAccessFile(file, "r")
     val is = Channels.newInputStream(raf.getChannel().position(pos))
@@ -123,9 +125,9 @@ class Jar2ExeScanner(file: File) {
    * @return a list of addresses where a zip/jar with entries was found
    */
   def getZipAddresses(): java.util.List[java.lang.Long] = {
-    _getZipAddresses().map(new java.lang.Long(_)).asJava
+    _getZipAddresses().map(java.lang.Long.valueOf(_)).asJava
   }
-  
+
   private def _getZipAddresses(): List[Address] = {
     val possibleAddr = getPossibleZipAddresses()
     var entryNr = 0
@@ -152,8 +154,8 @@ class Jar2ExeScanner(file: File) {
    * @return a list of addresses that might be the beginning of an embedded jar
    */
   def getPossibleClassAddresses(): java.util.List[java.lang.Long] =
-    _getPossibleClassAddresses.map(new java.lang.Long(_)).asJava
-    
+    _getPossibleClassAddresses.map(java.lang.Long.valueOf(_)).asJava
+
   private def _getPossibleClassAddresses(): List[Address] =
     for ((sig, addr) <- scanResult; if sig.name == "[CAFEBABE]") yield addr
 
@@ -165,21 +167,21 @@ class Jar2ExeScanner(file: File) {
    * @param dest the location to save the dump to
    */
   def dumpAt(addr: Long, dest: File): Unit = {
-    val raf = new RandomAccessFile(file, "r")
-    val out = new FileOutputStream(dest)
-    try {
-      raf.seek(addr)
-      val buffer = Array.fill(1024)(0.toByte)
-      var bytesRead = raf.read(buffer)
-      while (bytesRead > 0) {
-        out.write(buffer, 0, bytesRead)
-        bytesRead = raf.read(buffer)
+    using(new RandomAccessFile(file, "r")) { raf =>
+      using(new FileOutputStream(dest)) { out =>
+        raf.seek(addr)
+        val buffer = Array.fill(1024)(0.toByte)
+        var bytesRead = raf.read(buffer)
+        while (bytesRead > 0) {
+          out.write(buffer, 0, bytesRead)
+          bytesRead = raf.read(buffer)
+        }
       }
-    } finally {
-      raf.close()
-      out.close()
     }
   }
+
+  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
+    try { f(param) } finally { param.close() }
 
 }
 
@@ -188,7 +190,7 @@ object Jar2ExeScanner {
   private val version = """version: 0.1
     |author: Katja Hahn
     |last update: 6.Feb 2014""".stripMargin
-    
+
   private val title = "jwscan v0.1 -- by deque"
 
   private val usage = """Usage: java -jar jwscan.jar [-d <hexoffset>] <PEfile>

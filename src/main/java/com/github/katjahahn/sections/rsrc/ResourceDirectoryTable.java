@@ -53,7 +53,7 @@ public class ResourceDirectoryTable extends PEModule {
 	public ResourceDirectoryTable(Map<String, String[]> rsrcDirSpec,
 			byte[] tableBytes, int id, int offset) throws IOException {
 		this.rsrcDirSpec = rsrcDirSpec;
-		this.tableBytes = tableBytes;
+		this.tableBytes = tableBytes.clone();
 		this.id = id;
 		this.offset = offset;
 	}
@@ -176,7 +176,7 @@ public class ResourceDirectoryTable extends PEModule {
 	}
 
 	public Date getStamp() {
-		return stamp;
+		return (Date) stamp.clone();
 	}
 
 }

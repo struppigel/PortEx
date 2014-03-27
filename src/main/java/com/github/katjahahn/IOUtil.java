@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.github.katjahahn.coffheader.COFFHeaderKey;
@@ -240,16 +241,16 @@ public class IOUtil {
 		List<String> characteristics = new LinkedList<>();
 		try {
 			Map<String, String[]> map = readMap(filename);
-			for (String maskStr : map.keySet()) {
+			for (Entry<String, String[]> entry: map.entrySet()) {
 				try {
-					long mask = Long.parseLong(maskStr, 16);
+					long mask = Long.parseLong(entry.getKey(), 16);
 					if ((value & mask) != 0) {
-						characteristics.add(map.get(maskStr)[1]);
+						characteristics.add(entry.getValue()[1]);
 					}
 				} catch (NumberFormatException e) {
 					System.err.println("ERROR. number format mismatch in file "
 							+ filename + NL);
-					System.err.println("value: " + maskStr + NL);
+					System.err.println("value: " + entry.getKey() + NL);
 				}
 			}
 		} catch (IOException e) {
@@ -262,16 +263,16 @@ public class IOUtil {
 		StringBuilder b = new StringBuilder();
 		try {
 			Map<String, String[]> map = readMap(filename);
-			for (String maskStr : map.keySet()) {
+			for (Entry<String, String[]> entry : map.entrySet()) {
 				try {
-					long mask = Long.parseLong(maskStr, 16);
+					long mask = Long.parseLong(entry.getKey(), 16);
 					if ((value & mask) != 0) {
-						b.append("\t* " + map.get(maskStr)[1] + NL);
+						b.append("\t* " + entry.getValue()[1] + NL);
 					}
 				} catch (NumberFormatException e) {
 					b.append("ERROR. number format mismatch in file "
 							+ filename + NL);
-					b.append("value: " + maskStr + NL);
+					b.append("value: " + entry.getKey() + NL);
 				}
 			}
 		} catch (IOException e) {

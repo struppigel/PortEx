@@ -40,7 +40,7 @@ public class SectionTable extends PEModule {
 	private Map<String, String[]> specification;
 
 	public SectionTable(byte[] sectionTableBytes, int numberOfEntries) {
-		this.sectionTableBytes = sectionTableBytes;
+		this.sectionTableBytes = sectionTableBytes.clone();
 		this.numberOfEntries = numberOfEntries;
 		try {
 			specification = IOUtil.readMap(SECTION_TABLE_SPEC);

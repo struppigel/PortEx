@@ -41,7 +41,7 @@ public class ResourceDirectoryEntry extends PEModule {
 	public ResourceDirectoryEntry(boolean isNameEntry, byte[] entryBytes,
 			int entryNr, int parentId) throws IOException {
 		this.isNameEntry = isNameEntry;
-		this.entryBytes = entryBytes;
+		this.entryBytes = entryBytes.clone();
 		this.entryNr = entryNr;
 		this.parentId = parentId;
 		resourceDirEntrySpec = IOUtil.readMap(RSRC_DIR_ENTRY_SPEC);

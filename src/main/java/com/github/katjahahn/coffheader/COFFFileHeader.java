@@ -55,7 +55,7 @@ public class COFFFileHeader extends PEModule {
 	 */
 	public COFFFileHeader(byte[] headerbytes) {
 		assert headerbytes.length == HEADER_SIZE;
-		this.headerbytes = headerbytes;
+		this.headerbytes = headerbytes.clone();
 		try {
 			specification = IOUtil.readMap(COFF_SPEC_FILE);
 		} catch (NumberFormatException | IOException e) {

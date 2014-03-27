@@ -61,7 +61,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	public OptionalHeader(byte[] headerbytes) {
-		this.headerbytes = headerbytes;
+		this.headerbytes = headerbytes.clone();
 	}
 
 	@Override

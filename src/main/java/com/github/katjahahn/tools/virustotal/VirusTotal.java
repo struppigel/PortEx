@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.github.katjahahn.PEModule;
 import com.kanishka.virustotal.dto.FileScanReport;
@@ -94,9 +95,9 @@ public class VirusTotal {
 			Map<String, VirusScanInfo> scans = report.getScans();
 			if (scans == null)
 				return b.toString();
-			for (String key : scans.keySet()) {
-				VirusScanInfo virusInfo = scans.get(key);
-				b.append("Scanner : " + key + PEModule.NL);
+			for (Entry<String, VirusScanInfo> entry : scans.entrySet()) {
+				VirusScanInfo virusInfo = entry.getValue();
+				b.append("Scanner : " + entry.getKey() + PEModule.NL);
 				b.append("Result : " + virusInfo.getResult() + PEModule.NL);
 				b.append("Update : " + virusInfo.getUpdate() + PEModule.NL);
 				b.append("Version :" + virusInfo.getVersion() + PEModule.NL
