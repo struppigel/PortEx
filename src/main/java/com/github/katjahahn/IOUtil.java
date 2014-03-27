@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Katja Hahn
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.github.katjahahn;
 
 import java.io.BufferedReader;
@@ -88,7 +103,7 @@ public class IOUtil {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("DOS header")) {
-					data.dos = readDOS(reader);
+					readDOSAndPESig(data, reader);
 				}
 				if (line.contains("COFF header")) {
 					data.coff = readCOFF(reader);
@@ -104,7 +119,7 @@ public class IOUtil {
 		return data;
 	}
 
-	private static Map<MSDOSHeaderKey, String> readDOS(BufferedReader reader)
+	private static void readDOSAndPESig(TestData data, BufferedReader reader)
 			throws IOException {
 		Map<MSDOSHeaderKey, String> dos = new HashMap<>();
 		String line = null;
@@ -113,6 +128,10 @@ public class IOUtil {
 			if (split.length < 2) {
 				break;
 			}
+			if(split[0].contains("PE header offset")) {
+				data.peoffset = convertToInt(split[1].trim());
+				continue;
+			}
 			MSDOSHeaderKey key = getMSDOSKeyFor(split[0]);
 			if (key == null) {
 				continue;
@@ -120,9 +139,9 @@ public class IOUtil {
 			String value = split[1].trim();
 			dos.put(key, value);
 		}
-		return dos;
+		data.dos = dos;
 	}
-	
+
 	private static void readOpt(TestData data, BufferedReader reader)
 			throws IOException {
 		String line = null;
@@ -131,11 +150,12 @@ public class IOUtil {
 		while ((line = reader.readLine()) != null) {
 			String[] split = line.split(":");
 			if (split.length < 2) {
-				break;
+				continue;
 			}
-			String value = split[1].trim().split("\\s")[0]; //remove everything after whitespace
+			String value = split[1].trim().split("\\s")[0]; // remove everything
+															// after whitespace
 			StandardFieldEntryKey sKey = getStandardKeyFor(split[0]);
-			if(sKey == null) {
+			if (sKey == null) {
 				WindowsEntryKey wKey = getWindowsKeyFor(split[0]);
 				if (wKey != null) {
 					data.windowsOpt.put(wKey, value);
@@ -143,9 +163,12 @@ public class IOUtil {
 			} else {
 				data.standardOpt.put(sKey, value);
 			}
+			if (line.contains("Data-dictionary entries")) {
+				break;
+			}
 		}
 	}
-	
+
 	private static Map<COFFHeaderKey, String> readCOFF(BufferedReader reader)
 			throws IOException {
 		Map<COFFHeaderKey, String> coff = new HashMap<>();
@@ -159,7 +182,8 @@ public class IOUtil {
 			if (key == null) {
 				continue;
 			}
-			String value = split[1].trim().split("\\s")[0]; //remove everything after whitespace
+			String value = split[1].trim().split("\\s")[0]; // remove everything
+															// after whitespace
 			coff.put(key, value);
 		}
 		return coff;
@@ -259,6 +283,7 @@ public class IOUtil {
 		return b.toString();
 	}
 
+	//TODO test for correctly extracted entry number
 	private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
 		if (string.contains("Bytes in last page")) {
 			return MSDOSHeaderKey.LAST_PAGE_SIZE;
@@ -359,71 +384,80 @@ public class IOUtil {
 	}
 
 	private static WindowsEntryKey getWindowsKeyFor(String string) {
-			if (string.contains("checksum")) {
-				return WindowsEntryKey.CHECKSUM;
-			}
-			if (string.contains("DLL characteristics")) {
-				return WindowsEntryKey.DLL_CHARACTERISTICS;
-			}
-			if (string.contains("Alignment factor")) {
-				return WindowsEntryKey.FILE_ALIGNMENT;
-			}
-			if (string.contains("Imagebase")) {
-				return WindowsEntryKey.IMAGE_BASE;
-			}
-			if (string.contains("Address of .code")) {
-				return WindowsEntryKey.LOADER_FLAGS;
-			}
-			if (string.contains("Major version of image")) {
-				return WindowsEntryKey.MAJOR_IMAGE_VERSION;
-			}
-			if (string.contains("Major version of required OS")) {
-				return WindowsEntryKey.MAJOR_OS_VERSION;
-			}
-			if (string.contains("Major version of subsystem")) {
-				return WindowsEntryKey.MAJOR_SUBSYSTEM_VERSION;
-			}
-			if (string.contains("Minor version of image")) {
-				return WindowsEntryKey.MINOR_IMAGE_VERSION;
-			}
-			if (string.contains("Minor version of required OS")) {
-				return WindowsEntryKey.MINOR_OS_VERSION;
-			}
-			if (string.contains("Minor version of subsystem")) {
-				return WindowsEntryKey.MINOR_SUBSYSTEM_VERSION;
-			}
-			if (string.contains("Data-dictionary entries")) {
-				return WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES;
-			}
-			if (string.contains("Alignment of sections")) {
-				return WindowsEntryKey.SECTION_ALIGNMENT;
-			}
-			if (string.contains("Size of headers")) {
-				return WindowsEntryKey.SIZE_OF_HEADERS;
-			}
-			if (string.contains("Size of heap space to commit")) {
-				return WindowsEntryKey.SIZE_OF_HEAP_COMMIT;
-			}
-			if (string.contains("Size of heap space to reserve")) {
-				return WindowsEntryKey.SIZE_OF_HEAP_RESERVE;
-			}
-			if (string.contains("Size of image")) {
-				return WindowsEntryKey.SIZE_OF_IMAGE;
-			}
-			if (string.contains("Size of stack to commit")) {
-				return WindowsEntryKey.SIZE_OF_STACK_COMMIT;
-			}
-			if (string.contains("Size of stack to reserve")) {
-				return WindowsEntryKey.SIZE_OF_STACK_RESERVE;
-			}
-			if (string.contains("Subsystem required")) {
-				return WindowsEntryKey.SUBSYSTEM;
-			}
-	//		if (string.contains("")) { TODO missing in report (?)
-	//			return WindowsEntryKey.WIN32_VERSION_VALUE;
-	//		}
-			return null;
+		if (string.contains("checksum")) {
+			return WindowsEntryKey.CHECKSUM;
 		}
+		if (string.contains("DLL characteristics")) {
+			return WindowsEntryKey.DLL_CHARACTERISTICS;
+		}
+		if (string.contains("Alignment factor")) {
+			return WindowsEntryKey.FILE_ALIGNMENT;
+		}
+		if (string.contains("Imagebase")) {
+			return WindowsEntryKey.IMAGE_BASE;
+		}
+		if (string.contains("Address of .code")) {
+			return WindowsEntryKey.LOADER_FLAGS;
+		}
+		if (string.contains("Major version of image")) {
+			return WindowsEntryKey.MAJOR_IMAGE_VERSION;
+		}
+		if (string.contains("Major version of required OS")) {
+			return WindowsEntryKey.MAJOR_OS_VERSION;
+		}
+		if (string.contains("Major version of subsystem")) {
+			return WindowsEntryKey.MAJOR_SUBSYSTEM_VERSION;
+		}
+		if (string.contains("Minor version of image")) {
+			return WindowsEntryKey.MINOR_IMAGE_VERSION;
+		}
+		if (string.contains("Minor version of required OS")) {
+			return WindowsEntryKey.MINOR_OS_VERSION;
+		}
+		if (string.contains("Minor version of subsystem")) {
+			return WindowsEntryKey.MINOR_SUBSYSTEM_VERSION;
+		}
+		if (string.contains("Data-dictionary entries")) {
+			return WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES;
+		}
+		if (string.contains("Alignment of sections")) {
+			return WindowsEntryKey.SECTION_ALIGNMENT;
+		}
+		if (string.contains("Size of headers")) {
+			return WindowsEntryKey.SIZE_OF_HEADERS;
+		}
+		if (string.contains("Size of heap space to commit")) {
+			return WindowsEntryKey.SIZE_OF_HEAP_COMMIT;
+		}
+		if (string.contains("Size of heap space to reserve")) {
+			return WindowsEntryKey.SIZE_OF_HEAP_RESERVE;
+		}
+		if (string.contains("Size of image")) {
+			return WindowsEntryKey.SIZE_OF_IMAGE;
+		}
+		if (string.contains("Size of stack to commit")) {
+			return WindowsEntryKey.SIZE_OF_STACK_COMMIT;
+		}
+		if (string.contains("Size of stack to reserve")) {
+			return WindowsEntryKey.SIZE_OF_STACK_RESERVE;
+		}
+		if (string.contains("Subsystem required")) {
+			return WindowsEntryKey.SUBSYSTEM;
+		}
+		// if (string.contains("")) { TODO missing in report (?)
+		// return WindowsEntryKey.WIN32_VERSION_VALUE;
+		// }
+		return null;
+	}
+	
+	private static int convertToInt(String value) {
+		if (value.startsWith("0x")) {
+			value = value.replace("0x", "");
+			return Integer.parseInt(value, 16);
+		} else {
+			return Integer.parseInt(value);
+		}
+	}
 
 	public static class TestData {
 
@@ -435,6 +469,7 @@ public class IOUtil {
 		public List<SectionTableEntry> sections;
 		public List<ResourceDataEntry> resources;
 		public String filename;
+		public int peoffset;
 	}
 
 }

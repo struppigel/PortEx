@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Katja Hahn
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.github.katjahahn;
 
 import java.util.Arrays;
@@ -13,13 +28,13 @@ import java.util.Arrays;
 public class ByteArrayUtil {
 	
 	/**
-	 * Gets the integer value of a subarray of bytes. The values are considered
+	 * Retrieves the integer value of a subarray of bytes. The values are considered
 	 * little endian. The subarray is determined by offset and length.
 	 * 
 	 * @param bytes
 	 * @param offset
 	 * @param length
-	 * @return
+	 * @return int value
 	 */
 	public static int getBytesIntValue(byte[] bytes, int offset, int length) {
 		byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
@@ -27,13 +42,13 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Gets the long value of a subarray of bytes. The values are considered
+	 * Retrieves the long value of a subarray of bytes. The values are considered
 	 * little endian. The subarray is determined by offset and length.
 	 * 
 	 * @param bytes
 	 * @param offset
 	 * @param length
-	 * @return
+	 * @return long value
 	 */
 	public static long getBytesLongValue(byte[] bytes, int offset, int length) {
 		byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
@@ -41,12 +56,12 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Helping method to convert a byte array to a hex String
+	 * Converts a byte array to a hex string.
 	 * 
 	 * @param array
-	 * @return
+	 * @return hexadecimal string representation of the byte array
 	 */
-	public static String convertByteToHex(byte array[]) {
+	public static String byteToHex(byte array[]) {
 		StringBuilder buffer = new StringBuilder();
 		for (int i = 0; i < array.length; i++) {
 			if ((array[i] & 0xff) < 0x10) {
@@ -58,7 +73,7 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Helping method to convert a byte array to an int. The bytes are
+	 * Converts a byte array to an int. The bytes are
 	 * considered unsigned and little endian (first byte is the least
 	 * significant).
 	 * 
@@ -75,12 +90,12 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Helping method to convert a byte array to a long. The bytes are
+	 * Converts a byte array to a long. The bytes are
 	 * considered unsigned and little endian (first byte is the least
 	 * significant).
 	 * 
 	 * @param bytes
-	 * @return
+	 * @return 
 	 */
 	public static long bytesToLong(byte[] bytes) {
 		long value = 0;

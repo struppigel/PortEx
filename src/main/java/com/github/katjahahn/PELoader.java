@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Katja Hahn
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.github.katjahahn;
 
 import java.io.File;
@@ -7,9 +22,7 @@ import java.io.RandomAccessFile;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.idata.ImportSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -99,10 +112,10 @@ public class PELoader {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("WinRar.exe");
+		File file = new File("joined.exe");
 		PEData data = PELoader.loadPE(file);
-
-		SectionTable table = data.getSectionTable();
+		System.out.println("pe offset: 0x" + Integer.toHexString(data.getPESignature().getPEOffset()));
+//		SectionTable table = data.getSectionTable();
 //		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
 //				.getDataDirEntries();
 		// for (DataDirEntry entry : dataDirEntries) {
@@ -114,17 +127,17 @@ public class PELoader {
 		// System.out.println();
 		// }
 
-		SectionLoader loader = new SectionLoader(table,
-				data.getOptionalHeader(), file);
+//		SectionLoader loader = new SectionLoader(table,
+//				data.getOptionalHeader(), file);
 
 		// System.out.println(data.getCOFFFileHeader().getInfo());
 		// System.out.println(data.getOptionalHeader().getInfo());
 		// System.out.println(table.getInfo());
 		// System.out.println(data.getMSDOSHeader().getInfo());
 		// System.out.println(data.getPESignature().getInfo());
-		 ImportSection idata = loader.loadImportSection();
-		 System.out.println(loader.loadRsrcSection().getInfo());
-		 System.out.println(idata.getInfo());
+		// ImportSection idata = loader.loadImportSection();
+		// System.out.println(loader.loadRsrcSection().getInfo());
+		// System.out.println(idata.getInfo());
 
 		// new Overlay(new File("Minecraft.exe"), new
 		// File("Minecraftout.jar")).dump();
