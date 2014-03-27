@@ -1,5 +1,6 @@
 package com.github.katjahahn.optheader;
 
+import static com.github.katjahahn.optheader.DataDirectoryKey.*;
 import static org.testng.Assert.*;
 
 import java.io.File;
@@ -16,6 +17,8 @@ import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.IOUtil.TestData;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
+import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.optheader.OptionalHeader.MagicNumber;
 
 public class OptionalHeaderTest {
 
@@ -32,45 +35,82 @@ public class OptionalHeaderTest {
 	}
 
 	@Test
+	// TODO read from report
 	public void getDataDirEntries() {
-		throw new RuntimeException("Test not implemented");
+		for (PEData pedatum : pedata.values()) {
+			List<DataDirEntry> list = pedatum.getOptionalHeader()
+					.getDataDirEntries();
+			assertNotNull(list);
+			assertTrue(list.size() > 0);
+		}
 	}
 
 	@Test
 	public void getDataDirEntry() {
-		throw new RuntimeException("Test not implemented");
+		OptionalHeader header = pedata.get("strings.exe").getOptionalHeader();
+		DataDirectoryKey[] existant = { IMPORT_TABLE, RESOURCE_TABLE,
+				CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT};
+		for(DataDirectoryKey key : DataDirectoryKey.values()) {
+			DataDirEntry entry = header.getDataDirEntry(key);
+			if(isIn(existant, key)) {
+				assertNotNull(entry);
+			} else {
+				assertNull(entry);
+			}
+		}
+	}
+
+	private <T> boolean isIn(T[] array, T item) {
+		for (T t : array) {
+			if (t.equals(item)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Test
 	public void getDataDirInfo() {
-		throw new RuntimeException("Test not implemented");
+		String info = pedata.get("strings.exe").getOptionalHeader()
+				.getDataDirInfo();
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 
 	@Test
+	// TODO maybe better
 	public void getImageBaseDescription() {
-		throw new RuntimeException("Test not implemented");
+		String info = OptionalHeader.getImageBaseDescription(0x10000000);
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 
 	@Test
 	public void getInfo() {
-		throw new RuntimeException("Test not implemented");
+		String info = pedata.get("strings.exe").getOptionalHeader().getInfo();
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 
 	@Test
-	public void getMagicNumber() {
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void getMagicNumberString() {
-		throw new RuntimeException("Test not implemented");
+	public void getMagicNumberAndString() {
+		for (TestData testdatum : testdata) {
+			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+			OptionalHeader opt = pedatum.getOptionalHeader();
+			MagicNumber magic = opt.getMagicNumber();
+			String string = OptionalHeader.getMagicNumberString(magic);
+			assertNotNull(magic);
+			assertNotNull(string);
+			assertTrue(string.length() > 0);
+		}
 	}
 
 	@Test
 	public void getStandardFieldEntry() {
 		for (TestData testdatum : testdata) {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			for (Entry<StandardFieldEntryKey, String> entry : testdatum.standardOpt.entrySet()) {
+			for (Entry<StandardFieldEntryKey, String> entry : testdatum.standardOpt
+					.entrySet()) {
 				StandardFieldEntryKey key = entry.getKey();
 				OptionalHeader opt = pedatum.getOptionalHeader();
 				Long actual = opt.getStandardFieldEntry(key).value;
@@ -80,8 +120,8 @@ public class OptionalHeaderTest {
 			}
 		}
 	}
-	
-	//TODO in Oberklasse auslagern, ebenso prepare
+
+	// TODO in Oberklasse auslagern, ebenso prepare
 	private long convertToLong(String value) {
 		if (value.startsWith("0x")) {
 			value = value.replace("0x", "");
@@ -93,24 +133,36 @@ public class OptionalHeaderTest {
 
 	@Test
 	public void getStandardFields() {
-		throw new RuntimeException("Test not implemented");
+		for (PEData pedatum : pedata.values()) {
+			List<StandardEntry> list = pedatum.getOptionalHeader()
+					.getStandardFields();
+			assertNotNull(list);
+			assertEquals(list.size(), StandardFieldEntryKey.values().length);
+		}
 	}
 
 	@Test
 	public void getStandardFieldsInfo() {
-		throw new RuntimeException("Test not implemented");
+		String info = pedata.get("strings.exe").getOptionalHeader()
+				.getStandardFieldsInfo();
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 
 	@Test
+	// TODO maybe better
 	public void getSubsystemDescription() {
-		throw new RuntimeException("Test not implemented");
+		String info = OptionalHeader.getSubsystemDescription(13);
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 
 	@Test
 	public void getWindowsFieldEntry() {
 		for (TestData testdatum : testdata) {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			for (Entry<WindowsEntryKey, String> entry : testdatum.windowsOpt.entrySet()) {
+			for (Entry<WindowsEntryKey, String> entry : testdatum.windowsOpt
+					.entrySet()) {
 				WindowsEntryKey key = entry.getKey();
 				OptionalHeader opt = pedatum.getOptionalHeader();
 				long actual = opt.getWindowsFieldEntry(key).value;
@@ -123,16 +175,19 @@ public class OptionalHeaderTest {
 
 	@Test
 	public void getWindowsSpecificFields() {
-		throw new RuntimeException("Test not implemented");
+		for (PEData pedatum : pedata.values()) {
+			List<StandardEntry> list = pedatum.getOptionalHeader()
+					.getWindowsSpecificFields();
+			assertNotNull(list);
+			assertEquals(list.size(), WindowsEntryKey.values().length);
+		}
 	}
 
 	@Test
 	public void getWindowsSpecificInfo() {
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void readMagicNumber() {
-		throw new RuntimeException("Test not implemented");
+		String info = pedata.get("strings.exe").getOptionalHeader()
+				.getWindowsSpecificInfo();
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 }
