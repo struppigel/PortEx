@@ -23,7 +23,7 @@ package com.github.katjahahn;
  */
 public class StandardEntry {
 
-	public String key;
+	public HeaderKey key;
 	public String description;
 	public long value;
 
@@ -34,7 +34,7 @@ public class StandardEntry {
 	 * @param description
 	 * @param value
 	 */
-	public StandardEntry(String key, String description, long value) {
+	public StandardEntry(HeaderKey key, String description, long value) {
 		this.key = key;
 		this.description = description;
 		this.value = value;

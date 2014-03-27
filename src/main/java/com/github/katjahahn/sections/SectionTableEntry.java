@@ -37,11 +37,10 @@ public class SectionTableEntry {
 	}
 
 	public void add(StandardEntry entry) {
-		SectionTableEntryKey entryKey = SectionTableEntryKey.valueOf(entry.key);
-		if (entryKey != null) {
-			entries.put(entryKey, entry);
+		if(entry.key instanceof SectionTableEntryKey) {
+			entries.put((SectionTableEntryKey) entry.key, entry);
 		} else {
-			throw new IllegalArgumentException("invalid key"); //TODO maybe new StandardEntry class
+			throw new IllegalArgumentException("invalid key");
 		}
 	}
 

@@ -16,6 +16,8 @@
 package com.github.katjahahn.optheader;
 
 import static com.github.katjahahn.ByteArrayUtil.*;
+import static com.github.katjahahn.optheader.StandardFieldEntryKey.*;
+import static com.github.katjahahn.optheader.WindowsEntryKey.*;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
@@ -120,9 +123,8 @@ public class OptionalHeader extends PEModule {
 	 * @return the standard field entry for the given key
 	 */
 	public StandardEntry getStandardFieldEntry(StandardFieldEntryKey key) {
-		String keyString = key.toString();
 		for (StandardEntry entry : standardFields) {
-			if (entry.key.equals(keyString)) {
+			if (entry.key.equals(key)) {
 				return entry;
 			}
 		}
@@ -136,9 +138,8 @@ public class OptionalHeader extends PEModule {
 	 * @return the windows field entry for the given key
 	 */
 	public StandardEntry getWindowsFieldEntry(WindowsEntryKey key) {
-		String keyString = key.toString();
 		for (StandardEntry entry : windowsFields) {
-			if (entry.key.equals(keyString)) {
+			if (entry.key.equals(key)) {
 				return entry;
 			}
 		}
@@ -156,7 +157,7 @@ public class OptionalHeader extends PEModule {
 			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
-			String key = entry.getKey();
+			HeaderKey key = StandardFieldEntryKey.valueOf(entry.getKey());
 			standardFields
 					.add(new StandardEntry(key, specs[description], value));
 		}
@@ -215,16 +216,10 @@ public class OptionalHeader extends PEModule {
 			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
-			//TODO remove
-			if(value == 0x40000001) {
-				System.out.println("offset: " + specs[offsetLoc]);
-				System.out.println("length: " + specs[lengthLoc]);
-			}
-			
-			String key = entry.getKey();
+			WindowsEntryKey key = WindowsEntryKey.valueOf(entry.getKey());
 			windowsFields
 					.add(new StandardEntry(key, specs[description], value));
-			if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
+			if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
 				this.rvaNumber = (int) value; //always 4 Bytes
 			}
 		}
@@ -267,16 +262,16 @@ public class OptionalHeader extends PEModule {
 		StringBuilder b = new StringBuilder();
 		for (StandardEntry entry : windowsFields) {
 			long value = entry.value;
-			String key = entry.key;
+			HeaderKey key = entry.key;
 			String description = entry.description;
-			if (key.equals("IMAGE_BASE")) {
+			if (key.equals(IMAGE_BASE)) {
 				b.append(description + ": " + value + " (0x"
 						+ Long.toHexString(value) + "), "
 						+ getImageBaseDescription(value) + NL);
-			} else if (key.equals("SUBSYSTEM")) {
+			} else if (key.equals(SUBSYSTEM)) {
 				b.append(description + ": "
 						+ getSubsystemDescription((int) value) + NL); //subsystem has only 2 Bytes
-			} else if (key.equals("DLL_CHARACTERISTICS")) {
+			} else if (key.equals(DLL_CHARACTERISTICS)) {
 				b.append(NL + description + ": " + NL);
 				b.append(IOUtil.getCharacteristics(value, "dllcharacteristics")
 						+ NL);
@@ -285,7 +280,7 @@ public class OptionalHeader extends PEModule {
 			else {
 				b.append(description + ": " + value + " (0x"
 						+ Long.toHexString(value) + ")" + NL);
-				if (key.equals("NUMBER_OF_RVA_AND_SIZES")) {
+				if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
 					rvaNumber = (int) value; //rva nr has always 4 Bytes
 				}
 			}
@@ -301,12 +296,12 @@ public class OptionalHeader extends PEModule {
 		StringBuilder b = new StringBuilder();
 		for (StandardEntry entry : standardFields) {
 			long value = entry.value;
-			String key = entry.key;
+			HeaderKey key = entry.key;
 			String description = entry.description;
-			if (key.equals("MAGIC_NUMBER")) {
+			if (key.equals(MAGIC_NUMBER)) {
 				b.append(description + ": " + value + " --> "
 						+ getMagicNumberString(magicNumber) + NL);
-			} else if (key.equals("BASE_OF_DATA")) {
+			} else if (key.equals(BASE_OF_DATA)) {
 				if (magicNumber == MagicNumber.PE32) {
 					b.append(description + ": " + value + " (0x"
 							+ Long.toHexString(value) + ")" + NL);

@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.sections.rsrc;
-
 import static com.github.katjahahn.ByteArrayUtil.*;
+import static com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
@@ -65,19 +66,19 @@ public class ResourceDirectoryTable extends PEModule {
 			String[] specs = entry.getValue();
 			int value = getBytesIntValue(tableBytes,
 					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-			String key = entry.getKey();
+			ResourceDirectoryTableKey key = ResourceDirectoryTableKey.valueOf(entry.getKey());
 
-			if (key.equals("TIME_DATE_STAMP")) {
+			if (key.equals(TIME_DATE_STAMP)) {
 				stamp = getTimeDate(value);
 			}
 
-			if (key.equals("NR_OF_NAME_ENTRIES")) {
+			if (key.equals(NR_OF_NAME_ENTRIES)) {
 				nameEntries = value;
-			} else if (key.equals("NR_OF_ID_ENTRIES")) {
+			} else if (key.equals(NR_OF_ID_ENTRIES)) {
 				idEntries = value;
 			}
 
-			data.put(ResourceDirectoryTableKey.valueOf(key), new StandardEntry(
+			data.put(key, new StandardEntry(
 					key, specs[0], value));
 		}
 		if (nameEntries != 0 || idEntries != 0) {
@@ -152,10 +153,10 @@ public class ResourceDirectoryTable extends PEModule {
 		for (StandardEntry entry : data.values()) {
 
 			long value = entry.value;
-			String key = entry.key;
+			HeaderKey key = entry.key;
 			String description = entry.description;
 
-			if (key.equals("TIME_DATE_STAMP")) {
+			if (key.equals(TIME_DATE_STAMP)) {
 				b.append(description + ": ");
 				b.append(getTimeDate((int) value) + NL);
 			} else {

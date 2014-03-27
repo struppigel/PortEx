@@ -17,6 +17,7 @@ package com.github.katjahahn;
 
 /**
  * 
+ * Represents a key for a standard entry
  * 
  * @author Katja Hahn
  *

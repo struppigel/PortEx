@@ -63,9 +63,9 @@ public class SectionTable extends PEModule {
 				String[] specs = entry.getValue();
 				int value = getBytesIntValue(section, Integer.parseInt(specs[1]),
 						Integer.parseInt(specs[2]));
-				String key = entry.getKey();
+				SectionTableEntryKey key = SectionTableEntryKey.valueOf(entry.getKey());
 				
-				 if (key.equals("NAME")) {
+				 if (key.equals(SectionTableEntryKey.NAME)) {
 					 sectionEntry.setName(getUTF8String(section));
 					 continue;
 				 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
@@ -77,7 +78,7 @@ public class COFFFileHeader extends PEModule {
 			int value = getBytesIntValue(headerbytes,
 					Integer.parseInt(specs[offset]),
 					Integer.parseInt(specs[length]));
-			String key = entry.getKey();
+			HeaderKey key = COFFHeaderKey.valueOf(entry.getKey());
 			data.add(new StandardEntry(key, specs[description], value));
 		}
 	}
@@ -92,16 +93,16 @@ public class COFFFileHeader extends PEModule {
 		for (StandardEntry entry : data) {
 
 			int value = (int) entry.value; //COFF has no 8 Byte values
-			String key = entry.key;
+			HeaderKey key = entry.key;
 			String description = entry.description;
-			if (key.equals("CHARACTERISTICS")) {
+			if (key.equals(CHARACTERISTICS)) {
 				b.append(NL + description + ": " + NL);
 				b.append(IOUtil.getCharacteristics(value, "characteristics")
 						+ NL);
-			} else if (key.equals("TIME_DATE")) {
+			} else if (key.equals(TIME_DATE)) {
 				b.append(description + ": ");
 				b.append(convertToDate(value) + NL);
-			} else if (key.equals("MACHINE")) {
+			} else if (key.equals(MACHINE)) {
 				b.append(description + ": ");
 				b.append(getMachineTypeString(value) + NL);
 			} else {
@@ -145,9 +146,8 @@ public class COFFFileHeader extends PEModule {
 	 * @return
 	 */
 	public int get(COFFHeaderKey key) {
-		String keyString = key.toString();
 		for (StandardEntry entry : data) {
-			if (entry.key.equals(keyString)) {
+			if (entry.key.equals(key)) {
 				return (int) entry.value; //COFF has > 4 Byte values --> enough for int
 			}
 		}

@@ -63,12 +63,12 @@ public class MSDOSHeader extends PEModule {
 		try {
 			Map<String, String[]> map = IOUtil.readMap(specification);
 			for (Entry<String, String[]> entry : map.entrySet()) {
-				String key = entry.getKey();
+				MSDOSHeaderKey key = MSDOSHeaderKey.valueOf(entry.getKey());
 				String[] spec = entry.getValue();
 				int value = getBytesIntValue(headerbytes,
 						Integer.parseInt(spec[offsetLoc]),
 						Integer.parseInt(spec[sizeLoc]));
-				headerData.put(MSDOSHeaderKey.valueOf(key), new StandardEntry(key,
+				headerData.put(key, new StandardEntry(key,
 						spec[descriptionLoc], value));
 			}
 		} catch (IOException e) {

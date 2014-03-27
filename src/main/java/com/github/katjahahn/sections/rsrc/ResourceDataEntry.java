@@ -48,11 +48,11 @@ public class ResourceDataEntry extends PEModule {
 		data = new HashMap<>();
 		for (Entry<String, String[]> entry : resourceDataEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();
-			String key = entry.getKey();
+			ResourceDataEntryKey key = ResourceDataEntryKey.valueOf(entry.getKey());
 			int value = getBytesIntValue(entryBytes,
 					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 			String description = specs[0];
-			data.put(ResourceDataEntryKey.valueOf(key), new StandardEntry(key, description, value));
+			data.put(key, new StandardEntry(key, description, value));
 		}
 	}
 	
