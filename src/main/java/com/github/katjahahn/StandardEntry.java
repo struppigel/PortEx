@@ -21,6 +21,7 @@ import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntryKey;
+import com.github.katjahahn.sections.idata.IDataEntryKey;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntryKey;
 
 /**
@@ -64,12 +65,12 @@ public class StandardEntry {
 		this.value = value;
 	}
 
-	//XXX: This is not maintainable. Get rid of it.
+	//XXX: This is not maintainable, nor accurate (some keys have the same string). Get rid of it!
 	private HeaderKey getKeyForString(String str) {
 		HeaderKey[][] keyList = { COFFHeaderKey.values(),
 				MSDOSHeaderKey.values(), StandardFieldEntryKey.values(),
 				WindowsEntryKey.values(), DataDirectoryKey.values(),
-				SectionTableEntryKey.values(), ResourceDataEntryKey.values()};
+				SectionTableEntryKey.values(), ResourceDataEntryKey.values(), IDataEntryKey.values()};
 		for(HeaderKey[] keyArray : keyList) {
 			for(HeaderKey key : keyArray) {
 				if(key.toString().equalsIgnoreCase(str)) {
