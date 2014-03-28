@@ -45,8 +45,7 @@ public class OptionalHeaderTest {
 	}
 
 	@Test
-	// TODO read from report
-	public void getDataDirEntries() {
+	public void dataDirEntriesListValid() {
 		for (PEData pedatum : pedata.values()) {
 			List<DataDirEntry> list = pedatum.getOptionalHeader()
 					.getDataDirEntries();
@@ -56,13 +55,27 @@ public class OptionalHeaderTest {
 	}
 
 	@Test
+	public void getDataDirEntries() {
+		for (TestData testdatum : testdata) {
+			List<DataDirEntry> testDirs = testdatum.dataDir;
+			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+			OptionalHeader opt = pedatum.getOptionalHeader();
+			List<DataDirEntry> peDataEntries = opt.getDataDirEntries();
+			assertEquals(peDataEntries.size(), testDirs.size());
+			for (DataDirEntry expected : testDirs) {
+				assertTrue(peDataEntries.contains(expected));
+			}
+		}
+	}
+
+	@Test
 	public void getDataDirEntry() {
 		OptionalHeader header = pedata.get("strings.exe").getOptionalHeader();
 		DataDirectoryKey[] existant = { IMPORT_TABLE, RESOURCE_TABLE,
-				CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT};
-		for(DataDirectoryKey key : DataDirectoryKey.values()) {
+				CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT };
+		for (DataDirectoryKey key : DataDirectoryKey.values()) {
 			DataDirEntry entry = header.getDataDirEntry(key);
-			if(isIn(existant, key)) {
+			if (isIn(existant, key)) {
 				assertNotNull(entry);
 			} else {
 				assertNull(entry);

@@ -73,7 +73,7 @@ object LookupTableEntry {
   }
 
   private def getASCII(offset: Int, idatabytes: Array[Byte]): String = {
-    val nullindex = idatabytes.indexWhere(b => b == 0, offset)
+    val nullindex = idatabytes.indexWhere(_ == 0, offset)
     new String(idatabytes.slice(offset, nullindex))
   }
 

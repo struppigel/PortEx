@@ -92,4 +92,39 @@ public class DataDirEntry {
 		return "field name: " + key + NL + "virtual address: "
 				+ virtualAddress + NL + "size: " + size;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DataDirEntry other = (DataDirEntry) obj;
+		if (key != other.key)
+			return false;
+		if (size != other.size)
+			return false;
+		if (virtualAddress != other.virtualAddress)
+			return false;
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((key == null) ? 0 : key.hashCode());
+		result = prime * result + (int) (size ^ (size >>> 32));
+		result = prime * result
+				+ (int) (virtualAddress ^ (virtualAddress >>> 32));
+		return result;
+	}
 }

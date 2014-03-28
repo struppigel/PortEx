@@ -48,7 +48,7 @@ class ImportSection(
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
-        case ROM => throw new IllegalArgumentException
+        case ROM => throw new IllegalArgumentException("ROM file format not described")
       }
       do {
         entry = LookupTableEntry(idatabytes.clone, offset.toInt, EntrySize, virtualAddress)

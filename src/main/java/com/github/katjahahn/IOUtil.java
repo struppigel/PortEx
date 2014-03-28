@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import java.util.TreeMap;
 import com.github.katjahahn.coffheader.COFFHeaderKey;
 import com.github.katjahahn.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.optheader.DataDirEntry;
+import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntry;
@@ -66,8 +68,9 @@ public class IOUtil {
 	 * it.
 	 * 
 	 * @return list with all TestData instances
+	 * @throws IOException
 	 */
-	public static List<TestData> readTestDataList() {
+	public static List<TestData> readTestDataList() throws IOException {
 		List<TestData> data = new LinkedList<>();
 		File directory = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR).toFile();
 		for (File file : directory.listFiles()) {
@@ -94,10 +97,12 @@ public class IOUtil {
 	 * 
 	 * @param filename
 	 * @return
+	 * @throws IOException
 	 */
-	public static TestData readTestData(String filename) {
+	public static TestData readTestData(String filename) throws IOException {
 		TestData data = new TestData();
 		data.filename = filename;
+		System.err.println("Reading file " + filename); // TODO remove
 		Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
 		try (BufferedReader reader = Files.newBufferedReader(testfile,
 				Charset.forName("UTF-8"))) {
@@ -112,12 +117,58 @@ public class IOUtil {
 				if (line.contains("Optional (PE) header")) {
 					readOpt(data, reader);
 				}
+				if (line.contains("Data directories")) {
+					readDataDirs(data, reader);
+				}
 			}
 
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return data;
+	}
+
+	private static void readDataDirs(TestData data, BufferedReader reader)
+			throws IOException {
+		List<DataDirEntry> dataDirs = new ArrayList<DataDirEntry>();
+		DataDirEntry entry = readDataDirEntry(reader);
+		while (entry != null) {
+			dataDirs.add(entry);
+			entry = readDataDirEntry(reader);
+		}
+		data.dataDir = dataDirs;
+
+	}
+
+	private static DataDirEntry readDataDirEntry(BufferedReader reader)
+			throws IOException {
+		String line = null;
+		String name = null;
+		Integer virtualAddress = null;
+		Integer size = null;
+		while ((line = reader.readLine()) != null) {
+			String[] split = line.split(":");
+			if (split.length < 2 || split[0].contains("Sections")) {
+				break;
+			}
+			if (split[0].contains("Name")) {
+				name = split[1].trim();
+			} else if (split[0].contains("Virtual Address")) {
+				virtualAddress = convertToInt(split[1].trim());
+			} else if (split[0].contains("Size")) {
+				size = convertToInt(split[1].trim());
+			}
+			if (name != null && virtualAddress != null && size != null) {
+				reader.readLine(); // last empty line
+				DataDirectoryKey key = getDataDirKeyForName(name);
+				if (key != null) {
+					return new DataDirEntry(key, virtualAddress, size);
+				} else {
+					System.err.println("null data dir key returned for: "
+							+ name + " and " + line);
+					return null;
+				}
+			}
+		}
+		return null;
 	}
 
 	private static void readDOSAndPESig(TestData data, BufferedReader reader)
@@ -129,7 +180,7 @@ public class IOUtil {
 			if (split.length < 2) {
 				break;
 			}
-			if(split[0].contains("PE header offset")) {
+			if (split[0].contains("PE header offset")) {
 				data.peoffset = convertToInt(split[1].trim());
 				continue;
 			}
@@ -241,7 +292,7 @@ public class IOUtil {
 		List<String> characteristics = new LinkedList<>();
 		try {
 			Map<String, String[]> map = readMap(filename);
-			for (Entry<String, String[]> entry: map.entrySet()) {
+			for (Entry<String, String[]> entry : map.entrySet()) {
 				try {
 					long mask = Long.parseLong(entry.getKey(), 16);
 					if ((value & mask) != 0) {
@@ -284,7 +335,11 @@ public class IOUtil {
 		return b.toString();
 	}
 
-	//TODO test for correctly extracted entry number
+	/************************************************************************
+	 * The following methods are just translator for the pev report testfiles,
+	 * they have no use otherwise
+	 * ********************************************************************/
+	// TODO test for correctly extracted entry number
 	private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
 		if (string.contains("Bytes in last page")) {
 			return MSDOSHeaderKey.LAST_PAGE_SIZE;
@@ -450,7 +505,57 @@ public class IOUtil {
 		// }
 		return null;
 	}
-	
+
+	private static DataDirectoryKey getDataDirKeyForName(String name) {
+		if (name.contains("Import Table")) {
+			return DataDirectoryKey.IMPORT_TABLE;
+		}
+		if (name.contains("Resource Table")) {
+			return DataDirectoryKey.RESOURCE_TABLE;
+		}
+		if (name.contains("Certificate")) {
+			return DataDirectoryKey.CERTIFICATE_TABLE;
+		}
+		if (name.contains("Debug")) {
+			return DataDirectoryKey.DEBUG;
+		}
+		if (name.contains("Load Config Table")) {
+			return DataDirectoryKey.LOAD_CONFIG_TABLE;
+		}
+		if (name.contains("Import Address Table")) {
+			return DataDirectoryKey.IAT;
+		}
+		if (name.contains("TLS")) {
+			return DataDirectoryKey.TLS_TABLE;
+		}
+		// TODO verify the following keys
+		if (name.contains("Exception")) {
+			return DataDirectoryKey.EXCEPTION_TABLE;
+		}
+		if (name.contains("Architecture")) {
+			return DataDirectoryKey.ARCHITECTURE;
+		}
+		if (name.contains("Relocation")) {
+			return DataDirectoryKey.BASE_RELOCATION_TABLE;
+		}
+		if (name.contains("Bound Import")) {
+			return DataDirectoryKey.BOUND_IMPORT;
+		}
+		if (name.contains("Runtime Header")) {
+			return DataDirectoryKey.CLR_RUNTIME_HEADER;
+		}
+		if (name.contains("Delay Report")) {
+			return DataDirectoryKey.DELAY_REPORT_DESCRIPTOR;
+		}
+		if (name.contains("Export")) {
+			return DataDirectoryKey.EXPORT_TABLE;
+		}
+		if (name.contains("Global")) {
+			return DataDirectoryKey.GLOBAL_PTR;
+		}
+		return null;
+	}
+
 	private static int convertToInt(String value) {
 		if (value.startsWith("0x")) {
 			value = value.replace("0x", "");
@@ -466,7 +571,7 @@ public class IOUtil {
 		public Map<COFFHeaderKey, String> coff;
 		public Map<StandardFieldEntryKey, String> standardOpt;
 		public Map<WindowsEntryKey, String> windowsOpt;
-		public List<DataDirEntry> datadir;
+		public List<DataDirEntry> dataDir;
 		public List<SectionTableEntry> sections;
 		public List<ResourceDataEntry> resources;
 		public String filename;

@@ -17,6 +17,12 @@ package com.github.katjahahn.optheader;
 
 import com.github.katjahahn.HeaderKey;
 
+/**
+ * Key for the data directory table.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum DataDirectoryKey implements HeaderKey {
 	EXPORT_TABLE("export table"), IMPORT_TABLE("import table"), 
 	RESOURCE_TABLE("resource table"), EXCEPTION_TABLE("exception table"), 
@@ -24,7 +30,7 @@ public enum DataDirectoryKey implements HeaderKey {
 	DEBUG("debug"), ARCHITECTURE("architecture"), GLOBAL_PTR("global ptr"), 
 	TLS_TABLE("TLS table"), LOAD_CONFIG_TABLE("load config table"), 
 	BOUND_IMPORT("bound import"), IAT("IAT"), DELAY_REPORT_DESCRIPTOR("delay report descriptor"), 
-	CLR_RUNTIME_HEADER("CLR runtime header");
+	CLR_RUNTIME_HEADER("CLR runtime header"); 
 	
 	private String fieldName;
 	
@@ -34,6 +40,6 @@ public enum DataDirectoryKey implements HeaderKey {
 	
 	@Override
 	public String toString() {
-		return fieldName;
+		return fieldName; //TODO why the fieldname?
 	}
 }
