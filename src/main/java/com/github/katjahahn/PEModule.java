@@ -33,6 +33,11 @@ public abstract class PEModule {
 	 */
 	public abstract String getInfo();
 	
+	/**
+	 * Reads the information necessary. This is usually done by the {@link PELoader}
+	 * 
+	 * @throws IOException
+	 */
 	public abstract void read() throws IOException;
 	
 }

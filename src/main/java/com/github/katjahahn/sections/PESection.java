@@ -19,6 +19,12 @@ import java.io.IOException;
 
 import com.github.katjahahn.PEModule;
 
+/**
+ * Holds the bytes of a PESection.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public class PESection extends PEModule {
 
 	private byte[] sectionbytes;

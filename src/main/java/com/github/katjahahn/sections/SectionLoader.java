@@ -28,6 +28,13 @@ import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.RSRCSection;
 
+/**
+ * Responsible for computing section related values and loading sections with
+ * the given {@link SectionTable} information.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class SectionLoader {
 
 	private final SectionTable table;
@@ -138,12 +145,12 @@ public class SectionLoader {
 			SectionTableEntry idataEntry = resourceTable
 					.getSectionTableEntry(table);
 			Integer virtualAddress = idataEntry.get(VIRTUAL_ADDRESS) != null ? idataEntry
-					.get(VIRTUAL_ADDRESS).intValue() : null; //always 4 Bytes
+					.get(VIRTUAL_ADDRESS).intValue() : null; // always 4 Bytes
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(idataEntry.get(POINTER_TO_RAW_DATA));
-					byte[] idatabytes = new byte[idataEntry
-							.get(SIZE_OF_RAW_DATA).intValue()]; //always 4 Bytes
+					byte[] idatabytes = new byte[idataEntry.get(
+							SIZE_OF_RAW_DATA).intValue()]; // always 4 Bytes
 					raf.readFully(idatabytes);
 					ImportSection idata = new ImportSection(idatabytes,
 							virtualAddress, optHeader);

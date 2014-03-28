@@ -28,17 +28,30 @@ import java.util.Map.Entry;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
+
+/**
+ * Represents the section table of a PE. Is usually constructed by the PELoader.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class SectionTable extends PEModule {
 
 	private final static String SECTION_TABLE_SPEC = "sectiontablespec";
 	public final static int ENTRY_SIZE = 40;
-	
+
 	public List<SectionTableEntry> sections;
 
 	private final byte[] sectionTableBytes;
 	private final int numberOfEntries;
 	private Map<String, String[]> specification;
 
+	/**
+	 * @constructor creates the SectionTable with the bytes of the table and the
+	 *              number of entries
+	 * @param sectionTableBytes
+	 * @param numberOfEntries
+	 */
 	public SectionTable(byte[] sectionTableBytes, int numberOfEntries) {
 		this.sectionTableBytes = sectionTableBytes.clone();
 		this.numberOfEntries = numberOfEntries;
@@ -52,35 +65,47 @@ public class SectionTable extends PEModule {
 	@Override
 	public void read() throws IOException {
 		sections = new LinkedList<>();
-		
+
 		for (int i = 0; i < numberOfEntries; i++) {
 			SectionTableEntry sectionEntry = new SectionTableEntry();
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-			
+
 			for (Entry<String, String[]> entry : specification.entrySet()) {
 
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section, Integer.parseInt(specs[1]),
-						Integer.parseInt(specs[2]));
-				SectionTableEntryKey key = SectionTableEntryKey.valueOf(entry.getKey());
-				
-				 if (key.equals(SectionTableEntryKey.NAME)) {
-					 sectionEntry.setName(getUTF8String(section));
-					 continue;
-				 }
-				
+				int value = getBytesIntValue(section,
+						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
+				SectionTableEntryKey key = SectionTableEntryKey.valueOf(entry
+						.getKey());
+
+				if (key.equals(SectionTableEntryKey.NAME)) {
+					sectionEntry.setName(getUTF8String(section));
+					continue;
+				}
+
 				sectionEntry.add(new StandardEntry(key, specs[0], value));
 			}
 			sections.add(sectionEntry);
 		}
 	}
-	
+
+	/**
+	 * Returns all entries of the section table as a list
+	 * 
+	 * @return
+	 */
 	public List<SectionTableEntry> getSectionEntries() {
 		return new LinkedList<>(sections);
 	}
 
-	//TODO use the sections list
+	/**
+	 * Returns the value for the PointerToRawData entry of a given section name.
+	 * 
+	 * @param sectionName
+	 * @return
+	 */
+	// TODO use the sections list
 	public Integer getPointerToRawData(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
@@ -95,10 +120,10 @@ public class SectionTable extends PEModule {
 
 	private Integer getPointerToRawData(byte[] section) {
 		for (Entry<String, String[]> entry : specification.entrySet()) {
-			if(entry.getKey().equals("POINTER_TO_RAW_DATA")) {
+			if (entry.getKey().equals("POINTER_TO_RAW_DATA")) {
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section, Integer.parseInt(specs[1]),
-						Integer.parseInt(specs[2]));
+				int value = getBytesIntValue(section,
+						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 				return value;
 			}
 		}
@@ -120,8 +145,8 @@ public class SectionTable extends PEModule {
 		StringBuilder b = new StringBuilder();
 
 		for (int i = 0; i < numberOfEntries; i++) {
-			b.append("entry number " + (i + 1) + ": " + NL
-					+ "..............." + NL + NL);
+			b.append("entry number " + (i + 1) + ": " + NL + "..............."
+					+ NL + NL);
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
 			b.append(getNextEntryInfo(section) + NL);
@@ -139,9 +164,11 @@ public class SectionTable extends PEModule {
 					Integer.parseInt(specs[2]));
 			String key = entry.getKey();
 			if (key.equals("CHARACTERISTICS")) {
-				b.append(specs[0] + ": " + NL
-						+ IOUtil.getCharacteristics(value, "sectioncharacteristics")
-						+ NL);
+				b.append(specs[0]
+						+ ": "
+						+ NL
+						+ IOUtil.getCharacteristics(value,
+								"sectioncharacteristics") + NL);
 			} else if (key.equals("NAME")) {
 				b.append(specs[0] + ": " + getUTF8String(section) + NL);
 
@@ -166,6 +193,12 @@ public class SectionTable extends PEModule {
 		return null;
 	}
 
+	/**
+	 * Computes the virtual address for a given section name.
+	 * 
+	 * @param sectionName
+	 * @return virtual address of a section
+	 */
 	public Integer getVirtualAddress(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
@@ -179,38 +212,38 @@ public class SectionTable extends PEModule {
 
 	private Integer getVirtualAddress(byte[] section) {
 		for (Entry<String, String[]> entry : specification.entrySet()) {
-			if(entry.getKey().equals("VIRTUAL_ADDRESS")) {
+			if (entry.getKey().equals("VIRTUAL_ADDRESS")) {
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section, Integer.parseInt(specs[1]),
-						Integer.parseInt(specs[2]));
+				int value = getBytesIntValue(section,
+						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 				return value;
 			}
 		}
 		return null;
 	}
-	
+
 	// TODO not tested and it is almost the same code as getPointerToRawData
-		public Integer getSize(String sectionName) {
-			for (int i = 0; i < numberOfEntries; i++) {
-				byte[] section = Arrays.copyOfRange(sectionTableBytes, i
-						* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-				if (isSection(sectionName, section)) {
-					return getSizeOfRawData(section);
-				}
+	public Integer getSize(String sectionName) {
+		for (int i = 0; i < numberOfEntries; i++) {
+			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
+					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
+			if (isSection(sectionName, section)) {
+				return getSizeOfRawData(section);
 			}
-
-			return null;
 		}
 
-		public Integer getSizeOfRawData(byte[] section) {
-			for (Entry<String, String[]> entry : specification.entrySet()) {
-				if (entry.getKey().equals("SIZE_OF_RAW_DATA")) {
-					String[] specs = entry.getValue();
-					int value = getBytesIntValue(section,
-							Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-					return value;
-				}
+		return null;
+	}
+
+	public Integer getSizeOfRawData(byte[] section) {
+		for (Entry<String, String[]> entry : specification.entrySet()) {
+			if (entry.getKey().equals("SIZE_OF_RAW_DATA")) {
+				String[] specs = entry.getValue();
+				int value = getBytesIntValue(section,
+						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
+				return value;
 			}
-			return null;
 		}
+		return null;
+	}
 }

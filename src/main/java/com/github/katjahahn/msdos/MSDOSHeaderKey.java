@@ -17,6 +17,12 @@ package com.github.katjahahn.msdos;
 
 import com.github.katjahahn.HeaderKey;
 
+/**
+ * Keys for the MSDOS Header values
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum MSDOSHeaderKey implements HeaderKey {
 	SIGNATURE_WORD, LAST_PAGE_SIZE, FILE_PAGES, RELOCATION_ITEMS, 
 	HEADER_PARAGRAPHS, MINALLOC, MAXALLOC, INITIAL_SS, INITIAL_SP, 

@@ -85,6 +85,8 @@ public class COFFFileHeader extends PEModule {
 
 	/**
 	 * Constructs a string that summarizes all COFF File Header values.
+	 * 
+	 * @return string
 	 */
 	@Override
 	public String getInfo() {

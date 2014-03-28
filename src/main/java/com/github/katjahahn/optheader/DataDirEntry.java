@@ -23,23 +23,59 @@ import java.util.List;
 import com.github.katjahahn.sections.SectionTable;
 import com.github.katjahahn.sections.SectionTableEntry;
 
+/**
+ * Represents an entry of the data directory table. It is used like a struct.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class DataDirEntry {
 
+	/**
+	 * The key of the entry
+	 */
 	public DataDirectoryKey key;
+
+	/**
+	 * The virtual address of the entry
+	 */
 	public long virtualAddress; // RVA actually, but called like this in spec
+
+	/**
+	 * The size of the entry
+	 */
 	public long size;
 
+	/**
+	 * @contructor Creates a data dir entry with the fieldName, which is used to
+	 *             retrieve the corresponding {@link DataDirectoryKey}, and the
+	 *             virtualAddress and the size
+	 * @throws IllegalArgumentException
+	 *             if fieldName doesn't match a valid key
+	 * @param fieldName
+	 * @param virtualAddress
+	 * @param size
+	 */
 	public DataDirEntry(String fieldName, long virtualAddress, long size) {
-		for(DataDirectoryKey key: DataDirectoryKey.values()) {
-			if(key.toString().equals(fieldName)) {
+		for (DataDirectoryKey key : DataDirectoryKey.values()) {
+			if (key.toString().equals(fieldName)) {
 				this.key = key;
 			}
 		}
-		if(key == null) throw new IllegalArgumentException("no enum constant for given field name");
+		if (key == null)
+			throw new IllegalArgumentException(
+					"no enum constant for given field name");
 		this.virtualAddress = virtualAddress;
 		this.size = size;
 	}
 
+	/**
+	 * @contructor Creates a data dir entry based on key, virtualAddress and
+	 *             size
+	 * @param key
+	 * @param virtualAddress
+	 * @param size
+	 */
 	public DataDirEntry(DataDirectoryKey key, int virtualAddress, int size) {
 		this.key = key;
 		this.virtualAddress = virtualAddress;
@@ -64,7 +100,7 @@ public class DataDirEntry {
 	 * Returns the section table entry of the section that the data directory
 	 * entry is pointing to.
 	 * 
-	 *TODO duplicate to Sectionloader getSectionByRVA
+	 * TODO duplicate to Sectionloader getSectionByRVA
 	 * 
 	 * @param table
 	 * @return the section table entry of the section that the data directory
@@ -89,13 +125,10 @@ public class DataDirEntry {
 
 	@Override
 	public String toString() {
-		return "field name: " + key + NL + "virtual address: "
-				+ virtualAddress + NL + "size: " + size;
+		return "field name: " + key + NL + "virtual address: " + virtualAddress
+				+ NL + "size: " + size;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -114,7 +147,9 @@ public class DataDirEntry {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override

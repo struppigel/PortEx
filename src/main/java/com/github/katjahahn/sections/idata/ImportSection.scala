@@ -27,10 +27,12 @@ import IDataEntryKey._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
 
-class ImportSection(
+class ImportSection (
   private val idatabytes: Array[Byte],
   private val virtualAddress: Int,
   private val optHeader: OptionalHeader) extends PESection {
+  
+  //TODO set bytes for superclass
 
   private var dirEntries = List.empty[IDataEntry]
 

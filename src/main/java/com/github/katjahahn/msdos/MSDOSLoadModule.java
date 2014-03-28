@@ -23,6 +23,12 @@ import java.io.RandomAccessFile;
 
 import com.github.katjahahn.PEModule;
 
+/**
+ * Responsible for dumping the MSDOS load module.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class MSDOSLoadModule extends PEModule {
 
 	private static final int PAGE_SIZE = 512; // in Byte
@@ -31,6 +37,12 @@ public class MSDOSLoadModule extends PEModule {
 	private final File file;
 	private byte[] loadModuleBytes;
 
+	/**
+	 * @constructor creates the MSDOSLoadModule instance based on the
+	 *              {@link MSDOSHeader} of the given file
+	 * @param header
+	 * @param file
+	 */
 	public MSDOSLoadModule(MSDOSHeader header, File file) {
 		this.header = header;
 		this.file = file;
@@ -48,10 +60,20 @@ public class MSDOSLoadModule extends PEModule {
 		}
 	}
 
+	/**
+	 * Calculates the size of the load module.
+	 * 
+	 * @return load module size
+	 */
 	public int getLoadModuleSize() {
 		return getImageSize() - header.getHeaderSize();
 	}
 
+	/**
+	 * Calculates the size of the image based on {@link MSDOSHeader} information
+	 * 
+	 * @return image size
+	 */
 	public int getImageSize() {
 		int filePages = header.get(FILE_PAGES);
 		int lastPageSize = header.get(LAST_PAGE_SIZE);
