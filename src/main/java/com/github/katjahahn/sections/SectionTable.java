@@ -38,6 +38,10 @@ import com.github.katjahahn.StandardEntry;
 public class SectionTable extends PEModule {
 
 	private final static String SECTION_TABLE_SPEC = "sectiontablespec";
+	
+	/**
+	 * Size of one entry is {@value}
+	 */
 	public final static int ENTRY_SIZE = 40;
 
 	public List<SectionTableEntry> sections;
@@ -97,6 +101,16 @@ public class SectionTable extends PEModule {
 	 */
 	public List<SectionTableEntry> getSectionEntries() {
 		return new LinkedList<>(sections);
+	}
+	
+	//TODO javadoc and test
+	public SectionTableEntry getSectionEntry(String sectionName) {
+		 for(SectionTableEntry entry : sections) {
+			 if(entry.getName().equals(sectionName)) {
+				 return entry;
+			 }
+		 }
+		 return null;
 	}
 
 	/**

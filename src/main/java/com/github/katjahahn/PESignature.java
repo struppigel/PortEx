@@ -35,9 +35,9 @@ public class PESignature extends PEModule {
 	private static final byte[] PE_SIG = "PE\0\0".getBytes();
 	
 	/**
-	 * The length of the PE signature is {@value} //TODO javadoc tag is ignored
+	 * The length of the PE signature is {@value}
 	 */
-	public static final int PE_SIG_LENGTH = PE_SIG.length;
+	public static final int PE_SIG_LENGTH = 4;
 
 	private int peOffset = -1;
 	private final File file;

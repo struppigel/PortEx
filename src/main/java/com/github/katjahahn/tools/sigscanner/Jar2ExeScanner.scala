@@ -45,7 +45,7 @@ class Jar2ExeScanner(file: File) {
   /**
    * A list containing the signatures and addresses where they where found.
    */
-  lazy val scanResult: List[ScanResult] = scanner._findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
+  private lazy val scanResult: List[ScanResult] = scanner._findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
 
   /**
    * Returns a list with all signature scan result data found in the file.
