@@ -125,9 +125,9 @@ public class SectionLoader {
 	public static SectionTableEntry getSectionByRVA(SectionTable table, int rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
-			// both values are always 4 bytes
-			int vSize = section.get(VIRTUAL_SIZE).intValue();
-			int vAddress = section.get(VIRTUAL_ADDRESS).intValue();
+			//TODO cast to int is insecure. actual int is unsigned, java int is signed
+		    long vSize = section.get(VIRTUAL_SIZE);
+			long vAddress = section.get(VIRTUAL_ADDRESS);
 			if (rvaIsWithin(vAddress, vSize, rva)) {
 				return section;
 			}
@@ -135,8 +135,8 @@ public class SectionLoader {
 		return null;
 	}
 
-	private static boolean rvaIsWithin(int address, int size, int rva) {
-		int endpoint = address + size;
+	private static boolean rvaIsWithin(long address, long size, long rva) {
+		long endpoint = address + size;
 		return rva >= address && rva < endpoint;
 	}
 
@@ -154,13 +154,13 @@ public class SectionLoader {
 		if (resourceTable != null) {
 			SectionTableEntry idataEntry = resourceTable
 					.getSectionTableEntry(table);
-			Integer virtualAddress = idataEntry.get(VIRTUAL_ADDRESS) != null ? idataEntry
-					.get(VIRTUAL_ADDRESS).intValue() : null; // always 4 Bytes
+			Long virtualAddress = idataEntry.get(VIRTUAL_ADDRESS); 
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(idataEntry.get(POINTER_TO_RAW_DATA));
+					//TODO cast to int is insecure. actual int is unsigned, java int is signed
 					byte[] idatabytes = new byte[idataEntry.get(
-							SIZE_OF_RAW_DATA).intValue()]; // always 4 Bytes
+							SIZE_OF_RAW_DATA).intValue()];
 					raf.readFully(idatabytes);
 					ImportSection idata = new ImportSection(idatabytes,
 							virtualAddress, optHeader);

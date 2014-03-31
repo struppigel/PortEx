@@ -36,7 +36,7 @@ case class NullEntry() extends LookupTableEntry
 
 object LookupTableEntry {
 
-  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int, virtualAddress: Int): LookupTableEntry = {
+  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int, virtualAddress: Long): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     //    println(idatabytes.slice(offset, offset + entrySize).mkString(" "))
     val value = getBytesLongValue(idatabytes, offset, entrySize)
@@ -50,7 +50,7 @@ object LookupTableEntry {
     }
   }
 
-  private def createNameEntry(value: Long, idatabytes: Array[Byte], virtualAddress: Int): LookupTableEntry = {
+  private def createNameEntry(value: Long, idatabytes: Array[Byte], virtualAddress: Long): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
     val rva = (addrMask & value)
     //    println("rva: " + rva)

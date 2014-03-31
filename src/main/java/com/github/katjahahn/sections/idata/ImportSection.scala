@@ -29,7 +29,7 @@ import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
 
 class ImportSection (
   private val idatabytes: Array[Byte],
-  private val virtualAddress: Int,
+  private val virtualAddress: Long,
   private val optHeader: OptionalHeader) extends PESection {
   
   //TODO set bytes for superclass
@@ -60,7 +60,7 @@ class ImportSection (
       } while (!entry.isInstanceOf[NullEntry])
     }
   }
-
+  
   private def readDirEntries(): Unit = {
     var isLastEntry = false
     var i = 0
@@ -97,8 +97,9 @@ class ImportSection (
   private def getASCIIName(entry: IDataEntry): String = {
     def getName(value: Int): String = {
       val offset = value - virtualAddress
-      val nullindex = idatabytes.indexWhere(b => b == 0, offset)
-      new String(idatabytes.slice(offset, nullindex))
+      //TODO cast to int is insecure. actual int is unsigned, java int is signed
+      val nullindex = idatabytes.indexWhere(b => b == 0, offset.toInt)
+      new String(idatabytes.slice(offset.toInt, nullindex))
     }
     getName(entry(NAME_RVA).toInt)
   }
