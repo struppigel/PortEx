@@ -16,6 +16,7 @@
 package com.github.katjahahn.sections;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.github.katjahahn.StandardEntry;
 
@@ -34,6 +35,10 @@ public class SectionTableEntry {
 
 	public Long get(SectionTableEntryKey key) {
 		return entries.get(key).value;
+	}
+	
+	public Map<SectionTableEntryKey, StandardEntry> getEntryMap() {
+		return new HashMap<>(entries);
 	}
 
 	public void add(StandardEntry entry) {

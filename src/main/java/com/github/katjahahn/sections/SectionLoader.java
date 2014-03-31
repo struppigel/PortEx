@@ -26,7 +26,7 @@ import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.idata.ImportSection;
-import com.github.katjahahn.sections.rsrc.RSRCSection;
+import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
  * Responsible for computing section related values and loading sections with
@@ -58,6 +58,9 @@ public class SectionLoader {
 	 * Loads the section with the given name. If the file doesn't have a section
 	 * by this name, it returns null.
 	 * 
+	 * This does not instantiate subclasses of PESection. Use methods like
+	 * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
+	 * 
 	 * @param name
 	 *            the section's name
 	 * @return PESection of the given name, null if section isn't contained in
@@ -67,7 +70,7 @@ public class SectionLoader {
 	public PESection loadSection(String name) throws IOException {
 		// TODO recognize i.e. .rsrc section and create correct subclass
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-			Integer pointer = table.getPointerToRawData(name);
+			Long pointer = table.getPointerToRawData(name);
 			if (pointer != null) {
 				raf.seek(pointer);
 				byte[] sectionbytes = new byte[table.getSize(name)];
@@ -79,13 +82,13 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Loads all bytes and information of the .rsrc section.
+	 * Loads all bytes and information of the resource section.
 	 * 
 	 * @return RSRCSection of the given file, null if file doesn't have this
 	 *         section
 	 * @throws IOException
 	 */
-	public RSRCSection loadRsrcSection() throws IOException {
+	public ResourceSection loadResourceSection() throws IOException {
 		DataDirEntry resourceTable = getDataDirEntry(
 				optHeader.getDataDirEntries(), DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
@@ -101,7 +104,7 @@ public class SectionLoader {
 					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
 							.intValue()]; // rawsize is always 4 bytes
 					raf.readFully(rsrcbytes);
-					RSRCSection rsrc = new RSRCSection(rsrcbytes,
+					ResourceSection rsrc = new ResourceSection(rsrcbytes,
 							virtualAddress);
 					rsrc.read();
 					return rsrc;
@@ -114,9 +117,8 @@ public class SectionLoader {
 	public static SectionTableEntry getSectionByRVA(SectionTable table, int rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
-			int vSize = section.get(VIRTUAL_SIZE).intValue(); // both values are
-																// always 4
-																// Bytes
+			// both values are always 4 bytes
+			int vSize = section.get(VIRTUAL_SIZE).intValue();
 			int vAddress = section.get(VIRTUAL_ADDRESS).intValue();
 			if (rvaIsWithin(vAddress, vSize, rva)) {
 				return section;

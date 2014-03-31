@@ -83,13 +83,13 @@ public class DataDirEntry {
 	}
 
 	/**
-	 * Calculates the file offset of the the data directory based on the virtual
+	 * Calculates the file offset of the data directory based on the virtual
 	 * address and the entries in the section table.
 	 * 
 	 * @param table
 	 * @return file offset of data directory
 	 */
-	public long getFileOffset(SectionTable table) {
+	public long getFileOffset(SectionTable table) { //TODO not in use?
 		SectionTableEntry section = getSectionTableEntry(table);
 		long sectionRVA = section.get(VIRTUAL_ADDRESS);
 		long sectionOffset = section.get(POINTER_TO_RAW_DATA);
@@ -100,12 +100,12 @@ public class DataDirEntry {
 	 * Returns the section table entry of the section that the data directory
 	 * entry is pointing to.
 	 * 
-	 * TODO duplicate to Sectionloader getSectionByRVA
-	 * 
 	 * @param table
 	 * @return the section table entry of the section that the data directory
 	 *         entry is pointing to
 	 */
+	// this is a duplicate to Sectionloader getSectionByRVA, but intentional for
+	// better use of the API
 	public SectionTableEntry getSectionTableEntry(SectionTable table) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
@@ -147,11 +147,6 @@ public class DataDirEntry {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;

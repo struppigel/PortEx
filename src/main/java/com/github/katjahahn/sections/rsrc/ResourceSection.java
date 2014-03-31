@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.sections.PESection;
 
-public class RSRCSection extends PESection {
+public class ResourceSection extends PESection {
 
 	private final static String RSRC_DIR_SPEC = "rsrcdirspec";
 	private final static String RSRC_DIR_ENTRY_SPEC = "resourcedirentryspec";
@@ -41,7 +41,7 @@ public class RSRCSection extends PESection {
 	private final int virtualAddress;
 	private ResourceDirectoryTable resourceTree;
 
-	public RSRCSection(byte[] rsrcbytes, int virtualAddress) {
+	public ResourceSection(byte[] rsrcbytes, int virtualAddress) {
 		super(rsrcbytes.clone());
 		this.rsrcbytes = rsrcbytes.clone();
 		this.virtualAddress = virtualAddress;

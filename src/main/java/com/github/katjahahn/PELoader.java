@@ -25,8 +25,9 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.SectionTableEntry;
+import com.github.katjahahn.sections.SectionTableEntryKey;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -119,44 +120,12 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("WinRar.exe");
+		File file = new File("src/main/resources/testfiles/Lab03-01.exe");
 		PEData data = PELoader.loadPE(file);
 		SectionTable table = data.getSectionTable();
-//		List<DataDirEntry> dataDirEntries = data.getOptionalHeader()
-//				.getDataDirEntries();
-		// for (DataDirEntry entry : dataDirEntries) {
-		// System.out.println(entry);
-		// System.out.println("calculated file offset: "
-		// + entry.getFileOffset(table));
-		// System.out.println("section name: "
-		// + entry.getSectionTableEntry(table).getName());
-		// System.out.println();
-		// }
-
-		SectionLoader loader = new SectionLoader(table,
-				data.getOptionalHeader(), file);
-
-		// System.out.println(data.getCOFFFileHeader().getInfo());
-		// System.out.println(data.getOptionalHeader().getInfo());
-		 System.out.println(table.getInfo());
-		// System.out.println(data.getMSDOSHeader().getInfo());
-		// System.out.println(data.getPESignature().getInfo());
-//		 ImportSection idata = loader.loadImportSection();
-//		 System.out.println(loader.loadRsrcSection().getInfo());
-//		 System.out.println(idata.getInfo());
-
-		// new Overlay(new File("Minecraft.exe"), new
-		// File("Minecraftout.jar")).dump();
-//		Jar2ExeScanner scanner = new Jar2ExeScanner(new File("launch4jexe.exe"));
-//		System.out.println(scanner.createReport());
-
-//		List<Long> addresses = scanner.getZipAddresses();
-//		int i = 0;
-//		for (Long address : addresses) {
-//			i++;
-//			scanner.dumpAt(address, new File("dumped" + i + ".jar"));
-//		}
-		
+		for(SectionTableEntry section : table.getSectionEntries()) {
+			logger.debug("for " + section.getName() + " char: " + Long.toHexString(section.get(SectionTableEntryKey.CHARACTERISTICS)));
+		}
 	}
 
 }

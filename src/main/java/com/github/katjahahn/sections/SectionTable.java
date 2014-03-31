@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
@@ -37,15 +40,17 @@ import com.github.katjahahn.StandardEntry;
  */
 public class SectionTable extends PEModule {
 
+	private static final Logger logger = LogManager
+			.getLogger(SectionTable.class.getName());
+
 	private final static String SECTION_TABLE_SPEC = "sectiontablespec";
-	
+
 	/**
 	 * Size of one entry is {@value}
 	 */
 	public final static int ENTRY_SIZE = 40;
 
-	public List<SectionTableEntry> sections;
-
+	private List<SectionTableEntry> sections;
 	private final byte[] sectionTableBytes;
 	private final int numberOfEntries;
 	private Map<String, String[]> specification;
@@ -78,7 +83,7 @@ public class SectionTable extends PEModule {
 			for (Entry<String, String[]> entry : specification.entrySet()) {
 
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section,
+				long value = getBytesLongValue(section,
 						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 				SectionTableEntryKey key = SectionTableEntryKey.valueOf(entry
 						.getKey());
@@ -102,15 +107,25 @@ public class SectionTable extends PEModule {
 	public List<SectionTableEntry> getSectionEntries() {
 		return new LinkedList<>(sections);
 	}
-	
-	//TODO javadoc and test
+
+	/**
+	 * Returns the section entry that has the given name or null if there is no
+	 * section with that name. If there are several sections with the same name,
+	 * the first one will be returned.
+	 * 
+	 * TODO there might be several sections with the same name. Provide a better
+	 * way to fetch them.
+	 * 
+	 * @param sectionName
+	 * @return the section table entry that has the given sectionName
+	 */
 	public SectionTableEntry getSectionEntry(String sectionName) {
-		 for(SectionTableEntry entry : sections) {
-			 if(entry.getName().equals(sectionName)) {
-				 return entry;
-			 }
-		 }
-		 return null;
+		for (SectionTableEntry entry : sections) {
+			if (entry.getName().equals(sectionName)) {
+				return entry;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -120,7 +135,7 @@ public class SectionTable extends PEModule {
 	 * @return
 	 */
 	// TODO use the sections list
-	public Integer getPointerToRawData(String sectionName) {
+	public Long getPointerToRawData(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
@@ -132,11 +147,11 @@ public class SectionTable extends PEModule {
 		return null;
 	}
 
-	private Integer getPointerToRawData(byte[] section) {
+	private Long getPointerToRawData(byte[] section) {
 		for (Entry<String, String[]> entry : specification.entrySet()) {
 			if (entry.getKey().equals("POINTER_TO_RAW_DATA")) {
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section,
+				long value = getBytesLongValue(section,
 						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 				return value;
 			}

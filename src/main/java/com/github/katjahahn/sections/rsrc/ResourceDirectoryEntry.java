@@ -111,13 +111,13 @@ public class ResourceDirectoryEntry extends PEModule {
 
 		for (Entry<String, String[]> entry : resourceDirEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(entryBytes,
+			long value = getBytesLongValue(entryBytes,
 					Integer.parseInt(specs[valueOffset]),
 					Integer.parseInt(specs[valueSize]));
 			String key = entry.getKey();
 			if (key.equals("DATA_ENTRY_RVA_OR_SUBDIR_RVA")) {
 				appendSubDirOrDataEntryRvaInfo(b, dataEntryRvaDescription,
-						idEntryDescription, specs, value);
+						idEntryDescription, specs, (int) value); //TODO use always long
 			} else {
 				b.append(specs[description] + ": " + value + NL);
 			}

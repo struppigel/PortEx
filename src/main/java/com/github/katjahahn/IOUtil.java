@@ -32,6 +32,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.coffheader.COFFHeaderKey;
 import com.github.katjahahn.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.optheader.DataDirEntry;
@@ -39,6 +42,7 @@ import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntry;
+import com.github.katjahahn.sections.SectionTableEntryKey;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 /**
@@ -55,6 +59,7 @@ import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
  */
 public class IOUtil {
 
+	private static final Logger logger = LogManager.getLogger(IOUtil.class.getName());
 	public static final String NL = System.getProperty("line.separator");
 	// TODO system independend path separators
 	private static final String DELIMITER = ";";
@@ -102,7 +107,6 @@ public class IOUtil {
 	public static TestData readTestData(String filename) throws IOException {
 		TestData data = new TestData();
 		data.filename = filename;
-		System.err.println("Reading file " + filename); // TODO remove
 		Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
 		try (BufferedReader reader = Files.newBufferedReader(testfile,
 				Charset.forName("UTF-8"))) {
@@ -119,11 +123,60 @@ public class IOUtil {
 				}
 				if (line.contains("Data directories")) {
 					readDataDirs(data, reader);
+					readSections(data, reader);
 				}
 			}
 
 		}
 		return data;
+	}
+
+	private static void readSections(TestData data, BufferedReader reader)
+			throws IOException {
+		data.sections = new ArrayList<>();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			String[] split = line.split(":");
+			if (split[0].contains("Resources")) {
+				break;
+			}
+			SectionTableEntry entry = readSectionEntry(reader, line);
+			if (entry != null) {
+				data.sections.add(entry);
+			}
+		}
+	}
+
+	private static SectionTableEntry readSectionEntry(BufferedReader reader,
+			String line) throws IOException {
+		SectionTableEntry entry = new SectionTableEntry();
+		while (line != null) {
+			String[] split = line.split(":");
+			if (split.length < 2) {
+				break;
+			}
+			if (split[0].contains("Name")) {
+				String name = split[1].trim();
+				entry.setName(name);
+			} else {
+				long value = convertToLong(split[1]); 
+				SectionTableEntryKey key = getSectionKeyFor(split[0].trim());
+				if (key != null) {
+					entry.add(new StandardEntry(key, null, value));
+					if(key == SectionTableEntryKey.CHARACTERISTICS) {
+						logger.debug("characteristics read: " + Long.toHexString(value));
+					}
+				} else {
+					logger.warn("key was null for " + line);
+				}
+			}
+			line = reader.readLine();
+		}
+		if (entry.getEntryMap().size() == 5) { // exactly 5 values are in the
+												// pev report
+			return entry;
+		}
+		return null;
 	}
 
 	private static void readDataDirs(TestData data, BufferedReader reader)
@@ -162,7 +215,7 @@ public class IOUtil {
 				if (key != null) {
 					return new DataDirEntry(key, virtualAddress, size);
 				} else {
-					System.err.println("null data dir key returned for: "
+					logger.warn("null data dir key returned for: "
 							+ name + " and " + line);
 					return null;
 				}
@@ -305,7 +358,7 @@ public class IOUtil {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return characteristics;
 	}
@@ -327,7 +380,7 @@ public class IOUtil {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		if (b.length() == 0) {
 			b.append("\t**no characteristics**" + NL);
@@ -556,12 +609,42 @@ public class IOUtil {
 		return null;
 	}
 
-	private static int convertToInt(String value) {
+	private static SectionTableEntryKey getSectionKeyFor(String name) {
+		if (name.contains("Virtual size")) {
+			return SectionTableEntryKey.VIRTUAL_SIZE;
+		}
+		if (name.contains("Virtual address")) {
+			return SectionTableEntryKey.VIRTUAL_ADDRESS;
+		}
+		if (name.contains("Data size")) {
+			return SectionTableEntryKey.SIZE_OF_RAW_DATA;
+		}
+		if (name.contains("Data offset")) {
+			return SectionTableEntryKey.POINTER_TO_RAW_DATA;
+		}
+		if (name.contains("Characteristics")) {
+			return SectionTableEntryKey.CHARACTERISTICS;
+		}
+		return null;
+	}
+
+	private static int convertToInt(String val) {
+		String value = val.trim().split("\\s")[0].trim();
 		if (value.startsWith("0x")) {
 			value = value.replace("0x", "");
 			return Integer.parseInt(value, 16);
 		} else {
 			return Integer.parseInt(value);
+		}
+	}
+	
+	private static long convertToLong(String val) {
+		String value = val.trim().split("\\s")[0].trim();
+		if (value.startsWith("0x")) {
+			value = value.replace("0x", "");
+			return Long.parseLong(value, 16);
+		} else {
+			return Long.parseLong(value);
 		}
 	}
 
