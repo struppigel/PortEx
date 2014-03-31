@@ -119,9 +119,6 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		logger.trace("test1");
-		logger.warn("test2");
-		logger.error("test3");
 		File file = new File("WinRar.exe");
 		PEData data = PELoader.loadPE(file);
 		SectionTable table = data.getSectionTable();

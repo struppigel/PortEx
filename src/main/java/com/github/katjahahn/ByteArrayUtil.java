@@ -15,21 +15,30 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
+import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 
 /**
- * Utilities to convert from and to byte arrays. 
- *
+ * Utilities to convert from and to byte arrays.
+ * 
  * Supports hex string conversion and long/int conversion.
  * 
+ * Differences to methods of {@link java.nio.ByteBuffer}:
+ * {@link #bytesToInt(byte[])} and {@link #bytesToLong(byte[])} conversion
+ * methods don't care about the proper minimum length of the given byte array:
+ * No {@link BufferUnderflowException} is thrown. Thus they are more robust.
+ * {@link #byteToHex(byte[])} delimits bytes with spaces and every single byte
+ * value is converted, also prepended zero bytes in the array.
+ * 
  * @author Katja Hahn
- *
+ * 
  */
 public class ByteArrayUtil {
-	
+
 	/**
-	 * Retrieves the integer value of a subarray of bytes. The values are considered
-	 * little endian. The subarray is determined by offset and length.
+	 * Retrieves the integer value of a subarray of bytes. The values are
+	 * considered little endian. The subarray is determined by offset and
+	 * length.
 	 * 
 	 * @param bytes
 	 * @param offset
@@ -42,8 +51,9 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Retrieves the long value of a subarray of bytes. The values are considered
-	 * little endian. The subarray is determined by offset and length.
+	 * Retrieves the long value of a subarray of bytes. The values are
+	 * considered little endian. The subarray is determined by offset and
+	 * length.
 	 * 
 	 * @param bytes
 	 * @param offset
@@ -56,7 +66,10 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Converts a byte array to a hex string.
+	 * Converts a byte array to a hex string. 
+	 * 
+	 * Every single byte is shown in the string, also prepended zero bytes.
+	 * Single bytes are delimited with a space character.
 	 * 
 	 * @param array
 	 * @return hexadecimal string representation of the byte array
@@ -73,9 +86,8 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Converts a byte array to an int. The bytes are
-	 * considered unsigned and little endian (first byte is the least
-	 * significant).
+	 * Converts a byte array to an int. The bytes are considered unsigned and
+	 * little endian (first byte is the least significant).
 	 * 
 	 * @param bytes
 	 * @return
@@ -90,18 +102,17 @@ public class ByteArrayUtil {
 	}
 
 	/**
-	 * Converts a byte array to a long. The bytes are
-	 * considered unsigned and little endian (first byte is the least
-	 * significant).
+	 * Converts a byte array to a long. The bytes are considered unsigned and
+	 * little endian (first byte is the least significant).
 	 * 
 	 * @param bytes
-	 * @return 
+	 * @return
 	 */
 	public static long bytesToLong(byte[] bytes) {
 		long value = 0;
 		for (int i = 0; i < bytes.length; i++) {
 			int shift = 8 * i;
-			value += (long)(bytes[i] & 0xFF) << shift;
+			value += (long) (bytes[i] & 0xFF) << shift;
 		}
 		return value;
 	}
