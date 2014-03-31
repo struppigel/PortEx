@@ -60,4 +60,9 @@ public class PESignatureTest {
 	public void noPEFile() throws FileFormatException, IOException {
 		new PESignature(new File("userdb.txt")).read();
 	}
+	
+	@Test(expectedExceptions=IOException.class)
+	public void noFile() throws FileFormatException, IOException {
+		new PESignature(new File("unknown")).read();
+	}
 }

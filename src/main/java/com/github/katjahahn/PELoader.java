@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
@@ -33,6 +36,8 @@ import com.github.katjahahn.sections.SectionTable;
  * 
  */
 public class PELoader {
+	
+	private static final Logger logger = LogManager.getLogger(PELoader.class.getName());
 
 	private final File file;
 
@@ -113,6 +118,10 @@ public class PELoader {
 	}
 
 	public static void main(String[] args) throws IOException {
+		logger.entry();
+		logger.trace("test1");
+		logger.warn("test2");
+		logger.error("test3");
 		File file = new File("WinRar.exe");
 		PEData data = PELoader.loadPE(file);
 		SectionTable table = data.getSectionTable();
