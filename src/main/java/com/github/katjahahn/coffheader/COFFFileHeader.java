@@ -75,7 +75,7 @@ public class COFFFileHeader extends PEModule {
 		for (Entry<String, String[]> entry : specification.entrySet()) {
 
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(headerbytes,
+			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offset]),
 					Integer.parseInt(specs[length]));
 			HeaderKey key = COFFHeaderKey.valueOf(entry.getKey());

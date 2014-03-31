@@ -65,7 +65,7 @@ public class MSDOSHeader extends PEModule {
 			for (Entry<String, String[]> entry : map.entrySet()) {
 				MSDOSHeaderKey key = MSDOSHeaderKey.valueOf(entry.getKey());
 				String[] spec = entry.getValue();
-				int value = getBytesIntValue(headerbytes,
+				long value = getBytesLongValue(headerbytes,
 						Integer.parseInt(spec[offsetLoc]),
 						Integer.parseInt(spec[sizeLoc]));
 				headerData.put(key, new StandardEntry(key,

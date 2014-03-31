@@ -47,6 +47,7 @@ class ImportSection (
       var offset = dirEntry(I_ADDR_TABLE_RVA) - virtualAddress
       println("va: " + virtualAddress)
       println("offset: " + offset)
+      println("addr table rva: " + dirEntry(I_ADDR_TABLE_RVA))
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8

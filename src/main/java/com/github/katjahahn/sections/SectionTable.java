@@ -228,7 +228,7 @@ public class SectionTable extends PEModule {
 	 * @param sectionName
 	 * @return virtual address of a section
 	 */
-	public Integer getVirtualAddress(String sectionName) {
+	public Long getVirtualAddress(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
@@ -239,11 +239,11 @@ public class SectionTable extends PEModule {
 		return null;
 	}
 
-	private Integer getVirtualAddress(byte[] section) {
+	private Long getVirtualAddress(byte[] section) {
 		for (Entry<String, String[]> entry : specification.entrySet()) {
 			if (entry.getKey().equals("VIRTUAL_ADDRESS")) {
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section,
+				long value = getBytesLongValue(section,
 						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 				return value;
 			}
@@ -252,7 +252,7 @@ public class SectionTable extends PEModule {
 	}
 
 	// TODO not tested and it is almost the same code as getPointerToRawData
-	public Integer getSize(String sectionName) {
+	public Long getSize(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
@@ -264,11 +264,11 @@ public class SectionTable extends PEModule {
 		return null;
 	}
 
-	public Integer getSizeOfRawData(byte[] section) {
+	public Long getSizeOfRawData(byte[] section) {
 		for (Entry<String, String[]> entry : specification.entrySet()) {
 			if (entry.getKey().equals("SIZE_OF_RAW_DATA")) {
 				String[] specs = entry.getValue();
-				int value = getBytesIntValue(section,
+				long value = getBytesLongValue(section,
 						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 				return value;
 			}

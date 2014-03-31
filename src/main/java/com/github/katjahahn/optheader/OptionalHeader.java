@@ -324,7 +324,7 @@ public class OptionalHeader extends PEModule {
 	private MagicNumber readMagicNumber(Map<String, String[]> standardSpec) {
 		int offset = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[1]);
 		int length = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[2]);
-		int value = getBytesIntValue(headerbytes, offset, length);
+		long value = getBytesLongValue(headerbytes, offset, length);
 		for (MagicNumber num : MagicNumber.values()) {
 			if (num.getValue() == value) {
 				return num;

@@ -49,7 +49,7 @@ public class ResourceDataEntry extends PEModule {
 		for (Entry<String, String[]> entry : resourceDataEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();
 			ResourceDataEntryKey key = ResourceDataEntryKey.valueOf(entry.getKey());
-			int value = getBytesIntValue(entryBytes,
+			long value = getBytesLongValue(entryBytes,
 					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 			String description = specs[0];
 			data.put(key, new StandardEntry(key, description, value));

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
+import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
@@ -53,6 +54,12 @@ public class SectionLoader {
 		this.file = file;
 		this.optHeader = optHeader;
 	}
+	
+	public SectionLoader(PEData data) {
+		this.table = data.getSectionTable();
+		this.optHeader = data.getOptionalHeader();
+		this.file = data.getFile();
+	}
 
 	/**
 	 * Loads the section with the given name. If the file doesn't have a section
@@ -73,7 +80,8 @@ public class SectionLoader {
 			Long pointer = table.getPointerToRawData(name);
 			if (pointer != null) {
 				raf.seek(pointer);
-				byte[] sectionbytes = new byte[table.getSize(name)];
+				//TODO cast to int is insecure. actual int is unsigned, java int is signed
+				byte[] sectionbytes = new byte[table.getSize(name).intValue()]; 
 				raf.readFully(sectionbytes);
 				return new PESection(sectionbytes);
 			}
@@ -94,15 +102,15 @@ public class SectionLoader {
 		if (resourceTable != null) {
 			SectionTableEntry rsrcEntry = resourceTable
 					.getSectionTableEntry(table);
-			Integer virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS) != null ? rsrcEntry
-					.get(VIRTUAL_ADDRESS).intValue() : null; // va is always 4
+			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS); // va is always 4
 																// bytes
 
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
+					//TODO cast to int is insecure. actual int is unsigned, java int is signed
 					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
-							.intValue()]; // rawsize is always 4 bytes
+							.intValue()]; 
 					raf.readFully(rsrcbytes);
 					ResourceSection rsrc = new ResourceSection(rsrcbytes,
 							virtualAddress);

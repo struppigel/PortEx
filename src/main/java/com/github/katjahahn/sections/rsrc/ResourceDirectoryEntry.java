@@ -30,10 +30,10 @@ public class ResourceDirectoryEntry extends PEModule {
 	private final static String RSRC_DIR_ENTRY_SPEC = "resourcedirentryspec";
 
 	private final boolean isNameEntry;
-	private Integer nameRVA;
-	private Integer dataEntryRVA;
-	private Integer subDirRVA;
-	private Integer integerId;
+	private Long nameRVA;
+	private Long dataEntryRVA;
+	private Long subDirRVA;
+	private Long integerId;
 	private final byte[] entryBytes;
 	private final int entryNr;
 	private final int parentId;
@@ -54,7 +54,7 @@ public class ResourceDirectoryEntry extends PEModule {
 
 		for (Entry<String, String[]> entry : resourceDirEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(entryBytes,
+			long value = getBytesLongValue(entryBytes,
 					Integer.parseInt(specs[valueOffset]),
 					Integer.parseInt(specs[valueSize]));
 			String key = entry.getKey();
@@ -88,7 +88,8 @@ public class ResourceDirectoryEntry extends PEModule {
 		return (value & mask) == 0;
 	}
 
-	private int removeHighestBit(int value) {
+	//TODO test for long
+	private long removeHighestBit(long value) {
 		int mask = 0x7FFFFFFF;
 		return (value & mask);
 	}
@@ -128,11 +129,11 @@ public class ResourceDirectoryEntry extends PEModule {
 
 	private void appendSubDirOrDataEntryRvaInfo(StringBuilder b,
 			int dataEntryRvaDescription, int idEntryDescription,
-			String[] specs, int value) {
+			String[] specs, long value) {
 
 		if (isDataEntryRVA(value)) {
 			b.append(specs[dataEntryRvaDescription] + ": " + value + " (0x"
-					+ Integer.toHexString(value) + ")" + NL);
+					+ Long.toHexString(value) + ")" + NL);
 		} else {
 			value = removeHighestBit(value);
 			b.append(specs[idEntryDescription] + ": " + value + " (0x"
@@ -143,28 +144,28 @@ public class ResourceDirectoryEntry extends PEModule {
 	/**
 	 * @return the nameRVA
 	 */
-	public Integer getNameRVA() {
+	public Long getNameRVA() {
 		return nameRVA;
 	}
 
 	/**
 	 * @return the dataEntryRVA
 	 */
-	public Integer getDataEntryRVA() {
+	public Long getDataEntryRVA() {
 		return dataEntryRVA;
 	}
 
 	/**
 	 * @return the subDirRVA
 	 */
-	public Integer getSubDirRVA() {
+	public Long getSubDirRVA() {
 		return subDirRVA;
 	}
 
 	/**
 	 * @return the integerId
 	 */
-	public Integer getIntegerId() {
+	public Long getIntegerId() {
 		return integerId;
 	}
 

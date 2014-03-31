@@ -38,10 +38,10 @@ public class ResourceSection extends PESection {
 	private Map<String, String[]> resourceDirEntrySpec;
 	private Map<String, String[]> resourceDataEntrySpec;
 	private final byte[] rsrcbytes;
-	private final int virtualAddress;
+	private final long virtualAddress;
 	private ResourceDirectoryTable resourceTree;
 
-	public ResourceSection(byte[] rsrcbytes, int virtualAddress) {
+	public ResourceSection(byte[] rsrcbytes, long virtualAddress) {
 		super(rsrcbytes.clone());
 		this.rsrcbytes = rsrcbytes.clone();
 		this.virtualAddress = virtualAddress;
@@ -69,14 +69,14 @@ public class ResourceSection extends PESection {
 	// TODO this is obsolete
 	private String getResourceDirTableInfo(byte[] tableBytes, String id) {
 		StringBuilder b = new StringBuilder();
-		int nameEntries = 0;
-		int idEntries = 0;
+		long nameEntries = 0;
+		long idEntries = 0;
 
 		b.append("** table header " + id + " **" + NL + NL);
 		for (Entry<String, String[]> entry : rsrcDirSpec.entrySet()) {
 
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(tableBytes,
+			long value = getBytesLongValue(tableBytes,
 					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 			String key = entry.getKey();
 
@@ -101,7 +101,7 @@ public class ResourceSection extends PESection {
 	}
 
 	private String getResourceDirEntriesInfo(byte[] entryBytes,
-			int nameEntries, int idEntries) {
+			long nameEntries, long idEntries) {
 		StringBuilder b = new StringBuilder();
 		b.append(NL + "** table entries **" + NL + NL);
 		entryBytes = Arrays.copyOfRange(entryBytes, RESOURCE_DIR_OFFSET,
@@ -176,13 +176,13 @@ public class ResourceSection extends PESection {
 
 	private String getResourceDataEntry(byte[] resourceBytes) {
 		StringBuilder b = new StringBuilder();
-		int pointer = 0;
-		int size = 0;
+		long pointer = 0;
+		long size = 0;
 		b.append(NL + "** resource data **" + NL + NL);
 		for (Entry<String, String[]> entry : resourceDataEntrySpec.entrySet()) {
 			String[] specs = entry.getValue();
 			String key = entry.getKey();
-			int value = getBytesIntValue(resourceBytes,
+			long value = getBytesLongValue(resourceBytes,
 					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
 			if (key.equals("DATA_RVA")) {
 				pointer = value - virtualAddress;
@@ -191,10 +191,11 @@ public class ResourceSection extends PESection {
 				size = value;
 			}
 			b.append(specs[0] + ": " + value + " (0x"
-					+ Integer.toHexString(value) + ")" + NL);
+					+ Long.toHexString(value) + ")" + NL);
 		}
 		if (pointer != 0 && size != 0) {
-			showResource(b, pointer, size);
+			//TODO cast to int is insecure. actual int is unsigned, java int is signed
+			showResource(b, (int) pointer, (int) size);
 		}
 		return b.toString();
 	}
@@ -224,8 +225,8 @@ public class ResourceSection extends PESection {
 		return (value & mask) == 0;
 	}
 
-	private Date getTimeDate(int seconds) {
-		long millis = (long) seconds * 1000;
+	private Date getTimeDate(long seconds) {
+		long millis = seconds * 1000;
 		return new Date(millis);
 	}
 

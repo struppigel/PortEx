@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
+import java.io.File;
+
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
@@ -35,6 +37,7 @@ public class PEData {
 	private final OptionalHeader opt;
 	private final SectionTable table;
 	private final MSDOSHeader msdos;
+	private final File file;
 
 	/**
 	 * @constructor Creates a PEData instance.
@@ -45,12 +48,13 @@ public class PEData {
 	 * @param opt the Optional Header
 	 * @param table the Section Table
 	 */
-	public PEData(MSDOSHeader msdos, PESignature pesig, COFFFileHeader coff, OptionalHeader opt, SectionTable table) {
+	public PEData(MSDOSHeader msdos, PESignature pesig, COFFFileHeader coff, OptionalHeader opt, SectionTable table, File file) {
 		this.pesig = pesig;
 		this.coff = coff;
 		this.opt = opt;
 		this.msdos = msdos;
 		this.table = table;
+		this.file = file;
 	}
 	
 	public MSDOSHeader getMSDOSHeader() {
@@ -71,6 +75,10 @@ public class PEData {
 	
 	public OptionalHeader getOptionalHeader() {
 		return opt;
+	}
+
+	public File getFile() {
+		return file;
 	}
 
 }

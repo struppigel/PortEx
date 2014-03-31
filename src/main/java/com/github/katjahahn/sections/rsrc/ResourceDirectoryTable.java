@@ -14,6 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.sections.rsrc;
+
 import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey.*;
 
@@ -48,10 +49,10 @@ public class ResourceDirectoryTable extends PEModule {
 	private int idEntries;
 	private Date stamp;
 	private final int id;
-	private final int offset;
+	private final long offset;
 
 	public ResourceDirectoryTable(Map<String, String[]> rsrcDirSpec,
-			byte[] tableBytes, int id, int offset) throws IOException {
+			byte[] tableBytes, int id, long offset) throws IOException {
 		this.rsrcDirSpec = rsrcDirSpec;
 		this.tableBytes = tableBytes.clone();
 		this.id = id;
@@ -64,22 +65,22 @@ public class ResourceDirectoryTable extends PEModule {
 		for (Entry<String, String[]> entry : rsrcDirSpec.entrySet()) {
 
 			String[] specs = entry.getValue();
-			int value = getBytesIntValue(tableBytes,
+			long value = getBytesLongValue(tableBytes,
 					Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-			ResourceDirectoryTableKey key = ResourceDirectoryTableKey.valueOf(entry.getKey());
+			ResourceDirectoryTableKey key = ResourceDirectoryTableKey
+					.valueOf(entry.getKey());
 
 			if (key.equals(TIME_DATE_STAMP)) {
 				stamp = getTimeDate(value);
 			}
 
 			if (key.equals(NR_OF_NAME_ENTRIES)) {
-				nameEntries = value;
+				nameEntries = (int) value;
 			} else if (key.equals(NR_OF_ID_ENTRIES)) {
-				idEntries = value;
+				idEntries = (int) value;
 			}
 
-			data.put(key, new StandardEntry(
-					key, specs[0], value));
+			data.put(key, new StandardEntry(key, specs[0], value));
 		}
 		if (nameEntries != 0 || idEntries != 0) {
 			loadResourceDirEntries();
@@ -91,13 +92,14 @@ public class ResourceDirectoryTable extends PEModule {
 	private void loadChildren() throws IOException {
 		int childId = id;
 		for (ResourceDirectoryEntry entry : dirEntries) {
-			Integer address = entry.getSubDirRVA();
+			Long address = entry.getSubDirRVA();
 
 			if (address != null) {
 				childId++;
 				try {
+					//TODO cast to int is insecure. actual int is unsigned, java int is signed
 					byte[] resourceBytes = Arrays.copyOfRange(tableBytes,
-							address - offset, tableBytes.length);
+							(int)(address - offset), tableBytes.length);
 					ResourceDirectoryTable table = new ResourceDirectoryTable(
 							rsrcDirSpec, resourceBytes, childId, address);
 					table.read();
@@ -129,17 +131,20 @@ public class ResourceDirectoryTable extends PEModule {
 
 	private void loadDataEntries() {
 		for (ResourceDirectoryEntry dirEntry : dirEntries) {
-			Integer rva = dirEntry.getDataEntryRVA();
+			Long rva = dirEntry.getDataEntryRVA();
 			if (rva != null) {
+				//TODO cast to int is insecure. actual int is unsigned, java int is signed
 				byte[] entryBytes = Arrays.copyOfRange(tableBytes,
-						rva - offset, (rva - offset) + ResourceDataEntry.SIZE);
+						(int) (rva - offset),
+						(int) (rva - offset + ResourceDataEntry.SIZE));
 				dataEntries.add(new ResourceDataEntry(entryBytes));
 			}
 		}
 	}
 
-	private Date getTimeDate(int seconds) {
-		long millis = (long) seconds * 1000;
+	// TODO duplicate
+	private Date getTimeDate(long seconds) {
+		long millis = seconds * 1000;
 		return new Date(millis);
 	}
 

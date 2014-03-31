@@ -25,9 +25,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.SectionTableEntry;
-import com.github.katjahahn.sections.SectionTableEntryKey;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -74,7 +73,7 @@ public class PELoader {
 			table = loadSectionTable(pesig, coff, raf);
 			table.read();
 		}
-		return new PEData(msdos, pesig, coff, opt, table);
+		return new PEData(msdos, pesig, coff, opt, table, file);
 	}
 
 	private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf)
@@ -120,12 +119,10 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("src/main/resources/testfiles/Lab03-01.exe");
+		File file = new File("src/main/resources/testfiles/strings.exe");
 		PEData data = PELoader.loadPE(file);
-		SectionTable table = data.getSectionTable();
-		for(SectionTableEntry section : table.getSectionEntries()) {
-			logger.debug("for " + section.getName() + " char: " + Long.toHexString(section.get(SectionTableEntryKey.CHARACTERISTICS)));
-		}
+		SectionLoader loader = new SectionLoader(data);
+		System.out.println(loader.loadImportSection().getInfo());
 	}
 
 }
