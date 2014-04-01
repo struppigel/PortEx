@@ -51,6 +51,9 @@ class ImportSection(
 
   private var directoryTable = List.empty[DirectoryTableEntry]
 
+  /**
+   * Parses the directory table and the lookup table entries
+   */
   override def read(): Unit = {
     readDirEntries()
     readLookupTableEntries()
@@ -64,6 +67,10 @@ class ImportSection(
    */
   def getDirectoryTable(): java.util.List[DirectoryTableEntry] = directoryTable.asJava
 
+  /**
+   * Parses all lookup table entries for all entries in the directory table
+   * and adds the lookup table entries to the directory table entry they belong to
+   */
   private def readLookupTableEntries(): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
@@ -83,6 +90,10 @@ class ImportSection(
     }
   }
 
+  /**
+   * Parses all entries of the import section and writes them into the
+   * {@link #directoryTable}
+   */
   private def readDirEntries(): Unit = {
     var isLastEntry = false
     var i = 0
@@ -99,26 +110,45 @@ class ImportSection(
     } while (!isLastEntry)
   }
 
+  /**
+   * Parses the directory table entry at the given nr.
+   *
+   * @param nr the number of the entry
+   * @return Some entry if the entry at the given nr is not the null entry,
+   * None otherwise
+   */
   private def readDirEntry(nr: Int): Option[DirectoryTableEntry] = {
     val from = nr * ENTRY_SIZE
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
-    //TODO this condition is wrong (?)
+    /**
+     * @return true iff the given entry is not the last empty entry or null entry
+     */
     def isEmpty(entry: DirectoryTableEntry): Boolean =
-      //      entry.entries.values.forall(v => v == 0)
+      //this was my first try based on the spec, but didn't always work
+      //entry.entries.values.forall(v => v == 0) 
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
-    val entry = DirectoryTableEntry(entrybytes, I_DIR_ENTRY_SPEC)
+    val entry = DirectoryTableEntry(entrybytes)
     entry.name = getASCIIName(entry)
     if (isEmpty(entry)) None else
       Some(entry)
   }
 
-  private def entryDescription(): String =
+  /**
+   * Generates a description string of all entries
+   */
+  private def entriesDescription(): String =
     (for (e <- directoryTable)
       yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
 
+  /**
+   * Returns the string for the given directory table entry
+   *
+   * @param entry the directory table entry whose name shall be returned
+   * @return string
+   */
   private def getASCIIName(entry: DirectoryTableEntry): String = {
     def getName(value: Int): String = {
       val offset = value - virtualAddress
@@ -131,7 +161,7 @@ class ImportSection(
 
   /**
    * Returns a decription of all entries in the import section.
-   * 
+   *
    * @return a description of all entries in the import section
    */
   override def getInfo(): String =
@@ -139,14 +169,16 @@ class ImportSection(
 	|Import section
 	|--------------
     |
-    |$entryDescription""".stripMargin
+    |$entriesDescription""".stripMargin
 
 }
 
 object ImportSection {
 
-  private final val I_DIR_ENTRY_SPEC = "idataentryspec"
-  private final val HINT_NAME_TABLE_SPEC = "hintnametablespec"
+  /**
+   * Size of one entry is {@value}.
+   * It is used to calculate the offset of an entry.
+   */
   private final val ENTRY_SIZE = 20
 
   private final val logger = LogManager.getLogger(ImportSection.getClass().getName())

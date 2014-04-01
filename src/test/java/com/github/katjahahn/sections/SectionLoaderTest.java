@@ -20,8 +20,10 @@ import com.github.katjahahn.sections.idata.ImportSection;
 
 public class SectionLoaderTest {
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger = LogManager
 			.getLogger(SectionTableTest.class.getName());
+	@SuppressWarnings("unused")
 	private List<TestData> testdata;
 	private Map<String, PEData> pedata = new HashMap<>();
 

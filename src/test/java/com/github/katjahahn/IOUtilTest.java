@@ -25,11 +25,13 @@ public class IOUtilTest {
 
 	@Test //TODO
 	public void readArray() throws IOException {
+		@SuppressWarnings("unused")
 		List<String[]> spec = IOUtil.readArray("msdosheaderspec");
 	}
 
 	@Test //TODO
 	public void readMap() throws IOException {
+		@SuppressWarnings("unused")
 		Map<String, String[]> map = IOUtil.readMap("msdosheaderspec");
 	}
 }

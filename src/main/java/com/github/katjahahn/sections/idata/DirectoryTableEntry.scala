@@ -25,8 +25,19 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.ByteArrayUtil._
 
-class DirectoryTableEntry (private val entrybytes: Array[Byte],
-  private val specification: Map[String, Array[String]],
+/**
+ * Represents a directory table entry. Contains all lookup table entries that 
+ * belong to it and allows to access them.
+ * 
+ * @author Katja Hahn
+ * 
+ * @constructor instanciates a directory table entry with the map of entries that 
+ * represent the information belonging to the directory table entry. This map is 
+ * created by the {@link #apply} method of companion object
+ * 
+ * @param entries that represent the information of the directory table entry
+ */
+class DirectoryTableEntry (
   private val entries: Map[DirectoryTableEntryKey, StandardEntry]) extends PEModule {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
@@ -58,9 +69,18 @@ class DirectoryTableEntry (private val entrybytes: Array[Byte],
 }
 
 object DirectoryTableEntry {
+  
+   private final val I_DIR_ENTRY_SPEC = "idataentryspec"
 
-  def apply(entrybytes: Array[Byte], specLocation: String): DirectoryTableEntry = {
-    val specification = IOUtil.readMap(specLocation).asScala.toMap
+  /**
+   * Instantiates the directory table entry based on the given entry bytes
+   * 
+   * @param entrybytes the bytes that represent the directory table entry and are
+   * used to read the information
+   * @return the constructed directory table entry
+   */
+  def apply(entrybytes: Array[Byte]): DirectoryTableEntry = {
+    val specification = IOUtil.readMap(I_DIR_ENTRY_SPEC).asScala.toMap
     val buffer = ListBuffer.empty[StandardEntry]
     for ((key, specs) <- specification) {
       val description = specs(0)
@@ -71,6 +91,6 @@ object DirectoryTableEntry {
       buffer += entry
     }
     val entries: Map[DirectoryTableEntryKey, StandardEntry] = (buffer map { t => (t.key.asInstanceOf[DirectoryTableEntryKey], t) }).toMap;
-    new DirectoryTableEntry(entrybytes.clone, specification, entries)
+    new DirectoryTableEntry(entries)
   }
 }

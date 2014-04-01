@@ -40,6 +40,7 @@ import com.github.katjahahn.StandardEntry;
  */
 public class SectionTable extends PEModule {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LogManager
 			.getLogger(SectionTable.class.getName());
 

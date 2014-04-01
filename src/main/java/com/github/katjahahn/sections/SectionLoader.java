@@ -34,7 +34,7 @@ import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
  * Responsible for computing section related values and loading sections with
- * the given {@link SectionTable} information.
+ * the given section header information.
  * 
  * @author Katja Hahn
  * 
