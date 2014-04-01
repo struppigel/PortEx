@@ -71,17 +71,18 @@ public class SectionLoader {
 	 * Loads the section with the given name. If the file doesn't have a section
 	 * by this name, it returns null.
 	 * 
-	 * This does not instantiate subclasses of PESection. Use methods like
+	 * This does not instantiate subclasses of {@link PESection}. Use methods like
 	 * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
+	 * 
+	 * The file on disk is read to fetch the information
 	 * 
 	 * @param name
 	 *            the section's name
 	 * @return PESection of the given name, null if section isn't contained in
 	 *         file
-	 * @throws IOException
+	 * @throws IOException if unable to read the file
 	 */
 	public PESection loadSection(String name) throws IOException {
-		// TODO recognize i.e. .rsrc section and create correct subclass
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			Long pointer = table.getPointerToRawData(name);
 			if (pointer != null) {
@@ -99,20 +100,19 @@ public class SectionLoader {
 	/**
 	 * Loads all bytes and information of the resource section.
 	 * 
-	 * @return RSRCSection of the given file, null if file doesn't have this
+	 * The file on disk is read to fetch the information.
+	 * 
+	 * @return {@link ResourceSection} of the given file, null if file doesn't have this
 	 *         section
-	 * @throws IOException
+	 * @throws IOException if unable to read the file
 	 */
 	public ResourceSection loadResourceSection() throws IOException {
-		DataDirEntry resourceTable = getDataDirEntry(
+		DataDirEntry resourceTable = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
 			SectionTableEntry rsrcEntry = resourceTable
 					.getSectionTableEntry(table);
-			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS); // va is
-																	// always 4
-																	// bytes
-
+			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
@@ -136,7 +136,7 @@ public class SectionLoader {
 	 * 
 	 * @param table the section table of the file
 	 * @param rva the relative virtual address
-	 * @return the section table entry of the section the rva is pointing into
+	 * @return the {@link SectionTableEntry} of the section the rva is pointing into
 	 */
 	public static SectionTableEntry getSectionByRVA(SectionTable table, long rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
@@ -159,11 +159,11 @@ public class SectionLoader {
 	 * Loads all bytes and information of the import section.
 	 * The file on disk is read to fetch the information.
 	 * 
-	 * @return the import section
+	 * @return the import section, null if file doesn't have an import section
 	 * @throws IOException if unable to read the file
 	 */
 	public ImportSection loadImportSection() throws IOException {
-		DataDirEntry importTable = getDataDirEntry(
+		DataDirEntry importTable = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), DataDirectoryKey.IMPORT_TABLE);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
@@ -195,7 +195,7 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public byte[] readBytesFor(DataDirectoryKey dataDirKey) throws IOException {
-		DataDirEntry dataDir = getDataDirEntry(optHeader.getDataDirEntries(),
+		DataDirEntry dataDir = getDataDirEntryForKey(optHeader.getDataDirEntries(),
 				dataDirKey);
 		if (dataDir != null) {
 			SectionTableEntry section = dataDir.getSectionTableEntry(table);
@@ -227,7 +227,7 @@ public class SectionLoader {
 		return null;
 	}
 
-	private DataDirEntry getDataDirEntry(List<DataDirEntry> dataDirEntries,
+	private DataDirEntry getDataDirEntryForKey(List<DataDirEntry> dataDirEntries,
 			DataDirectoryKey key) {
 		for (DataDirEntry entry : dataDirEntries) {
 			if (entry.key.equals(key)) {

@@ -24,13 +24,24 @@ import com.github.katjahahn.StandardEntry
 import scala.collection.JavaConverters._
 import com.github.katjahahn.StandardDataEntry
 import com.github.katjahahn.PEModule._
-import com.github.katjahahn.StandardDataEntry
-import IDataEntryKey._
+import ImportDirEntryKey._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Represents the import section, fetches information about the data directory
+ * entries and their lookup table entries.
+ *
+ * The instance of this class is usually created by the section loader.
+ *
+ * @constructor
+ * @param idatabytes the bytes that belong to the import section
+ * @param virtualAddress the address all rva values in the import section are relative to
+ * @param optHeader the optional header of the file
+ * @author Katja Hahn
+ */
 class ImportSection(
   private val idatabytes: Array[Byte],
   private val virtualAddress: Long,
@@ -38,15 +49,23 @@ class ImportSection(
 
   //TODO set bytes for superclass
 
-  private var dirEntries = List.empty[IDataEntry]
+  private var directoryTable = List.empty[ImportDirTableEntry]
 
   override def read(): Unit = {
     readDirEntries()
     readLookupTableEntries()
   }
 
+  /**
+   * Returns the directory table entries of the import section.
+   * Each entry contains the lookup table entries that belong to it.
+   *
+   * @return a list of the directory table entries of the import section
+   */
+  def getDirectoryTable(): java.util.List[ImportDirTableEntry] = directoryTable.asJava
+
   private def readLookupTableEntries(): Unit = {
-    for (dirEntry <- dirEntries) {
+    for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
       if (iRVA == 0) iRVA = dirEntry(I_ADDR_TABLE_RVA)
@@ -73,34 +92,34 @@ class ImportSection(
           logger.debug("------------start-----------")
           logger.debug("dir entry read: " + entry)
           logger.debug("------------end-------------")
-          dirEntries = dirEntries :+ entry
+          directoryTable = directoryTable :+ entry
         case None => isLastEntry = true
       }
       i += 1
     } while (!isLastEntry)
   }
 
-  private def readDirEntry(nr: Int): Option[IDataEntry] = {
+  private def readDirEntry(nr: Int): Option[ImportDirTableEntry] = {
     val from = nr * ENTRY_SIZE
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
     //TODO this condition is wrong (?)
-    def isEmpty(entry: IDataEntry): Boolean =
+    def isEmpty(entry: ImportDirTableEntry): Boolean =
       //      entry.entries.values.forall(v => v == 0)
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
-    val entry = IDataEntry(entrybytes, I_DIR_ENTRY_SPEC)
+    val entry = ImportDirTableEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.name = getASCIIName(entry)
     if (isEmpty(entry)) None else
       Some(entry)
   }
 
   private def entryDescription(): String =
-    (for (e <- dirEntries)
+    (for (e <- directoryTable)
       yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
 
-  private def getASCIIName(entry: IDataEntry): String = {
+  private def getASCIIName(entry: ImportDirTableEntry): String = {
     def getName(value: Int): String = {
       val offset = value - virtualAddress
       //TODO cast to int is insecure. actual int is unsigned, java int is signed
@@ -110,6 +129,11 @@ class ImportSection(
     getName(entry(NAME_RVA).toInt)
   }
 
+  /**
+   * Returns a decription of all entries in the import section.
+   * 
+   * @return a description of all entries in the import section
+   */
   override def getInfo(): String =
     s"""|--------------
 	|Import section
