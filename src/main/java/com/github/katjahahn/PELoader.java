@@ -120,6 +120,8 @@ public class PELoader {
 	public static void main(String[] args) throws IOException {
 		logger.entry();
 		File file = new File("src/main/resources/testfiles/strings.exe");
+//		File file = new File("WinRar.exe");
+//		File file = new File("Holiday_Island.exe");
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
 		System.out.println(loader.loadImportSection().getInfo());

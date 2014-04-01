@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
@@ -37,6 +40,9 @@ import com.github.katjahahn.sections.rsrc.ResourceSection;
  * 
  */
 public class SectionLoader {
+
+	private static final Logger logger = LogManager
+			.getLogger(SectionLoader.class.getName());
 
 	private final SectionTable table;
 	private final File file;
@@ -54,7 +60,7 @@ public class SectionLoader {
 		this.file = file;
 		this.optHeader = optHeader;
 	}
-	
+
 	public SectionLoader(PEData data) {
 		this.table = data.getSectionTable();
 		this.optHeader = data.getOptionalHeader();
@@ -80,8 +86,9 @@ public class SectionLoader {
 			Long pointer = table.getPointerToRawData(name);
 			if (pointer != null) {
 				raf.seek(pointer);
-				//TODO cast to int is insecure. actual int is unsigned, java int is signed
-				byte[] sectionbytes = new byte[table.getSize(name).intValue()]; 
+				// TODO cast to int is insecure. actual int is unsigned, java
+				// int is signed
+				byte[] sectionbytes = new byte[table.getSize(name).intValue()];
 				raf.readFully(sectionbytes);
 				return new PESection(sectionbytes);
 			}
@@ -102,15 +109,17 @@ public class SectionLoader {
 		if (resourceTable != null) {
 			SectionTableEntry rsrcEntry = resourceTable
 					.getSectionTableEntry(table);
-			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS); // va is always 4
-																// bytes
+			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS); // va is
+																	// always 4
+																	// bytes
 
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
-					//TODO cast to int is insecure. actual int is unsigned, java int is signed
+					// TODO cast to int is insecure. actual int is unsigned,
+					// java int is signed
 					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
-							.intValue()]; 
+							.intValue()];
 					raf.readFully(rsrcbytes);
 					ResourceSection rsrc = new ResourceSection(rsrcbytes,
 							virtualAddress);
@@ -122,11 +131,10 @@ public class SectionLoader {
 		return null;
 	}
 
-	public static SectionTableEntry getSectionByRVA(SectionTable table, int rva) {
+	public static SectionTableEntry getSectionByRVA(SectionTable table, long rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
-			//TODO cast to int is insecure. actual int is unsigned, java int is signed
-		    long vSize = section.get(VIRTUAL_SIZE);
+			long vSize = section.get(VIRTUAL_SIZE);
 			long vAddress = section.get(VIRTUAL_ADDRESS);
 			if (rvaIsWithin(vAddress, vSize, rva)) {
 				return section;
@@ -149,21 +157,33 @@ public class SectionLoader {
 	 * @throws IOException
 	 */
 	public ImportSection loadImportSection() throws IOException {
-		DataDirEntry resourceTable = getDataDirEntry(
+		DataDirEntry importTable = getDataDirEntry(
 				optHeader.getDataDirEntries(), DataDirectoryKey.IMPORT_TABLE);
-		if (resourceTable != null) {
-			SectionTableEntry idataEntry = resourceTable
+		if (importTable != null) {
+			SectionTableEntry idataEntry = importTable
 					.getSectionTableEntry(table);
 			Long virtualAddress = idataEntry.get(VIRTUAL_ADDRESS); 
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-					raf.seek(idataEntry.get(POINTER_TO_RAW_DATA));
+					long pointerToRawData = idataEntry.get(POINTER_TO_RAW_DATA);
+					logger.debug("section name: " + idataEntry.getName());
+					logger.debug("pointer to raw data: " + pointerToRawData + " 0x" + Long.toHexString(pointerToRawData));
+					long rva = importTable.virtualAddress;
+					long sectionAddress =  rva - (virtualAddress - pointerToRawData);
+					Long sizeOfRawData = idataEntry.get(SIZE_OF_RAW_DATA) - (rva - virtualAddress);
+					logger.debug("rva: " + rva + " 0x" + Long.toHexString(rva));
+					logger.debug("va: " + virtualAddress+ " 0x" + Long.toHexString(virtualAddress));
+					logger.debug("section address: " + sectionAddress+ " 0x" + Long.toHexString(sectionAddress));
+					logger.debug("file size: " + file.length() + " 0x" + Long.toHexString(file.length()));
+					logger.debug("size of raw data: " + sizeOfRawData+ " 0x" + Long.toHexString(sizeOfRawData));
+					logger.debug("");
+					raf.seek(sectionAddress);
+					virtualAddress = rva; 
 					//TODO cast to int is insecure. actual int is unsigned, java int is signed
-					byte[] idatabytes = new byte[idataEntry.get(
-							SIZE_OF_RAW_DATA).intValue()];
+					byte[] idatabytes = new byte[sizeOfRawData.intValue()];
 					raf.readFully(idatabytes);
 					ImportSection idata = new ImportSection(idatabytes,
-							virtualAddress, optHeader);
+							virtualAddress, optHeader, rva, pointerToRawData);
 					idata.read();
 					return idata;
 				}

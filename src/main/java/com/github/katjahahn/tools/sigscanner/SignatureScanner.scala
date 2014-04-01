@@ -137,12 +137,12 @@ class SignatureScanner(signatures: List[Signature]) {
    *
    * @param data the pedata result created by a PELoader
    */
-  def getEntryPoint(file: File): Int = {
+  def getEntryPoint(file: File): Long = {
     val data = PELoader.loadPE(file)
-    val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value.toInt
+    val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val section = SectionLoader.getSectionByRVA(data.getSectionTable(), rva)
     val phystovirt = section.get(SectionTableEntryKey.VIRTUAL_ADDRESS) - section.get(SectionTableEntryKey.POINTER_TO_RAW_DATA)
-    rva - phystovirt.toInt
+    rva - phystovirt
   }
 }
 
