@@ -34,9 +34,7 @@ import org.apache.logging.log4j.Logger;
 class ImportSection(
   private val idatabytes: Array[Byte],
   private val virtualAddress: Long,
-  private val optHeader: OptionalHeader,
-  private val rva: Long,
-  private val pointerToRaw: Long) extends PESection {
+  private val optHeader: OptionalHeader) extends PESection {
 
   //TODO set bytes for superclass
 
@@ -47,31 +45,12 @@ class ImportSection(
     readLookupTableEntries()
   }
 
-  //  /**
-  //   * Calculates the entry point with the given PE data
-  //   *
-  //   * @param data the pedata result created by a PELoader
-  //   */
-  //  def getEntryPoint(file: File): Long = {
-  //    val data = PELoader.loadPE(file)
-  //    val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
-  //    val section = SectionLoader.getSectionByRVA(data.getSectionTable(), rva)
-  //    val phystovirt = section.get(SectionTableEntryKey.VIRTUAL_ADDRESS) - section.get(SectionTableEntryKey.POINTER_TO_RAW_DATA)
-  //    rva - phystovirt
-  //  }
-
   private def readLookupTableEntries(): Unit = {
     for (dirEntry <- dirEntries) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
-      logger.debug("I_ADDR_TABLE_RVA: 0x" + java.lang.Long.toHexString(dirEntry(I_ADDR_TABLE_RVA)))
       if (iRVA == 0) iRVA = dirEntry(I_ADDR_TABLE_RVA)
-      logger.debug("I_LOOKUP_TABLE_RVA: 0x" + java.lang.Long.toHexString(dirEntry(I_LOOKUP_TABLE_RVA)))
       var offset = iRVA - virtualAddress
-      logger.debug("va: " + virtualAddress + " 0x" + java.lang.Long.toHexString(virtualAddress))
-      logger.debug("offset: " + offset + " 0x" + java.lang.Long.toHexString(offset))
-      logger.debug("addr table rva: " + iRVA + " 0x" + java.lang.Long.toHexString(iRVA))
-      logger.debug("")
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
@@ -106,8 +85,7 @@ class ImportSection(
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
-    //TODO this condition is wrong, i read somewhere that the lookup table rva
-    //doesn't have to be specified in which case the IAT RVA would be taken
+    //TODO this condition is wrong (?)
     def isEmpty(entry: IDataEntry): Boolean =
       //      entry.entries.values.forall(v => v == 0)
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0

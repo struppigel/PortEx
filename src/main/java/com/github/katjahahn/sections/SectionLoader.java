@@ -131,6 +131,13 @@ public class SectionLoader {
 		return null;
 	}
 
+	/**
+	 * Returns the section entry of the section table the rva is pointing into.
+	 * 
+	 * @param table the section table of the file
+	 * @param rva the relative virtual address
+	 * @return the section table entry of the section the rva is pointing into
+	 */
 	public static SectionTableEntry getSectionByRVA(SectionTable table, long rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
@@ -148,46 +155,74 @@ public class SectionLoader {
 		return rva >= address && rva < endpoint;
 	}
 
-	// TODO almost same code as RSRCSection
 	/**
-	 * Loads all bytes and information of the import section
+	 * Loads all bytes and information of the import section.
+	 * The file on disk is read to fetch the information.
 	 * 
-	 * @param dataDirEntries
-	 * @return
-	 * @throws IOException
+	 * @return the import section
+	 * @throws IOException if unable to read the file
 	 */
 	public ImportSection loadImportSection() throws IOException {
 		DataDirEntry importTable = getDataDirEntry(
 				optHeader.getDataDirEntries(), DataDirectoryKey.IMPORT_TABLE);
 		if (importTable != null) {
-			SectionTableEntry idataEntry = importTable
-					.getSectionTableEntry(table);
-			Long virtualAddress = idataEntry.get(VIRTUAL_ADDRESS); 
+			long virtualAddress = importTable.virtualAddress;
+			byte[] idatabytes = readBytesFor(DataDirectoryKey.IMPORT_TABLE);
+			ImportSection idata = new ImportSection(idatabytes, virtualAddress,
+					optHeader);
+			idata.read();
+			return idata;
+		}
+		return null;
+	}
+
+	/**
+	 * Reads and returns the bytes that belong to the given data directory
+	 * entry.
+	 * 
+	 * The data directory entry rva points into section. This section is
+	 * determined and the file offset for the rva calculated. This file offset
+	 * is different from the beginning of the determined section, as the section
+	 * may contain more than the data directory. The returned bytes start at
+	 * that file offset and end at the end of the section the data directory is
+	 * in.
+	 * 
+	 * @param dataDirKey
+	 *            the key of the data directory entry you want the bytes for
+	 * @return byte array that contains the bytes the data directory entry rva
+	 *         is pointing to
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public byte[] readBytesFor(DataDirectoryKey dataDirKey) throws IOException {
+		DataDirEntry dataDir = getDataDirEntry(optHeader.getDataDirEntries(),
+				dataDirKey);
+		if (dataDir != null) {
+			SectionTableEntry section = dataDir.getSectionTableEntry(table);
+			logger.debug("fetching file offset for section: "
+					+ section.getName());
+			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
+				long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
+				logger.debug("pointer to raw data: " + pointerToRawData + " 0x"
+						+ Long.toHexString(pointerToRawData));
+				long rva = dataDir.virtualAddress;
+				long offset = rva - (virtualAddress - pointerToRawData);
+				Long sizeOfRawData = section.get(SIZE_OF_RAW_DATA)
+						- (rva - virtualAddress);
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-					long pointerToRawData = idataEntry.get(POINTER_TO_RAW_DATA);
-					logger.debug("section name: " + idataEntry.getName());
-					logger.debug("pointer to raw data: " + pointerToRawData + " 0x" + Long.toHexString(pointerToRawData));
-					long rva = importTable.virtualAddress;
-					long sectionAddress =  rva - (virtualAddress - pointerToRawData);
-					Long sizeOfRawData = idataEntry.get(SIZE_OF_RAW_DATA) - (rva - virtualAddress);
-					logger.debug("rva: " + rva + " 0x" + Long.toHexString(rva));
-					logger.debug("va: " + virtualAddress+ " 0x" + Long.toHexString(virtualAddress));
-					logger.debug("section address: " + sectionAddress+ " 0x" + Long.toHexString(sectionAddress));
-					logger.debug("file size: " + file.length() + " 0x" + Long.toHexString(file.length()));
-					logger.debug("size of raw data: " + sizeOfRawData+ " 0x" + Long.toHexString(sizeOfRawData));
-					logger.debug("");
-					raf.seek(sectionAddress);
-					virtualAddress = rva; 
-					//TODO cast to int is insecure. actual int is unsigned, java int is signed
-					byte[] idatabytes = new byte[sizeOfRawData.intValue()];
-					raf.readFully(idatabytes);
-					ImportSection idata = new ImportSection(idatabytes,
-							virtualAddress, optHeader, rva, pointerToRawData);
-					idata.read();
-					return idata;
+					raf.seek(offset);
+					virtualAddress = rva;
+					// TODO cast to int is insecure. actual int is unsigned
+					byte[] bytes = new byte[sizeOfRawData.intValue()];
+					raf.readFully(bytes);
+					return bytes;
 				}
+			} else {
+				logger.warn("virtual address not found!");
 			}
+		} else {
+			logger.warn("invalid dataDirKey");
 		}
 		return null;
 	}
