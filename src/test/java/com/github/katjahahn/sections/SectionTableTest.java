@@ -32,12 +32,18 @@ public class SectionTableTest {
 
 	@Test
 	public void getInfo() {
-		throw new RuntimeException("Test not implemented");
+		String info = pedata.get("strings.exe").getSectionTable().getInfo();
+		assertNotNull(info);
+		assertTrue(info.length() > 0);
 	}
 
 	@Test
 	public void getPointerToRawData() {
-		throw new RuntimeException("Test not implemented");
+		SectionTable table = pedata.get("strings.exe").getSectionTable();
+		for (SectionTableEntry section : table.getSectionEntries()) {
+			Long pointer = section.get(POINTER_TO_RAW_DATA);
+			assertEquals(table.getPointerToRawData(section.getName()), pointer);
+		}
 	}
 
 	@Test
@@ -84,26 +90,28 @@ public class SectionTableTest {
 
 	@Test
 	public void getSectionEntry() {
-		throw new RuntimeException("Test not implemented");
+		SectionTable table = pedata.get("strings.exe").getSectionTable();
+		for(SectionTableEntry section : table.getSectionEntries()) {
+			SectionTableEntry entry = table.getSectionEntry(section.getName());
+			assertEquals(entry, section);
+		}
 	}
 
 	@Test
 	public void getSize() {
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void getSizeOfRawData() {
-		throw new RuntimeException("Test not implemented");
+		SectionTable table = pedata.get("strings.exe").getSectionTable();
+		for(SectionTableEntry section : table.getSectionEntries()) {
+			Long size = table.getSize(section.getName());
+			assertEquals(size, section.get(SIZE_OF_RAW_DATA));
+		}
 	}
 
 	@Test
 	public void getVirtualAddress() {
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void read() {
-		throw new RuntimeException("Test not implemented");
+		SectionTable table = pedata.get("strings.exe").getSectionTable();
+		for(SectionTableEntry section : table.getSectionEntries()) {
+			Long size = table.getVirtualAddress(section.getName());
+			assertEquals(size, section.get(VIRTUAL_ADDRESS));
+		}
 	}
 }
