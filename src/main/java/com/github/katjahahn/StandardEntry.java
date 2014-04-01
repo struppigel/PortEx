@@ -21,7 +21,7 @@ import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntryKey;
-import com.github.katjahahn.sections.idata.ImportDirEntryKey;
+import com.github.katjahahn.sections.idata.DirectoryTableEntryKey;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntryKey;
 
 /**
@@ -70,7 +70,7 @@ public class StandardEntry {
 		HeaderKey[][] keyList = { COFFHeaderKey.values(),
 				MSDOSHeaderKey.values(), StandardFieldEntryKey.values(),
 				WindowsEntryKey.values(), DataDirectoryKey.values(),
-				SectionTableEntryKey.values(), ResourceDataEntryKey.values(), ImportDirEntryKey.values()};
+				SectionTableEntryKey.values(), ResourceDataEntryKey.values(), DirectoryTableEntryKey.values()};
 		for(HeaderKey[] keyArray : keyList) {
 			for(HeaderKey key : keyArray) {
 				if(key.toString().equalsIgnoreCase(str)) {

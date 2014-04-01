@@ -20,11 +20,11 @@ package com.github.katjahahn.sections.idata
 import com.github.katjahahn.sections.PESection
 import com.github.katjahahn.IOUtil
 import ImportSection._
+import DirectoryTableEntryKey._
 import com.github.katjahahn.StandardEntry
 import scala.collection.JavaConverters._
 import com.github.katjahahn.StandardDataEntry
 import com.github.katjahahn.PEModule._
-import ImportDirEntryKey._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +49,7 @@ class ImportSection(
 
   //TODO set bytes for superclass
 
-  private var directoryTable = List.empty[ImportDirTableEntry]
+  private var directoryTable = List.empty[DirectoryTableEntry]
 
   override def read(): Unit = {
     readDirEntries()
@@ -62,7 +62,7 @@ class ImportSection(
    *
    * @return a list of the directory table entries of the import section
    */
-  def getDirectoryTable(): java.util.List[ImportDirTableEntry] = directoryTable.asJava
+  def getDirectoryTable(): java.util.List[DirectoryTableEntry] = directoryTable.asJava
 
   private def readLookupTableEntries(): Unit = {
     for (dirEntry <- directoryTable) {
@@ -99,17 +99,17 @@ class ImportSection(
     } while (!isLastEntry)
   }
 
-  private def readDirEntry(nr: Int): Option[ImportDirTableEntry] = {
+  private def readDirEntry(nr: Int): Option[DirectoryTableEntry] = {
     val from = nr * ENTRY_SIZE
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
     //TODO this condition is wrong (?)
-    def isEmpty(entry: ImportDirTableEntry): Boolean =
+    def isEmpty(entry: DirectoryTableEntry): Boolean =
       //      entry.entries.values.forall(v => v == 0)
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
-    val entry = ImportDirTableEntry(entrybytes, I_DIR_ENTRY_SPEC)
+    val entry = DirectoryTableEntry(entrybytes, I_DIR_ENTRY_SPEC)
     entry.name = getASCIIName(entry)
     if (isEmpty(entry)) None else
       Some(entry)
@@ -119,7 +119,7 @@ class ImportSection(
     (for (e <- directoryTable)
       yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
 
-  private def getASCIIName(entry: ImportDirTableEntry): String = {
+  private def getASCIIName(entry: DirectoryTableEntry): String = {
     def getName(value: Int): String = {
       val offset = value - virtualAddress
       //TODO cast to int is insecure. actual int is unsigned, java int is signed

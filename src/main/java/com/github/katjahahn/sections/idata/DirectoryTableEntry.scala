@@ -25,9 +25,9 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.ByteArrayUtil._
 
-class ImportDirTableEntry (private val entrybytes: Array[Byte],
+class DirectoryTableEntry (private val entrybytes: Array[Byte],
   private val specification: Map[String, Array[String]],
-  private val entries: Map[ImportDirEntryKey, StandardEntry]) extends PEModule {
+  private val entries: Map[DirectoryTableEntryKey, StandardEntry]) extends PEModule {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -41,7 +41,7 @@ class ImportDirTableEntry (private val entrybytes: Array[Byte],
    */
   override def read(): Unit = {}
 
-  def apply(key: ImportDirEntryKey): Long = {
+  def apply(key: DirectoryTableEntryKey): Long = {
     entries(key).value
   }
 
@@ -57,9 +57,9 @@ class ImportDirTableEntry (private val entrybytes: Array[Byte],
 
 }
 
-object ImportDirTableEntry {
+object DirectoryTableEntry {
 
-  def apply(entrybytes: Array[Byte], specLocation: String): ImportDirTableEntry = {
+  def apply(entrybytes: Array[Byte], specLocation: String): DirectoryTableEntry = {
     val specification = IOUtil.readMap(specLocation).asScala.toMap
     val buffer = ListBuffer.empty[StandardEntry]
     for ((key, specs) <- specification) {
@@ -70,7 +70,7 @@ object ImportDirTableEntry {
       val entry = new StandardEntry(key, description, value)
       buffer += entry
     }
-    val entries: Map[ImportDirEntryKey, StandardEntry] = (buffer map { t => (t.key.asInstanceOf[ImportDirEntryKey], t) }).toMap;
-    new ImportDirTableEntry(entrybytes.clone, specification, entries)
+    val entries: Map[DirectoryTableEntryKey, StandardEntry] = (buffer map { t => (t.key.asInstanceOf[DirectoryTableEntryKey], t) }).toMap;
+    new DirectoryTableEntry(entrybytes.clone, specification, entries)
   }
 }
