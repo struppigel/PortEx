@@ -37,7 +37,7 @@ public class ResourceDirectoryEntry extends PEModule {
 	private final byte[] entryBytes;
 	private final int entryNr;
 	private final int parentId;
-	
+
 	public ResourceDirectoryEntry(boolean isNameEntry, byte[] entryBytes,
 			int entryNr, int parentId) throws IOException {
 		this.isNameEntry = isNameEntry;
@@ -88,7 +88,7 @@ public class ResourceDirectoryEntry extends PEModule {
 		return (value & mask) == 0;
 	}
 
-	//TODO test for long
+	// TODO test for long
 	private long removeHighestBit(long value) {
 		int mask = 0x7FFFFFFF;
 		return (value & mask);
@@ -118,13 +118,31 @@ public class ResourceDirectoryEntry extends PEModule {
 			String key = entry.getKey();
 			if (key.equals("DATA_ENTRY_RVA_OR_SUBDIR_RVA")) {
 				appendSubDirOrDataEntryRvaInfo(b, dataEntryRvaDescription,
-						idEntryDescription, specs, (int) value); //TODO use always long
+						idEntryDescription, specs, (int) value); // TODO use
+																	// always
+																	// long
 			} else {
 				b.append(specs[description] + ": " + value + NL);
+				b.append("resource type by id: "
+						+ getResourceTypeByID((int) value));
+				// TODO this is just for testing
 			}
 		}
 		b.append(NL);
 		return b.toString();
+	}
+
+	//TODO create file with info. see here for more: 
+	// http://msdn.microsoft.com/en-us/library/windows/desktop/ms648009%28v=vs.85%29.aspx
+	private String getResourceTypeByID(int id) {
+		switch (id) {
+		case 1:
+			return "RT_CURSOR";
+		case 10:
+			return "RT_RCDATA";
+		default:
+			return "unknown";
+		}
 	}
 
 	private void appendSubDirOrDataEntryRvaInfo(StringBuilder b,
