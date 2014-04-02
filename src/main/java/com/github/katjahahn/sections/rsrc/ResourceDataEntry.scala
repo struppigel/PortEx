@@ -19,7 +19,13 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.StandardEntry
 
-class ResourceDataEntry(private val data: Map[ResourceDataEntryKey, StandardEntry]) {
+class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardEntry]) {
+  override def toString(): String = 
+    s"""data entry
+       |..........
+       |
+       |${data.values.map(_.toString()).mkString("\n")}
+       |""".stripMargin
 
 }
 

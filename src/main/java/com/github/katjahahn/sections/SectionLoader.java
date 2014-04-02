@@ -30,7 +30,7 @@ import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.idata.ImportSection;
-import com.github.katjahahn.sections.rsrc.JResourceSection;
+import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
  * Responsible for computing section related values and loading sections with
@@ -102,11 +102,11 @@ public class SectionLoader {
 	 * 
 	 * The file on disk is read to fetch the information.
 	 * 
-	 * @return {@link JResourceSection} of the given file, null if file doesn't have this
+	 * @return {@link ResourceSection} of the given file, null if file doesn't have this
 	 *         section
 	 * @throws IOException if unable to read the file
 	 */
-	public JResourceSection loadResourceSection() throws IOException {
+	public ResourceSection loadResourceSection() throws IOException {
 		DataDirEntry resourceTable = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
@@ -121,7 +121,7 @@ public class SectionLoader {
 					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
 							.intValue()];
 					raf.readFully(rsrcbytes);
-					JResourceSection rsrc = new JResourceSection(rsrcbytes,
+					ResourceSection rsrc = new ResourceSection(rsrcbytes,
 							virtualAddress);
 					rsrc.read();
 					return rsrc;

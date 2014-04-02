@@ -43,7 +43,7 @@ import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntry;
 import com.github.katjahahn.sections.SectionTableEntryKey;
-import com.github.katjahahn.sections.rsrc.JResourceDataEntry;
+import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
@@ -656,7 +656,7 @@ public class IOUtil {
 		public Map<WindowsEntryKey, String> windowsOpt;
 		public List<DataDirEntry> dataDir;
 		public List<SectionTableEntry> sections;
-		public List<JResourceDataEntry> resources;
+		public List<ResourceDataEntry> resources;
 		public String filename;
 		public int peoffset;
 	}

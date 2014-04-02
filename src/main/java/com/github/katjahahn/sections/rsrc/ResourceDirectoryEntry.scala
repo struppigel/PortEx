@@ -20,8 +20,25 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
 
 abstract class ResourceDirectoryEntry
-case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable) extends ResourceDirectoryEntry
-case class DataEntry(id: IDOrName, data: ResourceDataEntry) extends ResourceDirectoryEntry
+
+case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int) extends ResourceDirectoryEntry {
+  override def toString(): String = 
+    s"""Sub Dir Entry $entryNr:
+       |${id.toString()}
+       |
+       |${table.getInfo()}
+       |""".stripMargin
+}
+case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extends ResourceDirectoryEntry {
+  override def toString(): String = 
+    s"""Data Dir Entry $entryNr:
+       |${id.toString()}
+       |
+       |${data.toString()}
+       |""".stripMargin
+}
+
+case class EmptyEntry() extends ResourceDirectoryEntry
 
 abstract class IDOrName
 case class ID(id: Long) extends IDOrName
@@ -37,9 +54,9 @@ object ResourceDirectoryEntry {
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
     val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry)
     if (isDataEntryRVA(rva)) {
-      createDataEntry(rva, id, tableBytes, offset)
+      createDataEntry(rva, id, tableBytes, offset, entryNr)
     } else {
-      createSubDirEntry(rva, id, tableBytes, offset)
+      createSubDirEntry(rva, id, tableBytes, offset, entryNr) 
     }
   }
 
@@ -69,19 +86,22 @@ object ResourceDirectoryEntry {
   }
 
   private def createDataEntry(rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long): DataEntry = {
+    tableBytes: Array[Byte], offset: Long, entryNr: Int): DataEntry = {
     val entryBytes = tableBytes.slice((rva - offset).toInt,
       (rva - offset + ResourceDataEntry.size).toInt)
     val data = ResourceDataEntry(entryBytes)
-    DataEntry(id, data)
+    DataEntry(id, data, entryNr)
   }
 
   private def createSubDirEntry(rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long): SubDirEntry = {
+    tableBytes: Array[Byte], offset: Long, entryNr: Int): SubDirEntry = {
     val address = removeHighestBit(rva)
     val resourceBytes = tableBytes.slice((address - offset).toInt, tableBytes.length)
+//    println("resource bytes sliced from " + (address - offset).toInt + " to " + tableBytes.length)
+//    println("creating subdir entry with rva " + address)
     val table = ResourceDirectoryTable(resourceBytes, address)
-    SubDirEntry(id, table)
+//    val table = null //TODO
+    SubDirEntry(id, table, entryNr)
   }
 
   private def isDataEntryRVA(value: Long): Boolean = {
