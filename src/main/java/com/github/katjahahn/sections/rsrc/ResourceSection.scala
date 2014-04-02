@@ -20,8 +20,6 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.IOUtil
 
 //TODO levels
-//TODO test this
-//TODO info strings
 
 class ResourceSection(
   private val rsrcbytes: Array[Byte],
@@ -32,7 +30,9 @@ class ResourceSection(
   //TODO super(rsrc bytes) call
   
   override def read(): Unit = {
-    resourceTable = ResourceDirectoryTable(rsrcbytes, 0)
+    val initialLevel = 1
+    val initialOffset = 0
+    resourceTable = ResourceDirectoryTable(initialLevel, rsrcbytes, initialOffset)
   }
 
   override def getInfo(): String = resourceTable.getInfo
