@@ -31,7 +31,7 @@ import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
-public class ResourceDirectoryTable extends PEModule {
+public class JResourceDirectoryTable extends PEModule {
 
 	private final static int ENTRY_SIZE = 8;
 	private final static int RESOURCE_DIR_OFFSET = 16;
@@ -41,9 +41,9 @@ public class ResourceDirectoryTable extends PEModule {
 
 	// TODO put children and dataEntries to DirectoryEntries
 	// XXX this is a mess!
-	private final List<ResourceDirectoryEntry> dirEntries = new ArrayList<>();
-	private final List<ResourceDirectoryTable> children = new ArrayList<>();
-	private final List<ResourceDataEntry> dataEntries = new ArrayList<>();
+	private final List<JResourceDirectoryEntry> dirEntries = new ArrayList<>();
+	private final List<JResourceDirectoryTable> children = new ArrayList<>();
+	private final List<JResourceDataEntry> dataEntries = new ArrayList<>();
 
 	private int nameEntries;
 	private int idEntries;
@@ -51,7 +51,7 @@ public class ResourceDirectoryTable extends PEModule {
 	private final int id;
 	private final long offset;
 
-	public ResourceDirectoryTable(Map<String, String[]> rsrcDirSpec,
+	public JResourceDirectoryTable(Map<String, String[]> rsrcDirSpec,
 			byte[] tableBytes, int id, long offset) throws IOException {
 		this.rsrcDirSpec = rsrcDirSpec;
 		this.tableBytes = tableBytes.clone();
@@ -91,7 +91,7 @@ public class ResourceDirectoryTable extends PEModule {
 
 	private void loadChildren() throws IOException {
 		int childId = id;
-		for (ResourceDirectoryEntry entry : dirEntries) {
+		for (JResourceDirectoryEntry entry : dirEntries) {
 			Long address = entry.getSubDirRVA();
 
 			if (address != null) {
@@ -100,7 +100,7 @@ public class ResourceDirectoryTable extends PEModule {
 					//TODO cast to int is insecure. actual int is unsigned, java int is signed
 					byte[] resourceBytes = Arrays.copyOfRange(tableBytes,
 							(int)(address - offset), tableBytes.length);
-					ResourceDirectoryTable table = new ResourceDirectoryTable(
+					JResourceDirectoryTable table = new JResourceDirectoryTable(
 							rsrcDirSpec, resourceBytes, childId, address);
 					table.read();
 					children.add(table);
@@ -120,24 +120,24 @@ public class ResourceDirectoryTable extends PEModule {
 			byte[] entryBytes = Arrays
 					.copyOfRange(tableBytes, offset, endpoint);
 			if (i < nameEntries) {
-				dirEntries.add(new ResourceDirectoryEntry(true, entryBytes,
+				dirEntries.add(new JResourceDirectoryEntry(true, entryBytes,
 						entryNr, id));
 			} else {
-				dirEntries.add(new ResourceDirectoryEntry(false, entryBytes,
+				dirEntries.add(new JResourceDirectoryEntry(false, entryBytes,
 						entryNr, id));
 			}
 		}
 	}
 
 	private void loadDataEntries() {
-		for (ResourceDirectoryEntry dirEntry : dirEntries) {
+		for (JResourceDirectoryEntry dirEntry : dirEntries) {
 			Long rva = dirEntry.getDataEntryRVA();
 			if (rva != null) {
 				//TODO cast to int is insecure. actual int is unsigned, java int is signed
 				byte[] entryBytes = Arrays.copyOfRange(tableBytes,
 						(int) (rva - offset),
-						(int) (rva - offset + ResourceDataEntry.SIZE));
-				dataEntries.add(new ResourceDataEntry(entryBytes));
+						(int) (rva - offset + JResourceDataEntry.SIZE));
+				dataEntries.add(new JResourceDataEntry(entryBytes));
 			}
 		}
 	}
@@ -168,13 +168,13 @@ public class ResourceDirectoryTable extends PEModule {
 				b.append(description + ": " + value + NL);
 			}
 		}
-		for (ResourceDirectoryEntry entry : dirEntries) {
+		for (JResourceDirectoryEntry entry : dirEntries) {
 			b.append(entry.getInfo());
 		}
-		for (ResourceDataEntry entry : dataEntries) {
+		for (JResourceDataEntry entry : dataEntries) {
 			b.append(entry.getInfo());
 		}
-		for (ResourceDirectoryTable child : children) {
+		for (JResourceDirectoryTable child : children) {
 			b.append(child.getInfo());
 		}
 		return b.toString();

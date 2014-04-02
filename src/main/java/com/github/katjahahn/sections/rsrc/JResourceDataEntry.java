@@ -26,7 +26,7 @@ import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
-public class ResourceDataEntry extends PEModule {
+public class JResourceDataEntry extends PEModule {
 
 	public static final int SIZE = 16;
 	private final static String RSRC_DATA_ENTRY_SPEC = "resourcedataentryspec";
@@ -34,7 +34,7 @@ public class ResourceDataEntry extends PEModule {
 	private Map<ResourceDataEntryKey, StandardEntry> data;
 	private byte[] entryBytes;
 
-	public ResourceDataEntry(byte[] entryBytes) {
+	public JResourceDataEntry(byte[] entryBytes) {
 		try {
 			this.entryBytes = entryBytes.clone();
 			resourceDataEntrySpec = IOUtil.readMap(RSRC_DATA_ENTRY_SPEC);

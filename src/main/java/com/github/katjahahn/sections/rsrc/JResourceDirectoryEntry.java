@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 
-public class ResourceDirectoryEntry extends PEModule {
+public class JResourceDirectoryEntry extends PEModule {
 
 	private final Map<String, String[]> resourceDirEntrySpec;
 	private final static String RSRC_DIR_ENTRY_SPEC = "resourcedirentryspec";
@@ -38,7 +38,7 @@ public class ResourceDirectoryEntry extends PEModule {
 	private final int entryNr;
 	private final int parentId;
 
-	public ResourceDirectoryEntry(boolean isNameEntry, byte[] entryBytes,
+	public JResourceDirectoryEntry(boolean isNameEntry, byte[] entryBytes,
 			int entryNr, int parentId) throws IOException {
 		this.isNameEntry = isNameEntry;
 		this.entryBytes = entryBytes.clone();
