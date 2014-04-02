@@ -80,7 +80,7 @@ object ResourceDirectoryEntry {
       ID(value)
     }
 
-  private def removeHighestBit(value: Long): Long = {
+  private def removeHighestIntBit(value: Long): Long = {
     val mask = 0x7FFFFFFF
     (value & mask)
   }
@@ -95,7 +95,7 @@ object ResourceDirectoryEntry {
 
   private def createSubDirEntry(rva: Long, id: IDOrName,
     tableBytes: Array[Byte], offset: Long, entryNr: Int): SubDirEntry = {
-    val address = removeHighestBit(rva)
+    val address = removeHighestIntBit(rva)
     val resourceBytes = tableBytes.slice((address - offset).toInt, tableBytes.length)
 //    println("resource bytes sliced from " + (address - offset).toInt + " to " + tableBytes.length)
 //    println("creating subdir entry with rva " + address)
