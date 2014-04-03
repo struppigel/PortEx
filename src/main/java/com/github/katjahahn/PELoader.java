@@ -29,6 +29,7 @@ import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
 import com.github.katjahahn.sections.rsrc.Resource;
+import com.github.katjahahn.sections.rsrc.ResourceDirectoryEntry;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
@@ -126,6 +127,7 @@ public class PELoader {
 		for(Resource r : resources) {
 			System.out.println(r);
 		}
+		ResourceDirectoryEntry entry = rsrc.getResourceTable().getTableEntries().get(0);
 	}
 
 }

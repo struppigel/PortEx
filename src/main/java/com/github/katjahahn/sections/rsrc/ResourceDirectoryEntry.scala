@@ -20,8 +20,22 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
 import ResourceDirectoryEntry._
 
+/**
+ * The entry of a {@link ResourceDirectoryTable}
+ * 
+ * There are two types of resource directory entries. They either point to another 
+ * resource directory table or to data. 
+ * The entries have either an {@link ID} or a {@link Name}
+ */
 abstract class ResourceDirectoryEntry
 
+/**
+ * An entry that points to another {@link ResourceDirectoryTable}
+ * 
+ * @param id the ID or Name of the entry
+ * @param table the table the entry points to
+ * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
+ */
 case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int) extends ResourceDirectoryEntry {
   override def toString(): String = 
     s"""Sub Dir Entry $entryNr:
@@ -30,6 +44,14 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int
        |${table.getInfo()}
        |""".stripMargin
 }
+
+/**
+ * This entry points to a {@link ResourceDataEntry}.
+ * 
+ * @param id the ID or Name of the entry
+ * @param data the resource data entry
+ * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
+ */
 case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extends ResourceDirectoryEntry {
   
   override def toString(): String = 
@@ -57,6 +79,18 @@ object ResourceDirectoryEntry {
   val typeIDMap = IOUtil.readArray(typeSpecLocation).asScala.map(a => (a(0).toInt, a(2))).toMap
   //TODO languageIDMap, nameIDMap
 
+  /**
+   * Creates a {@link ResourceDirectoryEntry}
+   * 
+   * @param isNameEntry indicates whether the ID is a number id or points to a name
+   * @param entryBytes the array of bytes this entry is made of
+   * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
+   * @param tableBytes the array of bytes the whole table is made of 
+   *   where this is entry is a member of 
+   * @param offset of the {@link ResourceDirectoryTable} this entry is a member of
+   * @param level the level of the {@link ResourceDirectoryTable} this entry is a member of 
+   * @return {@link ResourceDirectoryEntry}
+   */
   def apply(isNameEntry: Boolean, entryBytes: Array[Byte],
     entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Level): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)

@@ -50,7 +50,7 @@ class ResourceSection(val resourceTable: ResourceDirectoryTable) extends PEModul
    *
    * @return a List of {@link Resource} instances
    */
-  def getResources(): java.util.List[Resource] = resourceTable.getResources().asJava
+  def getResources(): java.util.List[Resource] = resourceTable.getResources()
 
 }
 
