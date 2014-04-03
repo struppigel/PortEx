@@ -42,8 +42,10 @@ case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extend
 
 abstract class IDOrName
 
-case class ID(id: Long) extends IDOrName {
-  override def toString(): String = "ID: " + typeIDMap.getOrElse(id.toInt, id.toString)
+case class ID(id: Long, level: Level) extends IDOrName {
+  override def toString(): String = 
+    "ID: " + {if (level.levelNr == 1) typeIDMap.getOrElse(id.toInt, id.toString) else id.toString}
+  
 }
 
 case class Name(rva: Long, name: String) extends IDOrName
@@ -59,7 +61,7 @@ object ResourceDirectoryEntry {
     entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Level): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
-    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry)
+    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level)
     if (isDataEntryRVA(rva)) {
       createDataEntry(rva, id, tableBytes, offset, entryNr)
     } else {
@@ -79,12 +81,12 @@ object ResourceDirectoryEntry {
     }
   }
 
-  private def getID(value: Long, isNameEntry: Boolean): IDOrName =
+  private def getID(value: Long, isNameEntry: Boolean, level: Level): IDOrName =
     if (isNameEntry) {
       val name = null //TODO
       Name(value, name)
     } else {
-      ID(value)
+      ID(value, level)
     }
 
   private def removeHighestIntBit(value: Long): Long = {
