@@ -17,11 +17,13 @@
  */
 package com.github.katjahahn.sections.rsrc
 
+import java.awt.image.BufferedImage
+
 /**
- * Holds the most information of a resource, which is the information provided 
+ * Holds the most information of a resource, which is the information provided
  * by the level IDs and the bytes that make up the resource.
  * This is the return datatype for the API user.
- * 
+ *
  * @constructor
  * @param
  * @param
@@ -36,7 +38,12 @@ class Resource(
    * @param
    */
   def this(resourceBytes: Array[Byte]) = this(resourceBytes, Map.empty)
+  
+  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "Unicode")
+  
+  def getResourceAsIcon(): BufferedImage = null //TODO
 
-  override def toString(): String = levelIDs.mkString(" || ") + resourceBytes
+  override def toString(): String = 
+    levelIDs.mkString(" || ") + " || resource bytes:\n" + getResourceBytesString
 
 }

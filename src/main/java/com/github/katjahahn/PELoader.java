@@ -15,10 +15,15 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.List;
+
+import net.sf.image4j.codec.bmp.BMPDecoder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -125,6 +130,10 @@ public class PELoader {
 		List<Resource> resources = rsrc.getResources();
 		for(Resource r : resources) {
 			System.out.println(r);
+			byte[] resourceBytes = r.resourceBytes();
+			InputStream is = new ByteArrayInputStream(resourceBytes);
+			BufferedImage images = BMPDecoder.read(is);
+			System.out.println(images);
 		}
 	}
 

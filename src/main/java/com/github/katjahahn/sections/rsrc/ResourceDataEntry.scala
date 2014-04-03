@@ -27,10 +27,10 @@ class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardEntry]) {
        |${data.values.map(_.toString()).mkString("\n")}
        |""".stripMargin
        
-  def readResourceBytes(virtualAddress: Long, tableBytes: Array[Byte]): Array[Byte] = {
-    val rva = data(ResourceDataEntryKey.DATA_RVA).value
-    val size = data(ResourceDataEntryKey.SIZE).value
-    tableBytes.slice(rva.toInt, (rva + size).toInt)
+  def readResourceBytes(virtualAddress: Long, rsrcBytes: Array[Byte]): Array[Byte] = {
+    val address = data(ResourceDataEntryKey.DATA_RVA).value - virtualAddress
+    val length = data(ResourceDataEntryKey.SIZE).value + address
+    rsrcBytes.slice(address.toInt, length.toInt)
   }
 
 }
