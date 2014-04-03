@@ -27,13 +27,13 @@ import ResourceDirectoryTable._
 
 /**
  * @author Katja Hahn
- * 
- * Header and the entries which point to either data or other resource directory 
- * tables. 
- * Each ResourceDirectoryTable therefore is also a tree consisting of more 
+ *
+ * Header and the entries which point to either data or other resource directory
+ * tables.
+ * Each ResourceDirectoryTable therefore is also a tree consisting of more
  * tables or resource data entries as leaves
- * 
- * @constructor creates an instance of the resource directory table with level, 
+ *
+ * @constructor creates an instance of the resource directory table with level,
  * header and entries
  * @param level the level of the table in the tree (where the table is a node)
  * @param header the table header
@@ -54,43 +54,55 @@ class ResourceDirectoryTable(private val level: Level,
 
   /**
    * Returns all resource directory entries of the table
-   * 
+   *
    * @returns a list of all resource directory entries
    */
   def getTableEntries(): java.util.List[ResourceDirectoryEntry] = entries.asJava
-  
+
+  /**
+   * @return all directory table entries that are data entries 
+   */
+  def getDataEntries(): java.util.List[DataEntry] = 
+    entries.collect { case d: DataEntry => d }.asJava
+
+  /**
+   * @return all directory table entries that are subdirectory entries
+   */
+  def getSubDirEntries(): java.util.List[SubDirEntry] =
+    entries.collect { case s: SubDirEntry => s }.asJava
+
   /**
    * Returns a map of the header key and value pairs.
-   * 
+   *
    * @return header map
    */
   def getHeader(): java.util.Map[ResourceDirectoryTableKey, StandardEntry] = header.asJava
-  
+
   /**
    * Returns the Long value for the given key
-   * 
+   *
    * @param key
    * @return The value for the given resource directory table key
    */
   def getHeaderValue(key: ResourceDirectoryTableKey): Long = header(key).value
-        
- /**
+
+  /**
    * Collects and returns all resources that this resource table tree has.
-   * 
+   *
    * @return a list of all resources
    */
   def getResources(): java.util.List[Resource] = entries.flatMap(getResources).asJava
-  
+
   /**
    * Collects and returns all resources that this resource table tree has.
-   * 
+   *
    * @return a scala list of all resources
    */
   def _getResources(): List[Resource] = entries.flatMap(getResources)
 
   /**
    * Collects all the resources of one table entry
-   * 
+   *
    * @param entry the table directory entry
    * @return a list of all resources that can be found with this entry
    */

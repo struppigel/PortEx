@@ -28,8 +28,8 @@ import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.rsrc.DataEntry;
 import com.github.katjahahn.sections.rsrc.Resource;
-import com.github.katjahahn.sections.rsrc.ResourceDirectoryEntry;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
@@ -124,10 +124,11 @@ public class PELoader {
 		SectionLoader loader = new SectionLoader(data);
 		ResourceSection rsrc = loader.loadResourceSection();
 		List<Resource> resources = rsrc.getResources();
-		for(Resource r : resources) {
-			System.out.println(r);
-		}
-		ResourceDirectoryEntry entry = rsrc.getResourceTable().getTableEntries().get(0);
+//		for(Resource r : resources) {
+//			System.out.println(r);
+//		}
+		DataEntry entry = rsrc.getResourceTable().getSubDirEntries().get(0).table().getSubDirEntries().get(0).table().getDataEntries().get(0);
+		System.out.println(entry);
 	}
 
 }

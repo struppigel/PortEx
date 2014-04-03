@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.sections.rsrc
 
 import com.github.katjahahn.IOUtil
@@ -22,23 +24,25 @@ import ResourceDirectoryEntry._
 
 /**
  * The entry of a {@link ResourceDirectoryTable}
- * 
- * There are two types of resource directory entries. They either point to another 
- * resource directory table or to data. 
+ *
+ * There are two types of resource directory entries. They either point to another
+ * resource directory table or to data.
  * The entries have either an {@link ID} or a {@link Name}
  */
 abstract class ResourceDirectoryEntry
 
 /**
  * An entry that points to another {@link ResourceDirectoryTable}
- * 
+ *
  * @param id the ID or Name of the entry
  * @param table the table the entry points to
  * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
  */
 case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int) extends ResourceDirectoryEntry {
-  override def toString(): String = 
-    s"""Sub Dir Entry $entryNr:
+  override def toString(): String =
+    s"""Sub Dir Entry $entryNr
+       |+++++++++++++++
+       |
        |${id.toString()}
        |
        |${table.getInfo()}
@@ -47,27 +51,32 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int
 
 /**
  * This entry points to a {@link ResourceDataEntry}.
- * 
+ *
  * @param id the ID or Name of the entry
  * @param data the resource data entry
  * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
  */
 case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extends ResourceDirectoryEntry {
-  
-  override def toString(): String = 
-    s"""Data Dir Entry $entryNr:
+
+  override def toString(): String =
+    s"""Data Dir Entry $entryNr
+       |++++++++++++++++
+       |
        |${id.toString()}
        |
        |${data.toString()}
        |""".stripMargin
 }
 
+/**
+ * Represents and ID or a name for a directory table entry
+ */
 abstract class IDOrName
 
 case class ID(id: Long, level: Level) extends IDOrName {
-  override def toString(): String = 
-    "ID: " + {if (level.levelNr == 1) typeIDMap.getOrElse(id.toInt, id.toString) else id.toString}
-  
+  override def toString(): String =
+    "ID: " + { if (level.levelNr == 1) typeIDMap.getOrElse(id.toInt, id.toString) else id.toString }
+
 }
 
 case class Name(rva: Long, name: String) extends IDOrName
@@ -81,14 +90,14 @@ object ResourceDirectoryEntry {
 
   /**
    * Creates a {@link ResourceDirectoryEntry}
-   * 
+   *
    * @param isNameEntry indicates whether the ID is a number id or points to a name
    * @param entryBytes the array of bytes this entry is made of
    * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
-   * @param tableBytes the array of bytes the whole table is made of 
-   *   where this is entry is a member of 
+   * @param tableBytes the array of bytes the whole table is made of
+   *   where this is entry is a member of
    * @param offset of the {@link ResourceDirectoryTable} this entry is a member of
-   * @param level the level of the {@link ResourceDirectoryTable} this entry is a member of 
+   * @param level the level of the {@link ResourceDirectoryTable} this entry is a member of
    * @return {@link ResourceDirectoryEntry}
    */
   def apply(isNameEntry: Boolean, entryBytes: Array[Byte],
@@ -99,7 +108,7 @@ object ResourceDirectoryEntry {
     if (isDataEntryRVA(rva)) {
       createDataEntry(rva, id, tableBytes, offset, entryNr)
     } else {
-      createSubDirEntry(rva, id, tableBytes, offset, entryNr, level) 
+      createSubDirEntry(rva, id, tableBytes, offset, entryNr, level)
     }
   }
 
