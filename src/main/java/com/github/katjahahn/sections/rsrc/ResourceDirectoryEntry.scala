@@ -56,7 +56,7 @@ object ResourceDirectoryEntry {
   //TODO languageIDMap, nameIDMap
 
   def apply(isNameEntry: Boolean, entryBytes: Array[Byte],
-    entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Int): ResourceDirectoryEntry = {
+    entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Level): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
     val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry)
@@ -101,10 +101,10 @@ object ResourceDirectoryEntry {
   }
 
   private def createSubDirEntry(rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long, entryNr: Int, level: Int): SubDirEntry = {
+    tableBytes: Array[Byte], offset: Long, entryNr: Int, level: Level): SubDirEntry = {
     val address = removeHighestIntBit(rva)
     val resourceBytes = tableBytes.slice((address - offset).toInt, tableBytes.length)
-    val table = ResourceDirectoryTable(level+1, resourceBytes, address)
+    val table = ResourceDirectoryTable(level.up, resourceBytes, address)
     SubDirEntry(id, table, entryNr)
   }
 

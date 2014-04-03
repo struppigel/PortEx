@@ -30,10 +30,14 @@ class ResourceSection(
   //TODO super(rsrc bytes) call
   
   override def read(): Unit = {
-    val initialLevel = 1
+    val initialLevel = Level()
     val initialOffset = 0
     resourceTable = ResourceDirectoryTable(initialLevel, rsrcbytes, initialOffset)
   }
 
   override def getInfo(): String = resourceTable.getInfo
+  
+  //TODO java
+  def getResources(): java.util.List[Resource] = resourceTable.getResources().asJava
+  
 }

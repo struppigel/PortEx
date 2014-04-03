@@ -25,18 +25,33 @@ import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey._
 import scala.collection.mutable.ListBuffer
 import ResourceDirectoryTable._
 
-class ResourceDirectoryTable(private val level: Int,
+class ResourceDirectoryTable(private val level: Level,
   private val header: Map[ResourceDirectoryTableKey, StandardEntry],
   private val entries: List[ResourceDirectoryEntry]) {
 
   def getInfo(): String =
     s"""|Resource Dir Table Header
         |-------------------------
-        |level: ${levelDescription.getOrElse(level, level.toString())}
+        |${level.toString()}
         |${header.values.map(_.toString()).mkString("\n")}
         |
         |${entries.map(_.toString()).mkString("\n")}
         |""".stripMargin
+
+  def getResources(): List[Resource] = entries.flatMap(getResources)
+
+  private def getResources(entry: ResourceDirectoryEntry): List[Resource] = {
+    entry match {
+      case e: DataEntry =>
+        val resourceBytes = e.data.readResourceBytes()
+        val levelIDs = Map(level -> e.id)
+        List(new Resource(resourceBytes, levelIDs))
+      case s: SubDirEntry =>
+        val res = s.table.getResources
+        res.foreach(r => r.levelIDs ++= Map(level -> s.id))
+        res
+    }
+  }
 }
 
 object ResourceDirectoryTable {
@@ -47,12 +62,11 @@ object ResourceDirectoryTable {
   private val entrySize = 8;
   private val resourceDirOffset = 16;
   private val specLocation = "rsrcdirspec"
-  private val levelDescription = Map(1 -> "type", 2 -> "name", 3 -> "language")
 
-  def apply(level: Int, tableBytes: Array[Byte], offset: Long): ResourceDirectoryTable = {
+  def apply(level: Level, tableBytes: Array[Byte], offset: Long): ResourceDirectoryTable = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
     val header = readHeader(spec, tableBytes)
-//    println("\ncreated header! \n\n" + header.values.map(_.toString()).mkString("\n"))
+    //    println("\ncreated header! \n\n" + header.values.map(_.toString()).mkString("\n"))
     val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
     val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
     val entries = readEntries(header, nameEntries, idEntries, tableBytes, offset, level)
@@ -71,7 +85,7 @@ object ResourceDirectoryTable {
   }
 
   private def readEntries(header: Header, nameEntries: Int, idEntries: Int,
-    tableBytes: Array[Byte], tableOffset: Long, level: Int): List[ResourceDirectoryEntry] = {
+    tableBytes: Array[Byte], tableOffset: Long, level: Level): List[ResourceDirectoryEntry] = {
     val entriesSum = nameEntries + idEntries
     var entries = ListBuffer.empty[ResourceDirectoryEntry]
     for (i <- 0 until entriesSum) {

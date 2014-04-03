@@ -26,6 +26,8 @@ class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardEntry]) {
        |
        |${data.values.map(_.toString()).mkString("\n")}
        |""".stripMargin
+       
+  def readResourceBytes(): Array[Byte] = Array.empty
 
 }
 
