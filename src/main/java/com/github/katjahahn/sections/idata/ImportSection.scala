@@ -27,8 +27,9 @@ import com.github.katjahahn.StandardDataEntry
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
-import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger;
+import com.github.katjahahn.PEModule
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -45,10 +46,9 @@ import org.apache.logging.log4j.Logger;
 class ImportSection(
   private val idatabytes: Array[Byte],
   private val virtualAddress: Long,
-  private val optHeader: OptionalHeader) extends PESection {
+  private val optHeader: OptionalHeader) extends PEModule {
 
-  //TODO set bytes for superclass
-
+  //TODO use companion object
   private var directoryTable = List.empty[DirectoryTableEntry]
 
   /**

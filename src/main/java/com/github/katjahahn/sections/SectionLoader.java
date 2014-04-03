@@ -121,9 +121,8 @@ public class SectionLoader {
 					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
 							.intValue()];
 					raf.readFully(rsrcbytes);
-					ResourceSection rsrc = new ResourceSection(rsrcbytes,
+					ResourceSection rsrc = ResourceSection.getInstance(rsrcbytes,
 							virtualAddress);
-					rsrc.read();
 					return rsrc;
 				}
 			}

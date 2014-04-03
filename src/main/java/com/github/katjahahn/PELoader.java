@@ -62,21 +62,17 @@ public class PELoader {
 	private PEData loadData() throws IOException {
 		PESignature pesig = new PESignature(file);
 		pesig.read();
-		MSDOSHeader msdos = null;
-		COFFFileHeader coff = null;
-		OptionalHeader opt = null;
-		SectionTable table = null;
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-			msdos = loadMSDOSHeader(raf);
+			MSDOSHeader msdos = loadMSDOSHeader(raf);
 			msdos.read();
-			coff = loadCOFFFileHeader(pesig, raf);
+			COFFFileHeader coff = loadCOFFFileHeader(pesig, raf);
 			coff.read();
-			opt = loadOptionalHeader(pesig, coff, raf);
+			OptionalHeader opt = loadOptionalHeader(pesig, coff, raf);
 			opt.read();
-			table = loadSectionTable(pesig, coff, raf);
+			SectionTable table = loadSectionTable(pesig, coff, raf);
 			table.read();
+			return new PEData(msdos, pesig, coff, opt, table, file);
 		}
-		return new PEData(msdos, pesig, coff, opt, table, file);
 	}
 
 	private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf)
@@ -122,10 +118,7 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-//		File file = new File("src/main/resources/testfiles/strings.exe");
-//		File file = new File("WinRar.exe");
 		File file = new File("Holiday_Island.exe");
-//		File file = new File("launch4jexe.exe");
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
 		ResourceSection rsrc = loader.loadResourceSection();
