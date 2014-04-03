@@ -37,6 +37,6 @@ class Resource(
    */
   def this(resourceBytes: Array[Byte]) = this(resourceBytes, Map.empty)
 
-  override def toString(): String = levelIDs.mkString(" || ")
+  override def toString(): String = levelIDs.mkString(" || ") + resourceBytes
 
 }

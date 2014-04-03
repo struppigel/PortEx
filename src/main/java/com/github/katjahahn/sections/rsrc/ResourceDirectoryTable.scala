@@ -60,9 +60,9 @@ class ResourceDirectoryTable(private val level: Level,
   def getTableEntries(): java.util.List[ResourceDirectoryEntry] = entries.asJava
 
   /**
-   * @return all directory table entries that are data entries 
+   * @return all directory table entries that are data entries
    */
-  def getDataEntries(): java.util.List[DataEntry] = 
+  def getDataEntries(): java.util.List[DataEntry] =
     entries.collect { case d: DataEntry => d }.asJava
 
   /**
@@ -88,32 +88,34 @@ class ResourceDirectoryTable(private val level: Level,
 
   /**
    * Collects and returns all resources that this resource table tree has.
-   *
+   * 
+   * @param virtualAddress the virtual address of the root(?) resource table
+   * @param rsrcBytes the bytes of the resource section
    * @return a list of all resources
    */
-  def getResources(): java.util.List[Resource] = entries.flatMap(getResources).asJava
+  def getResources(virtualAddress: Long, rsrcBytes: Array[Byte]): java.util.List[Resource] = 
+    _getResources(virtualAddress, rsrcBytes).asJava
 
-  /**
-   * Collects and returns all resources that this resource table tree has.
-   *
-   * @return a scala list of all resources
-   */
-  def _getResources(): List[Resource] = entries.flatMap(getResources)
+  def _getResources(virtualAddress: Long, tableBytes: Array[Byte]): List[Resource] = 
+    entries.flatMap(getResources(_, virtualAddress, tableBytes))
 
   /**
    * Collects all the resources of one table entry
    *
    * @param entry the table directory entry
+   * @param virtualAddress
+   * @param rsrcBytes
    * @return a list of all resources that can be found with this entry
    */
-  private def getResources(entry: ResourceDirectoryEntry): List[Resource] = {
+  private def getResources(entry: ResourceDirectoryEntry, virtualAddress: Long, 
+      rsrcBytes: Array[Byte]): List[Resource] = {
     entry match {
       case e: DataEntry =>
-        val resourceBytes = e.data.readResourceBytes()
+        val resourceBytes = e.data.readResourceBytes(virtualAddress, rsrcBytes)
         val levelIDs = Map(level -> e.id)
         List(new Resource(resourceBytes, levelIDs))
       case s: SubDirEntry =>
-        val res = s.table._getResources
+        val res = s.table._getResources(virtualAddress, rsrcBytes)
         res.foreach(r => r.levelIDs ++= Map(level -> s.id))
         res
     }

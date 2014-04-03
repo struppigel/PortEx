@@ -30,7 +30,10 @@ import com.github.katjahahn.PEModule
  * @param resourceTable the root resource directory table that makes up the tree 
  *   of the resource section
  */
-class ResourceSection(val resourceTable: ResourceDirectoryTable) extends PEModule {
+class ResourceSection(
+    val resourceTable: ResourceDirectoryTable, 
+    private val rsrcBytes: Array[Byte], 
+    val virtualAddress: Long) extends PEModule {
 
   override def read(): Unit = {}
   
@@ -50,7 +53,8 @@ class ResourceSection(val resourceTable: ResourceDirectoryTable) extends PEModul
    *
    * @return a List of {@link Resource} instances
    */
-  def getResources(): java.util.List[Resource] = resourceTable.getResources()
+  def getResources(): java.util.List[Resource] = 
+    resourceTable.getResources(virtualAddress, rsrcBytes)
 
 }
 
@@ -67,7 +71,7 @@ object ResourceSection {
     val initialLevel = Level()
     val initialOffset = 0
     val resourceTable = ResourceDirectoryTable(initialLevel, rsrcbytes, initialOffset)
-    new ResourceSection(resourceTable)
+    new ResourceSection(resourceTable, rsrcbytes, virtualAddress)
   }
 
   /**
