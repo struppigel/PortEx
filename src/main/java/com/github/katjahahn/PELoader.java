@@ -18,6 +18,7 @@ package com.github.katjahahn;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +26,10 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.rsrc.Resource;
+import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -117,12 +121,12 @@ public class PELoader {
 		logger.entry();
 		File file = new File("WinRar.exe");
 		PEData data = PELoader.loadPE(file);
-//		ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
-//		List<Resource> resources = rsrc.getResources();
-//		for (Resource r : resources) {
-//			System.out.println(r);
-//			System.out.println(r.resourceBytes().length);
-//		}
+		ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
+		List<Resource> resources = rsrc.getResources();
+		for (Resource r : resources) {
+			System.out.println(r);
+			System.out.println(r.resourceBytes().length);
+		}
 		
 	}
 
