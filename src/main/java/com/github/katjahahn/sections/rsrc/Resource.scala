@@ -39,9 +39,14 @@ class Resource(
    */
   def this(resourceBytes: Array[Byte]) = this(resourceBytes, Map.empty)
   
-  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "Unicode")
+  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
   
-  def getResourceAsIcon(): BufferedImage = null //TODO
+  //TODO implement, probably need to do that manually
+//  def getResourceAsIcon(): BufferedImage = null 
+  
+//  def isIcon(): Boolean = {
+//    levelIDs(new Level(1)).toString.contains("icon")
+//  }
 
   override def toString(): String = 
     levelIDs.mkString(" || ") + " || resource bytes:\n" + getResourceBytesString

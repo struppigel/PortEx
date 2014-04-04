@@ -63,7 +63,7 @@ public class IOUtil {
 	public static final String NL = System.getProperty("line.separator");
 	// TODO system independend path separators
 	private static final String DELIMITER = ";";
-	private static final String SPEC_DIR = "/data/";
+	private static final String SPEC_DIR = "data/";
 	private static final String RESOURCE_DIR = "src/main/resources";
 	private static final String TEST_FILE_DIR = "/testfiles";
 	private static final String TEST_REPORTS_DIR = "/reports";
@@ -306,6 +306,12 @@ public class IOUtil {
 	public static Map<String, String[]> readMap(String filename)
 			throws IOException {
 		Map<String, String[]> map = new TreeMap<>();
+//		String str = "src/main/java/data/" + filename;
+//		File file = new File(str);
+//		System.out.println("path: " + file.getAbsolutePath());
+//		System.out.println(file.exists());
+//		InputStream id = IOUtil.class.getResourceAsStream(str);
+//		System.out.println("is null? " + id);
 		try (InputStreamReader isr = new InputStreamReader(
 				IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
 				BufferedReader reader = new BufferedReader(isr)) {

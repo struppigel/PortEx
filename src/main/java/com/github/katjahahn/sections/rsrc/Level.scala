@@ -54,6 +54,8 @@ class Level(val levelNr: Int) extends Equals {
 
 }
 
+//TODO case class for type, name and language, calling super constructor? How?
+
 object Level {
   
   private val levelDescription = Map(1 -> "type", 2 -> "name", 3 -> "language")
