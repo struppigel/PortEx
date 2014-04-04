@@ -12,7 +12,10 @@
 \contentsline {chapter}{\numberline {4}Malware Hiding Techniques}{7}{chapter.4}
 \contentsline {chapter}{\numberline {5}Malware Analysis}{8}{chapter.5}
 \contentsline {section}{\numberline {5.1}Malware Analysis Techniques}{8}{section.5.1}
-\contentsline {chapter}{\numberline {6}Static Analysis Library}{9}{chapter.6}
-\contentsline {chapter}{\numberline {7}Evaluation}{10}{chapter.7}
-\contentsline {chapter}{\numberline {8}Das Competence Information Portal}{11}{chapter.8}
-\contentsline {chapter}{Bibliography}{13}{section*.10}
+\contentsline {chapter}{\numberline {6}Portable Executable Format}{9}{chapter.6}
+\contentsline {section}{\numberline {6.1}General Structure}{9}{section.6.1}
+\contentsline {section}{\numberline {6.2}Special Sections}{11}{section.6.2}
+\contentsline {chapter}{\numberline {7}Static Analysis Library}{12}{chapter.7}
+\contentsline {chapter}{\numberline {8}Evaluation}{13}{chapter.8}
+\contentsline {chapter}{\numberline {9}Das Competence Information Portal}{14}{chapter.9}
+\contentsline {chapter}{Bibliography}{17}{section*.15}

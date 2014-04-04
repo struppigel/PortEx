@@ -1,8 +1,20 @@
 \begin{thebibliography}{1}
 
+\bibitem{kath13}
+{\sc Kath, Randy}: {\em The Portable Executable File Format from Top to
+  Bottom}.
+\newblock
+  \url{http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html},
+  2013.
+
 \bibitem{sikorski12}
 {\sc Michael~Sikorski, Andrew~Honig}: {\em Practical Malware Analysis}.
 \newblock No Starch Press, Inc., 2012.
+
+\bibitem{pespec}
+{\sc {Microsoft Cooperation}}: {\em Microsoft PE and COFF specification}.
+\newblock \url{http://msdn.microsoft.com/library/windows/hardware/gg463125},
+  2013.
 
 \bibitem{szor05}
 {\sc Szor, Peter}: {\em {The Art of Computer Virus Research and Defense}}.

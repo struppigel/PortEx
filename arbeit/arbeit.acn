@@ -1,4 +1,28 @@
-\begin{theglossary}\glogroupV
+\begin{theglossary}\glogroupD
+
+\gloitem {\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}dynamic-link library\relax
+\glodelim 
+		\glsnumformat{9}\delimT 
+
+\gloitem {\glosslabel{acn:DRV}{\noexpand \acronymfont {DRV}}}legacy system driver\relax
+\glodelim 
+		\glsnumformat{9}\delimT \gloskip \glogroupE
+
+\gloitem {\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}executable\relax
+\glodelim 
+		\glsnumformat{9}\delimT \gloskip \glogroupF
+
+\gloitem {\glosslabel{acn:FON}{\noexpand \acronymfont {FON}}}font\relax
+\glodelim 
+		\glsnumformat{9}\delimT \gloskip \glogroupP
+
+\gloitem {\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax
+\glodelim 
+		\glsnumformat{9}\delimT \gloskip \glogroupS
+
+\gloitem {\glosslabel{acn:SYS}{\noexpand \acronymfont {SYS}}}real mode device driver\relax
+\glodelim 
+		\glsnumformat{9}\delimT \gloskip \glogroupV
 
 \gloitem {\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax
 \glodelim 

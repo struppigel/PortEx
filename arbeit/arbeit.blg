@@ -7,50 +7,51 @@ A level-1 auxiliary file: classification.aux
 A level-1 auxiliary file: av.aux
 A level-1 auxiliary file: hiding.aux
 A level-1 auxiliary file: analysis.aux
+A level-1 auxiliary file: peformat.aux
 A level-1 auxiliary file: portex.aux
 A level-1 auxiliary file: evaluation.aux
 A level-1 auxiliary file: cip.aux
 The style file: gerplain.bst
 A level-1 auxiliary file: statement.aux
 Database file #1: references.bib
-You've used 2 entries,
+You've used 4 entries,
             2343 wiz_defined-function locations,
-            564 strings with 4928 characters,
-and the built_in function-call counts, 474 in all, are:
-= -- 42
-> -- 14
+            575 strings with 5268 characters,
+and the built_in function-call counts, 940 in all, are:
+= -- 90
+> -- 28
 < -- 0
-+ -- 6
-- -- 4
-* -- 26
-:= -- 85
-add.period$ -- 4
-call.type$ -- 2
-change.case$ -- 6
++ -- 13
+- -- 8
+* -- 48
+:= -- 157
+add.period$ -- 8
+call.type$ -- 4
+change.case$ -- 12
 chr.to.int$ -- 0
-cite$ -- 2
-duplicate$ -- 26
-empty$ -- 49
-format.name$ -- 4
-if$ -- 101
+cite$ -- 4
+duplicate$ -- 44
+empty$ -- 99
+format.name$ -- 8
+if$ -- 211
 int.to.chr$ -- 0
-int.to.str$ -- 2
+int.to.str$ -- 4
 missing$ -- 4
-newline$ -- 11
-num.names$ -- 4
-pop$ -- 16
+newline$ -- 19
+num.names$ -- 8
+pop$ -- 32
 preamble$ -- 1
-purify$ -- 6
+purify$ -- 12
 quote$ -- 0
-skip$ -- 14
+skip$ -- 32
 stack$ -- 0
-substring$ -- 10
-swap$ -- 4
+substring$ -- 21
+swap$ -- 10
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 4
+type$ -- 12
 warning$ -- 0
-while$ -- 4
-width$ -- 3
-write$ -- 20
+while$ -- 8
+width$ -- 5
+write$ -- 38
