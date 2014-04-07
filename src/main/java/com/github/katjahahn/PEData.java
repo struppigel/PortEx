@@ -16,9 +16,11 @@
 package com.github.katjahahn;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
+import com.github.katjahahn.msdos.MSDOSLoadModule;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
 
@@ -75,6 +77,13 @@ public class PEData {
 	
 	public OptionalHeader getOptionalHeader() {
 		return opt;
+	}
+
+	//TODO maybe load with PELoader
+	public MSDOSLoadModule readMSDOSLoadModule() throws IOException {
+		MSDOSLoadModule module = new MSDOSLoadModule(msdos, file);
+		module.read();
+		return module;
 	}
 
 	public File getFile() {
