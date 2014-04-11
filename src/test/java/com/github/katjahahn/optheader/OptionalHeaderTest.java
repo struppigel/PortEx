@@ -27,10 +27,10 @@ import java.util.Map.Entry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.IOUtil.TestData;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber;
 
 public class OptionalHeaderTest {

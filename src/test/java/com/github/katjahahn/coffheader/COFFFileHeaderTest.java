@@ -29,10 +29,10 @@ import java.util.Map.Entry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.IOUtil.TestData;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
+import com.github.katjahahn.TestreportsReader.TestData;
 
 public class COFFFileHeaderTest {
 	

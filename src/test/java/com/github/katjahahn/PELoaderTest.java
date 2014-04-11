@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.testng.annotations.BeforeSuite;
 
-import com.github.katjahahn.IOUtil.TestData;
+import com.github.katjahahn.TestreportsReader.TestData;
 
 public class PELoaderTest {
 
@@ -32,11 +32,11 @@ public class PELoaderTest {
 
 	@BeforeSuite(alwaysRun = true)
 	public static void loadPE() throws IOException {
-		File[] testfiles = IOUtil.getTestiles();
+		File[] testfiles = TestreportsReader.getTestiles();
 		for (File file : testfiles) {
 			peData.put(file.getName(), PELoader.loadPE(file));
 		}
-		testData = IOUtil.readTestDataList();
+		testData = TestreportsReader.readTestDataList();
 	}
 
 	public static List<TestData> getTestData() throws IOException {

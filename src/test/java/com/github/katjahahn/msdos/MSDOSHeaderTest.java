@@ -28,11 +28,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.IOUtil.TestData;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.TestreportsReader.TestData;
 
 public class MSDOSHeaderTest {
 

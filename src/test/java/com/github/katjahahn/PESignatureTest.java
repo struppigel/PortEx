@@ -26,7 +26,7 @@ import java.util.Map;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.IOUtil.TestData;
+import com.github.katjahahn.TestreportsReader.TestData;
 
 public class PESignatureTest {
 
