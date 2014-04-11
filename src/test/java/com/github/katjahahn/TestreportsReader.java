@@ -24,6 +24,7 @@ import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTableEntry;
 import com.github.katjahahn.sections.SectionTableEntryKey;
+import com.github.katjahahn.sections.edata.ExportEntry;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 public class TestreportsReader {
@@ -31,9 +32,34 @@ public class TestreportsReader {
 	private static final Logger logger = LogManager.getLogger(IOUtil.class.getName());
 	public static final String NL = System.getProperty("line.separator");
 	
-	private static final String RESOURCE_DIR = "src/main/resources";
-	private static final String TEST_FILE_DIR = "/testfiles";
+	public static final String RESOURCE_DIR = "src/main/resources";
+	public static final String TEST_FILE_DIR = "/testfiles";
 	private static final String TEST_REPORTS_DIR = "/reports";
+	private static final String EXPORT_REPORTS_DIR = "/exportreports";
+	
+	public static Map<File, List<ExportEntry>> readExportEntries() throws IOException {
+		Map<File, List<ExportEntry>> data = new HashMap<>();
+		File directory = Paths.get(RESOURCE_DIR, EXPORT_REPORTS_DIR).toFile();
+		for (File file : directory.listFiles()) {
+			if (!file.isDirectory()) {
+				List<ExportEntry> entries = readExportEntries(file);
+				data.put(file, entries);
+			}
+		}
+		return data;
+	}
+
+	private static List<ExportEntry> readExportEntries(File file) throws IOException {
+		List<String[]> entries = IOUtil.readArrayFrom(file);
+		List<ExportEntry> list = new ArrayList<>();
+		for(String[] entry : entries) {
+			Long rva = Long.parseLong(entry[0]);
+			String name = entry[1];
+			int ordinal = Integer.parseInt(entry[2]);
+			list.add(new ExportEntry(rva, name, ordinal));
+		}
+		return list;
+	}
 
 	/**
 	 * Parses all testfile reports (by pev) and creates TestData instances from

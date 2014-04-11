@@ -16,8 +16,11 @@
 package com.github.katjahahn;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,8 +78,8 @@ public class IOUtil {
 	}
 
 	/**
-	 * Reads the specified file into a list of arrays. Each array is the entry
-	 * of one line in the file.
+	 * Reads the specified file from the specification directory into a list of 
+	 * arrays. Each array is the entry of one line in the file.
 	 * 
 	 * @param filename
 	 * @return
@@ -87,6 +90,27 @@ public class IOUtil {
 		try (InputStreamReader isr = new InputStreamReader(
 				IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
 				BufferedReader reader = new BufferedReader(isr)) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				String[] values = line.split(DELIMITER);
+				list.add(values);
+			}
+			return list;
+		}
+	}
+	
+	/**
+	 * Reads the specified file into a list of arrays. Each array is the entry
+	 * of one line in the file.
+	 * 
+	 * @param filename
+	 * @return
+	 * @throws IOException
+	 */
+	public static List<String[]> readArrayFrom(File file) throws IOException {
+		List<String[]> list = new LinkedList<>();
+		try (BufferedReader reader = Files.newBufferedReader(file.toPath(),
+				Charset.forName("UTF-8"))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] values = line.split(DELIMITER);
