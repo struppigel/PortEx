@@ -6,6 +6,8 @@ import com.github.katjahahn.PEModule
 
 class ExportAddressTable (val addresses: List[Long]) extends PEModule {
   
+  def apply(i: Int): Long = addresses(i)
+  
   override def read(): Unit = {}
   override def getInfo(): String = 
     s"""|Export Address Table

@@ -25,7 +25,9 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.edata.ExportSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -92,7 +94,6 @@ public class PELoader {
 	private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
 			RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH;
-		System.out.println("coff offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
 		return new COFFFileHeader(headerbytes);
 	}
@@ -101,7 +102,6 @@ public class PELoader {
 			COFFFileHeader coff, RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE;
-		System.out.println("opt offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, coff.getSizeOfOptionalHeader(),
 				raf);
 		return new OptionalHeader(headerbytes);
@@ -119,8 +119,8 @@ public class PELoader {
 		logger.entry();
 		File file = new File("src/main/resources/testfiles/DLL2.dll");
 		PEData data = PELoader.loadPE(file);
-		String info = data.getOptionalHeader().getDataDirInfo();
-		System.out.println(info);
+		ExportSection edata = new SectionLoader(data).loadExportSection();
+		System.out.println(edata.getInfo());
 	}
 
 }
