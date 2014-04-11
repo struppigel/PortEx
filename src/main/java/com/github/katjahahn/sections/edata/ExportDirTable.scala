@@ -11,6 +11,10 @@ import com.github.katjahahn.PEModule
 class ExportDirTable(
     private val entries: Map[ExportDirTableKey, StandardEntry]) extends PEModule {
   
+  def apply(key: ExportDirTableKey): Long = entries(key).value
+  
+  def get(key: ExportDirTableKey): Long = apply(key)
+  
   override def read(): Unit = {}
   override def getInfo(): String = entries.values.mkString(NL)
 
