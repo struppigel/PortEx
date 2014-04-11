@@ -28,8 +28,11 @@ import com.github.katjahahn.PEModule._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
 import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Logger
 import com.github.katjahahn.PEModule
+import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.PELoader
+import java.io.File
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -175,6 +178,13 @@ class ImportSection(
 
 object ImportSection {
 
+  def main(args: Array[String]): Unit = {
+    val data = PELoader.loadPE(new File("WinRar.exe"))
+    val loader = new SectionLoader(data)
+    val idata = loader.loadImportSection()
+    println(idata.getInfo)
+  }
+  
   /**
    * Size of one entry is {@value}.
    * It is used to calculate the offset of an entry.

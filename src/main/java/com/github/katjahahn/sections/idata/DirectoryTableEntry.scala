@@ -87,7 +87,8 @@ object DirectoryTableEntry {
       val offset = Integer.parseInt(specs(1))
       val size = Integer.parseInt(specs(2))
       val value = getBytesLongValue(entrybytes.clone, offset, size)
-      val entry = new StandardEntry(key, description, value) //TODO key
+      val ekey = DirectoryTableEntryKey.valueOf(key)
+      val entry = new StandardEntry(ekey, description, value) 
       buffer += entry
     }
     val entries: Map[DirectoryTableEntryKey, StandardEntry] = (buffer map { t => (t.key.asInstanceOf[DirectoryTableEntryKey], t) }).toMap;
