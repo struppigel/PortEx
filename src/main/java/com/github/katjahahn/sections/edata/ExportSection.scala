@@ -4,6 +4,7 @@ import com.github.katjahahn.PEModule
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
+import scala.collection.JavaConverters._
 import java.io.File
 import com.github.katjahahn.optheader.WindowsEntryKey
 
@@ -13,6 +14,10 @@ class ExportSection(
     private val namePointerTable: ExportNamePointerTable) extends PEModule {
   
   def getExportDirTable(): ExportDirTable = edataTable
+  
+  def getExportAddresses(): java.util.List[Long] = exportAddressTable.addresses.asJava
+  
+  def getPointerNameMap(): java.util.Map[Long, String] = namePointerTable.pointerNameMap.asJava
 
   override def read(): Unit = {}
   

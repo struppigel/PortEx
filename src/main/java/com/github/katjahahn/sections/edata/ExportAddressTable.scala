@@ -4,7 +4,7 @@ import com.github.katjahahn.ByteArrayUtil._
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.PEModule
 
-class ExportAddressTable (private val addresses: List[Long]) extends PEModule {
+class ExportAddressTable (val addresses: List[Long]) extends PEModule {
   
   override def read(): Unit = {}
   override def getInfo(): String = 

@@ -7,14 +7,17 @@ import com.github.katjahahn.PEModule._
 import java.io.File
 import ExportNamePointerTable._
 
-class ExportNamePointerTable(private val addresses: Map[Address, String]) extends PEModule {
+class ExportNamePointerTable(val pointerNameMap: Map[Address, String]) extends PEModule {
+  
   
   override def read(): Unit = {}
   override def getInfo(): String = 
     s"""|Name Pointer Table
-        |....................
+        |...................
         |
-        |${addresses.map(t => ("0x" + java.lang.Long.toHexString(t._1) -> t._2)).mkString(NL)}""".stripMargin
+        |RVA    ->  Name
+        |****************
+        |${pointerNameMap.map(t => ("0x" + java.lang.Long.toHexString(t._1) -> t._2)).mkString(NL)}""".stripMargin
 
 }
 
