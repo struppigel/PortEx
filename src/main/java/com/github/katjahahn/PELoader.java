@@ -96,6 +96,7 @@ public class PELoader {
 	private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
 			RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH;
+		System.out.println("coff offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
 		return new COFFFileHeader(headerbytes);
 	}
@@ -104,6 +105,7 @@ public class PELoader {
 			COFFFileHeader coff, RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE;
+		System.out.println("opt offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, coff.getSizeOfOptionalHeader(),
 				raf);
 		return new OptionalHeader(headerbytes);

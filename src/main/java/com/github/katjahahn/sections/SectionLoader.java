@@ -29,6 +29,7 @@ import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 
@@ -171,6 +172,26 @@ public class SectionLoader {
 					optHeader);
 			idata.read();
 			return idata;
+		}
+		return null;
+	}
+	
+	/**
+	 * Loads all bytes and information of the export section.
+	 * The file on disk is read to fetch the information.
+	 * 
+	 * @return the export section, null if file doesn't have an export section
+	 * @throws IOException if unable to read the file
+	 */
+	public ExportSection loadExportSection() throws IOException {
+		DataDirEntry exportTable = getDataDirEntryForKey(
+				optHeader.getDataDirEntries(), DataDirectoryKey.EXPORT_TABLE);
+		if (exportTable != null) {
+			long virtualAddress = exportTable.virtualAddress;
+			byte[] edatabytes = readBytesFor(DataDirectoryKey.EXPORT_TABLE);
+			ExportSection edata = ExportSection.getInstance(edatabytes, virtualAddress,
+					optHeader);
+			return edata;
 		}
 		return null;
 	}

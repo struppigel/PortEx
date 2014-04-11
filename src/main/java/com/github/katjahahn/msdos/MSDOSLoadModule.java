@@ -71,7 +71,7 @@ public class MSDOSLoadModule extends PEModule {
 
 	/**
 	 * Calculates the size of the image based on {@link MSDOSHeader} information
-	 * 
+	 * FIXME too large, surpasses PE signature
 	 * @return image size
 	 */
 	public int getImageSize() {

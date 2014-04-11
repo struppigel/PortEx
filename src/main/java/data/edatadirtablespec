@@ -1,0 +1,11 @@
+EXPORT_FLAGS;Export Flags;0;4
+TIME_DATE_STAMP;Time/Date Stamp;4;4
+MAJOR_VERSION;Major Version;8;2
+MINOR_VERSION;Minor Version;10;2
+NAME_RVA;Name RVA;12;4
+ORDINAL_BASE;Ordinal Base;16;4
+ADDR_TABLE_ENTRIES;Address Table Entries;20;4
+NR_OF_NAME_POINTERS;Number of Name Pointers;24;4
+EXPORT_ADDR_TABLE_RVA;Export Address Table RVA;28;4
+NAME_POINTER_RVA;Name Pointer RVA;32;4
+ORDINAL_TABLE_RVA;Ordinal Table RVA;36;4
