@@ -159,7 +159,7 @@ public class SectionLoader {
 	 * Loads all bytes and information of the import section.
 	 * The file on disk is read to fetch the information.
 	 * 
-	 * @return the import section, null if file doesn't have an import section
+	 * @return the import section, null if file doesn't have an import sectigetBytesLongValue(edataBytes, offset, length)on
 	 * @throws IOException if unable to read the file
 	 */
 	public ImportSection loadImportSection() throws IOException {
@@ -190,7 +190,7 @@ public class SectionLoader {
 			long virtualAddress = exportTable.virtualAddress;
 			byte[] edatabytes = readBytesFor(DataDirectoryKey.EXPORT_TABLE);
 			ExportSection edata = ExportSection.getInstance(edatabytes, virtualAddress,
-					optHeader);
+					optHeader, file);
 			return edata;
 		}
 		return null;
