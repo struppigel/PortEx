@@ -33,7 +33,7 @@ import com.github.katjahahn.PEModule
  * 
  * @constructor instanciates an export directory table. 
  */
-class ExportDirTable(
+class ExportDirTable private (
     private val entries: Map[ExportDirTableKey, StandardEntry]) extends PEModule {
   
   def apply(key: ExportDirTableKey): Long = entries(key).value

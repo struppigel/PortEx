@@ -33,34 +33,21 @@ import com.github.katjahahn.PEModule
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
 import java.io.File
+import scala.collection.mutable.ListBuffer
 
 /**
  * Represents the import section, fetches information about the data directory
  * entries and their lookup table entries.
  *
- * The instance of this class is usually created by the section loader.
- *
- * @constructor
- * @param idatabytes the bytes that belong to the import section
- * @param virtualAddress the address all rva values in the import section are relative to
- * @param optHeader the optional header of the file
  * @author Katja Hahn
  */
-class ImportSection(
-  private val idatabytes: Array[Byte],
-  private val virtualAddress: Long,
-  private val optHeader: OptionalHeader) extends PEModule {
-
-  //TODO use companion object
-  private var directoryTable = List.empty[DirectoryTableEntry]
+class ImportSection private (
+  private val directoryTable: List[DirectoryTableEntry]) extends PEModule {
 
   /**
    * Parses the directory table and the lookup table entries
    */
-  override def read(): Unit = {
-    readDirEntries()
-    readLookupTableEntries()
-  }
+  override def read(): Unit = {}
 
   /**
    * Returns the directory table entries of the import section.
@@ -71,10 +58,41 @@ class ImportSection(
   def getDirectoryTable(): java.util.List[DirectoryTableEntry] = directoryTable.asJava
 
   /**
+   * Generates a description string of all entries
+   */
+  private def entriesDescription(): String =
+    (for (e <- directoryTable)
+      yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
+
+  /**
+   * Returns a decription of all entries in the import section.
+   *
+   * @return a description of all entries in the import section
+   */
+  override def getInfo(): String =
+    s"""|--------------
+	|Import section
+	|--------------
+    |
+    |$entriesDescription""".stripMargin
+
+}
+
+object ImportSection {
+
+  def apply(idatabytes: Array[Byte], virtualAddress: Long,
+    optHeader: OptionalHeader): ImportSection = {
+    val directoryTable = readDirEntries(idatabytes, virtualAddress)
+    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes)
+    new ImportSection(directoryTable)
+  }
+
+  /**
    * Parses all lookup table entries for all entries in the directory table
    * and adds the lookup table entries to the directory table entry they belong to
    */
-  private def readLookupTableEntries(): Unit = {
+  private def readLookupTableEntries(directoryTable: List[DirectoryTableEntry],
+    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte]): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
@@ -97,20 +115,39 @@ class ImportSection(
    * Parses all entries of the import section and writes them into the
    * {@link #directoryTable}
    */
-  private def readDirEntries(): Unit = {
+  private def readDirEntries(idatabytes: Array[Byte], virtualAddress: Long): List[DirectoryTableEntry] = {
+    val directoryTable = ListBuffer[DirectoryTableEntry]()
     var isLastEntry = false
     var i = 0
     do {
-      readDirEntry(i) match {
+      readDirEntry(i, idatabytes, virtualAddress) match {
         case Some(entry) =>
           logger.debug("------------start-----------")
           logger.debug("dir entry read: " + entry)
           logger.debug("------------end-------------")
-          directoryTable = directoryTable :+ entry
+          directoryTable += entry
         case None => isLastEntry = true
       }
       i += 1
     } while (!isLastEntry)
+    directoryTable.toList
+  }
+
+  /**
+   * Returns the string for the given directory table entry
+   *
+   * @param entry the directory table entry whose name shall be returned
+   * @return string
+   */
+  private def getASCIIName(entry: DirectoryTableEntry, virtualAddress: Long,
+    idatabytes: Array[Byte]): String = {
+    def getName(value: Int): String = {
+      val offset = value - virtualAddress
+      //TODO cast to int is insecure. actual int is unsigned, java int is signed
+      val nullindex = idatabytes.indexWhere(b => b == 0, offset.toInt)
+      new String(idatabytes.slice(offset.toInt, nullindex))
+    }
+    getName(entry(NAME_RVA).toInt)
   }
 
   /**
@@ -120,7 +157,7 @@ class ImportSection(
    * @return Some entry if the entry at the given nr is not the null entry,
    * None otherwise
    */
-  private def readDirEntry(nr: Int): Option[DirectoryTableEntry] = {
+  private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long): Option[DirectoryTableEntry] = {
     val from = nr * ENTRY_SIZE
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
@@ -134,49 +171,22 @@ class ImportSection(
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
     val entry = DirectoryTableEntry(entrybytes)
-    entry.name = getASCIIName(entry)
+    entry.name = getASCIIName(entry, virtualAddress, idatabytes)
     if (isEmpty(entry)) None else
       Some(entry)
   }
 
   /**
-   * Generates a description string of all entries
-   */
-  private def entriesDescription(): String =
-    (for (e <- directoryTable)
-      yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
-
-  /**
-   * Returns the string for the given directory table entry
+   * The instance of this class is usually created by the section loader.
    *
-   * @param entry the directory table entry whose name shall be returned
-   * @return string
+   * @param idatabytes the bytes that belong to the import section
+   * @param virtualAddress the address all rva values in the import section are relative to
+   * @param optHeader the optional header of the file
+   * @return ImportSection instance
    */
-  private def getASCIIName(entry: DirectoryTableEntry): String = {
-    def getName(value: Int): String = {
-      val offset = value - virtualAddress
-      //TODO cast to int is insecure. actual int is unsigned, java int is signed
-      val nullindex = idatabytes.indexWhere(b => b == 0, offset.toInt)
-      new String(idatabytes.slice(offset.toInt, nullindex))
-    }
-    getName(entry(NAME_RVA).toInt)
-  }
-
-  /**
-   * Returns a decription of all entries in the import section.
-   *
-   * @return a description of all entries in the import section
-   */
-  override def getInfo(): String =
-    s"""|--------------
-	|Import section
-	|--------------
-    |
-    |$entriesDescription""".stripMargin
-
-}
-
-object ImportSection {
+  def getInstance(idatabytes: Array[Byte], virtualAddress: Long,
+    optHeader: OptionalHeader): ImportSection =
+    apply(idatabytes, virtualAddress, optHeader)
 
   def main(args: Array[String]): Unit = {
     val data = PELoader.loadPE(new File("WinRar.exe"))
@@ -184,7 +194,7 @@ object ImportSection {
     val idata = loader.loadImportSection()
     println(idata.getInfo)
   }
-  
+
   /**
    * Size of one entry is {@value}.
    * It is used to calculate the offset of an entry.

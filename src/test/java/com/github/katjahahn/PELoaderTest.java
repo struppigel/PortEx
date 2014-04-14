@@ -47,7 +47,7 @@ public class PELoaderTest {
 	}
 
 	public static Map<String, PEData> getPEData() throws IOException {
-		if (peData == null) {
+		if (peData == null || peData.size() == 0) {
 			loadPE();
 		}
 		return peData;

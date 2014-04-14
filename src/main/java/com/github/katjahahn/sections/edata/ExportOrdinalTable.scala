@@ -20,7 +20,9 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.PEModule
 import com.github.katjahahn.PEModule._
 
-class ExportOrdinalTable(val ordinals: List[Int], val base: Int) extends PEModule {
+class ExportOrdinalTable private (
+    val ordinals: List[Int], 
+    val base: Int) extends PEModule {
   
   def apply(i: Int): Int = ordinals(i)
   

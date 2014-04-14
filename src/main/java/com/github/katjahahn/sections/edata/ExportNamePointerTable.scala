@@ -22,7 +22,7 @@ import com.github.katjahahn.PEModule._
 import java.io.File
 import ExportNamePointerTable._
 
-class ExportNamePointerTable(val pointerNameList: List[(Address, String)]) extends PEModule {
+class ExportNamePointerTable private (val pointerNameList: List[(Address, String)]) extends PEModule {
   
   def getMap(): Map[Address, String] = pointerNameList.toMap
   

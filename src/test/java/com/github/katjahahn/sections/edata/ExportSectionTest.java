@@ -36,26 +36,22 @@ public class ExportSectionTest {
 
 	@Test
 	public void getExportEntries() throws IOException {
+		// assertEquals(pedata.size(), exportEntries.size());
 		for (Entry<File, List<ExportEntry>> set : exportEntries.entrySet()) {
 			File file = set.getKey();
 			List<ExportEntry> expected = set.getValue();
 			String filename = file.getName().replace(".txt", "");
-			System.out.println("testing: " + filename);
-			System.out.println("exists: " + new File(filename).exists());
-			for (Entry<String, PEData> pedatum : pedata.entrySet()) {
-				if (pedatum.getKey().contains(filename)) {
-					SectionLoader loader = new SectionLoader(
-							pedata.get(filename));
-					ExportSection edata = loader.loadExportSection();
-					if (edata == null) {
-						assertTrue(expected.size() == 0);
-					} else {
-						List<ExportEntry> actual = edata.getExportEntries();
-						assertEquals(actual, expected);
-					}
-					break;
-				}
+			SectionLoader loader = new SectionLoader(pedata.get(filename));
+			ExportSection edata = loader.loadExportSection();
+			if (edata == null) {
+				System.out.println("edata section is null for " + filename);
+				assertTrue(expected.size() == 0);
+			} else {
+				System.out.println("testing entries for " + filename);
+				List<ExportEntry> actual = edata.getExportEntries();
+				assertEquals(actual, expected);
 			}
+
 		}
 	}
 }

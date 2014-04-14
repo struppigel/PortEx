@@ -38,7 +38,7 @@ import com.github.katjahahn.StandardEntry
  * 
  * @param entries that represent the information of the directory table entry
  */
-class DirectoryTableEntry (
+class DirectoryTableEntry private (
   private val entries: Map[DirectoryTableEntryKey, StandardEntry]) extends PEModule {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil

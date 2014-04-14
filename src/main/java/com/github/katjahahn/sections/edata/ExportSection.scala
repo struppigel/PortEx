@@ -42,7 +42,7 @@ import ExportDirTableKey._
  * @param ordinalTable contains ordinal number of exported functions
  * 
  */
-class ExportSection(
+class ExportSection private (
   private val edataTable: ExportDirTable,
   private val exportAddressTable: ExportAddressTable,
   private val namePointerTable: ExportNamePointerTable,
@@ -161,7 +161,7 @@ class ExportSection(
 object ExportSection {
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab17-02.dll"))
+    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab11-03.dll")) //TODO correct ordinal and rva of this? see tests
     val loader = new SectionLoader(data)
     val edata = loader.loadExportSection()
     println(edata.getDetailedInfo)

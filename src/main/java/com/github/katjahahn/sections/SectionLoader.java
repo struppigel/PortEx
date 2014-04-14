@@ -168,7 +168,7 @@ public class SectionLoader {
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
 			byte[] idatabytes = readBytesFor(DataDirectoryKey.IMPORT_TABLE);
-			ImportSection idata = new ImportSection(idatabytes, virtualAddress,
+			ImportSection idata = ImportSection.getInstance(idatabytes, virtualAddress,
 					optHeader);
 			idata.read();
 			return idata;

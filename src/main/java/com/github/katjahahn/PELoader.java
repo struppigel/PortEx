@@ -27,7 +27,7 @@ import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.edata.ExportSection;
+import com.github.katjahahn.sections.idata.ImportSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -119,7 +119,7 @@ public class PELoader {
 		logger.entry();
 		File file = new File("src/main/resources/testfiles/DLL2.dll");
 		PEData data = PELoader.loadPE(file);
-		ExportSection edata = new SectionLoader(data).loadExportSection();
+		ImportSection edata = new SectionLoader(data).loadImportSection();
 		System.out.println(edata.getInfo());
 	}
 
