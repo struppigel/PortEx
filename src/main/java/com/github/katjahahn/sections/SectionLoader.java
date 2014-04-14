@@ -72,8 +72,9 @@ public class SectionLoader {
 	 * Loads the section with the given name. If the file doesn't have a section
 	 * by this name, it returns null.
 	 * 
-	 * This does not instantiate subclasses of {@link PESection}. Use methods like
-	 * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
+	 * This does not instantiate subclasses of {@link PESection}. Use methods
+	 * like {@link #loadImportSection()} or {@link #loadResourceSection()}
+	 * instead.
 	 * 
 	 * The file on disk is read to fetch the information
 	 * 
@@ -81,16 +82,44 @@ public class SectionLoader {
 	 *            the section's name
 	 * @return PESection of the given name, null if section isn't contained in
 	 *         file
-	 * @throws IOException if unable to read the file
+	 * @throws IOException
+	 *             if unable to read the file
 	 */
 	public PESection loadSection(String name) throws IOException {
+		return loadSection(name, false);
+	}
+
+	/**
+	 * Loads the section with the given name and may patch the size of the
+	 * section if the {@code patchSize} parameter is set. If the file doesn't
+	 * have a section by this name, it returns null.
+	 * 
+	 * This does not instantiate subclasses of {@link PESection}. Use methods
+	 * like {@link #loadImportSection()} or {@link #loadResourceSection()}
+	 * instead.
+	 * 
+	 * The file on disk is read to fetch the information
+	 * 
+	 * @param name
+	 *            the section's name
+	 * @param patchSize
+	 *            patches the section size if it surpasses the actual file size.
+	 *            This is an anomaly and only useful while dealing with
+	 *            corrupted PE files
+	 * @return PESection of the given name, null if section isn't contained in
+	 *         file
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public PESection loadSection(String name, boolean patchSize)
+			throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			Long pointer = table.getPointerToRawData(name);
 			if (pointer != null) {
 				raf.seek(pointer);
-				// TODO cast to int is insecure. actual int is unsigned, java
-				// int is signed
-				byte[] sectionbytes = new byte[table.getSize(name).intValue()];
+				int sectionSize = getSectionSize(table.getSectionEntry(name),
+						patchSize, pointer);
+				byte[] sectionbytes = new byte[sectionSize];
 				raf.readFully(sectionbytes);
 				return new PESection(sectionbytes);
 			}
@@ -99,15 +128,60 @@ public class SectionLoader {
 	}
 
 	/**
+	 * Gets the section size and patches it if {@code patchSize} is set.
+	 * 
+	 * @param entry
+	 *            section entry to get the size from
+	 * @param patchSize
+	 *            patches the section size if it surpasses the actual file size.
+	 *            This is an anomaly and only useful while dealing with
+	 *            corrupted PE files
+	 * @param pointer
+	 *            the pointertorawdata or file offset of the section
+	 * @return a possibly patched section size
+	 */
+	private int getSectionSize(SectionTableEntry entry, boolean patchSize,
+			Long pointer) {
+		long sectionSize = entry.get(SectionTableEntryKey.SIZE_OF_RAW_DATA);
+		long fileSize = file.length();
+		if (patchSize && (pointer + sectionSize > fileSize)) {
+			sectionSize = fileSize - pointer;
+		}
+		// TODO cast to int is insecure. actual int is unsigned,
+		// java int is signed
+		return (int) sectionSize;
+	}
+
+	/**
 	 * Loads all bytes and information of the resource section.
 	 * 
 	 * The file on disk is read to fetch the information.
 	 * 
-	 * @return {@link ResourceSection} of the given file, null if file doesn't have this
-	 *         section
-	 * @throws IOException if unable to read the file
+	 * @return {@link ResourceSection} of the given file, null if file doesn't
+	 *         have this section
+	 * @throws IOException
+	 *             if unable to read the file
 	 */
 	public ResourceSection loadResourceSection() throws IOException {
+		return loadResourceSection(false);
+	}
+
+	/**
+	 * Loads all bytes and information of the resource section.
+	 * 
+	 * The file on disk is read to fetch the information.
+	 * 
+	 * @param patchSize
+	 *            patches the given section size if it surpasses the actual file
+	 *            size. This is an anomaly and only useful while dealing with
+	 *            corrupted PE files
+	 * @return {@link ResourceSection} of the given file, null if file doesn't
+	 *         have this section
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public ResourceSection loadResourceSection(boolean patchSize)
+			throws IOException {
 		DataDirEntry resourceTable = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
@@ -116,14 +190,13 @@ public class SectionLoader {
 			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-					raf.seek(rsrcEntry.get(POINTER_TO_RAW_DATA));
-					// TODO cast to int is insecure. actual int is unsigned,
-					// java int is signed
-					byte[] rsrcbytes = new byte[rsrcEntry.get(SIZE_OF_RAW_DATA)
-							.intValue()];
+					long pointer = rsrcEntry.get(POINTER_TO_RAW_DATA);
+					raf.seek(pointer);
+					int size = getSectionSize(rsrcEntry, patchSize, pointer);
+					byte[] rsrcbytes = new byte[size];
 					raf.readFully(rsrcbytes);
-					ResourceSection rsrc = ResourceSection.getInstance(rsrcbytes,
-							virtualAddress);
+					ResourceSection rsrc = ResourceSection.getInstance(
+							rsrcbytes, virtualAddress);
 					return rsrc;
 				}
 			}
@@ -134,9 +207,12 @@ public class SectionLoader {
 	/**
 	 * Returns the section entry of the section table the rva is pointing into.
 	 * 
-	 * @param table the section table of the file
-	 * @param rva the relative virtual address
-	 * @return the {@link SectionTableEntry} of the section the rva is pointing into
+	 * @param table
+	 *            the section table of the file
+	 * @param rva
+	 *            the relative virtual address
+	 * @return the {@link SectionTableEntry} of the section the rva is pointing
+	 *         into
 	 */
 	public static SectionTableEntry getSectionByRVA(SectionTable table, long rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
@@ -156,41 +232,81 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Loads all bytes and information of the import section.
-	 * The file on disk is read to fetch the information.
+	 * Loads all bytes and information of the import section. The file on disk
+	 * is read to fetch the information.
 	 * 
-	 * @return the import section, null if file doesn't have an import sectigetBytesLongValue(edataBytes, offset, length)on
-	 * @throws IOException if unable to read the file
+	 * @return the import section, null if file doesn't have an import
+	 *         sectigetBytesLongValue(edataBytes, offset, length)on
+	 * @throws IOException
+	 *             if unable to read the file
 	 */
 	public ImportSection loadImportSection() throws IOException {
+		return loadImportSection(false);
+	}
+
+	/**
+	 * Loads all bytes and information of the import section. The file on disk
+	 * is read to fetch the information.
+	 * 
+	 * @param patchSize
+	 *            patches the section size if it surpasses the actual file size.
+	 *            This is an anomaly and only useful while dealing with
+	 *            corrupted PE files
+	 * @return the import section, null if file doesn't have an import
+	 *         sectigetBytesLongValue(edataBytes, offset, length)on
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public ImportSection loadImportSection(boolean patchSize)
+			throws IOException {
 		DataDirEntry importTable = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), DataDirectoryKey.IMPORT_TABLE);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
-			byte[] idatabytes = readBytesFor(DataDirectoryKey.IMPORT_TABLE);
-			ImportSection idata = ImportSection.getInstance(idatabytes, virtualAddress,
-					optHeader);
+			byte[] idatabytes = readBytesFor(DataDirectoryKey.IMPORT_TABLE,
+					patchSize);
+			ImportSection idata = ImportSection.getInstance(idatabytes,
+					virtualAddress, optHeader);
 			idata.read();
 			return idata;
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Loads all bytes and information of the export section.
-	 * The file on disk is read to fetch the information.
+	 * Loads all bytes and information of the export section. The file on disk
+	 * is read to fetch the information.
 	 * 
 	 * @return the export section, null if file doesn't have an export section
-	 * @throws IOException if unable to read the file
+	 * @throws IOException
+	 *             if unable to read the file
 	 */
 	public ExportSection loadExportSection() throws IOException {
+		return loadExportSection(false);
+	}
+
+	/**
+	 * Loads all bytes and information of the export section. The file on disk
+	 * is read to fetch the information.
+	 * 
+	 * @param patchSize
+	 *            patches the section size if it surpasses the actual file size.
+	 *            This is an anomaly and only useful while dealing with
+	 *            corrupted PE files
+	 * @return the export section, null if file doesn't have an export section
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public ExportSection loadExportSection(boolean patchSize)
+			throws IOException {
 		DataDirEntry exportTable = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), DataDirectoryKey.EXPORT_TABLE);
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
-			byte[] edatabytes = readBytesFor(DataDirectoryKey.EXPORT_TABLE);
-			ExportSection edata = ExportSection.getInstance(edatabytes, virtualAddress,
-					optHeader);
+			byte[] edatabytes = readBytesFor(DataDirectoryKey.EXPORT_TABLE,
+					patchSize);
+			ExportSection edata = ExportSection.getInstance(edatabytes,
+					virtualAddress, optHeader);
 			return edata;
 		}
 		return null;
@@ -214,9 +330,10 @@ public class SectionLoader {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public byte[] readBytesFor(DataDirectoryKey dataDirKey) throws IOException {
-		DataDirEntry dataDir = getDataDirEntryForKey(optHeader.getDataDirEntries(),
-				dataDirKey);
+	public byte[] readBytesFor(DataDirectoryKey dataDirKey, boolean patchSize)
+			throws IOException {
+		DataDirEntry dataDir = getDataDirEntryForKey(
+				optHeader.getDataDirEntries(), dataDirKey);
 		if (dataDir != null) {
 			SectionTableEntry section = dataDir.getSectionTableEntry(table);
 			logger.debug("fetching file offset for section: "
@@ -230,6 +347,9 @@ public class SectionLoader {
 				long offset = rva - (virtualAddress - pointerToRawData);
 				Long sizeOfRawData = section.get(SIZE_OF_RAW_DATA)
 						- (rva - virtualAddress);
+				if (patchSize && sizeOfRawData + offset > file.length()) {
+					sizeOfRawData = file.length() - offset;
+				}
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(offset);
 					virtualAddress = rva;
@@ -247,8 +367,8 @@ public class SectionLoader {
 		return null;
 	}
 
-	private DataDirEntry getDataDirEntryForKey(List<DataDirEntry> dataDirEntries,
-			DataDirectoryKey key) {
+	private DataDirEntry getDataDirEntryForKey(
+			List<DataDirEntry> dataDirEntries, DataDirectoryKey key) {
 		for (DataDirEntry entry : dataDirEntries) {
 			if (entry.key.equals(key)) {
 				return entry;
