@@ -4,6 +4,7 @@ import static org.testng.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +18,13 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionLoader;
-import com.github.katjahahn.sections.SectionTableTest;
 
 public class ExportSectionTest {
 
-	@SuppressWarnings("unused")
 	private static final Logger logger = LogManager
-			.getLogger(SectionTableTest.class.getName());
+			.getLogger(ExportSectionTest.class.getName());
 	private Map<File, List<ExportEntry>> exportEntries;
 	private Map<String, PEData> pedata = new HashMap<>();
 
@@ -41,17 +41,28 @@ public class ExportSectionTest {
 			File file = set.getKey();
 			List<ExportEntry> expected = set.getValue();
 			String filename = file.getName().replace(".txt", "");
-			SectionLoader loader = new SectionLoader(pedata.get(filename));
+			PEData datum = pedata.get(filename);
+			SectionLoader loader = new SectionLoader(datum);
 			ExportSection edata = loader.loadExportSection();
 			if (edata == null) {
-				System.out.println("edata section is null for " + filename);
 				assertTrue(expected.size() == 0);
 			} else {
-				System.out.println("testing entries for " + filename);
+				logger.info("testing entries for " + filename);
+				expected = substractImageBase(expected, datum);
 				List<ExportEntry> actual = edata.getExportEntries();
 				assertEquals(actual, expected);
 			}
 
 		}
+	}
+
+	//Patches the expected list to match our RVA that has not the image base added
+	private List<ExportEntry> substractImageBase(List<ExportEntry> expected, PEData datum) {
+		List<ExportEntry> list = new ArrayList<ExportEntry>();
+		long imageBase = datum.getOptionalHeader().getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE).value;
+		for(ExportEntry entry : expected) {
+			list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry.name(), entry.ordinal()));
+		}
+		return list;
 	}
 }

@@ -20,9 +20,14 @@ import static org.testng.Assert.*;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 public class OverlayTest {
+	
+	private static final Logger logger = LogManager
+			.getLogger(OverlayTest.class.getName());
 
 	@Test(timeOut = 9000)
 	public void hasOverlayTest() throws IOException {
@@ -51,8 +56,8 @@ public class OverlayTest {
 			File infile = new File(file);
 			Overlay overlay = new Overlay(infile, new File("out"));
 			long eof = overlay.getEndOfPE();
-			System.out.println("infile length: " + infile.length());
-			System.out.println("EOF: " + eof);
+			logger.debug("infile length: " + infile.length());
+			logger.debug("EOF: " + eof);
 			assertEquals(infile.length(), eof);
 		}
 	}

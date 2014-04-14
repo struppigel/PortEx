@@ -25,9 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.idata.ImportSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -117,10 +115,13 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("src/main/resources/testfiles/DLL2.dll");
+		File file = new File("src/main/resources/testfiles/Lab11-03.dll");
 		PEData data = PELoader.loadPE(file);
-		ImportSection edata = new SectionLoader(data).loadImportSection();
-		System.out.println(edata.getInfo());
+		String info = data.getOptionalHeader().getDataDirInfo();
+		System.out.println(info);
+		String infoTable = data.getSectionTable().getInfo();
+		System.out.println(infoTable);
+		
 	}
 
 }

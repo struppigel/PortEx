@@ -20,21 +20,20 @@ import static org.testng.Assert.*;
 import java.io.File;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 public class Jar2ExeScannerTest {
+	
+	@SuppressWarnings("unused")
+	private static final Logger logger = LogManager
+			.getLogger(Jar2ExeScannerTest.class.getName());
 
-	@Test
+	@Test //TODO
 	public void scanResultTest() {
 		Jar2ExeScanner scanner = new Jar2ExeScanner(new File("launch4jexe.exe"));
 		List<MatchedSignature> result = scanner.scan();
-		for(MatchedSignature sig : result) {
-			System.out.println("name: " + sig.name);
-			System.out.println("address: " + sig.address);
-			System.out.println("epOnly: " + sig.epOnly);
-			System.out.println("signature: " + sig.signature);
-			System.out.println();
-		}
 		assertTrue(contains(result, "[Launch4j]"));
 	}
 	

@@ -98,7 +98,7 @@ class ExportSection private (
    * @param name the name of an exported function
    * @return the ordinal for the given function name
    */
-  def getOrdinalForName(name: String): Int = namePointerTable(name)
+  def getOrdinalForName(name: String): Int = namePointerTable(name) + 1 //TODO really + 1?
   
   /**
    * Returns the relative virtual address for a given function name.
@@ -111,7 +111,7 @@ class ExportSection private (
    */
   def getSymbolRVAForName(name: String): Long = {
     val ordinal = getOrdinalForName(name)
-    if(ordinal == -1) -1 else exportAddressTable(ordinal - ordinalTable.base + 1)
+    if(ordinal == -1) -1 else exportAddressTable(ordinal - ordinalTable.base)
   }
   
   /**

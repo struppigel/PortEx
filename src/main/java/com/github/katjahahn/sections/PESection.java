@@ -41,7 +41,7 @@ public class PESection extends PEModule {
 
 	@Override
 	public String getInfo() {
-		return null;
+		return "PE section length: " + sectionbytes.length;
 	}
 
 	@Override

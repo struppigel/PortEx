@@ -28,6 +28,7 @@ import java.io.EOFException
 import scala.collection.JavaConverters._
 import SignatureScanner._
 import java.util.Comparator
+import org.apache.logging.log4j.LogManager
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for
