@@ -37,7 +37,7 @@ import com.github.katjahahn.sections.rsrc.ResourceSection;
  * Responsible for computing section related values and loading sections with
  * the given section header information.
  * 
- * The section loader is a factory for special sections like the
+ * The section loader is able to load special sections like the
  * {@link ImportSection}, {@link ExportSection} and {@link ResourceSection}
  * 
  * @author Katja Hahn
@@ -224,7 +224,7 @@ public class SectionLoader {
 	 * @return the {@link SectionTableEntry} of the section the rva is pointing
 	 *         into
 	 */
-	public static SectionTableEntry getSectionByRVA(SectionTable table, long rva) {
+	public SectionTableEntry getSectionEntryByRVA(long rva) {
 		List<SectionTableEntry> sections = table.getSectionEntries();
 		for (SectionTableEntry section : sections) {
 			long vSize = section.get(VIRTUAL_SIZE);

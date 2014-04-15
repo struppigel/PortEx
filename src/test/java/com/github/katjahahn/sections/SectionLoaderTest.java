@@ -35,15 +35,35 @@ public class SectionLoaderTest {
 		testdata = PELoaderTest.getTestData();
 		pedata = PELoaderTest.getPEData();
 	}
-
+	
 	@Test
-	public void getDataDirEntryForKey() {
-		throw new RuntimeException("Test not implemented");
+	public void constructorTest() {
+		PEData datum = pedata.get("strings.exe");
+		SectionLoader loader1 = new SectionLoader(datum);
+		SectionLoader loader2 = new SectionLoader(datum.getSectionTable(), datum.getOptionalHeader(), datum.getFile());
+		for(DataDirectoryKey key : DataDirectoryKey.values()) {
+			Long offset1 = loader1.getFileOffsetFor(key);
+			Long offset2 = loader2.getFileOffsetFor(key);
+			assertEquals(offset1, offset2);
+		}
 	}
 
 	@Test
-	public void getSectionByRVA() {
-		throw new RuntimeException("Test not implemented");
+	public void getSectionEntryByRVA() {
+		for(PEData datum : pedata.values()) {
+			SectionTable table = datum.getSectionTable();
+			SectionLoader loader = new SectionLoader(datum);
+			for(SectionTableEntry entry : table.getSectionEntries()) {
+				long start = entry.get(SectionTableEntryKey.VIRTUAL_ADDRESS);
+				long size = entry.get(SectionTableEntryKey.VIRTUAL_SIZE);
+				SectionTableEntry actual = loader.getSectionEntryByRVA(start);
+				assertEquals(actual, entry);
+				actual = loader.getSectionEntryByRVA(start + size - 1);
+				assertEquals(actual, entry);
+				actual = loader.getSectionEntryByRVA(size / 2 + start);
+				assertEquals(actual, entry);
+			}
+		}
 	}
 
 	@Test
@@ -84,7 +104,7 @@ public class SectionLoaderTest {
 			for (DataDirEntry testDir : testDirs) {
 				if (testDir.key.equals(DataDirectoryKey.RESOURCE_TABLE)) {
 					ResourceSection rsrc = new SectionLoader(pedatum)
-							.loadResourceSection(false);
+							.loadResourceSection();
 					assertNotNull(rsrc);
 				}
 			}
@@ -123,10 +143,5 @@ public class SectionLoaderTest {
 								.intValue());
 			}
 		}
-	}
-
-	@Test
-	public void readBytesFor() {
-		throw new RuntimeException("Test not implemented");
 	}
 }
