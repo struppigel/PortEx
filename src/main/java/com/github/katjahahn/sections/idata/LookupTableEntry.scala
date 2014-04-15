@@ -24,6 +24,7 @@ import com.github.katjahahn.PEModule._
 import LookupTableEntry._
 import java.lang.Long.toHexString
 import com.github.katjahahn.ByteArrayUtil._
+import org.apache.logging.log4j.LogManager
 
 /**
  * Represents a lookup table entry. Every lookup table entry is either an
@@ -60,6 +61,8 @@ case class NullEntry() extends LookupTableEntry
 
 object LookupTableEntry {
 
+  private final val logger = LogManager.getLogger(LookupTableEntry.getClass().getName())
+
   /**
    * Creates a lookup table entry based on the given import table bytes,
    * the size of the entry, the offset of the entry and the virtual address of
@@ -72,33 +75,30 @@ object LookupTableEntry {
    * given rva's of hint name entries)
    * @return lookup table entry
    */
-  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int, virtualAddress: Long): LookupTableEntry = {
+  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int, virtualAddress: Long, importTableOffset: Int): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
-    val value = getBytesLongValue(idatabytes, offset, entrySize)
+    val value = getBytesLongValue(idatabytes, offset + importTableOffset, entrySize)
 
     if (value == 0) {
       NullEntry()
     } else if ((value & ordFlagMask) != 0) {
       createOrdEntry(value)
     } else {
-      createNameEntry(value, idatabytes, virtualAddress)
+      createNameEntry(value, idatabytes, virtualAddress, importTableOffset)
     }
   }
 
-  private def createNameEntry(value: Long, idatabytes: Array[Byte], virtualAddress: Long): LookupTableEntry = {
+  private def createNameEntry(value: Long, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
     val rva = (addrMask & value)
-    //    println("rva: " + rva)
-    val address = (rva - virtualAddress)
-    //    println("virtual addr: " + virtualAddress)
-    //    println("address: " + address)
-    //    println("idata length: " + idatabytes.length)
-    if (address > idatabytes.length) NullEntry() //TODO remove
-    else {
-      val hint = getBytesIntValue(idatabytes, address.toInt, 2)
-      val name = getASCII(address.toInt + 2, idatabytes)
-      NameEntry(rva, new HintNameEntry(hint, name))
-    }
+    logger.debug("rva: " + rva)
+    val address = (rva - virtualAddress) + importTableOffset
+    logger.debug("virtual addr: " + virtualAddress)
+    logger.debug("address: " + address)
+    logger.debug("idata length: " + idatabytes.length)
+    val hint = getBytesIntValue(idatabytes, address.toInt, 2)
+    val name = getASCII(address.toInt + 2, idatabytes)
+    NameEntry(rva, new HintNameEntry(hint, name))
   }
 
   private def createOrdEntry(value: Long): OrdinalEntry = {

@@ -81,9 +81,9 @@ class ImportSection private (
 object ImportSection {
 
   def apply(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader): ImportSection = {
-    val directoryTable = readDirEntries(idatabytes, virtualAddress)
-    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes)
+    optHeader: OptionalHeader, importTableOffset: Int): ImportSection = {
+    val directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffset)
+    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset)
     new ImportSection(directoryTable)
   }
 
@@ -92,19 +92,20 @@ object ImportSection {
    * and adds the lookup table entries to the directory table entry they belong to
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryTableEntry],
-    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte]): Unit = {
+    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte], importTableOffset: Int): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
       if (iRVA == 0) iRVA = dirEntry(I_ADDR_TABLE_RVA)
       var offset = iRVA - virtualAddress
+      logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + idatabytes.length + " virtualAddress " + virtualAddress)
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException("ROM file format not described")
       }
       do {
-        entry = LookupTableEntry(idatabytes.clone, offset.toInt, EntrySize, virtualAddress)
+        entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset)
         if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
       } while (!entry.isInstanceOf[NullEntry])
@@ -115,12 +116,12 @@ object ImportSection {
    * Parses all entries of the import section and writes them into the
    * {@link #directoryTable}
    */
-  private def readDirEntries(idatabytes: Array[Byte], virtualAddress: Long): List[DirectoryTableEntry] = {
+  private def readDirEntries(idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): List[DirectoryTableEntry] = {
     val directoryTable = ListBuffer[DirectoryTableEntry]()
     var isLastEntry = false
     var i = 0
     do {
-      readDirEntry(i, idatabytes, virtualAddress) match {
+      readDirEntry(i, idatabytes, virtualAddress, importTableOffset) match {
         case Some(entry) =>
           logger.debug("------------start-----------")
           logger.debug("dir entry read: " + entry)
@@ -140,11 +141,11 @@ object ImportSection {
    * @return string
    */
   private def getASCIIName(entry: DirectoryTableEntry, virtualAddress: Long,
-    idatabytes: Array[Byte]): String = {
+    idatabytes: Array[Byte], importTableOffset: Int): String = {
     def getName(value: Int): String = {
-      val offset = value - virtualAddress
+      val offset = value - virtualAddress + importTableOffset
       //TODO cast to int is insecure. actual int is unsigned, java int is signed
-      val nullindex = idatabytes.indexWhere(b => b == 0, offset.toInt)
+      val nullindex = idatabytes.indexWhere(_ == 0, offset.toInt)
       new String(idatabytes.slice(offset.toInt, nullindex))
     }
     getName(entry(NAME_RVA).toInt)
@@ -157,8 +158,8 @@ object ImportSection {
    * @return Some entry if the entry at the given nr is not the null entry,
    * None otherwise
    */
-  private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long): Option[DirectoryTableEntry] = {
-    val from = nr * ENTRY_SIZE
+  private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): Option[DirectoryTableEntry] = {
+    val from = nr * ENTRY_SIZE + importTableOffset
     val until = from + ENTRY_SIZE
     val entrybytes = idatabytes.slice(from, until)
 
@@ -171,7 +172,7 @@ object ImportSection {
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
     val entry = DirectoryTableEntry(entrybytes)
-    entry.name = getASCIIName(entry, virtualAddress, idatabytes)
+    entry.name = getASCIIName(entry, virtualAddress, idatabytes, importTableOffset)
     if (isEmpty(entry)) None else
       Some(entry)
   }
@@ -185,11 +186,11 @@ object ImportSection {
    * @return ImportSection instance
    */
   def getInstance(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader): ImportSection =
-    apply(idatabytes, virtualAddress, optHeader)
+    optHeader: OptionalHeader, importTableOffset: Int): ImportSection =
+    apply(idatabytes, virtualAddress, optHeader, importTableOffset)
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("WinRar.exe"))
+    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab18-04.exe")) //FIXME results in error because of negative offset
     val loader = new SectionLoader(data)
     val idata = loader.loadImportSection()
     println(idata.getInfo)

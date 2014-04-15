@@ -263,12 +263,107 @@ public class SectionLoader {
 				optHeader.getDataDirEntries(), DataDirectoryKey.IMPORT_TABLE);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
-			byte[] idatabytes = readBytesFor(DataDirectoryKey.IMPORT_TABLE,
-					patchSize);
+			byte[] idatabytes = readSectionBytesFor(
+					DataDirectoryKey.IMPORT_TABLE, patchSize);
+			int importTableOffset = getOffsetDiffFor(DataDirectoryKey.IMPORT_TABLE);
 			ImportSection idata = ImportSection.getInstance(idatabytes,
-					virtualAddress, optHeader);
+					virtualAddress, optHeader, importTableOffset);
 			idata.read();
 			return idata;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the difference between the offset the data directory entry and
+	 * the begin of the section the entry is in.
+	 * 
+	 * E.g. the difference between file offset of the import table and the
+	 * pointer_to_raw_data of the idata section the table is in.
+	 * 
+	 * @param dataDirKey
+	 * @return the difference of the calculated data dir entry file offset to
+	 *         the pointer_to_raw_data the data dir entry is in, null if no data
+	 *         dir entry can be found for the specified key
+	 */
+	private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey) {
+		Long pointerToRawData = getPointerToRawDataFor(dataDirKey);
+		Long offset = getFileOffsetFor(dataDirKey);
+		if (pointerToRawData != null && offset != null) {
+			return (int) (offset - pointerToRawData);
+		}
+		return null;
+	}
+	
+	private Long getPointerToRawDataFor(DataDirectoryKey dataDirKey) {
+		DataDirEntry dataDir = getDataDirEntryForKey(
+				optHeader.getDataDirEntries(), dataDirKey);
+		if (dataDir != null) {
+			SectionTableEntry section = dataDir.getSectionTableEntry(table);
+			return section.get(POINTER_TO_RAW_DATA);
+		}
+		return null;
+	}
+
+	private Long getFileOffsetFor(DataDirectoryKey dataDirKey) {
+		DataDirEntry dataDir = getDataDirEntryForKey(
+				optHeader.getDataDirEntries(), dataDirKey);
+		if (dataDir != null) {
+			SectionTableEntry section = dataDir.getSectionTableEntry(table);
+			logger.debug("fetching file offset for section: "
+					+ section.getName());
+			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
+			if (virtualAddress != null) {
+				long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
+				logger.debug("pointer to raw data: " + pointerToRawData + " 0x"
+						+ Long.toHexString(pointerToRawData));
+				long rva = dataDir.virtualAddress;
+				return rva - (virtualAddress - pointerToRawData);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns all bytes of the section where the given data dir entry is in.
+	 * 
+	 * @param dataDirKey
+	 * @param patchSize
+	 * @return
+	 * @throws IOException
+	 */
+	private byte[] readSectionBytesFor(DataDirectoryKey dataDirKey,
+			boolean patchSize) throws IOException {
+		DataDirEntry dataDir = getDataDirEntryForKey(
+				optHeader.getDataDirEntries(), dataDirKey);
+		if (dataDir != null) {
+			SectionTableEntry section = dataDir.getSectionTableEntry(table);
+			logger.debug("fetching file offset for section: "
+					+ section.getName());
+			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
+			if (virtualAddress != null) {
+				long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
+				logger.debug("pointer to raw data: " + pointerToRawData + " 0x"
+						+ Long.toHexString(pointerToRawData));
+				long rva = dataDir.virtualAddress;
+				long offset = pointerToRawData;
+				Long sizeOfRawData = section.get(SIZE_OF_RAW_DATA);
+				if (patchSize && sizeOfRawData + offset > file.length()) {
+					sizeOfRawData = file.length() - offset;
+				}
+				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+					raf.seek(offset);
+					virtualAddress = rva;
+					// TODO cast to int is insecure. actual int is unsigned
+					byte[] bytes = new byte[sizeOfRawData.intValue()];
+					raf.readFully(bytes);
+					return bytes;
+				}
+			} else {
+				logger.warn("virtual address not found!");
+			}
+		} else {
+			logger.warn("invalid dataDirKey");
 		}
 		return null;
 	}
@@ -303,8 +398,8 @@ public class SectionLoader {
 				optHeader.getDataDirEntries(), DataDirectoryKey.EXPORT_TABLE);
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
-			byte[] edatabytes = readBytesFor(DataDirectoryKey.EXPORT_TABLE,
-					patchSize);
+			byte[] edatabytes = readDataDirBytesFor(
+					DataDirectoryKey.EXPORT_TABLE, patchSize);
 			ExportSection edata = ExportSection.getInstance(edatabytes,
 					virtualAddress, optHeader);
 			return edata;
@@ -330,8 +425,8 @@ public class SectionLoader {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public byte[] readBytesFor(DataDirectoryKey dataDirKey, boolean patchSize)
-			throws IOException {
+	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey,
+			boolean patchSize) throws IOException {
 		DataDirEntry dataDir = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), dataDirKey);
 		if (dataDir != null) {

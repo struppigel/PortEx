@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
 
 /**
@@ -117,10 +118,8 @@ public class PELoader {
 		logger.entry();
 		File file = new File("src/main/resources/testfiles/Lab11-03.dll");
 		PEData data = PELoader.loadPE(file);
-		String info = data.getOptionalHeader().getDataDirInfo();
+		String info = new SectionLoader(data).loadImportSection().getInfo();
 		System.out.println(info);
-		String infoTable = data.getSectionTable().getInfo();
-		System.out.println(infoTable);
 		
 	}
 
