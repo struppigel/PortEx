@@ -158,8 +158,8 @@ public class OptionalHeaderTest {
 	@Test
 	public void getStandardFields() {
 		for (PEData pedatum : pedata.values()) {
-			List<StandardEntry> list = pedatum.getOptionalHeader()
-					.getStandardFields();
+			Collection<StandardEntry> list = pedatum.getOptionalHeader()
+					.getStandardFields().values();
 			assertNotNull(list);
 			assertEquals(list.size(), StandardFieldEntryKey.values().length);
 		}
@@ -200,8 +200,8 @@ public class OptionalHeaderTest {
 	@Test
 	public void getWindowsSpecificFields() {
 		for (PEData pedatum : pedata.values()) {
-			List<StandardEntry> list = pedatum.getOptionalHeader()
-					.getWindowsSpecificFields();
+			Collection<StandardEntry> list = pedatum.getOptionalHeader()
+					.getWindowsSpecificFields().values();
 			assertNotNull(list);
 			assertEquals(list.size(), WindowsEntryKey.values().length);
 		}

@@ -21,7 +21,6 @@ import static com.github.katjahahn.optheader.WindowsEntryKey.*;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,8 +39,8 @@ public class OptionalHeader extends PEModule {
 
 	/* extracted file data */
 	private Map<DataDirectoryKey, DataDirEntry> dataDirEntries;
-	private List<StandardEntry> standardFields;
-	private List<StandardEntry> windowsFields;
+	private Map<StandardFieldEntryKey, StandardEntry> standardFields;
+	private Map<WindowsEntryKey, StandardEntry> windowsFields;
 
 	private final byte[] headerbytes;
 	private MagicNumber magicNumber;
@@ -90,16 +89,16 @@ public class OptionalHeader extends PEModule {
 	 * 
 	 * @return the windows specific fields
 	 */
-	public List<StandardEntry> getWindowsSpecificFields() {
-		return new LinkedList<>(windowsFields);
+	public Map<WindowsEntryKey, StandardEntry> getWindowsSpecificFields() {
+		return new HashMap<>(windowsFields);
 	}
 
 	/**
 	 * 
 	 * @return the standard fields
 	 */
-	public List<StandardEntry> getStandardFields() {
-		return new LinkedList<>(standardFields);
+	public Map<StandardFieldEntryKey, StandardEntry> getStandardFields() {
+		return new HashMap<>(standardFields);
 	}
 
 	/**
@@ -114,6 +113,23 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
+	 * Returns either a windows field entry or a standard field entry, depending
+	 * on the given key.
+	 * 
+	 * @param key
+	 * @return the windows field entry or the standard field entry that belongs
+	 *         to the given key, null if there is no {@link StandardEntry} for
+	 *         this key available
+	 */
+	public StandardEntry get(HeaderKey key) {
+		if (key instanceof StandardFieldEntryKey) {
+			return standardFields.get(key);
+		} else {
+			return windowsFields.get(key);
+		}
+	}
+
+	/**
 	 * Returns the standard field entry for the given key. //TODO use map
 	 * 
 	 * @param key
@@ -121,12 +137,7 @@ public class OptionalHeader extends PEModule {
 	 *         exist.
 	 */
 	public StandardEntry getStandardFieldEntry(StandardFieldEntryKey key) {
-		for (StandardEntry entry : standardFields) {
-			if (entry.key.equals(key)) {
-				return entry;
-			}
-		}
-		return null;
+		return standardFields.get(key);
 	}
 
 	/**
@@ -137,16 +148,11 @@ public class OptionalHeader extends PEModule {
 	 *         exist
 	 */
 	public StandardEntry getWindowsFieldEntry(WindowsEntryKey key) {
-		for (StandardEntry entry : windowsFields) {
-			if (entry.key.equals(key)) {
-				return entry;
-			}
-		}
-		return null;
+		return windowsFields.get(key);
 	}
 
 	private void loadStandardFields(Map<String, String[]> standardSpec) {
-		standardFields = new LinkedList<>();
+		standardFields = new HashMap<>();
 		int description = 0;
 		int offsetLoc = 1;
 		int lengthLoc = 2;
@@ -156,9 +162,10 @@ public class OptionalHeader extends PEModule {
 			long value = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
-			HeaderKey key = StandardFieldEntryKey.valueOf(entry.getKey());
-			standardFields
-					.add(new StandardEntry(key, specs[description], value));
+			StandardFieldEntryKey key = StandardFieldEntryKey.valueOf(entry
+					.getKey());
+			standardFields.put(key, new StandardEntry(key, specs[description],
+					value));
 		}
 
 	}
@@ -196,7 +203,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec) {
-		windowsFields = new LinkedList<StandardEntry>();
+		windowsFields = new HashMap<>();
 		int offsetLoc;
 		int lengthLoc;
 		final int description = 0;
@@ -217,8 +224,8 @@ public class OptionalHeader extends PEModule {
 					Integer.parseInt(specs[offsetLoc]),
 					Integer.parseInt(specs[lengthLoc]));
 			WindowsEntryKey key = WindowsEntryKey.valueOf(entry.getKey());
-			windowsFields
-					.add(new StandardEntry(key, specs[description], value));
+			windowsFields.put(key, new StandardEntry(key, specs[description],
+					value));
 			if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
 				this.rvaNumber = (int) value; // always 4 Bytes
 			}
@@ -260,7 +267,7 @@ public class OptionalHeader extends PEModule {
 	 */
 	public String getWindowsSpecificInfo() {
 		StringBuilder b = new StringBuilder();
-		for (StandardEntry entry : windowsFields) {
+		for (StandardEntry entry : windowsFields.values()) {
 			long value = entry.value;
 			HeaderKey key = entry.key;
 			String description = entry.description;
@@ -298,7 +305,7 @@ public class OptionalHeader extends PEModule {
 	 */
 	public String getStandardFieldsInfo() {
 		StringBuilder b = new StringBuilder();
-		for (StandardEntry entry : standardFields) {
+		for (StandardEntry entry : standardFields.values()) {
 			long value = entry.value;
 			HeaderKey key = entry.key;
 			String description = entry.description;
