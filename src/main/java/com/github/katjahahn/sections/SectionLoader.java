@@ -287,7 +287,7 @@ public class SectionLoader {
 	 *         dir entry can be found for the specified key
 	 */
 	private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey) {
-		Long pointerToRawData = getPointerToRawDataFor(dataDirKey);
+		Long pointerToRawData = getSectionEntryValue(dataDirKey, POINTER_TO_RAW_DATA);
 		Long offset = getFileOffsetFor(dataDirKey);
 		if (pointerToRawData != null && offset != null) {
 			return (int) (offset - pointerToRawData);
@@ -295,12 +295,19 @@ public class SectionLoader {
 		return null;
 	}
 	
-	private Long getPointerToRawDataFor(DataDirectoryKey dataDirKey) {
+	private SectionTableEntry getSectionTableEntryFor(DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), dataDirKey);
 		if (dataDir != null) {
-			SectionTableEntry section = dataDir.getSectionTableEntry(table);
-			return section.get(POINTER_TO_RAW_DATA);
+			return dataDir.getSectionTableEntry(table);
+		}
+		return null;
+	}
+	
+	private Long getSectionEntryValue(DataDirectoryKey dataDirKey, SectionTableEntryKey sectionKey) {
+		SectionTableEntry section = getSectionTableEntryFor(dataDirKey);
+		if (section != null) {
+			return section.get(sectionKey);
 		}
 		return null;
 	}
@@ -309,14 +316,9 @@ public class SectionLoader {
 		DataDirEntry dataDir = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), dataDirKey);
 		if (dataDir != null) {
-			SectionTableEntry section = dataDir.getSectionTableEntry(table);
-			logger.debug("fetching file offset for section: "
-					+ section.getName());
-			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
-			if (virtualAddress != null) {
-				long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
-				logger.debug("pointer to raw data: " + pointerToRawData + " 0x"
-						+ Long.toHexString(pointerToRawData));
+			Long virtualAddress = getSectionEntryValue(dataDirKey, VIRTUAL_ADDRESS);
+			Long pointerToRawData = getSectionEntryValue(dataDirKey, POINTER_TO_RAW_DATA);
+			if (virtualAddress != null && pointerToRawData != null) {
 				long rva = dataDir.virtualAddress;
 				return rva - (virtualAddress - pointerToRawData);
 			}
@@ -332,22 +334,16 @@ public class SectionLoader {
 	 * @return
 	 * @throws IOException
 	 */
-	private byte[] readSectionBytesFor(DataDirectoryKey dataDirKey,
+	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey,
 			boolean patchSize) throws IOException {
 		DataDirEntry dataDir = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), dataDirKey);
 		if (dataDir != null) {
-			SectionTableEntry section = dataDir.getSectionTableEntry(table);
-			logger.debug("fetching file offset for section: "
-					+ section.getName());
-			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
-			if (virtualAddress != null) {
-				long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
-				logger.debug("pointer to raw data: " + pointerToRawData + " 0x"
-						+ Long.toHexString(pointerToRawData));
+			Long virtualAddress = getSectionEntryValue(dataDirKey, VIRTUAL_ADDRESS);
+			Long offset = getSectionEntryValue(dataDirKey, POINTER_TO_RAW_DATA);
+			Long sizeOfRawData = getSectionEntryValue(dataDirKey, SIZE_OF_RAW_DATA);
+			if (virtualAddress != null && offset != null && sizeOfRawData != null) {
 				long rva = dataDir.virtualAddress;
-				long offset = pointerToRawData;
-				Long sizeOfRawData = section.get(SIZE_OF_RAW_DATA);
 				if (patchSize && sizeOfRawData + offset > file.length()) {
 					sizeOfRawData = file.length() - offset;
 				}
@@ -359,11 +355,9 @@ public class SectionLoader {
 					raf.readFully(bytes);
 					return bytes;
 				}
-			} else {
-				logger.warn("virtual address not found!");
-			}
+			} 
 		} else {
-			logger.warn("invalid dataDirKey");
+			logger.warn("invalid data dir key");
 		}
 		return null;
 	}
@@ -430,32 +424,25 @@ public class SectionLoader {
 		DataDirEntry dataDir = getDataDirEntryForKey(
 				optHeader.getDataDirEntries(), dataDirKey);
 		if (dataDir != null) {
-			SectionTableEntry section = dataDir.getSectionTableEntry(table);
-			logger.debug("fetching file offset for section: "
-					+ section.getName());
-			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
-			if (virtualAddress != null) {
-				long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
-				logger.debug("pointer to raw data: " + pointerToRawData + " 0x"
-						+ Long.toHexString(pointerToRawData));
+			Long virtualAddress = getSectionEntryValue(dataDirKey, VIRTUAL_ADDRESS);
+			Long pointerToRawData = getSectionEntryValue(dataDirKey, POINTER_TO_RAW_DATA);
+			Long sizeOfRawData = getSectionEntryValue(dataDirKey, SIZE_OF_RAW_DATA);
+			if (virtualAddress != null && pointerToRawData != null && sizeOfRawData != null) {
 				long rva = dataDir.virtualAddress;
 				long offset = rva - (virtualAddress - pointerToRawData);
-				Long sizeOfRawData = section.get(SIZE_OF_RAW_DATA)
-						- (rva - virtualAddress);
+				long size = sizeOfRawData - (rva - virtualAddress);
 				if (patchSize && sizeOfRawData + offset > file.length()) {
-					sizeOfRawData = file.length() - offset;
+					size = file.length() - offset;
 				}
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 					raf.seek(offset);
 					virtualAddress = rva;
 					// TODO cast to int is insecure. actual int is unsigned
-					byte[] bytes = new byte[sizeOfRawData.intValue()];
+					byte[] bytes = new byte[(int) size];
 					raf.readFully(bytes);
 					return bytes;
 				}
-			} else {
-				logger.warn("virtual address not found!");
-			}
+			} 
 		} else {
 			logger.warn("invalid dataDirKey");
 		}
