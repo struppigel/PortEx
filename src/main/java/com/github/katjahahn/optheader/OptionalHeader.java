@@ -20,6 +20,7 @@ import static com.github.katjahahn.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.optheader.WindowsEntryKey.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class OptionalHeader extends PEModule {
 	private static final String DATA_DIR_SPEC = "datadirectoriesspec";
 
 	/* extracted file data */
-	private List<DataDirEntry> dataDirEntries;
+	private Map<DataDirectoryKey, DataDirEntry> dataDirEntries;
 	private List<StandardEntry> standardFields;
 	private List<StandardEntry> windowsFields;
 
@@ -81,8 +82,8 @@ public class OptionalHeader extends PEModule {
 	 * 
 	 * @return the data directory entries
 	 */
-	public List<DataDirEntry> getDataDirEntries() {
-		return new LinkedList<>(dataDirEntries);
+	public Map<DataDirectoryKey, DataDirEntry> getDataDirEntries() {
+		return new HashMap<>(dataDirEntries);
 	}
 
 	/**
@@ -109,12 +110,7 @@ public class OptionalHeader extends PEModule {
 	 *         exist.
 	 */
 	public DataDirEntry getDataDirEntry(DataDirectoryKey key) {
-		for (DataDirEntry entry : dataDirEntries) {
-			if (entry.key.equals(key)) {
-				return entry;
-			}
-		}
-		return null;
+		return dataDirEntries.get(key);
 	}
 
 	/**
@@ -168,7 +164,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	private void loadDataDirectories(List<String[]> datadirSpec) {
-		dataDirEntries = new LinkedList<>();
+		dataDirEntries = new HashMap<>();
 		final int description = 0;
 		int offsetLoc;
 		int length = 4; // the actual length
@@ -191,8 +187,9 @@ public class OptionalHeader extends PEModule {
 			long size = getBytesLongValue(headerbytes,
 					Integer.parseInt(specs[offsetLoc]) + length, length);
 			if (address != 0) {
-				dataDirEntries.add(new DataDirEntry(specs[description],
-						address, size));
+				DataDirEntry entry = new DataDirEntry(specs[description],
+						address, size);
+				dataDirEntries.put(entry.key, entry);
 			}
 			counter++;
 		}
@@ -246,7 +243,7 @@ public class OptionalHeader extends PEModule {
 	 */
 	public String getDataDirInfo() {
 		StringBuilder b = new StringBuilder();
-		for (DataDirEntry entry : dataDirEntries) {
+		for (DataDirEntry entry : dataDirEntries.values()) {
 			b.append(entry.key + ": " + entry.virtualAddress + "(0x"
 					+ Long.toHexString(entry.virtualAddress) + ")/"
 					+ entry.size + "(0x" + Long.toHexString(entry.size) + ")"

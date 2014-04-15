@@ -23,7 +23,6 @@ import ImportSection._
 import DirectoryTableEntryKey._
 import com.github.katjahahn.StandardEntry
 import scala.collection.JavaConverters._
-import com.github.katjahahn.StandardDataEntry
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._

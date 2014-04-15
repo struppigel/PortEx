@@ -19,6 +19,7 @@ import static com.github.katjahahn.optheader.DataDirectoryKey.*;
 import static org.testng.Assert.*;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +48,10 @@ public class OptionalHeaderTest {
 	@Test
 	public void dataDirEntriesListValid() {
 		for (PEData pedatum : pedata.values()) {
-			List<DataDirEntry> list = pedatum.getOptionalHeader()
-					.getDataDirEntries();
-			assertNotNull(list);
-			assertTrue(list.size() > 0);
+			Collection<DataDirEntry> coll = pedatum.getOptionalHeader()
+					.getDataDirEntries().values();
+			assertNotNull(coll);
+			assertTrue(coll.size() > 0);
 		}
 	}
 
@@ -60,7 +61,7 @@ public class OptionalHeaderTest {
 			List<DataDirEntry> testDirs = testdatum.dataDir;
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
 			OptionalHeader opt = pedatum.getOptionalHeader();
-			List<DataDirEntry> peDataEntries = opt.getDataDirEntries();
+			Collection<DataDirEntry> peDataEntries = opt.getDataDirEntries().values();
 			assertEquals(peDataEntries.size(), testDirs.size());
 			for (DataDirEntry expected : testDirs) {
 				assertTrue(peDataEntries.contains(expected));
