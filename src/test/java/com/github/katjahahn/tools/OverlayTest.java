@@ -36,13 +36,13 @@ public class OverlayTest {
 				"src/main/resources/testfiles/Lab03-03.exe" };
 		for (String file : files) {
 			File infile = new File(file);
-			Overlay overlay = new Overlay(infile, new File("out"));
+			Overlay overlay = new Overlay(infile);
 			assertFalse(overlay.hasOverlay());
 		}
 		String[] overfiles = { "Holiday_Island.exe", "WinRar.exe", "joined.exe" };
 		for (String file : overfiles) {
 			File infile = new File(file);
-			Overlay overlay = new Overlay(infile, new File("out"));
+			Overlay overlay = new Overlay(infile);
 			assertTrue(overlay.hasOverlay());
 		}
 	}
@@ -54,7 +54,7 @@ public class OverlayTest {
 				"src/main/resources/testfiles/Lab03-03.exe" };
 		for (String file : noOverFiles) {
 			File infile = new File(file);
-			Overlay overlay = new Overlay(infile, new File("out"));
+			Overlay overlay = new Overlay(infile);
 			long eof = overlay.getEndOfPE();
 			logger.debug("infile length: " + infile.length());
 			logger.debug("EOF: " + eof);
@@ -63,7 +63,7 @@ public class OverlayTest {
 	}
 
 	@Test
-	public void dump() throws IOException {
+	public void dumpTo() throws IOException {
 		String[] mixedFiles = { "src/main/resources/testfiles/Lab03-01.exe",
 				"src/main/resources/testfiles/Lab03-04.exe",
 				"src/main/resources/testfiles/Lab03-03.exe",
@@ -71,8 +71,8 @@ public class OverlayTest {
 		File outfile = new File("out");
 		for (String file : mixedFiles) {
 			File infile = new File(file);
-			Overlay overlay = new Overlay(infile, outfile);
-			overlay.dump();
+			Overlay overlay = new Overlay(infile);
+			overlay.dumpTo(outfile);
 		}
 		outfile.delete();
 	}
