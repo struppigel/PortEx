@@ -35,7 +35,6 @@ import com.github.katjahahn.sections.SectionTableEntry;
 public class Overlay {
 
 	private final File file;
-	private final File outFile;
 	private Long eof;
 
 	/**
@@ -43,12 +42,9 @@ public class Overlay {
 	 *              file specified
 	 * @param file
 	 *            the file to be scanned for overlay
-	 * @param outFile
-	 *            the file to dump the overlay to
 	 */
-	public Overlay(File file, File outFile) {
+	public Overlay(File file) {
 		this.file = file;
-		this.outFile = outFile;
 	}
 
 	/**
@@ -83,16 +79,27 @@ public class Overlay {
 	public boolean hasOverlay() throws IOException {
 		return file.length() > getEndOfPE();
 	}
+	
+	/**
+	 * Calculates the size of the overlay in bytes.
+	 * 
+	 * @return size of overlay in bytes
+	 * @throws IOException if unable to read the input file
+	 */
+	public long getOverlaySize() throws IOException {
+		return file.length() - getEndOfPE();
+	}
 
 	/**
 	 * Writes a dump of the overlay to the specified output location.
 	 * 
+	 * @param outFile the file to write the dump to
 	 * @return true iff successfully dumped
-	 * @throws IOException
+	 * @throws IOException if unable to read the input file or write the output file
 	 */
-	public boolean dump() throws IOException {
+	public boolean dumpTo(File outFile) throws IOException {
 		if (hasOverlay()) {
-			dump(getEndOfPE());
+			dump(getEndOfPE(), outFile);
 			return true;
 		} else {
 			return false;
@@ -105,7 +112,7 @@ public class Overlay {
 	 * @param offset
 	 * @throws IOException
 	 */
-	private void dump(long offset) throws IOException {
+	private void dump(long offset, File outFile) throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r");
 				FileOutputStream out = new FileOutputStream(outFile)) {
 			raf.seek(offset);
