@@ -25,8 +25,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.tools.Overlay;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -116,11 +116,18 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("src/main/resources/testfiles/Lab11-03.dll");
+		File file = new File("ntdll.dll");
 		PEData data = PELoader.loadPE(file);
-		String info = new SectionLoader(data).loadImportSection().getInfo();
-		System.out.println(info);
-		
+		System.out.println(data.getOptionalHeader().getInfo());
+		System.out.println(data.getCOFFFileHeader().getInfo());
+		System.out.println(data.getSectionTable().getInfo());
+		boolean overlay = new Overlay(file, null).hasOverlay();
+		long overlayAt = new Overlay(file, null).getEndOfPE();
+		long overlaySize = file.length() - overlayAt;
+		System.out.println("Overlay: " + overlay);
+		System.out.println("File Size: " + file.length());
+		System.out.println("Overlay at: " + overlayAt);
+		System.out.println("Overlay size: " + overlaySize);
 	}
 
 }

@@ -98,7 +98,7 @@ class ExportSection private (
    * @param name the name of an exported function
    * @return the ordinal for the given function name
    */
-  def getOrdinalForName(name: String): Int = namePointerTable(name) + 1 //TODO really + 1?
+  def getOrdinalForName(name: String): Int = ordinalTable.ordinals(namePointerTable(name))
   
   /**
    * Returns the relative virtual address for a given function name.
@@ -161,7 +161,7 @@ class ExportSection private (
 object ExportSection {
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab11-03.dll")) //TODO correct ordinal and rva of this? see tests
+    val data = PELoader.loadPE(new File("src/main/resources/testfiles/ntdll.dll")) //TODO correct ordinal and rva of this? see tests
     val loader = new SectionLoader(data)
     val edata = loader.loadExportSection()
     println(edata.getDetailedInfo)

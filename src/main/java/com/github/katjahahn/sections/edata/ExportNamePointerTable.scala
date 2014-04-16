@@ -39,7 +39,7 @@ class ExportNamePointerTable private (val pointerNameList: List[(Address, String
         |
         |RVA    ->  Name
         |****************
-        |${getMap.map(t => ("0x" + java.lang.Long.toHexString(t._1) -> t._2)).mkString(NL)}""".stripMargin
+        |${pointerNameList.map(t => ("0x" + java.lang.Long.toHexString(t._1) -> t._2)).mkString(NL)}""".stripMargin
 
 }
 
