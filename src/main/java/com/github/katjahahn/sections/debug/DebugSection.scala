@@ -14,7 +14,13 @@ import com.github.katjahahn.sections.SectionLoader
 class DebugSection private (
   private val directoryTable: DebugDirectoryTable) extends PEModule {
 
-  override def getInfo(): String = directoryTable.mkString(";")
+  override def getInfo(): String = 
+    s"""|-------------
+        |Debug Section
+        |-------------
+        |
+        |${directoryTable.values.mkString(PEModule.NL)}""".stripMargin
+        
   override def read(): Unit = {}
 }
 
@@ -25,10 +31,11 @@ object DebugSection {
   private val debugspec = "debugdirentryspec"
     
   def main(args: Array[String]): Unit = {
-    val file = new File("ntdll.dll")
+    val file = new File("src/main/resources/testfiles/ntdll.dll")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
-    
+    val debug = loader.loadDebugSection()
+    println(debug.getInfo())
   }
 
   def apply(debugbytes: Array[Byte]): DebugSection = {

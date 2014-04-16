@@ -29,6 +29,7 @@ import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
@@ -163,6 +164,37 @@ public class SectionLoader {
 	}
 
 	/**
+	 * Loads all bytes and information of the debug section.
+	 * 
+	 * The file on disk is read to fetch the information.
+	 * 
+	 * @return {@link DebugSection} of the given file, null if file doesn't have
+	 *         this section
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public DebugSection loadDebugSection() throws IOException {
+		return loadDebugSection(false);
+	}
+
+	/**
+	 * Loads all bytes and information of the debug section. The file on disk is
+	 * read to fetch the information.
+	 * 
+	 * @param patchSize
+	 *            patches the section size if it surpasses the actual file size.
+	 *            This is an anomaly and only useful while dealing with
+	 *            corrupted PE files
+	 * @return the debug section, null if file doesn't have a debug section
+	 * @throws IOException
+	 *             if unable to read the file
+	 */
+	public DebugSection loadDebugSection(boolean patchSize) throws IOException {
+		byte[] bytes = readDataDirBytesFor(DataDirectoryKey.DEBUG, patchSize);
+		return DebugSection.apply(bytes);
+	}
+
+	/**
 	 * Loads all bytes and information of the resource section.
 	 * 
 	 * The file on disk is read to fetch the information.
@@ -192,8 +224,8 @@ public class SectionLoader {
 	 */
 	public ResourceSection loadResourceSection(boolean patchSize)
 			throws IOException {
-		DataDirEntry resourceTable = 
-				optHeader.getDataDirEntries().get(DataDirectoryKey.RESOURCE_TABLE);
+		DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
+				DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
 			SectionTableEntry rsrcEntry = resourceTable
 					.getSectionTableEntry(table);
@@ -269,8 +301,8 @@ public class SectionLoader {
 	 */
 	public ImportSection loadImportSection(boolean patchSize)
 			throws IOException {
-		DataDirEntry importTable = 
-				optHeader.getDataDirEntries().get(DataDirectoryKey.IMPORT_TABLE);
+		DataDirEntry importTable = optHeader.getDataDirEntries().get(
+				DataDirectoryKey.IMPORT_TABLE);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
 			byte[] idatabytes = readSectionBytesFor(
@@ -317,8 +349,7 @@ public class SectionLoader {
 	 */
 	private SectionTableEntry getSectionTableEntryFor(
 			DataDirectoryKey dataDirKey) {
-		DataDirEntry dataDir = 
-				optHeader.getDataDirEntries().get(dataDirKey);
+		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			return dataDir.getSectionTableEntry(table);
 		}
@@ -348,13 +379,13 @@ public class SectionLoader {
 	 * Returns the file offset of the data directory entry the given key belongs
 	 * to.
 	 * 
-	 * @param dataDirKey the key of the data directory entry
+	 * @param dataDirKey
+	 *            the key of the data directory entry
 	 * @return file offset of the rva that is in the data directory entry with
 	 *         the given key
 	 */
 	public Long getFileOffsetFor(DataDirectoryKey dataDirKey) {
-		DataDirEntry dataDir = 
-				optHeader.getDataDirEntries().get(dataDirKey);
+		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			Long virtualAddress = getSectionEntryValue(dataDirKey,
 					VIRTUAL_ADDRESS);
@@ -378,8 +409,7 @@ public class SectionLoader {
 	 */
 	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey,
 			boolean patchSize) throws IOException {
-		DataDirEntry dataDir = 
-				optHeader.getDataDirEntries().get(dataDirKey);
+		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			Long virtualAddress = getSectionEntryValue(dataDirKey,
 					VIRTUAL_ADDRESS);
@@ -433,8 +463,8 @@ public class SectionLoader {
 	 */
 	public ExportSection loadExportSection(boolean patchSize)
 			throws IOException {
-		DataDirEntry exportTable = 
-				optHeader.getDataDirEntries().get(DataDirectoryKey.EXPORT_TABLE);
+		DataDirEntry exportTable = optHeader.getDataDirEntries().get(
+				DataDirectoryKey.EXPORT_TABLE);
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
 			byte[] edatabytes = readDataDirBytesFor(
@@ -466,8 +496,7 @@ public class SectionLoader {
 	 */
 	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey,
 			boolean patchSize) throws IOException {
-		DataDirEntry dataDir = 
-				optHeader.getDataDirEntries().get(dataDirKey);
+		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			Long virtualAddress = getSectionEntryValue(dataDirKey,
 					VIRTUAL_ADDRESS);
