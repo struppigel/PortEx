@@ -12,7 +12,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Reading Header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Dumping of: MSDOS Load Module, Sections, Overlay, embedded ZIP, JAR or .class files
 * Mapping of Data Directory Entries to the corresponding Section
-* Reading Standard Section Formats: Import Section, Resource Section, Export Section
+* Reading Standard Section Formats: Import Section, Resource Section, Export Section, Debug Section
 * Scan for PEiD userdb signatures
 * Scan for jar2exe or class2exe wrappers
 * Scan for Unicode and ASCII strings contained in the file
