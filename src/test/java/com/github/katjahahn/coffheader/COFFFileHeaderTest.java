@@ -55,7 +55,7 @@ public class COFFFileHeaderTest {
 			for (Entry<COFFHeaderKey, String> entry : testdatum.coff.entrySet()) {
 				COFFHeaderKey key = entry.getKey();
 				COFFFileHeader coff = pedatum.getCOFFFileHeader();
-				int actual = coff.get(key);
+				int actual = coff.get(key).intValue();
 				String value = entry.getValue().trim();
 				int expected = convertToInt(value);
 				assertEquals(expected, actual);
@@ -114,10 +114,10 @@ public class COFFFileHeaderTest {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
 			String value = testdatum.coff.get(COFFHeaderKey.SECTION_NR).trim();
 			int expected = convertToInt(value);
-			int actual = pedatum.getCOFFFileHeader().getNumberOfSections();
+			int actual = pedatum.getCOFFFileHeader().getNumberOfSections().intValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(winRarCoff.getNumberOfSections(), 0x04);
+		assertEquals(winRarCoff.getNumberOfSections().intValue(), 0x04);
 	}
 
 	@Test
@@ -127,10 +127,10 @@ public class COFFFileHeaderTest {
 			String value = testdatum.coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
 					.trim();
 			int expected = convertToInt(value);
-			int actual = pedatum.getCOFFFileHeader().getSizeOfOptionalHeader();
+			int actual = pedatum.getCOFFFileHeader().getSizeOfOptionalHeader().intValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(winRarCoff.getSizeOfOptionalHeader(), 0x00e0);
+		assertEquals(winRarCoff.getSizeOfOptionalHeader().intValue(), 0x00e0);
 	}
 
 	@Test

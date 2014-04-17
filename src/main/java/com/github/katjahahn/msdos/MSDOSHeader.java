@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
@@ -77,7 +78,7 @@ public class MSDOSHeader extends PEModule {
 	
 	}
 
-	public int getHeaderSize() {
+	public long getHeaderSize() {
 		return get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
 	}
 
@@ -99,8 +100,8 @@ public class MSDOSHeader extends PEModule {
 		return new LinkedList<>(headerData.values());
 	}
 
-	public int get(MSDOSHeaderKey key) {
-		return (int) headerData.get(key).value; //no 8 Byte values in MSDOS header
+	public Long get(HeaderKey key) {
+		return headerData.get(key).value;
 	}
 
 	@Override

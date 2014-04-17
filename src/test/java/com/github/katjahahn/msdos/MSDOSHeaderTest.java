@@ -51,7 +51,7 @@ public class MSDOSHeaderTest {
 			for (Entry<MSDOSHeaderKey, String> entry : testdatum.dos.entrySet()) {
 				MSDOSHeaderKey key = entry.getKey();
 				MSDOSHeader dos = pedatum.getMSDOSHeader();
-				int actual = dos.get(key);
+				int actual = dos.get(key).intValue();
 				String value = entry.getValue().trim();
 				int expected = convertToInt(value);
 				assertEquals(expected, actual);
@@ -102,7 +102,7 @@ public class MSDOSHeaderTest {
 	@Test
 	public void getHeaderSize() throws IOException {
 		File file = new File("WinRar.exe");
-		int size = PELoader.loadPE(file).getMSDOSHeader().getHeaderSize();
+		long size = PELoader.loadPE(file).getMSDOSHeader().getHeaderSize();
 		assertTrue(size > 0 && size < file.length());
 	}
 	

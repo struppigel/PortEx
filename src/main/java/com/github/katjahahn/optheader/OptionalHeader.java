@@ -113,20 +113,26 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
-	 * Returns either a windows field entry or a standard field entry, depending
-	 * on the given key.
+	 * Returns either a windows field entry value or a standard field entry
+	 * value, depending on the given key.
 	 * 
 	 * @param key
-	 * @return the windows field entry or the standard field entry that belongs
-	 *         to the given key, null if there is no {@link StandardEntry} for
-	 *         this key available
+	 * @return the windows field entry value or the standard field entry value
+	 *         that belongs to the given key, null if there is no
+	 *         {@link StandardEntry} for this key available
 	 */
-	public StandardEntry get(HeaderKey key) {
+	public Long get(HeaderKey key) {
+		StandardEntry standardEntry = null;
 		if (key instanceof StandardFieldEntryKey) {
-			return standardFields.get(key);
+			standardEntry = standardFields.get(key);
+
 		} else {
-			return windowsFields.get(key);
+			standardEntry = windowsFields.get(key);
 		}
+		if (standardEntry != null) {
+			return standardEntry.value;
+		}
+		return null;
 	}
 
 	/**

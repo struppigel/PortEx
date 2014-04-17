@@ -19,12 +19,12 @@ package com.github.katjahahn.sections.idata
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-
 import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.IOUtil
 import com.github.katjahahn.PEModule
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.HeaderKey
 
 /**
  * Represents a directory table entry. Contains all lookup table entries that 
@@ -56,8 +56,8 @@ class DirectoryTableEntry private (
   def apply(key: DirectoryTableEntryKey): Long = {
     entries(key).value
   }
-  //TODO javadocs
-  def get(key: DirectoryTableEntryKey): Long = apply(key)
+  
+  def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryTableEntryKey])
 
   def getEntries(): java.util.Map[DirectoryTableEntryKey, StandardEntry] = entries.asJava
   

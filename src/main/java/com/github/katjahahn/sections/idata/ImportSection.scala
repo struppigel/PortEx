@@ -33,6 +33,7 @@ import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
 import java.io.File
 import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.sections.SpecialSection
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -41,12 +42,7 @@ import scala.collection.mutable.ListBuffer
  * @author Katja Hahn
  */
 class ImportSection private (
-  private val directoryTable: List[DirectoryTableEntry]) extends PEModule {
-
-  /**
-   * Parses the directory table and the lookup table entries
-   */
-  override def read(): Unit = {}
+  private val directoryTable: List[DirectoryTableEntry]) extends SpecialSection {
 
   /**
    * Returns the directory table entries of the import section.

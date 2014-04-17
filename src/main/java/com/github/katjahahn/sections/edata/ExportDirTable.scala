@@ -22,6 +22,7 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.PEModule
+import com.github.katjahahn.HeaderKey
 
 /**
  * @author Katja Hahn
@@ -44,7 +45,7 @@ class ExportDirTable private (
    * @param key a key of the export directory table
    * @return the standard entry for the given key
    */
-  def get(key: ExportDirTableKey): Long = apply(key)
+  def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[ExportDirTableKey])
   
   override def read(): Unit = {}
   override def getInfo(): String = entries.values.mkString(NL)

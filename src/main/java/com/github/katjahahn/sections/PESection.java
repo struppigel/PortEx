@@ -15,9 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.sections;
 
-import java.io.IOException;
-
-import com.github.katjahahn.PEModule;
 
 /**
  * Holds the bytes of a PESection.
@@ -25,7 +22,7 @@ import com.github.katjahahn.PEModule;
  * @author Katja Hahn
  *
  */
-public class PESection extends PEModule {
+public class PESection {
 
 	private byte[] sectionbytes;
 	
@@ -40,13 +37,8 @@ public class PESection extends PEModule {
 	}
 
 	@Override
-	public String getInfo() {
+	public String toString() {
 		return "PE section length: " + sectionbytes.length;
-	}
-
-	@Override
-	public void read() throws IOException {
-		
 	}
 
 }

@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
@@ -274,6 +275,11 @@ public class SectionTable extends PEModule {
 				return value;
 			}
 		}
+		return null;
+	}
+
+	@Override
+	public Long get(HeaderKey key) {
 		return null;
 	}
 }

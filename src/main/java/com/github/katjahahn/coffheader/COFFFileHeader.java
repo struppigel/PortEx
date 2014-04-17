@@ -136,8 +136,8 @@ public class COFFFileHeader extends PEModule {
 	 *            time in seconds
 	 * @return date
 	 */
-	private Date convertToDate(int seconds) {
-		long millis = (long) seconds * 1000;
+	private Date convertToDate(long seconds) {
+		long millis = seconds * 1000;
 		return new Date(millis);
 	}
 
@@ -147,13 +147,14 @@ public class COFFFileHeader extends PEModule {
 	 * @param key
 	 * @return
 	 */
-	public int get(COFFHeaderKey key) {
+	@Override
+	public Long get(HeaderKey key) {
 		for (StandardEntry entry : data) {
 			if (entry.key.equals(key)) {
-				return (int) entry.value; //COFF has > 4 Byte values --> enough for int
+				return entry.value; 
 			}
 		}
-		throw new IllegalArgumentException("invalid key");
+		return null;
 	}
 
 	/**
@@ -193,7 +194,7 @@ public class COFFFileHeader extends PEModule {
 	 * @return
 	 */
 	public int getCharacteristics() {
-		return get(CHARACTERISTICS);
+		return get(CHARACTERISTICS).intValue();
 	}
 
 	/**
@@ -212,7 +213,7 @@ public class COFFFileHeader extends PEModule {
 	 * @return MachineType
 	 */
 	public MachineType getMachineType() {
-		int value = get(MACHINE);
+		int value = get(MACHINE).intValue();
 		try {
 			Map<String, String[]> map = IOUtil.readMap("machinetype");
 			String hexKey = Integer.toHexString(value);
@@ -242,7 +243,7 @@ public class COFFFileHeader extends PEModule {
 	 * 
 	 * @return
 	 */
-	public int getSizeOfOptionalHeader() {
+	public Long getSizeOfOptionalHeader() {
 		return get(SIZE_OF_OPT_HEADER);
 	}
 
@@ -251,7 +252,7 @@ public class COFFFileHeader extends PEModule {
 	 * 
 	 * @return number of sections
 	 */
-	public int getNumberOfSections() {
+	public Long getNumberOfSections() {
 		return get(SECTION_NR);
 	}
 

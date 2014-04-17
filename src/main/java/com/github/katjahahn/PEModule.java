@@ -40,4 +40,5 @@ public abstract class PEModule {
 	 */
 	public abstract void read() throws IOException;
 	
+	public abstract Long get(HeaderKey key);
 }

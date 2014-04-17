@@ -30,7 +30,7 @@ import com.github.katjahahn.PEModule
  * @constructor creates the export table with the addresses found
  * @param addresses of the export section
  */
-class ExportAddressTable private (val addresses: List[Long]) extends PEModule {
+class ExportAddressTable private (val addresses: List[Long]) {
 
   /**
    * Returns the address at the given index
@@ -40,8 +40,7 @@ class ExportAddressTable private (val addresses: List[Long]) extends PEModule {
    */
   def apply(i: Int): Long = addresses(i)
 
-  override def read(): Unit = {}
-  override def getInfo(): String =
+  override def toString(): String =
     s"""|Export Address Table
         |....................
         |

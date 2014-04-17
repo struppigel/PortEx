@@ -23,7 +23,7 @@ public class PESectionTest {
 		byte[] randomBytes = new byte[20];
 		rand.nextBytes(randomBytes);
 		PESection section = new PESection(randomBytes);
-		String info = section.getInfo();
+		String info = section.toString();
 		assertNotNull(info);
 		assertTrue(info.length() > 0);
 	}

@@ -24,6 +24,7 @@ import scala.collection.JavaConverters._
 import java.io.File
 import com.github.katjahahn.optheader.WindowsEntryKey
 import ExportDirTableKey._
+import com.github.katjahahn.sections.SpecialSection
 
 /**
  * @author Katja Hahn
@@ -46,7 +47,7 @@ class ExportSection private (
   private val edataTable: ExportDirTable,
   private val exportAddressTable: ExportAddressTable,
   private val namePointerTable: ExportNamePointerTable,
-  private val ordinalTable: ExportOrdinalTable) extends PEModule {
+  private val ordinalTable: ExportOrdinalTable) extends SpecialSection {
 
   lazy val exportEntries = { //TODO only returns named entries so far
     val names = namePointerTable.pointerNameList.map(_._2)
@@ -121,8 +122,6 @@ class ExportSection private (
    */
   def getExportEntries(): java.util.List[ExportEntry] = exportEntries.asJava
 
-  override def read(): Unit = {}
-  
   /**
    * Returns a detailed info string that represents the inner structure of the 
    * export section. That means the contents of the different tables are not
@@ -136,11 +135,11 @@ class ExportSection private (
     	|--------------
     	|${edataTable.getInfo}
   		|
-  		|${exportAddressTable.getInfo}
+  		|${exportAddressTable.toString}
   		|
-  		|${namePointerTable.getInfo}
+  		|${namePointerTable.toString}
   		|
-  		|${ordinalTable.getInfo}""".stripMargin
+  		|${ordinalTable.toString}""".stripMargin
 
   /**
    * Returns a description string of the export entries found.

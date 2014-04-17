@@ -97,4 +97,9 @@ public class PESignature extends PEModule {
 				+ NL + "pe offset: " + peOffset + NL;
 	}
 
+	@Override
+	public Long get(HeaderKey key) {
+		return null;
+	}
+
 }

@@ -9,13 +9,15 @@ import com.github.katjahahn.ByteArrayUtil._
 import DebugSection._
 import com.github.katjahahn.PELoader
 import java.io.File
+import com.github.katjahahn.HeaderKey
 import com.github.katjahahn.sections.SectionLoader
 import DebugDirTableKey._
 import java.util.Date
+import com.github.katjahahn.sections.SpecialSection
 
 class DebugSection private (
   private val directoryTable: DebugDirectoryTable,
-  private val typeDescription: String) extends PEModule {
+  private val typeDescription: String) extends SpecialSection {
 
   override def getInfo(): String = 
     s"""|-------------
@@ -28,11 +30,9 @@ class DebugSection private (
           case _ => s.toString
           }).mkString(PEModule.NL)}""".stripMargin
         
-  override def read(): Unit = {}
-          
   def getTimeDateStamp(): Date = new Date(get(TIME_DATE_STAMP) * 1000)
         
-  def get(key: DebugDirTableKey): Long = directoryTable(key).value
+  def get(key: HeaderKey): java.lang.Long = directoryTable(key).value
   
   def getTypeDescription(): String = typeDescription
   
@@ -40,7 +40,7 @@ class DebugSection private (
 
 object DebugSection {
 
-  type DebugDirectoryTable = Map[DebugDirTableKey, StandardEntry]
+  type DebugDirectoryTable = Map[HeaderKey, StandardEntry]
 
   private val debugspec = "debugdirentryspec"
     
@@ -64,7 +64,7 @@ object DebugSection {
       val entry = new StandardEntry(ekey, description, value)
       buffer += entry
     }
-    val entries: DebugDirectoryTable = (buffer map { t => (t.key.asInstanceOf[DebugDirTableKey], t) }).toMap;
+    val entries: DebugDirectoryTable = (buffer map { t => (t.key, t) }).toMap;
     val types = IOUtil.getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
     new DebugSection(entries, types(0))
   }

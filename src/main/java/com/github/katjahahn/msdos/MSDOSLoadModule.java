@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.PEModule;
 
 /**
@@ -50,7 +51,7 @@ public class MSDOSLoadModule extends PEModule {
 
 	@Override
 	public void read() throws IOException {
-		int headerSize = header.getHeaderSize();
+		long headerSize = header.getHeaderSize();
 		int loadModuleSize = getLoadModuleSize();
 
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -66,7 +67,7 @@ public class MSDOSLoadModule extends PEModule {
 	 * @return load module size
 	 */
 	public int getLoadModuleSize() {
-		return getImageSize() - header.getHeaderSize();
+		return (int) (getImageSize() - header.getHeaderSize());
 	}
 
 	/**
@@ -75,8 +76,8 @@ public class MSDOSLoadModule extends PEModule {
 	 * @return image size
 	 */
 	public int getImageSize() {
-		int filePages = header.get(FILE_PAGES);
-		int lastPageSize = header.get(LAST_PAGE_SIZE);
+		int filePages = header.get(FILE_PAGES).intValue();
+		int lastPageSize = header.get(LAST_PAGE_SIZE).intValue();
 
 		int imageSize = (filePages - 1) * PAGE_SIZE + lastPageSize;
 		if (lastPageSize == 0) {
@@ -97,6 +98,11 @@ public class MSDOSLoadModule extends PEModule {
 		return "----------------" + NL + "MSDOS Load Module" + NL
 				+ "----------------" + NL + NL + "image size:" + getImageSize()
 				+ NL + "load module size: " + getLoadModuleSize() + NL;
+	}
+
+	@Override
+	public Long get(HeaderKey key) {
+		return null;
 	}
 
 }

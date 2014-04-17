@@ -22,13 +22,11 @@ import com.github.katjahahn.PEModule._
 
 class ExportOrdinalTable private (
     val ordinals: List[Int], 
-    val base: Int) extends PEModule {
+    val base: Int) {
   
   def apply(i: Int): Int = ordinals(i)
   
-  override def read(): Unit = {}
-
-  override def getInfo(): String = 
+  override def toString(): String = 
     s"""|Ordinal Table
         |..............
         |

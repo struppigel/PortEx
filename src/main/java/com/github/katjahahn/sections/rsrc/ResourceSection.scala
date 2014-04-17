@@ -21,6 +21,7 @@ import com.github.katjahahn.sections.PESection
 import scala.collection.JavaConverters._
 import com.github.katjahahn.IOUtil
 import com.github.katjahahn.PEModule
+import com.github.katjahahn.sections.SpecialSection
 
 /**
  * Holds the root resource directory table and provides access to the resources.
@@ -33,10 +34,8 @@ import com.github.katjahahn.PEModule
 class ResourceSection(
     val resourceTable: ResourceDirectoryTable, 
     private val rsrcBytes: Array[Byte], 
-    val virtualAddress: Long) extends PEModule {
+    val virtualAddress: Long) extends SpecialSection {
 
-  override def read(): Unit = {}
-  
   override def getInfo(): String = resourceTable.getInfo
 
   /**

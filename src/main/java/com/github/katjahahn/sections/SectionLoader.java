@@ -310,7 +310,6 @@ public class SectionLoader {
 			int importTableOffset = getOffsetDiffFor(DataDirectoryKey.IMPORT_TABLE);
 			ImportSection idata = ImportSection.getInstance(idatabytes,
 					virtualAddress, optHeader, importTableOffset);
-			idata.read();
 			return idata;
 		}
 		return null;
