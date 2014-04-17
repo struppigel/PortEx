@@ -10,18 +10,32 @@ import DebugSection._
 import com.github.katjahahn.PELoader
 import java.io.File
 import com.github.katjahahn.sections.SectionLoader
+import DebugDirTableKey._
+import java.util.Date
 
 class DebugSection private (
-  private val directoryTable: DebugDirectoryTable) extends PEModule {
+  private val directoryTable: DebugDirectoryTable,
+  private val typeDescription: String) extends PEModule {
 
   override def getInfo(): String = 
     s"""|-------------
         |Debug Section
         |-------------
         |
-        |${directoryTable.values.mkString(PEModule.NL)}""".stripMargin
+        |${directoryTable.values.map(s => s.key match {
+          case TYPE => "Type: " + typeDescription
+          case TIME_DATE_STAMP => "Time date stamp: " + getTimeDateStamp().toString
+          case _ => s.toString
+          }).mkString(PEModule.NL)}""".stripMargin
         
   override def read(): Unit = {}
+          
+  def getTimeDateStamp(): Date = new Date(get(TIME_DATE_STAMP) * 1000)
+        
+  def get(key: DebugDirTableKey): Long = directoryTable(key).value
+  
+  def getTypeDescription(): String = typeDescription
+  
 }
 
 object DebugSection {
@@ -51,6 +65,7 @@ object DebugSection {
       buffer += entry
     }
     val entries: DebugDirectoryTable = (buffer map { t => (t.key.asInstanceOf[DebugDirTableKey], t) }).toMap;
-    new DebugSection(entries)
+    val types = IOUtil.getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
+    new DebugSection(entries, types(0))
   }
 }
