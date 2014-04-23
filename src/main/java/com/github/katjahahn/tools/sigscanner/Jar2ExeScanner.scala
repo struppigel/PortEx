@@ -79,6 +79,8 @@ class Jar2ExeScanner(file: File) {
         entries += e.getName()
         e = zis.getNextEntry()
       }
+    } catch {
+      case e: IllegalArgumentException => return Nil
     } finally {
       zis.close();
     }
@@ -193,7 +195,7 @@ object Jar2ExeScanner {
     |last update: 6.Feb 2014""".stripMargin
 
   private val title = "jwscan v0.1 -- by deque"
-
+    
   private val usage = """Usage: java -jar jwscan.jar [-d <hexoffset>] <PEfile>
     """.stripMargin
 

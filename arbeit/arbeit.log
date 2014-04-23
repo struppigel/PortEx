@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  4 APR 2014 14:23
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  17 APR 2014 12:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1307,11 +1307,11 @@ Package rerunfilecheck Info: File `arbeit.out' has not changed.
 (rerunfilecheck)             Checksum: 636E02EC0179B61F3C6DAA063C111BA4;1066.
  ) 
 Here is how much of TeX's memory you used:
- 22164 strings out of 494979
- 373712 string characters out of 6179171
- 510551 words of memory out of 5000000
+ 22178 strings out of 494979
+ 373816 string characters out of 6179171
+ 511551 words of memory out of 5000000
  24436 multiletter control sequences out of 15000+600000
- 64697 words of font info for 326 fonts, out of 8000000 for 9000
+ 65747 words of font info for 338 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,77p,927b,656s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1324,10 +1324,10 @@ s/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1
 ts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 sl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (27 pages, 211956 bytes).
+Output written on arbeit.pdf (27 pages, 211803 bytes).
 PDF statistics:
- 336 PDF objects out of 1000 (max. 8388607)
- 291 compressed objects within 3 object streams
+ 337 PDF objects out of 1000 (max. 8388607)
+ 292 compressed objects within 3 object streams
  75 named destinations out of 1000 (max. 500000)
  44711 words of extra memory for PDF output out of 51595 (max. 10000000)
 

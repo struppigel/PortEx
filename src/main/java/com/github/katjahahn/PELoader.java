@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTable;
 
 /**
@@ -83,6 +84,7 @@ public class PELoader {
 			COFFFileHeader coff, RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
+		logger.info("SectionTable offset" + offset);
 		int numberOfEntries = coff.getNumberOfSections().intValue();
 		byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
 				* numberOfEntries, raf);
@@ -92,6 +94,7 @@ public class PELoader {
 	private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
 			RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH;
+		logger.info("COFF Header offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
 		return new COFFFileHeader(headerbytes);
 	}
@@ -100,6 +103,7 @@ public class PELoader {
 			COFFFileHeader coff, RandomAccessFile raf) throws IOException {
 		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE;
+		logger.info("Optional Header offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, coff.getSizeOfOptionalHeader().intValue(),
 				raf);
 		return new OptionalHeader(headerbytes);
@@ -115,7 +119,13 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("ntdll.dll");
+		File file = new File("MovieToAGIF.exe");
+		PEData data = PELoader.loadPE(file);
+		OptionalHeader opt = data.getOptionalHeader();
+		Long nr = opt.get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES);
+		logger.info(opt.getMagicNumber());
+		logger.info("nr: " + nr);
+		logger.info(Integer.toHexString(280 + 92));
 	}
 
 }

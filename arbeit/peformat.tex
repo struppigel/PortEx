@@ -10,7 +10,7 @@ The \PE{} format is described in the \emph{Microsoft Portable Executable and Com
 
 Figure~\ref{fig:peformat} illustrates the structure of a \PE{} file. An executable \PE{} file always starts with the MS-DOS Stub. This is an application which is able to run in MS-DOS. It prints the message \enquote{This program cannot be run in DOS mode}. The offset to the \PE{} signature is in location 0x3c of the stub and enables Windows to properly execute the \PE{} file. Right after the signature follow the COFF File Header, the Optional Header and the Section Table.
 
-The Section Table describes \ia{} characteristics, size and location of the sections that make up the rest of the \PE{} file.
+The Section Table describes \ia{} characteristics, size, name and location of the sections that make up the rest of the \PE{} file.
 
 \todo{make your own picture}
 \begin{figure}
@@ -21,11 +21,13 @@ The Section Table describes \ia{} characteristics, size and location of the sect
 
 \section{Special Sections}
 
-Sections may contain arbitrary information, which is only relevant to the application using them; but some sections have a special meaning. These sections can be recognized by certain flags that are set in the Section Table or by entries in the Data Directory Table of the Optional Header. The special sections also have typical section names, but their names are only a convention. They can not be relied on while trying to find certain sections.
+Sections may contain arbitrary information, which is only relevant to the application using them; but some sections have a special meaning. Their format is described in the PE COFF specification \cite{pespec}. These sections are recognized by entries in the Data Directory Table of the Optional Header. They have typical section names which are also used in the specification to refer to the sections. These names are not mandatory, but a convention. That's why they can not be relied on while trying to find certain sections.
 
 Some of these special sections are described right after.
 
 \subsection*{Import Section}
+
+The import section contains data about the
 
 \subsection*{Resource Section}
 
