@@ -25,7 +25,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTable;
 
 /**
@@ -121,11 +120,8 @@ public class PELoader {
 		logger.entry();
 		File file = new File("MovieToAGIF.exe");
 		PEData data = PELoader.loadPE(file);
-		OptionalHeader opt = data.getOptionalHeader();
-		Long nr = opt.get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES);
-		logger.info(opt.getMagicNumber());
-		logger.info("nr: " + nr);
-		logger.info(Integer.toHexString(280 + 92));
+		COFFFileHeader coff = data.getCOFFFileHeader();
+		System.out.println(coff.getInfo());
 	}
 
 }

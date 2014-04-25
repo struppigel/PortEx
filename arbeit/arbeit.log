@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.16)  17 APR 2014 12:51
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  25 APR 2014 10:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **arbeit.tex
 (./arbeit.tex
 LaTeX2e <2011/06/27>
-Babel <3.9f> and hyphenation patterns for 7 languages loaded.
+Babel <3.9h> and hyphenation patterns for 7 languages loaded.
 (./custom_libraries/report.cls
 Document Class: report 2007/10/19 v1.4h Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
@@ -242,18 +242,19 @@ Now handling font encoding U ...
    defining Unicode char U+2423 (decimal 9251)
 ))
 (/usr/share/texlive/texmf-dist/tex/generic/babel/babel.sty
-Package: babel 2013/05/16 v3.9f The Babel package
+Package: babel 2013/12/03 3.9h The Babel package
 
 (/usr/share/texlive/texmf-dist/tex/generic/babel-german/ngermanb.ldf
-Language: ngermanb 2008/07/06 v2.6n new German support from the babel system
+Language: ngermanb 2013/12/13 v2.7 German support for babel (new orthography)
 
 (/usr/share/texlive/texmf-dist/tex/generic/babel/babel.def
-File: babel.def 2013/05/16 v3.9f Babel common definitions
+File: babel.def 2013/12/03 3.9h Babel common definitions
 \babel@savecnt=\count88
 \U@D=\dimen103
 )
 \l@naustrian = a dialect from \language\l@ngerman 
-Package babel Info: Making " an active character on input line 92.
+\l@nswissgerman = a dialect from \language\l@ngerman 
+Package babel Info: Making " an active character on input line 88.
 )
 (/usr/share/texlive/texmf-dist/tex/generic/babel-english/english.ldf
 Language: english 2012/08/20 v3.3p English support from the babel system
@@ -293,7 +294,7 @@ Package: aecompl 1998/07/23 0.9 T1 Complements for AE fonts (D. Roegel)
 )
 (/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
-Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 (./custom_libraries/listings/listings.sty
 (/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
@@ -498,7 +499,7 @@ Package: makeidx 2000/03/29 v1.0m Standard LaTeX package
 
 Writing index file arbeit.idx
 (/usr/share/texlive/texmf-dist/tex/latex/pdfpages/pdfpages.sty
-Package: pdfpages 2013/05/30 v0.4u Insert pages of external PDF documents (AM)
+Package: pdfpages 2013/08/25 v0.4v Insert pages of external PDF documents (AM)
 
 (/usr/share/texlive/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2007/08/22 v4.3 Infix arithmetic (KKT,FJ)
@@ -514,7 +515,7 @@ LaTeX Info: Redefining \addtolength on input line 77.
 \calc@Cskip=\skip55
 )
 (/usr/share/texlive/texmf-dist/tex/latex/eso-pic/eso-pic.sty
-Package: eso-pic 2010/10/06 v2.0c eso-pic (RN)
+Package: eso-pic 2013/10/06 v2.0d eso-pic (RN)
 
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/atbegshi.sty
 Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
@@ -524,7 +525,7 @@ Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
 Package ifpdf Info: pdfTeX in PDF mode is detected.
 )))
 (/usr/share/texlive/texmf-dist/tex/latex/pdfpages/pppdftex.def
-File: pppdftex.def 2013/05/30 v0.4u Pdfpages driver for pdfTeX (AM)
+File: pppdftex.def 2013/08/25 v0.4v Pdfpages driver for pdfTeX (AM)
 )
 \AM@pagebox=\box36
 \AM@toc@title=\toks24
@@ -1206,26 +1207,26 @@ Chapter 5.
  (./peformat.tex
 Chapter 6.
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 15.
+ine 13.
 <graphics/peformat.png, id=218, 255.95625pt x 815.045pt>
 File: graphics/peformat.png Graphic file (type png)
 
 <use graphics/peformat.png>
-Package pdftex.def Info: graphics/peformat.png used on input line 17.
+Package pdftex.def Info: graphics/peformat.png used on input line 21.
 (pdftex.def)             Requested size: 187.80336pt x 598.02486pt.
 
 
-LaTeX Warning: Float too large for page by 22.62488pt on input line 20.
+LaTeX Warning: Float too large for page by 22.62488pt on input line 24.
 
-
-Underfull \vbox (badness 2556) has occurred while \output is active []
-
- [9
+[9
 
 
 
 ]
-[10 <./graphics/peformat.png (PNG copy)>]) [11]
+
+LaTeX Warning: Marginpar on page 10 moved.
+
+) [10] [11 <./graphics/peformat.png (PNG copy)>]
 \openout2 = `portex.aux'.
 
  (./portex.tex
@@ -1304,14 +1305,14 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 180.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 180.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 180.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: 636E02EC0179B61F3C6DAA063C111BA4;1066.
+(rerunfilecheck)             Checksum: FDBAF5F7CB3F504E974E5514C5E12E47;1066.
  ) 
 Here is how much of TeX's memory you used:
- 22178 strings out of 494979
- 373816 string characters out of 6179171
- 511551 words of memory out of 5000000
- 24436 multiletter control sequences out of 15000+600000
- 65747 words of font info for 338 fonts, out of 8000000 for 9000
+ 22192 strings out of 494976
+ 374187 string characters out of 6179137
+ 513238 words of memory out of 5000000
+ 24459 multiletter control sequences out of 15000+600000
+ 65222 words of font info for 332 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,77p,927b,656s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1324,10 +1325,10 @@ s/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1
 ts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 sl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (27 pages, 211803 bytes).
+Output written on arbeit.pdf (27 pages, 212593 bytes).
 PDF statistics:
- 337 PDF objects out of 1000 (max. 8388607)
- 292 compressed objects within 3 object streams
- 75 named destinations out of 1000 (max. 500000)
+ 338 PDF objects out of 1000 (max. 8388607)
+ 293 compressed objects within 3 object streams
+ 76 named destinations out of 1000 (max. 500000)
  44711 words of extra memory for PDF output out of 51595 (max. 10000000)
 

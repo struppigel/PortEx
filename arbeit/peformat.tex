@@ -8,7 +8,13 @@ The \PE{} format is described in the \emph{Microsoft Portable Executable and Com
 
 \section{General Structure}
 
-Figure~\ref{fig:peformat} illustrates the structure of a \PE{} file. An executable \PE{} file always starts with the MS-DOS Stub. This is an application which is able to run in MS-DOS. It prints the message \enquote{This program cannot be run in DOS mode}. The offset to the \PE{} signature is in location 0x3c of the stub and enables Windows to properly execute the \PE{} file. Right after the signature follow the COFF File Header, the Optional Header and the Section Table.
+Figure~\ref{fig:peformat} illustrates the structure of a \PE{} file. An executable \PE{} file always starts with the MS-DOS Stub. This is an application which is able to run in MS-DOS. The standard MS-DOS stub prints the message \enquote{This program cannot be run in DOS mode} and closes right after. 
+
+To determine if a file is of a certain file format, signatures are used. The file format signature is usually at the very beginning of the file. Since the \PE{} starts with the MS-DOS stub, which has a file signature itself, the \PE{} signature is placed after. \todo{MZ, PE00} The offset to the \PE{} signature is defined in location 0x3c of the stub, thus enables Windows to properly execute the \PE{} file. 
+
+Right after the signature follow the COFF File Header, the Optional Header and the Section Table. The COFF File Header contains information about the type of the target machine, the number of sections, a time date stamp that indicates when the file was created, the size of the Optional Header.and flags that indicate file characteristics.
+
+Despite its name the Optional Header is mandatory for image files. Only object files don't need it.
 
 The Section Table describes \ia{} characteristics, size, name and location of the sections that make up the rest of the \PE{} file.
 
