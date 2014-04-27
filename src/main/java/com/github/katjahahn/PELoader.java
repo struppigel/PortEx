@@ -25,7 +25,12 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.sections.debug.DebugSection;
+import com.github.katjahahn.sections.edata.ExportSection;
+import com.github.katjahahn.sections.idata.ImportSection;
+import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -118,10 +123,15 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("MovieToAGIF.exe");
+		File file = new File("src/main/resources/x64viruses/VirusShare_fdbde2e1fb4d183cee684e7b9819bc13");
 		PEData data = PELoader.loadPE(file);
-		COFFFileHeader coff = data.getCOFFFileHeader();
-		System.out.println(coff.getInfo());
+		System.out.println(data.toString());
+		SectionLoader loader = new SectionLoader(data);
+		ImportSection idata = loader.loadImportSection();
+		ResourceSection rsrc = loader.loadResourceSection();
+		ExportSection export = loader.loadExportSection();
+		DebugSection debug = loader.loadDebugSection();
+		System.out.println(debug.getInfo());
 	}
 
 }

@@ -174,7 +174,8 @@ public class SectionTable extends PEModule {
 	@Override
 	public String getInfo() {
 		StringBuilder b = new StringBuilder();
-
+		b.append("-----------------" + NL + "Section Table" + NL
+				+ "-----------------" + NL + NL);
 		for (int i = 0; i < numberOfEntries; i++) {
 			b.append("entry number " + (i + 1) + ": " + NL + "..............."
 					+ NL + NL);
