@@ -3,6 +3,8 @@ com.github.katjahahn.coffheader
 com.github.katjahahn.msdos
 com.github.katjahahn.optheader
 com.github.katjahahn.sections
+com.github.katjahahn.sections.debug
+com.github.katjahahn.sections.edata
 com.github.katjahahn.sections.idata
 com.github.katjahahn.sections.rsrc
 com.github.katjahahn.tools
