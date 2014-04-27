@@ -4,6 +4,7 @@ filelist
 pevscript.sh
 BinaryCollection
 todo
+Virus.Tirtas
 codecover
 .settings
 .classpath
@@ -14,7 +15,6 @@ src/main/resources/*
 *.exe
 *.dll
 # Package Files #
-*.jar
 *.war
 *.ear
 /target

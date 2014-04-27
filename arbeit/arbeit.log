@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  25 APR 2014 10:50
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  26 APR 2014 20:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1208,23 +1208,19 @@ Chapter 5.
 Chapter 6.
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
 ine 13.
-<graphics/peformat.png, id=218, 255.95625pt x 815.045pt>
-File: graphics/peformat.png Graphic file (type png)
-
-<use graphics/peformat.png>
-Package pdftex.def Info: graphics/peformat.png used on input line 21.
-(pdftex.def)             Requested size: 187.80336pt x 598.02486pt.
-
-
-LaTeX Warning: Float too large for page by 22.62488pt on input line 24.
-
 [9
 
 
 
-]
+] <graphics/peformat.png, id=224, 255.95625pt x 815.045pt>
+File: graphics/peformat.png Graphic file (type png)
 
-LaTeX Warning: Marginpar on page 10 moved.
+<use graphics/peformat.png>
+Package pdftex.def Info: graphics/peformat.png used on input line 23.
+(pdftex.def)             Requested size: 187.80336pt x 598.02486pt.
+
+
+LaTeX Warning: Float too large for page by 22.62488pt on input line 26.
 
 ) [10] [11 <./graphics/peformat.png (PNG copy)>]
 \openout2 = `portex.aux'.
@@ -1308,11 +1304,11 @@ Package rerunfilecheck Info: File `arbeit.out' has not changed.
 (rerunfilecheck)             Checksum: FDBAF5F7CB3F504E974E5514C5E12E47;1066.
  ) 
 Here is how much of TeX's memory you used:
- 22192 strings out of 494976
- 374187 string characters out of 6179137
- 513238 words of memory out of 5000000
+ 22199 strings out of 494976
+ 374239 string characters out of 6179137
+ 511238 words of memory out of 5000000
  24459 multiletter control sequences out of 15000+600000
- 65222 words of font info for 332 fonts, out of 8000000 for 9000
+ 65747 words of font info for 338 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,77p,927b,656s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1325,7 +1321,7 @@ s/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1
 ts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 sl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (27 pages, 212593 bytes).
+Output written on arbeit.pdf (27 pages, 213166 bytes).
 PDF statistics:
  338 PDF objects out of 1000 (max. 8388607)
  293 compressed objects within 3 object streams

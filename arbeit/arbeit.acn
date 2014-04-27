@@ -18,7 +18,7 @@
 
 \gloitem {\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax
 \glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupS
+		\glsnumformat{9\delimN 10}\delimT \gloskip \glogroupS
 
 \gloitem {\glosslabel{acn:SYS}{\noexpand \acronymfont {SYS}}}real mode device driver\relax
 \glodelim 
