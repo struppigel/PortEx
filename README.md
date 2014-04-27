@@ -18,11 +18,15 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Scan for Unicode and ASCII strings contained in the file
 * Get a Virustotal report
 
-For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki/Getting-Started) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
+For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
 ### Version Information
 
-The current version is not even Alpha yet, which is the reason that there are no binaries provided by now. However you can build the current source.
+The current version is not even Alpha yet, so beware of bugs.
+
+### Using PortEx
+
+Download portex.jar and include it to your build path. For more information, read the [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki)
 
 ### Building PortEx
 
