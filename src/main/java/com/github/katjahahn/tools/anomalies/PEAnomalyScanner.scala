@@ -20,19 +20,23 @@ object PEAnomalyScanner {
   
   def apply(file: File): PEAnomalyScanner = {
     val data = PELoader.loadPE(file)
-    new PEAnomalyScanner(data) with OptionalHeaderScanning
+    new PEAnomalyScanner(data) with OptionalHeaderScanning with COFFHeaderScanning
   }
 
   def main(args: Array[String]): Unit = {
-    for(file <- new File("src/main/resources/x64viruses/").listFiles) {
+    var counter = 0
+    val files = new File("src/main/resources/x64viruses/").listFiles
+    for(file <- files) {
       val scanner = PEAnomalyScanner(file)
       val list = scanner.scan
       if(list.size > 0) {
+    	  counter += 1
     	  println("scanning file: " + file.getName())
     	  list.foreach(println)
     	  println()
       }
     }
+    println("Anomalies found in " + counter + " of " + files.size + " files.")
   }
 
 }
