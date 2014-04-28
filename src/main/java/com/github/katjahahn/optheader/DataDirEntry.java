@@ -64,7 +64,7 @@ public class DataDirEntry {
 		}
 		if (key == null)
 			throw new IllegalArgumentException(
-					"no enum constant for given field name");
+					"no enum constant for given field name: " + fieldName);
 		this.virtualAddress = virtualAddress;
 		this.size = size;
 	}

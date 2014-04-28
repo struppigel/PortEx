@@ -11,7 +11,7 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
   }
   
   override def scan(): List[Anomaly] = {
-	List(new Anomaly("success"))
+	List[Anomaly]()
   }
   
 }
@@ -20,13 +20,19 @@ object PEAnomalyScanner {
   
   def apply(file: File): PEAnomalyScanner = {
     val data = PELoader.loadPE(file)
-    new PEAnomalyScanner(data) with DeprecatedCOFFScanning
+    new PEAnomalyScanner(data) with OptionalHeaderScanning
   }
 
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/x64viruses/VirusShare_fdbde2e1fb4d183cee684e7b9819bc13")
-    val scanner = PEAnomalyScanner(file)
-    scanner.scan.foreach(println)
+    for(file <- new File("src/main/resources/x64viruses/").listFiles) {
+      val scanner = PEAnomalyScanner(file)
+      val list = scanner.scan
+      if(list.size > 0) {
+    	  println("scanning file: " + file.getName())
+    	  list.foreach(println)
+    	  println()
+      }
+    }
   }
 
 }

@@ -72,6 +72,10 @@ public class OptionalHeader extends PEModule {
 
 		this.magicNumber = readMagicNumber(standardSpec);
 
+		if(!magicNumber.equals(MagicNumber.PE32)) {
+			standardSpec.remove("BASE_OF_DATA");
+		}
+		
 		loadStandardFields(standardSpec);
 		loadWindowsSpecificFields(windowsSpec);
 		loadDataDirectories(datadirSpec);
@@ -121,6 +125,7 @@ public class OptionalHeader extends PEModule {
 	 *         that belongs to the given key, null if there is no
 	 *         {@link StandardEntry} for this key available
 	 */
+	@Override
 	public Long get(HeaderKey key) {
 		StandardEntry standardEntry = null;
 		if (key instanceof StandardFieldEntryKey) {

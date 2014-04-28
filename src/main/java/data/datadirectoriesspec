@@ -13,3 +13,4 @@ bound import;184;200;8
 IAT;192;208;8
 delay import descriptor;200;216;8
 CLR runtime header;208;224;8
+reserved;216;232;8

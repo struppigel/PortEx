@@ -330,6 +330,7 @@ public class TestreportsReader {
 		// TODO: OEM identifier and OEM information missing in MSDOSspec
 		// TODO: not covered in testfiles: complemented_checksum and
 		// signature_word
+		System.err.println("missing msdos key: " + string);
 		return null;
 	}
 
@@ -355,6 +356,7 @@ public class TestreportsReader {
 		if (string.contains("Characteristics")) {
 			return COFFHeaderKey.CHARACTERISTICS;
 		}
+		System.err.println("missing coff header key: " + string);
 		return null;
 	}
 
@@ -386,6 +388,7 @@ public class TestreportsReader {
 		if (string.contains("Size of .bss")) {
 			return StandardFieldEntryKey.SIZE_OF_UNINIT_DATA;
 		}
+		System.err.println("missing standard field key: " + string);
 		return null;
 	}
 
@@ -453,6 +456,7 @@ public class TestreportsReader {
 		// if (string.contains("")) { TODO missing in report (?)
 		// return WindowsEntryKey.WIN32_VERSION_VALUE;
 		// }
+		System.err.println("missing windows key: " + string);
 		return null;
 	}
 
@@ -494,8 +498,8 @@ public class TestreportsReader {
 		if (name.contains("Runtime Header")) {
 			return DataDirectoryKey.CLR_RUNTIME_HEADER;
 		}
-		if (name.contains("Delay Report")) {
-			return DataDirectoryKey.DELAY_REPORT_DESCRIPTOR;
+		if (name.contains("Delay Import")) {
+			return DataDirectoryKey.DELAY_IMPORT_DESCRIPTOR;
 		}
 		if (name.contains("Export")) {
 			return DataDirectoryKey.EXPORT_TABLE;
@@ -503,6 +507,7 @@ public class TestreportsReader {
 		if (name.contains("Global")) {
 			return DataDirectoryKey.GLOBAL_PTR;
 		}
+		System.err.println("missing data dir key: " + name);
 		return null;
 	}
 
@@ -522,6 +527,8 @@ public class TestreportsReader {
 		if (name.contains("Characteristics")) {
 			return SectionTableEntryKey.CHARACTERISTICS;
 		}
+		
+		System.err.println("missing section table entry " + name);
 		return null;
 	}
 

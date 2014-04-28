@@ -29,8 +29,8 @@ public enum DataDirectoryKey implements HeaderKey {
 	CERTIFICATE_TABLE("certificate table"), BASE_RELOCATION_TABLE("base relocation table"), 
 	DEBUG("debug"), ARCHITECTURE("architecture"), GLOBAL_PTR("global ptr"), 
 	TLS_TABLE("TLS table"), LOAD_CONFIG_TABLE("load config table"), 
-	BOUND_IMPORT("bound import"), IAT("IAT"), DELAY_REPORT_DESCRIPTOR("delay report descriptor"), 
-	CLR_RUNTIME_HEADER("CLR runtime header"); 
+	BOUND_IMPORT("bound import"), IAT("IAT"), DELAY_IMPORT_DESCRIPTOR("delay import descriptor"), 
+	CLR_RUNTIME_HEADER("CLR runtime header"), RESERVED("reserved"); 
 	
 	private String fieldName;
 	

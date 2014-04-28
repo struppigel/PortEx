@@ -1,6 +1,7 @@
 package com.github.katjahahn.tools.anomalies
 
 import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.optheader.DataDirEntry
 
 class Anomaly(val description: String) {
   
@@ -8,4 +9,6 @@ class Anomaly(val description: String) {
   
 }
 
-case class DeprecatedAnomaly(standardEntry: StandardEntry, override val description: String) extends Anomaly(description)
+case class DeprecatedAnomaly(standardEntry: StandardEntry, override val description: String) extends Anomaly(description) 
+
+case class ReservedAnomaly(dataDirEntry: DataDirEntry, override val description: String) extends Anomaly(description)

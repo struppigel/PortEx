@@ -25,9 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.idata.ImportSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -122,9 +120,7 @@ public class PELoader {
 		logger.entry();
 		File file = new File("src/main/resources/x64viruses/VirusShare_fdbde2e1fb4d183cee684e7b9819bc13");
 		PEData data = PELoader.loadPE(file);
-		SectionLoader loader = new SectionLoader(data);
-		ImportSection idata = loader.loadImportSection();
-		System.out.println(idata.getInfo());
+		System.out.println(data);
 	}
 
 }

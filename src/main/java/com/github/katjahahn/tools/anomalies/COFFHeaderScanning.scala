@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.PEModule
 import scala.collection.JavaConverters._
 
-trait DeprecatedCOFFScanning extends AnomalyScanner {
+trait COFFHeaderScanning extends AnomalyScanner {
 
   abstract override def scan(): List[Anomaly] = {
     val coff = data.getCOFFFileHeader()
