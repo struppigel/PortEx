@@ -38,8 +38,6 @@ You also need [Maven](https://maven.apache.org/)
 
 #### Setup Third Party Libraries
 
-(Note: This process will be simplified when PortEx is in Alpha)
-
 Download [VirusTotalPublic](https://github.com/kdkanishka/Virustotal-Public-API-V2.0-Client/archive/master.zip)
 
 Extract the file and navigate to the *Virustotal-Public-API-V2.0-Client-master* folder. Build the jar with:
