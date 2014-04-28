@@ -22,7 +22,8 @@ For more information have a look at [PortEx Wiki](https://github.com/katjahahn/P
 
 ### Version Information
 
-The current version is not even Alpha yet, so beware of bugs.
+The current version is in Alpha, so beware of bugs.
+The first release will be in Fall 2014.
 
 ### Using PortEx
 
@@ -90,8 +91,9 @@ $ sbt eclipse
 
 Import the project to Eclipse via the *Import Wizard*.
 
-### Author
-[Katja Hahn](http://katjahahn.github.io/)
+### Author and Contact
+Katja Hahn
+E-Mail: portx (at) gmx (dot) de
 
 ### License
 [Apache License, Version 2.0](https://github.com/katjahahn/PortEx/blob/master/LICENSE)
