@@ -27,10 +27,7 @@ import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.debug.DebugSection;
-import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
-import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -125,13 +122,9 @@ public class PELoader {
 		logger.entry();
 		File file = new File("src/main/resources/x64viruses/VirusShare_fdbde2e1fb4d183cee684e7b9819bc13");
 		PEData data = PELoader.loadPE(file);
-		System.out.println(data.toString());
 		SectionLoader loader = new SectionLoader(data);
 		ImportSection idata = loader.loadImportSection();
-		ResourceSection rsrc = loader.loadResourceSection();
-		ExportSection export = loader.loadExportSection();
-		DebugSection debug = loader.loadDebugSection();
-		System.out.println(debug.getInfo());
+		System.out.println(idata.getInfo());
 	}
 
 }

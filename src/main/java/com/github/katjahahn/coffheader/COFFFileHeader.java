@@ -156,6 +156,21 @@ public class COFFFileHeader extends PEModule {
 		}
 		return null;
 	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public StandardEntry getEntry(HeaderKey key) {
+		for (StandardEntry entry : data) {
+			if (entry.key.equals(key)) {
+				return entry; 
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Returns a description of the machine type.
