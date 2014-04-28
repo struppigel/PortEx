@@ -29,4 +29,9 @@ case class NonDefaultAnomaly(standardEntry: StandardEntry, override val descript
 /**
  * A reserved value has been used.
  */
-case class ReservedAnomaly(dataDirEntry: DataDirEntry, override val description: String) extends Anomaly(description)
+case class ReservedAnomaly(standardEntry: StandardEntry, override val description: String) extends Anomaly(description)
+
+/**
+ * A reserved datadir value has been used.
+ */
+case class ReservedDataDirAnomaly(dataDirEntry: DataDirEntry, override val description: String) extends Anomaly(description)

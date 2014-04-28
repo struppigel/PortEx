@@ -408,4 +408,18 @@ public class OptionalHeader extends PEModule {
 		}
 		return null;
 	}
+	
+	public static String getSubsystemKey(int value) {
+		try {
+			Map<String, String[]> map = IOUtil.readMap("subsystem");
+			return map.get(String.valueOf(value))[0];
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public Subsystem getSubsystem() {
+		return Subsystem.valueOf(getSubsystemKey(get(SUBSYSTEM).intValue()));
+	}
 }

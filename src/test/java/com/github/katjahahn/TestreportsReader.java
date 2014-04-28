@@ -327,6 +327,15 @@ public class TestreportsReader {
 		if (string.contains("Overlay number")) {
 			return MSDOSHeaderKey.OVERLAY_NR;
 		}
+		if (string.contains("OEM identifier")) {
+			return null;
+		}
+		if (string.contains("OEM information")) {
+			return null;
+		}
+		if (string.contains("Magic number")) { //not testing MZ signature is on purpose
+			return null;
+		}
 		// TODO: OEM identifier and OEM information missing in MSDOSspec
 		// TODO: not covered in testfiles: complemented_checksum and
 		// signature_word
@@ -344,7 +353,7 @@ public class TestreportsReader {
 		if (string.contains("Date/time stamp")) {
 			return COFFHeaderKey.TIME_DATE;
 		}
-		if (string.contains("Symbol table offset")) {
+		if (string.contains("Symbol Table offset")) {
 			return null; // TODO ?
 		}
 		if (string.contains("Number of symbols")) {
@@ -388,7 +397,9 @@ public class TestreportsReader {
 		if (string.contains("Size of .bss")) {
 			return StandardFieldEntryKey.SIZE_OF_UNINIT_DATA;
 		}
-		System.err.println("missing standard field key: " + string);
+		if(getWindowsKeyFor(string) == null) {
+			System.err.println("missing standard field key: " + string);
+		}
 		return null;
 	}
 

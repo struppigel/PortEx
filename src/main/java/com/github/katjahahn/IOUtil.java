@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -141,6 +142,28 @@ public class IOUtil {
 			logger.error(e);
 		}
 		return characteristics;
+	}
+	
+	public static List<String> getCharacteristicKeys(long value, String filename) {
+		List<String> keys = new ArrayList<>();
+		try {
+			Map<String, String[]> map = readMap(filename);
+			for (Entry<String, String[]> entry : map.entrySet()) {
+				try {
+					long mask = Long.parseLong(entry.getKey(), 16);
+					if ((value & mask) != 0) {
+						keys.add(entry.getValue()[0]);
+					}
+				} catch (NumberFormatException e) {
+					logger.error("ERROR. number format mismatch in file "
+							+ filename + NL);
+					logger.error("value: " + entry.getKey() + NL);
+				}
+			}
+		} catch (IOException e) {
+			logger.error(e);
+		}
+		return keys;
 	}
 
 	public static String getCharacteristics(long value, String filename) {

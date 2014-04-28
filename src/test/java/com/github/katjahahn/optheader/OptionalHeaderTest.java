@@ -161,7 +161,18 @@ public class OptionalHeaderTest {
 			Collection<StandardEntry> list = pedatum.getOptionalHeader()
 					.getStandardFields().values();
 			assertNotNull(list);
-			assertEquals(list.size(), StandardFieldEntryKey.values().length);
+			int expected = StandardFieldEntryKey.values().length;
+			int actual = list.size();
+			MagicNumber magic = pedatum.getOptionalHeader().getMagicNumber();
+			if(magic != MagicNumber.PE32) {
+				expected--;
+			}
+			if(actual != expected) {
+				for(StandardEntry entry : list) {
+					System.err.println(entry.description); //debug purposes
+				}
+			}
+			assertEquals(actual, expected);;
 		}
 	}
 

@@ -90,7 +90,7 @@ public class COFFFileHeaderTest {
 			String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS)
 					.trim();
 			int expected = convertToInt(value);
-			int actual = pedatum.getCOFFFileHeader().getCharacteristics();
+			int actual = pedatum.getCOFFFileHeader().get(COFFHeaderKey.CHARACTERISTICS).intValue();
 			assertEquals(expected, actual);
 		}
 	}

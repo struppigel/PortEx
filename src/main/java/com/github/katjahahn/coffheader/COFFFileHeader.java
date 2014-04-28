@@ -19,6 +19,7 @@ import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.coffheader.COFFHeaderKey.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -204,12 +205,17 @@ public class COFFFileHeader extends PEModule {
 	}
 
 	/**
-	 * Returns the characteristics value.
+	 * Returns a list with all characteristics of the file.
 	 * 
 	 * @return
 	 */
-	public int getCharacteristics() {
-		return get(CHARACTERISTICS).intValue();
+	public List<Characteristic> getCharacteristics() {
+		List<String> keys = IOUtil.getCharacteristicKeys(get(CHARACTERISTICS).intValue(), "characteristics");
+		List<Characteristic> characteristics = new ArrayList<>();
+		for(String key : keys) {
+			characteristics.add(Characteristic.valueOf(key));
+		}
+		return characteristics;
 	}
 
 	/**
@@ -218,7 +224,7 @@ public class COFFFileHeader extends PEModule {
 	 * @return
 	 */
 	public List<String> getCharacteristicsDescriptions() {
-		return IOUtil.getCharacteristicsDescriptions(getCharacteristics(),
+		return IOUtil.getCharacteristicsDescriptions(get(CHARACTERISTICS).intValue(),
 				"characteristics");
 	}
 

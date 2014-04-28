@@ -20,7 +20,7 @@ object PEAnomalyScanner {
   
   def apply(file: File): PEAnomalyScanner = {
     val data = PELoader.loadPE(file)
-    new PEAnomalyScanner(data) with OptionalHeaderScanning with COFFHeaderScanning
+    new PEAnomalyScanner(data) with OptionalHeaderScanning
   }
 
   def main(args: Array[String]): Unit = {
