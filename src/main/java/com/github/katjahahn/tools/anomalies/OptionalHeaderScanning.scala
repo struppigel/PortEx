@@ -13,6 +13,9 @@ import com.github.katjahahn.optheader.WindowsEntryKey
 import com.github.katjahahn.optheader.StandardFieldEntryKey
 import com.github.katjahahn.optheader.DllCharacteristic
 import scala.collection.JavaConverters._
+import com.github.katjahahn.coffheader.COFFFileHeader
+import com.github.katjahahn.PESignature
+import com.github.katjahahn.sections.SectionTable
 
 trait OptionalHeaderScanning extends AnomalyScanner {
 
@@ -40,12 +43,35 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
+    val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
     if (headerSize % fileAlignment != 0) {
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
       val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${fileAlignment})"
-      anomalyList += WrongValueAnomaly(entry, description)
+      anomalyList += WrongValueAnomaly(headerSizeEntry, description)
     } //TODO headerSize >= MSDOS + PEHeader + Section Headers size
+    if (headerSize < headerSizeMin) {
+      val description = s"Optional Header: Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize}"
+      anomalyList += WrongValueAnomaly(headerSizeEntry, description)
+    }
+    if (headerSize != roundedUpHeaderSize) {
+      val description = s"Optional Header: Size of Headers should be ${roundedUpHeaderSize}, but is ${headerSize}"
+      anomalyList += WrongValueAnomaly(headerSizeEntry, description)
+    }
     anomalyList.toList
+  }
+
+  def headerSizeMin(): Long = {
+    val coff = data.getCOFFFileHeader()
+    val pesig = data.getPESignature()
+    val sectionTableSize = SectionTable.ENTRY_SIZE * coff.getNumberOfSections()
+    val coffOffset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
+    coffOffset + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader() + sectionTableSize
+  }
+
+  private def roundedUpHeaderSize(): Long = {
+    val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
+    if ((headerSizeMin % fileAlignment) != 0) {
+      (fileAlignment - (headerSizeMin % fileAlignment)) + headerSizeMin
+    } else headerSizeMin
   }
 
   private def checkReserved(opt: OptionalHeader): List[Anomaly] = {
@@ -72,7 +98,6 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   }
 
   private def checkFileAlignment(opt: OptionalHeader): List[Anomaly] = {
-    //TODO
     def isPowerOfTwo(x: Long): Boolean = (x != 0) && ((x & (x - 1)) == 0)
     val anomalyList = ListBuffer[Anomaly]()
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
@@ -108,17 +133,17 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
     val imageBase = entry.value
     if (imageBase % 65536 != 0) {
-      val description = "Image Base must be a multiple of 64 K, but is " + imageBase
+      val description = "Optional Header: Image Base must be a multiple of 64 K, but is " + imageBase
       anomalyList += WrongValueAnomaly(entry, description)
     }
     if (isDLL() && imageBase != 0x10000000) {
-      val description = "The default image base for a DLL is 0x10000000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
+      val description = "Optional Header: The default image base for a DLL is 0x10000000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
       anomalyList += NonDefaultAnomaly(entry, description)
     } else if (isWinCE() && imageBase != 0x00010000) {
-      val description = "The default image base for Win CE EXE is 0x00010000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
+      val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
       anomalyList += NonDefaultAnomaly(entry, description)
-    } //else if(imageBase != 0x00400000) { TODO
-    //      val description = "The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase) 
+    } //else if(imageBase != 0x00400000) { //TODO
+    //      val description = "Optional Header: The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase) 
     //      anomalyList += NonDefaultAnomaly(entry, description)
     //    }
     anomalyList.toList
