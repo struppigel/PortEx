@@ -16,7 +16,18 @@ trait COFFHeaderScanning extends AnomalyScanner {
     anomalyList ++= checkDeprecated(COFFHeaderKey.NR_OF_SYMBOLS, coff)
     anomalyList ++= checkDeprecated(COFFHeaderKey.POINTER_TO_SYMB_TABLE, coff)
     anomalyList ++= checkCharacteristics(coff)
+    anomalyList ++= checkNumberOfSections(coff)
     super.scan ::: anomalyList.toList
+  }
+
+  private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {
+    val sectionMax = 96
+    val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
+    if (sectionNr > sectionMax) {
+      val entry = coff.getEntry(COFFHeaderKey.SECTION_NR)
+      val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
+      List(WrongValueAnomaly(entry, description))
+    } else Nil
   }
 
   private def checkDeprecated(key: COFFHeaderKey, coff: COFFFileHeader): List[Anomaly] = {
@@ -29,13 +40,12 @@ trait COFFHeaderScanning extends AnomalyScanner {
 
   private def checkCharacteristics(coff: COFFFileHeader): List[Anomaly] = {
     val characteristics = coff.getCharacteristicsDescriptions().asScala
-    characteristics.foldRight(List[Anomaly]())((ch, list) => 
+    characteristics.foldRight(List[Anomaly]())((ch, list) =>
       if (ch.contains("DEPRECATED")) {
         val entry = coff.getEntry(COFFHeaderKey.CHARACTERISTICS)
         val description = "Deprecated Characteristic in COFF File Header: " + ch
         DeprecatedAnomaly(entry, description) :: list
-      } else list
-    )
+      } else list)
   }
 
 }

@@ -142,10 +142,10 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     } else if (isWinCE() && imageBase != 0x00010000) {
       val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
       anomalyList += NonDefaultAnomaly(entry, description)
-    } //else if(imageBase != 0x00400000) { //TODO
-    //      val description = "Optional Header: The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase) 
-    //      anomalyList += NonDefaultAnomaly(entry, description)
-    //    }
+    } else if(imageBase != 0x00400000) { //TODO
+      val description = "Optional Header: The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
+      anomalyList += NonDefaultAnomaly(entry, description)
+    }
     anomalyList.toList
   }
 
