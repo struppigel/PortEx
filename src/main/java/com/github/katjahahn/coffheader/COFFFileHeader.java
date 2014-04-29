@@ -45,6 +45,7 @@ public class COFFFileHeader extends PEModule {
 	private final byte[] headerbytes;
 	private List<StandardEntry> data;
 	private Map<String, String[]> specification;
+	private final long offset;
 
 	/**
 	 * @constructor Creates a COFFFileHeader instance that uses the bytes
@@ -54,14 +55,20 @@ public class COFFFileHeader extends PEModule {
 	 *            an array that holds the headerbytes. The length of the array
 	 *            has to be HEADER_SIZE.
 	 */
-	public COFFFileHeader(byte[] headerbytes) {
+	public COFFFileHeader(byte[] headerbytes, long offset) {
 		assert headerbytes.length == HEADER_SIZE;
 		this.headerbytes = headerbytes.clone();
+		this.offset = offset;
 		try {
 			specification = IOUtil.readMap(COFF_SPEC_FILE);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public long getOffset() {
+		return offset;
 	}
 
 	/**

@@ -39,7 +39,7 @@ import com.github.katjahahn.HeaderKey
  * @param entries that represent the information of the directory table entry
  */
 class DirectoryTableEntry private (
-  private val entries: Map[DirectoryTableEntryKey, StandardEntry]) extends PEModule {
+  private val entries: Map[DirectoryTableEntryKey, StandardEntry]) {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -47,11 +47,6 @@ class DirectoryTableEntry private (
   def addLookupTableEntry(e: LookupTableEntry): Unit = {
     lookupTableEntries = lookupTableEntries :+ e
   }
-
-  /**
-   * No use here, because object is used as factory instead
-   */
-  override def read(): Unit = {}
 
   def apply(key: DirectoryTableEntryKey): Long = {
     entries(key).value
@@ -63,7 +58,7 @@ class DirectoryTableEntry private (
   
   def getLookupTableEntries(): java.util.List[LookupTableEntry] = lookupTableEntries.asJava
   
-  override def getInfo(): String = s"""${entries.values.mkString(NL)} 
+  def getInfo(): String = s"""${entries.values.mkString(NL)} 
   |ASCII name: $name
   |
   |lookup table entries for $name

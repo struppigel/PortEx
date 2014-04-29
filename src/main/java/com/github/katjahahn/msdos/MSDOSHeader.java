@@ -47,9 +47,16 @@ public class MSDOSHeader extends PEModule {
 	private Map<MSDOSHeaderKey, StandardEntry> headerData;
 
 	private final byte[] headerbytes;
+	private final long offset;
 
-	public MSDOSHeader(byte[] headerbytes) {
+	public MSDOSHeader(byte[] headerbytes, long offset) {
 		this.headerbytes = headerbytes.clone();
+		this.offset = offset;
+	}
+	
+	@Override
+	public long getOffset() {
+		return offset;
 	}
 	
 	@Override
@@ -100,6 +107,7 @@ public class MSDOSHeader extends PEModule {
 		return new LinkedList<>(headerData.values());
 	}
 
+	@Override
 	public Long get(HeaderKey key) {
 		return headerData.get(key).value;
 	}

@@ -57,15 +57,18 @@ public class SectionTable extends PEModule {
 	private final int numberOfEntries;
 	private Map<String, String[]> specification;
 
+	private final long offset;
+
 	/**
 	 * @constructor creates the SectionTable with the bytes of the table and the
 	 *              number of entries
 	 * @param sectionTableBytes
 	 * @param numberOfEntries
 	 */
-	public SectionTable(byte[] sectionTableBytes, int numberOfEntries) {
+	public SectionTable(byte[] sectionTableBytes, int numberOfEntries, long offset) {
 		this.sectionTableBytes = sectionTableBytes.clone();
 		this.numberOfEntries = numberOfEntries;
+		this.offset = offset;
 		try {
 			specification = IOUtil.readMap(SECTION_TABLE_SPEC);
 		} catch (IOException e) {
@@ -282,5 +285,10 @@ public class SectionTable extends PEModule {
 	@Override
 	public Long get(HeaderKey key) {
 		return null;
+	}
+
+	@Override
+	public long getOffset() {
+		return offset;
 	}
 }

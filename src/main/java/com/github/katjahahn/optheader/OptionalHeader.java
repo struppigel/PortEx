@@ -48,6 +48,7 @@ public class OptionalHeader extends PEModule {
 	private final byte[] headerbytes;
 	private MagicNumber magicNumber;
 	private int rvaNumber;
+	private final long offset;
 
 	public static enum MagicNumber {
 		PE32(0x10B), PE32_PLUS(0x20B), ROM(0x107);
@@ -63,8 +64,9 @@ public class OptionalHeader extends PEModule {
 		}
 	}
 
-	public OptionalHeader(byte[] headerbytes) {
+	public OptionalHeader(byte[] headerbytes, long offset) {
 		this.headerbytes = headerbytes.clone();
+		this.offset = offset;
 	}
 
 	@Override
@@ -439,5 +441,10 @@ public class OptionalHeader extends PEModule {
 
 	public Subsystem getSubsystem() {
 		return Subsystem.valueOf(getSubsystemKey(get(SUBSYSTEM).intValue()));
+	}
+
+	@Override
+	public long getOffset() {
+		return offset;
 	}
 }

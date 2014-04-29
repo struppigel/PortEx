@@ -105,4 +105,9 @@ public class MSDOSLoadModule extends PEModule {
 		return null;
 	}
 
+	@Override
+	public long getOffset() {
+		return header.getHeaderSize();
+	}
+
 }

@@ -77,14 +77,15 @@ public class PESignature extends PEModule {
 			}
 		}
 	}
-
+	
 	/**
 	 * Returns the offset of the PE signature. Returns -1 if file hasn't been
 	 * read yet or the read file was no PE file.
 	 * 
 	 * @return offset of PE signature, -1 if file not read or file is no PE
 	 */
-	public int getPEOffset() {
+	@Override
+	public long getOffset() {
 		return peOffset;
 	}
 

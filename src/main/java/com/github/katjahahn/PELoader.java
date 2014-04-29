@@ -76,36 +76,36 @@ public class PELoader {
 			throws IOException {
 		byte[] headerbytes = loadBytes(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
 				raf);
-		return new MSDOSHeader(headerbytes);
+		return new MSDOSHeader(headerbytes, 0);
 	}
 
 	private SectionTable loadSectionTable(PESignature pesig,
 			COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
+		long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
 		logger.info("SectionTable offset" + offset);
 		int numberOfEntries = coff.getNumberOfSections().intValue();
 		byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
 				* numberOfEntries, raf);
-		return new SectionTable(tableBytes, numberOfEntries);
+		return new SectionTable(tableBytes, numberOfEntries, offset);
 	}
 
 	private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
 			RandomAccessFile raf) throws IOException {
-		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH;
+		long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH;
 		logger.info("COFF Header offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
-		return new COFFFileHeader(headerbytes);
+		return new COFFFileHeader(headerbytes, offset);
 	}
 
 	private OptionalHeader loadOptionalHeader(PESignature pesig,
 			COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-		long offset = pesig.getPEOffset() + PESignature.PE_SIG_LENGTH
+		long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE;
 		logger.info("Optional Header offset: " + offset);
 		byte[] headerbytes = loadBytes(offset, coff.getSizeOfOptionalHeader().intValue(),
 				raf);
-		return new OptionalHeader(headerbytes);
+		return new OptionalHeader(headerbytes, offset);
 	}
 
 	private byte[] loadBytes(long offset, int length, RandomAccessFile raf)

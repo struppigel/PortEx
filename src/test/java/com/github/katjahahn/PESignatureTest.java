@@ -47,10 +47,10 @@ public class PESignatureTest {
 	}
 
 	@Test
-	public void getPEOffset() {
+	public void getOffset() {
 		for (TestData testdatum : testdata) {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			int actual = pedatum.getPESignature().getPEOffset();
+			int actual = (int) pedatum.getPESignature().getOffset();
 			int expected = testdatum.peoffset;
 			assertEquals(actual, expected);
 		}

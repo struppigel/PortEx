@@ -35,7 +35,7 @@ import com.github.katjahahn.HeaderKey
  * @constructor instanciates an export directory table. 
  */
 class ExportDirTable private (
-    private val entries: Map[ExportDirTableKey, StandardEntry]) extends PEModule {
+    private val entries: Map[ExportDirTableKey, StandardEntry]) {
   
   def apply(key: ExportDirTableKey): Long = entries(key).value
  
@@ -47,8 +47,9 @@ class ExportDirTable private (
    */
   def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[ExportDirTableKey])
   
-  override def read(): Unit = {}
-  override def getInfo(): String = entries.values.mkString(NL)
+  def getInfo(): String = entries.values.mkString(NL)
+  
+  override def toString(): String = getInfo
 
 }
 

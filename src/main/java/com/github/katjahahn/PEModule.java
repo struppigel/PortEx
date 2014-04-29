@@ -28,6 +28,12 @@ public abstract class PEModule {
 	public static final String NL = System.getProperty("line.separator");
 	
 	/**
+	 * Returns the file offset for the beginning of the module
+	 * @return
+	 */
+	public abstract long getOffset();
+	
+	/**
 	 * Returns a description string of the {@link PEModule}.
 	 * @return
 	 */

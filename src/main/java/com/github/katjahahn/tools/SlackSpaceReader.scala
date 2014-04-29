@@ -16,7 +16,7 @@ class SlackSpaceReader(private val data: PEData) {
     val endpoint = module.getImageSize() / 8
     val overlay = data.getMSDOSHeader().get(MSDOSHeaderKey.OVERLAY_NR)
     println(data.getMSDOSHeader().getInfo())
-    val peSigOffset = data.getPESignature().getPEOffset()
+    val peSigOffset = data.getPESignature().getOffset()
     (endpoint, peSigOffset)
   }
   

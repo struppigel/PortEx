@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 
 public class MSDOSLoadModuleTest {
@@ -33,7 +34,8 @@ public class MSDOSLoadModuleTest {
 	@BeforeClass
 	public void prepare() throws IOException {
 		file = new File("WinRar.exe");
-		MSDOSHeader header = PELoader.loadPE(file).getMSDOSHeader();
+		PEData data = PELoader.loadPE(file);
+		MSDOSHeader header = data.getMSDOSHeader();
 		module = new MSDOSLoadModule(header, file);
 		module.read();
 	}
