@@ -20,6 +20,7 @@ import static com.github.katjahahn.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.optheader.WindowsEntryKey.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,9 @@ import com.github.katjahahn.StandardEntry;
 
 public class OptionalHeader extends PEModule {
 
-	/* spec location */
+	/* spec locations */
+	private static final String SUBSYSTEM_SPEC = "subsystem";
+	private static final String DLL_CHARACTERISTICS_SPEC = "dllcharacteristics";
 	private static final String STANDARD_SPEC = "optionalheaderstandardspec";
 	private static final String WINDOWS_SPEC = "optionalheaderwinspec";
 	private static final String DATA_DIR_SPEC = "datadirectoriesspec";
@@ -72,10 +75,10 @@ public class OptionalHeader extends PEModule {
 
 		this.magicNumber = readMagicNumber(standardSpec);
 
-		if(!magicNumber.equals(MagicNumber.PE32)) {
+		if (!magicNumber.equals(MagicNumber.PE32)) {
 			standardSpec.remove("BASE_OF_DATA");
 		}
-		
+
 		loadStandardFields(standardSpec);
 		loadWindowsSpecificFields(windowsSpec);
 		loadDataDirectories(datadirSpec);
@@ -295,7 +298,7 @@ public class OptionalHeader extends PEModule {
 																		// Bytes
 			} else if (key.equals(DLL_CHARACTERISTICS)) {
 				b.append(NL + description + ": " + NL);
-				b.append(IOUtil.getCharacteristics(value, "dllcharacteristics")
+				b.append(IOUtil.getCharacteristics(value, DLL_CHARACTERISTICS_SPEC)
 						+ NL);
 			}
 
@@ -393,6 +396,21 @@ public class OptionalHeader extends PEModule {
 		return "no default value";
 	}
 
+	public List<DllCharacteristic> getDllCharacteristics() {
+		List<String> keys = IOUtil.getCharacteristicKeys(
+				get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
+		List<DllCharacteristic> dllChs = new ArrayList<>();
+		for (String key : keys) {
+			dllChs.add(DllCharacteristic.valueOf(key));
+		}
+		return dllChs;
+	}
+
+	public List<String> getDllCharacteristicsDescriptions() {
+		return IOUtil.getCharacteristicsDescriptions(
+				get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
+	}
+
 	/**
 	 * Returns the description string of the subsystem value.
 	 * 
@@ -401,24 +419,24 @@ public class OptionalHeader extends PEModule {
 	 */
 	public static String getSubsystemDescription(int value) {
 		try {
-			Map<String, String[]> map = IOUtil.readMap("subsystem");
+			Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
 			return map.get(String.valueOf(value))[1];
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public static String getSubsystemKey(int value) {
 		try {
-			Map<String, String[]> map = IOUtil.readMap("subsystem");
+			Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
 			return map.get(String.valueOf(value))[0];
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public Subsystem getSubsystem() {
 		return Subsystem.valueOf(getSubsystemKey(get(SUBSYSTEM).intValue()));
 	}

@@ -11,9 +11,11 @@ import com.github.katjahahn.IOUtil
 import com.github.katjahahn.optheader.Subsystem
 import com.github.katjahahn.optheader.WindowsEntryKey
 import com.github.katjahahn.optheader.StandardFieldEntryKey
+import com.github.katjahahn.optheader.DllCharacteristic
+import scala.collection.JavaConverters._
 
 trait OptionalHeaderScanning extends AnomalyScanner {
-  
+
   abstract override def scan(): List[Anomaly] = {
     val opt = data.getOptionalHeader()
     val anomalyList = ListBuffer[Anomaly]()
@@ -26,19 +28,19 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def windowsFieldScan(opt: OptionalHeader): List[Anomaly] = {
     checkImageBase(opt) ::: checkSectionAlignment(opt) ::: checkReserved(opt) ::: checkSizes(opt)
   }
-  
+
   private def checkSizes(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val imageSize = opt.get(WindowsEntryKey.SIZE_OF_IMAGE)
     val headerSize = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
-    if(imageSize % sectionAlignment != 0) {
+    if (imageSize % sectionAlignment != 0) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
       val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
-    if(headerSize % fileAlignment != 0) {
+    if (headerSize % fileAlignment != 0) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
       val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${fileAlignment})"
       anomalyList += WrongValueAnomaly(entry, description)
@@ -50,13 +52,19 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val win32version = opt.get(WindowsEntryKey.WIN32_VERSION_VALUE)
     val loaderFlags = opt.get(WindowsEntryKey.LOADER_FLAGS)
+    val dllChs = opt.getDllCharacteristics().asScala
+    for (ch <- dllChs if ch.toString().contains("RESERVED")) {
+      val description = s"Optional Header: Reserved DllCharacteristic ${ch.toString()} is not 0"
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.DLL_CHARACTERISTICS)
+      List(ReservedAnomaly(entry, description))
+    }
     if (win32version != 0) {
       val description = "Optional Header: Reserved WIN32_VERSION_VALUE is not 0, but " + win32version
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.WIN32_VERSION_VALUE)
       List(ReservedAnomaly(entry, description))
-    } 
-    if(loaderFlags != 0) {
-      val description = "Optional Header: Reserved Loader Flags is not 0, but " + loaderFlags
+    }
+    if (loaderFlags != 0) {
+      val description = "Optional Header: Reserved LOADER_FLAGS is not 0, but " + loaderFlags
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.LOADER_FLAGS)
       List(ReservedAnomaly(entry, description))
     }
