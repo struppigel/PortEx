@@ -47,7 +47,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
-    val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
+    val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_HEADERS)
     if (headerSize % fileAlignment != 0) {
       val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${fileAlignment})"
       anomalyList += WrongValueAnomaly(headerSizeEntry, description)

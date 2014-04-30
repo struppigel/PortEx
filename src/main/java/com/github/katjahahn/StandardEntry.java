@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
-
 /**
  * A data class for a typical entry of PE Headers
  * 
@@ -26,7 +25,7 @@ public class StandardEntry {
 
 	public HeaderKey key;
 	public String description;
-	public long value;
+	public Long value;
 
 	/**
 	 * @constructor Creates a standard entry with the values specified.
@@ -35,7 +34,7 @@ public class StandardEntry {
 	 * @param description
 	 * @param value
 	 */
-	public StandardEntry(HeaderKey key, String description, long value) {
+	public StandardEntry(HeaderKey key, String description, Long value) {
 		this.key = key;
 		this.description = description;
 		this.value = value;
@@ -43,6 +42,9 @@ public class StandardEntry {
 
 	@Override
 	public String toString() {
+		if (value == null) {
+			return description;
+		}
 		return description + ": " + value + " (0x" + Long.toHexString(value)
 				+ ")";
 	}

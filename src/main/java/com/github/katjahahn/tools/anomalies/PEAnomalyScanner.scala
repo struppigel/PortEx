@@ -5,6 +5,7 @@ import com.github.katjahahn.PEData
 import com.github.katjahahn.PELoader
 import PartialFunction._
 import com.github.katjahahn.IOUtil._
+import scala.collection.JavaConverters._
 
 class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
   
@@ -15,7 +16,7 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
    */
   override def scanReport: String = {
     val report = StringBuilder.newBuilder
-    report ++= "Scanned File: " + data.getFile.getName
+    report ++= "Scanned File: " + data.getFile.getName + NL
     for(anomaly <- scan()) {
       report ++= "\t*" + anomaly.description + NL
     }
@@ -31,6 +32,8 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
   override def scan: List[Anomaly] = {
     List[Anomaly]()
   }
+  
+  def getAnomalies: java.util.List[Anomaly] = scan.asJava
 
 }
 
