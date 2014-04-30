@@ -37,6 +37,10 @@ public class SectionTableEntry {
 		return entries.get(key).value;
 	}
 	
+	public StandardEntry getEntry(SectionTableEntryKey key) {
+		return entries.get(key);
+	}
+	
 	public Map<SectionTableEntryKey, StandardEntry> getEntryMap() {
 		return new HashMap<>(entries);
 	}
