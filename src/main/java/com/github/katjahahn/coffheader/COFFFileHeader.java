@@ -102,7 +102,7 @@ public class COFFFileHeader extends PEModule {
 				+ "COFF File Header" + NL + "----------------" + NL);
 		for (StandardEntry entry : data) {
 
-			int value = (int) entry.value; //COFF has no 8 Byte values
+			long value = entry.value;
 			HeaderKey key = entry.key;
 			String description = entry.description;
 			if (key.equals(CHARACTERISTICS)) {
@@ -114,7 +114,7 @@ public class COFFFileHeader extends PEModule {
 				b.append(convertToDate(value) + NL);
 			} else if (key.equals(MACHINE)) {
 				b.append(description + ": ");
-				b.append(getMachineTypeString(value) + NL);
+				b.append(getMachineTypeString((int) value) + NL);
 			} else {
 				b.append(description + ": " + value + NL);
 			}
