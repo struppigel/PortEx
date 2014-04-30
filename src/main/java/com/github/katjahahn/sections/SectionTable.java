@@ -81,7 +81,8 @@ public class SectionTable extends PEModule {
 		sections = new LinkedList<>();
 
 		for (int i = 0; i < numberOfEntries; i++) {
-			SectionTableEntry sectionEntry = new SectionTableEntry();
+			int sectionNumber = i + 1;
+			SectionTableEntry sectionEntry = new SectionTableEntry(sectionNumber);
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
 

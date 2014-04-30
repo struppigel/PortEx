@@ -6,8 +6,12 @@ import com.github.katjahahn.coffheader.COFFHeaderKey
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.PEModule
 import scala.collection.JavaConverters._
+import com.github.katjahahn.IOUtil._
 
 trait COFFHeaderScanning extends AnomalyScanner {
+
+  abstract override def scanReport(): String =
+    "Applied COFF Header Scanning" + NL + super.scanReport
 
   abstract override def scan(): List[Anomaly] = {
     val coff = data.getCOFFFileHeader()

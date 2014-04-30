@@ -16,8 +16,12 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.coffheader.COFFFileHeader
 import com.github.katjahahn.PESignature
 import com.github.katjahahn.sections.SectionTable
+import com.github.katjahahn.IOUtil._
 
 trait OptionalHeaderScanning extends AnomalyScanner {
+  
+  abstract override def scanReport(): String =
+    "Applied Optional Header Scanning" + NL + super.scanReport
 
   abstract override def scan(): List[Anomaly] = {
     val opt = data.getOptionalHeader()

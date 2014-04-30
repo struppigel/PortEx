@@ -4,6 +4,7 @@ import java.io.File
 import com.github.katjahahn.PEData
 import com.github.katjahahn.PELoader
 import PartialFunction._
+import com.github.katjahahn.IOUtil._
 
 class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
   
@@ -13,7 +14,12 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
    * @return a description string of the scan
    */
   override def scanReport: String = {
-    "scan report not implemented yet" //TODO
+    val report = StringBuilder.newBuilder
+    report ++= "Scanned File: " + data.getFile.getName
+    for(anomaly <- scan()) {
+      report ++= "\t*" + anomaly.description + NL
+    }
+    report.toString
   }
 
   /**
@@ -95,11 +101,15 @@ object PEAnomalyScanner {
     for (file <- files) {
       val data = PELoader.loadPE(file)
       val scanner = new PEAnomalyScanner(data) with SectionTableScanning
+//      val report = scanner.scanReport
+//      if(!report.isEmpty()) {
+//    	  println(report)
+//      }
       val list = scanner.scan
       if (list.size > 0 && !list.forall(_.isInstanceOf[NonDefaultAnomaly])) {
+        println("Scanned File: " + data.getFile.getName)
         counter += 1
-        println("scanning file: " + file.getName())
-        list.foreach(println)
+        list.foreach(a => println("\t*" + a))
         println()
       }
     }

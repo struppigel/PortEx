@@ -126,12 +126,14 @@ public class TestreportsReader {
 			throws IOException {
 		data.sections = new ArrayList<>();
 		String line = null;
+		int number = 0;
 		while ((line = reader.readLine()) != null) {
+			number++;
 			String[] split = line.split(":");
 			if (split[0].contains("Resources")) {
 				break;
 			}
-			SectionTableEntry entry = readSectionEntry(reader, line);
+			SectionTableEntry entry = readSectionEntry(reader, line, number);
 			if (entry != null) {
 				data.sections.add(entry);
 			}
@@ -139,8 +141,8 @@ public class TestreportsReader {
 	}
 
 	private static SectionTableEntry readSectionEntry(BufferedReader reader,
-			String line) throws IOException {
-		SectionTableEntry entry = new SectionTableEntry();
+			String line, int number) throws IOException {
+		SectionTableEntry entry = new SectionTableEntry(number);
 		while (line != null) {
 			String[] split = line.split(":");
 			if (split.length < 2) {
