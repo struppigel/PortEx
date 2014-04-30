@@ -88,6 +88,7 @@ object PEAnomalyScanner {
     }
   }
 
+  //TODO VirusShare_baed21297974b6adf3298585baa78691 is very weird
   def main(args: Array[String]): Unit = {
     var counter = 0
     val files = new File("src/main/resources/x64viruses/").listFiles

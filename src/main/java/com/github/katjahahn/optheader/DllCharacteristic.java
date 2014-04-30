@@ -1,6 +1,8 @@
 package com.github.katjahahn.optheader;
 
-public enum DllCharacteristic {
+import com.github.katjahahn.Characteristic;
+
+public enum DllCharacteristic implements Characteristic {
 	RESERVED_1,
 	RESERVED_2,
 	RESERVED_3,

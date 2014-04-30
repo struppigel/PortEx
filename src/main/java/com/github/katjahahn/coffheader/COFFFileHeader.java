@@ -216,11 +216,11 @@ public class COFFFileHeader extends PEModule {
 	 * 
 	 * @return
 	 */
-	public List<Characteristic> getCharacteristics() {
+	public List<FileCharacteristic> getCharacteristics() {
 		List<String> keys = IOUtil.getCharacteristicKeys(get(CHARACTERISTICS).intValue(), "characteristics");
-		List<Characteristic> characteristics = new ArrayList<>();
+		List<FileCharacteristic> characteristics = new ArrayList<>();
 		for(String key : keys) {
-			characteristics.add(Characteristic.valueOf(key));
+			characteristics.add(FileCharacteristic.valueOf(key));
 		}
 		return characteristics;
 	}

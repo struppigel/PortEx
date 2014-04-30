@@ -1,8 +1,8 @@
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.coffheader.Characteristic
-import com.github.katjahahn.coffheader.Characteristic._
+import com.github.katjahahn.coffheader.FileCharacteristic
+import com.github.katjahahn.coffheader.FileCharacteristic._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.PEData
 import com.github.katjahahn.optheader.DataDirectoryKey

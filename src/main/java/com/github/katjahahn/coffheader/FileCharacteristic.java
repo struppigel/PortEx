@@ -1,6 +1,8 @@
 package com.github.katjahahn.coffheader;
 
-public enum Characteristic {
+import com.github.katjahahn.Characteristic;
+
+public enum FileCharacteristic implements Characteristic {
 	IMAGE_FILE_RELOCS_STRIPPED, 
 	IMAGE_FILE_EXECUTABLE_IMAGE,
 	IMAGE_FILE_LINE_NUMS_STRIPPED,

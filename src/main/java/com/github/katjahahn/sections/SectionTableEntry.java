@@ -15,15 +15,20 @@
  ******************************************************************************/
 package com.github.katjahahn.sections;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.StandardEntry;
 
 public class SectionTableEntry {
 
+	private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
 	private final HashMap<SectionTableEntryKey, StandardEntry> entries = new HashMap<>();
 	private String name;
+	private int nr; //TODO set and get number
 
 	public void setName(String name) {
 		this.name = name;
@@ -34,7 +39,11 @@ public class SectionTableEntry {
 	}
 
 	public Long get(SectionTableEntryKey key) {
-		return entries.get(key).value;
+		StandardEntry entry = getEntry(key);
+		if(entry != null) {
+			return entry.value;
+		}
+		return null;
 	}
 	
 	public StandardEntry getEntry(SectionTableEntryKey key) {
@@ -52,5 +61,16 @@ public class SectionTableEntry {
 			throw new IllegalArgumentException("invalid key");
 		}
 	}
+	
+	public List<SectionCharacteristic> getCharacteristics() {
+		List<SectionCharacteristic> list = new ArrayList<>();
+		List<String> keys = IOUtil.getCharacteristicKeys(get(SectionTableEntryKey.CHARACTERISTICS), SECTIONCHARACTERISTICS_SPEC);
+		for(String key : keys) {
+			list.add(SectionCharacteristic.valueOf(key));
+		}
+		return list;
+	}
+	
+	//TODO toString method
 
 }

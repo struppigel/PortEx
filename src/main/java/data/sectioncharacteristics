@@ -1,12 +1,22 @@
+0;RESERVED_0;Reserved for future use.
+1;RESERVED_1;Reserved for future use.
+2;RESERVED_2;Reserved for future use.
+4;RESERVED_4;Reserved for future use.
 8;IMAGE_SCN_TYPE_NO_PAD;The section should not be padded to the next boundary. DEPRECATED
+10;RESERVED_10;Reserved for future use.
 20;IMAGE_SCN_CNT_CODE;The section contains executable code.
 40;IMAGE_SCN_CNT_INITIALIZED_DATA;The section contains initialized data.
 80;IMAGE_SCN_CNT_UNINITIALIZED_DATA;The section contains uninitialized data.
+100;IMAGE_SCN_LNK_OTHER;Reserved for future use
 200;IMAGE_SCN_LNK_INFO;The section contains comments or other information. Valid for object files only.
+400;RESERVED_400;Reserved for future use.
 800;IMAGE_SCN_LNK_REMOVE;The section will not become part of the image. Valid for object files only.
 1000;IMAGE_SCN_LNK_COMDAT;The section contains COMDAT data.
 8000;IMAGE_SCN_GPREL;The section contains data referenced through the global pointer (GP).
-20000;IMAGE_SCN_MEM_16BIT;For ARM machine types, the section contains Thumb code.
+20000;IMAGE_SCN_MEM_PURGEABLE;Reserved for future use.
+20000;IMAGE_SCN_MEM_16BIT;For ARM machine types, the section contains Thumb code. Reserved for future use with other machine types.
+40000;IMAGE_SCN_MEM_LOCKED;Reserved for future use.
+80000;IMAGE_SCN_MEM_PRELOAD;Reserved for future use.
 100000;IMAGE_SCN_ALIGN_1BYTES;Align data on a 1-byte boundary. Valid only for object files.
 200000;IMAGE_SCN_ALIGN_2BYTES;Align data on a 2-byte boundary. Valid only for object files.
 300000;IMAGE_SCN_ALIGN_4BYTES;Align data on a 4-byte boundary. Valid only for object files.

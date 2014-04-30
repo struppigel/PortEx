@@ -118,7 +118,7 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("src/main/resources/x64viruses/VirusShare_fdbde2e1fb4d183cee684e7b9819bc13");
+		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
 		PEData data = PELoader.loadPE(file);
 		System.out.println(data);
 	}
