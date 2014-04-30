@@ -33,14 +33,14 @@ import com.github.katjahahn.StandardEntry;
  * Fetches values from the MSDOS header of the PE.
  * 
  * @author Katja Hahn
- *
+ * 
  */
 public class MSDOSHeader extends PEModule {
 
 	// Note: This is only the formatted header by now. The actual header may be
 	// larger, containing optional values.
 	public static final int FORMATTED_HEADER_SIZE = 28;
-	private static final int PARAGRAPH_SIZE = 16; //in Byte
+	private static final int PARAGRAPH_SIZE = 16; // in Byte
 
 	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
 	private static final String specification = "msdosheaderspec";
@@ -53,15 +53,15 @@ public class MSDOSHeader extends PEModule {
 		this.headerbytes = headerbytes.clone();
 		this.offset = offset;
 	}
-	
+
 	@Override
 	public long getOffset() {
 		return offset;
 	}
-	
+
 	@Override
 	public void read() throws IOException {
-		if(!hasSignature(headerbytes)) {
+		if (!hasSignature(headerbytes)) {
 			throw new IOException("No PE Signature found");
 		}
 		headerData = new HashMap<>();
@@ -82,9 +82,14 @@ public class MSDOSHeader extends PEModule {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	
+
 	}
 
+	/**
+	 * Calculates and returns the size of the header.
+	 * 
+	 * @return size of header
+	 */
 	public long getHeaderSize() {
 		return get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
 	}
@@ -103,6 +108,11 @@ public class MSDOSHeader extends PEModule {
 		}
 	}
 
+	/**
+	 * Returns a list of the header entries.
+	 * 
+	 * @return a list of header entries
+	 */
 	public List<StandardEntry> getHeaderEntries() {
 		return new LinkedList<>(headerData.values());
 	}

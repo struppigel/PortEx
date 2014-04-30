@@ -259,6 +259,12 @@ public class SectionTable extends PEModule {
 	}
 
 	// TODO this is nuts, why read it again? Same code as getPointerToRawData
+	/**
+	 * Returns the raw size of the section with the given section name.
+	 * TODO use entry number instead. the name is not enough to identify a section uniquely.
+	 * @param sectionName
+	 * @return
+	 */
 	public Long getSize(String sectionName) {
 		for (int i = 0; i < numberOfEntries; i++) {
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i

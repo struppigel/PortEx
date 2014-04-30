@@ -24,6 +24,13 @@ import java.util.Map.Entry;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.StandardEntry;
 
+/**
+ * Represents an entry of the {@link SectionTable}. The instance is usually
+ * created by the {@link SectionTable}.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class SectionTableEntry {
 
 	private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
@@ -34,68 +41,118 @@ public class SectionTableEntry {
 	/**
 	 * Creates a Section Table Entry instance.
 	 * 
-	 * @param number the number of the entry, beginning by 1 with the first entry
-	 * in the Section Headers
+	 * @param number
+	 *            the number of the entry, beginning by 1 with the first entry
+	 *            in the Section Headers
 	 */
 	public SectionTableEntry(int number) {
 		this.number = number;
 	}
-	
+
+	/**
+	 * Sets the name of the section table entry
+	 * 
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	/**
+	 * Returns the name of the section table entry
+	 * 
+	 * @return name
+	 */
 	public String getName() {
 		return name;
 	}
-	
+
+	/**
+	 * Returns the number of the section table entry
+	 * 
+	 * @return number
+	 */
 	public int getNumber() {
 		return number;
 	}
 
+	/**
+	 * Returns the long value that belongs to the given key. Note:
+	 * {@link SectionTableEntryKey.NAME} will return null. Use
+	 * {@link #getName()} instead.
+	 * 
+	 * @param key
+	 * @return long value or null if key doesn't exist
+	 */
 	public Long get(SectionTableEntryKey key) {
 		StandardEntry entry = getEntry(key);
-		if(entry != null) {
+		if (entry != null) {
 			return entry.value;
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Returns the {@link StandardEntry} for the given key
+	 * 
+	 * @param key
+	 * @return standard entry
+	 */
 	public StandardEntry getEntry(SectionTableEntryKey key) {
 		return entries.get(key);
 	}
-	
+
+	/**
+	 * Returns a map that contains all entries and their
+	 * {@link SectionTableEntryKey} as key
+	 * 
+	 * @return a map of all entries
+	 */
 	public Map<SectionTableEntryKey, StandardEntry> getEntryMap() {
 		return new HashMap<>(entries);
 	}
 
+	/**
+	 * Adds a {@link StandardEntry} to the section table entry
+	 * 
+	 * @param entry
+	 */
 	public void add(StandardEntry entry) {
-		if(entry.key instanceof SectionTableEntryKey) {
+		if (entry.key instanceof SectionTableEntryKey) {
 			entries.put((SectionTableEntryKey) entry.key, entry);
 		} else {
 			throw new IllegalArgumentException("invalid key");
 		}
 	}
-	
+
+	/**
+	 * Returns a list of all characteristics of that section.
+	 * 
+	 * @return list of all characteristics
+	 */
 	public List<SectionCharacteristic> getCharacteristics() {
 		List<SectionCharacteristic> list = new ArrayList<>();
-		List<String> keys = IOUtil.getCharacteristicKeys(get(SectionTableEntryKey.CHARACTERISTICS), SECTIONCHARACTERISTICS_SPEC);
-		for(String key : keys) {
+		List<String> keys = IOUtil.getCharacteristicKeys(
+				get(SectionTableEntryKey.CHARACTERISTICS),
+				SECTIONCHARACTERISTICS_SPEC);
+		for (String key : keys) {
 			list.add(SectionCharacteristic.valueOf(key));
 		}
 		return list;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append("Name: " + getName() + IOUtil.NL);
 
-		for (Entry<SectionTableEntryKey, StandardEntry> entry : entries.entrySet()) {
+		for (Entry<SectionTableEntryKey, StandardEntry> entry : entries
+				.entrySet()) {
 			Long value = entry.getValue().value;
 			SectionTableEntryKey key = entry.getKey();
 			if (key == SectionTableEntryKey.CHARACTERISTICS) {
-				b.append(entry.getValue().description + ": "
+				b.append(entry.getValue().description
+						+ ": "
 						+ IOUtil.NL
 						+ IOUtil.getCharacteristics(value,
 								SECTIONCHARACTERISTICS_SPEC) + IOUtil.NL);

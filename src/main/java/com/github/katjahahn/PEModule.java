@@ -18,33 +18,44 @@ package com.github.katjahahn;
 import java.io.IOException;
 
 /**
- * Represents a common structure of a PE like certain headers or the section table
+ * Represents a common structure of a PE like certain headers or the section
+ * table
  * 
  * @author Katja Hahn
- *
+ * 
  */
 public abstract class PEModule {
 
 	public static final String NL = System.getProperty("line.separator");
-	
+
 	/**
 	 * Returns the file offset for the beginning of the module
-	 * @return
+	 * 
+	 * @return file offset for the beginning of the module
 	 */
 	public abstract long getOffset();
-	
+
 	/**
 	 * Returns a description string of the {@link PEModule}.
-	 * @return
+	 * 
+	 * @return description string
 	 */
 	public abstract String getInfo();
-	
+
 	/**
-	 * Reads the information necessary. This is usually done by the {@link PELoader}
+	 * Reads the information necessary. This is usually done by the
+	 * {@link PELoader}
 	 * 
 	 * @throws IOException
 	 */
 	public abstract void read() throws IOException;
-	
+
+	/**
+	 * Returns the value for the given key or null if there is no value for that
+	 * key.
+	 * 
+	 * @param key
+	 * @return long value for the given key or null if value doesn't exist
+	 */
 	public abstract Long get(HeaderKey key);
 }

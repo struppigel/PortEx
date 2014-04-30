@@ -50,6 +50,12 @@ public class OptionalHeader extends PEModule {
 	private int rvaNumber;
 	private final long offset;
 
+	/**
+	 * The magic number of the PE file, indicating whether it is a PE32 or PE32+
+	 * 
+	 * @author Katja Hahn
+	 * 
+	 */
 	public static enum MagicNumber {
 		PE32(0x10B), PE32_PLUS(0x20B), ROM(0x107);
 
@@ -64,6 +70,13 @@ public class OptionalHeader extends PEModule {
 		}
 	}
 
+	/**
+	 * Creates an optional header instance with the given headerbytes and the
+	 * file offset of the beginning of the header
+	 * 
+	 * @param headerbytes
+	 * @param offset
+	 */
 	public OptionalHeader(byte[] headerbytes, long offset) {
 		this.headerbytes = headerbytes.clone();
 		this.offset = offset;
@@ -87,6 +100,8 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
+	 * Returns a map of the data directory entries with the
+	 * {@link DataDirectoryKey} as key
 	 * 
 	 * @return the data directory entries
 	 */
@@ -95,6 +110,8 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
+	 * Returns a map of the windows specific fields with the
+	 * {@link WindowsEntryKey} as key type
 	 * 
 	 * @return the windows specific fields
 	 */
@@ -103,6 +120,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
+	 * Returns a map of the standard fields.
 	 * 
 	 * @return the standard fields
 	 */
@@ -111,7 +129,7 @@ public class OptionalHeader extends PEModule {
 	}
 
 	/**
-	 * Returns the data directory entry for the given key. //TODO use map
+	 * Returns the data directory entry for the given key.
 	 * 
 	 * @param key
 	 * @return the data directory entry for the given key. null if key doesn't
@@ -300,8 +318,8 @@ public class OptionalHeader extends PEModule {
 																		// Bytes
 			} else if (key.equals(DLL_CHARACTERISTICS)) {
 				b.append(NL + description + ": " + NL);
-				b.append(IOUtil.getCharacteristics(value, DLL_CHARACTERISTICS_SPEC)
-						+ NL);
+				b.append(IOUtil.getCharacteristics(value,
+						DLL_CHARACTERISTICS_SPEC) + NL);
 			}
 
 			else {
@@ -398,6 +416,11 @@ public class OptionalHeader extends PEModule {
 		return "no default value";
 	}
 
+	/**
+	 * Returns a list of the DllCharacteristics that are set in the file.
+	 * 
+	 * @return list of DllCharacteristics
+	 */
 	public List<DllCharacteristic> getDllCharacteristics() {
 		List<String> keys = IOUtil.getCharacteristicKeys(
 				get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
@@ -408,9 +431,14 @@ public class OptionalHeader extends PEModule {
 		return dllChs;
 	}
 
+	/**
+	 * Returns a list of all DllCharacteristic descriptions.
+	 * 
+	 * @return list of DllCharacteristic descriptions
+	 */
 	public List<String> getDllCharacteristicsDescriptions() {
-		return IOUtil.getCharacteristicsDescriptions(
-				get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
+		return IOUtil.getCharacteristicsDescriptions(get(DLL_CHARACTERISTICS),
+				DLL_CHARACTERISTICS_SPEC);
 	}
 
 	/**
@@ -429,6 +457,12 @@ public class OptionalHeader extends PEModule {
 		return null;
 	}
 
+	/**
+	 * Returns the subsystem key string for the given value.
+	 * 
+	 * @param value
+	 * @return key string
+	 */
 	public static String getSubsystemKey(int value) {
 		try {
 			Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
@@ -439,6 +473,11 @@ public class OptionalHeader extends PEModule {
 		return null;
 	}
 
+	/**
+	 * Returns the subsystem instance of the file.
+	 * 
+	 * @return subsystem instance
+	 */
 	public Subsystem getSubsystem() {
 		return Subsystem.valueOf(getSubsystemKey(get(SUBSYSTEM).intValue()));
 	}

@@ -51,6 +51,11 @@ public enum SectionCharacteristic implements Characteristic {
 		this.description = description;
 	}
 	
+	/**
+	 * Returns the description of the section characteristic.
+	 * 
+	 * @return description
+	 */
 	public String getDescription() {
 		return description;
 	}

@@ -86,6 +86,12 @@ public class MSDOSLoadModule extends PEModule {
 		return imageSize;
 	}
 
+	/**
+	 * Returns the bytes of the load module.
+	 * 
+	 * @return bytes of the load module
+	 * @throws IOException
+	 */
 	public byte[] getDump() throws IOException {
 		if (loadModuleBytes == null) {
 			read();
