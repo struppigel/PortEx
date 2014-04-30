@@ -100,7 +100,7 @@ object PEAnomalyScanner {
     val files = new File("src/main/resources/x64viruses/").listFiles
     for (file <- files) {
       val data = PELoader.loadPE(file)
-      val scanner = new PEAnomalyScanner(data) with SectionTableScanning
+      val scanner = new PEAnomalyScanner(data) with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
 //      val report = scanner.scanReport
 //      if(!report.isEmpty()) {
 //    	  println(report)

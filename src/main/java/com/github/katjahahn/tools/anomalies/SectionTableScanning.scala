@@ -22,28 +22,48 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkDeprecated
     anomalyList ++= checkReserved
     anomalyList ++= checkAscendingVA
+    anomalyList ++= checkExtendedReloc
     super.scan ::: anomalyList.toList
   }
-  
+
+  private def checkExtendedReloc(): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val sectionTable = data.getSectionTable
+    val sections = sectionTable.getSectionEntries.asScala
+    for (section <- sections) {
+      if (section.getCharacteristics().contains(IMAGE_SCN_LNK_NRELOC_OVFL)) {
+    	val sectionName = filteredString(section.getName)
+        val entry = section.getEntry(SectionTableEntryKey.NUMBER_OF_RELOCATIONS)
+        val value = entry.value
+        if (value != 0xffff) {
+          val description = s"Section Table Entry ${sectionName}: has IMAGE_SCN_LNK_NRELOC_OVFL characteristic --> ${entry.key} must be 0xffff, but is " + value
+          anomalyList += WrongValueAnomaly(entry, description)
+        }
+      }
+    }
+    anomalyList.toList
+  }
+
   private def checkAscendingVA(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
     val sections = sectionTable.getSectionEntries.asScala
     var prevVA = -1
     for (section <- sections) {
+      val sectionName = filteredString(section.getName)
       val entry = section.getEntry(SectionTableEntryKey.VIRTUAL_ADDRESS)
       val sectionVA = entry.value
-      if(sectionVA <= prevVA) {
-        val description = s"Section Table Entry ${section.getName}: VIRTUAL_ADDRESS (${sectionVA}) should be greater than of the previous entry (${prevVA})"
+      if (sectionVA <= prevVA) {
+        val description = s"Section Table Entry ${sectionName}: VIRTUAL_ADDRESS (${sectionVA}) should be greater than of the previous entry (${prevVA})"
         anomalyList += WrongValueAnomaly(entry, description)
       }
     }
     anomalyList.toList
   }
-  
+
   private def filteredString(string: String): String = {
-    val controlCode : (Char) => Boolean = (c:Char) => (c <= 32 || c == 127)
-    val extendedCode : (Char) => Boolean = (c:Char) => (c <= 32 || c > 127)
+    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
+    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
     string.filterNot(controlCode).filterNot(extendedCode)
   }
 
