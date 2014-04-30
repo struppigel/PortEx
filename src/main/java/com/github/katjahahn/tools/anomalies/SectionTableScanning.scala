@@ -25,6 +25,12 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkReserved
     super.scan ::: anomalyList.toList
   }
+  
+  private def filteredString(string: String): String = {
+    val controlCode : (Char) => Boolean = (c:Char) => (c <= 32 || c == 127)
+    val extendedCode : (Char) => Boolean = (c:Char) => (c <= 32 || c > 127)
+    string.filterNot(controlCode).filterNot(extendedCode)
+  }
 
   private def checkReserved(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
@@ -33,7 +39,7 @@ trait SectionTableScanning extends AnomalyScanner {
     for (section <- sections) {
       val characteristics = section.getCharacteristics().asScala
       val entry = section.getEntry(SectionTableEntryKey.CHARACTERISTICS)
-      val sectionName = section.getName
+      val sectionName = filteredString(section.getName)
       characteristics.foreach(ch =>
         if (ch.getDescription.contains("Reserved")) {
           val description = s"Section Table Entry ${sectionName}: Reserved characteristic used: ${ch.toString}"
@@ -50,7 +56,7 @@ trait SectionTableScanning extends AnomalyScanner {
     for (section <- sections) {
       val ptrLineNrEntry = section.getEntry(SectionTableEntryKey.POINTER_TO_LINE_NUMBERS)
       val lineNrEntry = section.getEntry(SectionTableEntryKey.NUMBER_OF_LINE_NUMBERS)
-      val sectionName = section.getName
+      val sectionName = filteredString(section.getName)
       for (entry <- List(ptrLineNrEntry, lineNrEntry) if entry.value != 0) {
         val description = s"Section Table Entry ${sectionName}: ${entry.key} is deprecated, but has value " + entry.value
         anomalyList += DeprecatedAnomaly(entry, description)
@@ -64,7 +70,7 @@ trait SectionTableScanning extends AnomalyScanner {
     val sectionTable = data.getSectionTable()
     val sections = sectionTable.getSectionEntries().asScala
     for (section <- sections) yield {
-      val sectionName = section.getName
+      val sectionName = filteredString(section.getName)
       checkReloc(anomalyList, section, sectionName)
       checkObjectOnlyCharacteristics(anomalyList, section, sectionName)
       checkUninitializedDataConstraints(anomalyList, section, sectionName)
@@ -96,7 +102,7 @@ trait SectionTableScanning extends AnomalyScanner {
     for (section <- sections) {
       val sizeEntry = section.getEntry(SectionTableEntryKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getEntry(SectionTableEntryKey.POINTER_TO_RAW_DATA)
-      val sectionName = section.getName
+      val sectionName = filteredString(section.getName)
       for (entry <- List(sizeEntry, pointerEntry) if entry.value % fileAlignment != 0) {
         val description = s"Section Table Entry ${sectionName}: ${entry.key} (${entry.value}) must be a multiple of File Alignment (${fileAlignment})"
         anomalyList += WrongValueAnomaly(entry, description)
