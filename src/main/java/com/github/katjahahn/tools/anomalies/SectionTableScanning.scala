@@ -12,8 +12,6 @@ import com.github.katjahahn.sections.SectionTableEntry
 
 trait SectionTableScanning extends AnomalyScanner {
 
-  //TODO ascending order of VAs
-
   abstract override def scanReport(): String =
     "Applied Section Table Scanning" + NL + super.scanReport
 
@@ -23,7 +21,24 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkZeroValues
     anomalyList ++= checkDeprecated
     anomalyList ++= checkReserved
+    anomalyList ++= checkAscendingVA
     super.scan ::: anomalyList.toList
+  }
+  
+  private def checkAscendingVA(): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val sectionTable = data.getSectionTable
+    val sections = sectionTable.getSectionEntries.asScala
+    var prevVA = -1
+    for (section <- sections) {
+      val entry = section.getEntry(SectionTableEntryKey.VIRTUAL_ADDRESS)
+      val sectionVA = entry.value
+      if(sectionVA <= prevVA) {
+        val description = s"Section Table Entry ${section.getName}: VIRTUAL_ADDRESS (${sectionVA}) should be greater than of the previous entry (${prevVA})"
+        anomalyList += WrongValueAnomaly(entry, description)
+      }
+    }
+    anomalyList.toList
   }
   
   private def filteredString(string: String): String = {

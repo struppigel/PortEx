@@ -49,7 +49,7 @@ public class SectionTableEntry {
 		return name;
 	}
 	
-	public int getEntryNumber() {
+	public int getNumber() {
 		return number;
 	}
 
