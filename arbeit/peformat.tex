@@ -67,6 +67,25 @@ Entries of the Ordinal Table correspond to the Export Name Pointer Table entries
 
 The Export Name Pointer Table is an array of addresses which point to names of the Export Name Table. These names are null-terminated ASCII strings. They are the public names that other image files can use to import the symbols.
 
+Listing~\ref{lst:exportsample} shows example contents for a \DLL{} with two exported symbols: \texttt{DLL2Print} and \texttt{DLL2ReturnJ}.
+
+\lstinputlisting[caption=Example for Export Section contents,captionpos=t,label=lst:exportsample]{listings/edata_sample}
+
 \subsection*{Resource Section}
 
-\subsection*{Debug Section}
+Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. They are saved as an entry in the \emph{Resource Section}, which also has the name \emph{.rsrc Section}. The Resource Section is build up as a tree with the actual resource addresses as leaves. While \(2^{31}\) levels can be used according to the \PECOFF{} \cite[\p{100}]{pespec}, Windows only uses three levels with the first level node being the type, the second being the name and the third being the language information. Figure~\ref{fig:resourcetree} illustrates the structure of a resource tree.
+
+\begin{figure}
+\includegraphics[width=.98\textwidth, height=\textheight,keepaspectratio]{graphics/resourcetree}
+\caption{ Resource tree structure by \protect{\cite{kath13}}}
+\label{fig:resourcetree} 
+\end{figure}
+
+\subsection*{Debug Section and Debug Directory}
+
+Whereas most sections can be at an arbitrary location in the file, the \emph{Debug Section} (aka \emph{.debug Section}) must be placed as the very end of the image file. The reason is that the loader doesn't map this section into memory. Image files contain per default of the linker only a Debug Directory (as pointed to by the Data Directory Table), but not a Debug Section (see \cite[\p{78}]{pespec}). Thus the Debug Directory is either located in the Debug Section if it exists, in any other section of the \PE{} or not in any section at all.
+
+Every Debug Directory entry defines \ia{} size, location and the type (format) of a debug information block. 
+
+
+

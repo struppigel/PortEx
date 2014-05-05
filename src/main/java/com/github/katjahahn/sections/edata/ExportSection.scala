@@ -160,7 +160,7 @@ class ExportSection private (
 object ExportSection {
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("src/main/resources/testfiles/ntdll.dll")) //TODO correct ordinal and rva of this? see tests
+    val data = PELoader.loadPE(new File("src/main/resources/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
     val loader = new SectionLoader(data)
     val edata = loader.loadExportSection()
     println(edata.getDetailedInfo)

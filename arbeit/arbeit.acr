@@ -33,3 +33,7 @@
 \glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{12}
 \glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{12}
 \glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{12}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{12}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{14}
+\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{14}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{15}

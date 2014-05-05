@@ -18,11 +18,13 @@
 
 \gloitem {\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax
 \glodelim 
-		\glsnumformat{9}\delimN \glsnumformat{11}\delimT 
+		\glsnumformat{9}\delimN \glsnumformat{11}\delimN 
+		\glsnumformat{14\delimN 15}\delimT 
 
 \gloitem {\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax
 \glodelim 
-		\glsnumformat{9}\delimN \glsnumformat{11}\delimT \gloskip \glogroupV
+		\glsnumformat{9}\delimN \glsnumformat{11}\delimN 
+		\glsnumformat{14}\delimT \gloskip \glogroupV
 
 \gloitem {\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax
 \glodelim 
