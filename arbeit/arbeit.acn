@@ -1,12 +1,16 @@
 \begin{theglossary}\glogroupD
 
-\gloitem {\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}dynamic-link library\relax
+\gloitem {\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax
 \glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupE
+		\glsnumformat{9}\delimN \glsnumformat{11\delimN 12}\delimT \gloskip \glogroupE
 
-\gloitem {\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}executable\relax
+\gloitem {\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax
 \glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupN
+		\glsnumformat{9}\delimT \gloskip \glogroupI
+
+\gloitem {\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax
+\glodelim 
+		\glsnumformat{12}\delimT \gloskip \glogroupN
 
 \gloitem {\glosslabel{acn:NZ}{\noexpand \acronymfont {NZ}}}New Executable\relax
 \glodelim 
@@ -14,7 +18,11 @@
 
 \gloitem {\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax
 \glodelim 
-		\glsnumformat{9\delimN 10}\delimT \gloskip \glogroupV
+		\glsnumformat{9}\delimN \glsnumformat{11}\delimT 
+
+\gloitem {\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax
+\glodelim 
+		\glsnumformat{9}\delimN \glsnumformat{11}\delimT \gloskip \glogroupV
 
 \gloitem {\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax
 \glodelim 

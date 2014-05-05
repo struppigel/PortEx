@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  5 MAY 2014 10:18
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  5 MAY 2014 13:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1138,13 +1138,27 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 ] [4
 
-] (./arbeit.acn) [5
+] (./arbeit.acn
+Overfull \hbox (4.02081pt too wide) in alignment at lines 1--1
+ [] [] 
+ []
+
+
+Overfull \hbox (4.02081pt too wide) in alignment at lines 1--1
+ [] [] 
+ []
+
+
+Overfull \hbox (4.02081pt too wide) in alignment at lines 1--30
+ [] [] 
+ []
+
+) [5
 
 ] [6]
 \openout2 = `introduction.aux'.
 
-
-(./introduction.tex
+ (./introduction.tex
 Chapter 1.
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
@@ -1207,27 +1221,38 @@ Chapter 5.
  (./peformat.tex
 Chapter 6.
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 7.
+ine 9.
+<graphics/peformat.png, id=221, 244.915pt x 689.57625pt>
+File: graphics/peformat.png Graphic file (type png)
+
+<use graphics/peformat.png>
+Package pdftex.def Info: graphics/peformat.png used on input line 16.
+(pdftex.def)             Requested size: 212.39043pt x 598.00095pt.
+
+
+LaTeX Warning: Float too large for page by 22.60097pt on input line 19.
+
 [9
 
 
 
-] <graphics/peformat.png, id=227, 255.95625pt x 815.045pt>
-File: graphics/peformat.png Graphic file (type png)
+] [10 <./graphics/peformat.png (PNG copy)>]
+<graphics/importsection.png, id=235, 254.9525pt x 563.10374pt>
+File: graphics/importsection.png Graphic file (type png)
 
-<use graphics/peformat.png>
-Package pdftex.def Info: graphics/peformat.png used on input line 27.
-(pdftex.def)             Requested size: 187.80336pt x 598.02486pt.
+<use graphics/importsection.png>
+Package pdftex.def Info: graphics/importsection.png used on input line 44.
+(pdftex.def)             Requested size: 270.76964pt x 598.0385pt.
 
 
-LaTeX Warning: Float too large for page by 22.62488pt on input line 30.
+LaTeX Warning: Float too large for page by 22.63852pt on input line 47.
 
-) [10] [11 <./graphics/peformat.png (PNG copy)>]
+[11]) [12] [13 <./graphics/importsection.png (PNG copy)>]
 \openout2 = `portex.aux'.
 
  (./portex.tex
 Chapter 7.
-) [12
+) [14
 
 
 
@@ -1236,7 +1261,7 @@ Chapter 7.
 
  (./evaluation.tex
 Chapter 8.
-) [13
+) [15
 
 
 
@@ -1251,17 +1276,17 @@ Overfull \hbox (5.22127pt too wide) in paragraph at lines 2--155
 n. Dazu gehört die Möglichkeit,|
  []
 
-[14
+[16
 
 
 
 ]
 
-LaTeX Warning: Marginpar on page 15 moved.
+LaTeX Warning: Marginpar on page 17 moved.
 
-[15
+[17
 
-] [16
+] [18
 
 ] (./arbeit.bbl
 LaTeX Font Info:    Try loading font information for T1+pcr on input line 7.
@@ -1279,14 +1304,14 @@ Underfull \hbox (badness 6641) in paragraph at lines 19--22
 /m/it/10 (+20) Mi-crosoft PE and COFF spec-i-fi-ca-
  []
 
-) [17
+) [19
 
-] [18
+] [20
 
 ]
 \openout2 = `statement.aux'.
 
- (./statement.tex) [19
+ (./statement.tex) [21
 
 ]
 \tf@thm=\write12
@@ -1301,14 +1326,14 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 180.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 180.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 180.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: 6D989048B07F09375750B24A086A2D6D;1066.
+(rerunfilecheck)             Checksum: 185F68219F7FF388BF4B2779A72CE29A;1081.
  ) 
 Here is how much of TeX's memory you used:
- 22237 strings out of 494976
- 374746 string characters out of 6179137
- 514437 words of memory out of 5000000
- 24481 multiletter control sequences out of 15000+600000
- 66952 words of font info for 350 fonts, out of 8000000 for 9000
+ 22292 strings out of 494976
+ 375344 string characters out of 6179137
+ 517574 words of memory out of 5000000
+ 24496 multiletter control sequences out of 15000+600000
+ 69887 words of font info for 380 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,77p,927b,656s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1321,10 +1346,10 @@ s/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1
 ts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 sl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (27 pages, 216866 bytes).
+Output written on arbeit.pdf (29 pages, 242738 bytes).
 PDF statistics:
- 345 PDF objects out of 1000 (max. 8388607)
- 300 compressed objects within 3 object streams
- 79 named destinations out of 1000 (max. 500000)
- 44711 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 360 PDF objects out of 1000 (max. 8388607)
+ 311 compressed objects within 4 object streams
+ 83 named destinations out of 1000 (max. 500000)
+ 44716 words of extra memory for PDF output out of 51595 (max. 10000000)
 
