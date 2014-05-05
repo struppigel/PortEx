@@ -18,4 +18,4 @@
 \contentsline {chapter}{\numberline {7}Static Analysis Library}{12}{chapter.7}
 \contentsline {chapter}{\numberline {8}Evaluation}{13}{chapter.8}
 \contentsline {chapter}{\numberline {9}Das Competence Information Portal}{14}{chapter.9}
-\contentsline {chapter}{Bibliography}{17}{section*.16}
+\contentsline {chapter}{Bibliography}{17}{section*.18}

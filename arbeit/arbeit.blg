@@ -14,44 +14,44 @@ A level-1 auxiliary file: cip.aux
 The style file: gerplain.bst
 A level-1 auxiliary file: statement.aux
 Database file #1: references.bib
-You've used 4 entries,
+You've used 5 entries,
             2343 wiz_defined-function locations,
-            575 strings with 5268 characters,
-and the built_in function-call counts, 940 in all, are:
-= -- 90
-> -- 28
+            580 strings with 5354 characters,
+and the built_in function-call counts, 1174 in all, are:
+= -- 114
+> -- 35
 < -- 0
-+ -- 13
-- -- 8
-* -- 48
-:= -- 157
-add.period$ -- 8
-call.type$ -- 4
-change.case$ -- 12
++ -- 16
+- -- 10
+* -- 61
+:= -- 193
+add.period$ -- 10
+call.type$ -- 5
+change.case$ -- 15
 chr.to.int$ -- 0
-cite$ -- 4
-duplicate$ -- 44
-empty$ -- 99
-format.name$ -- 8
-if$ -- 211
+cite$ -- 5
+duplicate$ -- 53
+empty$ -- 124
+format.name$ -- 10
+if$ -- 266
 int.to.chr$ -- 0
-int.to.str$ -- 4
+int.to.str$ -- 5
 missing$ -- 4
-newline$ -- 19
-num.names$ -- 8
-pop$ -- 32
+newline$ -- 23
+num.names$ -- 10
+pop$ -- 40
 preamble$ -- 1
-purify$ -- 12
+purify$ -- 15
 quote$ -- 0
-skip$ -- 32
+skip$ -- 41
 stack$ -- 0
-substring$ -- 21
-swap$ -- 10
+substring$ -- 26
+swap$ -- 13
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 12
+type$ -- 16
 warning$ -- 0
-while$ -- 8
-width$ -- 5
-write$ -- 38
+while$ -- 10
+width$ -- 6
+write$ -- 47

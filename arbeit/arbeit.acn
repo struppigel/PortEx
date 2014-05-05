@@ -2,27 +2,19 @@
 
 \gloitem {\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}dynamic-link library\relax
 \glodelim 
-		\glsnumformat{9}\delimT 
-
-\gloitem {\glosslabel{acn:DRV}{\noexpand \acronymfont {DRV}}}legacy system driver\relax
-\glodelim 
 		\glsnumformat{9}\delimT \gloskip \glogroupE
 
 \gloitem {\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}executable\relax
 \glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupF
+		\glsnumformat{9}\delimT \gloskip \glogroupN
 
-\gloitem {\glosslabel{acn:FON}{\noexpand \acronymfont {FON}}}font\relax
+\gloitem {\glosslabel{acn:NZ}{\noexpand \acronymfont {NZ}}}New Executable\relax
 \glodelim 
 		\glsnumformat{9}\delimT \gloskip \glogroupP
 
 \gloitem {\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax
 \glodelim 
-		\glsnumformat{9\delimN 10}\delimT \gloskip \glogroupS
-
-\gloitem {\glosslabel{acn:SYS}{\noexpand \acronymfont {SYS}}}real mode device driver\relax
-\glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupV
+		\glsnumformat{9\delimN 10}\delimT \gloskip \glogroupV
 
 \gloitem {\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax
 \glodelim 

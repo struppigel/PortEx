@@ -1,10 +1,14 @@
 \chapter{Portable Executable Format} \label{chap:peformat}
 
-The \PE{} is a file format for executables and object files used by Microsoft products. Some examples for \PE{} file types are \DLL{}, \FON{}, \DRV{}, \SYS{} and \EXE{} files.
+The \PE{} is a file format for image and object files used by Microsoft products for 32- and 64-bit system architectures. It is the successor of the \NZ{} file format for 16-bit systems. The \PE{} format is described in the \emph{Microsoft Portable Executable and Common Object File Format Specification} \cite{pespec}
 
-PortEx extracts the information from the \PE{} format to assist in analysing malware. Therefore knowledge about the \PE{} format is neccessary to understand the inner workings of the library PortEx.
+\PE{} file types, which are relevant for this thesis, are \DLL{} and \EXE{} files. \DLL{} files export functions or data other programs can use. They can have various file endings, including \emph{.sys}, \emph{.dll}, \emph{ocx}, \emph{.cpl} and \emph{.drv}. (\cf{} \cite{micrdll}) A \DLL{} usually has no main entry point, but is loaded into the context of another process.
+\EXE{} files have the file ending \emph{.exe}. They usually don't export any functions. They have a main entry point and the system creates a new process upon launching the \EXE{}.
+The system recognizes the file type by a certain flag in the headers. \todo{reference} %(see \ref{dllflag})
 
-The \PE{} format is described in the \emph{Microsoft Portable Executable and Common Object File Format Specification} \cite{pespec}
+Both, \EXE{} and \DLL{} files, are considered as image files by the specification, because they contain executable code. \todo{Beleg} In contrast to image files are object files, which don't contain executable code. Object files are not an issue in the thesis.
+
+\portex{} extracts the information from the \PE{} format to assist in analysing malware. Therefore knowledge about the \PE{} format is neccessary to understand the inner workings of the library \portex{}.
 
 \section{General Structure}
 
@@ -14,7 +18,7 @@ To determine if a file is of a certain file format, signatures are used. The fil
 
 Right after the signature follow the COFF File Header, the Optional Header and the Section Table. The COFF File Header contains information about the type of the target machine, the number of sections, a time date stamp that indicates when the file was created, the size of the Optional Header.and flags that indicate file characteristics.
 
-Despite its name the Optional Header is mandatory for image files.Only object files don't need it.
+Despite its name the Optional Header is mandatory for image files. Only object files don't need it.
 
 The Section Table describes \ia{} characteristics, size, name and location of the sections that make up the rest of the \PE{} file.
 
