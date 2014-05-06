@@ -4,12 +4,8 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {6.1}{\ignorespaces Structure of a PE file\relax }}{10}{figure.caption.12}
-\contentsline {figure}{\numberline {6.2}{\ignorespaces Typical Import Section Layout by {\cite [p.\kern .16667em {}61]{pespec}}\relax }}{12}{figure.caption.18}
-\contentsline {figure}{\numberline {6.3}{\ignorespaces Resource tree structure by {\cite {kath13}}\relax }}{16}{figure.caption.23}
-\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Structure of a PE file\relax }}{8}{figure.caption.11}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Typical Import Section Layout by {\cite [p.\kern .16667em {}61]{pespec}}\relax }}{10}{figure.caption.17}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Resource tree structure by {\cite {kath13}}\relax }}{14}{figure.caption.22}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

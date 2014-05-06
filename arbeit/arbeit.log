@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  6 MAY 2014 11:25
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  6 MAY 2014 13:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -984,9 +984,9 @@ Package csquotes Info: ... found 'babel' package.
 Package csquotes Info: Adjusting default style.
 Package csquotes Info: Redefining alias 'default' -> 'english'.
 
-(./arbeit.aux (./titlepage.aux) (./introduction.aux) (./classification.aux)
-(./av.aux) (./hiding.aux) (./analysis.aux) (./peformat.aux) (./portex.aux)
-(./evaluation.aux) (./cip.aux) (./statement.aux))
+(./arbeit.aux (./titlepage.aux) (./introduction.aux) (./malware.aux)
+(./peformat.aux) (./analysis.aux) (./portex.aux) (./evaluation.aux)
+(./statement.aux))
 \openout1 = `arbeit.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 102.
@@ -1178,55 +1178,28 @@ been already used, duplicate ignored
                    \relax 
 l.22 
       [2]) [3]
-\openout2 = `classification.aux'.
+\openout2 = `malware.aux'.
 
- (./classification.tex
+ (./malware.tex
 Chapter 2.
 Package hyperref Info: bookmark level for unknown definition defaults to 0 on i
-nput line 7.
+nput line 9.
 [4
 
 
 
-]) [5]
-\openout2 = `av.aux'.
-
- (./av.tex
-Chapter 3.
-) [6
-
-
-
-]
-\openout2 = `hiding.aux'.
-
- (./hiding.tex
-Chapter 4.
-) [7
-
-
-
-]
-\openout2 = `analysis.aux'.
-
- (./analysis.tex
-Chapter 5.
-) [8
-
-
-
-]
+] [5]) [6]
 \openout2 = `peformat.aux'.
 
  (./peformat.tex
-Chapter 6.
+Chapter 3.
 Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
 ine 7.
-[9
+[7
 
 
 
-] <graphics/peformat.png, id=243, 244.915pt x 689.57625pt>
+] <graphics/peformat.png, id=235, 244.915pt x 689.57625pt>
 File: graphics/peformat.png Graphic file (type png)
 
 <use graphics/peformat.png>
@@ -1235,11 +1208,11 @@ Package pdftex.def Info: graphics/peformat.png used on input line 34.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [10 <./graphics/peformat.png (PNG copy)>]
+ [8 <./graphics/peformat.png (PNG copy)>]
 Underfull \vbox (badness 6592) has occurred while \output is active []
 
- [11]
-<graphics/importsection.png, id=260, 254.9525pt x 563.10374pt>
+ [9]
+<graphics/importsection.png, id=250, 254.9525pt x 563.10374pt>
 File: graphics/importsection.png Graphic file (type png)
 
 <use graphics/importsection.png>
@@ -1248,7 +1221,7 @@ Package pdftex.def Info: graphics/importsection.png used on input line 64.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [12 <./graphics/importsection.png (PNG copy)>]
+ [10 <./graphics/importsection.png (PNG copy)>]
 LaTeX Font Info:    Try loading font information for T1+pcr on input line 90.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
@@ -1260,21 +1233,27 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             See the microtype manual for details.
 
 
-LaTeX Warning: Marginpar on page 13 moved.
+LaTeX Warning: Marginpar on page 11 moved.
 
-(./listings/edata_sample [13])
-<graphics/resourcetree.png, id=285, 790.955pt x 589.20125pt>
+(./listings/edata_sample [11])
+<graphics/resourcetree.png, id=276, 790.955pt x 589.20125pt>
 File: graphics/resourcetree.png Graphic file (type png)
 
 <use graphics/resourcetree.png>
 Package pdftex.def Info: graphics/resourcetree.png used on input line 99.
 (pdftex.def)             Requested size: 338.10057pt x 251.85918pt.
- [14] (./listings/debug_sample)) [15] [16 <./graphics/resourcetree.png>]
+ [12] (./listings/debug_sample)) [13] [14 <./graphics/resourcetree.png>]
+\openout2 = `analysis.aux'.
+
+
+No file analysis.tex.
 \openout2 = `portex.aux'.
 
- (./portex.tex
-Chapter 7.
-) [17
+(./portex.tex
+Chapter 4.
+) [15
+
+
 
 
 
@@ -1282,31 +1261,10 @@ Chapter 7.
 \openout2 = `evaluation.aux'.
 
  (./evaluation.tex
-Chapter 8.
-) [18
+Chapter 5.
+) [16
 
 
-
-]
-\openout2 = `cip.aux'.
-
- (./cip.tex
-Chapter 9.
-)
-Overfull \hbox (5.22127pt too wide) in paragraph at lines 2--155
-\T1/aer/m/n/10 (-20) soll mit Hilfe eines Berichtssys-tems er-le-ichtert wer-de
-n. Dazu gehört die Möglichkeit,|
- []
-
-[19
-
-
-
-]
-
-LaTeX Warning: Marginpar on page 20 moved.
-
-[20
 
 ] (./arbeit.bbl
 Underfull \hbox (badness 6641) in paragraph at lines 19--22
@@ -1314,36 +1272,36 @@ Underfull \hbox (badness 6641) in paragraph at lines 19--22
 /m/it/10 (+20) Mi-crosoft PE and COFF spec-i-fi-ca-
  []
 
-) [21
+) [17
 
 
-] [22
+
+] [18
 
 ]
 \openout2 = `statement.aux'.
 
- (./statement.tex) [23
+ (./statement.tex) [19
 
 ]
 \tf@thm=\write12
 \openout12 = `arbeit.thm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 180.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 180.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 177.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 177.
  (./arbeit.aux (./titlepage.aux)
-(./introduction.aux) (./classification.aux) (./av.aux) (./hiding.aux)
-(./analysis.aux) (./peformat.aux) (./portex.aux) (./evaluation.aux) (./cip.aux)
-(./statement.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 180.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 180.
+(./introduction.aux) (./malware.aux) (./peformat.aux) (./analysis.aux)
+(./portex.aux) (./evaluation.aux) (./statement.aux))
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 177.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 177.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: 4B154B03995D1F4347361B8415648C19;1144.
+(rerunfilecheck)             Checksum: E2264FE1A767C962BA6151BAAD27B3E7;1173.
  ) 
 Here is how much of TeX's memory you used:
- 22749 strings out of 494976
- 380154 string characters out of 6179137
- 539887 words of memory out of 5000000
- 24834 multiletter control sequences out of 15000+600000
+ 22703 strings out of 494976
+ 379537 string characters out of 6179137
+ 538592 words of memory out of 5000000
+ 24817 multiletter control sequences out of 15000+600000
  76278 words of font info for 421 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,81p,927b,1910s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1358,10 +1316,10 @@ ts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 r9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (31 pages, 275650 bytes).
+Output written on arbeit.pdf (27 pages, 272265 bytes).
 PDF statistics:
- 469 PDF objects out of 1000 (max. 8388607)
- 413 compressed objects within 5 object streams
- 148 named destinations out of 1000 (max. 500000)
+ 447 PDF objects out of 1000 (max. 8388607)
+ 396 compressed objects within 4 object streams
+ 142 named destinations out of 1000 (max. 500000)
  45753 words of extra memory for PDF output out of 51595 (max. 10000000)
 

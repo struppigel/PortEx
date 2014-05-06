@@ -17,7 +17,7 @@ Both, \EXE{} and \DLL{} files, are considered as \emph{image files} by the \PECO
 This section explains some frequent terms that are also used by the \PECOFF{}. 
 
 \begin{definition}[RVA]
-\emph{\RVA{}} are used while the image file is loaded in memory. They are relative to the base address of the image file, which is the address of the first byte where the image is loaded in memory (\cf{} \cite[\p{19}]{pespec}). \todo{plural form for glossary term}
+\emph{\useacronym[es]{RVA}} are used while the image file is loaded in memory. They are relative to the base address of the image file, which is the address of the first byte where the image is loaded in memory (\cf{} \cite[\p{19}]{pespec}).
 \end{definition} 
 
 \begin{definition}[VA]
@@ -108,3 +108,7 @@ Whereas most sections can be at an arbitrary location in the file, the \emph{Deb
 Every Debug Directory entry defines \ia{} size, location and the type (format) of a debug information block. An example is in listing~\ref{lst:debugsample}
 
 \lstinputlisting[caption={Example for a Debug Section entry, output by \portex{}},captionpos=t,label=lst:debugsample]{listings/debug_sample}
+
+\section{PE Malformations}
+
+foobar

@@ -1,46 +1,46 @@
-\glossaryentry{VM@{\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax|glsnumformat}{8}
+\glossaryentry{VM@{\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax|glsnumformat}{6}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{7}
+\glossaryentry{NZ@{\glosslabel{acn:NZ}{\noexpand \acronymfont {NZ}}}New Executable\relax|glsnumformat}{7}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{7}
+\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{7}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{7}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{7}
+\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{7}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{7}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{7}
+\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{7}
+\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{7}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{7}
+\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{7}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{7}
+\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{7}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{7}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{7}
+\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{7}
+\glossaryentry{RVA@{\glosslabel{acn:RVA}{\noexpand \acronymfont {RVA}}}Relative Virtual Address\relax|glsnumformat}{8}
+\glossaryentry{VA@{\glosslabel{acn:VA}{\noexpand \acronymfont {VA}}}Virtual Address\relax|glsnumformat}{8}
+\glossaryentry{RVA@{\glosslabel{acn:RVA}{\noexpand \acronymfont {RVA}}}Relative Virtual Address\relax|glsnumformat}{8}
 \glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
-\glossaryentry{NZ@{\glosslabel{acn:NZ}{\noexpand \acronymfont {NZ}}}New Executable\relax|glsnumformat}{9}
 \glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
-\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{9}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
 \glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
 \glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{9}
-\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{9}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{9}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{9}
-\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{9}
-\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{9}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
-\glossaryentry{EXE@{\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax|glsnumformat}{9}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{9}
-\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{9}
+\glossaryentry{PEplus@{\glosslabel{acn:PEplus}{\noexpand \acronymfont {PE32+}}}Portable Executable with a 64-bit address space\relax|glsnumformat}{9}
+\glossaryentry{PEsmall@{\glosslabel{acn:PEsmall}{\noexpand \acronymfont {PE32}}}Portable Executable with a 32-bit address space\relax|glsnumformat}{9}
 \glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
 \glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{9}
-\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{9}
-\glossaryentry{RVA@{\glosslabel{acn:RVA}{\noexpand \acronymfont {RVA}}}Relative Virtual Address\relax|glsnumformat}{10}
-\glossaryentry{VA@{\glosslabel{acn:VA}{\noexpand \acronymfont {VA}}}Virtual Address\relax|glsnumformat}{10}
-\glossaryentry{RVA@{\glosslabel{acn:RVA}{\noexpand \acronymfont {RVA}}}Relative Virtual Address\relax|glsnumformat}{10}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
+\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{10}
+\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{10}
+\glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{11}
 \glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{11}
-\glossaryentry{PEplus@{\glosslabel{acn:PEplus}{\noexpand \acronymfont {PE32+}}}Portable Executable with a 64-bit address space\relax|glsnumformat}{11}
-\glossaryentry{PEsmall@{\glosslabel{acn:PEsmall}{\noexpand \acronymfont {PE32}}}Portable Executable with a 32-bit address space\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{11}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{11}
+\glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{11}
+\glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{11}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{11}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{11}
+\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{11}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{12}
 \glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{12}
-\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{12}
-\glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{13}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{13}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{13}
-\glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{13}
-\glossaryentry{IAT@{\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax|glsnumformat}{13}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{13}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{13}
-\glossaryentry{DLL@{\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax|glsnumformat}{13}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{14}
-\glossaryentry{PECOFF@{\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax|glsnumformat}{14}
-\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{15}
+\glossaryentry{PE@{\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax|glsnumformat}{13}

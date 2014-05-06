@@ -1,28 +1,33 @@
-1. Introduction                   
-2. Malware Classification 5%
-  - backdoor, botnet, downloader, information stealer, scareware, launcher, rootkit, spammer, worm, virus
-3. Detection by Antivirus Software 5% 
-  --> necessary to understand the hiding mechanisms of malware
-  - heuristics
-4. Malware Hiding Techniques 15%
-  - how malware hides from users, antivirus software and reverse engineering tools
-  - packer (crypter, binder, compressor, protector)
-5. Malware Analysis 15%
-  - static and dynamic analysis
-  - goals of malware analysis
-  - tools and techniques
-6. Static Analysis Library 30%
+1. Introduction 5%      
+2. Malware and Malware Detetection 25%
+    2.1. Malware Classification 5%
+        - backdoor, botnet, downloader, information stealer, scareware, launcher, rootkit, spammer, worm, virus
+    2.2. Malware Analysis 5%
+        - static and dynamic analysis
+        - goals of malware analysis
+        - tools and techniques
+    2.3. Malware Detection by Antivirus Software 5% 
+        --> necessary to understand the hiding mechanisms of malware
+        - heuristics
+    2.4. Malware Hiding Techniques 10%
+        - how malware hides from users, antivirus software and reverse engineering tools
+        - packer (crypter, binder, compressor, protector)
+3. Portable Executable Format 20%
+    3.1. General Structure and PE Headers 5% 
+    3.2. Special Sections 5%
+    3.3. PE Malformations 10%
+4. Static Analysis Library 25%
   - explanation of the functionality, implementation and usage
-7. Evaluation
+5. Evaluation 20%
   - show the quality and correct functionality:
     - tests with actual malware
     - library usability, code quality
-8. Comparison to other Tools and Libraries
-8. Summary and Conclusion
+  - comparison to other Tools and Libraries
+6. Summary and Conclusion 5%
 
 --------------------------------------------------------------
 Introduction: 5%
-Theoretical part (chapter 2-5): 40%
-Implementation (chapter 6): 35%
-Evaluation and Comparison (chapter 7-9): 15%
+Theoretical part (chapter 2-3): 45%
+Implementation (chapter 4): 45%
+Evaluation and Comparison (chapter 5): 20%
 Conclusion (chapter 9): 5%

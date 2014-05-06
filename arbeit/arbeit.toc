@@ -5,18 +5,18 @@
 \contentsline {chapter}{List of Tables}{iii}{chapter*.4}
 \contentsline {chapter}{List of Acronyms}{v}{section*.5}
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
-\contentsline {chapter}{\numberline {2}Malware Taxonomy}{4}{chapter.2}
-\contentsline {section}{\numberline {2.1}Behavioural Malware Types}{4}{section.2.1}
-\contentsline {section}{\numberline {2.2}Mass Malware and Targeted Malware}{5}{section.2.2}
-\contentsline {chapter}{\numberline {3}Detection by Antivirus Software}{6}{chapter.3}
-\contentsline {chapter}{\numberline {4}Malware Hiding Techniques}{7}{chapter.4}
-\contentsline {chapter}{\numberline {5}Malware Analysis}{8}{chapter.5}
-\contentsline {section}{\numberline {5.1}Malware Analysis Techniques}{8}{section.5.1}
-\contentsline {chapter}{\numberline {6}Portable Executable Format}{9}{chapter.6}
-\contentsline {section}{\numberline {6.1}General Concepts}{9}{section.6.1}
-\contentsline {section}{\numberline {6.2}General Structure and PE Headers}{11}{section.6.2}
-\contentsline {section}{\numberline {6.3}Special Sections}{12}{section.6.3}
-\contentsline {chapter}{\numberline {7}Static Analysis Library}{17}{chapter.7}
-\contentsline {chapter}{\numberline {8}Evaluation}{18}{chapter.8}
-\contentsline {chapter}{\numberline {9}Das Competence Information Portal}{19}{chapter.9}
-\contentsline {chapter}{Bibliography}{21}{section*.26}
+\contentsline {chapter}{\numberline {2}Malware}{4}{chapter.2}
+\contentsline {section}{\numberline {2.1}Malware Taxonomy}{4}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Behavioural Malware Types}{4}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Mass Malware and Targeted Malware}{6}{subsection.2.1.2}
+\contentsline {section}{\numberline {2.2}Malware Analysis}{6}{section.2.2}
+\contentsline {section}{\numberline {2.3}Malware Detection by Antivirus Software}{6}{section.2.3}
+\contentsline {section}{\numberline {2.4}Malware Hiding Techniques}{6}{section.2.4}
+\contentsline {chapter}{\numberline {3}Portable Executable Format}{7}{chapter.3}
+\contentsline {section}{\numberline {3.1}General Concepts}{7}{section.3.1}
+\contentsline {section}{\numberline {3.2}General Structure and PE Headers}{9}{section.3.2}
+\contentsline {section}{\numberline {3.3}Special Sections}{10}{section.3.3}
+\contentsline {section}{\numberline {3.4}PE Malformations}{13}{section.3.4}
+\contentsline {chapter}{\numberline {4}Static Analysis Library}{15}{chapter.4}
+\contentsline {chapter}{\numberline {5}Evaluation}{16}{chapter.5}
+\contentsline {chapter}{Bibliography}{17}{section*.24}

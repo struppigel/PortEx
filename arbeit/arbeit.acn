@@ -2,48 +2,48 @@
 
 \gloitem {\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax
 \glodelim 
-		\glsnumformat{9}\delimN \glsnumformat{11}\delimN 
-		\glsnumformat{13}\delimT \gloskip \glogroupE
+		\glsnumformat{7}\delimN \glsnumformat{9}\delimN 
+		\glsnumformat{11}\delimT \gloskip \glogroupE
 
 \gloitem {\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax
 \glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupI
+		\glsnumformat{7}\delimT \gloskip \glogroupI
 
 \gloitem {\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax
 \glodelim 
-		\glsnumformat{13}\delimT \gloskip \glogroupN
+		\glsnumformat{11}\delimT \gloskip \glogroupN
 
 \gloitem {\glosslabel{acn:NZ}{\noexpand \acronymfont {NZ}}}New Executable\relax
 \glodelim 
-		\glsnumformat{9}\delimT \gloskip \glogroupP
+		\glsnumformat{7}\delimT \gloskip \glogroupP
 
 \gloitem {\glosslabel{acn:PE}{\noexpand \acronymfont {PE}}}Portable Executable\relax
 \glodelim 
-		\glsnumformat{9}\delimN \glsnumformat{11}\delimN 
-		\glsnumformat{14\delimN 15}\delimT 
+		\glsnumformat{7}\delimN \glsnumformat{9}\delimN 
+		\glsnumformat{12\delimN 13}\delimT 
 
 \gloitem {\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax
 \glodelim 
-		\glsnumformat{9}\delimN \glsnumformat{12}\delimN 
-		\glsnumformat{14}\delimT 
+		\glsnumformat{7}\delimN \glsnumformat{10}\delimN 
+		\glsnumformat{12}\delimT 
 
 \gloitem {\glosslabel{acn:PEplus}{\noexpand \acronymfont {PE32+}}}Portable Executable with a 64-bit address space\relax
 \glodelim 
-		\glsnumformat{11}\delimT 
+		\glsnumformat{9}\delimT 
 
 \gloitem {\glosslabel{acn:PEsmall}{\noexpand \acronymfont {PE32}}}Portable Executable with a 32-bit address space\relax
 \glodelim 
-		\glsnumformat{11}\delimT \gloskip \glogroupR
+		\glsnumformat{9}\delimT \gloskip \glogroupR
 
 \gloitem {\glosslabel{acn:RVA}{\noexpand \acronymfont {RVA}}}Relative Virtual Address\relax
 \glodelim 
-		\glsnumformat{10}\delimT \gloskip \glogroupV
+		\glsnumformat{8}\delimT \gloskip \glogroupV
 
 \gloitem {\glosslabel{acn:VA}{\noexpand \acronymfont {VA}}}Virtual Address\relax
 \glodelim 
-		\glsnumformat{10}\delimT 
+		\glsnumformat{8}\delimT 
 
 \gloitem {\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax
 \glodelim 
-		\glsnumformat{8}\delimT 
+		\glsnumformat{6}\delimT 
 \end{theglossary}

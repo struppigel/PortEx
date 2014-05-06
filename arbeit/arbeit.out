@@ -2,18 +2,18 @@
 \BOOKMARK [0][-]{chapter*.4}{List of Tables}{}% 2
 \BOOKMARK [0][-]{section*.5}{List of Acronyms}{}% 3
 \BOOKMARK [0][-]{chapter.1}{Introduction}{}% 4
-\BOOKMARK [0][-]{chapter.2}{Malware Taxonomy}{}% 5
-\BOOKMARK [1][-]{section.2.1}{Behavioural Malware Types}{chapter.2}% 6
-\BOOKMARK [1][-]{section.2.2}{Mass Malware and Targeted Malware}{chapter.2}% 7
-\BOOKMARK [0][-]{chapter.3}{Detection by Antivirus Software}{}% 8
-\BOOKMARK [0][-]{chapter.4}{Malware Hiding Techniques}{}% 9
-\BOOKMARK [0][-]{chapter.5}{Malware Analysis}{}% 10
-\BOOKMARK [1][-]{section.5.1}{Malware Analysis Techniques}{chapter.5}% 11
-\BOOKMARK [0][-]{chapter.6}{Portable Executable Format}{}% 12
-\BOOKMARK [1][-]{section.6.1}{General Concepts}{chapter.6}% 13
-\BOOKMARK [1][-]{section.6.2}{General Structure and PE Headers}{chapter.6}% 14
-\BOOKMARK [1][-]{section.6.3}{Special Sections}{chapter.6}% 15
-\BOOKMARK [0][-]{chapter.7}{Static Analysis Library}{}% 16
-\BOOKMARK [0][-]{chapter.8}{Evaluation}{}% 17
-\BOOKMARK [0][-]{chapter.9}{Das Competence Information Portal}{}% 18
-\BOOKMARK [0][-]{section*.26}{Bibliography}{}% 19
+\BOOKMARK [0][-]{chapter.2}{Malware}{}% 5
+\BOOKMARK [1][-]{section.2.1}{Malware Taxonomy}{chapter.2}% 6
+\BOOKMARK [2][-]{subsection.2.1.1}{Behavioural Malware Types}{section.2.1}% 7
+\BOOKMARK [2][-]{subsection.2.1.2}{Mass Malware and Targeted Malware}{section.2.1}% 8
+\BOOKMARK [1][-]{section.2.2}{Malware Analysis}{chapter.2}% 9
+\BOOKMARK [1][-]{section.2.3}{Malware Detection by Antivirus Software}{chapter.2}% 10
+\BOOKMARK [1][-]{section.2.4}{Malware Hiding Techniques}{chapter.2}% 11
+\BOOKMARK [0][-]{chapter.3}{Portable Executable Format}{}% 12
+\BOOKMARK [1][-]{section.3.1}{General Concepts}{chapter.3}% 13
+\BOOKMARK [1][-]{section.3.2}{General Structure and PE Headers}{chapter.3}% 14
+\BOOKMARK [1][-]{section.3.3}{Special Sections}{chapter.3}% 15
+\BOOKMARK [1][-]{section.3.4}{PE Malformations}{chapter.3}% 16
+\BOOKMARK [0][-]{chapter.4}{Static Analysis Library}{}% 17
+\BOOKMARK [0][-]{chapter.5}{Evaluation}{}% 18
+\BOOKMARK [0][-]{section*.24}{Bibliography}{}% 19
