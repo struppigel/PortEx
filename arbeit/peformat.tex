@@ -111,4 +111,15 @@ Every Debug Directory entry defines \ia{} size, location and the type (format) o
 
 \section{PE Malformations}
 
-foobar
+\begin{definition}[Malformation]
+A \emph{malformation} is data or layout of a \PE{} file that violates the \PECOFF{}.
+\end{definition} 
+
+Malformations are either accidental results of \PE{} modifications or done on purpose to prevent reverse engineering tools from parsing the file correctly.
+
+A malformation doesn't necessarily prevent the Windows loader from running the file. The Windows loader doesn't work in full compliance with the \PECOFF{} to maintain backward compatibility with obsolete compilers and files. Malware writers utilize the loader's behaviour to create \PE{} files that can not be parsed by most tools used for malware analysis, but still run normally. 
+
+Accidental malformations occur when the malware writer doesn't know the \PECOFF{} thoroughly enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to another \PE{}, copying the own code into it and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
+
+Sheehan et\thinspace{}al. states that 68~\% of all image files have malformations. \cite[slide 7]{sheehan07}
+Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} without breaking and to recognize malformations.

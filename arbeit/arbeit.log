@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  6 MAY 2014 13:14
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  6 MAY 2014 15:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1267,7 +1267,7 @@ Chapter 5.
 
 
 ] (./arbeit.bbl
-Underfull \hbox (badness 6641) in paragraph at lines 19--22
+Underfull \hbox (badness 6641) in paragraph at lines 24--27
 []\T1/aer/m/sc/10 (+20) Microsoft Co-op-er-a-tion\T1/aer/m/n/10 (+20) : \T1/aer
 /m/it/10 (+20) Mi-crosoft PE and COFF spec-i-fi-ca-
  []
@@ -1298,11 +1298,11 @@ Package rerunfilecheck Info: File `arbeit.out' has not changed.
 (rerunfilecheck)             Checksum: E2264FE1A767C962BA6151BAAD27B3E7;1173.
  ) 
 Here is how much of TeX's memory you used:
- 22703 strings out of 494976
- 379537 string characters out of 6179137
- 538592 words of memory out of 5000000
- 24817 multiletter control sequences out of 15000+600000
- 76278 words of font info for 421 fonts, out of 8000000 for 9000
+ 22713 strings out of 494976
+ 379634 string characters out of 6179137
+ 538623 words of memory out of 5000000
+ 24818 multiletter control sequences out of 15000+600000
+ 76803 words of font info for 427 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,81p,927b,1910s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1316,10 +1316,10 @@ ts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 r9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (27 pages, 272265 bytes).
+Output written on arbeit.pdf (27 pages, 275665 bytes).
 PDF statistics:
- 447 PDF objects out of 1000 (max. 8388607)
- 396 compressed objects within 4 object streams
- 142 named destinations out of 1000 (max. 500000)
+ 450 PDF objects out of 1000 (max. 8388607)
+ 399 compressed objects within 4 object streams
+ 144 named destinations out of 1000 (max. 500000)
  45753 words of extra memory for PDF output out of 51595 (max. 10000000)
 

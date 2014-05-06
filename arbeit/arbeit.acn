@@ -25,7 +25,7 @@
 \gloitem {\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax
 \glodelim 
 		\glsnumformat{7}\delimN \glsnumformat{10}\delimN 
-		\glsnumformat{12}\delimT 
+		\glsnumformat{12\delimN 13}\delimT 
 
 \gloitem {\glosslabel{acn:PEplus}{\noexpand \acronymfont {PE32+}}}Portable Executable with a 64-bit address space\relax
 \glodelim 

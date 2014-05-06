@@ -3,55 +3,57 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: arbeit.aux
 A level-1 auxiliary file: titlepage.aux
 A level-1 auxiliary file: introduction.aux
-A level-1 auxiliary file: classification.aux
-A level-1 auxiliary file: av.aux
-A level-1 auxiliary file: hiding.aux
-A level-1 auxiliary file: analysis.aux
+A level-1 auxiliary file: malware.aux
 A level-1 auxiliary file: peformat.aux
+A level-1 auxiliary file: analysis.aux
 A level-1 auxiliary file: portex.aux
 A level-1 auxiliary file: evaluation.aux
-A level-1 auxiliary file: cip.aux
 The style file: gerplain.bst
 A level-1 auxiliary file: statement.aux
 Database file #1: references.bib
-You've used 5 entries,
+Too many commas in name 1 of "Casey Sheehan, Nick Hnatiw, Tom Robinson, Nick Suan" for entry sheehan07
+while executing---line 1161 of file gerplain.bst
+Too many commas in name 1 of "Casey Sheehan, Nick Hnatiw, Tom Robinson, Nick Suan" for entry sheehan07
+while executing---line 1202 of file gerplain.bst
+You've used 6 entries,
             2343 wiz_defined-function locations,
-            580 strings with 5354 characters,
-and the built_in function-call counts, 1174 in all, are:
-= -- 114
-> -- 35
+            583 strings with 5554 characters,
+and the built_in function-call counts, 1408 in all, are:
+= -- 139
+> -- 43
 < -- 0
-+ -- 16
-- -- 10
-* -- 61
-:= -- 193
-add.period$ -- 10
-call.type$ -- 5
-change.case$ -- 15
++ -- 19
+- -- 12
+* -- 75
+:= -- 230
+add.period$ -- 12
+call.type$ -- 6
+change.case$ -- 18
 chr.to.int$ -- 0
-cite$ -- 5
-duplicate$ -- 53
-empty$ -- 124
-format.name$ -- 10
-if$ -- 266
+cite$ -- 6
+duplicate$ -- 65
+empty$ -- 149
+format.name$ -- 12
+if$ -- 320
 int.to.chr$ -- 0
-int.to.str$ -- 5
+int.to.str$ -- 6
 missing$ -- 4
-newline$ -- 23
-num.names$ -- 10
-pop$ -- 40
+newline$ -- 26
+num.names$ -- 13
+pop$ -- 44
 preamble$ -- 1
-purify$ -- 15
+purify$ -- 18
 quote$ -- 0
-skip$ -- 41
+skip$ -- 49
 stack$ -- 0
-substring$ -- 26
-swap$ -- 13
+substring$ -- 31
+swap$ -- 16
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 16
+type$ -- 19
 warning$ -- 0
-while$ -- 10
-width$ -- 6
-write$ -- 47
+while$ -- 12
+width$ -- 7
+write$ -- 56
+(There were 2 error messages)

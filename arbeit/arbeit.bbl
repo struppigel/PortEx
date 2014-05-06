@@ -1,5 +1,10 @@
 \begin{thebibliography}{1}
 
+\bibitem{sheehan07}
+{\sc Casey~Sheehan, Nick~Hnatiw, Tom Robinson Nick~Suan}\ (\btxeditorlong{}):
+  {\em Pimp My PE: Parsing Malicious and Malformed Executables}, Virus Bulletin
+  2007. Sunbelt Software, 2007.
+
 \bibitem{kath13}
 {\sc Kath, Randy}: {\em The Portable Executable File Format from Top to
   Bottom}.
