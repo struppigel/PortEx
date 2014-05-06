@@ -10,9 +10,10 @@
 \BOOKMARK [0][-]{chapter.5}{Malware Analysis}{}% 10
 \BOOKMARK [1][-]{section.5.1}{Malware Analysis Techniques}{chapter.5}% 11
 \BOOKMARK [0][-]{chapter.6}{Portable Executable Format}{}% 12
-\BOOKMARK [1][-]{section.6.1}{General Structure and PE Headers}{chapter.6}% 13
-\BOOKMARK [1][-]{section.6.2}{Special Sections}{chapter.6}% 14
-\BOOKMARK [0][-]{chapter.7}{Static Analysis Library}{}% 15
-\BOOKMARK [0][-]{chapter.8}{Evaluation}{}% 16
-\BOOKMARK [0][-]{chapter.9}{Das Competence Information Portal}{}% 17
-\BOOKMARK [0][-]{section*.21}{Bibliography}{}% 18
+\BOOKMARK [1][-]{section.6.1}{General Concepts}{chapter.6}% 13
+\BOOKMARK [1][-]{section.6.2}{General Structure and PE Headers}{chapter.6}% 14
+\BOOKMARK [1][-]{section.6.3}{Special Sections}{chapter.6}% 15
+\BOOKMARK [0][-]{chapter.7}{Static Analysis Library}{}% 16
+\BOOKMARK [0][-]{chapter.8}{Evaluation}{}% 17
+\BOOKMARK [0][-]{chapter.9}{Das Competence Information Portal}{}% 18
+\BOOKMARK [0][-]{section*.26}{Bibliography}{}% 19

@@ -59,22 +59,28 @@ public class PESignature extends PEModule {
 	 * @throws IOException
 	 *             if something went wrong while trying to read the file
 	 */
-	@Override
+	@Override //TODO Maybe use boolean instead of exception.
 	public void read() throws FileFormatException, IOException {
+		throwIf(file.length() < PE_OFFSET_LOCATION + 2);
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			raf.seek(PE_OFFSET_LOCATION);
 			byte[] offsetBytes = new byte[2];
 			raf.readFully(offsetBytes);
 			peOffset = bytesToInt(offsetBytes);
+			throwIf(file.length() < peOffset + 4);
 			raf.seek(peOffset);
 			byte[] peSigVal = new byte[4];
 			raf.readFully(peSigVal);
 			for (int i = 0; i < PE_SIG.length; i++) {
-				if (peSigVal[i] != PE_SIG[i]) {
-					peOffset = -1;
-					throw new FileFormatException("given file is no PE file");
-				}
+				throwIf(peSigVal[i] != PE_SIG[i]);
 			}
+		}
+	}
+	
+	private void throwIf(boolean b) throws FileFormatException {
+		if(b) {
+			peOffset = -1;
+			throw new FileFormatException("given file is no PE file");
 		}
 	}
 	

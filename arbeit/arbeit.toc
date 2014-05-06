@@ -13,9 +13,10 @@
 \contentsline {chapter}{\numberline {5}Malware Analysis}{8}{chapter.5}
 \contentsline {section}{\numberline {5.1}Malware Analysis Techniques}{8}{section.5.1}
 \contentsline {chapter}{\numberline {6}Portable Executable Format}{9}{chapter.6}
-\contentsline {section}{\numberline {6.1}General Structure and PE Headers}{9}{section.6.1}
-\contentsline {section}{\numberline {6.2}Special Sections}{11}{section.6.2}
-\contentsline {chapter}{\numberline {7}Static Analysis Library}{16}{chapter.7}
-\contentsline {chapter}{\numberline {8}Evaluation}{17}{chapter.8}
-\contentsline {chapter}{\numberline {9}Das Competence Information Portal}{18}{chapter.9}
-\contentsline {chapter}{Bibliography}{21}{section*.21}
+\contentsline {section}{\numberline {6.1}General Concepts}{9}{section.6.1}
+\contentsline {section}{\numberline {6.2}General Structure and PE Headers}{11}{section.6.2}
+\contentsline {section}{\numberline {6.3}Special Sections}{12}{section.6.3}
+\contentsline {chapter}{\numberline {7}Static Analysis Library}{17}{chapter.7}
+\contentsline {chapter}{\numberline {8}Evaluation}{18}{chapter.8}
+\contentsline {chapter}{\numberline {9}Das Competence Information Portal}{19}{chapter.9}
+\contentsline {chapter}{Bibliography}{21}{section*.26}
