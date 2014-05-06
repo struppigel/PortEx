@@ -15,45 +15,45 @@ Too many commas in name 1 of "Casey Sheehan, Nick Hnatiw, Tom Robinson, Nick Sua
 while executing---line 1161 of file gerplain.bst
 Too many commas in name 1 of "Casey Sheehan, Nick Hnatiw, Tom Robinson, Nick Suan" for entry sheehan07
 while executing---line 1202 of file gerplain.bst
-You've used 6 entries,
+You've used 7 entries,
             2343 wiz_defined-function locations,
-            583 strings with 5554 characters,
-and the built_in function-call counts, 1408 in all, are:
-= -- 139
-> -- 43
+            589 strings with 5722 characters,
+and the built_in function-call counts, 1642 in all, are:
+= -- 164
+> -- 51
 < -- 0
-+ -- 19
-- -- 12
-* -- 75
-:= -- 230
-add.period$ -- 12
-call.type$ -- 6
-change.case$ -- 18
++ -- 22
+- -- 14
+* -- 89
+:= -- 267
+add.period$ -- 14
+call.type$ -- 7
+change.case$ -- 21
 chr.to.int$ -- 0
-cite$ -- 6
-duplicate$ -- 65
-empty$ -- 149
-format.name$ -- 12
-if$ -- 320
+cite$ -- 7
+duplicate$ -- 77
+empty$ -- 174
+format.name$ -- 14
+if$ -- 374
 int.to.chr$ -- 0
-int.to.str$ -- 6
+int.to.str$ -- 7
 missing$ -- 4
-newline$ -- 26
-num.names$ -- 13
-pop$ -- 44
+newline$ -- 29
+num.names$ -- 16
+pop$ -- 48
 preamble$ -- 1
-purify$ -- 18
+purify$ -- 21
 quote$ -- 0
-skip$ -- 49
+skip$ -- 57
 stack$ -- 0
-substring$ -- 31
-swap$ -- 16
+substring$ -- 36
+swap$ -- 19
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 19
+type$ -- 22
 warning$ -- 0
-while$ -- 12
-width$ -- 7
-write$ -- 56
+while$ -- 14
+width$ -- 8
+write$ -- 65
 (There were 2 error messages)

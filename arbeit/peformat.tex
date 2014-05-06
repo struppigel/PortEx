@@ -4,7 +4,7 @@ The \PE{} is a file format for image files used by Microsoft products for 32- an
 
 \PE{} file types, which are relevant for this thesis, are \DLL{} and \EXE{} files. \DLL{} files export functions or data other programs can use. They can have various file endings, including \emph{.sys}, \emph{.dll}, \emph{ocx}, \emph{.cpl} and \emph{.drv}. (\cf{} \cite{micrdll}) A \DLL{} is loaded into the context of another process.
 \EXE{} files have the file ending \emph{.exe}. They usually don't export any symbols. The system creates a new process upon launching the \EXE{}.
-The system recognizes the file type by a certain flag in the \PE{} headers. (see \ref{dllflag}) \todo{other file types? FON?}
+The system recognizes the file type by a certain flag in the \PE{} headers. (see page~\pageref{dllflag}) \todo{other file types? FON?}
 
 Both, \EXE{} and \DLL{} files, are considered as \emph{image files} by the \PECOFF{}, because they have been processed by a linker and are used as input for the loader. In contrast to image files are \emph{object files} (Common Object File Format or {COFF}), which are used as input for a linker (\cf{} \cite[\p{8}]{pespec}). The Common Object File Format is not an issue in the thesis.
 
@@ -28,7 +28,11 @@ A \emph{\VA{}} is the same as a \RVA{} with the base address added (\cf{} \cite[
 A defined unit of data or code within an image file is called a \emph{section} (\cf{} \cite[\p{19}]{pespec}). Sections are defined by their section header in the Section Table.
 \end{definition} 
 
-\section{General Structure and PE Headers}
+\begin{definition}[entry point]
+The \emph{entry point} is a \RVA{} to the starting address for \EXE{} files or to the initialization function for device drivers. (\cf{} \cite[\p{18}]{pespec})
+\end{definition} 
+
+\section{General Structure and PE Headers} \label{sec:pestructure}
 
 \begin{figure}
 \includegraphics[width=.98\textwidth, height=.60\textheight,keepaspectratio]{graphics/peformat}
@@ -36,9 +40,9 @@ A defined unit of data or code within an image file is called a \emph{section} (
 \label{fig:peformat} 
 \end{figure}
 
-Figure~\ref{fig:peformat} illustrates the structure of a \PE{} file. A \PE{} file always starts with the MS-DOS Stub. This is an application which is able to run in MS-DOS. The standard MS-DOS stub prints the message \enquote{This program cannot be run in DOS mode} and closes right after. 
+\autoref{fig:peformat} illustrates the structure of a \PE{} file. A \PE{} file always starts with the MS-DOS Stub. This is an application which is able to run in MS-DOS. The standard MS-DOS Stub prints the message \enquote{This program cannot be run in DOS mode} and closes right after. 
 
-Signatures are used to determine if a file is of a certain file format. The file format signature is usually at the very beginning of the file. Since the \PE{} starts with the MS-DOS stub, which has a file format signature itself, the \PE{} signature is placed after. \todo{MZ, PE00} The offset to the \PE{} signature is defined in location 0x3c of the MS-DOS stub, thus enables Windows to properly execute the \PE{} file. 
+Signatures are used to determine if a file is of a certain file format. The file format signature is usually at the very beginning of the file. Since the \PE{} starts with the MS-DOS Stub, which has a file format signature itself, the \PE{} signature is placed after. \todo{MZ, PE00} The offset to the \PE{} signature is defined in location 0x3c of the MS-DOS Stub, thus enables Windows to properly execute the \PE{} file. 
 
 Right after the PE signature follow the PE Headers: that are the COFF File Header, the Optional Header and the Section Table. \todo{that are uppercase?}
 
@@ -67,7 +71,7 @@ Some of these special sections are described right after. \todo{sections that ar
 \end{figure}
 
 Every image file that imports symbols has an \emph{Import Section}, also called \emph{.idata Section}.
-The Import Section contains the Import Directory Table, several Import Lookup Tables, the Hint-Name Table and the \IAT{}. A typical layout of the Import Section is in figure~\ref{fig:import}
+The Import Section contains the Import Directory Table, several Import Lookup Tables, the Hint-Name Table and the \IAT{}. A typical layout of the Import Section is in \autoref{fig:import}
 
 Every Import Directory Table entry points to an Import Lookup Table. Each Import Lookup Table describes the imported symbols of a single \DLL{}.
 
@@ -87,15 +91,15 @@ Entries of the Ordinal Table correspond to the Export Name Pointer Table entries
 
 The Export Name Pointer Table is an array of addresses which point to names of the Export Name Table. These names are null-terminated ASCII strings. They are the public names that other image files can use to import the symbols.
 
-Listing~\ref{lst:exportsample} shows example contents for a \DLL{} with two exported symbols: \texttt{DLL2Print} and \texttt{DLL2ReturnJ}. It also illustrates in lines 34-40 \todo{create labels, ab zeile ?} how the information from the different tables is resolved. \todo{resolved?}
+\autoref{lst:exportsample} shows example contents for a \DLL{} with two exported symbols: \texttt{DLL2Print} and \texttt{DLL2ReturnJ}. It also illustrates in lines 34-40 \todo{create labels, ab zeile ?} how the information from the different tables is combined. \todo{resolved?}
 
 \lstinputlisting[caption={Example for Export Section contents, output by \portex{}},captionpos=t,label=lst:exportsample]{listings/edata_sample}
 
 \subsection*{Resource Section}
 
-Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. They are saved as an entry in the \emph{Resource Section}, which also has the name \emph{.rsrc Section}. The Resource Section is build up as a tree with the actual resource addresses as leaves. While \(2^{31}\) tree levels can be used according to the \PECOFF{} \cite[\p{100}]{pespec}, Windows only uses three levels with the first level node being the type, the second being the name and the third being the language information. Figure~\ref{fig:resourcetree} illustrates the structure of a resource tree.
+Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. They are saved as an entry in the \emph{Resource Section}, which also has the name \emph{.rsrc Section}. The Resource Section is build up as a tree with the actual resource addresses as leaves. While \(2^{31}\) tree levels can be used according to the \PECOFF{} \cite[\p{100}]{pespec}, Windows only uses three levels with the first level node being the type, the second being the name and the third being the language information. \autoref{fig:resourcetree} illustrates the structure of a resource tree.
 
-\begin{figure}[b]
+\begin{figure}
 \includegraphics[width=.98\textwidth, height=\textheight,keepaspectratio]{graphics/resourcetree}
 \caption{ Resource tree structure by \protect{\cite{kath13}}}
 \label{fig:resourcetree} 
@@ -105,7 +109,7 @@ Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. T
 
 Whereas most sections can be at an arbitrary location in the file, the \emph{Debug Section} (aka \emph{.debug Section}) must be placed at the very end of the image file. The reason is that the loader doesn't map this section into memory. Image files contain per default of the linker only a Debug Directory (as pointed to by the Data Directory Table), but not a Debug Section (see \cite[\p{78}]{pespec}). Thus the Debug Directory is either located in the Debug Section if it exists, in any other section of the \PE{} or not in any section at all.
 
-Every Debug Directory entry defines \ia{} size, location and the type (format) of a debug information block. An example is in listing~\ref{lst:debugsample}
+Every Debug Directory entry defines \ia{} size, location and the type (format) of a debug information block. An example is in \autoref{lst:debugsample}
 
 \lstinputlisting[caption={Example for a Debug Section entry, output by \portex{}},captionpos=t,label=lst:debugsample]{listings/debug_sample}
 
@@ -122,4 +126,46 @@ A malformation doesn't necessarily prevent the Windows loader from running the f
 Accidental malformations occur when the malware writer doesn't know the \PECOFF{} thoroughly enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to another \PE{}, copying the own code into it and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
 
 Sheehan et\thinspace{}al. states that 68~\% of all image files have malformations. \cite[slide 7]{sheehan07}
-Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} without breaking and to recognize malformations.
+Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} correctly and to recognize malformations.
+Malformation examples are explained hereafter.
+
+\subsection{Simple Malformations}
+
+A malformation is simple if it concerns a single field or data table in the \PE{} (\cf{} \cite[slide 7]{vuksan11}).
+
+\subsubsection*{PE Headers in Overlay}
+
+As explained in \autoref{sec:pestructure} the address to the beginning of the PE signature and the following PE Headers is located in file offset 0x3c within the MS-DOS Stub. This address is a 32-bit value and can be changed to point to the overlay of the file as illustrated in \autoref{fig:overlayheader}. (\cf{} \cite[slide 13]{vuksan11})
+
+\begin{figure}
+\includegraphics[width=.98\textwidth, height=.60\textheight,keepaspectratio]{graphics/overlayheader}
+\caption{PE Header in Overlay \protect{(\cf{} \cite[slide 13]{vuksan11})}}
+\label{fig:overlayheader} 
+\end{figure}
+
+Reverse Engineering tools that expect the PE Headers to be in their standard location at a certain range from the beginning of the file will have difficulties to parse a \PE{} with this malformation.
+
+\subsubsection*{Section Table in Overlay}
+
+The idea from the previous malformation is extended by moving only the Section Table to the overlay. The Optional Header has a variable size. The offset from the beginning of the Optional Header and its size determine the beginning of the Section Table. The size is defined in the field \texttt{SizeOfOptionalHeaders} the COFF File Header. It is a 16-bit value, so the maximum value for the size is 65535. If the end of the file is smaller than the offset of the Optional Header plus its size, the Section Table can be moved to the very end of the file. \autoref{fig:overlaysectable} illustrates the malformation.
+
+As a result of this modification the Section Table will not be mapped to memory. A tool that parses the memory content will not be able to find the Section Table. Pericin demonstrates this in his talk at the BlackHat Conference with the debugger OllyDbg. \cite[min.\thinspace{}14:45]{vuksan11} 
+
+\begin{figure}
+\includegraphics[width=.98\textwidth, height=.60\textheight,keepaspectratio]{graphics/overlaysectable}
+\caption{Section Table in Overlay \protect{(\cf{} \cite[slide 14]{vuksan11})}}
+\label{fig:overlaysectable} 
+\end{figure}
+
+\subsubsection*{Dual Data Directories}
+
+The \texttt{SizeOfHeaders} field in the Optional Header defines the \enquote{combined size of an MS-DOS Stub, PE header, and section headers} \cite[\p{20}]{pespec}. But it also determines the \VA{} of the first section implicitly. \cite[slide 15]{vuksan11} 
+
+If the \texttt{SizeOfHeaders} field is modified to a smaller value, the modification will result in loading only part of the PE Header to memory. Most of the PE Header will still be processed on disk regardless of the \texttt{SizeOfHeaders} field, including the Section Table. So setting the \VA{} of the first section in the Section Table to the same value of the \texttt{SizeOfHeaders} field will make the section part of the PE Header in memory. 
+The Data Directory Table is parsed from memory by the operating system. That means writing a different continuation of the PE Header to the first section will result into \eg{} different imports or exports used by the operating system than the ones parsed on disk by reverse engineering tools.
+
+\todo{figure}
+
+\subsection{Complex Malformations}
+
+A malformation is complex if it concerns multiple fields or data tables in the \PE{} (\cf{} \cite[slide 7]{vuksan11}).

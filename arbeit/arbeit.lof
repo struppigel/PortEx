@@ -4,8 +4,10 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Structure of a PE file\relax }}{8}{figure.caption.11}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Typical Import Section Layout by {\cite [p.\kern .16667em {}61]{pespec}}\relax }}{10}{figure.caption.17}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Resource tree structure by {\cite {kath13}}\relax }}{14}{figure.caption.22}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Structure of a PE file\relax }}{9}{figure.caption.11}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Typical Import Section Layout by {\cite [p.\kern .16667em {}61]{pespec}}\relax }}{11}{figure.caption.17}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Resource tree structure by {\cite {kath13}}\relax }}{13}{figure.caption.22}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces PE Header in Overlay {(cf.{} \cite [slide 13]{vuksan11})}\relax }}{15}{figure.caption.25}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Section Table in Overlay {(cf.{} \cite [slide 14]{vuksan11})}\relax }}{16}{figure.caption.27}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

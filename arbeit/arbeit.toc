@@ -14,9 +14,11 @@
 \contentsline {section}{\numberline {2.4}Malware Hiding Techniques}{6}{section.2.4}
 \contentsline {chapter}{\numberline {3}Portable Executable Format}{7}{chapter.3}
 \contentsline {section}{\numberline {3.1}General Concepts}{7}{section.3.1}
-\contentsline {section}{\numberline {3.2}General Structure and PE Headers}{9}{section.3.2}
+\contentsline {section}{\numberline {3.2}General Structure and PE Headers}{8}{section.3.2}
 \contentsline {section}{\numberline {3.3}Special Sections}{10}{section.3.3}
-\contentsline {section}{\numberline {3.4}PE Malformations}{13}{section.3.4}
-\contentsline {chapter}{\numberline {4}Static Analysis Library}{15}{chapter.4}
-\contentsline {chapter}{\numberline {5}Evaluation}{16}{chapter.5}
-\contentsline {chapter}{Bibliography}{17}{section*.24}
+\contentsline {section}{\numberline {3.4}PE Malformations}{14}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Simple Malformations}{15}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Complex Malformations}{17}{subsection.3.4.2}
+\contentsline {chapter}{\numberline {4}Static Analysis Library}{18}{chapter.4}
+\contentsline {chapter}{\numberline {5}Evaluation}{19}{chapter.5}
+\contentsline {chapter}{Bibliography}{21}{section*.30}
