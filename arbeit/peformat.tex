@@ -124,6 +124,16 @@ Every Debug Directory entry defines \ia{} size, location and the type (format) o
 
 \lstinputlisting[caption={Example for a Debug Section entry, output by \portex{}},captionpos=t,label=lst:debugsample]{listings/debug_sample}
 
+\section{Loading Process}
+
+\begin{sidewaysfigure}
+\includegraphics[height=.39\textheight,keepaspectratio]{graphics/pe101}
+\caption{ Loading Process of a PE by \protect{\cite{peloading}}. Note that the term PE Header is used synonymously to COFF File Header in this graphic}
+\label{fig:loading} 
+\end{sidewaysfigure}
+
+\todo{add reference to figure}
+
 \section{PE Malformations}
 
 \begin{definition}[Malformation]
@@ -138,9 +148,10 @@ Accidental malformations occur if the malware writer doesn't know the \PECOFF{} 
 
 Sheehan et\thinspace{}al states that 68~\% of all image files have malformations. \cite[slide 7]{sheehan07}
 Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} correctly and to recognize malformations.
-Malformation examples are explained hereafter.
 
 While other sources only use the term malformation for a file that still runs normally, this is not a premise for this thesis. If modifications to a \PE{} done by malware, lead to a non-working host file, the file might still be of interest for malware analysis. \portex{} shall still be able to get as much information of the file as possible despite the damage done to the file. \todo{ausdruck? remove paragraph?}
+
+The following malformation examples are modifications done on purpose to deceive malware analysis tools.
 
 \subsection{Simple Malformations}
 

@@ -5,11 +5,15 @@ import java.io.IOException;
 
 public class PortexStats {
 
-	private static final String BASE_MALW_FOLDER = "/home/deque/git/PortEx/src/main/resources/virusshare128";
-	private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pevirus/";
+	private static final String BASE_MALW_FOLDER = "/home/deque/virusshare128";
+	private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
 	private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
+	
+	public static void main(String[] args) throws IOException {
+		sortPEFiles();
+	}
 
-	public void sortPEFiles() throws IOException {
+	public static void sortPEFiles() throws IOException {
 		File folder = new File(BASE_MALW_FOLDER);
 		int peCount = 0;
 		int noPECount = 0;
