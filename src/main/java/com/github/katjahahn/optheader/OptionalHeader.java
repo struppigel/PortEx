@@ -39,6 +39,12 @@ public class OptionalHeader extends PEModule {
 	private static final String STANDARD_SPEC = "optionalheaderstandardspec";
 	private static final String WINDOWS_SPEC = "optionalheaderwinspec";
 	private static final String DATA_DIR_SPEC = "datadirectoriesspec";
+	// minimum size of the optional header to read all values safely
+	public static final int MIN_SIZE = 112;
+	// minimum size of the optional header with magic number taken into account
+	private int minSize;
+	// maximum size estimated for NrOfRVAAndValue = 16
+	private int maxSize;
 
 	/* extracted file data */
 	private Map<DataDirectoryKey, DataDirEntry> dataDirEntries;
@@ -90,8 +96,13 @@ public class OptionalHeader extends PEModule {
 
 		this.magicNumber = readMagicNumber(standardSpec);
 
-		if (!magicNumber.equals(MagicNumber.PE32)) {
+		if (magicNumber.equals(MagicNumber.PE32)) {
+			minSize = 100;
+			maxSize = 224;
+		} else {
 			standardSpec.remove("BASE_OF_DATA");
+			minSize = 112;
+			maxSize = 240;
 		}
 
 		loadStandardFields(standardSpec);
@@ -193,13 +204,15 @@ public class OptionalHeader extends PEModule {
 
 		for (Entry<String, String[]> entry : standardSpec.entrySet()) {
 			String[] specs = entry.getValue();
-			long value = getBytesLongValue(headerbytes,
-					Integer.parseInt(specs[offsetLoc]),
-					Integer.parseInt(specs[lengthLoc]));
-			StandardFieldEntryKey key = StandardFieldEntryKey.valueOf(entry
-					.getKey());
-			standardFields.put(key, new StandardEntry(key, specs[description],
-					value));
+			int offset = Integer.parseInt(specs[offsetLoc]);
+			int length = Integer.parseInt(specs[lengthLoc]);
+			if (headerbytes.length >= offset + length) {
+				long value = getBytesLongValue(headerbytes, offset, length);
+				StandardFieldEntryKey key = StandardFieldEntryKey.valueOf(entry
+						.getKey());
+				standardFields.put(key, new StandardEntry(key,
+						specs[description], value));
+			}
 		}
 
 	}
@@ -254,14 +267,16 @@ public class OptionalHeader extends PEModule {
 
 		for (Entry<String, String[]> entry : windowsSpec.entrySet()) {
 			String[] specs = entry.getValue();
-			long value = getBytesLongValue(headerbytes,
-					Integer.parseInt(specs[offsetLoc]),
-					Integer.parseInt(specs[lengthLoc]));
-			WindowsEntryKey key = WindowsEntryKey.valueOf(entry.getKey());
-			windowsFields.put(key, new StandardEntry(key, specs[description],
-					value));
-			if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
-				this.rvaNumber = (int) value; // always 4 Bytes
+			int offset = Integer.parseInt(specs[offsetLoc]);
+			int length = Integer.parseInt(specs[lengthLoc]);
+			if (headerbytes.length >= offset + length) {
+				long value = getBytesLongValue(headerbytes, offset, length);
+				WindowsEntryKey key = WindowsEntryKey.valueOf(entry.getKey());
+				windowsFields.put(key, new StandardEntry(key,
+						specs[description], value));
+				if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
+					this.rvaNumber = (int) value; // always 4 Bytes
+				}
 			}
 		}
 	}
@@ -422,11 +437,14 @@ public class OptionalHeader extends PEModule {
 	 * @return list of DllCharacteristics
 	 */
 	public List<DllCharacteristic> getDllCharacteristics() {
-		List<String> keys = IOUtil.getCharacteristicKeys(
-				get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
 		List<DllCharacteristic> dllChs = new ArrayList<>();
-		for (String key : keys) {
-			dllChs.add(DllCharacteristic.valueOf(key));
+		Long characteristics = get(DLL_CHARACTERISTICS);
+		if (characteristics != null) {
+			List<String> keys = IOUtil.getCharacteristicKeys(characteristics,
+					DLL_CHARACTERISTICS_SPEC);
+			for (String key : keys) {
+				dllChs.add(DllCharacteristic.valueOf(key));
+			}
 		}
 		return dllChs;
 	}
@@ -485,5 +503,13 @@ public class OptionalHeader extends PEModule {
 	@Override
 	public long getOffset() {
 		return offset;
+	}
+
+	public int getMinSize() {
+		return minSize;
+	}
+
+	public int getMaxSize() {
+		return maxSize;
 	}
 }

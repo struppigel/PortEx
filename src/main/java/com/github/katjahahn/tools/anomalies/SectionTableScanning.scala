@@ -132,13 +132,14 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkFileAlignmentConstrains(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
+    if(fileAlignment == null) return Nil
     val sectionTable = data.getSectionTable()
     val sections = sectionTable.getSectionEntries().asScala
     for (section <- sections) {
       val sizeEntry = section.getEntry(SectionTableEntryKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getEntry(SectionTableEntryKey.POINTER_TO_RAW_DATA)
       val sectionName = filteredString(section.getName)
-      for (entry <- List(sizeEntry, pointerEntry) if entry.value % fileAlignment != 0) {
+      for (entry <- List(sizeEntry, pointerEntry) if entry != null && entry.value % fileAlignment != 0) {
         val description = s"Section Table Entry ${sectionName}: ${entry.key} (${entry.value}) must be a multiple of File Alignment (${fileAlignment})"
         anomalyList += WrongValueAnomaly(entry, description)
       }

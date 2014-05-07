@@ -22,4 +22,4 @@
 \contentsline {subsection}{\numberline {3.5.2}Complex Malformations}{19}{subsection.3.5.2}
 \contentsline {chapter}{\numberline {4}Static Analysis Library}{20}{chapter.4}
 \contentsline {chapter}{\numberline {5}Evaluation}{21}{chapter.5}
-\contentsline {chapter}{Bibliography}{23}{section*.31}
+\contentsline {chapter}{Bibliography}{23}{section*.30}

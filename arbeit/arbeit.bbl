@@ -1,9 +1,8 @@
 \begin{thebibliography}{1}
 
-\bibitem{sheehan07}
-{\sc Casey~Sheehan, Nick~Hnatiw, Tom Robinson Nick~Suan}\ (\btxeditorlong{}):
-  {\em Pimp My PE: Parsing Malicious and Malformed Executables}, Virus Bulletin
-  2007. Sunbelt Software, 2007.
+\bibitem{peloading}
+{\sc Corcami}: {\em {A Windows Executable Walkthrough}}.
+\newblock \url{https://code.google.com/p/corkami/wiki/PE101?show=content}.
 
 \bibitem{kath13}
 {\sc Kath, Randy}: {\em The Portable Executable File Format from Top to
@@ -11,11 +10,6 @@
 \newblock
   \url{http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html},
   2013.
-
-\bibitem{vuksan11}
-{\sc Mario~Vuksan, Tomislav~Pericin}\ (\btxeditorlong{}): {\em Constant
-  Insecurity: Things You Didn't Know About (PECOFF) Portable Executable
-  Format}, BlackHat USA 2011, Las Vegas. ReversingLabs, 2011.
 
 \bibitem{sikorski12}
 {\sc Michael~Sikorski, Andrew~Honig}: {\em Practical Malware Analysis}.
@@ -30,8 +24,19 @@
 \newblock \url{http://msdn.microsoft.com/library/windows/hardware/gg463125},
   2013.
 
+\bibitem{sheehan07}
+{\sc Sheehan, Casey}, {\sc Nick Hnatiw}, {\sc Tom Robinson} \btxandlong{}\ {\sc
+  Nick Suan}: {\em Pimp My PE: Parsing Malicious and Malformed Executables}.
+\newblock Virus Bulletin Conference 2007. Sunbelt Software, 2007.
+
 \bibitem{szor05}
 {\sc Szor, Peter}: {\em {The Art of Computer Virus Research and Defense}}.
 \newblock Addison Wesley Professional, February 2005.
+
+\bibitem{vuksan11}
+{\sc Vuksan, Mario} \btxandlong{}\ {\sc Tomislav Pericin}: {\em Constant
+  Insecurity: Things You Didn't Know About (PECOFF) Portable Executable
+  Format}.
+\newblock BlackHat USA 2011, Las Vegas. ReversingLabs, 2011.
 
 \end{thebibliography}

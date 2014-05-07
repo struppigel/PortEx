@@ -19,7 +19,7 @@ import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.IOUtil._
 
 trait OptionalHeaderScanning extends AnomalyScanner {
-  
+
   abstract override def scanReport(): String =
     "Applied Optional Header Scanning" + NL + super.scanReport
 
@@ -33,7 +33,8 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   }
 
   private def windowsFieldScan(opt: OptionalHeader): List[Anomaly] = {
-    checkImageBase(opt) ::: checkSectionAlignment(opt) ::: checkReserved(opt) ::: checkSizes(opt)
+    checkImageBase(opt) ::: checkSectionAlignment(opt) :::
+      checkFileAlignment(opt) ::: checkReserved(opt) ::: checkSizes(opt)
   }
 
   private def checkSizes(opt: OptionalHeader): List[Anomaly] = {
@@ -42,23 +43,25 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val headerSize = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
-    if (imageSize % sectionAlignment != 0) {
+    if (imageSize != null && sectionAlignment != null && imageSize % sectionAlignment != 0) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
       val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
     val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_HEADERS)
-    if (headerSize % fileAlignment != 0) {
-      val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${fileAlignment})"
-      anomalyList += WrongValueAnomaly(headerSizeEntry, description)
-    } //TODO headerSize >= MSDOS + PEHeader + Section Headers size
-    if (headerSize < headerSizeMin) {
-      val description = s"Optional Header: Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize}"
-      anomalyList += WrongValueAnomaly(headerSizeEntry, description)
-    }
-    if (headerSize != roundedUpHeaderSize) {
-      val description = s"Optional Header: Size of Headers should be ${roundedUpHeaderSize}, but is ${headerSize}"
-      anomalyList += WrongValueAnomaly(headerSizeEntry, description)
+    if (headerSize != null) {
+      if (fileAlignment != null && headerSize % fileAlignment != 0) {
+        val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${fileAlignment})"
+        anomalyList += WrongValueAnomaly(headerSizeEntry, description)
+      } //TODO headerSize >= MSDOS + PEHeader + Section Headers size
+      if (headerSize < headerSizeMin) {
+        val description = s"Optional Header: Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize}"
+        anomalyList += WrongValueAnomaly(headerSizeEntry, description)
+      }
+      if (headerSize != roundedUpHeaderSize) {
+        val description = s"Optional Header: Size of Headers should be ${roundedUpHeaderSize}, but is ${headerSize}"
+        anomalyList += WrongValueAnomaly(headerSizeEntry, description)
+      }
     }
     anomalyList.toList
   }
@@ -106,18 +109,20 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
-    val fileAlignment = entry.value
-    if (!isPowerOfTwo(fileAlignment)) {
-      val description = "Optional Header: File Alignment must be a power of 2, but is " + fileAlignment
-      anomalyList += WrongValueAnomaly(entry, description)
-    }
-    if (fileAlignment < 512 || fileAlignment > 65536) {
-      val description = "Optional Header: File Alignment must be between 512 and 64 K, but is " + fileAlignment
-      anomalyList += WrongValueAnomaly(entry, description)
-    }
-    if (fileAlignment != 512) {
-      val description = "Optional Header: Default File Alignment is 512, but actual value is " + fileAlignment
-      anomalyList += WrongValueAnomaly(entry, description)
+    if (entry != null) {
+      val fileAlignment = entry.value
+      if (!isPowerOfTwo(fileAlignment)) {
+        val description = "Optional Header: File Alignment must be a power of 2, but is " + fileAlignment
+        anomalyList += WrongValueAnomaly(entry, description)
+      }
+      if (fileAlignment < 512 || fileAlignment > 65536) {
+        val description = "Optional Header: File Alignment must be between 512 and 64 K, but is " + fileAlignment
+        anomalyList += WrongValueAnomaly(entry, description)
+      }
+      if (fileAlignment != 512) {
+        val description = "Optional Header: Default File Alignment is 512, but actual value is " + fileAlignment
+        anomalyList += WrongValueAnomaly(entry, description)
+      }
     }
     anomalyList.toList
   }
@@ -125,7 +130,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def checkSectionAlignment(opt: OptionalHeader): List[Anomaly] = {
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
-    if (sectionAlignment < fileAlignment) {
+    if (sectionAlignment != null && fileAlignment != null && sectionAlignment < fileAlignment) {
       val description = s"Optional Header: Section Alignment (${sectionAlignment}) needs to be >= File Alignment (${fileAlignment})"
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SECTION_ALIGNMENT)
       List(WrongValueAnomaly(entry, description))
@@ -135,20 +140,22 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def checkImageBase(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
-    val imageBase = entry.value
-    if (imageBase % 65536 != 0) {
-      val description = "Optional Header: Image Base must be a multiple of 64 K, but is " + imageBase
-      anomalyList += WrongValueAnomaly(entry, description)
-    }
-    if (isDLL() && imageBase != 0x10000000) {
-      val description = "Optional Header: The default image base for a DLL is 0x10000000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
-      anomalyList += NonDefaultAnomaly(entry, description)
-    } else if (isWinCE() && imageBase != 0x00010000) {
-      val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
-      anomalyList += NonDefaultAnomaly(entry, description)
-    } else if(imageBase != 0x00400000) { //TODO
-      val description = "Optional Header: The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
-      anomalyList += NonDefaultAnomaly(entry, description)
+    if (entry != null) {
+      val imageBase = entry.value
+      if (imageBase % 65536 != 0) {
+        val description = "Optional Header: Image Base must be a multiple of 64 K, but is " + imageBase
+        anomalyList += WrongValueAnomaly(entry, description)
+      }
+      if (isDLL() && imageBase != 0x10000000) {
+        val description = "Optional Header: The default image base for a DLL is 0x10000000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
+        anomalyList += NonDefaultAnomaly(entry, description)
+      } else if (isWinCE() && imageBase != 0x00010000) {
+        val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
+        anomalyList += NonDefaultAnomaly(entry, description)
+      } else if (imageBase != 0x00400000) { //TODO
+        val description = "Optional Header: The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
+        anomalyList += NonDefaultAnomaly(entry, description)
+      }
     }
     anomalyList.toList
   }
@@ -160,12 +167,21 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     data.getCOFFFileHeader().getCharacteristics().contains(IMAGE_FILE_DLL)
 
   private def dataDirScan(opt: OptionalHeader): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
     val datadirs = opt.getDataDirEntries()
+    if (datadirs.size() != 16) {
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
+      if (entry != null) {
+        val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
+        anomalyList += NonDefaultAnomaly(entry, description)
+      }
+    }
     if (datadirs.containsKey(DataDirectoryKey.RESERVED)) {
       val entry = datadirs.get(DataDirectoryKey.RESERVED)
       val description = "Reserved Data Directory Entry is not 0. Entry --> " + IOUtil.NL + entry.toString
-      List(ReservedDataDirAnomaly(entry, description))
-    } else Nil
+      anomalyList += ReservedDataDirAnomaly(entry, description)
+    }
+    anomalyList.toList
   }
 
 }

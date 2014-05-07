@@ -35,6 +35,7 @@ The \emph{entry point} is a \RVA{} to the starting address for \EXE{} files or t
 \section{General Structure} \label{sec:pestructure}
 
 \begin{figure}
+\centering
 \includegraphics[width=.98\textwidth, height=.60\textheight,keepaspectratio]{graphics/peformat}
 \caption{Structure of a PE file}
 \label{fig:peformat} 
@@ -90,6 +91,7 @@ The Export Name Pointer Table is an array of addresses which point to names of t
 \subsection*{Import Section}
 
 \begin{figure}
+\centering
 \includegraphics[width=.98\textwidth, height=.60\textheight,keepaspectratio]{graphics/importsection}
 \caption{Typical Import Section Layout by \protect{\cite[\p{61}]{pespec}}}
 \label{fig:import} 
@@ -126,6 +128,8 @@ Every Debug Directory entry defines \ia{} size, location and the type (format) o
 
 \section{Loading Process}
 
+test \cite{peloading} why?
+
 \begin{sidewaysfigure}
 \includegraphics[height=.39\textheight,keepaspectratio]{graphics/pe101}
 \caption{ Loading Process of a PE by \protect{\cite{peloading}}. Note that the term PE Header is used synonymously to COFF File Header in this graphic}
@@ -140,16 +144,15 @@ Every Debug Directory entry defines \ia{} size, location and the type (format) o
 A \emph{malformation} is data or layout of a \PE{} file that violates the \PECOFF{}.
 \end{definition} 
 
-Malformations are either accidental results of \PE{} modifications or done on purpose to prevent reverse engineering tools from parsing the file correctly.
-
-A malformation doesn't necessarily prevent the Windows loader from running the file. The Windows loader doesn't work in full compliance with the \PECOFF{} to maintain backward compatibility with obsolete compilers and files. Malware writers utilize the loader's behaviour to create normally working \PE{} files that can not be parsed by most tools used for malware analysis. 
+Malformations are either accidental results of \PE{} modifications or done on purpose.
+A malformation doesn't necessarily prevent the Windows loader from running the file. The Windows loader doesn't work in full compliance with the \PECOFF{} to maintain backward compatibility with obsolete compilers and files. Malware writers utilize the loader's behaviour to create normally working \PE{} files that can not be parsed by most tools used for malware analysis. Some malformations, like setting reserved fields, are also done to hide information in a \PE{}; for example marking a host file as infected to prevent a virus from infecting it twice.
 
 Accidental malformations occur if the malware writer doesn't know the \PECOFF{} enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to the host file, copying the own code into it and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
 
 Sheehan et\thinspace{}al states that 68~\% of all image files have malformations. \cite[slide 7]{sheehan07}
 Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} correctly and to recognize malformations.
 
-While other sources only use the term malformation for a file that still runs normally, this is not a premise for this thesis. If modifications to a \PE{} done by malware, lead to a non-working host file, the file might still be of interest for malware analysis. \portex{} shall still be able to get as much information of the file as possible despite the damage done to the file. \todo{ausdruck? remove paragraph?}
+%While other sources only use the term malformation for a file that still runs normally, this is not a premise for this thesis. If modifications to a \PE{} done by malware lead to a non-working host file, the file might still be of interest for malware analysis. \portex{} shall still be able to get as much information of the file as possible despite the damage done to the file. \todo{ausdruck? remove paragraph?}
 
 The following malformation examples are modifications done on purpose to deceive malware analysis tools.
 

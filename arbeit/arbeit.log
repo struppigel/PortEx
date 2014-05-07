@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  7 MAY 2014 11:56
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  7 MAY 2014 14:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1087,11 +1087,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 
 ]
-(./arbeit.lof
-
-LaTeX Warning: Citation `peloading' on page ii undefined on input line 10.
-
-)
+(./arbeit.lof)
 \tf@lof=\write10
 \openout10 = `arbeit.lof'.
 
@@ -1116,7 +1112,7 @@ Overfull \hbox (4.02081pt too wide) in alignment at lines 1--1
  []
 
 
-Overfull \hbox (4.02081pt too wide) in alignment at lines 1--50
+Overfull \hbox (4.02081pt too wide) in alignment at lines 1--51
  [] [] 
  []
 
@@ -1166,11 +1162,11 @@ ine 7.
 
 
 
-] <graphics/peformat.png, id=261, 342.27875pt x 689.57625pt>
+] <graphics/peformat.png, id=263, 342.27875pt x 689.57625pt>
 File: graphics/peformat.png Graphic file (type png)
 
 <use graphics/peformat.png>
-Package pdftex.def Info: graphics/peformat.png used on input line 38.
+Package pdftex.def Info: graphics/peformat.png used on input line 39.
 (pdftex.def)             Requested size: 178.09564pt x 358.80267pt.
 
 
@@ -1180,7 +1176,7 @@ LaTeX Warning: Marginpar on page 8 moved.
 
 LaTeX Warning: Marginpar on page 11 moved.
 
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 86.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 87.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
@@ -1190,50 +1186,43 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             See the microtype manual for details.
 
 (./listings/edata_sample [11])
-<graphics/importsection.png, id=326, 254.9525pt x 563.10374pt>
+<graphics/importsection.png, id=328, 254.9525pt x 563.10374pt>
 File: graphics/importsection.png Graphic file (type png)
 
 <use graphics/importsection.png>
-Package pdftex.def Info: graphics/importsection.png used on input line 93.
+Package pdftex.def Info: graphics/importsection.png used on input line 95.
 (pdftex.def)             Requested size: 162.45322pt x 358.80418pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [12 <./graphics/importsection.png (PNG copy)>]
-<graphics/resourcetree.png, id=350, 790.955pt x 589.20125pt>
+<graphics/resourcetree.png, id=352, 790.955pt x 589.20125pt>
 File: graphics/resourcetree.png Graphic file (type png)
 
 <use graphics/resourcetree.png>
-Package pdftex.def Info: graphics/resourcetree.png used on input line 114.
+Package pdftex.def Info: graphics/resourcetree.png used on input line 116.
 (pdftex.def)             Requested size: 338.10057pt x 251.85918pt.
  (./listings/debug_sample [13])
-<graphics/pe101.png, id=364, 917.9558pt x 362.61789pt>
+<graphics/pe101.png, id=367, 917.9558pt x 362.61789pt>
 File: graphics/pe101.png Graphic file (type png)
 
 <use graphics/pe101.png>
-Package pdftex.def Info: graphics/pe101.png used on input line 130.
+Package pdftex.def Info: graphics/pe101.png used on input line 134.
 (pdftex.def)             Requested size: 590.38913pt x 233.21964pt.
-
-
-LaTeX Warning: Citation `peloading' on page 14 undefined on input line 131.
-
-[14 <./graphics/resourcetree.png>] [15 <./graphics/pe101.png>]
-<graphics/overlayheader.png, id=393, 784.9325pt x 605.26125pt>
+ [14 <./graphics/resourcetree.png>] [15 <./graphics/pe101.png>] <graphics/overl
+ayheader.png, id=397, 784.9325pt x 605.26125pt>
 File: graphics/overlayheader.png Graphic file (type png)
 
 <use graphics/overlayheader.png>
-Package pdftex.def Info: graphics/overlayheader.png used on input line 172.
+Package pdftex.def Info: graphics/overlayheader.png used on input line 175.
 (pdftex.def)             Requested size: 338.10127pt x 260.7098pt.
  [16]
-<graphics/overlaysectable.png, id=408, 724.7075pt x 587.19376pt>
+<graphics/overlaysectable.png, id=411, 724.7075pt x 587.19376pt>
 File: graphics/overlaysectable.png Graphic file (type png)
 
 <use graphics/overlaysectable.png>
-Package pdftex.def Info: graphics/overlaysectable.png used on input line 186.
+Package pdftex.def Info: graphics/overlaysectable.png used on input line 189.
 (pdftex.def)             Requested size: 338.10237pt x 273.94722pt.
-
-Underfull \vbox (badness 4096) has occurred while \output is active []
-
  [17 <./graphics/overlayheader.png (PNG copy)>] [18 <./graphics/overlaysectable
 .png (PNG copy)>]) [19]
 \openout2 = `analysis.aux'.
@@ -1263,7 +1252,7 @@ Chapter 5.
 
 
 ] (./arbeit.bbl
-Underfull \hbox (badness 6641) in paragraph at lines 29--32
+Underfull \hbox (badness 6641) in paragraph at lines 23--26
 []\T1/aer/m/sc/10 (+20) Microsoft Co-op-er-a-tion\T1/aer/m/n/10 (+20) : \T1/aer
 /m/it/10 (+20) Mi-crosoft PE and COFF spec-i-fi-ca-
  []
@@ -1289,18 +1278,14 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 175.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 175.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 175.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: 629A163719B01D2E03C9511426648059;1369.
-
-
-LaTeX Warning: There were undefined references.
-
+(rerunfilecheck)             Checksum: D281FDC51684CF2D881B02E911832979;1369.
  ) 
 Here is how much of TeX's memory you used:
- 21711 strings out of 494976
- 361007 string characters out of 6179137
- 517225 words of memory out of 5000000
- 23762 multiletter control sequences out of 15000+600000
- 79779 words of font info for 457 fonts, out of 8000000 for 9000
+ 21753 strings out of 494976
+ 361231 string characters out of 6179137
+ 517192 words of memory out of 5000000
+ 23757 multiletter control sequences out of 15000+600000
+ 83911 words of font info for 498 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,76p,927b,1927s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1314,10 +1299,10 @@ ts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 r9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (33 pages, 613915 bytes).
+Output written on arbeit.pdf (33 pages, 614460 bytes).
 PDF statistics:
- 539 PDF objects out of 1000 (max. 8388607)
- 479 compressed objects within 5 object streams
+ 544 PDF objects out of 1000 (max. 8388607)
+ 484 compressed objects within 5 object streams
  169 named destinations out of 1000 (max. 500000)
  45792 words of extra memory for PDF output out of 51595 (max. 10000000)
 

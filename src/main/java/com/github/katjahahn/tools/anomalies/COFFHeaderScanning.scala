@@ -6,12 +6,13 @@ import com.github.katjahahn.coffheader.COFFHeaderKey
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.PEModule
 import scala.collection.JavaConverters._
-import com.github.katjahahn.IOUtil._
+import com.github.katjahahn.IOUtil
+import com.github.katjahahn.optheader.OptionalHeader
 
 trait COFFHeaderScanning extends AnomalyScanner {
 
   abstract override def scanReport(): String =
-    "Applied COFF Header Scanning" + NL + super.scanReport
+    "Applied COFF Header Scanning" + IOUtil.NL + super.scanReport
 
   abstract override def scan(): List[Anomaly] = {
     val coff = data.getCOFFFileHeader()
@@ -21,7 +22,21 @@ trait COFFHeaderScanning extends AnomalyScanner {
     anomalyList ++= checkDeprecated(COFFHeaderKey.POINTER_TO_SYMB_TABLE, coff)
     anomalyList ++= checkCharacteristics(coff)
     anomalyList ++= checkNumberOfSections(coff)
+    anomalyList ++= checkSizeOfOptHeader(coff)
     super.scan ::: anomalyList.toList
+  }
+  
+  private def checkSizeOfOptHeader(coff: COFFFileHeader): List[Anomaly] = {
+    val size = coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
+    val entry = coff.getEntry(COFFHeaderKey.SIZE_OF_OPT_HEADER)
+    val opt = data.getOptionalHeader()
+    if(size < opt.getMinSize) {
+      val description = "Collapsed Headers: The SizeOfOptionalHeader is too small, namely: " + size
+      List(WrongValueAnomaly(entry, description))
+    } else if(size > opt.getMaxSize) {
+      val description = "COFF File Header: SizeOfOptionalHeader is too large, namely: " + size
+      List(WrongValueAnomaly(entry, description))
+    } else Nil
   }
 
   private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {

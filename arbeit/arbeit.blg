@@ -11,49 +11,53 @@ A level-1 auxiliary file: evaluation.aux
 The style file: gerplain.bst
 A level-1 auxiliary file: statement.aux
 Database file #1: references.bib
-Too many commas in name 1 of "Casey Sheehan, Nick Hnatiw, Tom Robinson, Nick Suan" for entry sheehan07
-while executing---line 1161 of file gerplain.bst
-Too many commas in name 1 of "Casey Sheehan, Nick Hnatiw, Tom Robinson, Nick Suan" for entry sheehan07
-while executing---line 1202 of file gerplain.bst
-You've used 7 entries,
+A bad cross reference---entry "vuksan11"
+refers to entry "blackhat11", which doesn't exist
+A bad cross reference---entry "sheehan07"
+refers to entry "virusbtn07", which doesn't exist
+Warning--I didn't find a database entry for "blackhat11"
+Warning--I didn't find a database entry for "virusbtn07"
+Warning--empty booktitle in sheehan07
+Warning--empty booktitle in vuksan11
+You've used 8 entries,
             2343 wiz_defined-function locations,
-            589 strings with 5722 characters,
-and the built_in function-call counts, 1642 in all, are:
-= -- 164
-> -- 51
+            595 strings with 5878 characters,
+and the built_in function-call counts, 2113 in all, are:
+= -- 209
+> -- 78
 < -- 0
-+ -- 22
-- -- 14
-* -- 89
-:= -- 267
-add.period$ -- 14
-call.type$ -- 7
-change.case$ -- 21
++ -- 33
+- -- 24
+* -- 125
+:= -- 340
+add.period$ -- 18
+call.type$ -- 8
+change.case$ -- 28
 chr.to.int$ -- 0
-cite$ -- 7
-duplicate$ -- 77
-empty$ -- 174
-format.name$ -- 14
-if$ -- 374
+cite$ -- 10
+duplicate$ -- 96
+empty$ -- 211
+format.name$ -- 24
+if$ -- 482
 int.to.chr$ -- 0
-int.to.str$ -- 7
-missing$ -- 4
-newline$ -- 29
+int.to.str$ -- 8
+missing$ -- 6
+newline$ -- 35
 num.names$ -- 16
-pop$ -- 48
+pop$ -- 64
 preamble$ -- 1
-purify$ -- 21
+purify$ -- 28
 quote$ -- 0
-skip$ -- 57
+skip$ -- 72
 stack$ -- 0
-substring$ -- 36
-swap$ -- 19
+substring$ -- 41
+swap$ -- 26
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 22
-warning$ -- 0
-while$ -- 14
-width$ -- 8
-write$ -- 65
+type$ -- 28
+warning$ -- 2
+while$ -- 16
+width$ -- 9
+write$ -- 75
 (There were 2 error messages)

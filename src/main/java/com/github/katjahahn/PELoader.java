@@ -106,8 +106,14 @@ public class PELoader {
 		long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
 				+ COFFFileHeader.HEADER_SIZE;
 		logger.info("Optional Header offset: " + offset);
-		byte[] headerbytes = loadBytes(offset, coff.getSizeOfOptionalHeader().intValue(),
-				raf);
+		int size = coff.getSizeOfOptionalHeader().intValue();
+//		if(size < OptionalHeader.MIN_SIZE) {
+//			size = OptionalHeader.MIN_SIZE;
+//		}
+		if(size + offset > file.length()) {
+			size = (int) (file.length() - offset);
+		}
+		byte[] headerbytes = loadBytes(offset, size, raf);
 		return new OptionalHeader(headerbytes, offset);
 	}
 
