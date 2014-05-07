@@ -1,0 +1,40 @@
+Export Directory Table
+......................
+
+Minor Version: 0 (0x0)
+Address Table Entries: 2 (0x2)
+Ordinal Base: 1 (0x1)
+Name Pointer RVA: 31664 (0x7bb0)
+Export Flags: 0 (0x0)
+Ordinal Table RVA: 31672 (0x7bb8)
+Number of Name Pointers: 2 (0x2)
+Major Version: 0 (0x0)
+Time/Date Stamp: 1317493556 (0x4e875b34)
+Name RVA: 31676 (0x7bbc)
+Export Address Table RVA: 31656 (0x7ba8)
+
+Export Address Table
+....................
+
+0x1030, 0x1050
+
+Name Pointer Table
+...................
+
+RVA    ->  Name
+****************
+(0x7bc5,DLL2Print)
+(0x7bcf,DLL2ReturnJ)
+
+Ordinal Table
+..............
+
+1, 2
+
+Export Entries Summary 
+----------------------
+
+Name, Ordinal, RVA
+...................
+DLL2Print, 1, 0x1030
+DLL2ReturnJ, 2, 0x1050
