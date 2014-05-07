@@ -2,16 +2,16 @@
 
 \gloitem {\glosslabel{acn:DLL}{\noexpand \acronymfont {DLL}}}Dynamic-Link Library\relax
 \glodelim 
-		\glsnumformat{7\delimN 8}\delimN \glsnumformat{10}\delimN 
-		\glsnumformat{12}\delimT \gloskip \glogroupE
+		\glsnumformat{7\delimN 8}\delimN \glsnumformat{11}\delimN 
+		\glsnumformat{13}\delimT \gloskip \glogroupE
 
 \gloitem {\glosslabel{acn:EXE}{\noexpand \acronymfont {EXE}}}Executable File\relax
 \glodelim 
-		\glsnumformat{7\delimN 8}\delimT \gloskip \glogroupI
+		\glsnumformat{7\delimN 8}\delimN \glsnumformat{10}\delimT \gloskip \glogroupI
 
 \gloitem {\glosslabel{acn:IAT}{\noexpand \acronymfont {IAT}}}Import Address Table\relax
 \glodelim 
-		\glsnumformat{10}\delimT \gloskip \glogroupN
+		\glsnumformat{13}\delimT \gloskip \glogroupN
 
 \gloitem {\glosslabel{acn:NZ}{\noexpand \acronymfont {NZ}}}New Executable\relax
 \glodelim 
@@ -24,16 +24,16 @@
 
 \gloitem {\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax
 \glodelim 
-		\glsnumformat{7}\delimN \glsnumformat{10}\delimN 
-		\glsnumformat{13\delimN 14}\delimT 
+		\glsnumformat{7\delimN 8}\delimN \glsnumformat{10}\delimN 
+		\glsnumformat{13\delimR 15}\delimT 
 
 \gloitem {\glosslabel{acn:PEplus}{\noexpand \acronymfont {PE32+}}}Portable Executable with a 64-bit address space\relax
 \glodelim 
-		\glsnumformat{8}\delimT 
+		\glsnumformat{10}\delimT 
 
 \gloitem {\glosslabel{acn:PEsmall}{\noexpand \acronymfont {PE32}}}Portable Executable with a 32-bit address space\relax
 \glodelim 
-		\glsnumformat{8}\delimT \gloskip \glogroupR
+		\glsnumformat{10}\delimT \gloskip \glogroupR
 
 \gloitem {\glosslabel{acn:RVA}{\noexpand \acronymfont {RVA}}}Relative Virtual Address\relax
 \glodelim 

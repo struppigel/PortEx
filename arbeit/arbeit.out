@@ -11,11 +11,11 @@
 \BOOKMARK [1][-]{section.2.4}{Malware Hiding Techniques}{chapter.2}% 11
 \BOOKMARK [0][-]{chapter.3}{Portable Executable Format}{}% 12
 \BOOKMARK [1][-]{section.3.1}{General Concepts}{chapter.3}% 13
-\BOOKMARK [1][-]{section.3.2}{General Structure and PE Headers}{chapter.3}% 14
+\BOOKMARK [1][-]{section.3.2}{General Structure}{chapter.3}% 14
 \BOOKMARK [1][-]{section.3.3}{Special Sections}{chapter.3}% 15
 \BOOKMARK [1][-]{section.3.4}{PE Malformations}{chapter.3}% 16
 \BOOKMARK [2][-]{subsection.3.4.1}{Simple Malformations}{section.3.4}% 17
 \BOOKMARK [2][-]{subsection.3.4.2}{Complex Malformations}{section.3.4}% 18
 \BOOKMARK [0][-]{chapter.4}{Static Analysis Library}{}% 19
 \BOOKMARK [0][-]{chapter.5}{Evaluation}{}% 20
-\BOOKMARK [0][-]{section*.30}{Bibliography}{}% 21
+\BOOKMARK [0][-]{section*.35}{Bibliography}{}% 21

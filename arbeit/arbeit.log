@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  6 MAY 2014 20:50
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  7 MAY 2014 09:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1199,22 +1199,22 @@ ine 7.
 
 
 
-] <graphics/peformat.png, id=253, 244.915pt x 689.57625pt>
+] <graphics/peformat.png, id=253, 342.27875pt x 689.57625pt>
 File: graphics/peformat.png Graphic file (type png)
 
 <use graphics/peformat.png>
 Package pdftex.def Info: graphics/peformat.png used on input line 38.
-(pdftex.def)             Requested size: 127.435pt x 358.80267pt.
- [8] [9 <./graphics/peformat.png (PNG copy)>]
-<graphics/importsection.png, id=268, 254.9525pt x 563.10374pt>
-File: graphics/importsection.png Graphic file (type png)
+(pdftex.def)             Requested size: 178.09564pt x 358.80267pt.
 
-<use graphics/importsection.png>
-Package pdftex.def Info: graphics/importsection.png used on input line 68.
-(pdftex.def)             Requested size: 162.45322pt x 358.80418pt.
- [10] [11 <./graphics/importsection.png (PNG copy)>]
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 94.
- (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
+
+LaTeX Warning: Marginpar on page 8 moved.
+
+[8] [9 <./graphics/peformat.png (PNG copy)>] [10]
+
+LaTeX Warning: Marginpar on page 11 moved.
+
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 86.
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 Package microtype Info: Loading generic settings for font family
@@ -1222,32 +1222,39 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
+(./listings/edata_sample [11])
+<graphics/importsection.png, id=318, 254.9525pt x 563.10374pt>
+File: graphics/importsection.png Graphic file (type png)
 
-LaTeX Warning: Marginpar on page 12 moved.
+<use graphics/importsection.png>
+Package pdftex.def Info: graphics/importsection.png used on input line 93.
+(pdftex.def)             Requested size: 162.45322pt x 358.80418pt.
 
-(./listings/edata_sample [12])
-<graphics/resourcetree.png, id=330, 790.955pt x 589.20125pt>
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [12 <./graphics/importsection.png (PNG copy)>]
+<graphics/resourcetree.png, id=343, 790.955pt x 589.20125pt>
 File: graphics/resourcetree.png Graphic file (type png)
 
 <use graphics/resourcetree.png>
-Package pdftex.def Info: graphics/resourcetree.png used on input line 103.
+Package pdftex.def Info: graphics/resourcetree.png used on input line 114.
 (pdftex.def)             Requested size: 338.10057pt x 251.85918pt.
- [13 <./graphics/resourcetree.png>]
-(./listings/debug_sample) [14]
-<graphics/overlayheader.png, id=373, 768.8725pt x 536.0025pt>
+ (./listings/debug_sample [13]) [14 <./graphics/resourcetree.png>]
+<graphics/overlayheader.png, id=378, 784.9325pt x 605.26125pt>
 File: graphics/overlayheader.png Graphic file (type png)
 
 <use graphics/overlayheader.png>
-Package pdftex.def Info: graphics/overlayheader.png used on input line 141.
-(pdftex.def)             Requested size: 338.1055pt x 235.70279pt.
- [15 <./graphics/overlayheader.png (PNG copy)>] <graphics/overlaysectable.png, 
-id=384, 724.7075pt x 587.19376pt>
+Package pdftex.def Info: graphics/overlayheader.png used on input line 161.
+(pdftex.def)             Requested size: 338.10127pt x 260.7098pt.
+ [15]
+<graphics/overlaysectable.png, id=396, 724.7075pt x 587.19376pt>
 File: graphics/overlaysectable.png Graphic file (type png)
 
 <use graphics/overlaysectable.png>
-Package pdftex.def Info: graphics/overlaysectable.png used on input line 155.
+Package pdftex.def Info: graphics/overlaysectable.png used on input line 175.
 (pdftex.def)             Requested size: 338.10237pt x 273.94722pt.
- [16 <./graphics/overlaysectable.png (PNG copy)>]) [17]
+ [16 <./graphics/overlayheader.png (PNG copy)>]) [17 <./graphics/overlaysectabl
+e.png (PNG copy)>]
 \openout2 = `analysis.aux'.
 
 
@@ -1301,14 +1308,14 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 177.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 177.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 177.
 Package rerunfilecheck Info: File `arbeit.out' has not changed.
-(rerunfilecheck)             Checksum: C0001692AEC41CB96AE6526EA6E5E5B3;1322.
+(rerunfilecheck)             Checksum: 79FAE85B456511AD3094A1F63AAD91EE;1307.
  ) 
 Here is how much of TeX's memory you used:
- 22776 strings out of 494976
- 380563 string characters out of 6179137
- 532269 words of memory out of 5000000
- 24837 multiletter control sequences out of 15000+600000
- 79099 words of font info for 451 fonts, out of 8000000 for 9000
+ 22807 strings out of 494976
+ 381172 string characters out of 6179137
+ 532620 words of memory out of 5000000
+ 24855 multiletter control sequences out of 15000+600000
+ 79779 words of font info for 457 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,81p,927b,1916s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1322,10 +1329,10 @@ ts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 r9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (31 pages, 340071 bytes).
+Output written on arbeit.pdf (31 pages, 355581 bytes).
 PDF statistics:
- 510 PDF objects out of 1000 (max. 8388607)
- 450 compressed objects within 5 object streams
- 158 named destinations out of 1000 (max. 500000)
+ 522 PDF objects out of 1000 (max. 8388607)
+ 462 compressed objects within 5 object streams
+ 164 named destinations out of 1000 (max. 500000)
  45779 words of extra memory for PDF output out of 51595 (max. 10000000)
 
