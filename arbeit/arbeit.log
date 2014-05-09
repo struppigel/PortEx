@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  7 MAY 2014 14:32
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.4.22)  9 MAY 2014 17:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1162,7 +1162,7 @@ ine 7.
 
 
 
-] <graphics/peformat.png, id=263, 342.27875pt x 689.57625pt>
+] <graphics/peformat.png, id=265, 342.27875pt x 689.57625pt>
 File: graphics/peformat.png Graphic file (type png)
 
 <use graphics/peformat.png>
@@ -1186,7 +1186,7 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             See the microtype manual for details.
 
 (./listings/edata_sample [11])
-<graphics/importsection.png, id=328, 254.9525pt x 563.10374pt>
+<graphics/importsection.png, id=330, 254.9525pt x 563.10374pt>
 File: graphics/importsection.png Graphic file (type png)
 
 <use graphics/importsection.png>
@@ -1196,35 +1196,55 @@ Package pdftex.def Info: graphics/importsection.png used on input line 95.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [12 <./graphics/importsection.png (PNG copy)>]
-<graphics/resourcetree.png, id=352, 790.955pt x 589.20125pt>
+<graphics/resourcetree.png, id=354, 790.955pt x 589.20125pt>
 File: graphics/resourcetree.png Graphic file (type png)
 
 <use graphics/resourcetree.png>
 Package pdftex.def Info: graphics/resourcetree.png used on input line 116.
 (pdftex.def)             Requested size: 338.10057pt x 251.85918pt.
  (./listings/debug_sample [13])
-<graphics/pe101.png, id=367, 917.9558pt x 362.61789pt>
+<graphics/pe101.png, id=369, 917.9558pt x 362.61789pt>
 File: graphics/pe101.png Graphic file (type png)
 
 <use graphics/pe101.png>
 Package pdftex.def Info: graphics/pe101.png used on input line 134.
 (pdftex.def)             Requested size: 590.38913pt x 233.21964pt.
  [14 <./graphics/resourcetree.png>] [15 <./graphics/pe101.png>] <graphics/overl
-ayheader.png, id=397, 784.9325pt x 605.26125pt>
+ayheader.png, id=400, 784.9325pt x 605.26125pt>
 File: graphics/overlayheader.png Graphic file (type png)
 
 <use graphics/overlayheader.png>
 Package pdftex.def Info: graphics/overlayheader.png used on input line 175.
 (pdftex.def)             Requested size: 338.10127pt x 260.7098pt.
  [16]
-<graphics/overlaysectable.png, id=411, 724.7075pt x 587.19376pt>
+<graphics/overlaysectable.png, id=413, 724.7075pt x 587.19376pt>
 File: graphics/overlaysectable.png Graphic file (type png)
 
 <use graphics/overlaysectable.png>
 Package pdftex.def Info: graphics/overlaysectable.png used on input line 189.
 (pdftex.def)             Requested size: 338.10237pt x 273.94722pt.
+
+Underfull \vbox (badness 1603) has occurred while \output is active []
+
  [17 <./graphics/overlayheader.png (PNG copy)>] [18 <./graphics/overlaysectable
-.png (PNG copy)>]) [19]
+.png (PNG copy)>] <graphics/dualpeheader.png, id=428, 589.20125pt x 687.56876pt
+>
+File: graphics/dualpeheader.png Graphic file (type png)
+
+<use graphics/dualpeheader.png>
+Package pdftex.def Info: graphics/dualpeheader.png used on input line 203.
+(pdftex.def)             Requested size: 307.46526pt x 358.79678pt.
+
+Overfull \hbox (7.13719pt too wide) in paragraph at lines 212--214
+[]\T1/aer/m/n/10 (-20) The first pos-si-bil-i-tiy is set-ting the \T1/pcr/m/n/1
+0 FileAlignment \T1/aer/m/n/10 (-20) and the \T1/pcr/m/n/10 SectionAlignment|
+ []
+
+
+Underfull \vbox (badness 1184) has occurred while \output is active []
+
+ [19]
+[20 <./graphics/dualpeheader.png (PNG copy)>]) [21]
 \openout2 = `analysis.aux'.
 
 
@@ -1233,7 +1253,7 @@ No file analysis.tex.
 
 (./portex.tex
 Chapter 4.
-) [20
+) [22
 
 
 
@@ -1244,27 +1264,33 @@ Chapter 4.
 
  (./evaluation.tex
 Chapter 5.
-) [21
+) [23
 
 
 
-] [22
+] [24
 
 
 ] (./arbeit.bbl
-Underfull \hbox (badness 6641) in paragraph at lines 23--26
+Underfull \hbox (badness 1052) in paragraph at lines 27--30
 []\T1/aer/m/sc/10 (+20) Microsoft Co-op-er-a-tion\T1/aer/m/n/10 (+20) : \T1/aer
-/m/it/10 (+20) Mi-crosoft PE and COFF spec-i-fi-ca-
+/m/it/10 (+20) Mi-crosoft PE and COFF spec-i-fi-ca-tion\T1/aer/m/n/10 (+20) .
  []
 
-) [23
 
-] [24
+Underfull \hbox (badness 10000) in paragraph at lines 27--30
+[][]$\T1/pcr/m/n/10 http : / / msdn . microsoft . com / library / windows / har
+dware /
+ []
+
+) [25
+
+] [26
 
 ]
 \openout2 = `statement.aux'.
 
- (./statement.tex) [25
+ (./statement.tex) [27
 
 ]
 \tf@thm=\write12
@@ -1281,11 +1307,11 @@ Package rerunfilecheck Info: File `arbeit.out' has not changed.
 (rerunfilecheck)             Checksum: D281FDC51684CF2D881B02E911832979;1369.
  ) 
 Here is how much of TeX's memory you used:
- 21753 strings out of 494976
- 361231 string characters out of 6179137
- 517192 words of memory out of 5000000
- 23757 multiletter control sequences out of 15000+600000
- 83911 words of font info for 498 fonts, out of 8000000 for 9000
+ 21728 strings out of 494976
+ 361096 string characters out of 6179137
+ 518307 words of memory out of 5000000
+ 23761 multiletter control sequences out of 15000+600000
+ 80853 words of font info for 468 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  70i,9n,76p,927b,1927s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1299,10 +1325,10 @@ ts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 r9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
 /share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on arbeit.pdf (33 pages, 614460 bytes).
+Output written on arbeit.pdf (35 pages, 648098 bytes).
 PDF statistics:
- 544 PDF objects out of 1000 (max. 8388607)
- 484 compressed objects within 5 object streams
- 169 named destinations out of 1000 (max. 500000)
- 45792 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 568 PDF objects out of 1000 (max. 8388607)
+ 504 compressed objects within 6 object streams
+ 174 named destinations out of 1000 (max. 500000)
+ 45797 words of extra memory for PDF output out of 51595 (max. 10000000)
 

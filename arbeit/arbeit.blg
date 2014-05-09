@@ -15,49 +15,52 @@ A bad cross reference---entry "vuksan11"
 refers to entry "blackhat11", which doesn't exist
 A bad cross reference---entry "sheehan07"
 refers to entry "virusbtn07", which doesn't exist
+A bad cross reference---entry "revlabs11"
+refers to entry "blackhat11", which doesn't exist
 Warning--I didn't find a database entry for "blackhat11"
 Warning--I didn't find a database entry for "virusbtn07"
+Warning--empty booktitle in revlabs11
 Warning--empty booktitle in sheehan07
 Warning--empty booktitle in vuksan11
-You've used 8 entries,
+You've used 10 entries,
             2343 wiz_defined-function locations,
-            595 strings with 5878 characters,
-and the built_in function-call counts, 2113 in all, are:
-= -- 209
-> -- 78
+            603 strings with 6112 characters,
+and the built_in function-call counts, 2599 in all, are:
+= -- 256
+> -- 92
 < -- 0
-+ -- 33
-- -- 24
-* -- 125
-:= -- 340
-add.period$ -- 18
-call.type$ -- 8
-change.case$ -- 28
++ -- 39
+- -- 28
+* -- 149
+:= -- 417
+add.period$ -- 22
+call.type$ -- 10
+change.case$ -- 34
 chr.to.int$ -- 0
-cite$ -- 10
-duplicate$ -- 96
-empty$ -- 211
-format.name$ -- 24
-if$ -- 482
+cite$ -- 13
+duplicate$ -- 120
+empty$ -- 265
+format.name$ -- 28
+if$ -- 595
 int.to.chr$ -- 0
-int.to.str$ -- 8
-missing$ -- 6
-newline$ -- 35
-num.names$ -- 16
-pop$ -- 64
+int.to.str$ -- 10
+missing$ -- 7
+newline$ -- 43
+num.names$ -- 20
+pop$ -- 79
 preamble$ -- 1
-purify$ -- 28
+purify$ -- 34
 quote$ -- 0
-skip$ -- 72
+skip$ -- 91
 stack$ -- 0
-substring$ -- 41
-swap$ -- 26
+substring$ -- 51
+swap$ -- 32
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 28
-warning$ -- 2
-while$ -- 16
-width$ -- 9
-write$ -- 75
-(There were 2 error messages)
+type$ -- 36
+warning$ -- 3
+while$ -- 20
+width$ -- 12
+write$ -- 92
+(There were 3 error messages)

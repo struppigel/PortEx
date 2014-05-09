@@ -8,6 +8,7 @@ import com.github.katjahahn.PEModule
 import scala.collection.JavaConverters._
 import com.github.katjahahn.IOUtil
 import com.github.katjahahn.optheader.OptionalHeader
+import com.github.katjahahn.tools.Overlay
 
 trait COFFHeaderScanning extends AnomalyScanner {
   
@@ -23,8 +24,16 @@ trait COFFHeaderScanning extends AnomalyScanner {
     anomalyList ++= checkCharacteristics(coff)
     anomalyList ++= checkNumberOfSections(coff)
     anomalyList ++= checkSizeOfOptHeader(coff)
+    anomalyList ++= checkPEHeaderLocation(coff)
     super.scan ::: anomalyList.toList
   }  
+  
+  private def checkPEHeaderLocation(coff: COFFFileHeader): List[Anomaly] = {
+    val overlayLoc = new Overlay(data.getFile()).getEndOfPE()
+    if(coff.getOffset() >= overlayLoc) {
+      List(StructuralAnomaly("PE Header moved to Overlay."))
+    } else Nil
+  }
   
   private def checkSizeOfOptHeader(coff: COFFFileHeader): List[Anomaly] = {
     val size = coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)

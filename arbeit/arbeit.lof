@@ -10,5 +10,6 @@
 \contentsline {figure}{\numberline {3.4}{\ignorespaces Loading Process of a PE by {\cite {peloading}}. Note that the term PE Header is used synonymously to COFF File Header in this graphic}}{15}{figure.3.4}
 \contentsline {figure}{\numberline {3.5}{\ignorespaces PE Header in Overlay {(cf.{} \cite [slide 13]{vuksan11})}}}{17}{figure.3.5}
 \contentsline {figure}{\numberline {3.6}{\ignorespaces Section Table in Overlay {(cf.{} \cite [slide 14]{vuksan11})}}}{18}{figure.3.6}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Dual PE Header}}{20}{figure.3.7}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

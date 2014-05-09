@@ -8,9 +8,33 @@ public class PortexStats {
 	private static final String BASE_MALW_FOLDER = "/home/deque/virusshare128";
 	private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
 	private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
-	
+
 	public static void main(String[] args) throws IOException {
-		sortPEFiles();
+		ableToLoad();
+	}
+
+	public static int ableToLoad() {
+		int ableToLoad = 0;
+		int filesReadCounter = 0;
+		File folder = new File(PE_FOLDER);
+		File[] files = folder.listFiles();
+		for (File file : files) {
+			try {
+				PELoader.loadPE(file);
+				ableToLoad++;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
+			filesReadCounter++;
+			if (filesReadCounter % 100 == 0) {
+				System.out.println("Files read: " + filesReadCounter);
+				System.out.println("Able to load: " + ableToLoad);
+				System.out.println();
+			}
+		}
+		System.out.println("Able to load " + ableToLoad + "/"
+				+ files.length + " successfully.");
+		return ableToLoad;
 	}
 
 	public static void sortPEFiles() throws IOException {

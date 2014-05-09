@@ -1,8 +1,12 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{peloading}
 {\sc Corcami}: {\em {A Windows Executable Walkthrough}}.
 \newblock \url{https://code.google.com/p/corkami/wiki/PE101?show=content}.
+
+\bibitem{revlabs11}
+{\sc Corporation, ReversingLabs}: {\em {Undocumented PECOFF}}.
+\newblock BlackHat USA 2011, Las Vegas, 2011.
 
 \bibitem{kath13}
 {\sc Kath, Randy}: {\em The Portable Executable File Format from Top to
@@ -28,6 +32,10 @@
 {\sc Sheehan, Casey}, {\sc Nick Hnatiw}, {\sc Tom Robinson} \btxandlong{}\ {\sc
   Nick Suan}: {\em Pimp My PE: Parsing Malicious and Malformed Executables}.
 \newblock Virus Bulletin Conference 2007. Sunbelt Software, 2007.
+
+\bibitem{tinype}
+{\sc Sotirov, Alexander}: {\em {Tiny PE}}.
+\newblock \url{http://www.phreedom.org/research/tinype/}.
 
 \bibitem{szor05}
 {\sc Szor, Peter}: {\em {The Art of Computer Virus Research and Defense}}.

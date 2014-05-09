@@ -21,12 +21,13 @@
 \glodelim 
 		\glsnumformat{7\delimN 8}\delimN \glsnumformat{10}\delimN 
 		\glsnumformat{13\delimN 14}\delimN \glsnumformat{16}\delimN 
-		\glsnumformat{19}\delimT 
+		\glsnumformat{19}\delimN \glsnumformat{21}\delimT 
 
 \gloitem {\glosslabel{acn:PECOFF}{\noexpand \acronymfont {PE/COFF specification}}}\emph {Microsoft Portable Executable and Common Object File Format Specification}\relax
 \glodelim 
 		\glsnumformat{7\delimN 8}\delimN \glsnumformat{10}\delimN 
-		\glsnumformat{13\delimN 14}\delimN \glsnumformat{16}\delimT 
+		\glsnumformat{13\delimN 14}\delimN \glsnumformat{16}\delimN 
+		\glsnumformat{19}\delimT 
 
 \gloitem {\glosslabel{acn:PEplus}{\noexpand \acronymfont {PE32+}}}Portable Executable with a 64-bit address space\relax
 \glodelim 
@@ -42,8 +43,7 @@
 
 \gloitem {\glosslabel{acn:VA}{\noexpand \acronymfont {VA}}}Virtual Address\relax
 \glodelim 
-		\glsnumformat{8}\delimN \glsnumformat{17}\delimN 
-		\glsnumformat{19}\delimT 
+		\glsnumformat{8}\delimN \glsnumformat{19}\delimT 
 
 \gloitem {\glosslabel{acn:VM}{\noexpand \acronymfont {VM}}}Virtual Machine\relax
 \glodelim 

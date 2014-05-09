@@ -161,9 +161,9 @@ The following malformation examples are modifications done on purpose to deceive
 A malformation is \emph{simple} if it concerns a single field or data table in the \PE{} (\cf{} \cite[slide 7]{vuksan11}).
 The malformation examples described hereafter are in ascending order of their complexity. \todo{remove?}
 
-\subsubsection*{No Sections}
-
 \subsubsection*{Too Many Sections}
+
+According to the \PECOFF{} the number of sections is limited to 96 \cite[\p{12}]{pespec}. While Windows XP refuses to execute a \PE{} with more sections, Windows Vista, 7 and 8 run it nevertheless. The number of sections is defined in the COFF File Header in a 16-bit value. If the maximum number of 0xffff (65535) sections is set, tools might fail to allocate enough memory to load the file and crash subsequently. An example is IDA v5.3.
 
 \subsubsection*{PE Header in Overlay}
 
@@ -177,7 +177,7 @@ As explained in \autoref{sec:pestructure} the address to the beginning of the PE
 \label{fig:overlayheader} 
 \end{figure}
 
-Reverse Engineering tools that expect the PE Header to be in its standard location at a certain range from the beginning of the file will have difficulties to parse a \PE{} with this malformation.
+The overlay is never mapped into memory, so the PE Header won't be present in memory as well. The Windows loader reads it from disk and the file will be executed nevertheless. Tools that read the PE Header from memory can break because of that malformation.
 
 \subsubsection*{Section Table in Overlay}
 
@@ -191,15 +191,41 @@ As a result of this modification the Section Table will not be mapped to memory.
 \label{fig:overlaysectable} 
 \end{figure}
 
-\subsubsection*{Dual Data Directories}
+\subsubsection*{Dual PE Header} \label{subsubsec:dualheader}
 
 The \texttt{SizeOfHeaders} field in the Optional Header defines the \enquote{combined size of an MS-DOS Stub, PE header, and section headers} \cite[\p{20}]{pespec}. But it also determines the \VA{} of the first section implicitly. \cite[slide 15]{vuksan11} 
 
-If the \texttt{SizeOfHeaders} field is modified to a smaller value, the modification will result in loading only part of the PE Header to memory. Most of the PE Header will still be processed on disk regardless of the \texttt{SizeOfHeaders} field, including the Section Table. So setting the \VA{} of the first section in the Section Table to the same value of the \texttt{SizeOfHeaders} field will make the section part of the PE Header in memory. 
+If the \texttt{SizeOfHeaders} field is modified to a smaller value, the modification will result in loading only part of the PE Header to memory. The Windows loader still processes most of the PE Header on disk regardless of the \texttt{SizeOfHeaders} field. So setting the \VA{} of the first section in the Section Table to the same value of the \texttt{SizeOfHeaders} field will make the section part of the PE Header in memory whereas the PE Header read on disk is another one. \autoref{fig:dualpeheader} illustrates the malformation.
+
 The Data Directory Table is parsed from memory by the operating system. That means writing a different continuation of the PE Header to the first section will result into \eg{} different imports or exports used by the operating system than the ones parsed on disk by reverse engineering tools.
 
-\todo{figure}
+\begin{figure}
+\includegraphics[width=.98\textwidth, height=.60\textheight,keepaspectratio]{graphics/dualpeheader}
+\caption{Dual PE Header}
+\label{fig:dualpeheader} 
+\end{figure}
+
+\subsubsection*{Writeable PE Header} \label{subsubsec:writeableheader}
+
+The PE Header usually has only \texttt{execute} and \texttt{read} attributes enabled. There are two possibilities to make it writeable. 
+
+The first possibilitiy is setting the \texttt{FileAlignment} and the \texttt{SectionAlignment} to 0x200 (512) or smaller. Both values are part of the Optional Header. 0x200 is the minimum value according to the \PECOFF{} \cite[\p{19}]{pespec}. If the value in the PE Header is smaller, the Windows loader rounds it up to 0x200.
+These changes force the Windows loader to provide full access to the PE Header. (\cf{} \cite[\p{6}]{revlabs11})
+
+The second possibility is placing the PE Header in a section as explained in \emph{\nameref{subsubsec:dualheader}} and enabling the \texttt{write} attribute in the section header.
+
+This malformation is necessary for some of the complex malformations following after.
 
 \subsection{Complex Malformations}
 
 A malformation is complex if it concerns multiple fields or data tables in the \PE{} (\cf{} \cite[slide 7]{vuksan11}).
+
+\subsubsection*{No Sections}
+
+Despite having no sections a \PE{} is able to execute code by placing instructions within the PE Header. This is demonstrated by Sotirov in his \emph{Tiny PE} project. \cite{tinype}
+
+To make this work, the file has to be modified so that the physical offsets are the same as their virtual counterparts. The PE Header is made writable as explained in \emph{\nameref{subsubsec:writeableheader}} and the number of sections is set to 0. The \texttt{SizeOfHeaders} field in the Optional Header needs to be large to enough to make Windows load the whole file into memory. That way the \PE{} can execute code inside its PE Header.
+
+A \PE{} without sections may be partly unreadable by reverse engineering tools as a result of incorrect address conversions; or might be able to break tools that expect the file to have at least one section. An example is Hiew v8.03 which doesn't recognize a sectionless \PE{} as \PE{} file.
+
+
