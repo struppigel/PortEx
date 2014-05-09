@@ -107,9 +107,9 @@ public class PELoader {
 				+ COFFFileHeader.HEADER_SIZE;
 		logger.info("Optional Header offset: " + offset);
 		int size = coff.getSizeOfOptionalHeader().intValue();
-//		if(size < OptionalHeader.MIN_SIZE) {
-//			size = OptionalHeader.MIN_SIZE;
-//		}
+		if(size < OptionalHeader.MIN_SIZE) {
+			size = OptionalHeader.MIN_SIZE;
+		}
 		if(size + offset > file.length()) {
 			size = (int) (file.length() - offset);
 		}

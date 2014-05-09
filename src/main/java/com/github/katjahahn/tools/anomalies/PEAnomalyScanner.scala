@@ -40,6 +40,24 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
 object PEAnomalyScanner {
 
   /**
+   * Parses the given file and creates a PEAnomalyScanner instance that has all scanning
+   *  characteristics applied.
+   *
+   * @param file the pe file to scan for
+   * @return a PEAnomalyScanner instance with the traits applied from the boolean values
+   */
+  def getInstance(file: File): PEAnomalyScanner = getInstance(file, true, true, true)
+
+  /**
+   * Creates a PEAnomalyScanner instance that has all scanning characteristics
+   * applied.
+   *
+   * @param data the PEData object created by the PELoader
+   * @return a PEAnomalyScanner instance with the traits applied from the boolean values
+   */
+  def getInstance(data: PEData): PEAnomalyScanner = getInstance(data, true, true, true)
+
+  /**
    * Parses the given file and creates a PEAnomalyScanner instance that has the
    * scanning characteristics applied defined by the boolean scanning parameters.
    *

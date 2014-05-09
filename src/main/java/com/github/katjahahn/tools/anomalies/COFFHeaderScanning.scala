@@ -10,7 +10,7 @@ import com.github.katjahahn.IOUtil
 import com.github.katjahahn.optheader.OptionalHeader
 
 trait COFFHeaderScanning extends AnomalyScanner {
-
+  
   abstract override def scanReport(): String =
     "Applied COFF Header Scanning" + IOUtil.NL + super.scanReport
 
@@ -24,21 +24,21 @@ trait COFFHeaderScanning extends AnomalyScanner {
     anomalyList ++= checkNumberOfSections(coff)
     anomalyList ++= checkSizeOfOptHeader(coff)
     super.scan ::: anomalyList.toList
-  }
+  }  
   
   private def checkSizeOfOptHeader(coff: COFFFileHeader): List[Anomaly] = {
     val size = coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val entry = coff.getEntry(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val opt = data.getOptionalHeader()
     if(size < opt.getMinSize) {
-      val description = "Collapsed Headers: The SizeOfOptionalHeader is too small, namely: " + size
+      val description = s"Collapsed Headers: The SizeOfOptionalHeader (${size}) is too small, Section Table entries might not be valid."
       List(WrongValueAnomaly(entry, description))
     } else if(size > opt.getMaxSize) {
       val description = "COFF File Header: SizeOfOptionalHeader is too large, namely: " + size
       List(WrongValueAnomaly(entry, description))
     } else Nil
   }
-
+  
   private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {
     val sectionMax = 96
     val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)

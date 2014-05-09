@@ -1,13 +1,13 @@
 1;RESERVED_1;Reserved, must be zero
 2;RESERVED_2;Reserved, must be zero
-4;RESERVED_3;Reserved, must be zero
-8;RESERVED_4;Reserved, must be zero
+4;RESERVED_4;Reserved, must be zero
+8;RESERVED_8;Reserved, must be zero
 40;IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE;DLL can be relocated at load time.
 80;IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY;Code Integrity checks are enforced.
 100;IMAGE_DLL_CHARACTERISTICS_NX_COMPAT;Image is NX compatible.
 200;IMAGE_DLLCHARACTERISTICS_NO_ISOLATION;Isolation aware, but do not isolate the image.
 400;IMAGE_DLLCHARACTERISTICS_NO_SEH;Does not use structured exception (SE) handling. No SE handler may be called in this image.
 800;IMAGE_DLLCHARACTERISTICS_NO_BIND;Do not bind the image.
-1000;RESERVED_5;Reserved, must be zero
+1000;RESERVED_1000;Reserved, must be zero
 2000;IMAGE_DLLCHARACTERISTICS_WDM_DRIVER;A WDM driver.
 8000;IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE;Terminal Server aware.

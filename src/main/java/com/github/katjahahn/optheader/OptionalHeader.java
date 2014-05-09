@@ -497,7 +497,14 @@ public class OptionalHeader extends PEModule {
 	 * @return subsystem instance
 	 */
 	public Subsystem getSubsystem() {
-		return Subsystem.valueOf(getSubsystemKey(get(SUBSYSTEM).intValue()));
+		Long subsystem = get(SUBSYSTEM);
+		if (subsystem != null) {
+			String key = getSubsystemKey(subsystem.intValue());
+			if (key != null) {
+				return Subsystem.valueOf(key);
+			}
+		}
+		return null;
 	}
 
 	@Override
