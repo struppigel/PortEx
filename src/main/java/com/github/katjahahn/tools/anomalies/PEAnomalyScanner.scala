@@ -62,29 +62,13 @@ object PEAnomalyScanner {
     new PEAnomalyScanner(data) with COFFHeaderScanning with 
     OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
-  //TODO add DOS stub anomaly scanning
   def main(args: Array[String]): Unit = {
     var counter = 0
-    //    val files = new File("src/main/resources/x64viruses/").listFiles
-    //    for (file <- files) {
     val file = new File("src/main/resources/unusualfiles/tinype/tinyest.exe")
     val data = PELoader.loadPE(file)
-    println(data) //TODO parse section table of tinyest.exe correctly! Recognize collapsed MSDOS Header!
+    println(data) 
     val scanner = new PEAnomalyScanner(data) with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
     println(scanner.scanReport)
-    //      val report = scanner.scanReport
-    //      if(!report.isEmpty()) {
-    //    	  println(report)
-    //      }
-    //      val list = scanner.scan
-    //      if (list.size > 0 && !list.forall(_.isInstanceOf[NonDefaultAnomaly])) {
-    //        println("Scanned File: " + data.getFile.getName)
-    //        counter += 1
-    //        list.foreach(a => println("\t*" + a))
-    //        println()
-    //      }
-    //    }
-    //    println("Anomalies found in " + counter + " of " + files.size + " files. (Non-Default Anomalies omitted)")
   }
 
 }

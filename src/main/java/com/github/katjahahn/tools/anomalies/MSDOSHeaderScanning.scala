@@ -5,6 +5,8 @@ import com.github.katjahahn.IOUtil._
 import scala.collection.JavaConverters._
 
 trait MSDOSHeaderScanning extends AnomalyScanner {
+  
+  //TODO recognize non-standard header
 
   abstract override def scanReport(): String =
     "Applied MSDOS Header Scanning" + NL + super.scanReport

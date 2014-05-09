@@ -128,10 +128,7 @@ public class PELoader {
 	public static void main(String[] args) throws IOException {
 		logger.entry();
 		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-		boolean coffScanning = true;
-		boolean optScanning = true;
-		boolean sectionTableScanning = true;
-		PEAnomalyScanner scanner = PEAnomalyScanner.getInstance(file, coffScanning, optScanning, sectionTableScanning);
+		PEAnomalyScanner scanner = PEAnomalyScanner.getInstance(file);
 		List<Anomaly> anomalies = scanner.getAnomalies();
 		for(Anomaly anomaly: anomalies) {
 			System.out.println("Anomaly Type: " + anomaly.getType());
