@@ -1,4 +1,29 @@
 *.class
+
+# tex files # 
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.myacrin
+*.myacrlog
+*.myacrout
+*.out
+*.pdf
+*.thm
+*.toc
+
 fileanomalies
 literature
 filelist
@@ -15,6 +40,7 @@ src/main/target/*
 src/main/resources/*
 *.exe
 *.dll
+
 # Package Files #
 *.war
 *.ear
@@ -29,7 +55,7 @@ project/target/*
 *~
 *.aux
 test-output
-# TODO temporary stuff, include later #
+
 arbeit/.svn
 arbeit/appendix
 arbeit/dia1
