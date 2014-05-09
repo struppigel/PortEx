@@ -17,6 +17,7 @@ import com.github.katjahahn.coffheader.COFFFileHeader
 import com.github.katjahahn.PESignature
 import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.IOUtil._
+import com.github.katjahahn.StandardEntry
 
 trait OptionalHeaderScanning extends AnomalyScanner {
 
@@ -174,6 +175,9 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       if (entry != null) {
         val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
         anomalyList += NonDefaultAnomaly(entry, description)
+      } else {
+        val description = "Optional Header: NumberOfRVAAndSizes not given, Data Directory contains " + datadirs.size() + " entries."
+        anomalyList += StructuralAnomaly(description)
       }
     }
     if (datadirs.containsKey(DataDirectoryKey.RESERVED)) {

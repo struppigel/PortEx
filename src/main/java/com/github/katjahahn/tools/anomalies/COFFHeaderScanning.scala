@@ -31,8 +31,8 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val entry = coff.getEntry(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val opt = data.getOptionalHeader()
     if(size < opt.getMinSize) {
-      val description = s"Collapsed Headers: The SizeOfOptionalHeader (${size}) is too small, Section Table entries might not be valid."
-      List(WrongValueAnomaly(entry, description))
+      val description = s"COFF File Header: The SizeOfOptionalHeader (${size}) is too small"
+      List(WrongValueAnomaly(entry, description), StructuralAnomaly("Collapsed Optional Header, Section Table entries might not be valid."))
     } else if(size > opt.getMaxSize) {
       val description = "COFF File Header: SizeOfOptionalHeader is too large, namely: " + size
       List(WrongValueAnomaly(entry, description))

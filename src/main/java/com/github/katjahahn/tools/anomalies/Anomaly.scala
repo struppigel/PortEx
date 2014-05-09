@@ -15,6 +15,11 @@ abstract class Anomaly() {
 
 }
 
+case class StructuralAnomaly(override val description: String) extends Anomaly {
+  override def standardEntry = null
+  override def getType = AnomalyType.STRUCTURE
+}
+
 /**
  * A deprectated value is not zero as expected.
  */
