@@ -63,11 +63,14 @@
 \let\ps@plain\ps@empty							% removes page numbers from every first page of each chapter, a bit of a hack
 \makeatother
 \usepackage{pdfpages}
+\usepackage{thm-autoref}
 \usepackage{ntheorem}							% for starred \newtheorem
 
 \newtheorem{definition}{Definition}
+\providecommand*{\definitionautorefname}{definition} %makes it work with autoref
 \newtheorem{example}{Example}
 \newtheorem*{example-no-number}{Example}
+\providecommand*{\exampleautorefname}{example} %makes it work with autoref
 
 %\linespread{0.95}
 \linespread{1.05}
@@ -159,10 +162,8 @@
 %\addcontentsline{toc}{chapter}{Index}
 %\printindex
 
-\bibliographystyle{gerplain}
-%\bibliographystyle{plain}
-%\bibliographystyle{dinat}
-%\bibliographystyle{natdin}
+\bibliographystyle{alpha}
+%\bibliographystyle{gerplain}
 \bibliography{references}
 
 %Alle Weblinks wurden zuletzt am 21. September 2011 abgerufen.

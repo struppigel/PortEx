@@ -1,36 +1,57 @@
 \chapter{Portable Executable Format} \label{chap:peformat}
 
-The \PE{} is a file format for image files used by Microsoft products for 32- and 64-bit system architectures. It is the successor of the \NZ{} file format for 16-bit systems. The \PE{} format is described in the \PECOFF{} \cite{pespec}
+\portex{} extracts information from the \PE{} format to assist in analysing malware. Therefore knowledge about the \PE{} format is neccessary to understand the inner workings of the library \portex{} and why the extracted information is useful for malware analysis. 
 
-\PE{} file types, which are relevant for this thesis, are \DLL{} and \EXE{} files. \DLL{} files export functions or data other programs can use. They can have various file endings, including \emph{.sys}, \emph{.dll}, \emph{ocx}, \emph{.cpl} and \emph{.drv}. (\cf{} \cite{micrdll}) A \DLL{} is loaded into the context of another process.
-\EXE{} files have the file ending \emph{.exe}. They usually don't export any symbols. The system creates a new process upon launching the \EXE{}.
-The system recognizes the file type by a certain flag in the \PE{} headers. (see page~\pageref{dllflag}) \todo{other file types? FON?}
+Microsoft introduced the \PE{} file format in 1993 with the release of Windows NT 3.1. It is the successor of the \NZ{} file format for 16-bit systems. The \PE{} format has been incrementally changed since then, and supports not only 32-bit, but also 64-bit system architectures today. The \PE{} format is described in the \PECOFF{} \cite{pespec}.
 
-Both, \EXE{} and \DLL{} files, are considered as \emph{image files} by the \PECOFF{}, because they have been processed by a linker and are used as input for the loader. In contrast to image files are \emph{object files} (Common Object File Format or {COFF}), which are used as input for a linker (\cf{} \cite[\p{8}]{pespec}). The Common Object File Format is not an issue in the thesis.
-
-\portex{} extracts the information from the \PE{} format to assist in analysing malware. Therefore knowledge about the \PE{} format is neccessary to understand the inner workings of the library \portex{}. 
+The two \PE{} file types are \DLL{} and \EXE{} files. The differentiation between these file types is a semantic one. \DLL{} files are meant to export functions or data other programs can use. Therefore they usually only run within the context of other programs. They can have various file endings, including \emph{.sys}, \emph{.dll}, \emph{ocx}, \emph{.cpl} and \emph{.drv}. (\cf{} \cite{micrdll}) 
+\EXE{} files run in their own process instead of being loaded into an existing process of another program. They usually have the file ending \emph{.exe} and do not export any symbols. Both file types share the same format and hybrids are possible, \eg{}, an \EXE{} that exports symbols.
+%The system recognizes the file type by a certain flag in the \PE{} headers. (see page~\pageref{dllflag}) \todo{other file types? FON?}
 
 \section{General Concepts}
 
-\todo{add section with terms (VA, RVA, linker, section)? Or: explain how PE is loaded and explain terms there?}
-
 This section explains some frequent terms that are also used by the \PECOFF{} and necessary to understand the descriptions of the \PE{} format.
 
+\begin{definition}[linker]
+\enquote{Linking is the process of collecting and combining various pieces of code and data into a single file that can be loaded (copied) into memory and executed. [...] On modern systems, linking is performed automatically by programs called \emph{linkers}.} \cite[\p{654}]{bryant11}
+\end{definition} 
+
+\begin{definition}[loader]
+A \emph{loader} is a program that loads a file into main memory.
+\end{definition} 
+
+\begin{definition}[image file]
+\emph{Image files} have been processed by a linker and are used as input for the loader of the operating system. (\cf{} \cite[\p{8}]{pespec})
+\end{definition} 
+
+\EXE{} and \DLL{} files, are considered as \emph{image files} by the \PECOFF{} (\cf{} \cite[\p{8}]{pespec}).
+In contrast to image files are \emph{object files} (Common Object File Format or {COFF}), which are used as input for a linker (see \cite[\p{8}]{pespec}). The Common Object File Format is not an issue in the thesis.
+
+\begin{definition}[base address]
+The \emph{base address} is the address of the first byte where the image is loaded in memory (see \enquote{ImageBase} \cite[\p{19}]{pespec}).
+\end{definition} 
+
+\begin{definition}[physical address]
+A physical address is the offset of a certain byte in a file as it is written on disk. The very first byte of the file has the offset 0.
+\end{definition} 
+
 \begin{definition}[RVA]
-\emph{\useacronym[es]{RVA}} are used while the image file is loaded in memory. They are relative to the base address of the image file, which is the address of the first byte where the image is loaded in memory (\cf{} \cite[\p{19}]{pespec}).
+\emph{\useacronym*[es]{RVA}} are used while an image file is loaded in memory. They are relative to the base address of the image file (see \cite[\p{19}]{pespec}).
 \end{definition} 
 
 \begin{definition}[VA]
-A \emph{\VA{}} is the same as a \RVA{} with the base address added (\cf{} \cite[\p{19}]{pespec}).
+A \emph{\VA{}} is the same as a \RVA{} with the base address added (see \cite[\p{19}]{pespec}). \useacronym*[es]{VA} are absolute in-memory addresses.
 \end{definition} 
+
+The base address, which is given within the \PE{} file, is only a preferred loading address. If the image file can not be loaded at the preferred address into process space, another base address is applied. Hence, \useacronym[es]{RVA} are a way to specify addresses in-memory independendly from the base address. 
+
+\begin{definition}[entry point]\label{def:entrypoint} 
+The \emph{entry point} is a \RVA{} to the starting address for \EXE{} files, or to the initialization function for device drivers. (see \cite[\p{18}]{pespec}) 
+\end{definition}
 
 \begin{definition}[section]
-A defined unit of data or code within an image file is called a \emph{section} (\cf{} \cite[\p{19}]{pespec}). Sections are defined by their section header in the Section Table.
+A \enquote{basic unit of code or data within a PE or COFF file} \cite[\p{19}]{pespec} is called a \emph{section}. Sections are defined by their section header in the Section Table (\cf{} \cite[26]{pespec})
 \end{definition} 
-
-\begin{definition}[entry point]
-The \emph{entry point} is a \RVA{} to the starting address for \EXE{} files or to the initialization function for device drivers. (\cf{} \cite[\p{18}]{pespec}) \label{def:entrypoint} 
-\end{definition} \todo{define def: prefix for autoref}
 
 \section{General Structure} \label{sec:pestructure}
 
@@ -41,38 +62,62 @@ The \emph{entry point} is a \RVA{} to the starting address for \EXE{} files or t
 \label{fig:peformat} 
 \end{figure}
 
-\autoref{fig:peformat} illustrates the structure of a \PE{} file. It consists of the so called PE Header, followed by the Section Table and the sections. The overlay is optional data appended to the file. As different resources use the term \emph{PE Header} with variable meanings \todo{or not use it commonly}, the following defintion by the \PECOFF{} will be used in the following: \todo{avoid konjunktivb}
+\autoref{fig:peformat} illustrates the structure of a \PE{} file. It consists of the PE Header followed by the Section Table and the sections. The overlay is optional data appended to the file. The different parts of the \PE{} are explained hereafter. 
 
+Different resources use the term \emph{PE Header} with variable meanings, so the following definition is used in this thesis. \todo{examples}
 \begin{definition}[PE Header]
 The \emph{PE Header} \enquote{consists of a MS-DOS stub, the PE signature, the COFF file header, and an optional header.} \cite[\p{11}]{pespec}
 \end{definition} 
 
-The different parts of the \PE{} are explained hereafter.
+A \PE{} file starts with the MS-DOS Stub. This is an application, which is able to run in MS-DOS. The standard MS-DOS Stub prints the message \enquote{This program cannot be run in DOS mode}. 
 
-A \PE{} file always starts with the MS-DOS Stub. This is an application which is able to run in MS-DOS. The standard MS-DOS Stub prints the message \enquote{This program cannot be run in DOS mode} and closes right after. 
+The operating system determines the file format by looking for specific signatures. The file format signature is usually at the very beginning of the file. The \PE{} signature is placed after the MSDOS-Stub, because the MS-DOS Stub has a file format signature (the string \enquote{MZ}) itself. The offset to the \PE{} signature is defined in the MS-DOS Stub, thus enables Windows to properly execute the \PE{} file.
 
-The operating system determines the file format by looking for specific signatures. The file format signature is usually at the very beginning of the file. Since the \PE{} starts with the MS-DOS Stub, which has a file format signature itself, the \PE{} signature is placed after. \todo{MZ, PE00} The offset to the \PE{} signature is defined in location 0x3c of the MS-DOS Stub, thus enables Windows to properly execute the \PE{} file. Right after the PE signature follows the PE Header.
+\autoref{tbl:peheader} shows the contents of the PE Header and the Section Table.
 
-The first part of the PE Header is the COFF File Header. It contains information about the type of the target machine, the number of sections, a time date stamp that indicates when the file was created, the size of the Optional Header and flags that indicate file characteristics including a flag that indicates whether the file is a \DLL{}\label{dllflag}.
+\renewcommand{\arraystretch}{1.5}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{p{.30\textwidth} p{.63\textwidth}}
+			\toprule
+			Header name			& Contents\\
+			\midrule
+			COFF File Header	&  \ia{}, type of target machine, number of sections, time date stamp (when the file was created), size of Optional Header, file characteristics\\
 
-The Optional Header follows right after the COFF File Header at a certain offset from the beginning of the PE Header. Despite its name the Optional Header is mandatory for image files. Only object files don't need it. The Optional Header has three parts: Standard Fields, Windows Specific Fields and a Data Directory Table.
+		  Optional Header			& Standard Fields, Windows Specific Fields, Data Directory Table\\
+      \midrule
+      Standard Fields &  \ia{}, magic number, size of code, linker versions, entry point\\
+			Windows Specific Fields	& \ia{}, operating system the file can run on, file alignment, section alignment, \DLL{} characteristics, number of data directories\\
+			Data Directory Table	& each entry consists of address and size for a table or string that the system uses, \eg{}, import table, export table, resource table\\
+			\midrule
+      Section Table &  each entry is a section header for the section that make up the rest of the \PE{} file; a section header describes, \ia{}, characteristics, size, name and location of the section\\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+	\caption[PE Header contents]{PE Header and Section Table contents}
+	\label{tbl:peheader}
+\end{table}
 
-The Standard Fields of the Optional Header contain information necessary for loading and running the file. They determine for example, whether the image file allows a 64-bit address space (\PEplus{}) or is limited to a 32-bit address space (\PEsmall{}). They also declare \ia{} the size of initialized and uninitialized data, the size of the code, the linker versions and the entry point (see \autoref{def:entrypoint}) of the image file.
+%The COFF File Header contains information about the type of the target machine, the number of sections, a time date stamp that indicates when the file was created, the size of the Optional Header and flags that indicate file characteristics including a flag that indicates whether the file is a \DLL{}\label{dllflag}.
 
-The Windows Specific fields provide additional information for the Windows loader and linker like the operating systems the image file can run on, alignment values, dll characteristics and the number of data directories in the Data Directory Table.
+%The Optional Header follows right after the COFF File Header at a certain offset from the beginning of the PE Header. Despite its name the Optional Header is mandatory for image files. Only object files do not need it. The Optional Header has three parts: Standard Fields, Windows Specific Fields and a Data Directory Table.
 
-A Data Directory Table entry consists of address and size for a table or string that the system uses. Examples are the import table, the export table and the resource table. (see \cite[\pp{24}]{pespec})
+%The Standard Fields of the Optional Header contain information necessary for loading and running the file. They determine for example, whether the image file allows a 64-bit address space (\PEplus{}) or is limited to a 32-bit address space (\PEsmall{}). They also declare \ia{} the size of initialized and uninitialized data, the size of the code, the linker versions and the entry point (see \autoref{def:entrypoint} at page~\pageref{def:entrypoint}) of the image file.
 
-The Section Table is placed right after the Optional Header. It consists of the section headers for the sections that make up the rest of the \PE{} file. A section header describes \ia{} characteristics, size, name and location of a section.
+%The Windows Specific fields provide additional information for the Windows loader and linker like the operating systems the image file can run on, alignment values, dll characteristics and the number of data directories in the Data Directory Table.
 
-While the PE Header and Section Table described above are located at a fixed file offset, the rest of the \PE{} contains data defined by pointers in the PE Header or the Section Table. The sections contain arbitrary data, only some sections have a special meaning and are explained in \emph{\nameref{sec:specialsections}} below. An \EXE{} file has at least one section containing executable code.
+%A Data Directory Table entry consists of address and size for a table or string that the system uses. Examples are the import table, the export table and the resource table. (see \cite[\pp{24}]{pespec})
+
+%The Section Table is placed right after the Optional Header. It consists of the section headers for the sections that make up the rest of the \PE{} file. A section header describes \ia{} characteristics, size, name and location of a section.
+
+While the PE Header and Section Table are located at a fixed file offset, the rest of the \PE{} contains data defined by pointers in the PE Header or the Section Table. The sections contain arbitrary data, only some sections have a special meaning and are explained in \emph{\nameref{sec:specialsections}} below. An \EXE{} file has at least one section containing executable code.
 
 Data that was appended to the file, but is not part of the \PE{} format is called \emph{overlay}. Overlay is not mapped into memory. The overlay is used by some applications as a way to store arbitrary data without having to deal with the \PE{} format. 
 
 \section{Special Sections} \label{sec:specialsections}
 
-Sections may contain arbitrary information, which is only relevant to the application using them; but some sections have a special meaning. Their format is described in the \PECOFF{} \cite{pespec}. These sections are recognized by entries in the Data Directory Table of the Optional Header or certain flags in the Section Table. They have typical section names which are also used in the \PECOFF{} to refer to the sections. These names are not mandatory, but a convention. That's why they can not be relied on while trying to find certain sections in a \PE{}. Not only malware writers misuse the section names to obscure their purpose, but also legimate compilers and packers violate the convention. \todo{example!}
-Some of these special sections are described right after. \todo{sections that are recognized by portex}
+Sections may contain arbitrary information, which is only relevant to the application using them; but some sections have a special meaning. Their format is described in the \PECOFF{} \cite[\p{74-103}]{pespec}. These sections are recognized by entries in the Data Directory Table of the Optional Header or certain flags in the Section Table. They have typical section names which are also used in the \PECOFF{} to refer to the sections. These names are not mandatory, but a convention. That is why they can not be relied on while trying to find certain sections in a \PE{}. Not only malware writers misuse the section names to obscure their purpose, but also legimate compilers and packers violate the convention (\eg{} the packer UPX \footnote{\url{http://upx.sourceforge.net/}}).
+Some of these special sections are described in the following. \todo{sections that are recognized by portex}
 
 \subsection*{Export Section} \label{subsec:idata}
 
@@ -120,7 +165,7 @@ Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. T
 
 \subsection*{Debug Section and Debug Directory}
 
-Whereas most sections can be at an arbitrary location in the file, the \emph{Debug Section} (aka \emph{.debug Section}) must be placed at the very end of the image file. The reason is that the loader doesn't map this section into memory. Image files contain per default of the linker only a Debug Directory (as pointed to by the Data Directory Table), but not a Debug Section (see \cite[\p{78}]{pespec}). Thus the Debug Directory is either located in the Debug Section if it exists, in any other section of the \PE{} or not in any section at all.
+Whereas most sections can be at an arbitrary location in the file, the \emph{Debug Section} (aka \emph{.debug Section}) must be placed at the very end of the image file. The reason is that the loader does not map this section into memory. Image files contain per default of the linker only a Debug Directory (as pointed to by the Data Directory Table), but not a Debug Section (see \cite[\p{78}]{pespec}). Thus the Debug Directory is either located in the Debug Section if it exists, in any other section of the \PE{} or not in any section at all.
 
 Every Debug Directory entry defines \ia{} size, location and the type (format) of a debug information block. An example is in \autoref{lst:debugsample}
 
@@ -145,9 +190,9 @@ A \emph{malformation} is data or layout of a \PE{} file that violates the \PECOF
 \end{definition} 
 
 Malformations are either accidental results of \PE{} modifications or done on purpose.
-A malformation doesn't necessarily prevent the Windows loader from running the file. The Windows loader doesn't work in full compliance with the \PECOFF{} to maintain backward compatibility with obsolete compilers and files. Malware writers utilize the loader's behaviour to create normally working \PE{} files that can not be parsed by most tools used for malware analysis. Some malformations, like setting reserved fields, are also done to hide information in a \PE{}; for example marking a host file as infected to prevent a virus from infecting it twice.
+A malformation does not necessarily prevent the Windows loader from running the file. The Windows loader does not work in full compliance with the \PECOFF{} to maintain backward compatibility with obsolete compilers and files. Malware writers utilize the loader's behaviour to create normally working \PE{} files that can not be parsed by most tools used for malware analysis. Some malformations, like setting reserved fields, are also done to hide information in a \PE{}; for example marking a host file as infected to prevent a virus from infecting it twice.
 
-Accidental malformations occur if the malware writer doesn't know the \PECOFF{} enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to the host file, copying the own code into it and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
+Accidental malformations occur if the malware writer does not know the \PECOFF{} enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to the host file, copying the own code into it and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
 
 Sheehan et\thinspace{}al states that 68~\% of all image files have malformations. \cite[slide 7]{sheehan07}
 Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} correctly and to recognize malformations.
@@ -177,7 +222,7 @@ As explained in \autoref{sec:pestructure} the address to the beginning of the PE
 \label{fig:overlayheader} 
 \end{figure}
 
-The overlay is never mapped into memory, so the PE Header won't be present in memory as well. The Windows loader reads it from disk and the file will be executed nevertheless. Tools that read the PE Header from memory can break because of that malformation.
+The overlay is never mapped into memory, so the PE Header will not be present in memory as well. The Windows loader reads it from disk and the file will be executed nevertheless. Tools that read the PE Header from memory can break because of that malformation.
 
 \subsubsection*{Section Table in Overlay}
 
@@ -226,6 +271,4 @@ Despite having no sections a \PE{} is able to execute code by placing instructio
 
 To make this work, the file has to be modified so that the physical offsets are the same as their virtual counterparts. The PE Header is made writable as explained in \emph{\nameref{subsubsec:writeableheader}} and the number of sections is set to 0. The \texttt{SizeOfHeaders} field in the Optional Header needs to be large to enough to make Windows load the whole file into memory. That way the \PE{} can execute code inside its PE Header.
 
-A \PE{} without sections may be partly unreadable by reverse engineering tools as a result of incorrect address conversions; or might be able to break tools that expect the file to have at least one section. An example is Hiew v8.03 which doesn't recognize a sectionless \PE{} as \PE{} file.
-
-
+A \PE{} without sections may be partly unreadable by reverse engineering tools as a result of incorrect address conversions; or might be able to break tools that expect the file to have at least one section. An example is Hiew v8.03 which does not recognize a sectionless \PE{} as \PE{} file.
