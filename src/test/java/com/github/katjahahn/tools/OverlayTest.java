@@ -55,7 +55,7 @@ public class OverlayTest {
 		for (String file : noOverFiles) {
 			File infile = new File(file);
 			Overlay overlay = new Overlay(infile);
-			long eof = overlay.getEndOfPE();
+			long eof = overlay.getOverlayOffset();
 			logger.debug("infile length: " + infile.length());
 			logger.debug("EOF: " + eof);
 			assertEquals(infile.length(), eof);
