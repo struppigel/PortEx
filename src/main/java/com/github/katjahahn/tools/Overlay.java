@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 import com.github.katjahahn.sections.SectionTable;
 import com.github.katjahahn.sections.SectionTableEntry;
@@ -35,7 +36,7 @@ import com.github.katjahahn.sections.SectionTableEntry;
 public class Overlay {
 
 	private final File file;
-	private Long eof;
+	private Long offset;
 
 	/**
 	 * @constructor Creates an Overlay instance with the input file and output
@@ -54,20 +55,30 @@ public class Overlay {
 	 * @return the end of the PE file
 	 * @throws IOException
 	 */
-	public long getEndOfPE() throws IOException {
-		if (eof == null) {
-			com.github.katjahahn.PEData data = PELoader.loadPE(file);
+	public long getOverlayOffset() throws IOException {
+		if (offset == null) {
+			PEData data = PELoader.loadPE(file);
 			SectionTable table = data.getSectionTable();
-			eof = 0L;
+			offset = 0L;
 			for (SectionTableEntry section : table.getSectionEntries()) {
-				long endPoint = section.get(POINTER_TO_RAW_DATA)
-						+ section.get(SIZE_OF_RAW_DATA);
-				if (eof < endPoint) {
-					eof = endPoint;
+				long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
+			    long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
+			    long virtSize = section.get(VIRTUAL_SIZE);
+			    //see https://code.google.com/p/corkami/wiki/PE#section_table: "if bigger than virtual size, then virtual size is taken. "
+			    //and: "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
+			    if(virtSize != 0 && sizeOfRaw > virtSize) { 
+			    	sizeOfRaw = virtSize;
+			    }
+			    long endPoint = pointerToRaw + sizeOfRaw;
+				if (offset < endPoint) {
+					offset = endPoint;
 				}
 			}
 		}
-		return eof;
+		if(offset > file.length()) {
+			offset = file.length();
+		}
+		return offset;
 	}
 
 	/**
@@ -77,7 +88,7 @@ public class Overlay {
 	 * @throws IOException
 	 */
 	public boolean hasOverlay() throws IOException {
-		return file.length() > getEndOfPE();
+		return file.length() > getOverlayOffset();
 	}
 	
 	/**
@@ -87,7 +98,7 @@ public class Overlay {
 	 * @throws IOException if unable to read the input file
 	 */
 	public long getOverlaySize() throws IOException {
-		return file.length() - getEndOfPE();
+		return file.length() - getOverlayOffset();
 	}
 
 	/**
@@ -99,7 +110,7 @@ public class Overlay {
 	 */
 	public boolean dumpTo(File outFile) throws IOException {
 		if (hasOverlay()) {
-			dump(getEndOfPE(), outFile);
+			dump(getOverlayOffset(), outFile);
 			return true;
 		} else {
 			return false;
