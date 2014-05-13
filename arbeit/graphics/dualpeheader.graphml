@@ -20,7 +20,7 @@
           <y:Geometry height="69.0" width="214.0" x="177.0" y="185.99999999999994"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="27.28125" modelName="custom" textColor="#000000" visible="true" width="107.876953125" x="53.0615234375" y="20.859375">PE Header<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="27.28125" modelName="custom" textColor="#000000" visible="true" width="195.89453125" x="9.052734375" y="20.859375">PE File Header Part<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -156,7 +156,7 @@
           <y:Geometry height="69.0" width="214.0" x="177.0" y="254.99999999999994"/>
           <y:Fill color="#CCCCCC" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="50.5625" modelName="custom" textColor="#000000" visible="true" width="212.779296875" x="0.6103515625" y="9.21875">PE Header 
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="50.5625" modelName="custom" textColor="#000000" visible="true" width="212.779296875" x="0.6103515625" y="9.21875">PE File Header 
 Continuation on Disk<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
@@ -174,8 +174,8 @@ Continuation on Disk<y:LabelModel>
           <y:Geometry height="113.0" width="214.0" x="177.0" y="392.99999999999994"/>
           <y:Fill color="#CCCCCC" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="97.125" modelName="custom" textColor="#000000" visible="true" width="132.193359375" x="40.9033203125" y="7.9375">Section 1
-PE Header 
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="97.125" modelName="custom" textColor="#000000" visible="true" width="155.513671875" x="29.2431640625" y="7.9375">Section 1
+PE File Header 
 Continuation
 in Memory<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
@@ -194,7 +194,7 @@ in Memory<y:LabelModel>
           <y:Geometry height="69.0" width="214.0" x="519.5" y="186.0"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="27.28125" modelName="custom" textColor="#000000" visible="true" width="107.876953125" x="53.0615234375" y="20.859375">PE Header<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="27.28125" modelName="custom" textColor="#000000" visible="true" width="195.89453125" x="9.052734375" y="20.859375">PE File Header Part<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -296,8 +296,8 @@ in Memory<y:LabelModel>
           <y:Geometry height="113.0" width="214.0" x="519.5" y="255.0"/>
           <y:Fill color="#CCCCCC" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="97.125" modelName="custom" textColor="#000000" visible="true" width="132.193359375" x="40.9033203125" y="7.9375">Section 1
-PE Header 
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="20" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="97.125" modelName="custom" textColor="#000000" visible="true" width="155.513671875" x="29.2431640625" y="7.9375">Section 1
+PE File Header 
 Continuation
 in Memory<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
@@ -345,7 +345,6 @@ in Memory<y:LabelModel>
       </data>
     </node>
     <edge id="e0" source="n0" target="n0">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="106.966796875" sy="-34.5" tx="107.005859375" ty="33.416666666666714">
