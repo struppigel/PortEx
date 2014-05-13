@@ -4,7 +4,7 @@ The library \portex{} extracts information from the \PE{} format to assist in an
 
 Microsoft introduced the \PE{} file format in 1993 with the release of Windows NT 3.1. It is the successor of the \NZ{} file format for 16-bit systems. The \PE{} format has been incrementally changed since then, and supports not only 32-bit, but also 64-bit system architectures today. The \PE{} format is described in the \PECOFF{} \cite{pespec}. 
 
-This chapter defines frequently used terms in \autoref{sec:peconcepts}, gives an overview about the structure of a \PE{} file according to the \PECOFF{} in \autoref{sec:pestructure} and winds up with \PE{} file malformations in \autoref{sec:malformations}.
+This chapter defines frequently used terms in \autoref{sec:peconcepts}, gives an overview about the structure of a \PE{} file according to the \PECOFF{} in \autoref{sec:pestructure}, and winds up with \PE{} file malformations in \autoref{sec:malformations}.
 
 \section{General Concepts}\label{sec:peconcepts}
 
@@ -14,7 +14,7 @@ This section explains general concepts and frequent terms that are also used by 
 
 The two \PE{} file types are \DLL{} and \EXE{} files. The differentiation between these file types is solely a semantic one. 
 
-\DLL{} files are meant to export functions or data that other programs can use. Therefore they usually only run within the context of other programs. They can have various file extensions, including \emph{.sys}, \emph{.dll}, \emph{ocx}, \emph{.cpl} and \emph{.drv} (\cf{} \cite{micrdll}). 
+\DLL{} files are meant to export functions or data that other programs can use. Therefore they usually only run within the context of other programs. They can have various file extensions, including \emph{.sys}, \emph{.dll}, \emph{ocx}, \emph{.cpl}, and \emph{.drv} (\cf{} \cite{micrdll}). 
 
 \EXE{} files run in their own process instead of being loaded into an existing process of another program. They usually have the file extension \emph{.exe} and do not export any symbols. Both file types share the same format and hybrids are possible, \eg{}, an \EXE{} that exports symbols.
 %The system recognizes the file type by a certain flag in the \PE{} headers. (see page~\pageref{dllflag}) \todo{other file types? FON?}
@@ -86,6 +86,8 @@ The operating system determines the file format by looking for specific signatur
 \renewcommand{\arraystretch}{1.5}
 \begin{table}[h]
 	\begin{center}
+	\caption[PE File Header contents]{PE File Header and Section Table contents}
+	\label{tbl:peheader}
 		\begin{tabular}{p{.23\textwidth} p{.48\textwidth} p{.18\textwidth}}
 			\toprule
 			Header name			& Contents & Size in Bytes PE32/PE32+ \\
@@ -98,12 +100,10 @@ The operating system determines the file format by looking for specific signatur
 			Windows Specific Fields	& \ia{}, operating system the file can run on, file alignment, section alignment, \DLL{} characteristics, number of data directories & 68/88 \\
 			Data Directory Table	& each entry consists of address and size for a table or string that the system uses, \eg{}, import table, export table, resource table & variable\\
 			\midrule
-      Section Table &  each entry is a section header; a section header describes, \ia{}, characteristics, size, name and location of a section & variable\\
+      Section Table &  each entry is a section header; a section header describes, \ia{}, characteristics, size, name, and location of a section & variable\\
 			\bottomrule
 		\end{tabular}
 	\end{center}
-	\caption[PE File Header contents]{PE File Header and Section Table contents}
-	\label{tbl:peheader}
 \end{table}
 
 %The COFF File Header contains information about the type of the target machine, the number of sections, a time date stamp that indicates when the file was created, the size of the Optional Header and flags that indicate file characteristics including a flag that indicates whether the file is a \DLL{}\label{dllflag}.
@@ -118,7 +118,7 @@ The operating system determines the file format by looking for specific signatur
 
 %The Section Table is placed right after the Optional Header. It consists of the section headers for the sections that make up the rest of the \PE{} file. A section header describes \ia{} characteristics, size, name and location of a section.
 
-\autoref{tbl:peheader} shows the contents of the PE File Header and the Section Table. The \fieldname{MagicNumber} field of the Optional Header determines  whether the image file allows a 64-bit address space (\PEplus{}) or is limited to a 32-bit address space (\PEsmall{}). Some field sizes vary depending on the \fieldname{MagicNumber} and one field has been removed in \PEplus{} files (\fieldname{BaseOfData}, see \cite[18]{pespec}).
+\autoref{tbl:peheader} shows the contents of the PE File Header and the Section Table. The \fieldname{MagicNumber} field of the Optional Header determines  whether the image file allows a 64-bit address space (\PEplus{}) or is limited to a 32-bit address space (\PEsmall{}). Some field sizes vary depending on the \fieldname{MagicNumber}, and one field has been removed in \PEplus{} files (\fieldname{BaseOfData}, see \cite[18]{pespec}).
 
 All substructures of the PE File Header are consecutively arranged, thus located at a fixed offset from the beginning of the \PE{} signature. The offset of the Section Table depends on the \fieldname{SizeOfOptionalHeaders} field, which is located in the COFF File Header. The remainder of the \PE{} file contains data at addresses, which are defined in the PE File Header or the Section Table. 
 
@@ -138,7 +138,7 @@ The \emph{.edata Section} or \emph{Export Section} is generally found in \useacr
 
 Other image files have two ways to import symbols from the current image file: They either use an index into the Export Address Table (the index is also called \emph{ordinal}) or they use a public name of the symbol. Ordinals are defined in the Ordinal Table; public names are defined in the Export Name Table.
 
-Entries of the Ordinal Table correspond to the Export Name Pointer Table entries by their position. Every entry is an ordinal that represents an index in the Export Address Table.
+Entries of the Ordinal Table correspond to the Export Name Pointer Table entries by their position. Every entry is an ordinal, which represents an index in the Export Address Table.
 
 The Export Name Pointer Table is an array of addresses which point to names of the Export Name Table. These names are null-terminated ASCII strings. They are the public names that other image files can use to import the symbols.
 
@@ -156,7 +156,7 @@ The Export Name Pointer Table is an array of addresses which point to names of t
 \end{figure}
 
 Every image file that imports symbols has an \emph{Import Section}, also called \emph{.idata Section}.
-The Import Section contains the Import Directory Table, several Import Lookup Tables, the Hint-Name Table and the \IAT{}. A typical layout of the Import Section is in \autoref{fig:import}
+The Import Section contains the Import Directory Table, several Import Lookup Tables, the Hint-Name Table, and the \IAT{}. A typical layout of the Import Section is in \autoref{fig:import}
 
 Every Import Directory Table entry points to an Import Lookup Table. Each Import Lookup Table describes the imported symbols of a single \DLL{}.
 
@@ -168,7 +168,7 @@ The \IAT{} is identical to the Import Directory Table except while the image is 
 
 \subsection*{Resource Section}
 
-Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. They are saved as an entry in the \emph{Resource Section}, which also has the name \emph{.rsrc Section}. The Resource Section is build up as a tree with the actual resource addresses as leaves. While \(2^{31}\) tree levels can be used according to the \PECOFF{} \cite[\p{100}]{pespec}, Windows only uses three levels with the first level node being the type, the second being the name and the third being the language information. \autoref{fig:resourcetree} illustrates the structure of a resource tree.
+Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. They are saved as an entry in the \emph{Resource Section}, which also has the name \emph{.rsrc Section}. The Resource Section is build up as a tree with the actual resource addresses as leaves. While \(2^{31}\) tree levels can be used according to the \PECOFF{} \cite[\p{100}]{pespec}, Windows only uses three levels with the first level node being the type, the second being the name, and the third being the language information. \autoref{fig:resourcetree} illustrates the structure of a resource tree.
 
 \begin{figure}
 \includegraphics[width=.98\textwidth, height=\textheight,keepaspectratio]{graphics/resourcetree}
@@ -180,7 +180,7 @@ Resources of a \PE{} can be \ia{} icons, text, windows, copyright information. T
 
 Whereas most sections can be at an arbitrary location in the file, the \emph{Debug Section} (aka \emph{.debug Section})--if it exists--must be placed at the very end of the image file. The reason is that the loader does not map this section into memory. Image files contain per default of the linker only a Debug Directory (as pointed to by the Data Directory Table), but not a Debug Section (see \cite[\p{78}]{pespec}). Thus the Debug Directory is either located in the Debug Section if it exists, in any other section of the \PE{} or not in any section at all.
 
-Every Debug Directory entry defines \ia{} size, location and the type (format) of a debug information block. An example is in \autoref{lst:debugsample}
+Every Debug Directory entry defines \ia{} size, location, and the type (format) of a debug information block. An example is in \autoref{lst:debugsample}
 
 \lstinputlisting[caption={Example for a Debug Section entry, output by \portex{}},captionpos=t,label=lst:debugsample]{listings/debug_sample}
 
@@ -199,23 +199,77 @@ A \emph{malformation} is data or layout of a \PE{} file that violates the \PECOF
 Malformations are either accidental results of \PE{} modifications or done on purpose.
 A malformation does not necessarily prevent the Windows loader from running the file. The Windows loader does not work in full compliance with the \PECOFF{} to maintain backward compatibility with obsolete compilers and files. Malware writers utilize the loader's behaviour to create normally working \PE{} files that can not be parsed by most tools used for malware analysis. Some malformations, like setting reserved fields, are also done to hide information in a \PE{}; for example marking a host file as infected to prevent a virus from infecting it twice.
 
-Accidental malformations occur if the malware writer does not know the \PECOFF{} enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to the host file, copying the own code into it and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
+Accidental malformations occur if the malware writer does not know the \PECOFF{} enough to perform modifications in compliance with it. An example is a virus that spreads by adding a new section to the host file, copying the own code into it, and changing the entry point to the beginning of the new section. The changes done to the host file can lead to subsequent malformations without impairing the Windows loader while running the file.
 
-Sheehan et\thinspace{}al states that 68~\% of all image files have malformations. \cite[slide 7]{sheehan07}
+Sheehan et\thinspace{}al states that 68 percent of all image files have malformations. \cite[slide 7]{sheehan07}
 Because \portex{} specializes in \PE{} malware, one goal of \portex{} is to parse malformated \useacronym[s]{PE} correctly and to recognize malformations.
 
 %While other sources only use the term malformation for a file that still runs normally, this is not a premise for the present thesis. If modifications to a \PE{} done by malware lead to a non-working host file, the file might still be of interest for malware analysis. \portex{} shall still be able to get as much information of the file as possible despite the damage done to the file. \todo{ausdruck? remove paragraph?}
 
 The following malformation examples are modifications done on purpose to deceive malware analysis tools.
 
-\subsection{Simple Malformations}
+\subsection{Invalid Field Malformations}
 
-A malformation is \emph{simple} if it concerns a single field or data table in the \PE{} (\cf{} \cite[slide 7]{vuksan11}).
-The malformation examples described hereafter are in ascending order of their complexity. \todo{remove?}
+\begin{definition}[invalid field]
+An \emph{invalid field} is a field in the \PE{} File Header or a special section that has an invalid value according to the \PECOFF{}.
+\end{definition} 
+
+Invalid field malformations and examples are listed in \autoref{tbl:invalidmalformation}.
+
+\renewcommand{\arraystretch}{1.5}
+\begin{table}[h]
+	\begin{center}
+	\caption[Invalid Field Malformations]{Invalid Field Malformations}
+	\label{tbl:invalidmalformation}
+		\begin{tabular}{p{.45\textwidth} p{.48\textwidth} }
+			\toprule
+			Malformation			& Examples\\
+			\midrule
+      non-zero fields that should be zero & \\
+      mandatory fields that are not set & \\
+      fields or flags that are reserved, but set nevertheless & \\
+      fields that violate maximum or minimum value restrictions & \\
+      fields that violate alignment restrictions & \\
+      characteristics that exclude each other & \\
+      addresses or sizes that are too large or to small for the given file & \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\begin{itemize}
+\item non-zero fields that should be zero
+\item mandatory fields that are not set
+\item fields or flags that are reserved, but set nevertheless
+\item fields that violate maximum or minimum value restrictions
+\item fields that violate alignment restrictions
+\item characteristics that exclude each other
+\item addresses or sizes that are too large or to small for the given file, \eg{} a section size that is larger than the file
+\end{itemize}
+
+\subsection{Structural Malformations}
+
+\begin{definition}[structural malformation]
+\emph{Structural malformations} are: \PE{} structures (\ie{} headers and sections) at unusual locations, with unusual ordering, with recursive calls, and collapsed structures.
+\end{definition} \todo{redefine}
+
+Structural malformations include:
+
+\begin{itemize}
+\item structures at unusual locations
+\item unusual ordering of structures
+\item missing structures that are mandatory
+\item collapsed or overlapping structures
+\item duplicated structures
+\item loops in, \eg{}, the Resource Section tree, or import and export entries calling each other \todo{better name?}
+\item dummy entries, \eg{} to obfuscate imports
+\end{itemize}
+
+\todo{sort in the malformations to the correct subsections}
 
 \subsubsection*{Too Many Sections}
 
-According to the \PECOFF{} the number of sections is limited to 96 \cite[\p{12}]{pespec}. While Windows XP refuses to execute a \PE{} with more sections, Windows Vista, 7 and 8 run it nevertheless. The number of sections is defined in the COFF File Header in a 16-bit value. If the maximum number of 0xffff (65535) sections is set, tools might fail to allocate enough memory to load the file and crash subsequently. An example is IDA v5.3.
+According to the \PECOFF{} the number of sections is limited to 96 \cite[\p{12}]{pespec}. While Windows XP refuses to execute a \PE{} with more sections, Windows Vista, 7, and 8 run it nevertheless. The number of sections is defined in the COFF File Header in a 16-bit value. If the maximum number of 0xffff (65535) sections is set, tools might fail to allocate enough memory to load the file and crash subsequently. An example is IDA v5.3.
 
 \subsubsection*{PE File Header in Overlay}
 
@@ -267,10 +321,6 @@ These changes force the Windows loader to provide full access to the PE File Hea
 The second possibility is placing the PE File Header in a section as explained in \emph{\nameref{subsubsec:dualheader}} and enabling the \texttt{write} attribute in the section header.
 
 This malformation is necessary for some of the complex malformations following after.
-
-\subsection{Complex Malformations}
-
-A malformation is complex if it concerns multiple fields or data tables in the \PE{} (\cf{} \cite[slide 7]{vuksan11}).
 
 \subsubsection*{No Sections}
 

@@ -11,6 +11,8 @@ import com.github.katjahahn.sections.SectionLoader;
 public class PortexStats {
 
 	private static final String BASE_MALW_FOLDER = "/home/deque/virusshare128";
+	@SuppressWarnings("unused")
+	private static final String ANOMALY_FOLDER = "src/main/resources/unusualfiles/corkami";
 	private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
 	private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
 
