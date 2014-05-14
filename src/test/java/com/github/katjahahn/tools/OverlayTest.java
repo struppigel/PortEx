@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 public class OverlayTest {
-	
+	//TODO test the testfiles
 	private static final Logger logger = LogManager
 			.getLogger(OverlayTest.class.getName());
 
@@ -36,6 +36,7 @@ public class OverlayTest {
 		for (String file : files) {
 			File infile = new File(file);
 			System.out.println(infile.getName());
+			System.out.println();
 			Overlay overlay = new Overlay(infile);
 			assertFalse(overlay.hasOverlay());
 		}
@@ -44,6 +45,9 @@ public class OverlayTest {
 			File infile = new File(file);
 			System.out.println(infile.getName());
 			Overlay overlay = new Overlay(infile);
+			System.out.println("offset: " + overlay.getOverlayOffset());
+			System.out.println("filesize: " + infile.length());
+			System.out.println();
 			assertTrue(overlay.hasOverlay());
 		}
 	}

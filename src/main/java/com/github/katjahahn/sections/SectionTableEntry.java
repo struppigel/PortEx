@@ -66,7 +66,11 @@ public class SectionTableEntry {
 	 * @return aligned SizeOfRawData
 	 */
 	public long getAlignedSizeOfRaw() {
-		return (get(SIZE_OF_RAW_DATA) + 0xfff) & ~0xfff;
+		long sizeOfRaw = get(SIZE_OF_RAW_DATA);
+		if(sizeOfRaw == (sizeOfRaw & ~0xfff)) {
+			return sizeOfRaw;
+		}
+		return (sizeOfRaw + 0xfff) & ~0xfff;
 	}
 	
 	/**
@@ -75,7 +79,11 @@ public class SectionTableEntry {
 	 * @return aligned VirtualSize
 	 */
 	public long getAlignedVirtualSize() {
-		return (get(VIRTUAL_SIZE) + 0xfff) & ~0xfff;
+		long virtSize = get(VIRTUAL_SIZE);
+		if(virtSize == (virtSize & ~0xfff)) {
+			return virtSize;
+		}
+		return (virtSize + 0xfff) & ~0xfff;
 	}
 
 	/**
