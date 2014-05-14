@@ -24,6 +24,7 @@ import java.io.RandomAccessFile;
 
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
+import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionTable;
 import com.github.katjahahn.sections.SectionTableEntry;
 
@@ -37,6 +38,7 @@ public class Overlay {
 
 	private final File file;
 	private Long offset;
+	private PEData data;
 
 	/**
 	 * @constructor Creates an Overlay instance with the input file and output
@@ -46,6 +48,17 @@ public class Overlay {
 	 */
 	public Overlay(File file) {
 		this.file = file;
+	}
+	
+	public Overlay(PEData data) {
+		this.data = data;
+		this.file = data.getFile();
+	}
+	
+	public void read() throws IOException {
+		if(data == null) {
+			data = PELoader.loadPE(file);
+		}
 	}
 
 	/**
@@ -57,20 +70,13 @@ public class Overlay {
 	 */
 	public long getOverlayOffset() throws IOException {
 		if (offset == null) {
-			PEData data = PELoader.loadPE(file);
+			read();
 			SectionTable table = data.getSectionTable();
 			offset = 0L;
 			for (SectionTableEntry section : table.getSectionEntries()) {
-				long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
-			    long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
-			    long virtSize = section.get(VIRTUAL_SIZE);
-			    //see https://code.google.com/p/corkami/wiki/PE#section_table: "if bigger than virtual size, then virtual size is taken. "
-			    //and: "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
-			    if(virtSize != 0 && sizeOfRaw > virtSize) { 
-			    	sizeOfRaw = virtSize;
-			    }
-			    long endPoint = pointerToRaw + sizeOfRaw;
-				if (offset < endPoint) {
+				long alignedPointerToRaw = section.getAlignedPointerToRaw();
+			    long endPoint = getReadSize(section) + alignedPointerToRaw; //raw end pointer of section
+				if (offset < endPoint) { //determine largest endPoint
 					offset = endPoint;
 				}
 			}
@@ -79,6 +85,31 @@ public class Overlay {
 			offset = file.length();
 		}
 		return offset;
+	}
+	
+	/**
+	 * Determines the the number of bytes that is read for the section.
+	 * --> TODO include for section loader?
+	 * 
+	 * @param section
+	 * @return section size
+	 */
+	private long getReadSize(SectionTableEntry section) {
+		long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
+		long virtSize = section.get(VIRTUAL_SIZE);
+	    long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
+	    long fileAlign = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT);
+	    long alignedPointerToRaw = section.getAlignedPointerToRaw();
+	    //see Peter Ferrie's answer in: https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
+	    //Note: (two's complement of x AND value) rounds down value to a multiple of x if x is a power of 2
+		long readSize = ((pointerToRaw + sizeOfRaw) + fileAlign - 1) & ~(fileAlign - 1) - alignedPointerToRaw;
+		readSize = Math.min(readSize, section.getAlignedSizeOfRaw());
+		//see https://code.google.com/p/corkami/wiki/PE#section_table: "if bigger than virtual size, then virtual size is taken. "
+	    //and: "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
+	    if(virtSize != 0) {
+	    	readSize = Math.min(readSize,  section.getAlignedVirtualSize());
+	    }
+		return readSize;
 	}
 
 	/**

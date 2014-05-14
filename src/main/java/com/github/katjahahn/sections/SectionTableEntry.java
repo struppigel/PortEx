@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.sections;
 
+import static com.github.katjahahn.sections.SectionTableEntryKey.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +49,33 @@ public class SectionTableEntry {
 	 */
 	public SectionTableEntry(int number) {
 		this.number = number;
+	}
+	
+	/**
+	 * Returns the PointerToRawData rounded down to a multiple of 512.
+	 * 
+	 * @return aligned PointerToRawData
+	 */
+	public long getAlignedPointerToRaw() {
+		return get(POINTER_TO_RAW_DATA) & ~0x1ff;
+	}
+	
+	/**
+	 * Returns the SizeOfRawData rounded up to a multiple of 4kb.
+	 * 
+	 * @return aligned SizeOfRawData
+	 */
+	public long getAlignedSizeOfRaw() {
+		return (get(SIZE_OF_RAW_DATA) + 0xfff) & ~0xfff;
+	}
+	
+	/**
+	 * Returns the VirtualSize rounded up to a multiple of 4kb.
+	 * 
+	 * @return aligned VirtualSize
+	 */
+	public long getAlignedVirtualSize() {
+		return (get(VIRTUAL_SIZE) + 0xfff) & ~0xfff;
 	}
 
 	/**
