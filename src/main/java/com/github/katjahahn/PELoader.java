@@ -18,7 +18,6 @@ package com.github.katjahahn;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,8 +26,6 @@ import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.tools.anomalies.Anomaly;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -88,6 +85,9 @@ public class PELoader {
 				+ COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
 		logger.info("SectionTable offset" + offset);
 		int numberOfEntries = coff.getNumberOfSections().intValue();
+		if(numberOfEntries > 16) { //"rounded down to 16 if bigger" (corkami)
+			numberOfEntries = 16;
+		} //TODO .NET loader ignores nrOfSections value
 		byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
 				* numberOfEntries, raf);
 		return new SectionTable(tableBytes, numberOfEntries, offset);
@@ -127,15 +127,10 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-		PEAnomalyScanner scanner = PEAnomalyScanner.getInstance(file);
-		List<Anomaly> anomalies = scanner.getAnomalies();
-		for(Anomaly anomaly: anomalies) {
-			System.out.println("Anomaly Type: " + anomaly.getType());
-			System.out.println("Entry with anomaly: " + anomaly.standardEntry());
-			System.out.println(anomaly.description());
-			System.out.println();
-		}
+		File file = new File("WinRar.exe");
+		PEData data = loadPE(file);
+		String info = data.getOptionalHeader().getInfo();
+		System.out.println(info);
 	}
 
 }

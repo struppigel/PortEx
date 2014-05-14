@@ -49,14 +49,14 @@ public class Overlay {
 	public Overlay(File file) {
 		this.file = file;
 	}
-	
+
 	public Overlay(PEData data) {
 		this.data = data;
 		this.file = data.getFile();
 	}
-	
+
 	public void read() throws IOException {
-		if(data == null) {
+		if (data == null) {
 			data = PELoader.loadPE(file);
 		}
 	}
@@ -74,22 +74,33 @@ public class Overlay {
 			SectionTable table = data.getSectionTable();
 			offset = 0L;
 			for (SectionTableEntry section : table.getSectionEntries()) {
+				System.out
+						.println("\n-------reading section --------------\n\n"
+								+ section.toString());
+				System.out.println();
 				long alignedPointerToRaw = section.getAlignedPointerToRaw();
-			    long endPoint = getReadSize(section) + alignedPointerToRaw; //raw end pointer of section
-				if (offset < endPoint) { //determine largest endPoint
+				long readSize = getReadSize(section);
+				System.out.println("readsize: " + readSize);
+				long endPoint = readSize + alignedPointerToRaw; // raw end
+																// pointer of
+																// section
+				System.out.println("endpoint of section: " + endPoint);
+				if (offset < endPoint) { // determine largest endPoint
 					offset = endPoint;
+					System.out.println("new greatest offset: " + offset);
 				}
+				System.out.println();
 			}
 		}
-		if(offset > file.length()) {
+		if (offset > file.length()) {
 			offset = file.length();
 		}
 		return offset;
 	}
-	
+
 	/**
-	 * Determines the the number of bytes that is read for the section.
-	 * --> TODO include for section loader?
+	 * Determines the the number of bytes that is read for the section. --> TODO
+	 * include for section loader?
 	 * 
 	 * @param section
 	 * @return section size
@@ -97,19 +108,37 @@ public class Overlay {
 	private long getReadSize(SectionTableEntry section) {
 		long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
 		long virtSize = section.get(VIRTUAL_SIZE);
-	    long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
-	    long fileAlign = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT);
-	    long alignedPointerToRaw = section.getAlignedPointerToRaw();
-	    //see Peter Ferrie's answer in: https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
-	    //Note: (two's complement of x AND value) rounds down value to a multiple of x if x is a power of 2
-		long readSize = ((pointerToRaw + sizeOfRaw) + fileAlign - 1) & ~(fileAlign - 1) - alignedPointerToRaw;
+		long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
+		long fileAlign = data.getOptionalHeader().get(
+				WindowsEntryKey.FILE_ALIGNMENT);
+		System.out.println("filealignment: " + fileAlign);
+		long alignedPointerToRaw = section.getAlignedPointerToRaw();
+		System.out.println("pointer to raw aligned: " + alignedPointerToRaw);
+		// see Peter Ferrie's answer in:
+		// https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
+		long readSize = fileAligned(pointerToRaw + sizeOfRaw, fileAlign)
+				- alignedPointerToRaw;
+		System.out.println("file aligned readsize: " + readSize);
+		System.out.println("4kb aligned sizeofrawdata: "
+				+ section.getAlignedSizeOfRaw());
 		readSize = Math.min(readSize, section.getAlignedSizeOfRaw());
-		//see https://code.google.com/p/corkami/wiki/PE#section_table: "if bigger than virtual size, then virtual size is taken. "
-	    //and: "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
-	    if(virtSize != 0) {
-	    	readSize = Math.min(readSize,  section.getAlignedVirtualSize());
-	    }
+		// see https://code.google.com/p/corkami/wiki/PE#section_table:
+		// "if bigger than virtual size, then virtual size is taken. "
+		// and:
+		// "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
+		if (virtSize != 0) {
+			readSize = Math.min(readSize, section.getAlignedVirtualSize());
+		}
 		return readSize;
+	}
+	
+	private long fileAligned(long value, long fileAlign) {
+		// Note: (two's complement of x AND value) rounds down value to a
+		// multiple of x if x is a power of 2
+		if (value != (value & ~(fileAlign - 1))) {
+			value = ((value) + fileAlign - 1) & ~(fileAlign - 1);
+		}
+		return value;
 	}
 
 	/**
@@ -121,12 +150,13 @@ public class Overlay {
 	public boolean hasOverlay() throws IOException {
 		return file.length() > getOverlayOffset();
 	}
-	
+
 	/**
 	 * Calculates the size of the overlay in bytes.
 	 * 
 	 * @return size of overlay in bytes
-	 * @throws IOException if unable to read the input file
+	 * @throws IOException
+	 *             if unable to read the input file
 	 */
 	public long getOverlaySize() throws IOException {
 		return file.length() - getOverlayOffset();
@@ -135,9 +165,11 @@ public class Overlay {
 	/**
 	 * Writes a dump of the overlay to the specified output location.
 	 * 
-	 * @param outFile the file to write the dump to
+	 * @param outFile
+	 *            the file to write the dump to
 	 * @return true iff successfully dumped
-	 * @throws IOException if unable to read the input file or write the output file
+	 * @throws IOException
+	 *             if unable to read the input file or write the output file
 	 */
 	public boolean dumpTo(File outFile) throws IOException {
 		if (hasOverlay()) {
@@ -164,6 +196,19 @@ public class Overlay {
 				out.write(buffer, 0, bytesRead);
 			}
 		}
+	}
+
+	public static void main(String[] args) throws IOException {
+		File file = new File("joined.exe");
+		PEData data = PELoader.loadPE(file);
+		Overlay overlay = new Overlay(data);
+		if (overlay.hasOverlay()) {
+			System.out.println("file has overlay");
+		} else {
+			System.out.println("no overlay found");
+		}
+		System.out.println("offset found: " + overlay.getOverlayOffset());
+		System.out.println("filesize: " + file.length());
 	}
 
 }
