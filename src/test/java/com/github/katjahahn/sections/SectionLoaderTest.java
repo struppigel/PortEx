@@ -34,13 +34,14 @@ public class SectionLoaderTest {
 		testdata = PELoaderTest.getTestData();
 		pedata = PELoaderTest.getPEData();
 	}
-	
+
 	@Test
 	public void constructorTest() {
 		PEData datum = pedata.get("strings.exe");
 		SectionLoader loader1 = new SectionLoader(datum);
-		SectionLoader loader2 = new SectionLoader(datum.getSectionTable(), datum.getOptionalHeader(), datum.getFile());
-		for(DataDirectoryKey key : DataDirectoryKey.values()) {
+		SectionLoader loader2 = new SectionLoader(datum.getSectionTable(),
+				datum.getOptionalHeader(), datum.getFile());
+		for (DataDirectoryKey key : DataDirectoryKey.values()) {
 			Long offset1 = loader1.getFileOffsetFor(key);
 			Long offset2 = loader2.getFileOffsetFor(key);
 			assertEquals(offset1, offset2);
@@ -49,10 +50,10 @@ public class SectionLoaderTest {
 
 	@Test
 	public void getSectionEntryByRVA() {
-		for(PEData datum : pedata.values()) {
+		for (PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
 			SectionLoader loader = new SectionLoader(datum);
-			for(SectionHeader entry : table.getSectionEntries()) {
+			for (SectionHeader entry : table.getSectionEntries()) {
 				long start = entry.get(SectionHeaderKey.VIRTUAL_ADDRESS);
 				long size = entry.get(SectionHeaderKey.VIRTUAL_SIZE);
 				SectionHeader actual = loader.getSectionEntryByRVA(start);
@@ -117,21 +118,30 @@ public class SectionLoaderTest {
 	}
 
 	@Test
-	public void loadSection() throws IOException {
+	public void loadSectionByName() throws IOException {
 		for (PEData datum : pedata.values()) {
-			// exclude file with section size anomaly
-			if (datum.getFile().getName().equals("Lab05-01.dll")) {
-				continue;
-			}
 			SectionLoader loader = new SectionLoader(datum);
 			SectionTable table = datum.getSectionTable();
-			for (SectionHeader entry : table.getSectionEntries()) {
-				String name = entry.getName();
+			for (SectionHeader header : table.getSectionEntries()) {
+				String name = header.getName();
 				PESection section = loader.loadSection(name);
 				assertNotNull(section);
 				assertEquals(section.getDump().length,
-						entry.get(SectionHeaderKey.SIZE_OF_RAW_DATA)
-								.intValue());
+						(int) loader.getReadSize(header));
+			}
+		}
+	}
+
+	@Test
+	public void loadSectionByNumber() throws IOException {
+		for (PEData datum : pedata.values()) {
+			SectionLoader loader = new SectionLoader(datum);
+			SectionTable table = datum.getSectionTable();
+			for (SectionHeader header : table.getSectionEntries()) {
+				PESection section = loader.loadSection(header.getNumber());
+				assertNotNull(section);
+				assertEquals(section.getDump().length,
+						(int) loader.getReadSize(header));
 			}
 		}
 	}

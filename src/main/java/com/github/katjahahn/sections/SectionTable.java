@@ -123,8 +123,10 @@ public class SectionTable extends PEModule {
 	 * @return the section table entry that has the given number
 	 */
 	public SectionHeader getSectionEntry(int number) {
-		if (number > 0 && number < headers.size()) {
-			return headers.get(number);
+		for (SectionHeader header : headers) {
+			if (header.getNumber() == number) {
+				return header;
+			}
 		}
 		return null;
 	}

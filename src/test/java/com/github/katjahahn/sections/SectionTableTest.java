@@ -45,6 +45,28 @@ public class SectionTableTest {
 			assertEquals(table.getPointerToRawData(section.getName()), pointer);
 		}
 	}
+	
+	@Test
+	public void getSectionByNumber() {
+		for(PEData datum : pedata.values()) {
+			SectionTable table = datum.getSectionTable();
+			for(SectionHeader header : table.getSectionEntries()) {
+				SectionHeader entryByNum = table.getSectionEntry(header.getNumber());
+				assertEquals(entryByNum, header);
+			}
+		}
+	}
+	
+	@Test
+	public void getSectionByName() {
+		for(PEData datum : pedata.values()) {
+			SectionTable table = datum.getSectionTable();
+			for(SectionHeader header : table.getSectionEntries()) {
+				SectionHeader entryByNum = table.getSectionEntry(header.getName());
+				assertEquals(entryByNum, header);
+			}
+		}
+	}
 
 	@Test
 	public void getSectionEntries() {

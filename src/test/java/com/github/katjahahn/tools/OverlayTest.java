@@ -35,19 +35,13 @@ public class OverlayTest {
 				"src/main/resources/testfiles/Lab03-04.exe" }; //TODO more files
 		for (String file : files) {
 			File infile = new File(file);
-			System.out.println(infile.getName());
-			System.out.println();
 			Overlay overlay = new Overlay(infile);
 			assertFalse(overlay.exists());
 		}
 		String[] overfiles = { "Holiday_Island.exe", "WinRar.exe", "joined.exe" };
 		for (String file : overfiles) {
 			File infile = new File(file);
-			System.out.println(infile.getName());
 			Overlay overlay = new Overlay(infile);
-			System.out.println("offset: " + overlay.getOffset());
-			System.out.println("filesize: " + infile.length());
-			System.out.println();
 			assertTrue(overlay.exists());
 		}
 	}
@@ -60,8 +54,6 @@ public class OverlayTest {
 			File infile = new File(file);
 			Overlay overlay = new Overlay(infile);
 			long eof = overlay.getOffset();
-			logger.debug("infile length: " + infile.length());
-			logger.debug("EOF: " + eof);
 			assertEquals(infile.length(), eof);
 		}
 	}

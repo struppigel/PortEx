@@ -38,7 +38,6 @@ public class PEAnomalyScannerTest {
 		boolean containsKey = false;
 		for (Anomaly anomaly : anomalies) {
 			StandardEntry entry = anomaly.standardEntry();
-			System.out.println("entry: " + entry);
 			if (entry != null && key != null) {
 				if (key.equals(entry.key)) {
 					containsKey = true;
@@ -54,7 +53,6 @@ public class PEAnomalyScannerTest {
 			String description) {
 		boolean containsType = false;
 		for (Anomaly anomaly : anomalies) {
-			System.out.println(anomaly);
 			if (anomaly.getType() == type && anomaly.description().contains(description)) {
 				containsType = true;
 				break;

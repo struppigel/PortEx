@@ -121,19 +121,19 @@ public class SectionLoader {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public PESection loadSection(int sectionNr)
-			throws IOException {
+	public PESection loadSection(int sectionNr) throws IOException {
 		byte[] bytes = loadSectionBytes(sectionNr);
-		if(bytes != null) {
+		if (bytes != null) {
 			return new PESection(bytes);
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Returns the bytes of the section with the specified number. 
+	 * Returns the bytes of the section with the specified number.
 	 * 
-	 * @param sectionNr the number of the section
+	 * @param sectionNr
+	 *            the number of the section
 	 * @return bytes that represent the section with the given section number
 	 * @throws IOException
 	 */
@@ -141,7 +141,7 @@ public class SectionLoader {
 		SectionHeader section = table.getSectionEntry(sectionNr);
 		return loadSectionBytes(section);
 	}
-	
+
 	public byte[] loadSectionBytes(SectionHeader section) throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			if (section != null) {
@@ -151,6 +151,8 @@ public class SectionLoader {
 				byte[] sectionbytes = new byte[(int) readSize];
 				raf.readFully(sectionbytes);
 				return sectionbytes;
+			} else {
+				logger.warn("given section was null");
 			}
 		}
 		return null;
@@ -189,6 +191,9 @@ public class SectionLoader {
 		// "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
 		if (virtSize != 0) {
 			readSize = Math.min(readSize, section.getAlignedVirtualSize());
+		}
+		if (readSize + alignedPointerToRaw > file.length()) {
+			readSize = file.length() - alignedPointerToRaw;
 		}
 		return readSize;
 	}
@@ -282,8 +287,7 @@ public class SectionLoader {
 		DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
 				DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
-			SectionHeader rsrcEntry = resourceTable
-					.getSectionTableEntry(table);
+			SectionHeader rsrcEntry = resourceTable.getSectionTableEntry(table);
 			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -308,8 +312,7 @@ public class SectionLoader {
 	 *            the section table of the file
 	 * @param rva
 	 *            the relative virtual address
-	 * @return the {@link SectionHeader} of the section the rva is pointing
-	 *         into
+	 * @return the {@link SectionHeader} of the section the rva is pointing into
 	 */
 	public SectionHeader getSectionEntryByRVA(long rva) {
 		List<SectionHeader> sections = table.getSectionEntries();
@@ -393,16 +396,15 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Fetches the {@link SectionHeader} of the section the data directory
-	 * entry for the given key points into.
+	 * Fetches the {@link SectionHeader} of the section the data directory entry
+	 * for the given key points into.
 	 * 
 	 * @param dataDirKey
 	 *            the data directory key
 	 * @return the section table entry the data directory entry of that key
 	 *         points into
 	 */
-	private SectionHeader getSectionTableEntryFor(
-			DataDirectoryKey dataDirKey) {
+	private SectionHeader getSectionTableEntryFor(DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			return dataDir.getSectionTableEntry(table);
