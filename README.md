@@ -13,10 +13,11 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Dumping of: MSDOS Load Module, Sections, Overlay, embedded ZIP, JAR or .class files
 * Mapping of Data Directory Entries to the corresponding Section
 * Reading Standard Section Formats: Import Section, Resource Section, Export Section, Debug Section
-* Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values according to the PE specification
-* Scan for PEiD userdb signatures
+* Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values
+* Scan for PEiD signatures or your own signature database
 * Scan for jar2exe or class2exe wrappers
 * Scan for Unicode and ASCII strings contained in the file
+* Overlay detection
 * Get a Virustotal report
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
