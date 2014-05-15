@@ -2,7 +2,7 @@ import AssemblyKeys._ // put this at the top of the file
 
 assemblySettings
 
-jarName in assembly := "portex_alpha_0.2.jar"
+jarName in assembly := "portex_alpha_0.3.jar"
 
 test in assembly := {}
 
@@ -13,6 +13,10 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
     case PathList("testfiles", xs @ _*) => MergeStrategy.discard
     case PathList("reports", xs @ _*) => MergeStrategy.discard
     case PathList("exportreports", xs @ _*) => MergeStrategy.discard
+    case PathList("tinype", xs @ _*) => MergeStrategy.discard
+    case PathList("yoda", xs @ _*) => MergeStrategy.discard
+    case PathList("corkami", xs @ _*) => MergeStrategy.discard
+    case PathList("unusualfiles", xs @ _*) => MergeStrategy.discard
     case PathList("x64viruses", xs @ _*) => MergeStrategy.discard
     case x => old(x)
   }
