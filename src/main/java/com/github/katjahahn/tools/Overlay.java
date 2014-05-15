@@ -62,10 +62,9 @@ public class Overlay {
 	}
 
 	/**
-	 * Calculates the end of the PE file based on the section table (last
-	 * section plus its size)
+	 * Returns the file offset of the overlay.
 	 * 
-	 * @return the end of the PE file
+	 * @return file offset of the overlay
 	 * @throws IOException
 	 */
 	public long getOverlayOffset() throws IOException {
@@ -74,22 +73,12 @@ public class Overlay {
 			SectionTable table = data.getSectionTable();
 			offset = 0L;
 			for (SectionTableEntry section : table.getSectionEntries()) {
-				System.out
-						.println("\n-------reading section --------------\n\n"
-								+ section.toString());
-				System.out.println();
 				long alignedPointerToRaw = section.getAlignedPointerToRaw();
 				long readSize = getReadSize(section);
-				System.out.println("readsize: " + readSize);
-				long endPoint = readSize + alignedPointerToRaw; // raw end
-																// pointer of
-																// section
-				System.out.println("endpoint of section: " + endPoint);
+				long endPoint = readSize + alignedPointerToRaw; 
 				if (offset < endPoint) { // determine largest endPoint
 					offset = endPoint;
-					System.out.println("new greatest offset: " + offset);
 				}
-				System.out.println();
 			}
 		}
 		if (offset > file.length()) {
@@ -111,16 +100,11 @@ public class Overlay {
 		long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
 		long fileAlign = data.getOptionalHeader().get(
 				WindowsEntryKey.FILE_ALIGNMENT);
-		System.out.println("filealignment: " + fileAlign);
 		long alignedPointerToRaw = section.getAlignedPointerToRaw();
-		System.out.println("pointer to raw aligned: " + alignedPointerToRaw);
 		// see Peter Ferrie's answer in:
 		// https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
 		long readSize = fileAligned(pointerToRaw + sizeOfRaw, fileAlign)
 				- alignedPointerToRaw;
-		System.out.println("file aligned readsize: " + readSize);
-		System.out.println("4kb aligned sizeofrawdata: "
-				+ section.getAlignedSizeOfRaw());
 		readSize = Math.min(readSize, section.getAlignedSizeOfRaw());
 		// see https://code.google.com/p/corkami/wiki/PE#section_table:
 		// "if bigger than virtual size, then virtual size is taken. "
@@ -135,7 +119,7 @@ public class Overlay {
 	private long fileAligned(long value, long fileAlign) {
 		// Note: (two's complement of x AND value) rounds down value to a
 		// multiple of x if x is a power of 2
-		if (value != (value & ~(fileAlign - 1))) {
+		if (value % fileAlign != 0) {
 			value = ((value) + fileAlign - 1) & ~(fileAlign - 1);
 		}
 		return value;
