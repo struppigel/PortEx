@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 public class OverlayTest {
 	//TODO test the testfiles
+	@SuppressWarnings("unused")
 	private static final Logger logger = LogManager
 			.getLogger(OverlayTest.class.getName());
 

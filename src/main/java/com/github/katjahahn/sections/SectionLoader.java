@@ -199,31 +199,6 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Gets the section size and patches it if {@code patchSize} is set.
-	 * 
-	 * @param entry
-	 *            section entry to get the size from
-	 * @param patchSize
-	 *            patches the section size if it surpasses the actual file size.
-	 *            This is an anomaly and only useful while dealing with
-	 *            corrupted PE files
-	 * @param pointer
-	 *            the pointertorawdata or file offset of the section
-	 * @return a possibly patched section size
-	 */
-	private int getSectionSize(SectionHeader entry, boolean patchSize,
-			Long pointer) {
-		long sectionSize = entry.get(SectionHeaderKey.SIZE_OF_RAW_DATA);
-		long fileSize = file.length();
-		if (patchSize && (pointer + sectionSize > fileSize)) {
-			sectionSize = fileSize - pointer;
-		}
-		// TODO cast to int is insecure. actual int is unsigned,
-		// java int is signed
-		return (int) sectionSize;
-	}
-
-	/**
 	 * Loads all bytes and information of the debug section.
 	 * 
 	 * The file on disk is read to fetch the information.
@@ -265,41 +240,16 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public ResourceSection loadResourceSection() throws IOException {
-		return loadResourceSection(false);
-	}
-
-	/**
-	 * Loads all bytes and information of the resource section.
-	 * 
-	 * The file on disk is read to fetch the information.
-	 * 
-	 * @param patchSize
-	 *            patches the given section size if it surpasses the actual file
-	 *            size. This is an anomaly and only useful while dealing with
-	 *            corrupted PE files
-	 * @return {@link ResourceSection} of the given file, null if file doesn't
-	 *         have this section
-	 * @throws IOException
-	 *             if unable to read the file
-	 */
-	public ResourceSection loadResourceSection(boolean patchSize)
-			throws IOException {
 		DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
 				DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
 			SectionHeader rsrcEntry = resourceTable.getSectionTableEntry(table);
 			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
-				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-					long pointer = rsrcEntry.get(POINTER_TO_RAW_DATA);
-					raf.seek(pointer);
-					int size = getSectionSize(rsrcEntry, patchSize, pointer);
-					byte[] rsrcbytes = new byte[size];
-					raf.readFully(rsrcbytes);
-					ResourceSection rsrc = ResourceSection.getInstance(
-							rsrcbytes, virtualAddress);
-					return rsrc;
-				}
+				byte[] rsrcbytes = loadSectionBytes(rsrcEntry);
+				ResourceSection rsrc = ResourceSection.getInstance(rsrcbytes,
+						virtualAddress);
+				return rsrc;
 			}
 		}
 		return null;
