@@ -225,7 +225,7 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public DebugSection loadDebugSection(boolean patchSize) throws IOException {
-		byte[] bytes = readDataDirBytesFor(DataDirectoryKey.DEBUG, patchSize);
+		byte[] bytes = readDataDirBytesFor(DataDirectoryKey.DEBUG);
 		return DebugSection.apply(bytes);
 	}
 
@@ -354,7 +354,7 @@ public class SectionLoader {
 	 * @return the section table entry the data directory entry of that key
 	 *         points into
 	 */
-	private SectionHeader getSectionTableEntryFor(DataDirectoryKey dataDirKey) {
+	private SectionHeader getSectionHeaderFor(DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			return dataDir.getSectionTableEntry(table);
@@ -374,7 +374,7 @@ public class SectionLoader {
 	 */
 	private Long getSectionEntryValue(DataDirectoryKey dataDirKey,
 			SectionHeaderKey sectionKey) {
-		SectionHeader section = getSectionTableEntryFor(dataDirKey);
+		SectionHeader section = getSectionHeaderFor(dataDirKey);
 		if (section != null) {
 			return section.get(sectionKey);
 		}
@@ -452,29 +452,12 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public ExportSection loadExportSection() throws IOException {
-		return loadExportSection(false);
-	}
-
-	/**
-	 * Loads all bytes and information of the export section. The file on disk
-	 * is read to fetch the information.
-	 * 
-	 * @param patchSize
-	 *            patches the section size if it surpasses the actual file size.
-	 *            This is an anomaly and only useful while dealing with
-	 *            corrupted PE files
-	 * @return the export section, null if file doesn't have an export section
-	 * @throws IOException
-	 *             if unable to read the file
-	 */
-	public ExportSection loadExportSection(boolean patchSize)
-			throws IOException {
 		DataDirEntry exportTable = optHeader.getDataDirEntries().get(
 				DataDirectoryKey.EXPORT_TABLE);
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
 			byte[] edatabytes = readDataDirBytesFor(
-					DataDirectoryKey.EXPORT_TABLE, patchSize);
+					DataDirectoryKey.EXPORT_TABLE);
 			ExportSection edata = ExportSection.getInstance(edatabytes,
 					virtualAddress, optHeader);
 			return edata;
@@ -500,22 +483,18 @@ public class SectionLoader {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey,
-			boolean patchSize) throws IOException {
+	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey) throws IOException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
-			Long virtualAddress = getSectionEntryValue(dataDirKey,
-					VIRTUAL_ADDRESS);
-			Long pointerToRawData = getSectionEntryValue(dataDirKey,
-					POINTER_TO_RAW_DATA);
-			Long sizeOfRawData = getSectionEntryValue(dataDirKey,
-					SIZE_OF_RAW_DATA);
-			if (virtualAddress != null && pointerToRawData != null
-					&& sizeOfRawData != null) {
+			SectionHeader header = getSectionHeaderFor(dataDirKey);
+			long pointerToRawData = header.getAlignedPointerToRaw();
+			long sizeOfRawData = header.getAlignedSizeOfRaw();
+			Long virtualAddress = header.get(VIRTUAL_ADDRESS);
+			if (virtualAddress != null) {
 				long rva = dataDir.virtualAddress;
 				long offset = rva - (virtualAddress - pointerToRawData);
 				long size = sizeOfRawData - (rva - virtualAddress);
-				if (patchSize && sizeOfRawData + offset > file.length()) {
+				if (sizeOfRawData + offset > file.length()) {
 					size = file.length() - offset;
 				}
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -526,6 +505,8 @@ public class SectionLoader {
 					raf.readFully(bytes);
 					return bytes;
 				}
+			} else {
+				logger.warn("virtual address is null for data dir: " + dataDirKey);
 			}
 		} else {
 			logger.warn("invalid dataDirKey");
