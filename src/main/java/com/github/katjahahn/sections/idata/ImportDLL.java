@@ -15,15 +15,32 @@
  ******************************************************************************/
 package com.github.katjahahn.sections.idata;
 
-import com.github.katjahahn.HeaderKey;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Represents a key for a value of a directory table entry.
- * 
- * @author Katja Hahn
- *
- */
-public enum DirectoryTableEntryKey implements HeaderKey {
+public class ImportDLL {
+	
+	private final String name;
+	
+	private final List<NameImport> nameImports;
+	private final List<OrdinalImport> ordinalImports;
+	
+	public ImportDLL(String name, List<NameImport> nameImports, List<OrdinalImport> ordinalImports) {
+		this.name = name;
+		this.nameImports = new ArrayList<>(nameImports);
+		this.ordinalImports = new ArrayList<>(ordinalImports);
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public List<NameImport> getNameImports() {
+		return new ArrayList<>(nameImports);
+	}
+	
+	public List<OrdinalImport> getOrdinalImports() {
+		return new ArrayList<>(ordinalImports);
+	}
 
-	NAME_RVA, I_LOOKUP_TABLE_RVA, TIME_DATE_STAMP, FORWARDER_CHAIN, I_ADDR_TABLE_RVA;
 }

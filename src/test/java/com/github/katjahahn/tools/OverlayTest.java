@@ -38,17 +38,17 @@ public class OverlayTest {
 			System.out.println(infile.getName());
 			System.out.println();
 			Overlay overlay = new Overlay(infile);
-			assertFalse(overlay.hasOverlay());
+			assertFalse(overlay.exists());
 		}
 		String[] overfiles = { "Holiday_Island.exe", "WinRar.exe", "joined.exe" };
 		for (String file : overfiles) {
 			File infile = new File(file);
 			System.out.println(infile.getName());
 			Overlay overlay = new Overlay(infile);
-			System.out.println("offset: " + overlay.getOverlayOffset());
+			System.out.println("offset: " + overlay.getOffset());
 			System.out.println("filesize: " + infile.length());
 			System.out.println();
-			assertTrue(overlay.hasOverlay());
+			assertTrue(overlay.exists());
 		}
 	}
 
@@ -59,7 +59,7 @@ public class OverlayTest {
 		for (String file : noOverFiles) {
 			File infile = new File(file);
 			Overlay overlay = new Overlay(infile);
-			long eof = overlay.getOverlayOffset();
+			long eof = overlay.getOffset();
 			logger.debug("infile length: " + infile.length());
 			logger.debug("EOF: " + eof);
 			assertEquals(infile.length(), eof);

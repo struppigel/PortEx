@@ -1,20 +1,18 @@
-/**
- * *****************************************************************************
+/*******************************************************************************
  * Copyright 2014 Katja Hahn
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ****************************************************************************
- */
+ ******************************************************************************/
 package com.github.katjahahn.sections.idata
 
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber
@@ -33,7 +31,9 @@ import org.apache.logging.log4j.LogManager
  *
  * @author Katja Hahn
  */
-abstract class LookupTableEntry
+abstract class LookupTableEntry {
+  def toImport(): Import
+}
 
 /**
  * @constructor instantiates an ordinal entry
@@ -41,6 +41,7 @@ abstract class LookupTableEntry
  */
 case class OrdinalEntry(val ordNumber: Int) extends LookupTableEntry {
   override def toString(): String = "ordinal: " + ordNumber
+  override def toImport(): Import = new OrdinalImport(ordNumber)
 }
 
 /**
@@ -51,13 +52,17 @@ case class OrdinalEntry(val ordNumber: Int) extends LookupTableEntry {
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry) extends LookupTableEntry {
   override def toString(): String =
     s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, RVA: $nameRVA (0x${toHexString(nameRVA)})"
+
+  override def toImport(): Import = new NameImport(nameRVA, hintNameEntry.name, hintNameEntry.hint)
 }
 
 /**
  * @constructor instantiates a null entry, which is an empty entry that
  * indicates the end of the lookup table
  */
-case class NullEntry() extends LookupTableEntry
+case class NullEntry() extends LookupTableEntry {
+  override def toImport(): Import = null
+}
 
 object LookupTableEntry {
 

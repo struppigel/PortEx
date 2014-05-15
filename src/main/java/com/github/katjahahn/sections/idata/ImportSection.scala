@@ -38,7 +38,7 @@ import com.github.katjahahn.sections.SpecialSection
 /**
  * Represents the import section, fetches information about the data directory
  * entries and their lookup table entries.
- *
+ * TODO forwarder addresses
  * @author Katja Hahn
  */
 class ImportSection private (
@@ -58,6 +58,10 @@ class ImportSection private (
   private def entriesDescription(): String =
     (for (e <- directoryTable)
       yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
+      
+  def getImports(): java.util.List[ImportDLL] = 
+    directoryTable.map(e => e.toImportDLL).asJava
+  
 
   /**
    * Returns a decription of all entries in the import section.

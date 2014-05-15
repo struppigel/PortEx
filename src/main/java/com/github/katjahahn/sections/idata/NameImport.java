@@ -15,15 +15,15 @@
  ******************************************************************************/
 package com.github.katjahahn.sections.idata;
 
-import com.github.katjahahn.HeaderKey;
+public class NameImport implements Import {
 
-/**
- * Represents a key for a value of a directory table entry.
- * 
- * @author Katja Hahn
- *
- */
-public enum DirectoryTableEntryKey implements HeaderKey {
+	public long rva;
+	public String name;
+	public int hint;
 
-	NAME_RVA, I_LOOKUP_TABLE_RVA, TIME_DATE_STAMP, FORWARDER_CHAIN, I_ADDR_TABLE_RVA;
+	public NameImport(long rva, String name, int hint) {
+		this.rva = rva;
+		this.hint = hint;
+		this.name = name;
+	}
 }

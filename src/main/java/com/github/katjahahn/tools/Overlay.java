@@ -67,7 +67,7 @@ public class Overlay {
 	 * @return file offset of the overlay
 	 * @throws IOException
 	 */
-	public long getOverlayOffset() throws IOException {
+	public long getOffset() throws IOException {
 		if (offset == null) {
 			read();
 			SectionTable table = data.getSectionTable();
@@ -131,8 +131,8 @@ public class Overlay {
 	 * @return true iff the file has an overlay
 	 * @throws IOException
 	 */
-	public boolean hasOverlay() throws IOException {
-		return file.length() > getOverlayOffset();
+	public boolean exists() throws IOException {
+		return file.length() > getOffset();
 	}
 
 	/**
@@ -142,8 +142,8 @@ public class Overlay {
 	 * @throws IOException
 	 *             if unable to read the input file
 	 */
-	public long getOverlaySize() throws IOException {
-		return file.length() - getOverlayOffset();
+	public long getSize() throws IOException {
+		return file.length() - getOffset();
 	}
 
 	/**
@@ -156,8 +156,8 @@ public class Overlay {
 	 *             if unable to read the input file or write the output file
 	 */
 	public boolean dumpTo(File outFile) throws IOException {
-		if (hasOverlay()) {
-			dump(getOverlayOffset(), outFile);
+		if (exists()) {
+			dump(getOffset(), outFile);
 			return true;
 		} else {
 			return false;
@@ -186,13 +186,28 @@ public class Overlay {
 		File file = new File("joined.exe");
 		PEData data = PELoader.loadPE(file);
 		Overlay overlay = new Overlay(data);
-		if (overlay.hasOverlay()) {
+		if (overlay.exists()) {
 			System.out.println("file has overlay");
 		} else {
 			System.out.println("no overlay found");
 		}
-		System.out.println("offset found: " + overlay.getOverlayOffset());
+		System.out.println("offset found: " + overlay.getOffset());
 		System.out.println("filesize: " + file.length());
+	}
+
+	/**
+	 * Loads all bytes of the overlay into an array and returns them.
+	 * 
+	 * @return array containing the overlay bytes
+	 * @throws IOException 
+	 */
+	public byte[] getDump() throws IOException {
+		byte[] dump = new byte[(int) getSize()];
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+			raf.seek(offset);
+			raf.readFully(dump);
+		}
+		return dump;
 	}
 
 }

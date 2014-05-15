@@ -44,7 +44,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
   }  
   
   private def checkPEHeaderLocation(coff: COFFFileHeader): List[Anomaly] = {
-    val overlayLoc = new Overlay(data.getFile()).getOverlayOffset
+    val overlayLoc = new Overlay(data.getFile()).getOffset
     if(coff.getOffset() >= overlayLoc) {
       List(StructuralAnomaly("PE Header moved to Overlay."))
     } else Nil
