@@ -2,7 +2,6 @@ package com.github.katjahahn.sections;
 
 import static org.testng.Assert.*;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -53,10 +52,10 @@ public class SectionLoaderTest {
 		for(PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
 			SectionLoader loader = new SectionLoader(datum);
-			for(SectionTableEntry entry : table.getSectionEntries()) {
-				long start = entry.get(SectionTableEntryKey.VIRTUAL_ADDRESS);
-				long size = entry.get(SectionTableEntryKey.VIRTUAL_SIZE);
-				SectionTableEntry actual = loader.getSectionEntryByRVA(start);
+			for(SectionHeader entry : table.getSectionEntries()) {
+				long start = entry.get(SectionHeaderKey.VIRTUAL_ADDRESS);
+				long size = entry.get(SectionHeaderKey.VIRTUAL_SIZE);
+				SectionHeader actual = loader.getSectionEntryByRVA(start);
 				assertEquals(actual, entry);
 				actual = loader.getSectionEntryByRVA(start + size - 1);
 				assertEquals(actual, entry);
@@ -110,19 +109,11 @@ public class SectionLoaderTest {
 			}
 		}
 	}
-	
-	@Test
-	public void loadSectionWithSizePatch() throws IOException {
-		PEData datum = pedata.get("Lab05-01.dll");
-		PESection section = new SectionLoader(datum).loadSection(".reloc", true);
-		long size = datum.getFile().length() - datum.getSectionTable().getPointerToRawData(".reloc");
-		assertEquals(section.getDump().length, size);
-	}
 
-	@Test(expectedExceptions = EOFException.class)
+	@Test
 	public void loadSectionWithSizeAnomaly() throws IOException {
 		PEData datum = pedata.get("Lab05-01.dll");
-		new SectionLoader(datum).loadSection(".reloc", false);
+		new SectionLoader(datum).loadSection(".reloc");
 	}
 
 	@Test
@@ -134,12 +125,12 @@ public class SectionLoaderTest {
 			}
 			SectionLoader loader = new SectionLoader(datum);
 			SectionTable table = datum.getSectionTable();
-			for (SectionTableEntry entry : table.getSectionEntries()) {
+			for (SectionHeader entry : table.getSectionEntries()) {
 				String name = entry.getName();
 				PESection section = loader.loadSection(name);
 				assertNotNull(section);
 				assertEquals(section.getDump().length,
-						entry.get(SectionTableEntryKey.SIZE_OF_RAW_DATA)
+						entry.get(SectionHeaderKey.SIZE_OF_RAW_DATA)
 								.intValue());
 			}
 		}

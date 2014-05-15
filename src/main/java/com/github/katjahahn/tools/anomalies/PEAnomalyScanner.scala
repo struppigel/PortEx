@@ -22,6 +22,11 @@ import PartialFunction._
 import com.github.katjahahn.IOUtil._
 import scala.collection.JavaConverters._
 
+/**
+ * Scans for anomalies and malformations in a PE file.
+ * 
+ * @author Katja Hahn
+ */
 class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
 
   /**

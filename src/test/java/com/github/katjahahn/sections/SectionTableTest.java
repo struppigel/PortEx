@@ -1,6 +1,6 @@
 package com.github.katjahahn.sections;
 
-import static com.github.katjahahn.sections.SectionTableEntryKey.*;
+import static com.github.katjahahn.sections.SectionHeaderKey.*;
 import static org.testng.Assert.*;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class SectionTableTest {
 	@Test
 	public void getPointerToRawData() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for (SectionTableEntry section : table.getSectionEntries()) {
+		for (SectionHeader section : table.getSectionEntries()) {
 			Long pointer = section.get(POINTER_TO_RAW_DATA);
 			assertEquals(table.getPointerToRawData(section.getName()), pointer);
 		}
@@ -51,29 +51,37 @@ public class SectionTableTest {
 		for (TestData testdatum : testdata) {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
 			logger.debug("testing file " + testdatum.filename);
-			List<SectionTableEntry> list = pedatum.getSectionTable()
+			List<SectionHeader> list = pedatum.getSectionTable()
 					.getSectionEntries();
 			assertEquals(list.size(), testdatum.sections.size());
 			assertEquality(list, testdatum.sections);
+			assertSectionNumbers(list);
+		}
+	}
+	
+	private void assertSectionNumbers(List<SectionHeader> list) {
+		for(int i = 0; i < list.size(); i++) {
+			SectionHeader section = list.get(i);
+			assertEquals(section.getNumber(), i + 1);
 		}
 	}
 
-	private void assertEquality(List<SectionTableEntry> actualData,
-			List<SectionTableEntry> testData) {
-		for (SectionTableEntry section : testData) {
+	private void assertEquality(List<SectionHeader> actualData,
+			List<SectionHeader> testData) {
+		for (SectionHeader section : testData) {
 			assertContains(actualData, section);
 		}
 	}
 
-	private void assertContains(List<SectionTableEntry> list,
-			SectionTableEntry section) {
-		SectionTableEntryKey[] relevantKeys = { CHARACTERISTICS,
+	private void assertContains(List<SectionHeader> list,
+			SectionHeader section) {
+		SectionHeaderKey[] relevantKeys = { CHARACTERISTICS,
 				VIRTUAL_ADDRESS, VIRTUAL_SIZE, POINTER_TO_RAW_DATA,
 				SIZE_OF_RAW_DATA }; // key that are tested for equality, other
 									// keys are not covered by testdata
-		for (SectionTableEntry entry : list) {
+		for (SectionHeader entry : list) {
 			if (entry.getName().equals(section.getName())) {
-				for (SectionTableEntryKey key : relevantKeys) {
+				for (SectionHeaderKey key : relevantKeys) {
 					Long value1 = entry.get(key);
 					Long value2 = section.get(key);
 					if (value1 == null || !value1.equals(value2)) {
@@ -91,8 +99,8 @@ public class SectionTableTest {
 	@Test
 	public void getSectionEntry() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionTableEntry section : table.getSectionEntries()) {
-			SectionTableEntry entry = table.getSectionEntry(section.getName());
+		for(SectionHeader section : table.getSectionEntries()) {
+			SectionHeader entry = table.getSectionEntry(section.getName());
 			assertEquals(entry, section);
 		}
 	}
@@ -100,7 +108,7 @@ public class SectionTableTest {
 	@Test
 	public void getSize() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionTableEntry section : table.getSectionEntries()) {
+		for(SectionHeader section : table.getSectionEntries()) {
 			Long size = table.getSize(section.getName());
 			assertEquals(size, section.get(SIZE_OF_RAW_DATA));
 		}
@@ -109,7 +117,7 @@ public class SectionTableTest {
 	@Test
 	public void getVirtualAddress() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionTableEntry section : table.getSectionEntries()) {
+		for(SectionHeader section : table.getSectionEntries()) {
 			Long size = table.getVirtualAddress(section.getName());
 			assertEquals(size, section.get(VIRTUAL_ADDRESS));
 		}

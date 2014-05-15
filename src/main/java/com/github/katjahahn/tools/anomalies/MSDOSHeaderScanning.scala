@@ -19,6 +19,11 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.IOUtil._
 import scala.collection.JavaConverters._
 
+/**
+ * Scans the MSDOS Header for anomalies
+ * 
+ * @author Katja Hahn
+ */
 trait MSDOSHeaderScanning extends AnomalyScanner {
   
   //TODO recognize non-standard header

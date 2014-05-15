@@ -34,6 +34,11 @@ import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.IOUtil._
 import com.github.katjahahn.StandardEntry
 
+/**
+ * Scans the Optional Header for anomalies.
+ * 
+ * @author Katja Hahn
+ */
 trait OptionalHeaderScanning extends AnomalyScanner {
 
   abstract override def scanReport(): String =

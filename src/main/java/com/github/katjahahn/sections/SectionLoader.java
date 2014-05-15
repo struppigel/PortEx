@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.sections;
 
-import static com.github.katjahahn.sections.SectionTableEntryKey.*;
+import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,7 @@ import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
+import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
@@ -97,13 +98,15 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public PESection loadSection(String name) throws IOException {
-		return loadSection(name, false);
+		SectionHeader section = table.getSectionHeaderByName(name);
+		int sectionNr = section.getNumber();
+		return loadSection(sectionNr);
 	}
 
 	/**
-	 * Loads the section with the given name and may patch the size of the
+	 * Loads the section with the given number and may patch the size of the
 	 * section if the {@code patchSize} parameter is set. If the file doesn't
-	 * have a section by this name, it returns null.
+	 * have a section by this number, it returns null.
 	 * 
 	 * This does not instantiate subclasses of {@link PESection}. Use methods
 	 * like {@link #loadImportSection()} or {@link #loadResourceSection()}
@@ -111,31 +114,83 @@ public class SectionLoader {
 	 * 
 	 * The file on disk is read to fetch the information
 	 * 
-	 * @param name
+	 * @param sectionNr
 	 *            the section's name
-	 * @param patchSize
-	 *            patches the section size if it surpasses the actual file size.
-	 *            This is an anomaly and only useful while dealing with
-	 *            corrupted PE files
-	 * @return PESection of the given name, null if section isn't contained in
-	 *         file
+	 * @return PESection of the given number, null if there is no section with
+	 *         that number
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public PESection loadSection(String name, boolean patchSize)
+	public PESection loadSection(int sectionNr)
 			throws IOException {
+		byte[] bytes = loadSectionBytes(sectionNr);
+		if(bytes != null) {
+			return new PESection(bytes);
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the bytes of the section with the specified number. 
+	 * 
+	 * @param sectionNr the number of the section
+	 * @return bytes that represent the section with the given section number
+	 * @throws IOException
+	 */
+	public byte[] loadSectionBytes(int sectionNr) throws IOException {
+		SectionHeader section = table.getSectionEntry(sectionNr);
+		return loadSectionBytes(section);
+	}
+	
+	public byte[] loadSectionBytes(SectionHeader section) throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-			Long pointer = table.getPointerToRawData(name);
-			if (pointer != null) {
-				raf.seek(pointer);
-				int sectionSize = getSectionSize(table.getSectionEntry(name),
-						patchSize, pointer);
-				byte[] sectionbytes = new byte[sectionSize];
+			if (section != null) {
+				long alignedPointerToRaw = section.getAlignedPointerToRaw();
+				long readSize = getReadSize(section);
+				raf.seek(alignedPointerToRaw);
+				byte[] sectionbytes = new byte[(int) readSize];
 				raf.readFully(sectionbytes);
-				return new PESection(sectionbytes);
+				return sectionbytes;
 			}
 		}
 		return null;
+	}
+
+	private long fileAligned(long value) {
+		long fileAlign = optHeader.get(WindowsEntryKey.FILE_ALIGNMENT);
+		// Note: (two's complement of x AND value) rounds down value to a
+		// multiple of x if x is a power of 2
+		if (value % fileAlign != 0) {
+			value = ((value) + fileAlign - 1) & ~(fileAlign - 1);
+		}
+		return value;
+	}
+
+	/**
+	 * Determines the the number of bytes that is read for the section. --> TODO
+	 * include for section loader?
+	 * 
+	 * @param section
+	 * @return section size
+	 */
+	public long getReadSize(SectionHeader section) {
+		long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
+		long virtSize = section.get(VIRTUAL_SIZE);
+		long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
+		long alignedPointerToRaw = section.getAlignedPointerToRaw();
+		// see Peter Ferrie's answer in:
+		// https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
+		long readSize = fileAligned(pointerToRaw + sizeOfRaw)
+				- alignedPointerToRaw;
+		readSize = Math.min(readSize, section.getAlignedSizeOfRaw());
+		// see https://code.google.com/p/corkami/wiki/PE#section_table:
+		// "if bigger than virtual size, then virtual size is taken. "
+		// and:
+		// "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
+		if (virtSize != 0) {
+			readSize = Math.min(readSize, section.getAlignedVirtualSize());
+		}
+		return readSize;
 	}
 
 	/**
@@ -151,9 +206,9 @@ public class SectionLoader {
 	 *            the pointertorawdata or file offset of the section
 	 * @return a possibly patched section size
 	 */
-	private int getSectionSize(SectionTableEntry entry, boolean patchSize,
+	private int getSectionSize(SectionHeader entry, boolean patchSize,
 			Long pointer) {
-		long sectionSize = entry.get(SectionTableEntryKey.SIZE_OF_RAW_DATA);
+		long sectionSize = entry.get(SectionHeaderKey.SIZE_OF_RAW_DATA);
 		long fileSize = file.length();
 		if (patchSize && (pointer + sectionSize > fileSize)) {
 			sectionSize = fileSize - pointer;
@@ -227,7 +282,7 @@ public class SectionLoader {
 		DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
 				DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
-			SectionTableEntry rsrcEntry = resourceTable
+			SectionHeader rsrcEntry = resourceTable
 					.getSectionTableEntry(table);
 			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
@@ -253,12 +308,12 @@ public class SectionLoader {
 	 *            the section table of the file
 	 * @param rva
 	 *            the relative virtual address
-	 * @return the {@link SectionTableEntry} of the section the rva is pointing
+	 * @return the {@link SectionHeader} of the section the rva is pointing
 	 *         into
 	 */
-	public SectionTableEntry getSectionEntryByRVA(long rva) {
-		List<SectionTableEntry> sections = table.getSectionEntries();
-		for (SectionTableEntry section : sections) {
+	public SectionHeader getSectionEntryByRVA(long rva) {
+		List<SectionHeader> sections = table.getSectionEntries();
+		for (SectionHeader section : sections) {
 			long vSize = section.get(VIRTUAL_SIZE);
 			long vAddress = section.get(VIRTUAL_ADDRESS);
 			if (rvaIsWithin(vAddress, vSize, rva)) {
@@ -338,7 +393,7 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Fetches the {@link SectionTableEntry} of the section the data directory
+	 * Fetches the {@link SectionHeader} of the section the data directory
 	 * entry for the given key points into.
 	 * 
 	 * @param dataDirKey
@@ -346,7 +401,7 @@ public class SectionLoader {
 	 * @return the section table entry the data directory entry of that key
 	 *         points into
 	 */
-	private SectionTableEntry getSectionTableEntryFor(
+	private SectionHeader getSectionTableEntryFor(
 			DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
@@ -366,8 +421,8 @@ public class SectionLoader {
 	 * @return the section entry value that belongs to the given key
 	 */
 	private Long getSectionEntryValue(DataDirectoryKey dataDirKey,
-			SectionTableEntryKey sectionKey) {
-		SectionTableEntry section = getSectionTableEntryFor(dataDirKey);
+			SectionHeaderKey sectionKey) {
+		SectionHeader section = getSectionTableEntryFor(dataDirKey);
 		if (section != null) {
 			return section.get(sectionKey);
 		}

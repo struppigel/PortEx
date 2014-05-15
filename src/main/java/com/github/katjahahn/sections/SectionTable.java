@@ -52,7 +52,7 @@ public class SectionTable extends PEModule {
 	 */
 	public final static int ENTRY_SIZE = 40;
 
-	private List<SectionTableEntry> sections;
+	private List<SectionHeader> headers;
 	private final byte[] sectionTableBytes;
 	private final int numberOfEntries;
 	private Map<String, String[]> specification;
@@ -65,7 +65,8 @@ public class SectionTable extends PEModule {
 	 * @param sectionTableBytes
 	 * @param numberOfEntries
 	 */
-	public SectionTable(byte[] sectionTableBytes, int numberOfEntries, long offset) {
+	public SectionTable(byte[] sectionTableBytes, int numberOfEntries,
+			long offset) {
 		this.sectionTableBytes = sectionTableBytes.clone();
 		this.numberOfEntries = numberOfEntries;
 		this.offset = offset;
@@ -78,11 +79,11 @@ public class SectionTable extends PEModule {
 
 	@Override
 	public void read() throws IOException {
-		sections = new LinkedList<>();
+		headers = new LinkedList<>();
 
 		for (int i = 0; i < numberOfEntries; i++) {
 			int sectionNumber = i + 1;
-			SectionTableEntry sectionEntry = new SectionTableEntry(sectionNumber);
+			SectionHeader sectionEntry = new SectionHeader(sectionNumber);
 			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
 					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
 
@@ -91,27 +92,41 @@ public class SectionTable extends PEModule {
 				String[] specs = entry.getValue();
 				long value = getBytesLongValue(section,
 						Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-				SectionTableEntryKey key = SectionTableEntryKey.valueOf(entry
-						.getKey());
+				SectionHeaderKey key = SectionHeaderKey.valueOf(entry.getKey());
 
-				if (key.equals(SectionTableEntryKey.NAME)) {
+				if (key.equals(SectionHeaderKey.NAME)) {
 					sectionEntry.setName(getUTF8String(section));
 					continue;
 				}
 
 				sectionEntry.add(new StandardEntry(key, specs[0], value));
 			}
-			sections.add(sectionEntry);
+			headers.add(sectionEntry);
 		}
 	}
 
 	/**
-	 * Returns all entries of the section table as a list
+	 * Returns all entries of the section table as a list. They are in the same
+	 * order as they are within the Section Table.
 	 * 
-	 * @return
+	 * @return ordered section table entries
 	 */
-	public List<SectionTableEntry> getSectionEntries() {
-		return new LinkedList<>(sections);
+	public List<SectionHeader> getSectionEntries() {
+		return new LinkedList<>(headers);
+	}
+
+	/**
+	 * Returns the section entry that has the given number or null if there is
+	 * no section with that number.
+	 * 
+	 * @param number
+	 * @return the section table entry that has the given number
+	 */
+	public SectionHeader getSectionEntry(int number) {
+		if (number > 0 && number < headers.size()) {
+			return headers.get(number);
+		}
+		return null;
 	}
 
 	/**
@@ -125,8 +140,8 @@ public class SectionTable extends PEModule {
 	 * @param sectionName
 	 * @return the section table entry that has the given sectionName
 	 */
-	public SectionTableEntry getSectionEntry(String sectionName) {
-		for (SectionTableEntry entry : sections) {
+	public SectionHeader getSectionEntry(String sectionName) {
+		for (SectionHeader entry : headers) {
 			if (entry.getName().equals(sectionName)) {
 				return entry;
 			}
@@ -260,8 +275,10 @@ public class SectionTable extends PEModule {
 
 	// TODO this is nuts, why read it again? Same code as getPointerToRawData
 	/**
-	 * Returns the raw size of the section with the given section name.
-	 * TODO use entry number instead. the name is not enough to identify a section uniquely.
+	 * Returns the raw size of the section with the given section name. TODO use
+	 * entry number instead. the name is not enough to identify a section
+	 * uniquely.
+	 * 
 	 * @param sectionName
 	 * @return
 	 */
@@ -297,5 +314,20 @@ public class SectionTable extends PEModule {
 	@Override
 	public long getOffset() {
 		return offset;
+	}
+
+	/**
+	 * Returns the first section that has the given name.
+	 * 
+	 * @param name
+	 * @return first section with the given name
+	 */
+	public SectionHeader getSectionHeaderByName(String name) {
+		for (SectionHeader header : headers) {
+			if (header.getName().equals(name)) {
+				return header;
+			}
+		}
+		return null;
 	}
 }

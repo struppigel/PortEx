@@ -22,8 +22,8 @@ import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
-import com.github.katjahahn.sections.SectionTableEntry;
-import com.github.katjahahn.sections.SectionTableEntryKey;
+import com.github.katjahahn.sections.SectionHeader;
+import com.github.katjahahn.sections.SectionHeaderKey;
 import com.github.katjahahn.sections.edata.ExportEntry;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
@@ -133,16 +133,16 @@ public class TestreportsReader {
 			if (split[0].contains("Resources")) {
 				break;
 			}
-			SectionTableEntry entry = readSectionEntry(reader, line, number);
+			SectionHeader entry = readSectionEntry(reader, line, number);
 			if (entry != null) {
 				data.sections.add(entry);
 			}
 		}
 	}
 
-	private static SectionTableEntry readSectionEntry(BufferedReader reader,
+	private static SectionHeader readSectionEntry(BufferedReader reader,
 			String line, int number) throws IOException {
-		SectionTableEntry entry = new SectionTableEntry(number);
+		SectionHeader entry = new SectionHeader(number);
 		while (line != null) {
 			String[] split = line.split(":");
 			if (split.length < 2) {
@@ -153,10 +153,10 @@ public class TestreportsReader {
 				entry.setName(name);
 			} else {
 				long value = convertToLong(split[1]); 
-				SectionTableEntryKey key = getSectionKeyFor(split[0].trim());
+				SectionHeaderKey key = getSectionKeyFor(split[0].trim());
 				if (key != null) {
 					entry.add(new StandardEntry(key, null, value));
-					if(key == SectionTableEntryKey.CHARACTERISTICS) {
+					if(key == SectionHeaderKey.CHARACTERISTICS) {
 						logger.debug("characteristics read: " + Long.toHexString(value));
 					}
 				} else {
@@ -524,21 +524,21 @@ public class TestreportsReader {
 		return null;
 	}
 
-	private static SectionTableEntryKey getSectionKeyFor(String name) {
+	private static SectionHeaderKey getSectionKeyFor(String name) {
 		if (name.contains("Virtual size")) {
-			return SectionTableEntryKey.VIRTUAL_SIZE;
+			return SectionHeaderKey.VIRTUAL_SIZE;
 		}
 		if (name.contains("Virtual address")) {
-			return SectionTableEntryKey.VIRTUAL_ADDRESS;
+			return SectionHeaderKey.VIRTUAL_ADDRESS;
 		}
 		if (name.contains("Data size")) {
-			return SectionTableEntryKey.SIZE_OF_RAW_DATA;
+			return SectionHeaderKey.SIZE_OF_RAW_DATA;
 		}
 		if (name.contains("Data offset")) {
-			return SectionTableEntryKey.POINTER_TO_RAW_DATA;
+			return SectionHeaderKey.POINTER_TO_RAW_DATA;
 		}
 		if (name.contains("Characteristics")) {
-			return SectionTableEntryKey.CHARACTERISTICS;
+			return SectionHeaderKey.CHARACTERISTICS;
 		}
 		
 		System.err.println("missing section table entry " + name);
@@ -572,7 +572,7 @@ public class TestreportsReader {
 		public Map<StandardFieldEntryKey, String> standardOpt;
 		public Map<WindowsEntryKey, String> windowsOpt;
 		public List<DataDirEntry> dataDir;
-		public List<SectionTableEntry> sections;
+		public List<SectionHeader> sections;
 		public List<ResourceDataEntry> resources;
 		public String filename;
 		public int peoffset;

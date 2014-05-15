@@ -27,7 +27,7 @@ import com.github.katjahahn.PELoader
 import com.github.katjahahn.optheader.StandardFieldEntryKey._
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.sections.SectionTable
-import com.github.katjahahn.sections.SectionTableEntryKey
+import com.github.katjahahn.sections.SectionHeaderKey
 import Signature._
 import SignatureScanner._
 import com.github.katjahahn.FileFormatException
@@ -141,7 +141,7 @@ class SignatureScanner(signatures: List[Signature]) {
     val data = PELoader.loadPE(file)
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val section = new SectionLoader(data).getSectionEntryByRVA(rva)
-    val phystovirt = section.get(SectionTableEntryKey.VIRTUAL_ADDRESS) - section.get(SectionTableEntryKey.POINTER_TO_RAW_DATA)
+    val phystovirt = section.get(SectionHeaderKey.VIRTUAL_ADDRESS) - section.get(SectionHeaderKey.POINTER_TO_RAW_DATA)
     rva - phystovirt
   }
 }

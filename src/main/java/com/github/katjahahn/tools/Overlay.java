@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.tools;
 
-import static com.github.katjahahn.sections.SectionTableEntryKey.*;
+import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,8 +25,8 @@ import java.io.RandomAccessFile;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 import com.github.katjahahn.optheader.WindowsEntryKey;
+import com.github.katjahahn.sections.SectionHeader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.SectionTableEntry;
 
 /**
  * Recognizes and dumps overlay in a PE file.
@@ -72,7 +72,7 @@ public class Overlay {
 			read();
 			SectionTable table = data.getSectionTable();
 			offset = 0L;
-			for (SectionTableEntry section : table.getSectionEntries()) {
+			for (SectionHeader section : table.getSectionEntries()) {
 				long alignedPointerToRaw = section.getAlignedPointerToRaw();
 				long readSize = getReadSize(section);
 				long endPoint = readSize + alignedPointerToRaw; 
@@ -88,13 +88,13 @@ public class Overlay {
 	}
 
 	/**
-	 * Determines the the number of bytes that is read for the section. --> TODO
-	 * include for section loader?
+	 * Determines the the number of bytes that is read for the section.
 	 * 
 	 * @param section
 	 * @return section size
 	 */
-	private long getReadSize(SectionTableEntry section) {
+	//TODO maybe use SectionLoader instead
+	private long getReadSize(SectionHeader section) {
 		long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
 		long virtSize = section.get(VIRTUAL_SIZE);
 		long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);

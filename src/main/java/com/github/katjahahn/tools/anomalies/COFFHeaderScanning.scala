@@ -25,6 +25,11 @@ import com.github.katjahahn.IOUtil
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.tools.Overlay
 
+/**
+ * Scans the COFF File Header for anomalies.
+ * 
+ * @author Katja Hahn
+ */
 trait COFFHeaderScanning extends AnomalyScanner {
   
   abstract override def scanReport(): String =

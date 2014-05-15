@@ -16,12 +16,12 @@
 package com.github.katjahahn.optheader;
 
 import static com.github.katjahahn.PEModule.*;
-import static com.github.katjahahn.sections.SectionTableEntryKey.*;
+import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
 import java.util.List;
 
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.SectionTableEntry;
+import com.github.katjahahn.sections.SectionHeader;
 
 /**
  * Represents an entry of the data directory table. It is used like a struct.
@@ -90,7 +90,7 @@ public class DataDirEntry {
 	 * @return file offset of data directory
 	 */
 	public long getFileOffset(SectionTable table) { //TODO not in use?
-		SectionTableEntry section = getSectionTableEntry(table);
+		SectionHeader section = getSectionTableEntry(table);
 		long sectionRVA = section.get(VIRTUAL_ADDRESS);
 		long sectionOffset = section.get(POINTER_TO_RAW_DATA);
 		return (virtualAddress - sectionRVA) + sectionOffset;
@@ -106,9 +106,9 @@ public class DataDirEntry {
 	 */
 	// this is a duplicate to Sectionloader getSectionByRVA, but intentional for
 	// better use of the API
-	public SectionTableEntry getSectionTableEntry(SectionTable table) {
-		List<SectionTableEntry> sections = table.getSectionEntries();
-		for (SectionTableEntry section : sections) {
+	public SectionHeader getSectionTableEntry(SectionTable table) {
+		List<SectionHeader> sections = table.getSectionEntries();
+		for (SectionHeader section : sections) {
 			int vSize = section.get(VIRTUAL_SIZE).intValue();
 			int vAddress = section.get(VIRTUAL_ADDRESS).intValue();
 			if (rvaIsWithin(vAddress, vSize)) {
