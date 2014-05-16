@@ -9,10 +9,9 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 
 ### Features (so far)
 
-* Reading Header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
-* Dumping of: MSDOS Load Module, Sections, Overlay, embedded ZIP, JAR or .class files
-* Mapping of Data Directory Entries to the corresponding Section
-* Reading Standard Section Formats: Import Section, Resource Section, Export Section, Debug Section
+* Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
+* Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section
+* Dumping of sections, overlay, embedded ZIP, JAR or .class files
 * Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values
 * Scan for PEiD signatures or your own signature database
 * Scan for jar2exe or class2exe wrappers
