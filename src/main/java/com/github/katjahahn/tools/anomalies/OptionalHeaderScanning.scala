@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
@@ -36,7 +38,7 @@ import com.github.katjahahn.StandardEntry
 
 /**
  * Scans the Optional Header for anomalies.
- * 
+ *
  * @author Katja Hahn
  */
 trait OptionalHeaderScanning extends AnomalyScanner {
@@ -193,8 +195,10 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
       if (entry != null) {
-        val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
-        anomalyList += NonDefaultAnomaly(entry, description)
+        if (entry.value != 16) {
+          val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
+          anomalyList += NonDefaultAnomaly(entry, description)
+        }
       } else {
         val description = "Optional Header: NumberOfRVAAndSizes not given, Data Directory contains " + datadirs.size() + " entries."
         anomalyList += StructuralAnomaly(description)

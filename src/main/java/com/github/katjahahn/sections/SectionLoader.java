@@ -209,22 +209,6 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public DebugSection loadDebugSection() throws IOException {
-		return loadDebugSection(false);
-	}
-
-	/**
-	 * Loads all bytes and information of the debug section. The file on disk is
-	 * read to fetch the information.
-	 * 
-	 * @param patchSize
-	 *            patches the section size if it surpasses the actual file size.
-	 *            This is an anomaly and only useful while dealing with
-	 *            corrupted PE files
-	 * @return the debug section, null if file doesn't have a debug section
-	 * @throws IOException
-	 *             if unable to read the file
-	 */
-	public DebugSection loadDebugSection(boolean patchSize) throws IOException {
 		byte[] bytes = readDataDirBytesFor(DataDirectoryKey.DEBUG);
 		return DebugSection.apply(bytes);
 	}
@@ -456,8 +440,7 @@ public class SectionLoader {
 				DataDirectoryKey.EXPORT_TABLE);
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
-			byte[] edatabytes = readDataDirBytesFor(
-					DataDirectoryKey.EXPORT_TABLE);
+			byte[] edatabytes = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
 			ExportSection edata = ExportSection.getInstance(edatabytes,
 					virtualAddress, optHeader);
 			return edata;
@@ -483,7 +466,8 @@ public class SectionLoader {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey) throws IOException {
+	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey)
+			throws IOException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);
@@ -494,7 +478,10 @@ public class SectionLoader {
 				long rva = dataDir.virtualAddress;
 				long offset = rva - (virtualAddress - pointerToRawData);
 				long size = sizeOfRawData - (rva - virtualAddress);
-				if (sizeOfRawData + offset > file.length()) {
+				if (size < dataDir.size) {
+					size = dataDir.size;
+				}
+				if (size + offset > file.length()) {
 					size = file.length() - offset;
 				}
 				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -506,7 +493,8 @@ public class SectionLoader {
 					return bytes;
 				}
 			} else {
-				logger.warn("virtual address is null for data dir: " + dataDirKey);
+				logger.warn("virtual address is null for data dir: "
+						+ dataDirKey);
 			}
 		} else {
 			logger.warn("invalid dataDirKey");

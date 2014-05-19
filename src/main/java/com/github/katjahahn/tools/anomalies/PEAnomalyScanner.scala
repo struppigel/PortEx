@@ -84,7 +84,7 @@ object PEAnomalyScanner {
 
   def main(args: Array[String]): Unit = {
     var counter = 0
-    val file = new File("src/main/resources/unusualfiles/tinype/tinyest.exe")
+    val file = new File("src/main/resources/unusualfiles/corkami/sectionless.exe");
     val data = PELoader.loadPE(file)
     println(data) 
     val scanner = new PEAnomalyScanner(data) with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning

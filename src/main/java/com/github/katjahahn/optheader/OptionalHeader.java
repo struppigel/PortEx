@@ -236,14 +236,16 @@ public class OptionalHeader extends PEModule {
 			if (counter >= rvaNumber) {
 				break;
 			}
-			long address = getBytesLongValue(headerbytes,
-					Integer.parseInt(specs[offsetLoc]), length);
-			long size = getBytesLongValue(headerbytes,
-					Integer.parseInt(specs[offsetLoc]) + length, length);
-			if (address != 0) {
-				DataDirEntry entry = new DataDirEntry(specs[description],
-						address, size);
-				dataDirEntries.put(entry.key, entry);
+			int offset = Integer.parseInt(specs[offsetLoc]);
+			if (headerbytes.length >= offset + length) {
+				long address = getBytesLongValue(headerbytes, offset, length);
+				long size = getBytesLongValue(headerbytes, offset + length,
+						length);
+				if (address != 0) {
+					DataDirEntry entry = new DataDirEntry(specs[description],
+							address, size);
+					dataDirEntries.put(entry.key, entry);
+				}
 			}
 			counter++;
 		}
