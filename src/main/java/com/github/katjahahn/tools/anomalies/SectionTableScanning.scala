@@ -26,6 +26,8 @@ import com.github.katjahahn.sections.SectionCharacteristic._
 import com.github.katjahahn.sections.SectionCharacteristic
 import java.util.Arrays
 import com.github.katjahahn.sections.SectionHeader
+import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.sections.SectionLoader
 
 /**
  * Scans the Section Table for anomalies.
@@ -46,7 +48,39 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkAscendingVA
     anomalyList ++= checkExtendedReloc
     anomalyList ++= checkTooLargeSizes
+    anomalyList ++= checkSectionNames
+    anomalyList ++= checkOverlappingSections
     super.scan ::: anomalyList.toList
+  }
+
+  private def checkSectionNames(): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val sectionTable = data.getSectionTable
+    val sections = sectionTable.getSectionEntries.asScala
+    val usualNames = List(".bss", ".cormeta", ".data", ".debug", ".drective",
+      ".edata", ".idata", ".rsrc", ".idlsym", ".pdata", ".rdata", ".reloc",
+      ".sbss", ".sdata", ".srdata", ".sxdata", ".text", ".tls", ".vsdata",
+      ".xdata", ".debug$F", ".debug$P", ".debug$S", ".debug$T", ".tls$")
+    for (section <- sections) {
+      val sectionName = filteredString(section.getName)
+      val entry = new StandardEntry(SectionHeaderKey.NAME, section.getName, null);
+      if (sectionName != section.getName) {
+        val description = s"Section number ${section.getNumber()} has control symbols in name: ${filteredSymbols(section.getName).mkString(", ")}"
+        anomalyList += new NonDefaultAnomaly(entry, description)
+      }
+      if (!usualNames.contains(section.getName)) {
+        val description = s"Section name is unusual: ${sectionName}";
+        anomalyList += new NonDefaultAnomaly(entry, description)
+      }
+    }
+    anomalyList.toList
+  }
+
+  private def filteredSymbols(name: String): List[String] = {
+    def getUnicodeValue(c: Char): String = "\\u" + Integer.toHexString(c | 0x10000).substring(1)
+    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
+    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
+    name.map(c => if (controlCode(c) || extendedCode(c)) { getUnicodeValue(c) } else c.toString).toList
   }
 
   private def checkTooLargeSizes(): List[Anomaly] = {
@@ -57,7 +91,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionName = filteredString(section.getName)
       val entry = section.getEntry(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val value = entry.value
-      if (value + section.getAlignedPointerToRaw() > data.getFile().length() ) {
+      if (value + section.getAlignedPointerToRaw() > data.getFile().length()) {
         val description = s"Section Table Entry ${sectionName}: ${entry.key} is larger (${value}) than permitted by file.length"
         anomalyList += WrongValueAnomaly(entry, description)
       }
@@ -77,6 +111,31 @@ trait SectionTableScanning extends AnomalyScanner {
         if (value != 0xffff) {
           val description = s"Section Table Entry ${sectionName}: has IMAGE_SCN_LNK_NRELOC_OVFL characteristic --> ${entry.key} must be 0xffff, but is " + value
           anomalyList += WrongValueAnomaly(entry, description)
+        }
+      }
+    }
+    anomalyList.toList
+  }
+
+  private def checkOverlappingSections(): List[Anomaly] = {
+    def overlaps(t1: (Long, Long), t2: (Long, Long)): Boolean = 
+      !(((t1._1 < t2._1) && (t1._2 <= t2._1)) || ((t2._1 < t1._1) && (t2._2 <= t1._1)))
+    val anomalyList = ListBuffer[Anomaly]()
+    val sectionTable = data.getSectionTable
+    val sections = sectionTable.getSectionEntries.asScala
+    val loader = new SectionLoader(data)
+    var prevVA = -1
+    for (section <- sections) {
+      val sectionName = filteredString(section.getName)
+      val physStart = section.getAlignedPointerToRaw()
+      val physEnd = loader.getReadSize(section) + physStart
+      for (i <- section.getNumber() + 1 to sections.length) { //correct?
+        val sec = sectionTable.getSectionEntry(i)
+        val start = sec.getAlignedPointerToRaw()
+        val end = loader.getReadSize(sec) + physStart
+        if (overlaps((start, end), (physStart, physEnd))) {
+          val description = s"Section ${sectionName} with number ${section.getNumber} (${physStart}/${physEnd}) overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (${start}/${end})"
+          anomalyList += StructuralAnomaly(description)
         }
       }
     }
