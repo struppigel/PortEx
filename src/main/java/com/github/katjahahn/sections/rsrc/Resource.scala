@@ -49,6 +49,6 @@ class Resource(
 //  }
 
   override def toString(): String = 
-    levelIDs.mkString(" || ") + " || resource bytes:\n" + getResourceBytesString
+    levelIDs.mkString(" || ")
 
 }

@@ -22,6 +22,9 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.IOUtil
 import com.github.katjahahn.PEModule
 import com.github.katjahahn.sections.SpecialSection
+import com.github.katjahahn.PELoader
+import java.io.File
+import com.github.katjahahn.sections.SectionLoader
 
 /**
  * Holds the root resource directory table and provides access to the resources.
@@ -58,6 +61,12 @@ class ResourceSection(
 }
 
 object ResourceSection {
+  
+  def main(args: Array[String]): Unit = {
+    val pedata = PELoader.loadPE(new File("WinRar.exe"))
+    val rsrc = new SectionLoader(pedata).loadResourceSection()
+    println(rsrc.getResources.asScala.mkString("\n"))
+  }
 
   /**
    * Creates an instance of the ResourceSection

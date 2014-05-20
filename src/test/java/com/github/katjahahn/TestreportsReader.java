@@ -27,6 +27,7 @@ import com.github.katjahahn.sections.SectionHeaderKey;
 import com.github.katjahahn.sections.edata.ExportEntry;
 import com.github.katjahahn.sections.idata.ImportDLL;
 import com.github.katjahahn.sections.idata.NameImport;
+import com.github.katjahahn.sections.idata.OrdinalImport;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 public class TestreportsReader {
@@ -65,14 +66,22 @@ public class TestreportsReader {
 					list.add(dll);
 				}
 				dll = new ImportDLL(entry[0]);
-			} else if (entry.length == 2) { // ImportDLL entry
+			} else if (entry.length == 4) { // ImportDLL entry
 				if (dll == null) {
 					logger.error("parsing error for line: " + entry[0] + ";"
 							+ entry[1]);
 				} else {
 					Long rva = Long.parseLong(entry[0]);
 					String name = entry[1];
-					dll.add(new NameImport(rva, name, -1, -1, null)); // hint, dirEntry and nameRVA are dummies
+					if (!entry[3].contains("None")) {
+						int ordinal = Integer.parseInt(entry[3]);
+						OrdinalImport ord = new OrdinalImport(ordinal, rva, null);
+						dll.add(ord);
+					} else {
+						int hint = Integer.parseInt(entry[2]);
+						NameImport nameImp = new NameImport(rva, name, hint, -1, null);
+						dll.add(nameImp); 
+					}
 				}
 			}
 		}

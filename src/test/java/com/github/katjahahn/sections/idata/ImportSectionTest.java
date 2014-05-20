@@ -76,6 +76,11 @@ public class ImportSectionTest {
 						nameImport.hint, nameImport.nameRVA, null);
 				newDLL.add(newImport);
 			}
+			for (OrdinalImport ordImport : dll.getOrdinalImports()) {
+				long rva = ordImport.rva - imageBase;
+				OrdinalImport newImport = new OrdinalImport(ordImport.ordinal, rva, null);
+				newDLL.add(newImport);
+			}
 			list.add(newDLL);
 		}
 		return list;
@@ -96,6 +101,20 @@ public class ImportSectionTest {
 			}
 			assertNotNull(found);
 		}
+		for (OrdinalImport readImport : actualDLL.getOrdinalImports()) {
+			OrdinalImport found = find(peFileDLL.getOrdinalImports(),
+					readImport);
+			if (found == null) {
+				logger.error("unable to find import " + readImport);
+				logger.error("image base used: " + imageBase);
+				logger.error("pefile size: " + peFileDLL.getOrdinalImports().size());
+				logger.error("actual size: " + actualDLL.getOrdinalImports().size());
+				logger.info("pefile dll list: " + peFileDLL);
+				logger.info("portex dll list: " + actualDLL);
+			}
+			assertNotNull(found);
+		}
+
 		int actualSize = actualDLL.getNameImports().size()
 				+ actualDLL.getOrdinalImports().size();
 		int expectedSize = peFileDLL.getNameImports().size()
@@ -103,12 +122,31 @@ public class ImportSectionTest {
 		assertEquals(actualSize, expectedSize);
 	}
 
+	private OrdinalImport find(List<OrdinalImport> ordinalImports,
+			OrdinalImport readImport) {
+		long iat = readImport
+				.getDirEntry(DirectoryTableEntryKey.I_ADDR_TABLE_RVA);
+		long ilt = readImport
+				.getDirEntry(DirectoryTableEntryKey.I_LOOKUP_TABLE_RVA);
+		if (ilt == 0)
+			ilt = iat;
+		for (OrdinalImport pefileImport : ordinalImports) {
+			long rva1 = pefileImport.rva - iat;
+			long rva2 = readImport.rva - ilt;
+			if (pefileImport.ordinal == readImport.ordinal && rva1 == rva2) {
+				return pefileImport;
+			}
+		}
+		return null;
+	}
+
 	private NameImport find(List<NameImport> pefileList, NameImport readImport) {
 		long iat = readImport
 				.getDirEntry(DirectoryTableEntryKey.I_ADDR_TABLE_RVA);
 		long ilt = readImport
 				.getDirEntry(DirectoryTableEntryKey.I_LOOKUP_TABLE_RVA);
-		if(ilt == 0) ilt = iat;
+		if (ilt == 0)
+			ilt = iat;
 		for (NameImport pefileImport : pefileList) {
 			long rva1 = pefileImport.rva - iat;
 			long rva2 = readImport.rva - ilt;
