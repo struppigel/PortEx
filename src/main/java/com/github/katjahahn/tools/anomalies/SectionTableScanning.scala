@@ -92,7 +92,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val entry = section.getEntry(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val value = entry.value
       if (value + section.getAlignedPointerToRaw() > data.getFile().length()) {
-        val description = s"Section Table Entry ${sectionName}: ${entry.key} is larger (${value}) than permitted by file.length"
+        val description = s"Section Table Entry ${sectionName}: ${entry.key} is larger (${value}) than permitted by file length"
         anomalyList += WrongValueAnomaly(entry, description)
       }
     }

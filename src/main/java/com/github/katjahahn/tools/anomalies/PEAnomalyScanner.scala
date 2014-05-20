@@ -24,6 +24,7 @@ import PartialFunction._
 import com.github.katjahahn.IOUtil._
 import scala.collection.JavaConverters._
 import com.github.katjahahn.tools.Overlay
+import com.github.katjahahn.sections.SectionLoader
 
 /**
  * Scans for anomalies and malformations in a PE file.
@@ -84,19 +85,23 @@ object PEAnomalyScanner {
   def getInstance(data: PEData): PEAnomalyScanner =
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
+  //FIXME VirusShare_baed21297974b6adf3298585baa78691 seems to have overflow issues
   def main(args: Array[String]): Unit = {
     var counter = 0
-    val folder = new File("src/main/resources/x64viruses/");
-    for (file <- folder.listFiles()) {
+    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
+//    for (file <- folder.listFiles()) {
       val data = PELoader.loadPE(file)
+      val loader = new SectionLoader(data)
+      println(loader.loadExportSection().getInfo())
       //    println(data) 
       val scanner = new PEAnomalyScanner(data) with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
       val over = new Overlay(data)
+      println(data)
       println(scanner.scanReport)
       println("has overlay: " + over.exists())
       println("overlay offset: " + over.getOffset())
       println()
-    }
+//    }
   }
 
 }

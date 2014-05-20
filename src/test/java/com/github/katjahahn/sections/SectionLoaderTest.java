@@ -2,6 +2,7 @@ package com.github.katjahahn.sections;
 
 import static org.testng.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,9 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.github.katjahahn.FileFormatException;
 import com.github.katjahahn.PEData;
+import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.optheader.DataDirEntry;
@@ -36,7 +39,7 @@ public class SectionLoaderTest {
 	}
 
 	@Test
-	public void constructorTest() {
+	public void constructorTest() throws FileFormatException {
 		PEData datum = pedata.get("strings.exe");
 		SectionLoader loader1 = new SectionLoader(datum);
 		SectionLoader loader2 = new SectionLoader(datum.getSectionTable(),
@@ -47,6 +50,23 @@ public class SectionLoaderTest {
 			assertEquals(offset1, offset2);
 		}
 	}
+	
+	@Test(expectedExceptions=FileFormatException.class)
+	public void unableToLoadImports() throws IOException {
+		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
+		PEData data = PELoader.loadPE(file);
+		SectionLoader loader = new SectionLoader(data);
+		loader.loadImportSection();
+	}
+
+	@Test(expectedExceptions=FileFormatException.class)
+	public void unableToLoadResources() throws IOException {
+		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
+		PEData data = PELoader.loadPE(file);
+		SectionLoader loader = new SectionLoader(data);
+		loader.loadResourceSection();
+	}
+
 
 	@Test
 	public void getSectionEntryByRVA() {

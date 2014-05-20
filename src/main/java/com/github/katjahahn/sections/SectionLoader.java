@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.FileFormatException;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
@@ -223,20 +224,24 @@ public class SectionLoader {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
-	public ResourceSection loadResourceSection() throws IOException {
+	public ResourceSection loadResourceSection() throws IOException,
+			FileFormatException {
 		DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
 				DataDirectoryKey.RESOURCE_TABLE);
 		if (resourceTable != null) {
 			SectionHeader rsrcEntry = resourceTable.getSectionTableEntry(table);
-			Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
-			if (virtualAddress != null) {
-				byte[] rsrcbytes = loadSectionBytes(rsrcEntry);
-				ResourceSection rsrc = ResourceSection.getInstance(rsrcbytes,
-						virtualAddress);
-				return rsrc;
+			if (rsrcEntry != null) {
+				Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
+				if (virtualAddress != null) {
+					byte[] rsrcbytes = loadSectionBytes(rsrcEntry);
+					ResourceSection rsrc = ResourceSection.getInstance(
+							rsrcbytes, virtualAddress);
+					return rsrc;
+				}
 			}
 		}
-		return null;
+		throw new FileFormatException("unable to load "
+				+ DataDirectoryKey.RESOURCE_TABLE);
 	}
 
 	/**
@@ -269,12 +274,15 @@ public class SectionLoader {
 	 * Loads all bytes and information of the import section. The file on disk
 	 * is read to fetch the information.
 	 * 
-	 * @return the import section, null if file doesn't have an import
-	 *         sectigetBytesLongValue(edataBytes, offset, length)on
+	 * @return the import section, null if not datadir entry for import table
+	 *         exists
 	 * @throws IOException
 	 *             if unable to read the file
+	 * @throws FileFormatException
+	 *             if import section can not be loaded
 	 */
-	public ImportSection loadImportSection() throws IOException {
+	public ImportSection loadImportSection() throws IOException,
+			FileFormatException {
 		return loadImportSection(false);
 	}
 
@@ -284,22 +292,22 @@ public class SectionLoader {
 	 * 
 	 * @param patchSize
 	 *            patches the section size if it surpasses the actual file size.
-	 *            This is an anomaly and only useful while dealing with
-	 *            corrupted PE files
-	 * @return the import section, null if file doesn't have an import
-	 *         sectigetBytesLongValue(edataBytes, offset, length)on
+	 * @return the import section or null if no data dir entry for the import
+	 *         table is given
 	 * @throws IOException
 	 *             if unable to read the file
+	 * @throws FileFormatException
+	 *             if section can not be loaded
 	 */
 	public ImportSection loadImportSection(boolean patchSize)
-			throws IOException {
-		DataDirEntry importTable = optHeader.getDataDirEntries().get(
-				DataDirectoryKey.IMPORT_TABLE);
+			throws IOException, FileFormatException {
+		DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
+		DataDirEntry importTable = optHeader.getDataDirEntries()
+				.get(dataDirKey);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
-			byte[] idatabytes = readSectionBytesFor(
-					DataDirectoryKey.IMPORT_TABLE, patchSize);
-			int importTableOffset = getOffsetDiffFor(DataDirectoryKey.IMPORT_TABLE);
+			byte[] idatabytes = readSectionBytesFor(dataDirKey, patchSize);
+			int importTableOffset = getOffsetDiffFor(dataDirKey);
 			ImportSection idata = ImportSection.getInstance(idatabytes,
 					virtualAddress, optHeader, importTableOffset);
 			return idata;
@@ -316,17 +324,19 @@ public class SectionLoader {
 	 * 
 	 * @param dataDirKey
 	 * @return the difference of the calculated data dir entry file offset to
-	 *         the pointer_to_raw_data the data dir entry is in, null if no data
-	 *         dir entry can be found for the specified key
+	 *         the pointer_to_raw_data the data dir entry is in
+	 * @throws FileFormatException
+	 *             if offset can not be determined
 	 */
-	private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey) {
+	private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey)
+			throws FileFormatException {
 		Long pointerToRawData = getSectionEntryValue(dataDirKey,
 				POINTER_TO_RAW_DATA);
 		Long offset = getFileOffsetFor(dataDirKey);
 		if (pointerToRawData != null && offset != null) {
 			return (int) (offset - pointerToRawData);
 		}
-		return null;
+		throw new FileFormatException("unable to load " + dataDirKey);
 	}
 
 	/**
@@ -336,7 +346,8 @@ public class SectionLoader {
 	 * @param dataDirKey
 	 *            the data directory key
 	 * @return the section table entry the data directory entry of that key
-	 *         points into
+	 *         points into or null if there is no data dir entry for the key
+	 *         available
 	 */
 	private SectionHeader getSectionHeaderFor(DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
@@ -372,7 +383,7 @@ public class SectionLoader {
 	 * @param dataDirKey
 	 *            the key of the data directory entry
 	 * @return file offset of the rva that is in the data directory entry with
-	 *         the given key
+	 *         the given key, null if file offset can not be determined
 	 */
 	public Long getFileOffsetFor(DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
@@ -401,26 +412,8 @@ public class SectionLoader {
 			boolean patchSize) throws IOException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
-			Long virtualAddress = getSectionEntryValue(dataDirKey,
-					VIRTUAL_ADDRESS);
-			Long offset = getSectionEntryValue(dataDirKey, POINTER_TO_RAW_DATA);
-			Long sizeOfRawData = getSectionEntryValue(dataDirKey,
-					SIZE_OF_RAW_DATA);
-			if (virtualAddress != null && offset != null
-					&& sizeOfRawData != null) {
-				long rva = dataDir.virtualAddress;
-				if (patchSize && sizeOfRawData + offset > file.length()) {
-					sizeOfRawData = file.length() - offset;
-				}
-				try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-					raf.seek(offset);
-					virtualAddress = rva;
-					// TODO cast to int is insecure. actual int is unsigned
-					byte[] bytes = new byte[sizeOfRawData.intValue()];
-					raf.readFully(bytes);
-					return bytes;
-				}
-			}
+			SectionHeader header = getSectionHeaderFor(dataDirKey);
+			return loadSectionBytes(header);
 		} else {
 			logger.warn("invalid data dir key");
 		}
@@ -467,17 +460,16 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey)
-			throws IOException {
+			throws IOException, FileFormatException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);
 			long pointerToRawData = header.getAlignedPointerToRaw();
-			long sizeOfRawData = header.getAlignedSizeOfRaw();
 			Long virtualAddress = header.get(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
 				long rva = dataDir.virtualAddress;
 				long offset = rva - (virtualAddress - pointerToRawData);
-				long size = sizeOfRawData - (rva - virtualAddress);
+				long size = (getReadSize(header) + pointerToRawData) - rva;
 				if (size < dataDir.size) {
 					size = dataDir.size;
 				}
@@ -499,7 +491,7 @@ public class SectionLoader {
 		} else {
 			logger.warn("invalid dataDirKey");
 		}
-		return null;
+		throw new FileFormatException("unable to load " + dataDirKey);
 	}
 
 }
