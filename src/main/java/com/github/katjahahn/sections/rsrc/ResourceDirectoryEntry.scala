@@ -21,6 +21,13 @@ import com.github.katjahahn.IOUtil
 import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
 import ResourceDirectoryEntry._
+import java.io.File
+import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.PELoader
+import com.github.katjahahn.sections.SectionHeaderKey
+import java.io.RandomAccessFile
+import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.optheader.WindowsEntryKey
 
 /**
  * The entry of a {@link ResourceDirectoryTable}
@@ -79,7 +86,9 @@ case class ID(id: Long, level: Level) extends IDOrName {
 
 }
 
-case class Name(rva: Long, name: String) extends IDOrName
+case class Name(rva: Long, name: String) extends IDOrName {
+  override def toString(): String = name
+}
 
 object ResourceDirectoryEntry {
 
@@ -100,15 +109,17 @@ object ResourceDirectoryEntry {
    * @param level the level of the {@link ResourceDirectoryTable} this entry is a member of
    * @return {@link ResourceDirectoryEntry}
    */
-  def apply(isNameEntry: Boolean, entryBytes: Array[Byte],
-    entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Level): ResourceDirectoryEntry = {
+  def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
+    entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Level,
+    virtualAddress: Long, rsrcOffset: Long): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
-    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level)
+    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level,
+      tableBytes, virtualAddress, offset, rsrcOffset)
     if (isDataEntryRVA(rva)) {
       createDataEntry(rva, id, tableBytes, offset, entryNr)
     } else {
-      createSubDirEntry(rva, id, tableBytes, offset, entryNr, level)
+      createSubDirEntry(file, rva, id, tableBytes, offset, entryNr, level, virtualAddress, rsrcOffset)
     }
   }
 
@@ -124,13 +135,30 @@ object ResourceDirectoryEntry {
     }
   }
 
-  private def getID(value: Long, isNameEntry: Boolean, level: Level): IDOrName =
+  private def getID(value: Long, isNameEntry: Boolean, level: Level,
+    tablebytes: Array[Byte], virtualAddress: Long, offset: Long, rsrcOffset: Long): IDOrName =
     if (isNameEntry) {
-      val name = null //TODO
+      val name = getStringAtRVA(value, tablebytes, virtualAddress, offset, rsrcOffset) //TODO
       Name(value, name)
     } else {
       ID(value, level)
     }
+
+  private def getStringAtRVA(rva: Long, tablebytes: Array[Byte],
+    virtualAddress: Long, offset: Long, rsrcOffset: Long): String = {
+    val nameRVA = removeHighestIntBit(rva)
+    val address = nameRVA - offset
+    readStringAtOffset(tablebytes, address)
+  }
+
+  private def readStringAtOffset(tablebytes: Array[Byte], address: Long): String = {
+    val length = 2
+    val strLength = getBytesIntValue(tablebytes, address.toInt, length)
+    val strBytes = strLength * 2 //wg UTF-16 --> 2 Byte
+    val stringAddress = (address + length).toInt
+    val bytes = tablebytes.slice(stringAddress, stringAddress + strBytes)
+    new String(bytes, "UTF-16LE")
+  }
 
   private def removeHighestIntBit(value: Long): Long = {
     val mask = 0x7FFFFFFF
@@ -145,11 +173,12 @@ object ResourceDirectoryEntry {
     DataEntry(id, data, entryNr)
   }
 
-  private def createSubDirEntry(rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long, entryNr: Int, level: Level): SubDirEntry = {
+  private def createSubDirEntry(file: File, rva: Long, id: IDOrName,
+    tableBytes: Array[Byte], offset: Long, entryNr: Int, level: Level,
+    virtualAddress: Long, rsrcOffset: Long): SubDirEntry = {
     val address = removeHighestIntBit(rva)
     val resourceBytes = tableBytes.slice((address - offset).toInt, tableBytes.length)
-    val table = ResourceDirectoryTable(level.up, resourceBytes, address)
+    val table = ResourceDirectoryTable(file, level.up, resourceBytes, address, virtualAddress, rsrcOffset)
     SubDirEntry(id, table, entryNr)
   }
 

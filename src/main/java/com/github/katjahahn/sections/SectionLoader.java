@@ -234,8 +234,9 @@ public class SectionLoader {
 				Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 				if (virtualAddress != null) {
 					byte[] rsrcbytes = loadSectionBytes(rsrcEntry);
-					ResourceSection rsrc = ResourceSection.getInstance(
-							rsrcbytes, virtualAddress);
+					long rsrcOffset = rsrcEntry.getAlignedPointerToRaw();
+					ResourceSection rsrc = ResourceSection.getInstance(file,
+							rsrcbytes, virtualAddress, rsrcOffset);
 					return rsrc;
 				}
 			}

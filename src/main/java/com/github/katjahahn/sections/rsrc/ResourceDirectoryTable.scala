@@ -24,6 +24,7 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey._
 import scala.collection.mutable.ListBuffer
 import ResourceDirectoryTable._
+import java.io.File
 
 /**
  * @author Katja Hahn
@@ -131,12 +132,14 @@ object ResourceDirectoryTable {
   private val resourceDirOffset = 16;
   private val specLocation = "rsrcdirspec"
 
-  def apply(level: Level, tableBytes: Array[Byte], offset: Long): ResourceDirectoryTable = {
+  def apply(file: File, level: Level, tableBytes: Array[Byte], offset: Long, 
+      virtualAddress: Long, rsrcOffset: Long): ResourceDirectoryTable = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
     val header = readHeader(spec, tableBytes)
     val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
     val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
-    val entries = readEntries(header, nameEntries, idEntries, tableBytes, offset, level)
+    val entries = readEntries(file, header, nameEntries, idEntries, tableBytes, 
+        offset, level, virtualAddress, rsrcOffset)
     return new ResourceDirectoryTable(level, header, entries)
   }
 
@@ -151,8 +154,8 @@ object ResourceDirectoryTable {
     }
   }
 
-  private def readEntries(header: Header, nameEntries: Int, idEntries: Int,
-    tableBytes: Array[Byte], tableOffset: Long, level: Level): List[ResourceDirectoryEntry] = {
+  private def readEntries(file: File, header: Header, nameEntries: Int, idEntries: Int,
+    tableBytes: Array[Byte], tableOffset: Long, level: Level, virtualAddress: Long, rsrcOffset: Long): List[ResourceDirectoryEntry] = {
     val entriesSum = nameEntries + idEntries
     var entries = ListBuffer.empty[ResourceDirectoryEntry]
     for (i <- 0 until entriesSum) {
@@ -161,8 +164,8 @@ object ResourceDirectoryTable {
       val entryNr = i + 1
       val entryBytes = tableBytes.slice(offset, endpoint)
       val isNameEntry = i < nameEntries
-      entries += ResourceDirectoryEntry(isNameEntry, entryBytes, entryNr,
-        tableBytes, tableOffset, level)
+      entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
+        tableBytes, tableOffset, level, virtualAddress, rsrcOffset)
     }
     entries.toList
   }

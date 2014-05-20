@@ -75,10 +75,12 @@ object ResourceSection {
    * @param virtualAddress the virtual address all RVAs are relative to
    * @returns
    */
-  def apply(rsrcbytes: Array[Byte], virtualAddress: Long): ResourceSection = {
+  def apply(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
+      rsrcOffset: Long): ResourceSection = {
     val initialLevel = Level()
     val initialOffset = 0
-    val resourceTable = ResourceDirectoryTable(initialLevel, rsrcbytes, initialOffset)
+    val resourceTable = ResourceDirectoryTable(file, initialLevel, rsrcbytes, 
+        initialOffset, virtualAddress, rsrcOffset)
     new ResourceSection(resourceTable, rsrcbytes, virtualAddress)
   }
 
@@ -89,7 +91,8 @@ object ResourceSection {
    * @param virtualAddress the virtual address all RVAs are relative to
    * @returns
    */
-  def getInstance(rsrcbytes: Array[Byte], virtualAddress: Long): ResourceSection = 
-    apply(rsrcbytes, virtualAddress)
+  def getInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
+      rsrcOffset: Long): ResourceSection = 
+    apply(file, rsrcbytes, virtualAddress, rsrcOffset)
 
 }
