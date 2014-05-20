@@ -97,6 +97,7 @@ object ImportSection {
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
       if (iRVA == 0) iRVA = dirEntry(I_ADDR_TABLE_RVA)
       var offset = iRVA - virtualAddress
+      var relOffset = iRVA
       logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + idatabytes.length + " virtualAddress " + virtualAddress)
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
@@ -104,9 +105,10 @@ object ImportSection {
         case ROM => throw new IllegalArgumentException("ROM file format not described")
       }
       do {
-        entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset)
+        entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset, relOffset, dirEntry)
         if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
+        relOffset += EntrySize
       } while (!entry.isInstanceOf[NullEntry])
     }
   }
@@ -189,7 +191,7 @@ object ImportSection {
     apply(idatabytes, virtualAddress, optHeader, importTableOffset)
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab18-04.exe")) //FIXME results in error because of negative offset
+    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab09-02.exe"))
     val loader = new SectionLoader(data)
     val idata = loader.loadImportSection()
     println(idata.getInfo)

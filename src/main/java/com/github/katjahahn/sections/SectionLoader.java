@@ -458,6 +458,8 @@ public class SectionLoader {
 	 *         is pointing to
 	 * @throws IOException
 	 *             if unable to read the file
+	 * @throws FileFormatException
+	 *             if unable to load the file, e.g. not virtual address given
 	 */
 	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey)
 			throws IOException, FileFormatException {

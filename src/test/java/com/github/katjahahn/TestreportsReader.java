@@ -25,19 +25,65 @@ import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionHeader;
 import com.github.katjahahn.sections.SectionHeaderKey;
 import com.github.katjahahn.sections.edata.ExportEntry;
+import com.github.katjahahn.sections.idata.ImportDLL;
+import com.github.katjahahn.sections.idata.NameImport;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 public class TestreportsReader {
-	
-	private static final Logger logger = LogManager.getLogger(IOUtil.class.getName());
+
+	private static final Logger logger = LogManager.getLogger(IOUtil.class
+			.getName());
 	public static final String NL = System.getProperty("line.separator");
-	
+
 	public static final String RESOURCE_DIR = "src/main/resources";
 	public static final String TEST_FILE_DIR = "/testfiles";
 	private static final String TEST_REPORTS_DIR = "/reports";
 	private static final String EXPORT_REPORTS_DIR = "/exportreports";
-	
-	public static Map<File, List<ExportEntry>> readExportEntries() throws IOException {
+	private static final String IMPORT_REPORTS_DIR = "/importreports";
+
+	public static Map<File, List<ImportDLL>> readImportEntries()
+			throws IOException {
+		Map<File, List<ImportDLL>> data = new HashMap<>();
+		File directory = Paths.get(RESOURCE_DIR, IMPORT_REPORTS_DIR).toFile();
+		for (File file : directory.listFiles()) {
+			if (!file.isDirectory()) {
+				List<ImportDLL> entries = readImportEntries(file);
+				data.put(file, entries);
+			}
+		}
+		return data;
+	}
+
+	private static List<ImportDLL> readImportEntries(File file)
+			throws IOException {
+		List<String[]> entries = IOUtil.readArrayFrom(file);
+		List<ImportDLL> list = new ArrayList<>();
+		ImportDLL dll = null;
+		for (String[] entry : entries) {
+			if (entry.length == 1 || entry.length == 0) { // new ImportDLL
+				if (dll != null) {
+					list.add(dll);
+				}
+				dll = new ImportDLL(entry[0]);
+			} else if (entry.length == 2) { // ImportDLL entry
+				if (dll == null) {
+					logger.error("parsing error for line: " + entry[0] + ";"
+							+ entry[1]);
+				} else {
+					Long rva = Long.parseLong(entry[0]);
+					String name = entry[1];
+					dll.add(new NameImport(rva, name, -1, -1, null)); // hint, dirEntry and nameRVA are dummies
+				}
+			}
+		}
+		if (dll != null) {
+			list.add(dll);
+		}
+		return list;
+	}
+
+	public static Map<File, List<ExportEntry>> readExportEntries()
+			throws IOException {
 		Map<File, List<ExportEntry>> data = new HashMap<>();
 		File directory = Paths.get(RESOURCE_DIR, EXPORT_REPORTS_DIR).toFile();
 		for (File file : directory.listFiles()) {
@@ -49,10 +95,11 @@ public class TestreportsReader {
 		return data;
 	}
 
-	private static List<ExportEntry> readExportEntries(File file) throws IOException {
+	private static List<ExportEntry> readExportEntries(File file)
+			throws IOException {
 		List<String[]> entries = IOUtil.readArrayFrom(file);
 		List<ExportEntry> list = new ArrayList<>();
-		for(String[] entry : entries) {
+		for (String[] entry : entries) {
 			Long rva = Long.parseLong(entry[0]);
 			String name = entry[1];
 			int ordinal = Integer.parseInt(entry[2]);
@@ -152,12 +199,13 @@ public class TestreportsReader {
 				String name = split[1].trim();
 				entry.setName(name);
 			} else {
-				long value = convertToLong(split[1]); 
+				long value = convertToLong(split[1]);
 				SectionHeaderKey key = getSectionKeyFor(split[0].trim());
 				if (key != null) {
 					entry.add(new StandardEntry(key, null, value));
-					if(key == SectionHeaderKey.CHARACTERISTICS) {
-						logger.debug("characteristics read: " + Long.toHexString(value));
+					if (key == SectionHeaderKey.CHARACTERISTICS) {
+						logger.debug("characteristics read: "
+								+ Long.toHexString(value));
 					}
 				} else {
 					logger.warn("key was null for " + line);
@@ -208,8 +256,8 @@ public class TestreportsReader {
 				if (key != null) {
 					return new DataDirEntry(key, virtualAddress, size);
 				} else {
-					logger.warn("null data dir key returned for: "
-							+ name + " and " + line);
+					logger.warn("null data dir key returned for: " + name
+							+ " and " + line);
 					return null;
 				}
 			}
@@ -286,7 +334,7 @@ public class TestreportsReader {
 		}
 		return coff;
 	}
-	
+
 	/************************************************************************
 	 * The following methods are just translator for the pev report testfiles,
 	 * they have no use otherwise
@@ -335,7 +383,8 @@ public class TestreportsReader {
 		if (string.contains("OEM information")) {
 			return null;
 		}
-		if (string.contains("Magic number")) { //not testing MZ signature is on purpose
+		if (string.contains("Magic number")) { // not testing MZ signature is on
+												// purpose
 			return null;
 		}
 		// TODO: OEM identifier and OEM information missing in MSDOSspec
@@ -399,7 +448,7 @@ public class TestreportsReader {
 		if (string.contains("Size of .bss")) {
 			return StandardFieldEntryKey.SIZE_OF_UNINIT_DATA;
 		}
-		if(getWindowsKeyFor(string) == null) {
+		if (getWindowsKeyFor(string) == null) {
 			System.err.println("missing standard field key: " + string);
 		}
 		return null;
@@ -540,7 +589,7 @@ public class TestreportsReader {
 		if (name.contains("Characteristics")) {
 			return SectionHeaderKey.CHARACTERISTICS;
 		}
-		
+
 		System.err.println("missing section table entry " + name);
 		return null;
 	}
@@ -554,7 +603,7 @@ public class TestreportsReader {
 			return Integer.parseInt(value);
 		}
 	}
-	
+
 	private static long convertToLong(String val) {
 		String value = val.trim().split("\\s")[0].trim();
 		if (value.startsWith("0x")) {

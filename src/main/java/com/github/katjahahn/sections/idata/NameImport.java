@@ -18,12 +18,26 @@ package com.github.katjahahn.sections.idata;
 public class NameImport implements Import {
 
 	public long rva;
+	public long nameRVA;
 	public String name;
 	public int hint;
+	private final DirectoryTableEntry parent;
 
-	public NameImport(long rva, String name, int hint) {
+	public NameImport(long rva, String name, int hint, long nameRVA,
+			DirectoryTableEntry parent) {
 		this.rva = rva;
 		this.hint = hint;
 		this.name = name;
+		this.nameRVA = nameRVA;
+		this.parent = parent;
+	}
+
+	public Long getDirEntry(DirectoryTableEntryKey key) {
+		return parent.get(key);
+	}
+
+	@Override
+	public String toString() {
+		return "rva: " + rva + ", name: " + name + ", hint: " + hint;
 	}
 }

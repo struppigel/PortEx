@@ -18,6 +18,8 @@ package com.github.katjahahn.sections.idata;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.katjahahn.IOUtil;
+
 public class ImportDLL {
 	
 	private final String name;
@@ -31,6 +33,20 @@ public class ImportDLL {
 		this.ordinalImports = new ArrayList<>(ordinalImports);
 	}
 	
+	public ImportDLL(String name) {
+		this.name = name;
+		this.nameImports = new ArrayList<>();
+		this.ordinalImports = new ArrayList<>();
+	}
+	
+	public void add(NameImport nameImport) {
+		this.nameImports.add(nameImport);
+	}
+	
+	public void add(OrdinalImport ordImport) {
+		this.ordinalImports.add(ordImport);
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -41,6 +57,19 @@ public class ImportDLL {
 	
 	public List<OrdinalImport> getOrdinalImports() {
 		return new ArrayList<>(ordinalImports);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder buffer = new StringBuilder();
+		buffer.append(name + IOUtil.NL);
+		for(Import nameImport : nameImports) {
+			buffer.append(nameImport.toString() + IOUtil.NL);
+		}
+		for(Import ordImport : ordinalImports) {
+			buffer.append(ordImport.toString() + IOUtil.NL);
+		}
+		return buffer.toString();
 	}
 
 }

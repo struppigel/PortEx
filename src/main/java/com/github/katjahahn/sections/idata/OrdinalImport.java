@@ -18,8 +18,20 @@ package com.github.katjahahn.sections.idata;
 public class OrdinalImport implements Import {
 
 	public int ordinal;
+	public long rva;
+	private final DirectoryTableEntry parent;
 	
-	public OrdinalImport(int ordinal) {
+	public OrdinalImport(int ordinal, long rva, DirectoryTableEntry parent) {
 		this.ordinal = ordinal;
+		this.rva = rva;
+		this.parent = parent;
+	}
+	
+	public Long getDirEntry(DirectoryTableEntryKey key) {
+		return parent.get(key);
+	}
+	@Override
+	public String toString() {
+		return "ordinal: " + ordinal + ", RVA: " + rva;
 	}
 }

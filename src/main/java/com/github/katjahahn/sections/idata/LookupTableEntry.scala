@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.sections.idata
 
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber
@@ -39,9 +41,10 @@ abstract class LookupTableEntry {
  * @constructor instantiates an ordinal entry
  * @param ordNumber
  */
-case class OrdinalEntry(val ordNumber: Int) extends LookupTableEntry {
-  override def toString(): String = "ordinal: " + ordNumber
-  override def toImport(): Import = new OrdinalImport(ordNumber)
+case class OrdinalEntry(val ordNumber: Int, val rva: Long, 
+    dirEntry: DirectoryTableEntry) extends LookupTableEntry {
+  override def toString(): String = s"ordinal: $ordNumber RVA: $rva (0x${toHexString(rva)})"
+  override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry)
 }
 
 /**
@@ -49,11 +52,12 @@ case class OrdinalEntry(val ordNumber: Int) extends LookupTableEntry {
  * @param nameRVA
  * @param hintNameEntry
  */
-case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry) extends LookupTableEntry {
+case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
+  val rva: Long, val dirEntry: DirectoryTableEntry) extends LookupTableEntry {
   override def toString(): String =
-    s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, RVA: $nameRVA (0x${toHexString(nameRVA)})"
+    s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, nameRVA: $nameRVA (0x${toHexString(nameRVA)}), RVA: $rva (0x${toHexString(rva)})"
 
-  override def toImport(): Import = new NameImport(nameRVA, hintNameEntry.name, hintNameEntry.hint)
+  override def toImport(): Import = new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry)
 }
 
 /**
@@ -80,36 +84,38 @@ object LookupTableEntry {
    * given rva's of hint name entries)
    * @return lookup table entry
    */
-  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int, virtualAddress: Long, importTableOffset: Int): LookupTableEntry = {
+  def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int,
+    virtualAddress: Long, importTableOffset: Int, rva: Long, dirEntry: DirectoryTableEntry): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     val value = getBytesLongValue(idatabytes, offset + importTableOffset, entrySize)
-
     if (value == 0) {
       NullEntry()
     } else if ((value & ordFlagMask) != 0) {
-      createOrdEntry(value)
+      createOrdEntry(value, rva, dirEntry)
     } else {
-      createNameEntry(value, idatabytes, virtualAddress, importTableOffset)
+      createNameEntry(value, idatabytes, virtualAddress, importTableOffset, rva, dirEntry)
     }
   }
 
-  private def createNameEntry(value: Long, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): LookupTableEntry = {
+  private def createNameEntry(value: Long, idatabytes: Array[Byte],
+    virtualAddress: Long, importTableOffset: Int, rva: Long,
+    dirEntry: DirectoryTableEntry): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
-    val rva = (addrMask & value)
-    logger.debug("rva: " + rva)
-    val address = (rva - virtualAddress) + importTableOffset
+    val nameRVA = (addrMask & value)
+    logger.debug("rva: " + nameRVA)
+    val address = (nameRVA - virtualAddress) + importTableOffset
     logger.debug("virtual addr: " + virtualAddress)
     logger.debug("address: " + address)
     logger.debug("idata length: " + idatabytes.length)
     val hint = getBytesIntValue(idatabytes, address.toInt, 2)
     val name = getASCII(address.toInt + 2, idatabytes)
-    NameEntry(rva, new HintNameEntry(hint, name))
+    NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry)
   }
 
-  private def createOrdEntry(value: Long): OrdinalEntry = {
+  private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryTableEntry): OrdinalEntry = {
     val ordMask = 0xFFFFL
     val ord = (ordMask & value).toInt
-    OrdinalEntry(ord)
+    OrdinalEntry(ord, rva, dirEntry)
   }
 
   private def getASCII(offset: Int, idatabytes: Array[Byte]): String = {
