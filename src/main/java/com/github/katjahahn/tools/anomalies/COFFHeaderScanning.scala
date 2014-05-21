@@ -81,7 +81,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
   private def checkDeprecated(key: COFFHeaderKey, coff: COFFFileHeader): List[Anomaly] = {
     val entry = coff.getEntry(key)
     if (entry.value != 0) {
-      List(DeprecatedAnomaly(entry, "COFF File Header: Deprecated value for NumberOfSymbols is " + entry.value))
+      List(DeprecatedAnomaly(entry, "COFF File Header: Deprecated value for " + key.toString + " is " + entry.value))
     } else Nil
 
   }
