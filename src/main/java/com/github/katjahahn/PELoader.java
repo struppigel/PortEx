@@ -18,7 +18,6 @@ package com.github.katjahahn;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,12 +25,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.idata.ImportDLL;
-import com.github.katjahahn.sections.idata.ImportSection;
-import com.github.katjahahn.sections.idata.NameImport;
-import com.github.katjahahn.sections.idata.OrdinalImport;
+import com.github.katjahahn.tools.Overlay;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -133,24 +128,11 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry();
-		File file = new File("WinRar.exe");
+		File file = new File("MovieToAGIF.exe");
 		PEData data = PELoader.loadPE(file);
-		SectionLoader loader = new SectionLoader(data);
-		ImportSection idata = loader.loadImportSection();
-		List<ImportDLL> imports = idata.getImports();
-		for(ImportDLL dll : imports) {
-			System.out.println("Imports from " + dll.getName());
-			for(NameImport nameImport : dll.getNameImports()) {
-				System.out.print("Name: " + nameImport.name);
-				System.out.print(" Hint: " + nameImport.hint);
-				System.out.println(" RVA: " + nameImport.rva);
-			}
-			
-			for(OrdinalImport ordImport : dll.getOrdinalImports()) {
-				System.out.println("Ordinal: " + ordImport.ordinal);
-			}
-			System.out.println();
-		}
+		Overlay overlay = new Overlay(data);
+		System.out.println(overlay.exists());
+		System.out.println(overlay.getOffset());
 	}
 
 }

@@ -99,7 +99,7 @@ abstract class SignatureTree {
 
   /**
    * Returns whether the current SignatureTree Node (or Leave) has a value that equals b.
-   *  A Leave always returns false as it has no value saved.
+   * A Leave always returns false as it has no value saved.
    *
    * @param b an Option byte
    * @return true iff it is a Node and has a value that equals b

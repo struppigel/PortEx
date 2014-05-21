@@ -35,6 +35,7 @@ import com.github.katjahahn.PESignature
 import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.IOUtil._
 import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.sections.SectionHeaderKey
 
 /**
  * Scans the Optional Header for anomalies.
@@ -52,12 +53,62 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     if (opt == null) return Nil
     anomalyList ++= dataDirScan(opt)
     anomalyList ++= windowsFieldScan(opt)
+    anomalyList ++= standardFieldScan(opt)
     super.scan ::: anomalyList.toList
   }
 
   private def windowsFieldScan(opt: OptionalHeader): List[Anomaly] = {
     checkImageBase(opt) ::: checkSectionAlignment(opt) :::
-      checkFileAlignment(opt) ::: checkReserved(opt) ::: checkSizes(opt)
+      checkFileAlignment(opt) ::: checkLowAlignment(opt) :::
+      checkReserved(opt) ::: checkSizes(opt)
+  }
+
+  private def standardFieldScan(opt: OptionalHeader): List[Anomaly] = {
+    checkEntryPoint(opt)
+  }
+
+  private def checkEntryPoint(opt: OptionalHeader): List[Anomaly] = {
+    def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
+      1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
+    def isVirtual(ep: Long): Boolean = {
+      val sectionHeaders = data.getSectionTable().getSectionEntries().asScala
+      val addresses = sectionHeaders.map(_.get(SectionHeaderKey.VIRTUAL_ADDRESS)).filter(_ != 0)
+      if (addresses.size > 0)
+        ep < addresses.min
+      else false
+    }
+    val anomalyList = ListBuffer[Anomaly]()
+    val ep = opt.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+    val sizeOfHeaders = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
+    val entry = opt.getStandardFieldEntry(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+    if (ep == 0 && !isDLL) {
+      val description = s"Optional Header: address of entry point is ${ep}, but PE is no DLL"
+      anomalyList += WrongValueAnomaly(entry, description)
+    }
+    if (ep != 0 && ep < sizeOfHeaders) {
+      val description = s"Optional Header: address of entry point (${ep}) is smaller than size of headers (${sizeOfHeaders})"
+      anomalyList += WrongValueAnomaly(entry, description)
+    }
+    if (isVirtual(ep)) {
+      val description = s"Optional Header: virtual entry point (${ep}): starts in virtual space before any section"
+      anomalyList += WrongValueAnomaly(entry, description)
+    }
+    anomalyList.toList
+  }
+
+  private def checkLowAlignment(opt: OptionalHeader): List[Anomaly] = {
+    //see: https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment
+    def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
+      1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
+    val anomalyList = ListBuffer[Anomaly]()
+    val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
+    val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
+    if (isLowAlignment(sectionAlignment, fileAlignment)) {
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
+      val description = s"Optional Header: Low alignment mode, section alignment = ${sectionAlignment}, file alignment = ${fileAlignment}"
+      anomalyList += WrongValueAnomaly(entry, description)
+    }
+    anomalyList.toList
   }
 
   private def checkSizes(opt: OptionalHeader): List[Anomaly] = {
