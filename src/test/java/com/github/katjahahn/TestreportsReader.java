@@ -156,7 +156,7 @@ public class TestreportsReader {
 		data.filename = filename;
 		Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
 		try (BufferedReader reader = Files.newBufferedReader(testfile,
-				Charset.forName("UTF-8"))) {
+				Charset.forName("ISO-8859-1"))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("DOS header")) {

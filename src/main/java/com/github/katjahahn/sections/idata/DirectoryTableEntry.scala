@@ -58,6 +58,7 @@ class DirectoryTableEntry private (
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
+  var forwarderString: String = _
 
   def addLookupTableEntry(e: LookupTableEntry): Unit = {
     lookupTableEntries = lookupTableEntries :+ e
@@ -81,7 +82,7 @@ class DirectoryTableEntry private (
   
   def getInfo(): String = s"""${entries.values.mkString(NL)} 
   |ASCII name: $name
-  |
+  |${if(forwarderString != null) "Forwarder string: " + forwarderString else ""}
   |lookup table entries for $name
   |--------------------------------------
   |

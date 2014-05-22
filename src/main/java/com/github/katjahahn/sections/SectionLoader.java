@@ -284,31 +284,16 @@ public class SectionLoader {
 	 */
 	public ImportSection loadImportSection() throws IOException,
 			FileFormatException {
-		return loadImportSection(false);
-	}
-
-	/**
-	 * Loads all bytes and information of the import section. The file on disk
-	 * is read to fetch the information.
-	 * 
-	 * @param patchSize
-	 *            patches the section size if it surpasses the actual file size.
-	 * @return the import section or null if no data dir entry for the import
-	 *         table is given
-	 * @throws IOException
-	 *             if unable to read the file
-	 * @throws FileFormatException
-	 *             if section can not be loaded
-	 */
-	public ImportSection loadImportSection(boolean patchSize)
-			throws IOException, FileFormatException {
 		DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
 		DataDirEntry importTable = optHeader.getDataDirEntries()
 				.get(dataDirKey);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
-			byte[] idatabytes = readSectionBytesFor(dataDirKey, patchSize);
+			byte[] idatabytes = readSectionBytesFor(dataDirKey);
 			int importTableOffset = getOffsetDiffFor(dataDirKey);
+			logger.debug("importsection offset diff: " + importTableOffset);
+			logger.debug("idatalength: " + idatabytes.length);
+			logger.debug("virtual address of ILT: " + virtualAddress);
 			ImportSection idata = ImportSection.getInstance(idatabytes,
 					virtualAddress, optHeader, importTableOffset);
 			return idata;
@@ -331,8 +316,8 @@ public class SectionLoader {
 	 */
 	private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey)
 			throws FileFormatException {
-		Long pointerToRawData = getSectionEntryValue(dataDirKey,
-				POINTER_TO_RAW_DATA);
+		SectionHeader header = getSectionHeaderFor(dataDirKey);
+		Long pointerToRawData = header.getAlignedPointerToRaw();
 		Long offset = getFileOffsetFor(dataDirKey);
 		if (pointerToRawData != null && offset != null) {
 			return (int) (offset - pointerToRawData);
@@ -414,12 +399,10 @@ public class SectionLoader {
 	 * Returns all bytes of the section where the given data dir entry is in.
 	 * 
 	 * @param dataDirKey
-	 * @param patchSize
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey,
-			boolean patchSize) throws IOException {
+	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey) throws IOException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);

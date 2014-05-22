@@ -50,14 +50,6 @@ public class SectionLoaderTest {
 			assertEquals(offset1, offset2);
 		}
 	}
-	
-	@Test(expectedExceptions=FileFormatException.class)
-	public void unableToLoadImports() throws IOException {
-		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-		PEData data = PELoader.loadPE(file);
-		SectionLoader loader = new SectionLoader(data);
-		loader.loadImportSection();
-	}
 
 	@Test(expectedExceptions=FileFormatException.class)
 	public void unableToLoadResources() throws IOException {
@@ -66,7 +58,6 @@ public class SectionLoaderTest {
 		SectionLoader loader = new SectionLoader(data);
 		loader.loadResourceSection();
 	}
-
 
 	@Test
 	public void getSectionEntryByRVA() {

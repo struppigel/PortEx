@@ -38,7 +38,7 @@ import com.github.katjahahn.sections.SpecialSection
 /**
  * Represents the import section, fetches information about the data directory
  * entries and their lookup table entries.
- * TODO forwarder addresses 
+ * TODO forwarder addresses
  * TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
  * @author Katja Hahn
  */
@@ -59,10 +59,9 @@ class ImportSection private (
   private def entriesDescription(): String =
     (for (e <- directoryTable)
       yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
-      
-  def getImports(): java.util.List[ImportDLL] = 
+
+  def getImports(): java.util.List[ImportDLL] =
     directoryTable.map(e => e.toImportDLL).asJava
-  
 
   /**
    * Returns a decription of all entries in the import section.
@@ -82,6 +81,7 @@ object ImportSection {
 
   def apply(idatabytes: Array[Byte], virtualAddress: Long,
     optHeader: OptionalHeader, importTableOffset: Int): ImportSection = {
+    logger.debug("reading direntries for root table")
     val directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffset)
     readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset)
     new ImportSection(directoryTable)
@@ -123,6 +123,7 @@ object ImportSection {
     var isLastEntry = false
     var i = 0
     do {
+      logger.debug(s"reading ${i + 1}. entry")
       readDirEntry(i, idatabytes, virtualAddress, importTableOffset) match {
         case Some(entry) =>
           logger.debug("------------start-----------")
@@ -142,15 +143,12 @@ object ImportSection {
    * @param entry the directory table entry whose name shall be returned
    * @return string
    */
-  private def getASCIIName(entry: DirectoryTableEntry, virtualAddress: Long,
+  private def getASCIIName(nameRVA: Int, virtualAddress: Long,
     idatabytes: Array[Byte], importTableOffset: Int): String = {
-    def getName(value: Int): String = {
-      val offset = value - virtualAddress + importTableOffset
-      //TODO cast to int is insecure. actual int is unsigned, java int is signed
-      val nullindex = idatabytes.indexWhere(_ == 0, offset.toInt)
-      new String(idatabytes.slice(offset.toInt, nullindex))
-    }
-    getName(entry(NAME_RVA).toInt)
+    val offset = nameRVA - virtualAddress + importTableOffset
+    //TODO cast to int is insecure. actual int is unsigned, java int is signed
+    val nullindex = idatabytes.indexWhere(_ == 0, offset.toInt)
+    new String(idatabytes.slice(offset.toInt, nullindex))
   }
 
   /**
@@ -162,9 +160,11 @@ object ImportSection {
    */
   private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): Option[DirectoryTableEntry] = {
     val from = nr * ENTRY_SIZE + importTableOffset
+    logger.debug("reading from: " + from)
     val until = from + ENTRY_SIZE
+    logger.debug("reading until: " + until)
     val entrybytes = idatabytes.slice(from, until)
-
+    logger.debug("entrybytes length " + entrybytes.length)
     /**
      * @return true iff the given entry is not the last empty entry or null entry
      */
@@ -174,7 +174,13 @@ object ImportSection {
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
     val entry = DirectoryTableEntry(entrybytes)
-    entry.name = getASCIIName(entry, virtualAddress, idatabytes, importTableOffset)
+    logger.debug("entry info ---> \n" + entry.getInfo + "\n ----> end of entry info\n")
+    entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, idatabytes, importTableOffset)
+    logger.debug("entry name: " + entry.name)
+    if (entry(FORWARDER_CHAIN) != 0) {
+      entry.forwarderString = getASCIIName(entry(FORWARDER_CHAIN).toInt, virtualAddress, idatabytes, importTableOffset)
+      logger.debug("forwarder string: " + entry.forwarderString)
+    }
     if (isEmpty(entry)) None else
       Some(entry)
   }
