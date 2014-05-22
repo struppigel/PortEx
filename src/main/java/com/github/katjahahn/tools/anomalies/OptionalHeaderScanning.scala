@@ -71,7 +71,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
       1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
     def isVirtual(ep: Long): Boolean = {
-      val sectionHeaders = data.getSectionTable().getSectionEntries().asScala
+      val sectionHeaders = data.getSectionTable().getSectionHeaders().asScala
       val addresses = sectionHeaders.map(_.get(SectionHeaderKey.VIRTUAL_ADDRESS)).filter(_ != 0)
       if (addresses.size > 0)
         ep < addresses.min

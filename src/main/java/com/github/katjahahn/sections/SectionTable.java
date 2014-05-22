@@ -111,7 +111,7 @@ public class SectionTable extends PEModule {
 	 * 
 	 * @return ordered section table entries
 	 */
-	public List<SectionHeader> getSectionEntries() {
+	public List<SectionHeader> getSectionHeaders() {
 		return new LinkedList<>(headers);
 	}
 

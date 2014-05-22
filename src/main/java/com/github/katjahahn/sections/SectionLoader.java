@@ -255,7 +255,7 @@ public class SectionLoader {
 	 * @return the {@link SectionHeader} of the section the rva is pointing into
 	 */
 	public SectionHeader getSectionEntryByRVA(long rva) {
-		List<SectionHeader> sections = table.getSectionEntries();
+		List<SectionHeader> sections = table.getSectionHeaders();
 		for (SectionHeader section : sections) {
 			long vSize = section.get(VIRTUAL_SIZE);
 			long vAddress = section.get(VIRTUAL_ADDRESS);

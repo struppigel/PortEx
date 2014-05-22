@@ -56,7 +56,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkSectionNames(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     val usualNames = List(".bss", ".cormeta", ".data", ".debug", ".drective",
       ".edata", ".idata", ".rsrc", ".idlsym", ".pdata", ".rdata", ".reloc",
       ".sbss", ".sdata", ".srdata", ".sxdata", ".text", ".tls", ".vsdata",
@@ -86,7 +86,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkTooLargeSizes(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
       val sectionName = filteredString(section.getName)
       val entry = section.getEntry(SectionHeaderKey.SIZE_OF_RAW_DATA)
@@ -102,7 +102,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkExtendedReloc(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
       if (section.getCharacteristics().contains(IMAGE_SCN_LNK_NRELOC_OVFL)) {
         val sectionName = filteredString(section.getName)
@@ -122,7 +122,7 @@ trait SectionTableScanning extends AnomalyScanner {
       !(((t1._1 < t2._1) && (t1._2 <= t2._1)) || ((t2._1 < t1._1) && (t2._2 <= t1._1)))
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     val loader = new SectionLoader(data)
     var prevVA = -1
     for (section <- sections) {
@@ -145,7 +145,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkAscendingVA(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     var prevVA = -1
     for (section <- sections) {
       val sectionName = filteredString(section.getName)
@@ -168,7 +168,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkReserved(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
       val characteristics = section.getCharacteristics().asScala
       val entry = section.getEntry(SectionHeaderKey.CHARACTERISTICS)
@@ -185,7 +185,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkDeprecated(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
-    val sections = sectionTable.getSectionEntries.asScala
+    val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
       val ptrLineNrEntry = section.getEntry(SectionHeaderKey.POINTER_TO_LINE_NUMBERS)
       val lineNrEntry = section.getEntry(SectionHeaderKey.NUMBER_OF_LINE_NUMBERS)
@@ -201,7 +201,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkZeroValues(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable()
-    val sections = sectionTable.getSectionEntries().asScala
+    val sections = sectionTable.getSectionHeaders().asScala
     for (section <- sections) yield {
       val sectionName = filteredString(section.getName)
       checkReloc(anomalyList, section, sectionName)
@@ -242,7 +242,7 @@ trait SectionTableScanning extends AnomalyScanner {
     val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
     if (fileAlignment == null) return Nil
     val sectionTable = data.getSectionTable()
-    val sections = sectionTable.getSectionEntries().asScala
+    val sections = sectionTable.getSectionHeaders().asScala
     for (section <- sections) {
       val sizeEntry = section.getEntry(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getEntry(SectionHeaderKey.POINTER_TO_RAW_DATA)

@@ -126,12 +126,6 @@ public class PEAnomalyScannerTest {
 	}
 
 	@Test
-	public void overlayHeader() {
-		performTest(sectionlessAnomalies, AnomalyType.STRUCTURE,
-				"PE Header moved to Overlay");
-	}
-
-	@Test
 	public void deprecated() {
 		performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,
 				"COFF line numbers have been removed");

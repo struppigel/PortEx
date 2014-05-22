@@ -90,7 +90,7 @@ object PEAnomalyScanner {
   //TODO VirusShare_baed21297974b6adf3298585baa78691 is weird
   def main(args: Array[String]): Unit = {
     var counter = 0
-    val file = new File("src/main/resources/unusualfiles/tinype/tinyest.exe");
+    val file = new File("corkamix.exe");
     //    for (file <- folder.listFiles()) {
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
@@ -99,7 +99,7 @@ object PEAnomalyScanner {
     val over = new Overlay(data)
     println(scanner.scanReport)
     println("has overlay: " + over.exists())
-    println("overlay offset: " + over.getOffset())
+    println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
     println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
     println()
     //    }

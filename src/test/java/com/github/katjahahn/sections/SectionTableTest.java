@@ -40,7 +40,7 @@ public class SectionTableTest {
 	@Test
 	public void getPointerToRawData() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for (SectionHeader section : table.getSectionEntries()) {
+		for (SectionHeader section : table.getSectionHeaders()) {
 			Long pointer = section.get(POINTER_TO_RAW_DATA);
 			assertEquals(table.getPointerToRawData(section.getName()), pointer);
 		}
@@ -50,7 +50,7 @@ public class SectionTableTest {
 	public void getSectionByNumber() {
 		for(PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
-			for(SectionHeader header : table.getSectionEntries()) {
+			for(SectionHeader header : table.getSectionHeaders()) {
 				SectionHeader entryByNum = table.getSectionEntry(header.getNumber());
 				assertEquals(entryByNum, header);
 			}
@@ -61,7 +61,7 @@ public class SectionTableTest {
 	public void getSectionByName() {
 		for(PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
-			for(SectionHeader header : table.getSectionEntries()) {
+			for(SectionHeader header : table.getSectionHeaders()) {
 				SectionHeader entryByNum = table.getSectionEntry(header.getName());
 				assertEquals(entryByNum, header);
 			}
@@ -74,7 +74,7 @@ public class SectionTableTest {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
 			logger.debug("testing file " + testdatum.filename);
 			List<SectionHeader> list = pedatum.getSectionTable()
-					.getSectionEntries();
+					.getSectionHeaders();
 			assertEquals(list.size(), testdatum.sections.size());
 			assertEquality(list, testdatum.sections);
 			assertSectionNumbers(list);
@@ -121,7 +121,7 @@ public class SectionTableTest {
 	@Test
 	public void getSectionEntry() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionHeader section : table.getSectionEntries()) {
+		for(SectionHeader section : table.getSectionHeaders()) {
 			SectionHeader entry = table.getSectionEntry(section.getName());
 			assertEquals(entry, section);
 		}
@@ -130,7 +130,7 @@ public class SectionTableTest {
 	@Test
 	public void getSize() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionHeader section : table.getSectionEntries()) {
+		for(SectionHeader section : table.getSectionHeaders()) {
 			Long size = table.getSize(section.getName());
 			assertEquals(size, section.get(SIZE_OF_RAW_DATA));
 		}
@@ -139,7 +139,7 @@ public class SectionTableTest {
 	@Test
 	public void getVirtualAddress() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionHeader section : table.getSectionEntries()) {
+		for(SectionHeader section : table.getSectionHeaders()) {
 			Long size = table.getVirtualAddress(section.getName());
 			assertEquals(size, section.get(VIRTUAL_ADDRESS));
 		}

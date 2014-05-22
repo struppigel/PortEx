@@ -107,7 +107,7 @@ public class DataDirEntry {
 	// this is a duplicate to Sectionloader getSectionByRVA, but intentional for
 	// better use of the API
 	public SectionHeader getSectionTableEntry(SectionTable table) {
-		List<SectionHeader> sections = table.getSectionEntries();
+		List<SectionHeader> sections = table.getSectionHeaders();
 		for (SectionHeader section : sections) {
 			int vSize = section.get(VIRTUAL_SIZE).intValue();
 			int vAddress = section.get(VIRTUAL_ADDRESS).intValue();

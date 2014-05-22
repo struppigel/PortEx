@@ -67,8 +67,8 @@ public class PESignature extends PEModule {
 	 */
 	@Override
 	public void read() throws FileFormatException, IOException {
-		throwIf(file.length() < PE_OFFSET_LOCATION + 2);
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+			throwIf(file.length() < PE_OFFSET_LOCATION + 2);
 			raf.seek(PE_OFFSET_LOCATION);
 			byte[] offsetBytes = new byte[2];
 			raf.readFully(offsetBytes);

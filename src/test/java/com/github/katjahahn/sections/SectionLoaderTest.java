@@ -73,7 +73,7 @@ public class SectionLoaderTest {
 		for (PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
 			SectionLoader loader = new SectionLoader(datum);
-			for (SectionHeader entry : table.getSectionEntries()) {
+			for (SectionHeader entry : table.getSectionHeaders()) {
 				long start = entry.get(SectionHeaderKey.VIRTUAL_ADDRESS);
 				long size = entry.get(SectionHeaderKey.VIRTUAL_SIZE);
 				SectionHeader actual = loader.getSectionEntryByRVA(start);
@@ -142,7 +142,7 @@ public class SectionLoaderTest {
 		for (PEData datum : pedata.values()) {
 			SectionLoader loader = new SectionLoader(datum);
 			SectionTable table = datum.getSectionTable();
-			for (SectionHeader header : table.getSectionEntries()) {
+			for (SectionHeader header : table.getSectionHeaders()) {
 				String name = header.getName();
 				PESection section = loader.loadSection(name);
 				assertNotNull(section);
@@ -157,7 +157,7 @@ public class SectionLoaderTest {
 		for (PEData datum : pedata.values()) {
 			SectionLoader loader = new SectionLoader(datum);
 			SectionTable table = datum.getSectionTable();
-			for (SectionHeader header : table.getSectionEntries()) {
+			for (SectionHeader header : table.getSectionHeaders()) {
 				PESection section = loader.loadSection(header.getNumber());
 				assertNotNull(section);
 				assertEquals(section.getDump().length,
