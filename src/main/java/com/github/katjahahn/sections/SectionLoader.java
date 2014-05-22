@@ -317,10 +317,12 @@ public class SectionLoader {
 	private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey)
 			throws FileFormatException {
 		SectionHeader header = getSectionHeaderFor(dataDirKey);
-		Long pointerToRawData = header.getAlignedPointerToRaw();
-		Long offset = getFileOffsetFor(dataDirKey);
-		if (pointerToRawData != null && offset != null) {
-			return (int) (offset - pointerToRawData);
+		if (header != null) {
+			long pointerToRawData = header.getAlignedPointerToRaw();
+			Long offset = getFileOffsetFor(dataDirKey);
+			if (offset != null) {
+				return (int) (offset - pointerToRawData);
+			}
 		}
 		throw new FileFormatException("unable to load " + dataDirKey);
 	}
@@ -379,7 +381,7 @@ public class SectionLoader {
 		}
 		return null;
 	}
-	
+
 	public Long getFileOffsetFor(long rva) {
 		SectionHeader section = getSectionHeaderByRVA(rva);
 		if (section != null) {
@@ -402,7 +404,8 @@ public class SectionLoader {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey) throws IOException {
+	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey)
+			throws IOException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);

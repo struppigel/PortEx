@@ -198,7 +198,9 @@ object ImportSection {
     apply(idatabytes, virtualAddress, optHeader, importTableOffset)
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("src/main/resources/testfiles/Lab09-02.exe"))
+    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")
+    val data = PELoader.loadPE(file)
+    println(file.length)
     val loader = new SectionLoader(data)
     val idata = loader.loadImportSection()
     println(idata.getInfo)
