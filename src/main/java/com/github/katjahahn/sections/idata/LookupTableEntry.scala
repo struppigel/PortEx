@@ -41,8 +41,8 @@ abstract class LookupTableEntry {
  * @constructor instantiates an ordinal entry
  * @param ordNumber
  */
-case class OrdinalEntry(val ordNumber: Int, val rva: Long, 
-    dirEntry: DirectoryTableEntry) extends LookupTableEntry {
+case class OrdinalEntry(val ordNumber: Int, val rva: Long,
+  dirEntry: DirectoryTableEntry) extends LookupTableEntry {
   override def toString(): String = s"ordinal: $ordNumber RVA: $rva (0x${toHexString(rva)})"
   override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry)
 }
@@ -87,13 +87,19 @@ object LookupTableEntry {
   def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int,
     virtualAddress: Long, importTableOffset: Int, rva: Long, dirEntry: DirectoryTableEntry): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
-    val value = getBytesLongValue(idatabytes, offset + importTableOffset, entrySize)
-    if (value == 0) {
-      NullEntry()
-    } else if ((value & ordFlagMask) != 0) {
-      createOrdEntry(value, rva, dirEntry)
-    } else {
-      createNameEntry(value, idatabytes, virtualAddress, importTableOffset, rva, dirEntry)
+    try {
+      val value = getBytesLongValue(idatabytes, offset + importTableOffset, entrySize)
+      if (value == 0) {
+        NullEntry()
+      } else if ((value & ordFlagMask) != 0) {
+        createOrdEntry(value, rva, dirEntry)
+      } else {
+        createNameEntry(value, idatabytes, virtualAddress, importTableOffset, rva, dirEntry)
+      }
+    } catch {
+      case e: Exception =>
+        logger.warn("invalid lookup table entry at rva " + rva)
+        NullEntry()
     }
   }
 

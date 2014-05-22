@@ -129,9 +129,9 @@ public class PELoader {
 
 	public static void main(String[] args) throws IOException {
 		logger.entry(); //TODO make imports reading work with normalimports.exe!
-		File file = new File("src/main/resources/unusualfiles/tinype/normalimports.exe");
+		File file = new File("src/main/resources/unusualfiles/tinype/collapsedimport.exe");
 		PEData data = PELoader.loadPE(file);
-		System.out.println(data);
+//		System.out.println(data);
 		ImportSection idata = new SectionLoader(data).loadImportSection();
 		System.out.println(idata.getInfo());
 	}

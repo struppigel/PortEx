@@ -80,10 +80,10 @@ class ImportSection private (
 object ImportSection {
 
   def apply(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader, importTableOffset: Int): ImportSection = {
+    optHeader: OptionalHeader, importTableOffset: Int, fileSize: Long): ImportSection = {
     logger.debug("reading direntries for root table")
     val directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffset)
-    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset)
+    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset, fileSize)
     new ImportSection(directoryTable)
   }
 
@@ -92,11 +92,16 @@ object ImportSection {
    * and adds the lookup table entries to the directory table entry they belong to
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryTableEntry],
-    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte], importTableOffset: Int): Unit = {
+    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte], importTableOffset: Int, fileSize: Long): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
-      if (iRVA == 0) iRVA = dirEntry(I_ADDR_TABLE_RVA)
+      if (iRVA == 0 || (iRVA - virtualAddress) > fileSize) {
+        iRVA = dirEntry(I_ADDR_TABLE_RVA)
+        logger.debug("using IAT rva")
+      } else {
+        logger.debug("using ILT rva")
+      }
       var offset = iRVA - virtualAddress
       var relOffset = iRVA
       logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + idatabytes.length + " virtualAddress " + virtualAddress)
@@ -164,7 +169,8 @@ object ImportSection {
     val until = from + ENTRY_SIZE
     logger.debug("reading until: " + until)
     val entrybytes = idatabytes.slice(from, until)
-    logger.debug("entrybytes length " + entrybytes.length)
+    if(entrybytes.length < ENTRY_SIZE) return None
+
     /**
      * @return true iff the given entry is not the last empty entry or null entry
      */
@@ -194,8 +200,8 @@ object ImportSection {
    * @return ImportSection instance
    */
   def getInstance(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader, importTableOffset: Int): ImportSection =
-    apply(idatabytes, virtualAddress, optHeader, importTableOffset)
+    optHeader: OptionalHeader, importTableOffset: Int, fileSize: Long): ImportSection =
+    apply(idatabytes, virtualAddress, optHeader, importTableOffset, fileSize)
 
   def main(args: Array[String]): Unit = {
     val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")

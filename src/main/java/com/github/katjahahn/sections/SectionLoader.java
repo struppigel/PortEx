@@ -149,6 +149,7 @@ public class SectionLoader {
 				long alignedPointerToRaw = section.getAlignedPointerToRaw();
 				long readSize = getReadSize(section);
 				raf.seek(alignedPointerToRaw);
+				logger.debug("reading section bytes from " + alignedPointerToRaw + " to " + readSize);
 				byte[] sectionbytes = new byte[(int) readSize];
 				raf.readFully(sectionbytes);
 				return sectionbytes;
@@ -295,7 +296,7 @@ public class SectionLoader {
 			logger.debug("idatalength: " + idatabytes.length);
 			logger.debug("virtual address of ILT: " + virtualAddress);
 			ImportSection idata = ImportSection.getInstance(idatabytes,
-					virtualAddress, optHeader, importTableOffset);
+					virtualAddress, optHeader, importTableOffset, file.length());
 			return idata;
 		}
 		return null;
@@ -338,7 +339,7 @@ public class SectionLoader {
 	 *         available
 	 */
 	private SectionHeader getSectionHeaderFor(DataDirectoryKey dataDirKey) {
-		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
+		DataDirEntry dataDir = optHeader.getDataDirEntry(dataDirKey);
 		if (dataDir != null) {
 			return dataDir.getSectionTableEntry(table);
 		}
@@ -406,7 +407,7 @@ public class SectionLoader {
 	 */
 	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey)
 			throws IOException {
-		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
+		DataDirEntry dataDir = optHeader.getDataDirEntry(dataDirKey);
 		if (dataDir != null) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);
 			return loadSectionBytes(header);
