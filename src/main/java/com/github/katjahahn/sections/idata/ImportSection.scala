@@ -82,8 +82,15 @@ object ImportSection {
   def apply(idatabytes: Array[Byte], virtualAddress: Long,
     optHeader: OptionalHeader, importTableOffset: Int, fileSize: Long): ImportSection = {
     logger.debug("reading direntries for root table")
-    val directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffset)
-    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset, fileSize)
+    var directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffset)
+    try {
+      readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset, fileSize)
+    } catch {
+      case e: FailureEntryException => 
+        //filter empty directoryTableEntries, they are of no use and probably because
+        //of collapsed imports or other malformations, example: tinype
+        directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
+    }
     new ImportSection(directoryTable)
   }
 
@@ -169,7 +176,7 @@ object ImportSection {
     val until = from + ENTRY_SIZE
     logger.debug("reading until: " + until)
     val entrybytes = idatabytes.slice(from, until)
-    if(entrybytes.length < ENTRY_SIZE) return None
+    if (entrybytes.length < ENTRY_SIZE) return None
 
     /**
      * @return true iff the given entry is not the last empty entry or null entry

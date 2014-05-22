@@ -99,7 +99,7 @@ object LookupTableEntry {
     } catch {
       case e: Exception =>
         logger.warn("invalid lookup table entry at rva " + rva)
-        NullEntry()
+        throw new FailureEntryException()
     }
   }
 
