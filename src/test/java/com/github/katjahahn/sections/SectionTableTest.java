@@ -51,7 +51,7 @@ public class SectionTableTest {
 		for(PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
 			for(SectionHeader header : table.getSectionHeaders()) {
-				SectionHeader entryByNum = table.getSectionEntry(header.getNumber());
+				SectionHeader entryByNum = table.getSectionHeader(header.getNumber());
 				assertEquals(entryByNum, header);
 			}
 		}
@@ -62,7 +62,7 @@ public class SectionTableTest {
 		for(PEData datum : pedata.values()) {
 			SectionTable table = datum.getSectionTable();
 			for(SectionHeader header : table.getSectionHeaders()) {
-				SectionHeader entryByNum = table.getSectionEntry(header.getName());
+				SectionHeader entryByNum = table.getSectionHeader(header.getName());
 				assertEquals(entryByNum, header);
 			}
 		}
@@ -122,7 +122,7 @@ public class SectionTableTest {
 	public void getSectionEntry() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
 		for(SectionHeader section : table.getSectionHeaders()) {
-			SectionHeader entry = table.getSectionEntry(section.getName());
+			SectionHeader entry = table.getSectionHeader(section.getName());
 			assertEquals(entry, section);
 		}
 	}

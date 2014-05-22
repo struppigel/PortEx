@@ -139,7 +139,7 @@ public class SectionLoader {
 	 * @throws IOException
 	 */
 	public byte[] loadSectionBytes(int sectionNr) throws IOException {
-		SectionHeader section = table.getSectionEntry(sectionNr);
+		SectionHeader section = table.getSectionHeader(sectionNr);
 		return loadSectionBytes(section);
 	}
 
@@ -254,7 +254,7 @@ public class SectionLoader {
 	 *            the relative virtual address
 	 * @return the {@link SectionHeader} of the section the rva is pointing into
 	 */
-	public SectionHeader getSectionEntryByRVA(long rva) {
+	public SectionHeader getSectionHeaderByRVA(long rva) {
 		List<SectionHeader> sections = table.getSectionHeaders();
 		for (SectionHeader section : sections) {
 			long vSize = section.get(VIRTUAL_SIZE);
@@ -389,14 +389,23 @@ public class SectionLoader {
 	public Long getFileOffsetFor(DataDirectoryKey dataDirKey) {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
-			Long virtualAddress = getSectionEntryValue(dataDirKey,
-					VIRTUAL_ADDRESS);
-			Long pointerToRawData = getSectionEntryValue(dataDirKey,
-					POINTER_TO_RAW_DATA);
+			long rva = dataDir.virtualAddress;
+			return getFileOffsetFor(rva);
+		}
+		return null;
+	}
+	
+	public Long getFileOffsetFor(long rva) {
+		SectionHeader section = getSectionHeaderByRVA(rva);
+		if (section != null) {
+			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
+			Long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
 			if (virtualAddress != null && pointerToRawData != null) {
-				long rva = dataDir.virtualAddress;
 				return rva - (virtualAddress - pointerToRawData);
 			}
+		} else if (rva <= file.length()) {
+			// data is not located within a section
+			return rva;
 		}
 		return null;
 	}

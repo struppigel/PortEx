@@ -130,7 +130,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val physStart = section.getAlignedPointerToRaw()
       val physEnd = loader.getReadSize(section) + physStart
       for (i <- section.getNumber() + 1 to sections.length) { //correct?
-        val sec = sectionTable.getSectionEntry(i)
+        val sec = sectionTable.getSectionHeader(i)
         val start = sec.getAlignedPointerToRaw()
         val end = loader.getReadSize(sec) + physStart
         if (overlaps((start, end), (physStart, physEnd))) {

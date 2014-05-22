@@ -122,7 +122,7 @@ public class SectionTable extends PEModule {
 	 * @param number
 	 * @return the section table entry that has the given number
 	 */
-	public SectionHeader getSectionEntry(int number) {
+	public SectionHeader getSectionHeader(int number) {
 		for (SectionHeader header : headers) {
 			if (header.getNumber() == number) {
 				return header;
@@ -142,7 +142,7 @@ public class SectionTable extends PEModule {
 	 * @param sectionName
 	 * @return the section table entry that has the given sectionName
 	 */
-	public SectionHeader getSectionEntry(String sectionName) {
+	public SectionHeader getSectionHeader(String sectionName) {
 		for (SectionHeader entry : headers) {
 			if (entry.getName().equals(sectionName)) {
 				return entry;

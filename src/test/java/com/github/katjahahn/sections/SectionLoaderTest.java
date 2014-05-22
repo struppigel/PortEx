@@ -76,11 +76,11 @@ public class SectionLoaderTest {
 			for (SectionHeader entry : table.getSectionHeaders()) {
 				long start = entry.get(SectionHeaderKey.VIRTUAL_ADDRESS);
 				long size = entry.get(SectionHeaderKey.VIRTUAL_SIZE);
-				SectionHeader actual = loader.getSectionEntryByRVA(start);
+				SectionHeader actual = loader.getSectionHeaderByRVA(start);
 				assertEquals(actual, entry);
-				actual = loader.getSectionEntryByRVA(start + size - 1);
+				actual = loader.getSectionHeaderByRVA(start + size - 1);
 				assertEquals(actual, entry);
-				actual = loader.getSectionEntryByRVA(size / 2 + start);
+				actual = loader.getSectionHeaderByRVA(size / 2 + start);
 				assertEquals(actual, entry);
 			}
 		}
