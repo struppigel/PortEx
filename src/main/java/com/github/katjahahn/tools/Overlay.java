@@ -25,7 +25,6 @@ import java.util.List;
 
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
-import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionHeader;
 import com.github.katjahahn.sections.SectionTable;
@@ -73,11 +72,10 @@ public class Overlay {
 		if (offset == null) {
 			read();
 			SectionTable table = data.getSectionTable();
-			OptionalHeader opt = data.getOptionalHeader();
 			offset = 0L;
 			List<SectionHeader> headers = table.getSectionHeaders();
 			if(headers.size() == 0) { //offset for sectionless PE's
-				offset = Math.max(table.getOffset(), opt.getMinSize()); //TODO correct???
+				offset = file.length();
 			}
 			for (SectionHeader section : headers) {
 				long alignedPointerToRaw = section.getAlignedPointerToRaw();

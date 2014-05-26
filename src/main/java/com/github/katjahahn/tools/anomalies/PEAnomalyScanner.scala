@@ -87,22 +87,27 @@ object PEAnomalyScanner {
   def getInstance(data: PEData): PEAnomalyScanner =
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
-  //TODO VirusShare_baed21297974b6adf3298585baa78691 is weird
+  private val usage = "java -jar anomalyscan.jar <filename>"
   def main(args: Array[String]): Unit = {
-    var counter = 0
-    val file = new File("corkamix.exe");
-    //    for (file <- folder.listFiles()) {
-    val data = PELoader.loadPE(file)
-    val loader = new SectionLoader(data)
-    println(data)
-    val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
-    val over = new Overlay(data)
-    println(scanner.scanReport)
-    println("has overlay: " + over.exists())
-    println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-    println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-    println()
-    //    }
+    if (args.size < 1) {
+      println(usage)
+    } else {
+      val file = new File(args(0))
+      if (!file.exists()) {
+    	System.err.println("File doesn't exist!")
+      } else {
+        val data = PELoader.loadPE(file)
+        val loader = new SectionLoader(data)
+        println(data)
+        val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
+        val over = new Overlay(data)
+        println(scanner.scanReport)
+        println("has overlay: " + over.exists())
+        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+        println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+        println()
+      }
+    }
   }
 
 }
