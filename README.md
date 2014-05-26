@@ -57,7 +57,7 @@ Create the following portex.pom:
 Download portex.jar and install portex to your local Maven repository as follows:
 
 ```
-$ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
+$ mvn install:install-file -Dfile=portex.jar -DpomFile=portex.pom
 ```
 
 Now you can include PortEx to your project by adding the following Maven dependency:
