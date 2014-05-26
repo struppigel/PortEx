@@ -1,7 +1,7 @@
 PortEx
 ======
 
-### Welcome to PortEx
+### Welcome to PortEx Alpha
 
 PortEx is a Java library for static malware analysis of portable executable files.  
 PortEx is written in Java and Scala, but targeted at Java applications.  
@@ -22,7 +22,7 @@ For more information have a look at [PortEx Wiki](https://github.com/katjahahn/P
 
 ### Version Information
 
-The current version is in Alpha, so beware of bugs.
+The current version is in Alpha, so beware of bugs and changes of the API until the first release.
 The first release will be in December 2014.
 
 ### Using PortEx
