@@ -60,33 +60,31 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 
 <p>Use the following pom.xml for Maven</p>
 
-<pre><code>
-<?xml version='1.0' encoding='UTF-8'?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>default</groupId>
-    <artifactId>portex_2.10</artifactId>
-    <packaging>jar</packaging>
-    <description>portex</description>
-    <version>0.1-SNAPSHOT</version>
-    <name>portex</name>
-    <organization>
-        <name>default</name>
-    </organization>
-    <dependencies>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>2.10.3</version>
-        </dependency>
-    </dependencies>
-</project>
+<pre><code>&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;default&lt;/groupId&gt;
+    &lt;artifactId&gt;portex_2.10&lt;/artifactId&gt;
+    &lt;packaging&gt;jar&lt;/packaging&gt;
+    &lt;description&gt;portex&lt;/description&gt;
+    &lt;version&gt;0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;portex&lt;/name&gt;
+    &lt;organization&gt;
+        &lt;name&gt;default&lt;/name&gt;
+    &lt;/organization&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.scala-lang&lt;/groupId&gt;
+            &lt;artifactId&gt;scala-library&lt;/artifactId&gt;
+            &lt;version&gt;2.10.3&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/project&gt;
 </code></pre>
 
 <p>Download portex.jar and include it to your local Maven repository as follows:</p>
 
-<pre><code>
-$ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
+<pre><code>$ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
 </code></pre>
 
 <p>Alternatively download portex.fat.jar and just include it to your build path.</p> 
