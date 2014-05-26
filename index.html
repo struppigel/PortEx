@@ -41,26 +41,57 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 
 <ul>
 <li>Reading Header information from: MSDOS Header, COFF File Header, Optional Header, Section Table</li>
-<li>Dumping of: MSDOS Load Module, Sections, Overlay, embedded ZIP, JAR or .class files</li>
-<li>Mapping of Data Directory Entries to the corresponding Section</li>
-<li>Reading Standard Section Formats: Import Section, Resource Section, Export Section, Debug Section</li>
-<li>Scanning for file anomalies, including usage of deprecated, reserved or wrong values</li>
+<li>Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section</li>
+<li>Dumping of sections, overlay, embedded ZIP, JAR or .class files</li>
+<li>Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values</li>
 <li>Scan for PEiD signatures or your own signature database</li>
 <li>Scan for jar2exe or class2exe wrappers</li>
 <li>Scan for Unicode and ASCII strings contained in the file</li>
 <li>Overlay detection</li>
-<li>Get a Virustotal report</li>
 </ul><p>For more information have a look at <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a> and the <a href="http://katjahahn.github.io/PortEx/javadocs">Documentation</a></p>
 
 <h3>
 <a name="version" class="anchor" href="#version"><span class="octicon octicon-link"></span></a>Version</h3>
 
-<p>The current version is in Alpha, so beware of bugs. The first release will be in fall 2014.</p>
+<p>The current version is in Alpha, so beware of bugs. The first release will be in December 2014.</p>
 
 <h3>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Using Portex</h3>
 
-<p>Download portex.jar and include it to your build path. For more information, read the <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a></p>
+<p>Use the following pom.xml for Maven</p>
+
+<pre><code>
+<?xml version='1.0' encoding='UTF-8'?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>default</groupId>
+    <artifactId>portex_2.10</artifactId>
+    <packaging>jar</packaging>
+    <description>portex</description>
+    <version>0.1-SNAPSHOT</version>
+    <name>portex</name>
+    <organization>
+        <name>default</name>
+    </organization>
+    <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.10.3</version>
+        </dependency>
+    </dependencies>
+</project>
+</code></pre>
+
+<p>Download portex.jar and include it to your local Maven repository as follows:</p>
+
+<pre><code>
+$ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
+</code></pre>
+
+<p>Alternatively download portex.fat.jar and just include it to your build path.</p> 
+
+<p>For more information, read the <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a></p>
 
 <h3>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Building Portex</h3>
@@ -69,22 +100,6 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Requirements</h4>
 
 <p>PortEx is build with <a href="http://www.scala-sbt.org">sbt</a></p>
-<p>You also need <a href="https://maven.apache.org/">Maven</a></p>
-
-<h4>
-<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Setup Third Party Libraries</h4>
-
-<p>Download <a href="https://github.com/kdkanishka/Virustotal-Public-API-V2.0-Client/archive/master.zip">VirusTotalPublic</a></p>
-
-<p>Extract the file and navigate to the <i>Virustotal-Public-API-V2.0-Client-master</i> folder. Build the jar with:</p>
-
-<pre><code>$ mvn clean install -DskipTests
-</code></pre>
-
-<p>Then publish it to your local Maven repository:</p>
-
-<pre><code>$ mvn install:install-file -Dfile=target/VirustotalPublicV2.0.0-1.1-GA.jar -DpomFile=pom.xml
-</code></pre>
 
 <h4>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Compile and Build with sbt</h4>
