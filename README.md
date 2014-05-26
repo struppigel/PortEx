@@ -17,14 +17,13 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Scan for jar2exe or class2exe wrappers
 * Scan for Unicode and ASCII strings contained in the file
 * Overlay detection
-* Get a Virustotal report
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
 ### Version Information
 
 The current version is in Alpha, so beware of bugs.
-The first release will be in Fall 2014.
+The first release will be in December 2014.
 
 ### Using PortEx
 
@@ -35,23 +34,6 @@ Download portex.jar and include it to your build path. For more information, rea
 #### Requirements
 
 PortEx is build with [sbt](http://www.scala-sbt.org)  
-You also need [Maven](https://maven.apache.org/)
-
-#### Setup Third Party Libraries
-
-Download [VirusTotalPublic](https://github.com/kdkanishka/Virustotal-Public-API-V2.0-Client/archive/master.zip)
-
-Extract the file and navigate to the *Virustotal-Public-API-V2.0-Client-master* folder. Build the jar with:
-
-```
-$ mvn clean install -DskipTests
-```
-
-Then publish it to your local Maven repository:
-
-```
-$ mvn install:install-file -Dfile=target/VirustotalPublicV2.0.0-1.1-GA.jar -DpomFile=pom.xml
-```
 
 #### Compile and Build With sbt
 

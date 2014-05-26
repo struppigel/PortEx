@@ -213,7 +213,7 @@ object ImportSection {
 
   def main(args: Array[String]): Unit = {
     //    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")
-    val file = new File("src/main/resources/unusualfiles/tinype/collapsediat.exe")
+    val file = new File("src/main/resources/unusualfiles/tinype/downloader.exe")
     val data = PELoader.loadPE(file)
     println(data)
     val loader = new SectionLoader(data)
