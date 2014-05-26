@@ -27,7 +27,40 @@ The first release will be in December 2014.
 
 ### Using PortEx
 
-Download portex.jar and include it to your build path. For more information, read the [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki)
+Use the following pom.xml for Maven
+
+```
+<?xml version='1.0' encoding='UTF-8'?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>default</groupId>
+    <artifactId>portex_2.10</artifactId>
+    <packaging>jar</packaging>
+    <description>portex</description>
+    <version>0.1-SNAPSHOT</version>
+    <name>portex</name>
+    <organization>
+        <name>default</name>
+    </organization>
+    <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.10.3</version>
+        </dependency>
+    </dependencies>
+</project>
+```
+
+Download portex.jar and include it to your local Maven repository as follows:
+
+```
+$ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
+```
+
+Alternatively download portex.fat.jar and just include it to your build path.
+
+For more information, read the [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki)
 
 ### Building PortEx
 
