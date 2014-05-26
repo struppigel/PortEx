@@ -27,7 +27,9 @@ The first release will be in December 2014.
 
 ### Using PortEx
 
-Use the following pom.xml for Maven
+#### Including PortEx to a Maven Project
+
+Create the following portex.pom:
 
 ```
 <?xml version='1.0' encoding='UTF-8'?>
@@ -52,11 +54,23 @@ Use the following pom.xml for Maven
 </project>
 ```
 
-Download portex.jar and include it to your local Maven repository as follows:
+Download portex.jar and install portex to your local Maven repository as follows:
 
 ```
 $ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
 ```
+
+Now you can include PortEx to your project by adding the following Maven dependency:
+
+```
+<dependency>
+  		<groupId>default</groupId>
+  		<artifactId>portex_2.10</artifactId>
+  		<version>0.1-SNAPSHOT</version>
+</dependency>
+```
+
+#### Using the Fat Jar
 
 Alternatively download portex.fat.jar and just include it to your build path.
 
