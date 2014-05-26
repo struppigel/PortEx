@@ -4,7 +4,7 @@ PortEx
 ### Welcome to PortEx
 
 PortEx is a Java library for static malware analysis of portable executable files.  
-PortEx is written in Java and Scala, but targeted for Java applications.  
+PortEx is written in Java and Scala, but targeted at Java applications.  
 Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 
 ### Features (so far)
