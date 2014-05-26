@@ -58,7 +58,10 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 <h3>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Using Portex</h3>
 
-<p>Use the following pom.xml for Maven</p>
+<h4>
+<a name="user-content-including-portex-to-a-maven-project" class="anchor" href="#including-portex-to-a-maven-project"><span class="octicon octicon-link"></span></a>Including PortEx to a Maven Project</h4>
+
+<p>Create the following portex.pom:</p>
 
 <pre><code>&lt;?xml version='1.0' encoding='UTF-8'?&gt;
 &lt;project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"&gt;
@@ -82,17 +85,26 @@ PortEx is written in Java and Scala, but targeted for Java applications.</p>
 &lt;/project&gt;
 </code></pre>
 
-<p>Download portex.jar and include it to your local Maven repository as follows:</p>
+<p>Download portex.jar and install portex to your local Maven repository as follows:</p>
 
-<pre><code>$ mvn install:install-file -Dfile=portex.jar -DpomFile=pom.xml
+<pre><code>$ mvn install:install-file -Dfile=portex.jar -DpomFile=portex.pom
 </code></pre>
 
-<p>Alternatively download portex.fat.jar and just include it to your build path.</p> 
+<p>Now you can include PortEx to your project by adding the following Maven dependency:</p>
+
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;default&lt;/groupId&gt;
+        &lt;artifactId&gt;portex_2.10&lt;/artifactId&gt;
+        &lt;version&gt;0.1-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h4>
+<a name="user-content-using-the-fat-jar" class="anchor" href="#using-the-fat-jar"><span class="octicon octicon-link"></span></a>Using the Fat Jar</h4>
+
+<p>Alternatively download portex.fat.jar and just include it to your build path.</p>
 
 <p>For more information, read the <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a></p>
-
-<h3>
-<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Building Portex</h3>
 
 <h4>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Requirements</h4>
