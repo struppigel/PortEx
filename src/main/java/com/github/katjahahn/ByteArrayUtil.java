@@ -18,6 +18,9 @@ package com.github.katjahahn;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Utilities to convert from and to byte arrays.
  * 
@@ -34,6 +37,9 @@ import java.util.Arrays;
  * 
  */
 public class ByteArrayUtil {
+
+	private static final Logger logger = LogManager
+			.getLogger(ByteArrayUtil.class.getName());
 
 	/**
 	 * Retrieves the integer value of a subarray of bytes. The values are
@@ -61,12 +67,37 @@ public class ByteArrayUtil {
 	 * @return long value
 	 */
 	public static long getBytesLongValue(byte[] bytes, int offset, int length) {
-		byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
+		byte[] value = new byte[length];
+		value = Arrays.copyOfRange(bytes, offset, offset + length);
 		return bytesToLong(value);
 	}
 
 	/**
-	 * Converts a byte array to a hex string. 
+	 * Retrieves the long value of a subarray of bytes. The values are
+	 * considered little endian. The subarray is determined by offset and
+	 * length. If bytes length is not large enough for given offset and length
+	 * the values are considered 0.
+	 * 
+	 * @param bytes
+	 * @param offset
+	 * @param length
+	 * @return long value
+	 */
+	public static long getBytesLongValueSafely(byte[] bytes, int offset,
+			int length) {
+		byte[] value = new byte[length];
+		if (offset + length > bytes.length) {
+			logger.warn("byte array not large enough for given offset + length");
+		}
+		for (int i = 0; offset + i < bytes.length && i < length; i++) {
+			value[i] = bytes[offset + i];
+
+		}
+		return bytesToLong(value);
+	}
+
+	/**
+	 * Converts a byte array to a hex string.
 	 * 
 	 * Every single byte is shown in the string, also prepended zero bytes.
 	 * Single bytes are delimited with a space character.

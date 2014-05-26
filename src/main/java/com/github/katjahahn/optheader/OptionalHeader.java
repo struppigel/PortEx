@@ -26,12 +26,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardEntry;
 
 public class OptionalHeader extends PEModule {
+	
+	@SuppressWarnings("unused")
+	private static final Logger logger = LogManager.getLogger(OptionalHeader.class
+			.getName());
 
 	/* spec locations */
 	private static final String SUBSYSTEM_SPEC = "subsystem";
@@ -39,8 +46,8 @@ public class OptionalHeader extends PEModule {
 	private static final String STANDARD_SPEC = "optionalheaderstandardspec";
 	private static final String WINDOWS_SPEC = "optionalheaderwinspec";
 	private static final String DATA_DIR_SPEC = "datadirectoriesspec";
-	// minimum size of the optional header to read all values safely
-	public static final int MIN_SIZE = 112;
+	// maximum size of the optional header to read all values safely
+	public static final int MAX_SIZE = 240;
 	// minimum size of the optional header with magic number taken into account
 	private int minSize;
 	// maximum size estimated for NrOfRVAAndValue = 16
@@ -237,9 +244,9 @@ public class OptionalHeader extends PEModule {
 				break;
 			}
 			int offset = Integer.parseInt(specs[offsetLoc]);
-			if (headerbytes.length >= offset + length) {
-				long address = getBytesLongValue(headerbytes, offset, length);
-				long size = getBytesLongValue(headerbytes, offset + length,
+			if (headerbytes.length >= offset) {
+				long address = getBytesLongValueSafely(headerbytes, offset, length);
+				long size = getBytesLongValueSafely(headerbytes, offset + length,
 						length);
 				if (address != 0) {
 					DataDirEntry entry = new DataDirEntry(specs[description],
@@ -278,6 +285,9 @@ public class OptionalHeader extends PEModule {
 						specs[description], value));
 				if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
 					this.rvaNumber = (int) value; // always 4 Bytes
+					if (rvaNumber > 16) {
+						rvaNumber = 16;
+					}
 				}
 			}
 		}

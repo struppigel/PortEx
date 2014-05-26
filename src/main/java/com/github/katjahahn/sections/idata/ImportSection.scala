@@ -34,6 +34,7 @@ import com.github.katjahahn.PELoader
 import java.io.File
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.sections.SpecialSection
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -86,7 +87,7 @@ object ImportSection {
     try {
       readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset, fileSize)
     } catch {
-      case e: FailureEntryException => 
+      case e: FailureEntryException =>
         //filter empty directoryTableEntries, they are of no use and probably because
         //of collapsed imports or other malformations, example: tinype
         directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
@@ -211,12 +212,18 @@ object ImportSection {
     apply(idatabytes, virtualAddress, optHeader, importTableOffset, fileSize)
 
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")
+    //    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")
+    val file = new File("src/main/resources/unusualfiles/tinype/collapsediat.exe")
     val data = PELoader.loadPE(file)
-    println(file.length)
+    println(data)
     val loader = new SectionLoader(data)
     val idata = loader.loadImportSection()
-    println(idata.getInfo)
+    if (idata != null) {
+      println(idata.getInfo)
+    } else {
+      println("import section null")
+    }
+    println(PEAnomalyScanner.getInstance(data).scanReport)
   }
 
   /**
