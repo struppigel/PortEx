@@ -25,6 +25,7 @@ import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey._
 import scala.collection.mutable.ListBuffer
 import ResourceDirectoryTable._
 import java.io.File
+import org.apache.logging.log4j.LogManager
 
 /**
  * @author Katja Hahn
@@ -89,15 +90,15 @@ class ResourceDirectoryTable(private val level: Level,
 
   /**
    * Collects and returns all resources that this resource table tree has.
-   * 
+   *
    * @param virtualAddress the virtual address of the root(?) resource table
    * @param rsrcBytes the bytes of the resource section
    * @return a list of all resources
    */
-  def getResources(virtualAddress: Long, rsrcBytes: Array[Byte]): java.util.List[Resource] = 
+  def getResources(virtualAddress: Long, rsrcBytes: Array[Byte]): java.util.List[Resource] =
     _getResources(virtualAddress, rsrcBytes).asJava
 
-  def _getResources(virtualAddress: Long, tableBytes: Array[Byte]): List[Resource] = 
+  def _getResources(virtualAddress: Long, tableBytes: Array[Byte]): List[Resource] =
     entries.flatMap(getResources(_, virtualAddress, tableBytes))
 
   /**
@@ -108,8 +109,8 @@ class ResourceDirectoryTable(private val level: Level,
    * @param rsrcBytes
    * @return a list of all resources that can be found with this entry
    */
-  private def getResources(entry: ResourceDirectoryEntry, virtualAddress: Long, 
-      rsrcBytes: Array[Byte]): List[Resource] = {
+  private def getResources(entry: ResourceDirectoryEntry, virtualAddress: Long,
+    rsrcBytes: Array[Byte]): List[Resource] = {
     entry match {
       case e: DataEntry =>
         val resourceBytes = e.data.readResourceBytes(virtualAddress, rsrcBytes)
@@ -128,29 +129,41 @@ object ResourceDirectoryTable {
   type Header = Map[ResourceDirectoryTableKey, StandardEntry]
   type Specification = Map[String, Array[String]]
 
+  private val logger = LogManager.getLogger(ResourceDirectoryTable.getClass().getName());
   private val entrySize = 8;
   private val resourceDirOffset = 16;
   private val specLocation = "rsrcdirspec"
 
-  def apply(file: File, level: Level, tableBytes: Array[Byte], offset: Long, 
-      virtualAddress: Long, rsrcOffset: Long): ResourceDirectoryTable = {
+  def apply(file: File, level: Level, tableBytes: Array[Byte], offset: Long,
+    virtualAddress: Long, rsrcOffset: Long): ResourceDirectoryTable = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
-    val header = readHeader(spec, tableBytes)
-    val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
-    val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
-    val entries = readEntries(file, header, nameEntries, idEntries, tableBytes, 
-        offset, level, virtualAddress, rsrcOffset)
-    return new ResourceDirectoryTable(level, header, entries)
+    val maybeHeader = readHeader(spec, tableBytes)
+    maybeHeader match {
+      case None => throw new IllegalArgumentException("unable to read resource directory table")
+      case Some(header) =>
+        val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
+        val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
+        val entries = readEntries(file, header, nameEntries, idEntries, tableBytes,
+          offset, level, virtualAddress, rsrcOffset)
+        new ResourceDirectoryTable(level, header, entries)
+    }
   }
 
   private def readHeader(spec: Specification,
-    tableBytes: Array[Byte]): Header = {
-    for ((s1, s2) <- spec) yield {
+    tableBytes: Array[Byte]): Option[Header] = {
+    val list = (for ((s1, s2) <- spec) yield {
       val key = ResourceDirectoryTableKey.valueOf(s1)
-      val value = getBytesLongValue(tableBytes,
-        Integer.parseInt(s2(1)), Integer.parseInt(s2(2)))
-      val standardEntry = new StandardEntry(key, s2(0), value)
-      (key, standardEntry)
+      val offset = Integer.parseInt(s2(1))
+      val length = Integer.parseInt(s2(2))
+      if (offset + length > tableBytes.length) None else {
+        val value = getBytesLongValue(tableBytes, offset, length)
+        val standardEntry = new StandardEntry(key, s2(0), value)
+        Some((key, standardEntry))
+      }
+    }).toList
+    if (list.contains(None)) None else {
+      val map = list.collect { case Some(tuple) => tuple } toMap;
+      Some(map)
     }
   }
 
@@ -158,14 +171,19 @@ object ResourceDirectoryTable {
     tableBytes: Array[Byte], tableOffset: Long, level: Level, virtualAddress: Long, rsrcOffset: Long): List[ResourceDirectoryEntry] = {
     val entriesSum = nameEntries + idEntries
     var entries = ListBuffer.empty[ResourceDirectoryEntry]
-    for (i <- 0 until entriesSum) {
-      val offset = resourceDirOffset + i * entrySize
-      val endpoint = offset + entrySize
-      val entryNr = i + 1
-      val entryBytes = tableBytes.slice(offset, endpoint)
-      val isNameEntry = i < nameEntries
-      entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
-        tableBytes, tableOffset, level, virtualAddress, rsrcOffset)
+    try {
+      for (i <- 0 until entriesSum) {
+        val offset = resourceDirOffset + i * entrySize
+        val endpoint = offset + entrySize
+        val entryNr = i + 1
+        val entryBytes = tableBytes.slice(offset, endpoint)
+        val isNameEntry = i < nameEntries
+        entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
+          tableBytes, tableOffset, level, virtualAddress, rsrcOffset)
+      }
+    } catch {
+      case e: IllegalArgumentException =>
+        logger.warn(e.getMessage());
     }
     entries.toList
   }

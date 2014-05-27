@@ -64,7 +64,8 @@ class ResourceSection(
 object ResourceSection {
   
   def main(args: Array[String]): Unit = {
-    val pedata = PELoader.loadPE(new File("WinRar.exe"))
+    val file = new File("src/main/resources/unusualfiles/corkami/resource_loop.exe")
+    val pedata = PELoader.loadPE(file)
     val rsrc = new SectionLoader(pedata).loadResourceSection()
     println(rsrc.getResources.asScala.mkString("\n"))
   }
