@@ -1,4 +1,6 @@
 arbeit
+*.sh
+*.py
 Virus.Tirtas
 codecover
 fileanomalies
