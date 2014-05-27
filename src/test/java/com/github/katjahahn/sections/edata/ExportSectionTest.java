@@ -16,6 +16,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.PEData;
+import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.optheader.WindowsEntryKey;
@@ -32,6 +33,26 @@ public class ExportSectionTest {
 	public void prepare() throws IOException {
 		exportEntries = TestreportsReader.readExportEntries();
 		pedata = PELoaderTest.getPEData();
+	}
+	
+	@Test
+	public void forwarderTest() throws IOException {
+		File forwarder = new File("src/main/resources/unusualfiles/corkami/forwarder.dll");
+		PEData data = PELoader.loadPE(forwarder);
+		ExportSection edata = ExportSection.load(data);
+		List<ExportEntry> exportEntries = edata.getExportEntries();
+		for(ExportEntry export : exportEntries) {
+			assertTrue(export.forwarded());
+		}
+		
+		File nonforwarder = new File("src/main/resources/testfiles/DLL2.dll");
+		data = PELoader.loadPE(nonforwarder);
+		edata = ExportSection.load(data);
+		exportEntries = edata.getExportEntries();
+		for(ExportEntry export : exportEntries) {
+			assertFalse(export.forwarded());
+		}
+		
 	}
 
 	@Test
