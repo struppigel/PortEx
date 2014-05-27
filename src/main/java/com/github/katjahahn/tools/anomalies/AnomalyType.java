@@ -15,6 +15,35 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.anomalies;
 
+/**
+ * Represents the semantics of an anomaly.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum AnomalyType {
-	DEPRECATED, WRONG, NON_DEFAULT, RESERVED, STRUCTURE;
+
+	/**
+	 * These values or characteristics have ben set, but are deprecated
+	 */
+	DEPRECATED,
+	/**
+	 * These are values that violate the PE specification
+	 */
+	WRONG,
+	/**
+	 * These values differ from the standard value. That doesn't mean they are
+	 * wrong, they just might be unusual.
+	 */
+	NON_DEFAULT,
+	/**
+	 * These values or characteristics are reserved and should be zero, but
+	 * where set nevertheless
+	 */
+	RESERVED,
+	/**
+	 * Represents unusual location, order, number or size of PE structures, e.g.
+	 * collapsed, overlapping, moved to overlay
+	 */
+	STRUCTURE;
 }

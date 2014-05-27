@@ -37,6 +37,11 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
     super.scan ::: anomalyList.toList
   }
   
+  /**
+   * Checks if the MSDOS header is collapsed. Returns a structural anomaly if true.
+   * 
+   * @return anomaly list
+   */
   private def checkCollapsedHeader(): List[Anomaly] = {
     val sig = data.getPESignature()
     val e_lfanew = sig.getOffset()

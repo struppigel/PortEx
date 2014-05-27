@@ -18,18 +18,34 @@ package com.github.katjahahn.tools.anomalies
 import com.github.katjahahn.StandardEntry
 import com.github.katjahahn.optheader.DataDirEntry
 
+/**
+ * PE file anomaly or malformation.
+ */
 abstract class Anomaly() {
 
   override def toString(): String = description
 
+  /**
+   * The description of the anomaly
+   */
   def description(): String
 
+  /**
+   * Represents a field this anomaly is associated with
+   */
   def standardEntry(): StandardEntry
   
+  /**
+   * The anomaly type
+   */
   def getType(): AnomalyType
 
 }
 
+/**
+ * Represents unusual location, order, number or size of PE structures, e.g.
+ * collapsed, overlapping, moved to overlay
+ */
 case class StructuralAnomaly(override val description: String) extends Anomaly {
   override def standardEntry = null
   override def getType = AnomalyType.STRUCTURE

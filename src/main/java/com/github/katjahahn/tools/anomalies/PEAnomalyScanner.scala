@@ -50,15 +50,20 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
   }
 
   /**
-   * Scans the PE and returns a list of the anomalies found.
+   * Scans the PE and returns a (scala-)list of the anomalies found.
    * Returns an empty list if no traits have been added.
+   * 
+   * Use getAnomalies for a Java compatible list.
    *
-   * @return list of anomalies found
+   * @return (scala-)list of anomalies found
    */
   override def scan: List[Anomaly] = {
     List[Anomaly]()
   }
 
+  /**
+   * @return list of anomalies found
+   */
   def getAnomalies: java.util.List[Anomaly] = scan.asJava
 
 }

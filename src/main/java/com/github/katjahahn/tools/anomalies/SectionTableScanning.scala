@@ -53,6 +53,12 @@ trait SectionTableScanning extends AnomalyScanner {
     super.scan ::: anomalyList.toList
   }
 
+  /**
+   * Checks the section headers for control symbols in the section names and 
+   * unusual names.
+   * 
+   * @return anomaly list
+   */
   private def checkSectionNames(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
@@ -76,13 +82,25 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
-  private def filteredSymbols(name: String): List[String] = {
+  /**
+   * Filteres control code and extended code from the given string. Returns a 
+   * list of the filtered symbols.
+   * 
+   * @param str the string to filter the symbols from
+   * @return list of filtered symbols, each symbol represented as unicode code string
+   */
+  private def filteredSymbols(str: String): List[String] = {
     def getUnicodeValue(c: Char): String = "\\u" + Integer.toHexString(c | 0x10000).substring(1)
     val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
     val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
-    name.map(c => if (controlCode(c) || extendedCode(c)) { getUnicodeValue(c) } else c.toString).toList
+    str.map(c => if (controlCode(c) || extendedCode(c)) { getUnicodeValue(c) } else c.toString).toList
   }
 
+  /**
+   * Checks if SizeOfRawData is larger than the file size permits. 
+   * 
+   * @return anomaly list
+   */
   private def checkTooLargeSizes(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
@@ -99,6 +117,11 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks extended reloc constraints.
+   * 
+   * @return anomaly list
+   */
   private def checkExtendedReloc(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
@@ -117,6 +140,11 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks all sections whether they are physically overlapping.
+   * 
+   * @return anomaly list
+   */
   private def checkOverlappingSections(): List[Anomaly] = {
     def overlaps(t1: (Long, Long), t2: (Long, Long)): Boolean = 
       !(((t1._1 < t2._1) && (t1._2 <= t2._1)) || ((t2._1 < t1._1) && (t2._2 <= t1._1)))
@@ -142,6 +170,11 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks all section for ascending virtual addresses
+   * 
+   * @return anomaly list
+   */
   private def checkAscendingVA(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
@@ -159,12 +192,23 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Filters all control symbols and extended code from the given string. The 
+   * filtered string is returned.
+   * 
+   * @return filtered string
+   */
   private def filteredString(string: String): String = {
     val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
     val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
     string.filterNot(controlCode).filterNot(extendedCode)
   }
 
+  /**
+   * Checks for reserved fields in the characteristics of the sections.
+   * 
+   * @return anomaly list
+   */
   private def checkReserved(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
@@ -182,6 +226,11 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks for the use of deprecated fields in the section headers.
+   * 
+   * @return anomaly list
+   */
   private def checkDeprecated(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
@@ -198,6 +247,11 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks each section for values that should be set, but are 0 nevertheless.
+   * 
+   * @return anomaly list
+   */
   private def checkZeroValues(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable()
@@ -212,6 +266,14 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks if SizeOfRawData or VirtualSize is 0 and, if true, adds the anomaly 
+   * to the given list.
+   * 
+   * @param anomalyList the list to add the anomalies to
+   * @param section the section to check
+   * @param sectionName the name to use for the anomaly description
+   */
   private def checkZeroSizes(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
     val sizeOfRaw = section.getEntry(SectionHeaderKey.SIZE_OF_RAW_DATA)
     val virtSize = section.getEntry(SectionHeaderKey.VIRTUAL_SIZE)
@@ -221,6 +283,14 @@ trait SectionTableScanning extends AnomalyScanner {
     }
   }
 
+  /**
+   * Checks the constraints for the uninitialized data field in the given section.
+   * Adds the anomaly to the given list if constraints are violated.
+   * 
+   * @param anomalyList the list to add the anomalies to
+   * @param section the section to check
+   * @param sectionName the name to use for the anomaly description
+   */
   private def checkUninitializedDataConstraints(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
     def containsOnlyUnitializedData(): Boolean =
       section.getCharacteristics().contains(IMAGE_SCN_CNT_UNINITIALIZED_DATA) &&
@@ -237,6 +307,12 @@ trait SectionTableScanning extends AnomalyScanner {
     }
   }
 
+  /**
+   * Checks SizeOfRawData and PointerOfRawData of every section for file 
+   * alignment constraints.
+   * 
+   * @return anomaly list
+   */
   private def checkFileAlignmentConstrains(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
@@ -255,6 +331,14 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks characteristics of the given section. Adds anomaly to the list if 
+   * a section has constraints only an object file is allowed to have.
+   * 
+   * @param anomalyList the list to add the anomalies to
+   * @param section the section to check
+   * @param sectionName the name to use for the anomaly description
+   */
   private def checkObjectOnlyCharacteristics(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
     val alignmentCharacteristics = Arrays.asList(SectionCharacteristic.values).asScala.filter(k => k.toString.contains("IMAGE_SCN_ALIGN")).toList
     val objectOnly = List(IMAGE_SCN_TYPE_NO_PAD, IMAGE_SCN_LNK_INFO, IMAGE_SCN_LNK_REMOVE, IMAGE_SCN_LNK_COMDAT) ::: alignmentCharacteristics
@@ -265,6 +349,13 @@ trait SectionTableScanning extends AnomalyScanner {
     }
   }
 
+  /**
+   * Checks PointerTo- and NumberOfRelocations for values set. Both should be zero.
+   * 
+   * @param anomalyList the list to add the anomalies to
+   * @param section the section to check
+   * @param sectionName the name to use for the anomaly description
+   */
   private def checkReloc(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
     val relocEntry = section.getEntry(SectionHeaderKey.POINTER_TO_RELOCATIONS)
     val nrRelocEntry = section.getEntry(SectionHeaderKey.NUMBER_OF_RELOCATIONS)

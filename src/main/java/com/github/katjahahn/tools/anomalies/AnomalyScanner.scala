@@ -17,10 +17,23 @@ package com.github.katjahahn.tools.anomalies
 
 import com.github.katjahahn.PEData
 
+/**
+ * Looks for certain anomalies in the given data parameter
+ */
 abstract class AnomalyScanner(val data: PEData) {
   
+  /**
+   * Returns a report of the anomaly scan
+   * 
+   * @return a scan report
+   */
   def scanReport(): String
 
+  /**
+   * Scans for anomalies and returns a list of anomalies found.
+   * 
+   * @return anomaly list
+   */
   def scan(): List[Anomaly]
   
 }

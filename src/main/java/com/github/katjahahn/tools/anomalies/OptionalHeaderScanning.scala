@@ -57,16 +57,34 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     super.scan ::: anomalyList.toList
   }
 
+  /**
+   * Scans all Windows specific fields for anomalies.
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def windowsFieldScan(opt: OptionalHeader): List[Anomaly] = {
     checkImageBase(opt) ::: checkSectionAlignment(opt) :::
       checkFileAlignment(opt) ::: checkLowAlignment(opt) :::
       checkReserved(opt) ::: checkSizes(opt)
   }
 
+  /**
+   * Scans all standard fields for anomalies.
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def standardFieldScan(opt: OptionalHeader): List[Anomaly] = {
     checkEntryPoint(opt)
   }
 
+  /**
+   * Checks for entry point anomalies.
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkEntryPoint(opt: OptionalHeader): List[Anomaly] = {
     def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
       1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
@@ -89,13 +107,19 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val description = s"Optional Header: address of entry point (${ep}) is smaller than size of headers (${sizeOfHeaders})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
-    if (isVirtual(ep)) {
+    if (isVirtual(ep)) { //TODO add more virtual entry point anomalies
       val description = s"Optional Header: virtual entry point (${ep}): starts in virtual space before any section"
       anomalyList += WrongValueAnomaly(entry, description)
     }
     anomalyList.toList
   }
 
+  /**
+   * Checks for low alignment mode.
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkLowAlignment(opt: OptionalHeader): List[Anomaly] = {
     //see: https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment
     def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
@@ -111,6 +135,12 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks SizeOfImage and SizeOfHeaders for correct alignment and min/max constraints
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkSizes(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val imageSize = opt.get(WindowsEntryKey.SIZE_OF_IMAGE)
@@ -140,7 +170,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
-  def headerSizeMin(): Long = {
+  /**
+   * Returns the minimum value for the SizeOfHeader based on the section table
+   * offset plus size. No alignment is taken into account.
+   *
+   * @return the minimum header size
+   */
+  private def headerSizeMin(): Long = {
     val coff = data.getCOFFFileHeader()
     val pesig = data.getPESignature()
     val sectionTableSize = SectionTable.ENTRY_SIZE * coff.getNumberOfSections()
@@ -148,6 +184,11 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     coffOffset + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader() + sectionTableSize
   }
 
+  /**
+   * Rounds up the header size minimum to a multiple of FileAlignment.
+   *
+   * @return aligned SizeOfHeaders value as it should be
+   */
   private def roundedUpHeaderSize(): Long = {
     val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
     if ((headerSizeMin % fileAlignment) != 0) {
@@ -155,6 +196,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     } else headerSizeMin
   }
 
+  /**
+   * Checks for reserved entries in the windows specific fields, including
+   * DLLCharacteristics, LoaderFlags, Win32VersionValue
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkReserved(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val win32version = opt.get(WindowsEntryKey.WIN32_VERSION_VALUE)
@@ -178,6 +226,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks the FileAlignment field for min, max and default values and
+   * verifies if it is a power of two.
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkFileAlignment(opt: OptionalHeader): List[Anomaly] = {
     def isPowerOfTwo(x: Long): Boolean = (x != 0) && ((x & (x - 1)) == 0)
     val anomalyList = ListBuffer[Anomaly]()
@@ -201,6 +256,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * Checks the section alignment for constraints, like section alignment being
+   * larger than or equal to file alignment.
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkSectionAlignment(opt: OptionalHeader): List[Anomaly] = {
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
@@ -211,6 +273,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     } else Nil
   }
 
+  /**
+   * Checks image base constraints, including default values according to the
+   * specification, multiple of 64 K
+   *
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def checkImageBase(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
@@ -234,12 +303,27 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
+  /**
+   * @return true iff the current optional header has the
+   * IMAGE_SUBSYSTEM_WINDOWS_CE_GUI subsystem set.
+   */
   private def isWinCE(): Boolean =
     data.getOptionalHeader().getSubsystem() == Subsystem.IMAGE_SUBSYSTEM_WINDOWS_CE_GUI
 
+  /**
+   * @return true iff the current coff file header has the IMAGE_FILE_DLL
+   * characteristic set
+   */
   private def isDLL(): Boolean =
     data.getCOFFFileHeader().getCharacteristics().contains(IMAGE_FILE_DLL)
 
+  /**
+   * Scans the data directories for anomalies, including number of entries and 
+   * reserved entries.
+   * 
+   * @param opt optional header
+   * @return anomaly list
+   */
   private def dataDirScan(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val datadirs = opt.getDataDirEntries()
