@@ -24,6 +24,7 @@ public class PEAnomalyScannerTest {
 	private List<Anomaly> tinyAnomalies;
 	private List<Anomaly> maxSecXPAnomalies;
 	private List<Anomaly> sectionlessAnomalies;
+	private List<Anomaly> dupe;
 
 	@BeforeClass
 	public void prepare() {
@@ -36,6 +37,9 @@ public class PEAnomalyScannerTest {
 		file = Paths.get(UNUSUAL_FOLDER, "corkami", "sectionless.exe").toFile();
 		scanner = PEAnomalyScanner.getInstance(file);
 		sectionlessAnomalies = scanner.getAnomalies();
+		file = Paths.get(UNUSUAL_FOLDER, "corkami", "duplicate_section.exe").toFile();
+		scanner = PEAnomalyScanner.getInstance(file);
+		dupe = scanner.getAnomalies();
 	}
 
 	@Test
@@ -160,6 +164,13 @@ public class PEAnomalyScannerTest {
 		performTest(maxSecXPAnomalies, AnomalyType.WRONG, "Size of Headers");
 		performTest(sectionlessAnomalies, AnomalyType.WRONG, "Size of Image");
 		performTest(sectionlessAnomalies, AnomalyType.WRONG, "Size of Headers");
+	}
+	
+	@Test
+	public void overlappingSections() {
+		performTest(dupe, AnomalyType.STRUCTURE, "duplicate of section");
+		//TODO overlap
+		//TODO use customized section table structure --> section table factory?
 	}
 
 	// @Test
