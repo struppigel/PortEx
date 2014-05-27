@@ -36,6 +36,8 @@ import com.github.katjahahn.sections.SectionLoader
  */
 trait SectionTableScanning extends AnomalyScanner {
 
+  type SectionRange = (Long, Long)
+
   abstract override def scanReport(): String =
     "Applied Section Table Scanning" + NL + super.scanReport
 
@@ -53,10 +55,17 @@ trait SectionTableScanning extends AnomalyScanner {
     super.scan ::: anomalyList.toList
   }
 
+  private def physicalSectionRange(section: SectionHeader): SectionRange = {
+    val loader = new SectionLoader(data)
+    val start = section.getAlignedPointerToRaw()
+    val end = loader.getReadSize(section) + start
+    return (start, end)
+  }
+
   /**
-   * Checks the section headers for control symbols in the section names and 
+   * Checks the section headers for control symbols in the section names and
    * unusual names.
-   * 
+   *
    * @return anomaly list
    */
   private def checkSectionNames(): List[Anomaly] = {
@@ -83,9 +92,9 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Filteres control code and extended code from the given string. Returns a 
+   * Filteres control code and extended code from the given string. Returns a
    * list of the filtered symbols.
-   * 
+   *
    * @param str the string to filter the symbols from
    * @return list of filtered symbols, each symbol represented as unicode code string
    */
@@ -97,8 +106,8 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Checks if SizeOfRawData is larger than the file size permits. 
-   * 
+   * Checks if SizeOfRawData is larger than the file size permits.
+   *
    * @return anomaly list
    */
   private def checkTooLargeSizes(): List[Anomaly] = {
@@ -119,7 +128,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   /**
    * Checks extended reloc constraints.
-   * 
+   *
    * @return anomaly list
    */
   private def checkExtendedReloc(): List[Anomaly] = {
@@ -141,28 +150,35 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Checks all sections whether they are physically overlapping.
-   * 
+   * Checks all sections whether they are physically overlapping or even a
+   * duplicate of each other.
+   *
    * @return anomaly list
    */
   private def checkOverlappingSections(): List[Anomaly] = {
-    def overlaps(t1: (Long, Long), t2: (Long, Long)): Boolean = 
+    def overlaps(t1: SectionRange, t2: SectionRange): Boolean =
       !(((t1._1 < t2._1) && (t1._2 <= t2._1)) || ((t2._1 < t1._1) && (t2._2 <= t1._1)))
+
+    def isDuplicate(sec1: SectionHeader, sec2: SectionHeader): Boolean = {
+      val range1 = physicalSectionRange(sec1)
+      val range2 = physicalSectionRange(sec2)
+      return range1 == range2
+    }
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
     val sections = sectionTable.getSectionHeaders.asScala
     val loader = new SectionLoader(data)
-    var prevVA = -1
     for (section <- sections) {
       val sectionName = filteredString(section.getName)
-      val physStart = section.getAlignedPointerToRaw()
-      val physEnd = loader.getReadSize(section) + physStart
+      val range1 = physicalSectionRange(section)
       for (i <- section.getNumber() + 1 to sections.length) { //correct?
         val sec = sectionTable.getSectionHeader(i)
-        val start = sec.getAlignedPointerToRaw()
-        val end = loader.getReadSize(sec) + physStart
-        if (overlaps((start, end), (physStart, physEnd))) {
-          val description = s"Section Header ${section.getNumber()} with name ${sectionName} (${physStart}/${physEnd}) overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (${start}/${end})"
+        val range2 = physicalSectionRange(sec)
+        if (isDuplicate(section, sec)) {
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (${range1._1}/${range2._2}) is a duplicate of section ${sec.getNumber()} with name ${filteredString(sec.getName)}"
+          anomalyList += StructuralAnomaly(description)
+        } else if (overlaps(range2, range1)) {
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (${range1._1}/${range2._2}) overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (${range2._1}/${range2._2})"
           anomalyList += StructuralAnomaly(description)
         }
       }
@@ -172,7 +188,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   /**
    * Checks all section for ascending virtual addresses
-   * 
+   *
    * @return anomaly list
    */
   private def checkAscendingVA(): List[Anomaly] = {
@@ -193,9 +209,9 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Filters all control symbols and extended code from the given string. The 
+   * Filters all control symbols and extended code from the given string. The
    * filtered string is returned.
-   * 
+   *
    * @return filtered string
    */
   private def filteredString(string: String): String = {
@@ -206,7 +222,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   /**
    * Checks for reserved fields in the characteristics of the sections.
-   * 
+   *
    * @return anomaly list
    */
   private def checkReserved(): List[Anomaly] = {
@@ -228,7 +244,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   /**
    * Checks for the use of deprecated fields in the section headers.
-   * 
+   *
    * @return anomaly list
    */
   private def checkDeprecated(): List[Anomaly] = {
@@ -249,7 +265,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   /**
    * Checks each section for values that should be set, but are 0 nevertheless.
-   * 
+   *
    * @return anomaly list
    */
   private def checkZeroValues(): List[Anomaly] = {
@@ -267,9 +283,9 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Checks if SizeOfRawData or VirtualSize is 0 and, if true, adds the anomaly 
+   * Checks if SizeOfRawData or VirtualSize is 0 and, if true, adds the anomaly
    * to the given list.
-   * 
+   *
    * @param anomalyList the list to add the anomalies to
    * @param section the section to check
    * @param sectionName the name to use for the anomaly description
@@ -286,7 +302,7 @@ trait SectionTableScanning extends AnomalyScanner {
   /**
    * Checks the constraints for the uninitialized data field in the given section.
    * Adds the anomaly to the given list if constraints are violated.
-   * 
+   *
    * @param anomalyList the list to add the anomalies to
    * @param section the section to check
    * @param sectionName the name to use for the anomaly description
@@ -308,9 +324,9 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Checks SizeOfRawData and PointerOfRawData of every section for file 
+   * Checks SizeOfRawData and PointerOfRawData of every section for file
    * alignment constraints.
-   * 
+   *
    * @return anomaly list
    */
   private def checkFileAlignmentConstrains(): List[Anomaly] = {
@@ -332,9 +348,9 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Checks characteristics of the given section. Adds anomaly to the list if 
+   * Checks characteristics of the given section. Adds anomaly to the list if
    * a section has constraints only an object file is allowed to have.
-   * 
+   *
    * @param anomalyList the list to add the anomalies to
    * @param section the section to check
    * @param sectionName the name to use for the anomaly description
@@ -351,7 +367,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   /**
    * Checks PointerTo- and NumberOfRelocations for values set. Both should be zero.
-   * 
+   *
    * @param anomalyList the list to add the anomalies to
    * @param section the section to check
    * @param sectionName the name to use for the anomaly description

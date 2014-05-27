@@ -93,7 +93,7 @@ object PEAnomalyScanner {
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/unusualfiles/tinype/collapsedimport.exe")
+    val file = new File("src/main/resources/unusualfiles/corkami/duplicate_section.exe")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
     println(data)
