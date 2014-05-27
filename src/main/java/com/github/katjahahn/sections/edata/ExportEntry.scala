@@ -33,10 +33,11 @@ package com.github.katjahahn.sections.edata
 class ExportEntry (
     val symbolRVA: Long, 
     val name: String, 
-    val ordinal: Int) extends Equals {
+    val ordinal: Int,
+    val forwarded: Boolean) extends Equals {
   
   override def toString(): String = 
-    s"""${name}, ${ordinal}, 0x${java.lang.Long.toHexString(symbolRVA)}"""
+    s"""${name}, ${ordinal}, 0x${java.lang.Long.toHexString(symbolRVA)} ${if(forwarded) ", forwarded" else ""}"""
   
   def canEqual(other: Any) = {
       other.isInstanceOf[com.github.katjahahn.sections.edata.ExportEntry]

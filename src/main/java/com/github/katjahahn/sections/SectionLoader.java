@@ -432,7 +432,7 @@ public class SectionLoader {
 			long virtualAddress = exportTable.virtualAddress;
 			byte[] edatabytes = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
 			ExportSection edata = ExportSection.getInstance(edatabytes,
-					virtualAddress, optHeader);
+					virtualAddress, optHeader, this);
 			return edata;
 		}
 		return null;

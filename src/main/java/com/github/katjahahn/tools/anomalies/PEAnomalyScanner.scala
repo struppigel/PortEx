@@ -93,17 +93,19 @@ object PEAnomalyScanner {
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/unusualfiles/corkami/duplicate_section.exe")
+    val file = new File("src/main/resources/unusualfiles/corkami/forwarder.dll")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
     println(data)
-    val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
-    val over = new Overlay(data)
-    println(scanner.scanReport)
-    println("has overlay: " + over.exists())
-    println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-    println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-    println()
+    val edata = loader.loadExportSection()
+    println(edata.getInfo)
+//    val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
+//    val over = new Overlay(data)
+//    println(scanner.scanReport)
+//    println("has overlay: " + over.exists())
+//    println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+//    println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+//    println()
 
   }
 

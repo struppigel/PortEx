@@ -61,7 +61,7 @@ public class ExportSectionTest {
 		List<ExportEntry> list = new ArrayList<ExportEntry>();
 		long imageBase = datum.getOptionalHeader().getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE).value;
 		for(ExportEntry entry : expected) {
-			list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry.name(), entry.ordinal()));
+			list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry.name(), entry.ordinal(), false));
 		}
 		return list;
 	}

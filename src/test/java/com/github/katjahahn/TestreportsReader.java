@@ -112,7 +112,7 @@ public class TestreportsReader {
 			Long rva = Long.parseLong(entry[0]);
 			String name = entry[1];
 			int ordinal = Integer.parseInt(entry[2]);
-			list.add(new ExportEntry(rva, name, ordinal));
+			list.add(new ExportEntry(rva, name, ordinal, false));
 		}
 		return list;
 	}
