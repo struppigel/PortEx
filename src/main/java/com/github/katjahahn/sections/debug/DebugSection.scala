@@ -14,6 +14,7 @@ import com.github.katjahahn.sections.SectionLoader
 import DebugDirTableKey._
 import java.util.Date
 import com.github.katjahahn.sections.SpecialSection
+import com.github.katjahahn.PEData
 
 /**
  * @author Katja Hahn
@@ -84,6 +85,16 @@ object DebugSection {
    * @return debugsection instance
    */
   def getInstance(debugbytes: Array[Byte]): DebugSection = apply(debugbytes)
+  
+  /**
+   * Loads the debug section and returns it.
+   * 
+   * This is just a shortcut to loading the section using the {@link SectionLoader}
+   * 
+   * @return instance of the debug section
+   */
+  def load(data: PEData): DebugSection = 
+    new SectionLoader(data).loadDebugSection()
 
   def apply(debugbytes: Array[Byte]): DebugSection = {
     val specification = IOUtil.readMap("debugdirentryspec").asScala.toMap

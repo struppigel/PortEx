@@ -35,6 +35,7 @@ import java.io.File
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
+import com.github.katjahahn.PEData
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -210,6 +211,16 @@ object ImportSection {
   def getInstance(idatabytes: Array[Byte], virtualAddress: Long,
     optHeader: OptionalHeader, importTableOffset: Int, fileSize: Long): ImportSection =
     apply(idatabytes, virtualAddress, optHeader, importTableOffset, fileSize)
+    
+  /**
+   * Loads the import section and returns it.
+   * 
+   * This is just a shortcut to loading the section using the {@link SectionLoader}
+   * 
+   * @return instance of the import section
+   */
+  def load(data: PEData): ImportSection = 
+    new SectionLoader(data).loadImportSection()
 
   def main(args: Array[String]): Unit = {
     //    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")

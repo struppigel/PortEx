@@ -30,6 +30,7 @@ import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.optheader.DataDirectoryKey
 import com.github.katjahahn.sections.SectionHeader
+import com.github.katjahahn.PEData
 
 /**
  * @author Katja Hahn
@@ -53,14 +54,13 @@ class ExportSection private (
   private val exportAddressTable: ExportAddressTable,
   private val namePointerTable: ExportNamePointerTable,
   private val ordinalTable: ExportOrdinalTable,
-  opt: OptionalHeader,
   exportHeader: SectionHeader,
   sectionLoader: SectionLoader) extends SpecialSection {
 
   lazy val exportEntries = { //TODO only returns named entries so far
-    //see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
-    //if the function's RVA is inside the exports section (as given by the 
-    //VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded.
+    // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
+    // "if the function's RVA is inside the exports section (as given by the
+    // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
     def isForwarderRVA(rva: Long): Boolean = { //TODO is that approach accurate?
       val header = sectionLoader.getSectionHeaderByRVA(rva)
       if (header == null) false
@@ -194,7 +194,8 @@ object ExportSection {
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
-    new ExportSection(edataTable, exportAddressTable, namePointerTable, ordinalTable, opt, exportSection, sectionLoader)
+    new ExportSection(edataTable, exportAddressTable, namePointerTable, 
+        ordinalTable, exportSection, sectionLoader)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirTable,
@@ -227,9 +228,21 @@ object ExportSection {
    * @param virtualAddress the virtual address from the data directory entry
    * table that points to the export section
    * @param opt optional header of the file
+   * @param sectionLoader the sectionLoader of the current file
    * @return instance of the export section
    */
   def getInstance(edataBytes: Array[Byte], virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader): ExportSection =
     apply(edataBytes, virtualAddress, opt, sectionLoader)
+    
+  /**
+   * Loads the export section and returns it.
+   * 
+   * This is just a shortcut to loading the section using the {@link SectionLoader}
+   * 
+   * @return instance of the export section
+   */
+  def load(data: PEData): ExportSection = 
+    new SectionLoader(data).loadExportSection()
+  
 }

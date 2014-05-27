@@ -29,6 +29,7 @@ package com.github.katjahahn.sections.edata
  * @param symbolRVA the relative virtual address that points to the function
  * @param name the name of the function
  * @param ordinal the ordinal of the function
+ * @param forwarded true iff export entry is a fowarder entry
  */
 class ExportEntry (
     val symbolRVA: Long, 

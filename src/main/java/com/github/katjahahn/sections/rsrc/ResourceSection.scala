@@ -25,6 +25,7 @@ import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.PELoader
 import java.io.File
 import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.PEData
 
 /**
  * Holds the root resource directory table and provides access to the resources.
@@ -94,5 +95,15 @@ object ResourceSection {
   def getInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
       rsrcOffset: Long): ResourceSection = 
     apply(file, rsrcbytes, virtualAddress, rsrcOffset)
+    
+  /**
+   * Loads the resource section and returns it.
+   * 
+   * This is just a shortcut to loading the section using the {@link SectionLoader}
+   * 
+   * @return instance of the resource section
+   */
+  def load(data: PEData): ResourceSection = 
+    new SectionLoader(data).loadResourceSection()
 
 }
