@@ -1,4 +1,6 @@
 *.class
+*.sh
+*.py
 
 # tex files # 
 *.acn
