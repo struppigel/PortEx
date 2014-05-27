@@ -39,7 +39,7 @@ Create the following portex.pom:
     <artifactId>portex_2.10</artifactId>
     <packaging>jar</packaging>
     <description>portex</description>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.4.0</version>
     <name>portex</name>
     <organization>
         <name>default</name>
@@ -66,7 +66,7 @@ Now you can include PortEx to your project by adding the following Maven depende
 <dependency>
   		<groupId>default</groupId>
   		<artifactId>portex_2.10</artifactId>
-  		<version>0.1-SNAPSHOT</version>
+  		<version>0.4.0</version>
 </dependency>
 ```
 
