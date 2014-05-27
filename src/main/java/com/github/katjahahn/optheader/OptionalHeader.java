@@ -442,6 +442,23 @@ public class OptionalHeader extends PEModule {
 			return "default for Windows NT, 2000, XP, 95, 98 and Me";
 		return "no default value";
 	}
+	
+	/**
+	 * Checks if image base is too large or zero and relocates it accordingly.
+	 * Otherwise the usual image base is returned.
+	 * 
+	 * see: @see <a href="https://code.google.com/p/corkami/wiki/PE#ImageBase">corkami</a>
+	 * 
+	 * @return relocated image base
+	 */
+	public long getRelocatedImageBase() {
+		long imageBase = get(WindowsEntryKey.IMAGE_BASE);
+		long sizeOfImage = get(WindowsEntryKey.SIZE_OF_IMAGE);
+		if(imageBase + sizeOfImage >= 0x80000000L || imageBase == 0L) {
+			return 0x10000L;
+		}
+		return imageBase;
+	}
 
 	/**
 	 * Returns a list of the DllCharacteristics that are set in the file.

@@ -25,6 +25,7 @@ public class PEAnomalyScannerTest {
 	private List<Anomaly> maxSecXPAnomalies;
 	private List<Anomaly> sectionlessAnomalies;
 	private List<Anomaly> dupe;
+	private List<Anomaly> zeroImageBase;
 
 	@BeforeClass
 	public void prepare() {
@@ -40,6 +41,9 @@ public class PEAnomalyScannerTest {
 		file = Paths.get(UNUSUAL_FOLDER, "corkami", "duplicate_section.exe").toFile();
 		scanner = PEAnomalyScanner.getInstance(file);
 		dupe = scanner.getAnomalies();
+		file = Paths.get(UNUSUAL_FOLDER, "corkami", "imagebase_null.exe").toFile();
+		scanner = PEAnomalyScanner.getInstance(file);
+		zeroImageBase = scanner.getAnomalies();
 	}
 
 	@Test
@@ -171,6 +175,12 @@ public class PEAnomalyScannerTest {
 		performTest(dupe, AnomalyType.STRUCTURE, "duplicate of section");
 		//TODO overlap
 		//TODO use customized section table structure --> section table factory?
+	}
+	
+	@Test
+	public void imageBaseConstraints() {
+		String description = "image base is 0";
+		performTest(zeroImageBase, AnomalyType.NON_DEFAULT, description);
 	}
 
 	// @Test

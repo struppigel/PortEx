@@ -275,7 +275,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
 
   /**
    * Checks image base constraints, including default values according to the
-   * specification, multiple of 64 K
+   * specification, multiple of 64 K, zero value, too large value
    *
    * @param opt optional header
    * @return anomaly list
@@ -285,17 +285,26 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
     if (entry != null) {
       val imageBase = entry.value
+      val sizeOfImage = opt.get(WindowsEntryKey.SIZE_OF_IMAGE)
       if (imageBase % 65536 != 0) {
         val description = "Optional Header: Image Base must be a multiple of 64 K, but is " + imageBase
         anomalyList += WrongValueAnomaly(entry, description)
       }
-      if (isDLL() && imageBase != 0x10000000) {
+      if (sizeOfImage != null && (imageBase + sizeOfImage) >= 0x80000000L) {
+        val description = s"Optional Header: ImageBase + SizeOfImage is too large (${imageBase + sizeOfImage}), thus relocated to 0x10000"
+        anomalyList += NonDefaultAnomaly(entry, description)
+      }
+      if (imageBase == 0) {
+        val description = s"Optional Header: The image base is 0, thus relocated to 0x10000"
+        anomalyList += NonDefaultAnomaly(entry, description)
+      }
+      if (isDLL() && imageBase != 0x10000000L) {
         val description = "Optional Header: The default image base for a DLL is 0x10000000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
         anomalyList += NonDefaultAnomaly(entry, description)
-      } else if (isWinCE() && imageBase != 0x00010000) {
+      } else if (isWinCE() && imageBase != 0x00010000L) {
         val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
         anomalyList += NonDefaultAnomaly(entry, description)
-      } else if (imageBase != 0x00400000) { //TODO
+      } else if (imageBase != 0x00400000L) { //TODO
         val description = "Optional Header: The default image base is 0x00400000, but actual value is 0x" + java.lang.Long.toHexString(imageBase)
         anomalyList += NonDefaultAnomaly(entry, description)
       }
