@@ -50,5 +50,7 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
       List(StructuralAnomaly(description))
     } else Nil
   }
+  
+  //TODO non-default stub
 
 }

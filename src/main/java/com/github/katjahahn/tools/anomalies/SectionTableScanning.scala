@@ -28,6 +28,7 @@ import java.util.Arrays
 import com.github.katjahahn.sections.SectionHeader
 import com.github.katjahahn.StandardEntry
 import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.tools.Overlay
 
 /**
  * Scans the Section Table for anomalies.
@@ -52,7 +53,20 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkTooLargeSizes
     anomalyList ++= checkSectionNames
     anomalyList ++= checkOverlappingSections
+    anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
+  }
+
+  //TODO test this
+  private def sectionTableInOverlay(): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val sectionTable = data.getSectionTable
+    val overlay = new Overlay(data)
+    if (sectionTable.getOffset >= overlay.getOffset) {
+      val description = s"Section Table (offset: ${sectionTable.getOffset}) moved to Overlay"
+      anomalyList += StructuralAnomaly(description)
+    }
+    anomalyList.toList
   }
 
   private def physicalSectionRange(section: SectionHeader): SectionRange = {
