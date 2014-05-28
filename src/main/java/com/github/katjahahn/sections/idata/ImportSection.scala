@@ -45,7 +45,10 @@ import com.github.katjahahn.PEData
  * @author Katja Hahn
  */
 class ImportSection private (
-  private val directoryTable: List[DirectoryTableEntry]) extends SpecialSection {
+  private val directoryTable: List[DirectoryTableEntry],
+  val offset: Long) extends SpecialSection {
+  
+  override def getOffset(): Long = offset
 
   /**
    * Returns the directory table entries of the import section.
@@ -93,7 +96,7 @@ object ImportSection {
         //of collapsed imports or other malformations, example: tinype
         directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
     }
-    new ImportSection(directoryTable)
+    new ImportSection(directoryTable, importTableOffset)
   }
 
   /**
@@ -206,6 +209,8 @@ object ImportSection {
    * @param idatabytes the bytes that belong to the import section
    * @param virtualAddress the address all rva values in the import section are relative to
    * @param optHeader the optional header of the file
+   * @param importTableOffset
+   * @param fileSize
    * @return ImportSection instance
    */
   def getInstance(idatabytes: Array[Byte], virtualAddress: Long,

@@ -23,7 +23,10 @@ import com.github.katjahahn.PEData
  */
 class DebugSection private (
   private val directoryTable: DebugDirectoryTable,
-  private val typeDescription: String) extends SpecialSection {
+  private val typeDescription: String,
+  val offset: Long) extends SpecialSection {
+  
+  override def getOffset(): Long = offset
 
   override def getInfo(): String =
     s"""|-------------
@@ -82,9 +85,10 @@ object DebugSection {
    * Creates an instance of the DebugSection for the given debug bytes.
    * 
    * @param debugbytes the byte array that represents the debug section
+   * @param offset the debug sections starts at
    * @return debugsection instance
    */
-  def getInstance(debugbytes: Array[Byte]): DebugSection = apply(debugbytes)
+  def getInstance(debugbytes: Array[Byte], offset: Long): DebugSection = apply(debugbytes, offset)
   
   /**
    * Loads the debug section and returns it.
@@ -96,7 +100,7 @@ object DebugSection {
   def load(data: PEData): DebugSection = 
     new SectionLoader(data).loadDebugSection()
 
-  def apply(debugbytes: Array[Byte]): DebugSection = {
+  def apply(debugbytes: Array[Byte], offset: Long): DebugSection = {
     val specification = IOUtil.readMap("debugdirentryspec").asScala.toMap
     val buffer = ListBuffer.empty[StandardEntry]
     for ((key, specs) <- specification) {
@@ -110,6 +114,6 @@ object DebugSection {
     }
     val entries: DebugDirectoryTable = (buffer map { t => (t.key, t) }).toMap;
     val types = IOUtil.getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
-    new DebugSection(entries, types(0))
+    new DebugSection(entries, types(0), offset)
   }
 }

@@ -38,9 +38,12 @@ import com.github.katjahahn.PEData
 class ResourceSection(
     val resourceTable: ResourceDirectoryTable, 
     private val rsrcBytes: Array[Byte], 
-    val virtualAddress: Long) extends SpecialSection {
+    val virtualAddress: Long,
+    val offset: Long) extends SpecialSection {
 
   override def getInfo(): String = resourceTable.getInfo
+  
+  override def getOffset(): Long = offset
 
   /**
    * Returns the {@link ResourceDirectoryTable} that is the root of the
@@ -73,8 +76,10 @@ object ResourceSection {
   /**
    * Creates an instance of the ResourceSection
    *
+   * @param file 
    * @param rsrcbytes the array of bytes the section is made up of
    * @param virtualAddress the virtual address all RVAs are relative to
+   * @param rsrcOffset
    * @returns
    */
   def apply(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
@@ -83,14 +88,16 @@ object ResourceSection {
     val initialOffset = 0
     val resourceTable = ResourceDirectoryTable(file, initialLevel, rsrcbytes, 
         initialOffset, virtualAddress, rsrcOffset)
-    new ResourceSection(resourceTable, rsrcbytes, virtualAddress)
+    new ResourceSection(resourceTable, rsrcbytes, virtualAddress, rsrcOffset)
   }
 
   /**
    * Creates an instance of the ResourceSection
    *
+   * @param file
    * @param rsrcbytes the array of bytes the section is made up of
    * @param virtualAddress the virtual address all RVAs are relative to
+   * @param rsrcOffset
    * @returns
    */
   def getInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 

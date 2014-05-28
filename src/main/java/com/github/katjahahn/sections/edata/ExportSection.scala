@@ -55,7 +55,10 @@ class ExportSection private (
   private val namePointerTable: ExportNamePointerTable,
   private val ordinalTable: ExportOrdinalTable,
   exportHeader: SectionHeader,
-  sectionLoader: SectionLoader) extends SpecialSection {
+  sectionLoader: SectionLoader,
+  val offset: Long) extends SpecialSection {
+  
+  override def getOffset(): Long = offset
 
   lazy val exportEntries = { //TODO only returns named entries so far
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
@@ -188,14 +191,14 @@ object ExportSection {
   }
 
   def apply(edataBytes: Array[Byte], virtualAddress: Long,
-    opt: OptionalHeader, sectionLoader: SectionLoader): ExportSection = {
+    opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
     val edataTable = ExportDirTable(edataBytes)
     val exportSection = sectionLoader.getSectionHeaderByRVA(opt.getDataDirEntry(DataDirectoryKey.EXPORT_TABLE).virtualAddress)
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
     new ExportSection(edataTable, exportAddressTable, namePointerTable, 
-        ordinalTable, exportSection, sectionLoader)
+        ordinalTable, exportSection, sectionLoader, offset)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirTable,
@@ -232,8 +235,8 @@ object ExportSection {
    * @return instance of the export section
    */
   def getInstance(edataBytes: Array[Byte], virtualAddress: Long,
-    opt: OptionalHeader, sectionLoader: SectionLoader): ExportSection =
-    apply(edataBytes, virtualAddress, opt, sectionLoader)
+    opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection =
+    apply(edataBytes, virtualAddress, opt, sectionLoader, offset)
     
   /**
    * Loads the export section and returns it.

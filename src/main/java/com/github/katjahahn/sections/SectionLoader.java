@@ -211,8 +211,8 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public DebugSection loadDebugSection() throws IOException {
-		byte[] bytes = readDataDirBytesFor(DataDirectoryKey.DEBUG);
-		return DebugSection.apply(bytes);
+		BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.DEBUG);
+		return DebugSection.apply(res.bytes, res.offset);
 	}
 
 	/**
@@ -347,25 +347,6 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Retuns the value of the section entry the data directory entry of the
-	 * given {@code dataDirkey} points into
-	 * 
-	 * @param dataDirKey
-	 *            the key for the data directory entry that shall be used
-	 * @param sectionKey
-	 *            the key of the section entry value
-	 * @return the section entry value that belongs to the given key
-	 */
-	private Long getSectionEntryValue(DataDirectoryKey dataDirKey,
-			SectionHeaderKey sectionKey) {
-		SectionHeader section = getSectionHeaderFor(dataDirKey);
-		if (section != null) {
-			return section.get(sectionKey);
-		}
-		return null;
-	}
-
-	/**
 	 * Returns the file offset of the data directory entry the given key belongs
 	 * to.
 	 * 
@@ -430,9 +411,11 @@ public class SectionLoader {
 				DataDirectoryKey.EXPORT_TABLE);
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
-			byte[] edatabytes = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
+			BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
+			byte[] edatabytes = res.bytes;
+			long offset = res.offset;
 			ExportSection edata = ExportSection.getInstance(edatabytes,
-					virtualAddress, optHeader, this);
+					virtualAddress, optHeader, this, offset);
 			return edata;
 		}
 		return null;
@@ -440,7 +423,7 @@ public class SectionLoader {
 
 	/**
 	 * Reads and returns the bytes that belong to the given data directory
-	 * entry.
+	 * entry as well as the offset the bytes where read from.
 	 * 
 	 * The data directory entry rva points into section. This section is
 	 * determined and the file offset for the rva calculated. This file offset
@@ -458,7 +441,7 @@ public class SectionLoader {
 	 * @throws FileFormatException
 	 *             if unable to load the file, e.g. not virtual address given
 	 */
-	public byte[] readDataDirBytesFor(DataDirectoryKey dataDirKey)
+	private BytesAndOffset readDataDirBytesFor(DataDirectoryKey dataDirKey)
 			throws IOException, FileFormatException {
 		DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
 		if (dataDir != null) {
@@ -481,7 +464,7 @@ public class SectionLoader {
 					// TODO cast to int is insecure. actual int is unsigned
 					byte[] bytes = new byte[(int) size];
 					raf.readFully(bytes);
-					return bytes;
+					return new BytesAndOffset(bytes, offset);
 				}
 			} else {
 				logger.warn("virtual address is null for data dir: "
@@ -491,6 +474,16 @@ public class SectionLoader {
 			logger.warn("invalid dataDirKey");
 		}
 		throw new FileFormatException("unable to load " + dataDirKey);
+	}
+	
+	private static class BytesAndOffset {
+		public long offset;
+		public byte[] bytes;
+		
+		public BytesAndOffset(byte[] bytes, long offset) {
+			this.offset = offset;
+			this.bytes = bytes;
+		}
 	}
 
 }
