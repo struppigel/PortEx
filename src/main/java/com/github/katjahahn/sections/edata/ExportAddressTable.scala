@@ -19,8 +19,7 @@ package com.github.katjahahn.sections.edata
 
 import com.github.katjahahn.ByteArrayUtil._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.PEModule
-
+import com.github.katjahahn.PEHeader
 /**
  * @author Katja Hahn
  *

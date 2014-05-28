@@ -198,7 +198,7 @@ public class TestreportsReader {
 
 	private static SectionHeader readSectionEntry(BufferedReader reader,
 			String line, int number) throws IOException {
-		SectionHeader entry = new SectionHeader(number);
+		SectionHeader entry = new SectionHeader(number, -1);
 		while (line != null) {
 			String[] split = line.split(":");
 			if (split.length < 2) {

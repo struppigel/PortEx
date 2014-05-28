@@ -81,9 +81,11 @@ public class SectionTable {
 
 		for (int i = 0; i < numberOfEntries; i++) {
 			int sectionNumber = i + 1;
-			SectionHeader sectionEntry = new SectionHeader(sectionNumber);
-			byte[] section = Arrays.copyOfRange(sectionTableBytes, i
-					* ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
+			int sectionOffset = i * ENTRY_SIZE;
+			SectionHeader sectionEntry = new SectionHeader(sectionNumber,
+					sectionOffset);
+			byte[] section = Arrays.copyOfRange(sectionTableBytes,
+					sectionOffset, sectionOffset + ENTRY_SIZE);
 
 			for (Entry<String, String[]> entry : specification.entrySet()) {
 

@@ -20,7 +20,7 @@ package com.github.katjahahn.sections.rsrc
 import com.github.katjahahn.sections.PESection
 import scala.collection.JavaConverters._
 import com.github.katjahahn.IOUtil
-import com.github.katjahahn.PEModule
+import com.github.katjahahn.PEHeader
 import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.PELoader
 import java.io.File

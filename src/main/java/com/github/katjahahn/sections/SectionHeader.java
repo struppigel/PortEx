@@ -17,13 +17,16 @@ package com.github.katjahahn.sections;
 
 import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
 
 /**
@@ -33,12 +36,13 @@ import com.github.katjahahn.StandardField;
  * @author Katja Hahn
  * 
  */
-public class SectionHeader {
+public class SectionHeader extends PEHeader {
 
 	private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
 	private final HashMap<SectionHeaderKey, StandardField> entries = new HashMap<>();
 	private String name;
 	private final int number;
+	private final long offset;
 
 	/**
 	 * Creates a Section Table Entry instance.
@@ -47,8 +51,9 @@ public class SectionHeader {
 	 *            the number of the entry, beginning by 1 with the first entry
 	 *            in the Section Headers
 	 */
-	public SectionHeader(int number) {
+	public SectionHeader(int number, long offset) {
 		this.number = number;
+		this.offset = offset;
 	}
 	
 	/**
@@ -121,8 +126,9 @@ public class SectionHeader {
 	 * @param key
 	 * @return long value or null if key doesn't exist
 	 */
-	public Long get(SectionHeaderKey key) {
-		StandardField entry = getEntry(key);
+	@Override
+	public Long get(HeaderKey key) {
+		StandardField entry = getField(key);
 		if (entry != null) {
 			return entry.value;
 		}
@@ -135,7 +141,8 @@ public class SectionHeader {
 	 * @param key
 	 * @return standard entry
 	 */
-	public StandardField getEntry(SectionHeaderKey key) {
+	@Override
+	public StandardField getField(HeaderKey key) {
 		return entries.get(key);
 	}
 
@@ -201,4 +208,19 @@ public class SectionHeader {
 		return b.toString();
 	}
 
+	@Override
+	public long getOffset() {
+		return offset;
+	}
+
+	@Override
+	public String getInfo() {
+		return this.toString();
+	}
+
+	@Override
+	public void read() throws IOException {
+		// TODO Auto-generated method stub
+	}
+	
 }
