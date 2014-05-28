@@ -16,6 +16,7 @@
 package com.github.katjahahn;
 
 import static com.github.katjahahn.ByteArrayUtil.*;
+import static com.github.katjahahn.IOUtil.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +32,7 @@ import org.apache.logging.log4j.Logger;
  * @author Katja Hahn
  * 
  */
-public class PESignature extends PEHeader {
+public class PESignature {
 	
 	private static final Logger logger = LogManager.getLogger(PESignature.class
 			.getName());
@@ -71,7 +72,6 @@ public class PESignature extends PEHeader {
 	 * @throws IOException
 	 *             if something went wrong while trying to read the file
 	 */
-	@Override
 	public void read() throws FileFormatException, IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			throwIf(file.length() < PE_OFFSET_LOCATION + 2);
@@ -125,7 +125,6 @@ public class PESignature extends PEHeader {
 	 * 
 	 * @return offset of PE signature, -1 if file not read or file is no PE
 	 */
-	@Override
 	public long getOffset() {
 		return peOffset;
 	}
@@ -133,7 +132,6 @@ public class PESignature extends PEHeader {
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public String getInfo() {
 		return "-------------" + NL + "PE Signature" + NL + "-------------"
 				+ NL + "pe offset: " + peOffset + NL;
@@ -142,7 +140,6 @@ public class PESignature extends PEHeader {
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public Long get(HeaderKey key) {
 		return null;
 	}

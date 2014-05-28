@@ -168,6 +168,24 @@ public class OptionalHeader extends PEHeader {
 	 */
 	@Override
 	public Long get(HeaderKey key) {
+		StandardField standardEntry = getField(key);
+		if (standardEntry != null) {
+			return standardEntry.value;
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns either a windows field entry value or a standard field entry
+	 * value, depending on the given key.
+	 * 
+	 * @param key
+	 * @return the windows field entry value or the standard field entry value
+	 *         that belongs to the given key, null if there is no
+	 *         {@link StandardField} for this key available
+	 */
+	@Override
+	public StandardField getField(HeaderKey key) {
 		StandardField standardEntry = null;
 		if (key instanceof StandardFieldEntryKey) {
 			standardEntry = standardFields.get(key);
@@ -175,10 +193,7 @@ public class OptionalHeader extends PEHeader {
 		} else {
 			standardEntry = windowsFields.get(key);
 		}
-		if (standardEntry != null) {
-			return standardEntry.value;
-		}
-		return null;
+		return standardEntry;
 	}
 
 	/**

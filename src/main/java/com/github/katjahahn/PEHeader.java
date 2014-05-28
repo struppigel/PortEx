@@ -58,4 +58,13 @@ public abstract class PEHeader {
 	 * @return long value for the given key or null if value doesn't exist
 	 */
 	public abstract Long get(HeaderKey key);
+	
+	/**
+	 * Returns the {@link StandardField} for the given key or null if there is no value for that
+	 * key.
+	 * 
+	 * @param key
+	 * @return {@link StandardField} for the given key or null if value doesn't exist
+	 */
+	public abstract StandardField getField(HeaderKey key);
 }

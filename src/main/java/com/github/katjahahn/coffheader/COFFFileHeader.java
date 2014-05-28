@@ -283,5 +283,15 @@ public class COFFFileHeader extends PEHeader {
 	public Long getNumberOfSections() {
 		return get(SECTION_NR);
 	}
+	
+	@Override
+	public StandardField getField(HeaderKey key) {
+		for (StandardField entry : data) {
+			if (entry.key.equals(key)) {
+				return entry; 
+			}
+		}
+		return null;
+	}
 
 }

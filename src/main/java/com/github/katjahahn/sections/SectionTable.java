@@ -16,6 +16,7 @@
 package com.github.katjahahn.sections;
 
 import static com.github.katjahahn.ByteArrayUtil.*;
+import static com.github.katjahahn.IOUtil.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -28,9 +29,7 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
 
 /**
@@ -39,7 +38,7 @@ import com.github.katjahahn.StandardField;
  * @author Katja Hahn
  * 
  */
-public class SectionTable extends PEHeader {
+public class SectionTable {
 
 	@SuppressWarnings("unused")
 	private static final Logger logger = LogManager
@@ -77,7 +76,6 @@ public class SectionTable extends PEHeader {
 		}
 	}
 
-	@Override
 	public void read() throws IOException {
 		headers = new LinkedList<>();
 
@@ -192,7 +190,6 @@ public class SectionTable extends PEHeader {
 		return false;
 	}
 
-	@Override
 	public String getInfo() {
 		StringBuilder b = new StringBuilder();
 		b.append("-----------------" + NL + "Section Table" + NL
@@ -308,12 +305,6 @@ public class SectionTable extends PEHeader {
 		return null;
 	}
 
-	@Override
-	public Long get(HeaderKey key) {
-		return null;
-	}
-
-	@Override
 	public long getOffset() {
 		return offset;
 	}

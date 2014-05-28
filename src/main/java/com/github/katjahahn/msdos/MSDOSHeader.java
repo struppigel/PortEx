@@ -119,7 +119,16 @@ public class MSDOSHeader extends PEHeader {
 
 	@Override
 	public Long get(HeaderKey key) {
-		return headerData.get(key).value;
+		StandardField field = getField(key);
+		if(field != null) {
+			return field.value;
+		}
+		return null;
+	}
+	
+	@Override
+	public StandardField getField(HeaderKey key) {
+		return headerData.get(key);
 	}
 
 	@Override

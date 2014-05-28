@@ -15,14 +15,12 @@
  ******************************************************************************/
 package com.github.katjahahn.msdos;
 
+import static com.github.katjahahn.IOUtil.*;
 import static com.github.katjahahn.msdos.MSDOSHeaderKey.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import com.github.katjahahn.HeaderKey;
-import com.github.katjahahn.PEHeader;
 
 /**
  * Responsible for dumping the MSDOS load module.
@@ -30,7 +28,7 @@ import com.github.katjahahn.PEHeader;
  * @author Katja Hahn
  * 
  */
-public class MSDOSLoadModule extends PEHeader {
+public class MSDOSLoadModule {
 
 	private static final int PAGE_SIZE = 512; // in Byte
 
@@ -49,7 +47,6 @@ public class MSDOSLoadModule extends PEHeader {
 		this.file = file;
 	}
 
-	@Override
 	public void read() throws IOException {
 		long headerSize = header.getHeaderSize();
 		int loadModuleSize = getLoadModuleSize();
@@ -99,19 +96,12 @@ public class MSDOSLoadModule extends PEHeader {
 		return loadModuleBytes.clone();
 	}
 
-	@Override
 	public String getInfo() {
 		return "----------------" + NL + "MSDOS Load Module" + NL
 				+ "----------------" + NL + NL + "image size:" + getImageSize()
 				+ NL + "load module size: " + getLoadModuleSize() + NL;
 	}
 
-	@Override
-	public Long get(HeaderKey key) {
-		return null;
-	}
-
-	@Override
 	public long getOffset() {
 		return header.getHeaderSize();
 	}
