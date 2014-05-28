@@ -1,7 +1,6 @@
 package com.github.katjahahn.sections.debug
 
-import com.github.katjahahn.PEModule
-import com.github.katjahahn.IOUtil
+import com.github.katjahahn.IOUtil._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.StandardField
@@ -38,7 +37,7 @@ class DebugSection private (
         case TYPE => "Type: " + typeDescription
         case TIME_DATE_STAMP => "Time date stamp: " + getTimeDateStamp().toString
         case _ => s.toString
-      }).mkString(PEModule.NL)
+      }).mkString(NL)
     }""".stripMargin
 
   /**
@@ -101,7 +100,7 @@ object DebugSection {
     new SectionLoader(data).loadDebugSection()
 
   def apply(debugbytes: Array[Byte], offset: Long): DebugSection = {
-    val specification = IOUtil.readMap("debugdirentryspec").asScala.toMap
+    val specification = readMap("debugdirentryspec").asScala.toMap
     val buffer = ListBuffer.empty[StandardField]
     for ((key, specs) <- specification) {
       val description = specs(0)
@@ -113,7 +112,7 @@ object DebugSection {
       buffer += entry
     }
     val entries: DebugDirectoryTable = (buffer map { t => (t.key, t) }).toMap;
-    val types = IOUtil.getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
+    val types = getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
     new DebugSection(entries, types(0), offset)
   }
 }

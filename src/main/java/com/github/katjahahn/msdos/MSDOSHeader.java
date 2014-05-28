@@ -26,7 +26,7 @@ import java.util.Map.Entry;
 
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEModule;
+import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
 
 /**
@@ -35,7 +35,7 @@ import com.github.katjahahn.StandardField;
  * @author Katja Hahn
  * 
  */
-public class MSDOSHeader extends PEModule {
+public class MSDOSHeader extends PEHeader {
 
 	// Note: This is only the formatted header by now. The actual header may be
 	// larger, containing optional values.

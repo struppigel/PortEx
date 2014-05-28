@@ -17,11 +17,10 @@
  */
 package com.github.katjahahn.sections.edata
 
-import com.github.katjahahn.PEModule
+import com.github.katjahahn.IOUtil.{ NL }
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
-import com.github.katjahahn.PEModule._
 import scala.collection.JavaConverters._
 import java.io.File
 import com.github.katjahahn.optheader.WindowsEntryKey
@@ -57,7 +56,7 @@ class ExportSection private (
   exportHeader: SectionHeader,
   sectionLoader: SectionLoader,
   val offset: Long) extends SpecialSection {
-  
+
   override def getOffset(): Long = offset
 
   lazy val exportEntries = { //TODO only returns named entries so far
@@ -197,8 +196,8 @@ object ExportSection {
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
-    new ExportSection(edataTable, exportAddressTable, namePointerTable, 
-        ordinalTable, exportSection, sectionLoader, offset)
+    new ExportSection(edataTable, exportAddressTable, namePointerTable,
+      ordinalTable, exportSection, sectionLoader, offset)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirTable,
@@ -237,15 +236,15 @@ object ExportSection {
   def getInstance(edataBytes: Array[Byte], virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection =
     apply(edataBytes, virtualAddress, opt, sectionLoader, offset)
-    
+
   /**
    * Loads the export section and returns it.
-   * 
+   *
    * This is just a shortcut to loading the section using the {@link SectionLoader}
-   * 
+   *
    * @return instance of the export section
    */
-  def load(data: PEData): ExportSection = 
+  def load(data: PEData): ExportSection =
     new SectionLoader(data).loadExportSection()
-  
+
 }

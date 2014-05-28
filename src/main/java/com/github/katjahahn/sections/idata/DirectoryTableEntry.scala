@@ -38,8 +38,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.IOUtil
-import com.github.katjahahn.PEModule
-import com.github.katjahahn.PEModule._
+import com.github.katjahahn.IOUtil.{ NL }
 import com.github.katjahahn.StandardField
 import com.github.katjahahn.HeaderKey
 

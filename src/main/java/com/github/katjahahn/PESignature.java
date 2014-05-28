@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
  * @author Katja Hahn
  * 
  */
-public class PESignature extends PEModule {
+public class PESignature extends PEHeader {
 	
 	private static final Logger logger = LogManager.getLogger(PESignature.class
 			.getName());

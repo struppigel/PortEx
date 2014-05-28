@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEModule;
+import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
 
 /**
@@ -39,7 +39,7 @@ import com.github.katjahahn.StandardField;
  * @author Katja Hahn
  * 
  */
-public class SectionTable extends PEModule {
+public class SectionTable extends PEHeader {
 
 	@SuppressWarnings("unused")
 	private static final Logger logger = LogManager

@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEModule;
+import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
 
 /**
@@ -37,7 +37,7 @@ import com.github.katjahahn.StandardField;
  * @author Katja Hahn
  * 
  */
-public class COFFFileHeader extends PEModule {
+public class COFFFileHeader extends PEHeader {
 
 	public static final String COFF_SPEC_FILE = "coffheaderspec";
 	public static final int HEADER_SIZE = 20;

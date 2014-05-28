@@ -19,8 +19,7 @@ package com.github.katjahahn.sections.idata
 
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
-import com.github.katjahahn.PEModule
-import com.github.katjahahn.PEModule._
+import com.github.katjahahn.IOUtil.{ NL }
 import LookupTableEntry._
 import java.lang.Long.toHexString
 import com.github.katjahahn.ByteArrayUtil._

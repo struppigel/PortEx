@@ -18,17 +18,15 @@
 package com.github.katjahahn.sections.idata
 
 import com.github.katjahahn.sections.PESection
-import com.github.katjahahn.IOUtil
+import com.github.katjahahn.IOUtil.{ NL }
 import ImportSection._
 import DirectoryTableEntryKey._
 import com.github.katjahahn.StandardField
 import scala.collection.JavaConverters._
-import com.github.katjahahn.PEModule._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber._
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import com.github.katjahahn.PEModule
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
 import java.io.File
@@ -63,7 +61,7 @@ class ImportSection private (
    */
   private def entriesDescription(): String =
     (for (e <- directoryTable)
-      yield e.getInfo() + IOUtil.NL + IOUtil.NL).mkString
+      yield e.getInfo() + NL + NL).mkString
 
   def getImports(): java.util.List[ImportDLL] =
     directoryTable.map(e => e.toImportDLL).asJava

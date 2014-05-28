@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.github.katjahahn.HeaderKey;
-import com.github.katjahahn.PEModule;
+import com.github.katjahahn.PEHeader;
 
 /**
  * Responsible for dumping the MSDOS load module.
@@ -30,7 +30,7 @@ import com.github.katjahahn.PEModule;
  * @author Katja Hahn
  * 
  */
-public class MSDOSLoadModule extends PEModule {
+public class MSDOSLoadModule extends PEHeader {
 
 	private static final int PAGE_SIZE = 512; // in Byte
 

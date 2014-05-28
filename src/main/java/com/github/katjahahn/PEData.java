@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
-import static com.github.katjahahn.PEModule.*;
+import static com.github.katjahahn.PEHeader.*;
 
 import java.io.File;
 import java.io.IOException;

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.optheader;
 
-import static com.github.katjahahn.PEModule.*;
+import static com.github.katjahahn.PEHeader.*;
 import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
 import java.util.List;
