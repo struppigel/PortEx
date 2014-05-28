@@ -187,19 +187,6 @@ public class Overlay {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		File file = new File("joined.exe");
-		PEData data = PELoader.loadPE(file);
-		Overlay overlay = new Overlay(data);
-		if (overlay.exists()) {
-			System.out.println("file has overlay");
-		} else {
-			System.out.println("no overlay found");
-		}
-		System.out.println("offset found: " + overlay.getOffset());
-		System.out.println("filesize: " + file.length());
-	}
-
 	/**
 	 * Loads all bytes of the overlay into an array and returns them.
 	 * 

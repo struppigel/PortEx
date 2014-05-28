@@ -164,21 +164,6 @@ public class COFFFileHeader extends PEHeader {
 		}
 		return null;
 	}
-	
-	/**
-	 * TODO
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public StandardField getEntry(HeaderKey key) {
-		for (StandardField entry : data) {
-			if (entry.key.equals(key)) {
-				return entry; 
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Returns a description of the machine type.
