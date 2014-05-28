@@ -158,7 +158,7 @@ object SignatureScanner {
    */
   type ScanResult = (Signature, Address)
 
-  private val defaultSigs = new File("userdb.txt")
+  private val defaultSigs = "/userdb.txt"
 
   private val version = """version: 0.1
     |author: Katja Hahn
@@ -187,8 +187,35 @@ object SignatureScanner {
    * @return SignatureScanner with default signatures
    */
   def apply(): SignatureScanner =
-    new SignatureScanner(_loadSignatures(defaultSigs))
+    new SignatureScanner(loadDefaultSigs())
 
+  
+  /**
+   * Loads the signatures from the given file.
+   *
+   * @param sigFile the file containing the signatures
+   * @return a list containing the signatures of the file
+   */
+  private def loadDefaultSigs(): List[Signature] = {
+    implicit val codec = Codec("UTF-8")
+    //replace malformed input
+    codec.onMalformedInput(CodingErrorAction.REPLACE)
+    codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
+
+    var sigs = ListBuffer[Signature]()
+    var is = this.getClass().getResourceAsStream(defaultSigs)
+    val it = scala.io.Source.fromInputStream(is)(codec).getLines
+    while (it.hasNext) {
+      val line = it.next
+      if (line.startsWith("[") && it.hasNext) {
+        val line2 = it.next
+        if (it.hasNext) {
+          sigs += Signature(line, it.next, line2)
+        }
+      }
+    }
+    sigs.toList
+  }
   /**
    * Loads the signatures from the given file.
    *
@@ -231,7 +258,10 @@ object SignatureScanner {
   }
 
   def main(args: Array[String]): Unit = {
-    invokeCLI(args)
+    val file = new File("Holiday_Island.exe")
+    val scanner = SignatureScanner()
+    scanner.scanAll(file).asScala.foreach(println)
+//    invokeCLI(args)
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -241,7 +271,7 @@ object SignatureScanner {
       println(usage)
     } else {
       var eponly = true
-      var signatures = defaultSigs
+      var signatures = new File(defaultSigs)
       var file = new File(options('inputfile))
 
       if (options.contains('version)) {

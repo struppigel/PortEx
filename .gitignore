@@ -1,6 +1,9 @@
 *.class
 *.sh
 *.py
+UserDB.TXT
+userdb.jclausing.txt
+testuserdb.txt
 
 # tex files # 
 *.acn
@@ -50,8 +53,6 @@ src/main/resources/*
 /bin
 vtapikey
 .cache
-*.txt
-*.TXT
 project/project/*
 project/target/*
 *~
