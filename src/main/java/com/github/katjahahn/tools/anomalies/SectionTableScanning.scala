@@ -26,7 +26,7 @@ import com.github.katjahahn.sections.SectionCharacteristic._
 import com.github.katjahahn.sections.SectionCharacteristic
 import java.util.Arrays
 import com.github.katjahahn.sections.SectionHeader
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.tools.Overlay
 
@@ -92,7 +92,7 @@ trait SectionTableScanning extends AnomalyScanner {
       ".xdata", ".debug$F", ".debug$P", ".debug$S", ".debug$T", ".tls$")
     for (section <- sections) {
       val sectionName = filteredString(section.getName)
-      val entry = new StandardEntry(SectionHeaderKey.NAME, section.getName, null);
+      val entry = new StandardField(SectionHeaderKey.NAME, section.getName, null);
       if (sectionName != section.getName) {
         val description = s"Section Header ${section.getNumber()} has control symbols in name: ${filteredSymbols(section.getName).mkString(", ")}"
         anomalyList += new NonDefaultAnomaly(entry, description)

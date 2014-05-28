@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.HeaderKey;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 import com.github.katjahahn.coffheader.COFFHeaderKey;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionHeaderKey;
@@ -72,9 +72,9 @@ public class PEAnomalyScannerTest {
 	private List<Anomaly> filterByKey(HeaderKey key, List<Anomaly> anomalies) {
 		List<Anomaly> list = new ArrayList<>();
 		for (Anomaly anomaly : anomalies) {
-			StandardEntry entry = anomaly.standardEntry();
-			if (entry != null && key != null) {
-				if (key.equals(entry.key)) {
+			StandardField field = anomaly.field();
+			if (field != null && key != null) {
+				if (key.equals(field.key)) {
 					list.add(anomaly);
 				}
 			}

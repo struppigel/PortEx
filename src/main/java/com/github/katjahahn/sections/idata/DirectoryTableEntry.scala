@@ -40,7 +40,7 @@ import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.IOUtil
 import com.github.katjahahn.PEModule
 import com.github.katjahahn.PEModule._
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 import com.github.katjahahn.HeaderKey
 
 /**
@@ -56,7 +56,7 @@ import com.github.katjahahn.HeaderKey
  * @param entries that represent the information of the directory table entry
  */
 class DirectoryTableEntry private (
-  private val entries: Map[DirectoryTableEntryKey, StandardEntry]) {
+  private val entries: Map[DirectoryTableEntryKey, StandardField]) {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -78,7 +78,7 @@ class DirectoryTableEntry private (
 
   def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryTableEntryKey])
 
-  def getEntries(): java.util.Map[DirectoryTableEntryKey, StandardEntry] = entries.asJava
+  def getEntries(): java.util.Map[DirectoryTableEntryKey, StandardField] = entries.asJava
 
   def getLookupTableEntries(): java.util.List[LookupTableEntry] = lookupTableEntries.asJava
 
@@ -107,7 +107,7 @@ object DirectoryTableEntry {
    */
   def apply(entrybytes: Array[Byte]): DirectoryTableEntry = {
     val specification = IOUtil.readMap(I_DIR_ENTRY_SPEC).asScala.toMap
-    val buffer = ListBuffer.empty[StandardEntry]
+    val buffer = ListBuffer.empty[StandardField]
     for ((key, specs) <- specification) {
       val description = specs(0)
       val offset = Integer.parseInt(specs(1))
@@ -115,11 +115,11 @@ object DirectoryTableEntry {
       if (offset + size <= entrybytes.length) {
         val value = getBytesLongValue(entrybytes.clone, offset, size)
         val ekey = DirectoryTableEntryKey.valueOf(key)
-        val entry = new StandardEntry(ekey, description, value)
+        val entry = new StandardField(ekey, description, value)
         buffer += entry
       } else throw new IllegalArgumentException("invalid entrybytes length, length: " + entrybytes.length)
     }
-    val entries: Map[DirectoryTableEntryKey, StandardEntry] = (buffer map { t => (t.key.asInstanceOf[DirectoryTableEntryKey], t) }).toMap;
+    val entries: Map[DirectoryTableEntryKey, StandardField] = (buffer map { t => (t.key.asInstanceOf[DirectoryTableEntryKey], t) }).toMap;
     new DirectoryTableEntry(entries)
   }
 }

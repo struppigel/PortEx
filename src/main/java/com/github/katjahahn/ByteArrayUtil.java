@@ -76,7 +76,10 @@ public class ByteArrayUtil {
 	 * Retrieves the long value of a subarray of bytes. The values are
 	 * considered little endian. The subarray is determined by offset and
 	 * length. If bytes length is not large enough for given offset and length
-	 * the values are considered 0.
+	 * the values are considered 0. 
+	 * 
+	 * This may be used for file format fields, where part of the value has been cut.
+	 * Example: TinyPE
 	 * 
 	 * @param bytes
 	 * @param offset

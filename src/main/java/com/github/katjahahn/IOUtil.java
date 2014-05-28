@@ -58,8 +58,8 @@ public class IOUtil {
 	 * rest is put into a list and used as map value. Each entry is one line of
 	 * the file.
 	 * 
-	 * @param filename
-	 * @return
+	 * @param filename the name of the specification file (not the path to it)
+	 * @return a map with the first column as keys and the other columns as values.
 	 * @throws IOException
 	 */
 	public static Map<String, String[]> readMap(String filename)
@@ -82,8 +82,8 @@ public class IOUtil {
 	 * Reads the specified file from the specification directory into a list of 
 	 * arrays. Each array is the entry of one line in the file.
 	 * 
-	 * @param filename
-	 * @return
+	 * @param filename the name of the specification file (not the path to it)
+	 * @return a list of arrays, each array representing a line in the spec
 	 * @throws IOException
 	 */
 	public static List<String[]> readArray(String filename) throws IOException {
@@ -102,10 +102,12 @@ public class IOUtil {
 	
 	/**
 	 * Reads the specified file into a list of arrays. Each array is the entry
-	 * of one line in the file.
+	 * of one line in the file. 
 	 * 
-	 * @param filename
-	 * @return
+	 * This method allows to read from files outside of the packaged jar.
+	 * 
+	 * @param file the file to read from
+	 * @return a list of arrays, each array representing a line in the spec
 	 * @throws IOException
 	 */
 	public static List<String[]> readArrayFrom(File file) throws IOException {
@@ -121,6 +123,16 @@ public class IOUtil {
 		}
 	}
 
+	/**
+	 * Returns a list of the descriptions of all characteristics that are set
+	 * by the value flag.
+	 * 
+	 * This is intented to be used for string output of characteristics.
+	 * 
+	 * @param value the value of the characteristics field
+	 * @param filename the name of the specification file (not the path to it)
+	 * @return description list, each element is one characteristic flag that was set
+	 */
 	public static List<String> getCharacteristicsDescriptions(long value,
 			String filename) {
 		List<String> characteristics = new LinkedList<>();
@@ -144,6 +156,13 @@ public class IOUtil {
 		return characteristics;
 	}
 	
+	/**
+	 * Returns a list of all characteristic keys that have been set by the value.
+	 * 
+	 * @param value the value of the characteristics field
+	 * @param filename the name of the specification file (not the path to it)
+	 * @return list of the characteristic's keys that are set
+	 */
 	public static List<String> getCharacteristicKeys(long value, String filename) {
 		List<String> keys = new ArrayList<>();
 		try {
@@ -166,6 +185,16 @@ public class IOUtil {
 		return keys;
 	}
 
+	/**
+	 * Returns a description of all characteristics that are set
+	 * by the value flag.
+	 * 
+	 * This is intented to be used for string output of characteristics.
+	 * 
+	 * @param value the value of the characteristics field
+	 * @param filename the name of the specification file (not the path to it)
+	 * @return formatted description for all characteristic flags that have been set
+	 */
 	public static String getCharacteristics(long value, String filename) {
 		StringBuilder b = new StringBuilder();
 		try {

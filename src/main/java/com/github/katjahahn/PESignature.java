@@ -36,9 +36,15 @@ public class PESignature extends PEModule {
 	private static final Logger logger = LogManager.getLogger(PESignature.class
 			.getName());
 
-	private static final int PE_OFFSET_LOCATION = 0x3c;
+	/**
+	 * The location of the PE signature offset is {@value}
+	 */
+	public static final int PE_OFFSET_LOCATION = 0x3c;
 
-	private static final byte[] PE_SIG = "PE\0\0".getBytes();
+	/**
+	 * The signature bytes
+	 */
+	public static final byte[] PE_SIG = "PE\0\0".getBytes();
 
 	/**
 	 * The length of the PE signature is {@value}
@@ -101,6 +107,11 @@ public class PESignature extends PEModule {
 		}
 	}
 
+	/**
+	 * Throws FileFormatException and sets peOffset to -1 iff b is true
+	 * @param b
+	 * @throws FileFormatException
+	 */
 	private void throwIf(boolean b) throws FileFormatException {
 		if (b) {
 			peOffset = -1;
@@ -128,6 +139,9 @@ public class PESignature extends PEModule {
 				+ NL + "pe offset: " + peOffset + NL;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Long get(HeaderKey key) {
 		return null;

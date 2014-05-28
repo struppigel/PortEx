@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 
 /**
  * Reads the COFF File Header and allows access to the information in it.
@@ -43,7 +43,7 @@ public class COFFFileHeader extends PEModule {
 	public static final int HEADER_SIZE = 20;
 
 	private final byte[] headerbytes;
-	private List<StandardEntry> data;
+	private List<StandardField> data;
 	private Map<String, String[]> specification;
 	private final long offset;
 
@@ -87,7 +87,7 @@ public class COFFFileHeader extends PEModule {
 					Integer.parseInt(specs[offset]),
 					Integer.parseInt(specs[length]));
 			HeaderKey key = COFFHeaderKey.valueOf(entry.getKey());
-			data.add(new StandardEntry(key, specs[description], value));
+			data.add(new StandardField(key, specs[description], value));
 		}
 	}
 
@@ -100,7 +100,7 @@ public class COFFFileHeader extends PEModule {
 	public String getInfo() {
 		StringBuilder b = new StringBuilder("----------------" + NL
 				+ "COFF File Header" + NL + "----------------" + NL);
-		for (StandardEntry entry : data) {
+		for (StandardField entry : data) {
 
 			long value = entry.value;
 			HeaderKey key = entry.key;
@@ -157,7 +157,7 @@ public class COFFFileHeader extends PEModule {
 	 */
 	@Override
 	public Long get(HeaderKey key) {
-		for (StandardEntry entry : data) {
+		for (StandardField entry : data) {
 			if (entry.key.equals(key)) {
 				return entry.value; 
 			}
@@ -171,8 +171,8 @@ public class COFFFileHeader extends PEModule {
 	 * @param key
 	 * @return
 	 */
-	public StandardEntry getEntry(HeaderKey key) {
-		for (StandardEntry entry : data) {
+	public StandardField getEntry(HeaderKey key) {
+		for (StandardField entry : data) {
 			if (entry.key.equals(key)) {
 				return entry; 
 			}

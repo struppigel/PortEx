@@ -45,7 +45,7 @@ public abstract class PEModule {
 	/**
 	 * Reads the information necessary. This is usually done by the
 	 * {@link PELoader}
-	 * 
+	 * TODO maybe use factories instead
 	 * @throws IOException
 	 */
 	public abstract void read() throws IOException;

@@ -18,7 +18,7 @@
 package com.github.katjahahn.sections.rsrc
 
 import com.github.katjahahn.IOUtil
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 import com.github.katjahahn.ByteArrayUtil._
 import scala.collection.JavaConverters._
 import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey._
@@ -78,7 +78,7 @@ class ResourceDirectoryTable(private val level: Level,
    *
    * @return header map
    */
-  def getHeader(): java.util.Map[ResourceDirectoryTableKey, StandardEntry] = header.asJava
+  def getHeader(): java.util.Map[ResourceDirectoryTableKey, StandardField] = header.asJava
 
   /**
    * Returns the Long value for the given key
@@ -126,7 +126,7 @@ class ResourceDirectoryTable(private val level: Level,
 
 object ResourceDirectoryTable {
 
-  type Header = Map[ResourceDirectoryTableKey, StandardEntry]
+  type Header = Map[ResourceDirectoryTableKey, StandardField]
   type Specification = Map[String, Array[String]]
 
   private val logger = LogManager.getLogger(ResourceDirectoryTable.getClass().getName());
@@ -157,7 +157,7 @@ object ResourceDirectoryTable {
       val length = Integer.parseInt(s2(2))
       if (offset + length > tableBytes.length) None else {
         val value = getBytesLongValue(tableBytes, offset, length)
-        val standardEntry = new StandardEntry(key, s2(0), value)
+        val standardEntry = new StandardField(key, s2(0), value)
         Some((key, standardEntry))
       }
     }).toList

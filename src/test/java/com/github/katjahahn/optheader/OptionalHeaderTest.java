@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.optheader.OptionalHeader.MagicNumber;
 
@@ -158,7 +158,7 @@ public class OptionalHeaderTest {
 	@Test
 	public void getStandardFields() {
 		for (PEData pedatum : pedata.values()) {
-			Collection<StandardEntry> list = pedatum.getOptionalHeader()
+			Collection<StandardField> list = pedatum.getOptionalHeader()
 					.getStandardFields().values();
 			assertNotNull(list);
 			int expected = StandardFieldEntryKey.values().length;
@@ -168,7 +168,7 @@ public class OptionalHeaderTest {
 				expected--;
 			}
 			if(actual != expected) {
-				for(StandardEntry entry : list) {
+				for(StandardField entry : list) {
 					System.err.println(entry.description); //debug purposes
 				}
 			}
@@ -211,7 +211,7 @@ public class OptionalHeaderTest {
 	@Test
 	public void getWindowsSpecificFields() {
 		for (PEData pedatum : pedata.values()) {
-			Collection<StandardEntry> list = pedatum.getOptionalHeader()
+			Collection<StandardField> list = pedatum.getOptionalHeader()
 					.getWindowsSpecificFields().values();
 			assertNotNull(list);
 			assertEquals(list.size(), WindowsEntryKey.values().length);

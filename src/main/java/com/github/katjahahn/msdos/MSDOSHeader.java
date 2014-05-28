@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 
 /**
  * Fetches values from the MSDOS header of the PE.
@@ -44,7 +44,7 @@ public class MSDOSHeader extends PEModule {
 
 	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
 	private static final String specification = "msdosheaderspec";
-	private Map<MSDOSHeaderKey, StandardEntry> headerData;
+	private Map<MSDOSHeaderKey, StandardField> headerData;
 
 	private final byte[] headerbytes;
 	private final long offset;
@@ -76,7 +76,7 @@ public class MSDOSHeader extends PEModule {
 				long value = getBytesLongValue(headerbytes,
 						Integer.parseInt(spec[offsetLoc]),
 						Integer.parseInt(spec[sizeLoc]));
-				headerData.put(key, new StandardEntry(key,
+				headerData.put(key, new StandardField(key,
 						spec[descriptionLoc], value));
 			}
 		} catch (IOException e) {
@@ -113,7 +113,7 @@ public class MSDOSHeader extends PEModule {
 	 * 
 	 * @return a list of header entries
 	 */
-	public List<StandardEntry> getHeaderEntries() {
+	public List<StandardField> getHeaderEntries() {
 		return new LinkedList<>(headerData.values());
 	}
 
@@ -129,7 +129,7 @@ public class MSDOSHeader extends PEModule {
 		} else {
 			StringBuilder b = new StringBuilder("-------------" + NL
 					+ "MS DOS Header" + NL + "-------------" + NL);
-			for (StandardEntry entry : headerData.values()) {
+			for (StandardField entry : headerData.values()) {
 				b.append(entry.description + ": " + entry.value + " (0x"
 						+ Long.toHexString(entry.value) + ")" + NL);
 			}

@@ -34,7 +34,7 @@ import com.github.katjahahn.coffheader.COFFFileHeader
 import com.github.katjahahn.PESignature
 import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.IOUtil._
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 import com.github.katjahahn.sections.SectionHeaderKey
 
 /**

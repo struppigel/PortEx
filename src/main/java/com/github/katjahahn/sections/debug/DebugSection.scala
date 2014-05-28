@@ -4,7 +4,7 @@ import com.github.katjahahn.PEModule
 import com.github.katjahahn.IOUtil
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 import com.github.katjahahn.ByteArrayUtil._
 import DebugSection._
 import com.github.katjahahn.PELoader
@@ -69,7 +69,7 @@ class DebugSection private (
 
 object DebugSection {
 
-  type DebugDirectoryTable = Map[HeaderKey, StandardEntry]
+  type DebugDirectoryTable = Map[HeaderKey, StandardField]
 
   private val debugspec = "debugdirentryspec"
 
@@ -102,14 +102,14 @@ object DebugSection {
 
   def apply(debugbytes: Array[Byte], offset: Long): DebugSection = {
     val specification = IOUtil.readMap("debugdirentryspec").asScala.toMap
-    val buffer = ListBuffer.empty[StandardEntry]
+    val buffer = ListBuffer.empty[StandardField]
     for ((key, specs) <- specification) {
       val description = specs(0)
       val offset = Integer.parseInt(specs(1))
       val size = Integer.parseInt(specs(2))
       val value = getBytesLongValue(debugbytes.clone, offset, size)
       val ekey = DebugDirTableKey.valueOf(key)
-      val entry = new StandardEntry(ekey, description, value)
+      val entry = new StandardField(ekey, description, value)
       buffer += entry
     }
     val entries: DebugDirectoryTable = (buffer map { t => (t.key, t) }).toMap;

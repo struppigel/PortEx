@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 import com.github.katjahahn.TestreportsReader.TestData;
 
 public class MSDOSHeaderTest {
@@ -108,7 +108,7 @@ public class MSDOSHeaderTest {
 	
 	@Test
 	public void getHeaderEntries() {
-		List<StandardEntry> list = pedata.get("strings.exe").getMSDOSHeader()
+		List<StandardField> list = pedata.get("strings.exe").getMSDOSHeader()
 				.getHeaderEntries();
 		assertNotNull(list);
 		assertEquals(list.size(), MSDOSHeaderKey.values().length);

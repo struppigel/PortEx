@@ -211,7 +211,7 @@ public class TestreportsReader {
 				long value = convertToLong(split[1]);
 				SectionHeaderKey key = getSectionKeyFor(split[0].trim());
 				if (key != null) {
-					entry.add(new StandardEntry(key, null, value));
+					entry.add(new StandardField(key, null, value));
 					if (key == SectionHeaderKey.CHARACTERISTICS) {
 						logger.debug("characteristics read: "
 								+ Long.toHexString(value));

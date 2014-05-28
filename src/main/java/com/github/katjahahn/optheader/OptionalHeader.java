@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 
 public class OptionalHeader extends PEModule {
 	
@@ -55,8 +55,8 @@ public class OptionalHeader extends PEModule {
 
 	/* extracted file data */
 	private Map<DataDirectoryKey, DataDirEntry> dataDirEntries;
-	private Map<StandardFieldEntryKey, StandardEntry> standardFields;
-	private Map<WindowsEntryKey, StandardEntry> windowsFields;
+	private Map<StandardFieldEntryKey, StandardField> standardFields;
+	private Map<WindowsEntryKey, StandardField> windowsFields;
 
 	private final byte[] headerbytes;
 	private MagicNumber magicNumber;
@@ -133,7 +133,7 @@ public class OptionalHeader extends PEModule {
 	 * 
 	 * @return the windows specific fields
 	 */
-	public Map<WindowsEntryKey, StandardEntry> getWindowsSpecificFields() {
+	public Map<WindowsEntryKey, StandardField> getWindowsSpecificFields() {
 		return new HashMap<>(windowsFields);
 	}
 
@@ -142,7 +142,7 @@ public class OptionalHeader extends PEModule {
 	 * 
 	 * @return the standard fields
 	 */
-	public Map<StandardFieldEntryKey, StandardEntry> getStandardFields() {
+	public Map<StandardFieldEntryKey, StandardField> getStandardFields() {
 		return new HashMap<>(standardFields);
 	}
 
@@ -164,11 +164,11 @@ public class OptionalHeader extends PEModule {
 	 * @param key
 	 * @return the windows field entry value or the standard field entry value
 	 *         that belongs to the given key, null if there is no
-	 *         {@link StandardEntry} for this key available
+	 *         {@link StandardField} for this key available
 	 */
 	@Override
 	public Long get(HeaderKey key) {
-		StandardEntry standardEntry = null;
+		StandardField standardEntry = null;
 		if (key instanceof StandardFieldEntryKey) {
 			standardEntry = standardFields.get(key);
 
@@ -188,7 +188,7 @@ public class OptionalHeader extends PEModule {
 	 * @return the standard field entry for the given key, null if key doesn't
 	 *         exist.
 	 */
-	public StandardEntry getStandardFieldEntry(StandardFieldEntryKey key) {
+	public StandardField getStandardFieldEntry(StandardFieldEntryKey key) {
 		return standardFields.get(key);
 	}
 
@@ -199,7 +199,7 @@ public class OptionalHeader extends PEModule {
 	 * @return the windows field entry for the given key, null if key doesn't
 	 *         exist
 	 */
-	public StandardEntry getWindowsFieldEntry(WindowsEntryKey key) {
+	public StandardField getWindowsFieldEntry(WindowsEntryKey key) {
 		return windowsFields.get(key);
 	}
 
@@ -217,7 +217,7 @@ public class OptionalHeader extends PEModule {
 				long value = getBytesLongValue(headerbytes, offset, length);
 				StandardFieldEntryKey key = StandardFieldEntryKey.valueOf(entry
 						.getKey());
-				standardFields.put(key, new StandardEntry(key,
+				standardFields.put(key, new StandardField(key,
 						specs[description], value));
 			}
 		}
@@ -281,7 +281,7 @@ public class OptionalHeader extends PEModule {
 			if (headerbytes.length >= offset + length) {
 				long value = getBytesLongValue(headerbytes, offset, length);
 				WindowsEntryKey key = WindowsEntryKey.valueOf(entry.getKey());
-				windowsFields.put(key, new StandardEntry(key,
+				windowsFields.put(key, new StandardField(key,
 						specs[description], value));
 				if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
 					this.rvaNumber = (int) value; // always 4 Bytes
@@ -328,7 +328,7 @@ public class OptionalHeader extends PEModule {
 	 */
 	public String getWindowsSpecificInfo() {
 		StringBuilder b = new StringBuilder();
-		for (StandardEntry entry : windowsFields.values()) {
+		for (StandardField entry : windowsFields.values()) {
 			long value = entry.value;
 			HeaderKey key = entry.key;
 			String description = entry.description;
@@ -366,7 +366,7 @@ public class OptionalHeader extends PEModule {
 	 */
 	public String getStandardFieldsInfo() {
 		StringBuilder b = new StringBuilder();
-		for (StandardEntry entry : standardFields.values()) {
+		for (StandardField entry : standardFields.values()) {
 			long value = entry.value;
 			HeaderKey key = entry.key;
 			String description = entry.description;

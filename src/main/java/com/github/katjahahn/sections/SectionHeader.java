@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 
 /**
  * Represents an entry of the {@link SectionTable}. The instance is usually
@@ -36,7 +36,7 @@ import com.github.katjahahn.StandardEntry;
 public class SectionHeader {
 
 	private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
-	private final HashMap<SectionHeaderKey, StandardEntry> entries = new HashMap<>();
+	private final HashMap<SectionHeaderKey, StandardField> entries = new HashMap<>();
 	private String name;
 	private final int number;
 
@@ -122,7 +122,7 @@ public class SectionHeader {
 	 * @return long value or null if key doesn't exist
 	 */
 	public Long get(SectionHeaderKey key) {
-		StandardEntry entry = getEntry(key);
+		StandardField entry = getEntry(key);
 		if (entry != null) {
 			return entry.value;
 		}
@@ -130,12 +130,12 @@ public class SectionHeader {
 	}
 
 	/**
-	 * Returns the {@link StandardEntry} for the given key
+	 * Returns the {@link StandardField} for the given key
 	 * 
 	 * @param key
 	 * @return standard entry
 	 */
-	public StandardEntry getEntry(SectionHeaderKey key) {
+	public StandardField getEntry(SectionHeaderKey key) {
 		return entries.get(key);
 	}
 
@@ -145,16 +145,16 @@ public class SectionHeader {
 	 * 
 	 * @return a map of all entries
 	 */
-	public Map<SectionHeaderKey, StandardEntry> getEntryMap() {
+	public Map<SectionHeaderKey, StandardField> getEntryMap() {
 		return new HashMap<>(entries);
 	}
 
 	/**
-	 * Adds a {@link StandardEntry} to the section table entry
+	 * Adds a {@link StandardField} to the section table entry
 	 * 
 	 * @param entry
 	 */
-	public void add(StandardEntry entry) {
+	public void add(StandardField entry) {
 		if (entry.key instanceof SectionHeaderKey) {
 			entries.put((SectionHeaderKey) entry.key, entry);
 		} else {
@@ -183,7 +183,7 @@ public class SectionHeader {
 		StringBuilder b = new StringBuilder();
 		b.append("Name: " + getName() + IOUtil.NL);
 
-		for (Entry<SectionHeaderKey, StandardEntry> entry : entries
+		for (Entry<SectionHeaderKey, StandardField> entry : entries
 				.entrySet()) {
 			Long value = entry.getValue().value;
 			SectionHeaderKey key = entry.getKey();

@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEModule;
-import com.github.katjahahn.StandardEntry;
+import com.github.katjahahn.StandardField;
 
 /**
  * Represents the section table of a PE. Is usually constructed by the PELoader.
@@ -99,7 +99,7 @@ public class SectionTable extends PEModule {
 					continue;
 				}
 
-				sectionEntry.add(new StandardEntry(key, specs[0], value));
+				sectionEntry.add(new StandardField(key, specs[0], value));
 			}
 			headers.add(sectionEntry);
 		}

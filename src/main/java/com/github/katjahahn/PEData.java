@@ -67,26 +67,57 @@ public class PEData {
 		this.file = file;
 	}
 
+	/**
+	 * Returns the {@link MSDOSHeader}
+	 * 
+	 * @return msdos header
+	 */
 	public MSDOSHeader getMSDOSHeader() {
 		return msdos;
 	}
 
+	/**
+	 * Returns the {@link PESignature}
+	 * 
+	 * @return pe signature
+	 */
 	public PESignature getPESignature() {
 		return pesig;
 	}
 
+	/**
+	 * Returns the {@link SectionTable}
+	 * 
+	 * @return section table
+	 */
 	public SectionTable getSectionTable() {
 		return table;
 	}
 
+	/**
+	 * Returns the {@link COFFFileHeader}
+	 * 
+	 * @return coff file header
+	 */
 	public COFFFileHeader getCOFFFileHeader() {
 		return coff;
 	}
 
+	/**
+	 * Returns the {@link OptionalHeader}
+	 * 
+	 * @return optional header
+	 */
 	public OptionalHeader getOptionalHeader() {
 		return opt;
 	}
 
+	/**
+	 * Reads and returns the {@link MSDOSLoadModule}
+	 * 
+	 * @return msdos load module
+	 * @throws IOException
+	 */
 	// TODO maybe load with PELoader
 	public MSDOSLoadModule readMSDOSLoadModule() throws IOException {
 		MSDOSLoadModule module = new MSDOSLoadModule(msdos, file);
@@ -94,14 +125,29 @@ public class PEData {
 		return module;
 	}
 
+	/**
+	 * Returns the file the data belongs to
+	 * 
+	 * @return file
+	 */
 	public File getFile() {
 		return file;
 	}
 
+	/**
+	 * Returns a description string of all pe headers (that is msdos header,
+	 * pesignature, coff file header, optional header and section table)
+	 * 
+	 * @return description string of all pe headers
+	 */
+	public String getInfo() {
+		return msdos.getInfo() + NL + pesig.getInfo() + NL + coff.getInfo()
+				+ NL + opt.getInfo() + NL + table.getInfo();
+	}
+
 	@Override
 	public String toString() {
-		return msdos.getInfo() + NL + pesig.getInfo() + NL + coff.getInfo() + NL
-				+ opt.getInfo() + NL + table.getInfo();
+		return getInfo();
 	}
 
 }

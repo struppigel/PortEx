@@ -21,7 +21,7 @@ import com.github.katjahahn.sections.PESection
 import com.github.katjahahn.IOUtil
 import ImportSection._
 import DirectoryTableEntryKey._
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 import scala.collection.JavaConverters._
 import com.github.katjahahn.PEModule._
 import com.github.katjahahn.optheader.OptionalHeader

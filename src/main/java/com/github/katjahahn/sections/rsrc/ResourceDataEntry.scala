@@ -19,9 +19,9 @@ package com.github.katjahahn.sections.rsrc
 import com.github.katjahahn.IOUtil
 import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
-import com.github.katjahahn.StandardEntry
+import com.github.katjahahn.StandardField
 
-class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardEntry]) {
+class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardField]) {
   override def toString(): String =
     s"""data entry
        |..........
@@ -52,7 +52,7 @@ object ResourceDataEntry {
       }
       val value = getBytesLongValue(entryBytes, offset, length)
       val description = sVal(0)
-      (key, new StandardEntry(key, description, value))
+      (key, new StandardField(key, description, value))
     }
     new ResourceDataEntry(data)
   }
