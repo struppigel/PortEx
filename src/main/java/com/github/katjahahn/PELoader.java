@@ -87,9 +87,6 @@ public class PELoader {
 				+ COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
 		logger.info("SectionTable offset" + offset);
 		int numberOfEntries = coff.getNumberOfSections().intValue();
-		if(numberOfEntries > 16) { //"rounded down to 16 if bigger" (corkami)
-			numberOfEntries = 16;
-		} //TODO .NET loader ignores nrOfSections value
 		byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
 				* numberOfEntries, raf);
 		return new SectionTable(tableBytes, numberOfEntries, offset);

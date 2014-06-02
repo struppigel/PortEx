@@ -58,7 +58,7 @@ public class PESignatureTest {
 	
 	@Test(expectedExceptions=FileFormatException.class)
 	public void noPEFile() throws FileFormatException, IOException {
-		new PESignature(new File("userdb.txt")).read();
+		new PESignature(new File("build.sbt")).read();
 	}
 	
 	@Test(expectedExceptions=IOException.class)

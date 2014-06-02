@@ -325,4 +325,8 @@ public class SectionTable {
 		}
 		return null;
 	}
+
+	public int getSize() {
+		return ENTRY_SIZE * numberOfEntries;
+	}
 }
