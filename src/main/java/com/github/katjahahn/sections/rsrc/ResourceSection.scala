@@ -83,7 +83,7 @@ object ResourceSection {
    * @param rsrcbytes the array of bytes the section is made up of
    * @param virtualAddress the virtual address all RVAs are relative to
    * @param rsrcOffset
-   * @returns
+   * @return
    */
   def apply(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
       rsrcOffset: Long): ResourceSection = {
@@ -101,7 +101,7 @@ object ResourceSection {
    * @param rsrcbytes the array of bytes the section is made up of
    * @param virtualAddress the virtual address all RVAs are relative to
    * @param rsrcOffset
-   * @returns
+   * @return
    */
   def getInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
       rsrcOffset: Long): ResourceSection = 

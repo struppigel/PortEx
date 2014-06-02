@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,8 +24,7 @@ import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 
 public class Visualizer {
-	
-	//TODO make with work with tinype and duplicated sections
+	// TODO make with work with tinype and duplicated sections
 
 	private static final int DEFAULT_WIDTH = 300;
 	private static final int DEFAULT_HEIGHT = 600;
@@ -69,20 +67,82 @@ public class Visualizer {
 	private boolean overlayAvailable;
 	private boolean epAvailable;
 
+	/**
+	 * Visualizer instance with default values applied.
+	 * 
+	 * Default values are: {@value Visualizer#DEFAULT_PIXEL_SIZE} //TODO
+	 * {@value Visualizer#DEFAULT_PIXELATED} {@value #DEFAULT_ADDITIONAL_GAP}
+	 * {@value #DEFAULT_HEIGHT} {@value #DEFAULT_WIDTH}
+	 * {@value #DEFAULT_LEGEND_WIDTH}
+	 * 
+	 * @param data
+	 *            the data object of the pe file to visualize
+	 */
 	public Visualizer(PEData data) {
 		this(data, DEFAULT_PIXEL_SIZE);
 	}
 
+	/**
+	 * Visualizer instance with pixelSize and otherwise default values applied.
+	 * 
+	 * Default values are: {@value Visualizer#DEFAULT_PIXELATED}
+	 * {@value #DEFAULT_ADDITIONAL_GAP} {@value #DEFAULT_HEIGHT}
+	 * {@value #DEFAULT_WIDTH} {@value #DEFAULT_LEGEND_WIDTH}
+	 * 
+	 * @param data
+	 *            the data object of the pe file to visualize
+	 * @param pixelSize
+	 *            size of one rectangle that represents a certain amount of
+	 *            bytes
+	 */
 	public Visualizer(PEData data, int pixelSize) {
 		this(data, pixelSize, DEFAULT_PIXELATED, DEFAULT_ADDITIONAL_GAP);
 	}
 
+	/**
+	 * Creates a visualizer instance based on pixelSize and, pixelated and additionalGap.
+	 * Otherwise default values applied.
+	 * 
+	 * Default values are: {@value #DEFAULT_HEIGHT} {@value #DEFAULT_WIDTH}
+	 * {@value #DEFAULT_LEGEND_WIDTH}
+	 * 
+	 * @param data
+	 *            the data object of the pe file to visualize
+	 * @param pixelSize
+	 *            size of one rectangle that represents a certain amount of
+	 *            bytes
+	 * @param pixelated
+	 *            applies a border to every pixel
+	 * @param additionalGap
+	 *            the reduced size on each side of pixels that lie on top of
+	 *            others, e.g. for the resource section
+	 */
 	public Visualizer(PEData data, int pixelSize, boolean pixelated,
 			int additionalGap) {
 		this(data, pixelSize, pixelated, additionalGap, DEFAULT_WIDTH,
 				DEFAULT_WIDTH + DEFAULT_LEGEND_WIDTH, DEFAULT_HEIGHT);
 	}
 
+	/**
+	 * Creates a visualizer instance.
+	 * 
+	 * @param data
+	 *            the data object of the pe file to visualize
+	 * @param pixelSize
+	 *            size of one rectangle that represents a certain amount of
+	 *            bytes
+	 * @param pixelated
+	 *            applies a border to every pixel
+	 * @param additionalGap
+	 *            the reduced size on each side of pixels that lie on top of
+	 *            others, e.g. for the resource section
+	 * @param fileWidth
+	 *            the width of the shown file
+	 * @param imageWidth
+	 *            the width of the whole image, fileWidth - imageWidth is the
+	 *            width for the legend
+	 * @param imageHeight the height of the image
+	 */
 	public Visualizer(PEData data, int pixelSize, boolean pixelated,
 			int additionalGap, int fileWidth, int imageWidth, int imageHeight) {
 		this.additionalGap = additionalGap;
@@ -103,7 +163,7 @@ public class Visualizer {
 
 	public BufferedImage createImage() throws IOException {
 		image = new BufferedImage(imageWidth, height, IMAGE_TYPE);
-		
+
 		long msdosOffset = 0;
 		long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
 		drawPixels(msdosColor, msdosOffset, msdosSize);
@@ -116,14 +176,15 @@ public class Visualizer {
 		long coffOffset = data.getCOFFFileHeader().getOffset();
 		long coffSize = withMinLength(COFFFileHeader.HEADER_SIZE);
 		drawPixels(coffColor, coffOffset, coffSize);
-		
+
 		// TODO getSize for every module
 		drawSections();
 
 		Overlay overlay = new Overlay(data);
 		if (overlay.exists()) {
 			long overlayOffset = overlay.getOffset();
-			drawPixels(overlayColor, overlayOffset, withMinLength(overlay.getSize()));
+			drawPixels(overlayColor, overlayOffset,
+					withMinLength(overlay.getSize()));
 			overlayAvailable = true;
 		}
 
@@ -131,13 +192,14 @@ public class Visualizer {
 		drawLegend();
 		return image;
 	}
-	
+
 	private long withMinLength(long length) {
-		double minLength = data.getFile().length() / (double)(xPixels * yPixels);
-		if(minLength < 1) {
+		double minLength = data.getFile().length()
+				/ (double) (xPixels * yPixels);
+		if (minLength < 1) {
 			minLength = 1;
 		}
-		if(length < minLength) {
+		if (length < minLength) {
 			return Math.round(minLength);
 		}
 		return length;
@@ -209,14 +271,13 @@ public class Visualizer {
 			long sectionOffset = header.getAlignedPointerToRaw();
 			// TODO put readSize to sectiontable or sectionheader
 			long sectionSize = new SectionLoader(data).getReadSize(header);
-			System.out.println("section at offset: " + sectionOffset);
 			drawPixels(sectionColor, sectionOffset, sectionSize);
 			sectionColor = variate(sectionColor);
 		}
 	}
 
 	private Color variate(Color color) {
-		int diff = 30;
+		final int diff = 30;
 		Color newColor = new Color(color.getRed() - diff, color.getGreen()
 				- diff, color.getBlue() - diff);
 		if (newColor.equals(Color.black)) {
@@ -312,7 +373,7 @@ public class Visualizer {
 		int pixelStart = getPixelNumber(fileOffset);
 		int pixelLength = getPixelNumber(fileLength);
 		int pixelMax = xPixels * yPixels;
-		if(pixelStart >= pixelMax) {
+		if (pixelStart >= pixelMax) {
 			System.err.println("too many pixels");
 		}
 		for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
@@ -328,20 +389,20 @@ public class Visualizer {
 
 	private int getPixelNumber(long fileOffset) {
 		long fileSize = data.getFile().length();
-		return (int) Math.ceil(fileOffset * (xPixels * yPixels)
+		return (int) Math.round(fileOffset * (xPixels * yPixels)
 				/ (double) fileSize);
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("src/main/resources/testfiles/Lab11-01.exe");
-//		File file = new File("/home/deque/Downloads/Odin307/Odin3 v3.07.exe");
+		File file = new File("src/main/resources/testfiles/DLL1.dll");
+		// File file = new
+		// File("/home/deque/Downloads/Odin307/Odin3 v3.07.exe");
 		PEData data = PELoader.loadPE(file);
-		System.out.println("sections: "
-				+ data.getCOFFFileHeader().getNumberOfSections());
 		System.out.println(file.length());
 		Visualizer vi = new Visualizer(data, 5, false, 1);
 		BufferedImage image = vi.createImage();
-		ImageIO.write(image, "png", new File(file.getName().replace(".exe", ".png")));
+		// ImageIO.write(image, "png", new File(file.getName().replace(".exe",
+		// ".png")));
 		JFrame frame = new JFrame();
 		frame.setSize(600, 600);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

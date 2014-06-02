@@ -57,7 +57,7 @@ class ResourceDirectoryTable(private val level: Level,
   /**
    * Returns all resource directory entries of the table
    *
-   * @returns a list of all resource directory entries
+   * @return a list of all resource directory entries
    */
   def getTableEntries(): java.util.List[ResourceDirectoryEntry] = entries.asJava
 
