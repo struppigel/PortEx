@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -332,14 +333,15 @@ public class Visualizer {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("src/main/resources/testfiles/ntdll.dll");
+		File file = new File("src/main/resources/testfiles/Lab11-01.exe");
 //		File file = new File("/home/deque/Downloads/Odin307/Odin3 v3.07.exe");
 		PEData data = PELoader.loadPE(file);
 		System.out.println("sections: "
 				+ data.getCOFFFileHeader().getNumberOfSections());
 		System.out.println(file.length());
-		Visualizer vi = new Visualizer(data, 10, false, 2);
+		Visualizer vi = new Visualizer(data, 5, false, 1);
 		BufferedImage image = vi.createImage();
+		ImageIO.write(image, "png", new File(file.getName().replace(".exe", ".png")));
 		JFrame frame = new JFrame();
 		frame.setSize(600, 600);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
