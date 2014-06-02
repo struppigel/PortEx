@@ -145,8 +145,9 @@ public class ImportSectionTest {
 				.getDirEntry(DirectoryTableEntryKey.I_ADDR_TABLE_RVA);
 		long ilt = readImport
 				.getDirEntry(DirectoryTableEntryKey.I_LOOKUP_TABLE_RVA);
-		if (ilt == 0)
+		if (ilt == 0) {
 			ilt = iat;
+		}
 		for (NameImport pefileImport : pefileList) {
 			long rva1 = pefileImport.rva - iat;
 			long rva2 = readImport.rva - ilt;

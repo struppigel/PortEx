@@ -123,9 +123,12 @@ public class SectionLoader {
 	 *             if unable to read the file
 	 */
 	public PESection loadSection(int sectionNr) throws IOException {
-		byte[] bytes = loadSectionBytes(sectionNr);
-		if (bytes != null) {
-			return new PESection(bytes);
+		BytesAndOffset tuple = loadSectionBytes(sectionNr);
+		if (tuple != null) {
+			byte[] bytes = tuple.bytes;
+			if (bytes != null) {
+				return new PESection(bytes);
+			}
 		}
 		return null;
 	}
@@ -138,21 +141,23 @@ public class SectionLoader {
 	 * @return bytes that represent the section with the given section number
 	 * @throws IOException
 	 */
-	public byte[] loadSectionBytes(int sectionNr) throws IOException {
+	public BytesAndOffset loadSectionBytes(int sectionNr) throws IOException {
 		SectionHeader section = table.getSectionHeader(sectionNr);
 		return loadSectionBytes(section);
 	}
 
-	public byte[] loadSectionBytes(SectionHeader section) throws IOException {
+	public BytesAndOffset loadSectionBytes(SectionHeader section)
+			throws IOException {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			if (section != null) {
 				long alignedPointerToRaw = section.getAlignedPointerToRaw();
 				long readSize = getReadSize(section);
 				raf.seek(alignedPointerToRaw);
-				logger.debug("reading section bytes from " + alignedPointerToRaw + " to " + readSize);
+				logger.debug("reading section bytes from "
+						+ alignedPointerToRaw + " to " + readSize);
 				byte[] sectionbytes = new byte[(int) readSize];
 				raf.readFully(sectionbytes);
-				return sectionbytes;
+				return new BytesAndOffset(sectionbytes, alignedPointerToRaw);
 			} else {
 				logger.warn("given section was null");
 			}
@@ -212,7 +217,10 @@ public class SectionLoader {
 	 */
 	public DebugSection loadDebugSection() throws IOException {
 		BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.DEBUG);
-		return DebugSection.apply(res.bytes, res.offset);
+		if (res != null) {
+			return DebugSection.apply(res.bytes, res.offset);
+		}
+		return null;
 	}
 
 	/**
@@ -234,7 +242,11 @@ public class SectionLoader {
 			if (rsrcEntry != null) {
 				Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
 				if (virtualAddress != null) {
-					byte[] rsrcbytes = loadSectionBytes(rsrcEntry);
+					BytesAndOffset tuple = loadSectionBytes(rsrcEntry);
+					if(tuple == null) {
+						return null;
+					}
+					byte[] rsrcbytes = tuple.bytes;
 					long rsrcOffset = rsrcEntry.getAlignedPointerToRaw();
 					ResourceSection rsrc = ResourceSection.getInstance(file,
 							rsrcbytes, virtualAddress, rsrcOffset);
@@ -242,8 +254,7 @@ public class SectionLoader {
 				}
 			}
 		}
-		throw new FileFormatException("unable to load "
-				+ DataDirectoryKey.RESOURCE_TABLE);
+		return null;
 	}
 
 	/**
@@ -290,13 +301,19 @@ public class SectionLoader {
 				.get(dataDirKey);
 		if (importTable != null) {
 			long virtualAddress = importTable.virtualAddress;
-			byte[] idatabytes = readSectionBytesFor(dataDirKey);
+			BytesAndOffset tuple = readSectionBytesFor(dataDirKey);
+			if(tuple == null) {
+				return null;
+			}
+			byte[] idatabytes = tuple.bytes;
+			long offset = tuple.offset;
 			int importTableOffset = getOffsetDiffFor(dataDirKey);
 			logger.debug("importsection offset diff: " + importTableOffset);
 			logger.debug("idatalength: " + idatabytes.length);
 			logger.debug("virtual address of ILT: " + virtualAddress);
 			ImportSection idata = ImportSection.getInstance(idatabytes,
-					virtualAddress, optHeader, importTableOffset, file.length());
+					virtualAddress, optHeader, importTableOffset,
+					file.length(), offset);
 			return idata;
 		}
 		return null;
@@ -386,7 +403,7 @@ public class SectionLoader {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] readSectionBytesFor(DataDirectoryKey dataDirKey)
+	public BytesAndOffset readSectionBytesFor(DataDirectoryKey dataDirKey)
 			throws IOException {
 		DataDirEntry dataDir = optHeader.getDataDirEntry(dataDirKey);
 		if (dataDir != null) {
@@ -412,6 +429,9 @@ public class SectionLoader {
 		if (exportTable != null) {
 			long virtualAddress = exportTable.virtualAddress;
 			BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
+			if(res == null) {
+				return null;
+			}
 			byte[] edatabytes = res.bytes;
 			long offset = res.offset;
 			ExportSection edata = ExportSection.getInstance(edatabytes,
@@ -422,8 +442,8 @@ public class SectionLoader {
 	}
 
 	/**
-	 * Reads and returns the bytes that belong to the given data directory
-	 * entry as well as the offset the bytes where read from.
+	 * Reads and returns the bytes that belong to the given data directory entry
+	 * as well as the offset the bytes where read from.
 	 * 
 	 * The data directory entry rva points into section. This section is
 	 * determined and the file offset for the rva calculated. This file offset
@@ -473,13 +493,13 @@ public class SectionLoader {
 		} else {
 			logger.warn("invalid dataDirKey");
 		}
-		throw new FileFormatException("unable to load " + dataDirKey);
+		return null;
 	}
-	
+
 	private static class BytesAndOffset {
 		public long offset;
 		public byte[] bytes;
-		
+
 		public BytesAndOffset(byte[] bytes, long offset) {
 			this.offset = offset;
 			this.bytes = bytes;

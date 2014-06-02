@@ -51,20 +51,20 @@ public class SectionLoaderTest {
 		}
 	}
 	
-	@Test(expectedExceptions=FileFormatException.class)
+	@Test
 	public void unableToLoadImports() throws IOException {
 		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
-		loader.loadImportSection();
+		assertNull(loader.loadImportSection());
 	}
 
-	@Test(expectedExceptions=FileFormatException.class)
+	@Test
 	public void unableToLoadResources() throws IOException {
 		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
-		loader.loadResourceSection();
+		assertNull(loader.loadResourceSection());
 	}
 
 

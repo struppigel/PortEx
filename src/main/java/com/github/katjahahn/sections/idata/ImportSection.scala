@@ -44,9 +44,12 @@ import com.github.katjahahn.PEData
  */
 class ImportSection private (
   private val directoryTable: List[DirectoryTableEntry],
-  val offset: Long) extends SpecialSection {
+  val offset: Long,
+  val size: Long) extends SpecialSection {
   
   override def getOffset(): Long = offset
+  
+  def getSize(): Long = size
 
   /**
    * Returns the directory table entries of the import section.
@@ -81,20 +84,25 @@ class ImportSection private (
 }
 
 object ImportSection {
+  
+  /**
+   * Maximum offset the import section has values in (used to determine the accurate size)
+   */
+  private var relOffsetMax = 0L
 
   def apply(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader, importTableOffset: Int, fileSize: Long): ImportSection = {
+    optHeader: OptionalHeader, importTableOffsetDiff: Int, fileSize: Long, fileOffset: Long): ImportSection = {
     logger.debug("reading direntries for root table")
-    var directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffset)
+    var directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffsetDiff)
     try {
-      readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffset, fileSize)
+      readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffsetDiff, fileSize)
     } catch {
       case e: FailureEntryException =>
         //filter empty directoryTableEntries, they are of no use and probably because
         //of collapsed imports or other malformations, example: tinype
         directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
     }
-    new ImportSection(directoryTable, importTableOffset)
+    new ImportSection(directoryTable, fileOffset, idatabytes.length)
   }
 
   /**
@@ -118,13 +126,14 @@ object ImportSection {
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
-        case ROM => throw new IllegalArgumentException("ROM file format not described")
+        case ROM => throw new IllegalArgumentException("ROM file format not covered by PortEx")
       }
       do {
         entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset, relOffset, dirEntry)
         if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
         relOffset += EntrySize
+        if(relOffsetMax < relOffset) relOffsetMax = relOffset;
       } while (!entry.isInstanceOf[NullEntry])
     }
   }
@@ -177,6 +186,7 @@ object ImportSection {
     val from = nr * ENTRY_SIZE + importTableOffset
     logger.debug("reading from: " + from)
     val until = from + ENTRY_SIZE
+    if (relOffsetMax < until) relOffsetMax = until
     logger.debug("reading until: " + until)
     val entrybytes = idatabytes.slice(from, until)
     if (entrybytes.length < ENTRY_SIZE) return None
@@ -212,8 +222,8 @@ object ImportSection {
    * @return ImportSection instance
    */
   def getInstance(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader, importTableOffset: Int, fileSize: Long): ImportSection =
-    apply(idatabytes, virtualAddress, optHeader, importTableOffset, fileSize)
+    optHeader: OptionalHeader, offsetDiff: Int, fileSize: Long, fileOffset: Long): ImportSection =
+    apply(idatabytes, virtualAddress, optHeader, offsetDiff, fileSize, fileOffset)
     
   /**
    * Loads the import section and returns it.

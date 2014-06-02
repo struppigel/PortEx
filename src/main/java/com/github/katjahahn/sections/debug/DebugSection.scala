@@ -23,10 +23,13 @@ import com.github.katjahahn.PEData
 class DebugSection private (
   private val directoryTable: DebugDirectoryTable,
   private val typeDescription: String,
-  val offset: Long) extends SpecialSection {
+  val offset: Long,
+  val size: Long) extends SpecialSection {
   
   override def getOffset(): Long = offset
-
+	
+  def getSize(): Long = size
+  
   override def getInfo(): String =
     s"""|-------------
         |Debug Section
@@ -113,6 +116,6 @@ object DebugSection {
     }
     val entries: DebugDirectoryTable = (buffer map { t => (t.key, t) }).toMap;
     val types = getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
-    new DebugSection(entries, types(0), offset)
+    new DebugSection(entries, types(0), offset, debugbytes.length)
   }
 }

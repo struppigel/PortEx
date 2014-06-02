@@ -39,9 +39,12 @@ class ResourceSection(
     val resourceTable: ResourceDirectoryTable, 
     private val rsrcBytes: Array[Byte], 
     val virtualAddress: Long,
-    val offset: Long) extends SpecialSection {
+    val offset: Long,
+    val size: Long) extends SpecialSection {
 
   override def getInfo(): String = resourceTable.getInfo
+  
+  def getSize(): Long = size
   
   override def getOffset(): Long = offset
 
@@ -88,7 +91,7 @@ object ResourceSection {
     val initialOffset = 0
     val resourceTable = ResourceDirectoryTable(file, initialLevel, rsrcbytes, 
         initialOffset, virtualAddress, rsrcOffset)
-    new ResourceSection(resourceTable, rsrcbytes, virtualAddress, rsrcOffset)
+    new ResourceSection(resourceTable, rsrcbytes, virtualAddress, rsrcOffset, rsrcbytes.length)
   }
 
   /**

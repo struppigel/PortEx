@@ -563,4 +563,8 @@ public class OptionalHeader extends PEHeader {
 	public int getMaxSize() {
 		return maxSize;
 	}
+
+	public long getSize() {
+		return headerbytes.length;
+	}
 }

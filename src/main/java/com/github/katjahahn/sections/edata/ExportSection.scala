@@ -55,9 +55,11 @@ class ExportSection private (
   private val ordinalTable: ExportOrdinalTable,
   exportHeader: SectionHeader,
   sectionLoader: SectionLoader,
-  val offset: Long) extends SpecialSection {
+  val offset: Long,
+  val size: Long) extends SpecialSection {
 
   override def getOffset(): Long = offset
+  def getSize(): Long = size
 
   lazy val exportEntries = { //TODO only returns named entries so far
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
@@ -197,7 +199,7 @@ object ExportSection {
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
-      ordinalTable, exportSection, sectionLoader, offset)
+      ordinalTable, exportSection, sectionLoader, offset, edataBytes.length)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirTable,
