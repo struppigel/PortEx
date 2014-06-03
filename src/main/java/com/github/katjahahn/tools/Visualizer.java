@@ -394,9 +394,8 @@ public class Visualizer {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File file = new File("src/main/resources/testfiles/DLL1.dll");
-		// File file = new
-		// File("/home/deque/Downloads/Odin307/Odin3 v3.07.exe");
+//		File file = new File("src/main/resources/testfiles/ntdll.dll");
+		File file = new  File("/home/deque/Downloads/Odin307/Odin3 v3.07.exe");
 		PEData data = PELoader.loadPE(file);
 		System.out.println(file.length());
 		Visualizer vi = new Visualizer(data, 5, false, 1);
