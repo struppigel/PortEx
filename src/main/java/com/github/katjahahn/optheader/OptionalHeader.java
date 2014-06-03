@@ -14,6 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.optheader;
+
 import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.optheader.WindowsEntryKey.*;
@@ -147,14 +148,15 @@ public class OptionalHeader extends PEHeader {
     }
 
     /**
-     * Returns the data directory entry for the given key.
+     * Returns the optional data directory entry for the given key or absent if
+     * entry doesn't exist.
      * 
      * @param key
-     * @return the data directory entry for the given key. null if key doesn't
-     *         exist.
+     * @return the data directory entry for the given key or absent if entry
+     *         doesn't exist.
      */
-    public DataDirEntry getDataDirEntry(DataDirectoryKey key) {
-        return dataDirEntries.get(key);
+    public Optional<DataDirEntry> getDataDirEntry(DataDirectoryKey key) {
+        return Optional.fromNullable(dataDirEntries.get(key));
     }
 
     /**
@@ -200,7 +202,7 @@ public class OptionalHeader extends PEHeader {
      * 
      * @param key
      * @return the windows field entry value or the standard field entry value
-     *         that belongs to the given key, null if there is no
+     *         that belongs to the given key, absent optional if there is no
      *         {@link StandardField} for this key available
      */
     @Override
@@ -219,10 +221,11 @@ public class OptionalHeader extends PEHeader {
      * Returns the standard field entry for the given key. //TODO use map
      * 
      * @param key
-     * @return the standard field entry for the given key, null if key doesn't
+     * @return the standard field entry for the given key, absent if key doesn't
      *         exist.
      */
-    public Optional<StandardField> getStandardFieldEntry(StandardFieldEntryKey key) {
+    public Optional<StandardField> getStandardFieldEntry(
+            StandardFieldEntryKey key) {
         return Optional.fromNullable(standardFields.get(key));
     }
 
@@ -230,7 +233,7 @@ public class OptionalHeader extends PEHeader {
      * Returns the windows field entry for the given key.
      * 
      * @param key
-     * @return the windows field entry for the given key, null if key doesn't
+     * @return the windows field entry for the given key, absent if key doesn't
      *         exist
      */
     public Optional<StandardField> getWindowsFieldEntry(WindowsEntryKey key) {
@@ -340,7 +343,7 @@ public class OptionalHeader extends PEHeader {
     }
 
     /**
-     * A description of all data directories.
+     * Returns a description of all data directories.
      * 
      * @return description of all data directories.
      */
@@ -430,7 +433,7 @@ public class OptionalHeader extends PEHeader {
                 return num;
             }
         }
-        return null;
+        throw new IllegalArgumentException("unable to read magic number");
     }
 
     /**
@@ -505,8 +508,8 @@ public class OptionalHeader extends PEHeader {
         List<DllCharacteristic> dllChs = new ArrayList<>();
         Optional<Long> characteristics = get(DLL_CHARACTERISTICS);
         if (characteristics.isPresent()) {
-            List<String> keys = IOUtil.getCharacteristicKeys(characteristics.get(),
-                    DLL_CHARACTERISTICS_SPEC);
+            List<String> keys = IOUtil.getCharacteristicKeys(
+                    characteristics.get(), DLL_CHARACTERISTICS_SPEC);
             for (String key : keys) {
                 dllChs.add(DllCharacteristic.valueOf(key));
             }
@@ -537,7 +540,8 @@ public class OptionalHeader extends PEHeader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        throw new IllegalArgumentException(
+                "unable to find subsystem description");
     }
 
     /**
@@ -553,7 +557,7 @@ public class OptionalHeader extends PEHeader {
         } catch (IOException e) {
             logger.error(e);
         }
-        return null; //TODO remove
+        throw new IllegalArgumentException("unable to find subsystem key");
     }
 
     /**
@@ -564,10 +568,7 @@ public class OptionalHeader extends PEHeader {
     public Subsystem getSubsystem() {
         long subsystem = getValue(SUBSYSTEM);
         String key = getSubsystemKey((int) subsystem);
-        if (key != null) {
-            return Subsystem.valueOf(key);
-        }
-        throw new IllegalStateException("no subsystem found");
+        return Subsystem.valueOf(key);
     }
 
     @Override

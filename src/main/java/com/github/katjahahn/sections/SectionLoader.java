@@ -35,6 +35,7 @@ import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
+import com.google.common.base.Optional;
 
 /**
  * Responsible for computing section related values and loading sections with
@@ -356,9 +357,9 @@ public class SectionLoader {
 	 *         available
 	 */
 	private SectionHeader getSectionHeaderFor(DataDirectoryKey dataDirKey) {
-		DataDirEntry dataDir = optHeader.getDataDirEntry(dataDirKey);
-		if (dataDir != null) {
-			return dataDir.getSectionTableEntry(table);
+		Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+		if (dataDir.isPresent()) {
+			return dataDir.get().getSectionTableEntry(table);
 		}
 		return null;
 	}
@@ -405,8 +406,8 @@ public class SectionLoader {
 	 */
 	public BytesAndOffset readSectionBytesFor(DataDirectoryKey dataDirKey)
 			throws IOException {
-		DataDirEntry dataDir = optHeader.getDataDirEntry(dataDirKey);
-		if (dataDir != null) {
+		Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+		if (dataDir.isPresent()) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);
 			return loadSectionBytes(header);
 		} else {
