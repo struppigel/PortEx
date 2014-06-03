@@ -309,13 +309,13 @@ public class COFFFileHeader extends PEHeader {
      * {@inheritDoc}
      */
     @Override
-    public StandardField getField(HeaderKey key) {
+    public Optional<StandardField> getField(HeaderKey key) {
         for (StandardField entry : data) {
             if (entry.key.equals(key)) {
-                return entry;
+                return Optional.fromNullable(entry);
             }
         }
-        return null;
+        return Optional.absent();
     }
 
 }

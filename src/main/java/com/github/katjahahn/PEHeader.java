@@ -75,12 +75,12 @@ public abstract class PEHeader {
 
     // TODO use Optional instead of returning null!
     /**
-     * Returns the {@link StandardField} for the given key or null if there is
-     * no value for that key.
+     * Returns the optional for the {@link StandardField} for the given key or
+     * absent if there is no value for that key.
      * 
      * @param key
-     * @return {@link StandardField} for the given key or null if value doesn't
-     *         exist
+     * @return {@link StandardField} for the given key or absent if value
+     *         doesn't exist
      */
-    public abstract StandardField getField(HeaderKey key);
+    public abstract Optional<StandardField> getField(HeaderKey key);
 }

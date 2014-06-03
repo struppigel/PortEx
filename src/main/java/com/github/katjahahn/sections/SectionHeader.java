@@ -130,9 +130,9 @@ public class SectionHeader extends PEHeader {
 	 */
 	@Override
 	public long getValue(HeaderKey key) {
-		StandardField entry = getField(key);
-		if (entry != null) {
-			return entry.value;
+		Optional<StandardField> entry = getField(key);
+		if (entry.isPresent()) {
+			return entry.get().value;
 		}
 		throw new IllegalArgumentException("key not found " + key);
 	}
@@ -147,9 +147,9 @@ public class SectionHeader extends PEHeader {
      */
     @Override
     public Optional<Long> get(HeaderKey key) {
-        StandardField entry = getField(key);
-        if (entry != null) {
-            return Optional.fromNullable(entry.value);
+        Optional<StandardField> entry = getField(key);
+        if (entry.isPresent()) {
+            return Optional.of(entry.get().value);
         }
         return Optional.absent();
     }
@@ -161,8 +161,8 @@ public class SectionHeader extends PEHeader {
 	 * @return standard entry
 	 */
 	@Override
-	public StandardField getField(HeaderKey key) {
-		return entries.get(key);
+	public Optional<StandardField> getField(HeaderKey key) {
+		return Optional.fromNullable(entries.get(key));
 	}
 
 	/**

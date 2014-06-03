@@ -129,9 +129,9 @@ public class MSDOSHeader extends PEHeader {
      */
     @Override
     public long getValue(HeaderKey key) {
-        StandardField field = getField(key);
-        if (field != null) {
-            return field.value;
+        Optional<StandardField> field = getField(key);
+        if (field.isPresent()) {
+            return field.get().value;
         }
         throw new IllegalArgumentException("value for key not found " + key);
     }
@@ -141,9 +141,9 @@ public class MSDOSHeader extends PEHeader {
      */
     @Override
     public Optional<Long> get(HeaderKey key) {
-        StandardField field = getField(key);
-        if (field != null) {
-            return Optional.fromNullable(field.value);
+        Optional<StandardField> field = getField(key);
+        if (field.isPresent()) {
+            return Optional.of(field.get().value);
         }
         return Optional.absent();
     }
@@ -152,8 +152,8 @@ public class MSDOSHeader extends PEHeader {
      * {@inheritDoc}
      */
     @Override
-    public StandardField getField(HeaderKey key) {
-        return headerData.get(key);
+    public Optional<StandardField> getField(HeaderKey key) {
+        return Optional.fromNullable(headerData.get(key));
     }
 
     /**

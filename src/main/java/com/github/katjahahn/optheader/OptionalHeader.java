@@ -169,9 +169,9 @@ public class OptionalHeader extends PEHeader {
      */
     @Override
     public long getValue(HeaderKey key) {
-        StandardField standardEntry = getField(key);
-        if (standardEntry != null) {
-            return standardEntry.value;
+        Optional<StandardField> standardEntry = getField(key);
+        if (standardEntry.isPresent()) {
+            return standardEntry.get().value;
         }
         throw new IllegalArgumentException("No value found for key " + key);
     }
@@ -186,9 +186,9 @@ public class OptionalHeader extends PEHeader {
      */
     @Override
     public Optional<Long> get(HeaderKey key) {
-        StandardField standardEntry = getField(key);
-        if (standardEntry != null) {
-            return Optional.fromNullable(standardEntry.value);
+        Optional<StandardField> standardEntry = getField(key);
+        if (standardEntry.isPresent()) {
+            return Optional.of(standardEntry.get().value);
         }
         return Optional.absent();
     }
@@ -203,7 +203,7 @@ public class OptionalHeader extends PEHeader {
      *         {@link StandardField} for this key available
      */
     @Override
-    public StandardField getField(HeaderKey key) {
+    public Optional<StandardField> getField(HeaderKey key) {
         StandardField standardEntry = null;
         if (key instanceof StandardFieldEntryKey) {
             standardEntry = standardFields.get(key);
@@ -211,7 +211,7 @@ public class OptionalHeader extends PEHeader {
         } else {
             standardEntry = windowsFields.get(key);
         }
-        return standardEntry;
+        return Optional.fromNullable(standardEntry);
     }
 
     /**
