@@ -47,9 +47,10 @@ public class DataDirEntry {
     public long size;
 
     /**
-     * @contructor Creates a data dir entry with the fieldName, which is used to
-     *             retrieve the corresponding {@link DataDirectoryKey}, and the
-     *             virtualAddress and the size
+     * Creates a data dir entry with the fieldName, which is used to retrieve
+     * the corresponding {@link DataDirectoryKey}, and the virtualAddress and
+     * the size
+     * 
      * @throws IllegalArgumentException
      *             if fieldName doesn't match a valid key
      * @param fieldName
@@ -70,8 +71,8 @@ public class DataDirEntry {
     }
 
     /**
-     * @contructor Creates a data dir entry based on key, virtualAddress and
-     *             size
+     * Creates a data dir entry based on key, virtualAddress and size
+     * 
      * @param key
      * @param virtualAddress
      * @param size

@@ -125,7 +125,7 @@ public class SectionHeader extends PEHeader {
 	 * {@link #getName()} instead.
 	 * 
 	 * @param key
-	 * @return long value or null if key doesn't exist
+	 * @return long value
 	 * @throw {@link IllegalArgumentException} if not found
 	 */
 	@Override
