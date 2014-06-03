@@ -24,7 +24,49 @@ import com.github.katjahahn.HeaderKey;
  * 
  */
 public enum COFFHeaderKey implements HeaderKey {
-
-	MACHINE, SECTION_NR, TIME_DATE, NR_OF_SYMBOLS, POINTER_TO_SYMB_TABLE, 
-	SIZE_OF_OPT_HEADER, CHARACTERISTICS;
+	/**
+	 * The number that identifies the type of target machine.
+	 * <p>
+	 * Prefer to get the machine type as enum
+	 * 
+	 * @see MachineType
+	 * @see COFFFileHeader#getMachineType()
+	 */
+	MACHINE,
+	/**
+	 * The number of sections in the file. This indicates the size of the
+	 * section table.
+	 * 
+	 * @see COFFFileHeader#getNumberOfSections()
+	 */
+	SECTION_NR,
+	/**
+	 * Indicates when the file was created.
+	 */
+	TIME_DATE,
+	/**
+	 * The number of entries in the symbol table. This data can be used to
+	 * locate the string table, which immediately follows the symbol table. This
+	 * value should be zero for an image because COFF debugging information is
+	 * deprecated.
+	 */
+	NR_OF_SYMBOLS,
+	/**
+	 * The file offset of the COFF symbol table, or zero if no COFF symbol table
+	 * is present. This value should be zero for an image because COFF debugging
+	 * information is deprecated.
+	 */
+	POINTER_TO_SYMB_TABLE,
+	/**
+	 * Size of optional header. The value determines the beginning of the
+	 * section table.
+	 */
+	SIZE_OF_OPT_HEADER,
+	/**
+	 * The flags that indicate the attributes of the file.
+	 * 
+	 * @see COFFFileHeader#getCharacteristics()
+	 * @see FileCharacteristic
+	 */
+	CHARACTERISTICS;
 }
