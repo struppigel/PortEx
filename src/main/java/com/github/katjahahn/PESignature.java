@@ -26,8 +26,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Reads the offset of the PE signature and the signature itself. Can be used to
- * verify that the file is indeed a PE file.
+ * Reads the offset of the PE signature and the signature itself. 
+ * <p>
+ * Can be used to verify that the file is indeed a PE file.
  * 
  * @author Katja Hahn
  * 
@@ -56,7 +57,7 @@ public class PESignature {
 	private final File file;
 
 	/**
-	 * @constructor Creates a PESignature instance with the input file specified
+	 * Creates a PESignature instance with the input file
 	 * @param file
 	 *            the PE file that should be checked for the signature
 	 */
@@ -129,19 +130,9 @@ public class PESignature {
 		return peOffset;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public String getInfo() {
 		return "-------------" + NL + "PE Signature" + NL + "-------------"
 				+ NL + "pe offset: " + peOffset + NL;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Long get(HeaderKey key) {
-		return null;
 	}
 
 }

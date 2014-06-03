@@ -50,6 +50,8 @@ public class ByteArrayUtil {
 
 	private static final Logger logger = LogManager
 			.getLogger(ByteArrayUtil.class.getName());
+	
+	private ByteArrayUtil() {}
 
 	/**
 	 * Retrieves the integer value of a subarray of bytes. The values are

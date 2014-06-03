@@ -18,8 +18,8 @@ package com.github.katjahahn;
 import java.io.IOException;
 
 /**
- * This is thrown if a specification file doesn't have the expected formatting,
- * e.g. wrong delimiters.
+ * Is thrown if a specification file doesn't have the expected formatting,
+ * for example wrong delimiters.
  * 
  * @author Katja Hahn
  * 

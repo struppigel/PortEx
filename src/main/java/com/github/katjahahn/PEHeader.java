@@ -42,10 +42,11 @@ public abstract class PEHeader {
 	 */
 	public abstract String getInfo();
 
+	//TODO maybe use factories instead
 	/**
 	 * Reads the information necessary. This is usually done by the
 	 * {@link PELoader}
-	 * TODO maybe use factories instead
+	 * 
 	 * @throws IOException
 	 */
 	public abstract void read() throws IOException;

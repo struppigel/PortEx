@@ -44,7 +44,7 @@ public class PEData {
 	private final File file;
 
 	/**
-	 * @constructor Creates a PEData instance.
+	 * Creates a PEData instance.
 	 * 
 	 * @param msdos
 	 *            the MSDOS Header
@@ -126,7 +126,7 @@ public class PEData {
 	}
 
 	/**
-	 * Returns the file the data belongs to
+	 * Returns the file the data belongs to.
 	 * 
 	 * @return file
 	 */
@@ -136,7 +136,7 @@ public class PEData {
 
 	/**
 	 * Returns a description string of all pe headers (that is msdos header,
-	 * pesignature, coff file header, optional header and section table)
+	 * pesignature, coff file header, optional header and section table).
 	 * 
 	 * @return description string of all pe headers
 	 */

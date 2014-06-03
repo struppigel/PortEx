@@ -14,7 +14,6 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -48,11 +47,11 @@ public class PELoader {
 	}
 
 	/**
-	 * Loads the basic data for the given PE file.
+	 * Loads the basic header data for the given PE file.
 	 * 
-	 * @param peFile
-	 * @return data of the PE file
-	 * @throws IOException
+	 * @param peFile the file to load the data from
+	 * @return data header data of the PE file
+	 * @throws IOException if unable to load the file
 	 */
 	public static PEData loadPE(File peFile) throws IOException {
 		return new PELoader(peFile).loadData();

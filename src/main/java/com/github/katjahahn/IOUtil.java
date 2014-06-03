@@ -35,37 +35,44 @@ import org.apache.logging.log4j.Logger;
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
  * the data subdirectory of PortEx.
- * 
+ * <p>
  * The specification text files are CSV, where the values are separated by
  * semicolon and a new entry begins on a new line.
- * 
- * The report files for testing are done with the tool pev.
  * 
  * @author Katja Hahn
  * 
  */
 public class IOUtil {
 
-	private static final Logger logger = LogManager.getLogger(IOUtil.class.getName());
+	private static final Logger logger = LogManager.getLogger(IOUtil.class
+			.getName());
+	/**
+	 * System independend newline.
+	 */
 	public static final String NL = System.getProperty("line.separator");
 	// TODO system independend path separators
 	private static final String DELIMITER = ";";
 	private static final String SPEC_DIR = "/data/";
-	
+
+	private IOUtil() {
+	}
 
 	/**
 	 * Reads the specified file into a map. The first value is used as key. The
 	 * rest is put into a list and used as map value. Each entry is one line of
 	 * the file.
 	 * 
-	 * @param filename the name of the specification file (not the path to it)
-	 * @return a map with the first column as keys and the other columns as values.
+	 * @param filename
+	 *            the name of the specification file (not the path to it)
+	 * @return a map with the first column as keys and the other columns as
+	 *         values.
 	 * @throws IOException
+	 *             if unable to read the specification file
 	 */
 	public static Map<String, String[]> readMap(String filename)
 			throws IOException {
 		Map<String, String[]> map = new TreeMap<>();
-		
+
 		try (InputStreamReader isr = new InputStreamReader(
 				IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
 				BufferedReader reader = new BufferedReader(isr)) {
@@ -79,12 +86,14 @@ public class IOUtil {
 	}
 
 	/**
-	 * Reads the specified file from the specification directory into a list of 
+	 * Reads the specified file from the specification directory into a list of
 	 * arrays. Each array is the entry of one line in the file.
 	 * 
-	 * @param filename the name of the specification file (not the path to it)
+	 * @param filename
+	 *            the name of the specification file (not the path to it)
 	 * @return a list of arrays, each array representing a line in the spec
 	 * @throws IOException
+	 *             if unable to read the specification file
 	 */
 	public static List<String[]> readArray(String filename) throws IOException {
 		List<String[]> list = new LinkedList<>();
@@ -99,16 +108,18 @@ public class IOUtil {
 			return list;
 		}
 	}
-	
+
 	/**
 	 * Reads the specified file into a list of arrays. Each array is the entry
-	 * of one line in the file. 
-	 * 
+	 * of one line in the file.
+	 * <p>
 	 * This method allows to read from files outside of the packaged jar.
 	 * 
-	 * @param file the file to read from
+	 * @param file
+	 *            the file to read from
 	 * @return a list of arrays, each array representing a line in the spec
 	 * @throws IOException
+	 *             if unable to read the file
 	 */
 	public static List<String[]> readArrayFrom(File file) throws IOException {
 		List<String[]> list = new LinkedList<>();
@@ -124,14 +135,17 @@ public class IOUtil {
 	}
 
 	/**
-	 * Returns a list of the descriptions of all characteristics that are set
-	 * by the value flag.
-	 * 
+	 * Returns a list of the descriptions of all characteristics that are set by
+	 * the value flag.
+	 * <p>
 	 * This is intented to be used for string output of characteristics.
 	 * 
-	 * @param value the value of the characteristics field
-	 * @param filename the name of the specification file (not the path to it)
-	 * @return description list, each element is one characteristic flag that was set
+	 * @param value
+	 *            the value of the characteristics field
+	 * @param filename
+	 *            the name of the specification file (not the path to it)
+	 * @return description list, each element is one characteristic flag that
+	 *         was set
 	 */
 	public static List<String> getCharacteristicsDescriptions(long value,
 			String filename) {
@@ -145,9 +159,10 @@ public class IOUtil {
 						characteristics.add(entry.getValue()[1]);
 					}
 				} catch (NumberFormatException e) {
-					System.err.println("ERROR. number format mismatch in file "
-							+ filename + NL);
-					System.err.println("value: " + entry.getKey() + NL);
+
+					logger.error("ERROR. number format mismatch in file "
+							+ filename);
+					logger.error("value: " + entry.getKey());
 				}
 			}
 		} catch (IOException e) {
@@ -155,12 +170,15 @@ public class IOUtil {
 		}
 		return characteristics;
 	}
-	
+
 	/**
-	 * Returns a list of all characteristic keys that have been set by the value.
+	 * Returns a list of all characteristic keys that have been set by the
+	 * value.
 	 * 
-	 * @param value the value of the characteristics field
-	 * @param filename the name of the specification file (not the path to it)
+	 * @param value
+	 *            the value of the characteristics field
+	 * @param filename
+	 *            the name of the specification file (not the path to it)
 	 * @return list of the characteristic's keys that are set
 	 */
 	public static List<String> getCharacteristicKeys(long value, String filename) {
@@ -175,8 +193,8 @@ public class IOUtil {
 					}
 				} catch (NumberFormatException e) {
 					logger.error("ERROR. number format mismatch in file "
-							+ filename + NL);
-					logger.error("value: " + entry.getKey() + NL);
+							+ filename);
+					logger.error("value: " + entry.getKey());
 				}
 			}
 		} catch (IOException e) {
@@ -186,14 +204,17 @@ public class IOUtil {
 	}
 
 	/**
-	 * Returns a description of all characteristics that are set
-	 * by the value flag.
-	 * 
+	 * Returns a description of all characteristics that are set by the value
+	 * flag.
+	 * <p>
 	 * This is intented to be used for string output of characteristics.
 	 * 
-	 * @param value the value of the characteristics field
-	 * @param filename the name of the specification file (not the path to it)
-	 * @return formatted description for all characteristic flags that have been set
+	 * @param value
+	 *            the value of the characteristics field
+	 * @param filename
+	 *            the name of the specification file (not the path to it)
+	 * @return formatted description for all characteristic flags that have been
+	 *         set
 	 */
 	public static String getCharacteristics(long value, String filename) {
 		StringBuilder b = new StringBuilder();
@@ -206,9 +227,9 @@ public class IOUtil {
 						b.append("\t* " + entry.getValue()[1] + NL);
 					}
 				} catch (NumberFormatException e) {
-					b.append("ERROR. number format mismatch in file "
-							+ filename + NL);
-					b.append("value: " + entry.getKey() + NL);
+					logger.error("ERROR. number format mismatch in file "
+							+ filename);
+					logger.error("value: " + entry.getKey());
 				}
 			}
 		} catch (IOException e) {

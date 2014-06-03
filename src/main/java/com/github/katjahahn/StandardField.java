@@ -37,11 +37,11 @@ public class StandardField {
 	public Long value;
 
 	/**
-	 * @constructor Creates a standard entry with the values specified.
+	 * Creates a standard entry with the values specified.
 	 * 
-	 * @param key
-	 * @param description
-	 * @param value
+	 * @param key the key that describes the field
+	 * @param description of the field
+	 * @param value of the field entry
 	 */
 	public StandardField(HeaderKey key, String description, Long value) {
 		this.key = key;
