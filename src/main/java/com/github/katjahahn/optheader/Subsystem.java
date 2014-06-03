@@ -1,6 +1,8 @@
 package com.github.katjahahn.optheader;
 
-public enum Subsystem {
+import com.github.katjahahn.Characteristic;
+
+public enum Subsystem implements Characteristic {
 	IMAGE_SYSTEM_UNKNOWN,
 	IMAGE_SUBSYSTEM_NATIVE,
 	IMAGE_SUBSYSTEM_WINDOWS_GUI,
@@ -12,4 +14,14 @@ public enum Subsystem {
 	IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER,
 	IMAGE_SUBSYSTEM_EFI_ROM,
 	IMAGE_SUBSYSTEM_XBOX;
+
+	@Override
+	public boolean isReserved() {
+		return false;
+	}
+
+	@Override
+	public boolean isDeprecated() {
+		return false;
+	}
 }

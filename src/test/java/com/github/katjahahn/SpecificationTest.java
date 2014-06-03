@@ -19,6 +19,7 @@ import com.github.katjahahn.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.DllCharacteristic;
 import com.github.katjahahn.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.optheader.Subsystem;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionCharacteristic;
 import com.github.katjahahn.sections.SectionHeaderKey;
@@ -46,6 +47,7 @@ public class SpecificationTest {
 				"dllcharacteristics");
 		characteristicspecs.put(SectionCharacteristic.values(),
 				"sectioncharacteristics");
+		characteristicspecs.put(Subsystem.values(), "subsystem");
 
 		headerspecs.put(COFFHeaderKey.values(), "coffheaderspec");
 		headerspecs.put(DataDirectoryKey.values(), "datadirectoriesspec");
@@ -59,10 +61,10 @@ public class SpecificationTest {
 		headerspecs.put(ResourceDataEntryKey.values(), "resourcedataentryspec");
 		headerspecs.put(ResourceDirectoryTableKey.values(), "rsrcdirspec");
 		headerspecs.put(SectionHeaderKey.values(), "sectiontablespec");
-		// TODO resourcetype, machinetype
-		// TODO debugtypes, subsystem
+		// TODO resourcetype, machinetype (covered by MachineTypeTest so far), debugtypes
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void characteristicCoherence() throws IOException {
 		final int keyIndex = 1;
@@ -79,6 +81,7 @@ public class SpecificationTest {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void headerCoherence() throws IOException {
 		int keyIndex = 0;

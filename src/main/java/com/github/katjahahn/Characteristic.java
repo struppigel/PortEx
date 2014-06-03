@@ -16,12 +16,27 @@
 package com.github.katjahahn;
 
 /**
- * Represents characteristical flags used by the PE format. These might be file
- * characteristics, dll characteristics or similar.
+ * Represents characteristical flags used by the PE format. These include file
+ * characteristics, dll characteristics, subsystem, machinetype, resourcetype or
+ * similar.
  * 
  * @author Katja Hahn
  * 
  */
 public interface Characteristic {
+
+	/**
+	 * Indicates whether the flag is reserved for future use.
+	 * 
+	 * @return true iff reserved
+	 */
+	public boolean isReserved();
+
+	/**
+	 * Indicates whether the flag is deprecated.
+	 * 
+	 * @return true iff deprecated
+	 */
+	public boolean isDeprecated();
 
 }

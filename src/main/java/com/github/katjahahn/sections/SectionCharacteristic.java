@@ -17,26 +17,32 @@ package com.github.katjahahn.sections;
 
 import com.github.katjahahn.Characteristic;
 
+/**
+ * Represents the attributes of a section.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum SectionCharacteristic implements Characteristic {
-	RESERVED_0("Reserved for future use."),
-	RESERVED_1("Reserved for future use."),
-	RESERVED_2("Reserved for future use."),
-	RESERVED_4("Reserved for future use."),
-	IMAGE_SCN_TYPE_NO_PAD("The section should not be padded to the next boundary. DEPRECATED"),
-	RESERVED_10("Reserved for future use."),
+	RESERVED_0("Reserved for future use.", true, false),
+	RESERVED_1("Reserved for future use.", true, false),
+	RESERVED_2("Reserved for future use.", true, false),
+	RESERVED_4("Reserved for future use.", true, false),
+	IMAGE_SCN_TYPE_NO_PAD("The section should not be padded to the next boundary. DEPRECATED", false, true),
+	RESERVED_10("Reserved for future use.", true, false),
 	IMAGE_SCN_CNT_CODE("The section contains executable code."),
 	IMAGE_SCN_CNT_INITIALIZED_DATA("The section contains initialized data."),
 	IMAGE_SCN_CNT_UNINITIALIZED_DATA("The section contains uninitialized data."),
-	IMAGE_SCN_LNK_OTHER("Reserved for future use."),
+	IMAGE_SCN_LNK_OTHER("Reserved for future use.", true, false),
 	IMAGE_SCN_LNK_INFO("The section contains comments or other information. Valid for object files only."),
-	RESERVED_400("Reserved for future use."),
+	RESERVED_400("Reserved for future use.", true, false),
 	IMAGE_SCN_LNK_REMOVE("The section will not become part of the image. Valid for object files only."),
 	IMAGE_SCN_LNK_COMDAT("The section contains COMDAT data."),
 	IMAGE_SCN_GPREL("The section contains data referenced through the global pointer (GP)."),
-	IMAGE_SCN_MEM_PURGEABLE("Reserved for future use."),
-	IMAGE_SCN_MEM_16BIT("For ARM machine types, the section contains Thumb code. Reserved for future use with other machine types."),
-	IMAGE_SCN_MEM_LOCKED("Reserved for future use."),
-	IMAGE_SCN_MEM_PRELOAD("Reserved for future use."),
+	IMAGE_SCN_MEM_PURGEABLE("Reserved for future use.", true, false),
+	IMAGE_SCN_MEM_16BIT("For ARM machine types, the section contains Thumb code. Reserved for future use with other machine types.", true, false),
+	IMAGE_SCN_MEM_LOCKED("Reserved for future use.", true, false),
+	IMAGE_SCN_MEM_PRELOAD("Reserved for future use.", true, false),
 	IMAGE_SCN_ALIGN_1BYTES("Align data on a 1-byte boundary. Valid only for object files."),
 	IMAGE_SCN_ALIGN_2BYTES("Align data on a 2-byte boundary. Valid only for object files."),
 	IMAGE_SCN_ALIGN_4BYTES("Align data on a 4-byte boundary. Valid only for object files."),
@@ -61,9 +67,19 @@ public enum SectionCharacteristic implements Characteristic {
 	IMAGE_SCN_MEM_WRITE("The section can be written to.");
 
 	private String description;
+	private boolean deprecated;
+	private boolean reserved;
 	
 	private SectionCharacteristic(String description) {
 		this.description = description;
+		this.reserved = false;
+		this.deprecated = false;
+	}
+	
+	private SectionCharacteristic(String description, boolean reserved, boolean deprecated) {
+		this.description = description;
+		this.reserved = reserved;
+		this.deprecated = deprecated;
 	}
 	
 	/**
@@ -73,5 +89,21 @@ public enum SectionCharacteristic implements Characteristic {
 	 */
 	public String getDescription() {
 		return description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isReserved() {
+		return reserved;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isDeprecated() {
+		return deprecated;
 	}
 }

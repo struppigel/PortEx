@@ -31,17 +31,17 @@ public enum FileCharacteristic implements Characteristic {
 	 * be zero.
 	 * 
 	 */
-	IMAGE_FILE_LINE_NUMS_STRIPPED,
+	IMAGE_FILE_LINE_NUMS_STRIPPED(false, true),
 	/**
 	 * COFF symbol table entries for local symbols have been removed. This flag
 	 * is deprecated and should be zero.
 	 */
-	IMAGE_FILE_LOCAL_SYMS_STRIPPED,
+	IMAGE_FILE_LOCAL_SYMS_STRIPPED(false, true),
 	/**
 	 * Obsolete. Aggressively trim working set. This flag is deprecated for
 	 * Windows 2000 and later and must be zero.
 	 */
-	IMAGE_FILE_AGGRESSIVE_WS_TRIM,
+	IMAGE_FILE_AGGRESSIVE_WS_TRIM(false, true),
 	/**
 	 * Application can handle > 2‑GB addresses.
 	 */
@@ -49,13 +49,13 @@ public enum FileCharacteristic implements Characteristic {
 	/**
 	 * This flag with value 0x40 is reserved for future use.
 	 */
-	RESERVED_40, //TODO include to anomaly detection
+	RESERVED_40(true, false), // TODO include to anomaly detection
 	/**
 	 * Little endian: the least significant bit (LSB) precedes the most
 	 * significant bit (MSB) in memory. This flag is deprecated and should be
 	 * zero.
 	 */
-	IMAGE_FILE_BYTES_REVERSED_LO,
+	IMAGE_FILE_BYTES_REVERSED_LO(false, true),
 	/**
 	 * Machine is based on a 32-bit-word architecture
 	 */
@@ -92,5 +92,28 @@ public enum FileCharacteristic implements Characteristic {
 	 * Big endian: the MSB precedes the LSB in memory. This flag is deprecated
 	 * and should be zero.
 	 */
-	IMAGE_FILE_BYTES_REVERSED_HI;
+	IMAGE_FILE_BYTES_REVERSED_HI(false, true);
+
+	private boolean deprecated;
+	private boolean reserved;
+
+	private FileCharacteristic() {
+		this.deprecated = false;
+		this.reserved = false;
+	}
+
+	private FileCharacteristic(boolean reserved, boolean deprecated) {
+		this.reserved = reserved;
+		this.deprecated = deprecated;
+	}
+
+	@Override
+	public boolean isReserved() {
+		return reserved;
+	}
+
+	@Override
+	public boolean isDeprecated() {
+		return deprecated;
+	}
 }

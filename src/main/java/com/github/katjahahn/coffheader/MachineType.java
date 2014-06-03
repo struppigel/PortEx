@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.coffheader;
 
+import com.github.katjahahn.Characteristic;
+
 /**
  * Represents the machine the image file can run on.
  * <p>
@@ -23,7 +25,7 @@ package com.github.katjahahn.coffheader;
  * @author Katja Hahn
  *
  */
-public enum MachineType {
+public enum MachineType implements Characteristic {
 	/**
 	 * The contents of this field are assumed to be applicable to any machine type
 	 */
@@ -120,6 +122,16 @@ public enum MachineType {
 	 */
 	public String getKey() {
 		return "IMAGE_FILE_MACHINE_" + this.toString();
+	}
+
+	@Override
+	public boolean isReserved() {
+		return false;
+	}
+
+	@Override
+	public boolean isDeprecated() {
+		return false;
 	}
 
 }
