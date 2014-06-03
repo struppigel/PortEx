@@ -180,7 +180,8 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val coff = data.getCOFFFileHeader()
     val pesig = data.getPESignature()
     val sectionTableSize = SectionTable.ENTRY_SIZE * coff.getNumberOfSections()
-    val coffOffset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
+    val pesigOffset = pesig.getOffset.get
+    val coffOffset =  + PESignature.PE_SIG_LENGTH
     coffOffset + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader() + sectionTableSize
   }
 
