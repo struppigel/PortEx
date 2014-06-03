@@ -158,47 +158,6 @@ public class SectionTable {
                 "invalid section name, no section header found");
     }
 
-    /**
-     * Returns the value for the PointerToRawData entry of a given section name.
-     * 
-     * @param sectionName
-     * @return
-     */
-    // TODO use the sections list
-    public Long getPointerToRawData(String sectionName) {
-        for (int i = 0; i < numberOfEntries; i++) {
-            byte[] section = Arrays.copyOfRange(sectionTableBytes, i
-                    * ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-            if (isSection(sectionName, section)) {
-                return getPointerToRawData(section);
-            }
-        }
-
-        return null;
-    }
-
-    private Long getPointerToRawData(byte[] section) {
-        for (Entry<String, String[]> entry : specification.entrySet()) {
-            if (entry.getKey().equals("POINTER_TO_RAW_DATA")) {
-                String[] specs = entry.getValue();
-                long value = getBytesLongValue(section,
-                        Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-                return value;
-            }
-        }
-        return null;
-    }
-
-    private boolean isSection(String sectionName, byte[] section) {
-        for (String key : specification.keySet()) {
-            if (key.equals("NAME")
-                    && getUTF8String(section).equals(sectionName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public String getInfo() {
         StringBuilder b = new StringBuilder();
         b.append("-----------------" + NL + "Section Table" + NL
@@ -252,68 +211,6 @@ public class SectionTable {
         return null;
     }
 
-    /**
-     * Computes the virtual address for a given section name.
-     * 
-     * @param sectionName
-     * @return virtual address of a section
-     */
-    public Long getVirtualAddress(String sectionName) {
-        for (int i = 0; i < numberOfEntries; i++) {
-            byte[] section = Arrays.copyOfRange(sectionTableBytes, i
-                    * ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-            if (isSection(sectionName, section)) {
-                return getVirtualAddress(section);
-            }
-        }
-        return null;
-    }
-
-    private Long getVirtualAddress(byte[] section) {
-        for (Entry<String, String[]> entry : specification.entrySet()) {
-            if (entry.getKey().equals("VIRTUAL_ADDRESS")) {
-                String[] specs = entry.getValue();
-                long value = getBytesLongValue(section,
-                        Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-                return value;
-            }
-        }
-        return null;
-    }
-
-    // TODO this is nuts, why read it again? Same code as getPointerToRawData
-    /**
-     * Returns the raw size of the section with the given section name. TODO use
-     * entry number instead. the name is not enough to identify a section
-     * uniquely.
-     * 
-     * @param sectionName
-     * @return
-     */
-    public Long getSize(String sectionName) {
-        for (int i = 0; i < numberOfEntries; i++) {
-            byte[] section = Arrays.copyOfRange(sectionTableBytes, i
-                    * ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-            if (isSection(sectionName, section)) {
-                return getSizeOfRawData(section);
-            }
-        }
-
-        return null;
-    }
-
-    private Long getSizeOfRawData(byte[] section) {
-        for (Entry<String, String[]> entry : specification.entrySet()) {
-            if (entry.getKey().equals("SIZE_OF_RAW_DATA")) {
-                String[] specs = entry.getValue();
-                long value = getBytesLongValue(section,
-                        Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-                return value;
-            }
-        }
-        return null;
-    }
-
     public long getOffset() {
         return offset;
     }
@@ -333,6 +230,11 @@ public class SectionTable {
         return null;
     }
 
+    /**
+     * Returns the size of the section table.
+     * 
+     * @return size of the section table
+     */
     public int getSize() {
         return ENTRY_SIZE * numberOfEntries;
     }

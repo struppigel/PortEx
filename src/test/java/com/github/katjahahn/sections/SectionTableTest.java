@@ -43,7 +43,7 @@ public class SectionTableTest {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
 		for (SectionHeader section : table.getSectionHeaders()) {
 			Long pointer = section.getValue(POINTER_TO_RAW_DATA);
-			assertEquals(table.getPointerToRawData(section.getName()), pointer);
+			assertEquals(table.getSectionHeader(section.getName()).get(POINTER_TO_RAW_DATA).get(), pointer);
 		}
 	}
 	
@@ -125,24 +125,6 @@ public class SectionTableTest {
 		for(SectionHeader section : table.getSectionHeaders()) {
 			SectionHeader entry = table.getSectionHeader(section.getName());
 			assertEquals(entry, section);
-		}
-	}
-
-	@Test
-	public void getSize() {
-		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionHeader section : table.getSectionHeaders()) {
-			Long size = table.getSize(section.getName());
-			assertEquals(size, section.get(SIZE_OF_RAW_DATA).get());
-		}
-	}
-
-	@Test
-	public void getVirtualAddress() {
-		SectionTable table = pedata.get("strings.exe").getSectionTable();
-		for(SectionHeader section : table.getSectionHeaders()) {
-			Long size = table.getVirtualAddress(section.getName());
-			assertEquals(size, section.get(VIRTUAL_ADDRESS).get());
 		}
 	}
 }
