@@ -166,7 +166,7 @@ public class SectionLoader {
 	}
 
 	private long fileAligned(long value) {
-		long fileAlign = optHeader.get(WindowsEntryKey.FILE_ALIGNMENT);
+		long fileAlign = optHeader.getValue(WindowsEntryKey.FILE_ALIGNMENT);
 		// Note: (two's complement of x AND value) rounds down value to a
 		// multiple of x if x is a power of 2
 		if (value % fileAlign != 0) {
@@ -183,9 +183,9 @@ public class SectionLoader {
 	 * @return section size
 	 */
 	public long getReadSize(SectionHeader section) {
-		long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
-		long virtSize = section.get(VIRTUAL_SIZE);
-		long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
+		long pointerToRaw = section.getValue(POINTER_TO_RAW_DATA);
+		long virtSize = section.getValue(VIRTUAL_SIZE);
+		long sizeOfRaw = section.getValue(SIZE_OF_RAW_DATA);
 		long alignedPointerToRaw = section.getAlignedPointerToRaw();
 		// see Peter Ferrie's answer in:
 		// https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
@@ -240,7 +240,7 @@ public class SectionLoader {
 		if (resourceTable != null) {
 			SectionHeader rsrcEntry = resourceTable.getSectionTableEntry(table);
 			if (rsrcEntry != null) {
-				Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
+				Long virtualAddress = rsrcEntry.getValue(VIRTUAL_ADDRESS);
 				if (virtualAddress != null) {
 					BytesAndOffset tuple = loadSectionBytes(rsrcEntry);
 					if(tuple == null) {
@@ -269,8 +269,8 @@ public class SectionLoader {
 	public SectionHeader getSectionHeaderByRVA(long rva) {
 		List<SectionHeader> sections = table.getSectionHeaders();
 		for (SectionHeader section : sections) {
-			long vSize = section.get(VIRTUAL_SIZE);
-			long vAddress = section.get(VIRTUAL_ADDRESS);
+			long vSize = section.getValue(VIRTUAL_SIZE);
+			long vAddress = section.getValue(VIRTUAL_ADDRESS);
 			if (rvaIsWithin(vAddress, vSize, rva)) {
 				return section;
 			}
@@ -384,8 +384,8 @@ public class SectionLoader {
 	public Long getFileOffsetFor(long rva) {
 		SectionHeader section = getSectionHeaderByRVA(rva);
 		if (section != null) {
-			Long virtualAddress = section.get(VIRTUAL_ADDRESS);
-			Long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
+			Long virtualAddress = section.getValue(VIRTUAL_ADDRESS);
+			Long pointerToRawData = section.getValue(POINTER_TO_RAW_DATA);
 			if (virtualAddress != null && pointerToRawData != null) {
 				return rva - (virtualAddress - pointerToRawData);
 			}
@@ -467,7 +467,7 @@ public class SectionLoader {
 		if (dataDir != null) {
 			SectionHeader header = getSectionHeaderFor(dataDirKey);
 			long pointerToRawData = header.getAlignedPointerToRaw();
-			Long virtualAddress = header.get(VIRTUAL_ADDRESS);
+			Long virtualAddress = header.getValue(VIRTUAL_ADDRESS);
 			if (virtualAddress != null) {
 				long rva = dataDir.virtualAddress;
 				long offset = rva - (virtualAddress - pointerToRawData);

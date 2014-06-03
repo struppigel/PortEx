@@ -42,7 +42,7 @@ public class ImportSectionTest {
 			PEData pedatum = pedata.get(list.getKey().getName()
 					.replace(".txt", ""));
 			if (pedatum != null) {
-				long imageBase = pedatum.getOptionalHeader().get(
+				long imageBase = pedatum.getOptionalHeader().getValue(
 						WindowsEntryKey.IMAGE_BASE);
 				SectionLoader loader = new SectionLoader(pedatum);
 				ImportSection idata = loader.loadImportSection();
@@ -66,7 +66,7 @@ public class ImportSectionTest {
 	private List<ImportDLL> substractImageBase(List<ImportDLL> expected,
 			PEData datum) {
 		List<ImportDLL> list = new ArrayList<>();
-		long imageBase = datum.getOptionalHeader().get(
+		long imageBase = datum.getOptionalHeader().getValue(
 				WindowsEntryKey.IMAGE_BASE);
 		for (ImportDLL dll : expected) {
 			ImportDLL newDLL = new ImportDLL(dll.getName());

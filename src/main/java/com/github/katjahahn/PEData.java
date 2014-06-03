@@ -144,7 +144,10 @@ public class PEData {
 		return msdos.getInfo() + NL + pesig.getInfo() + NL + coff.getInfo()
 				+ NL + opt.getInfo() + NL + table.getInfo();
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return getInfo();

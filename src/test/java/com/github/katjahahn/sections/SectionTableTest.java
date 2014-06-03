@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader.TestData;
+import com.google.common.base.Optional;
 
 public class SectionTableTest {
 
@@ -41,7 +42,7 @@ public class SectionTableTest {
 	public void getPointerToRawData() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
 		for (SectionHeader section : table.getSectionHeaders()) {
-			Long pointer = section.get(POINTER_TO_RAW_DATA);
+			Long pointer = section.getValue(POINTER_TO_RAW_DATA);
 			assertEquals(table.getPointerToRawData(section.getName()), pointer);
 		}
 	}
@@ -104,12 +105,12 @@ public class SectionTableTest {
 		for (SectionHeader entry : list) {
 			if (entry.getName().equals(section.getName())) {
 				for (SectionHeaderKey key : relevantKeys) {
-					Long value1 = entry.get(key);
-					Long value2 = section.get(key);
-					if (value1 == null || !value1.equals(value2)) {
+					Optional<Long> value1 = entry.get(key);
+					Optional<Long> value2 = section.get(key);
+					if (!value1.isPresent() || !value1.equals(value2)) {
 						logger.warn("comparison failed for key: " + key
-								+ " and value1 " + Long.toHexString(value1)
-								+ " and value2 " + Long.toHexString(value2));
+								+ " and value1 " + value1
+								+ " and value2 " + value2);
 					}
 					assertNotNull(value1);
 					assertEquals(value1, value2);
@@ -132,7 +133,7 @@ public class SectionTableTest {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
 		for(SectionHeader section : table.getSectionHeaders()) {
 			Long size = table.getSize(section.getName());
-			assertEquals(size, section.get(SIZE_OF_RAW_DATA));
+			assertEquals(size, section.get(SIZE_OF_RAW_DATA).get());
 		}
 	}
 
@@ -141,7 +142,7 @@ public class SectionTableTest {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
 		for(SectionHeader section : table.getSectionHeaders()) {
 			Long size = table.getVirtualAddress(section.getName());
-			assertEquals(size, section.get(VIRTUAL_ADDRESS));
+			assertEquals(size, section.get(VIRTUAL_ADDRESS).get());
 		}
 	}
 }

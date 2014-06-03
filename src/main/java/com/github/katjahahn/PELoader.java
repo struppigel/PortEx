@@ -57,11 +57,19 @@ public class PELoader {
      * @return data header data of the PE file
      * @throws IOException
      *             if unable to load the file
+     * @throws IllegalStateException if no valid PE file
      */
     public static PEData loadPE(File peFile) throws IOException {
         return new PELoader(peFile).loadData();
     }
 
+    /**
+     * Loads the PE file header data into a PEData instance.
+     * 
+     * @return header data
+     * @throws IOException if file can not be read
+     * @throws IllegalStateException if no valid PE file
+     */
     private PEData loadData() throws IOException {
         PESignature pesig = new PESignature(file);
         pesig.read();
@@ -80,6 +88,13 @@ public class PELoader {
         }
     }
 
+    /**
+     * Loads the MSDOS header.
+     * 
+     * @param raf the random access file instance
+     * @return msdos header
+     * @throws IOException if unable to read header
+     */
     private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf)
             throws IOException {
         byte[] headerbytes = loadBytes(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
@@ -88,32 +103,32 @@ public class PELoader {
     }
 
     /**
-     * presumes valid PE file
+     * Loads the section table. Presumes a valid PE file.
      * 
-     * @param pesig
-     * @param coff
-     * @param raf
-     * @return
-     * @throws IOException
+     * @param pesig pe signature
+     * @param coff coff file header
+     * @param raf the random access file instance
+     * @return section table
+     * @throws IOException if unable to read header
      */
     private SectionTable loadSectionTable(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
         long offset = pesig.getOffset().get() + PESignature.PE_SIG_LENGTH
                 + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
         logger.info("SectionTable offset" + offset);
-        int numberOfEntries = coff.getNumberOfSections().intValue();
+        int numberOfEntries = (int) coff.getNumberOfSections();
         byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
                 * numberOfEntries, raf);
         return new SectionTable(tableBytes, numberOfEntries, offset);
     }
 
     /**
-     * presumes valid PE file
+     * Loads the coff file header. Presumes a valid PE file.
      * 
-     * @param pesig
-     * @param raf
-     * @return
-     * @throws IOException
+     * @param pesig pe signature
+     * @param raf the random access file instance
+     * @return coff file header
+     * @throws IOException if unable to read header
      */
     private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
             RandomAccessFile raf) throws IOException {
@@ -124,13 +139,13 @@ public class PELoader {
     }
 
     /**
-     * presumes valid PE file
+     * Loads the optional header. Presumes a valid PE file.
      * 
-     * @param pesig
-     * @param coff
-     * @param raf
-     * @return
-     * @throws IOException
+     * @param pesig pe signature
+     * @param coff coff file header
+     * @param raf the random access file instance
+     * @return optional header
+     * @throws IOException if unable to read header
      */
     private OptionalHeader loadOptionalHeader(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {

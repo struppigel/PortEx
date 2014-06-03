@@ -293,13 +293,13 @@ public class Visualizer {
     }
 
     private Long getEntryPoint() {
-        long rva = data.getOptionalHeader().get(
+        long rva = data.getOptionalHeader().getValue(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
         SectionHeader section = new SectionLoader(data)
                 .getSectionHeaderByRVA(rva);
         if (section != null) {
-            Long phystovirt = section.get(SectionHeaderKey.VIRTUAL_ADDRESS)
-                    - section.get(SectionHeaderKey.POINTER_TO_RAW_DATA);
+            long phystovirt = section.getValue(SectionHeaderKey.VIRTUAL_ADDRESS)
+                    - section.getValue(SectionHeaderKey.POINTER_TO_RAW_DATA);
             return rva - phystovirt;
         }
         return null;

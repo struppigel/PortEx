@@ -17,6 +17,8 @@ package com.github.katjahahn;
 
 import java.io.IOException;
 
+import com.google.common.base.Optional;
+
 /**
  * Represents a common structure of a PE like certain headers or the section
  * table
@@ -26,46 +28,59 @@ import java.io.IOException;
  */
 public abstract class PEHeader {
 
-	public static final String NL = System.getProperty("line.separator");
+    public static final String NL = System.getProperty("line.separator");
 
-	/**
-	 * Returns the file offset for the beginning of the module
-	 * 
-	 * @return file offset for the beginning of the module
-	 */
-	public abstract long getOffset();
+    /**
+     * Returns the file offset for the beginning of the module
+     * 
+     * @return file offset for the beginning of the module
+     */
+    public abstract long getOffset();
 
-	/**
-	 * Returns a description string of the {@link PEHeader}.
-	 * 
-	 * @return description string
-	 */
-	public abstract String getInfo();
+    /**
+     * Returns a description string of the {@link PEHeader}.
+     * 
+     * @return description string
+     */
+    public abstract String getInfo();
 
-	//TODO maybe use factories instead
-	/**
-	 * Reads the information necessary. This is usually done by the
-	 * {@link PELoader}
-	 * 
-	 * @throws IOException
-	 */
-	public abstract void read() throws IOException;
+    // TODO maybe use factories instead
+    /**
+     * Reads the information necessary. This is usually done by the
+     * {@link PELoader}
+     * 
+     * @throws IOException
+     */
+    public abstract void read() throws IOException;
 
-	/**
-	 * Returns the value for the given key or null if there is no value for that
-	 * key.
-	 * 
-	 * @param key
-	 * @return long value for the given key or null if value doesn't exist
-	 */
-	public abstract Long get(HeaderKey key);
-	
-	/**
-	 * Returns the {@link StandardField} for the given key or null if there is no value for that
-	 * key.
-	 * 
-	 * @param key
-	 * @return {@link StandardField} for the given key or null if value doesn't exist
-	 */
-	public abstract StandardField getField(HeaderKey key);
+    /**
+     * Returns the value for the given key or null if there is no value for that
+     * key.
+     * 
+     * @param key
+     * @return long value for the given key or null if value doesn't exist
+     */
+    public abstract Optional<Long> get(HeaderKey key);
+
+    /**
+     * Returns the value for the given key.
+     * 
+     * @param key
+     * @return long value for the given key
+     * @throws IllegalArgumentException
+     *             if key doesn't exist
+     */
+    public abstract long getValue(HeaderKey key)
+            throws IllegalArgumentException;
+
+    // TODO use Optional instead of returning null!
+    /**
+     * Returns the {@link StandardField} for the given key or null if there is
+     * no value for that key.
+     * 
+     * @param key
+     * @return {@link StandardField} for the given key or null if value doesn't
+     *         exist
+     */
+    public abstract StandardField getField(HeaderKey key);
 }

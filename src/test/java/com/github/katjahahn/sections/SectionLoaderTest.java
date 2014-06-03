@@ -74,8 +74,8 @@ public class SectionLoaderTest {
 			SectionTable table = datum.getSectionTable();
 			SectionLoader loader = new SectionLoader(datum);
 			for (SectionHeader entry : table.getSectionHeaders()) {
-				long start = entry.get(SectionHeaderKey.VIRTUAL_ADDRESS);
-				long size = entry.get(SectionHeaderKey.VIRTUAL_SIZE);
+				long start = entry.getValue(SectionHeaderKey.VIRTUAL_ADDRESS);
+				long size = entry.getValue(SectionHeaderKey.VIRTUAL_SIZE);
 				SectionHeader actual = loader.getSectionHeaderByRVA(start);
 				assertEquals(actual, entry);
 				actual = loader.getSectionHeaderByRVA(start + size - 1);

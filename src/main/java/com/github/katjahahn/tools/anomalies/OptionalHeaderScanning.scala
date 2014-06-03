@@ -90,14 +90,14 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
     def isVirtual(ep: Long): Boolean = {
       val sectionHeaders = data.getSectionTable().getSectionHeaders().asScala
-      val addresses = sectionHeaders.map(_.get(SectionHeaderKey.VIRTUAL_ADDRESS)).filter(_ != 0)
+      val addresses = sectionHeaders.map(_.getValue(SectionHeaderKey.VIRTUAL_ADDRESS)).filter(_ != 0)
       if (addresses.size > 0)
         ep < addresses.min
       else false
     }
     val anomalyList = ListBuffer[Anomaly]()
-    val ep = opt.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
-    val sizeOfHeaders = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
+    val ep = opt.getValue(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+    val sizeOfHeaders = opt.getValue(WindowsEntryKey.SIZE_OF_HEADERS)
     val entry = opt.getStandardFieldEntry(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
     if (ep == 0 && !isDLL) {
       val description = s"Optional Header: address of entry point is ${ep}, but PE is no DLL"
@@ -125,8 +125,8 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
       1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
     val anomalyList = ListBuffer[Anomaly]()
-    val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
-    val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
+    val sectionAlignment = opt.getValue(WindowsEntryKey.SECTION_ALIGNMENT)
+    val fileAlignment = opt.getValue(WindowsEntryKey.FILE_ALIGNMENT)
     if (isLowAlignment(sectionAlignment, fileAlignment)) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
       val description = s"Optional Header: Low alignment mode, section alignment = ${sectionAlignment}, file alignment = ${fileAlignment}"
@@ -147,23 +147,23 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val headerSize = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
-    if (imageSize != null && sectionAlignment != null && imageSize % sectionAlignment != 0) {
+    if (imageSize.isPresent && sectionAlignment.isPresent && imageSize.get % sectionAlignment.get != 0) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
-      val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment})"
+      val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment.get})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
     val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_HEADERS)
-    if (headerSize != null) {
-      if (fileAlignment != null && headerSize % fileAlignment != 0) {
-        val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${fileAlignment})"
+    if (headerSize.isPresent) {
+      if (fileAlignment.isPresent && headerSize.get % fileAlignment.get != 0) {
+        val description = s"Optional Header: Size of Headers (${headerSize.get}) must be a multiple of File Alignment (${fileAlignment.get})"
         anomalyList += WrongValueAnomaly(headerSizeEntry, description)
       } //TODO headerSize >= MSDOS + PEHeader + Section Headers size
-      if (headerSize < headerSizeMin) {
-        val description = s"Optional Header: Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize}"
+      if (headerSize.get < headerSizeMin) {
+        val description = s"Optional Header: Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize.get}"
         anomalyList += WrongValueAnomaly(headerSizeEntry, description)
       }
-      if (headerSize != roundedUpHeaderSize) {
-        val description = s"Optional Header: Size of Headers should be ${roundedUpHeaderSize}, but is ${headerSize}"
+      if (headerSize.get != roundedUpHeaderSize) {
+        val description = s"Optional Header: Size of Headers should be ${roundedUpHeaderSize}, but is ${headerSize.get}"
         anomalyList += WrongValueAnomaly(headerSizeEntry, description)
       }
     }
@@ -191,7 +191,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    * @return aligned SizeOfHeaders value as it should be
    */
   private def roundedUpHeaderSize(): Long = {
-    val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
+    val fileAlignment = data.getOptionalHeader().getValue(WindowsEntryKey.FILE_ALIGNMENT)
     if ((headerSizeMin % fileAlignment) != 0) {
       (fileAlignment - (headerSizeMin % fileAlignment)) + headerSizeMin
     } else headerSizeMin
@@ -219,12 +219,12 @@ trait OptionalHeaderScanning extends AnomalyScanner {
         List(DeprecatedAnomaly(entry, description))
       }
     }
-    if (win32version != 0) {
+    if (win32version.isPresent() && win32version.get != 0) {
       val description = "Optional Header: Reserved WIN32_VERSION_VALUE is not 0, but " + win32version
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.WIN32_VERSION_VALUE)
       List(ReservedAnomaly(entry, description))
     }
-    if (loaderFlags != 0) {
+    if (loaderFlags.isPresent && loaderFlags.get != 0) {
       val description = "Optional Header: Reserved LOADER_FLAGS is not 0, but " + loaderFlags
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.LOADER_FLAGS)
       List(ReservedAnomaly(entry, description))
@@ -242,7 +242,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def checkFileAlignment(opt: OptionalHeader): List[Anomaly] = {
     def isPowerOfTwo(x: Long): Boolean = (x != 0) && ((x & (x - 1)) == 0)
     val anomalyList = ListBuffer[Anomaly]()
-    val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
+    val sectionAlignment = opt.getValue(WindowsEntryKey.SECTION_ALIGNMENT)
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
     if (entry != null) {
       val fileAlignment = entry.value
@@ -272,8 +272,8 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def checkSectionAlignment(opt: OptionalHeader): List[Anomaly] = {
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
-    if (sectionAlignment != null && fileAlignment != null && sectionAlignment < fileAlignment) {
-      val description = s"Optional Header: Section Alignment (${sectionAlignment}) needs to be >= File Alignment (${fileAlignment})"
+    if (sectionAlignment.isPresent && fileAlignment.isPresent && sectionAlignment.get < fileAlignment.get) {
+      val description = s"Optional Header: Section Alignment (${sectionAlignment.get}) needs to be >= File Alignment (${fileAlignment.get})"
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SECTION_ALIGNMENT)
       List(WrongValueAnomaly(entry, description))
     } else Nil
@@ -296,8 +296,8 @@ trait OptionalHeaderScanning extends AnomalyScanner {
         val description = "Optional Header: Image Base must be a multiple of 64 K, but is " + imageBase
         anomalyList += WrongValueAnomaly(entry, description)
       }
-      if (sizeOfImage != null && (imageBase + sizeOfImage) >= 0x80000000L) {
-        val description = s"Optional Header: ImageBase + SizeOfImage is too large (${imageBase + sizeOfImage}), thus relocated to 0x10000"
+      if (sizeOfImage .isPresent() && (imageBase + sizeOfImage.get) >= 0x80000000L) {
+        val description = s"Optional Header: ImageBase + SizeOfImage is too large (${imageBase + sizeOfImage.get}), thus relocated to 0x10000"
         anomalyList += NonDefaultAnomaly(entry, description)
       }
       if (imageBase == 0) {
@@ -323,6 +323,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    * IMAGE_SUBSYSTEM_WINDOWS_CE_GUI subsystem set.
    */
   private def isWinCE(): Boolean =
+    data.getOptionalHeader().get(WindowsEntryKey.SUBSYSTEM).isPresent() &&
     data.getOptionalHeader().getSubsystem() == Subsystem.IMAGE_SUBSYSTEM_WINDOWS_CE_GUI
 
   /**

@@ -72,7 +72,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
    * @return anomaly list
    */
   private def checkSizeOfOptHeader(coff: COFFFileHeader): List[Anomaly] = {
-    val size = coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
+    val size = coff.getValue(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val entry = coff.getField(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val opt = data.getOptionalHeader()
     if (size < opt.getMinSize) {
@@ -92,7 +92,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
    */
   private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {
     val sectionMax = 96
-    val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
+    val sectionNr = coff.getValue(COFFHeaderKey.SECTION_NR)
     if (sectionNr > sectionMax) {
       val entry = coff.getField(COFFHeaderKey.SECTION_NR)
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr

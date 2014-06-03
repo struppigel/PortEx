@@ -100,10 +100,10 @@ public class Overlay {
 	 */
 	//TODO maybe use SectionLoader instead
 	private long getReadSize(SectionHeader section) {
-		long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
-		long virtSize = section.get(VIRTUAL_SIZE);
-		long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
-		long fileAlign = data.getOptionalHeader().get(
+		long pointerToRaw = section.getValue(POINTER_TO_RAW_DATA);
+		long virtSize = section.getValue(VIRTUAL_SIZE);
+		long sizeOfRaw = section.getValue(SIZE_OF_RAW_DATA);
+		long fileAlign = data.getOptionalHeader().getValue(
 				WindowsEntryKey.FILE_ALIGNMENT);
 		long alignedPointerToRaw = section.getAlignedPointerToRaw();
 		// see Peter Ferrie's answer in:

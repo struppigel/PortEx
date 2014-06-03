@@ -46,7 +46,7 @@ public class PESignature {
     public static final int PE_OFFSET_LOCATION = 0x3c;
 
     /**
-     * The signature bytes
+     * The signature bytes of the string PE\0\0
      */
     public static final byte[] PE_SIG = "PE\0\0".getBytes();
 
@@ -69,7 +69,7 @@ public class PESignature {
     }
 
     /**
-     * 
+     * Reads the PE signature, sets the peOffset
      * 
      * @throws FileFormatException
      *             if file is not a PE file
@@ -112,7 +112,7 @@ public class PESignature {
     }
 
     /**
-     * Throws FileFormatException and sets peOffset to -1 iff b is true
+     * Throws FileFormatException and sets peOffset to absent iff b is true
      * 
      * @param b
      * @throws FileFormatException

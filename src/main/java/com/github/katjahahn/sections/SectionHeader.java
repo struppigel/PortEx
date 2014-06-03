@@ -28,6 +28,7 @@ import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
+import com.google.common.base.Optional;
 
 /**
  * Represents an entry of the {@link SectionTable}. The instance is usually
@@ -62,7 +63,7 @@ public class SectionHeader extends PEHeader {
 	 * @return aligned PointerToRawData
 	 */
 	public long getAlignedPointerToRaw() {
-		return get(POINTER_TO_RAW_DATA) & ~0x1ff;
+		return getValue(POINTER_TO_RAW_DATA) & ~0x1ff;
 	}
 	
 	/**
@@ -71,7 +72,7 @@ public class SectionHeader extends PEHeader {
 	 * @return aligned SizeOfRawData
 	 */
 	public long getAlignedSizeOfRaw() {
-		long sizeOfRaw = get(SIZE_OF_RAW_DATA);
+		long sizeOfRaw = getValue(SIZE_OF_RAW_DATA);
 		if(sizeOfRaw == (sizeOfRaw & ~0xfff)) {
 			return sizeOfRaw;
 		}
@@ -84,7 +85,7 @@ public class SectionHeader extends PEHeader {
 	 * @return aligned VirtualSize
 	 */
 	public long getAlignedVirtualSize() {
-		long virtSize = get(VIRTUAL_SIZE);
+		long virtSize = getValue(VIRTUAL_SIZE);
 		if(virtSize == (virtSize & ~0xfff)) {
 			return virtSize;
 		}
@@ -120,20 +121,38 @@ public class SectionHeader extends PEHeader {
 
 	/**
 	 * Returns the long value that belongs to the given key. Note:
-	 * {@link SectionHeaderKey.NAME} will return null. Use
+	 * {@link SectionHeaderKey.NAME} will throw an exception. Use
 	 * {@link #getName()} instead.
 	 * 
 	 * @param key
 	 * @return long value or null if key doesn't exist
+	 * @throw {@link IllegalArgumentException} if not found
 	 */
 	@Override
-	public Long get(HeaderKey key) {
+	public long getValue(HeaderKey key) {
 		StandardField entry = getField(key);
 		if (entry != null) {
 			return entry.value;
 		}
-		return null;
+		throw new IllegalArgumentException("key not found " + key);
 	}
+	
+	/**
+     * Returns the long value that belongs to the given key. Note:
+     * {@link SectionHeaderKey.NAME} will return absent. Use
+     * {@link #getName()} instead.
+     * 
+     * @param key
+     * @return optional value, absent if key doesn't exist
+     */
+    @Override
+    public Optional<Long> get(HeaderKey key) {
+        StandardField entry = getField(key);
+        if (entry != null) {
+            return Optional.fromNullable(entry.value);
+        }
+        return Optional.absent();
+    }
 
 	/**
 	 * Returns the {@link StandardField} for the given key
@@ -177,7 +196,7 @@ public class SectionHeader extends PEHeader {
 	public List<SectionCharacteristic> getCharacteristics() {
 		List<SectionCharacteristic> list = new ArrayList<>();
 		List<String> keys = IOUtil.getCharacteristicKeys(
-				get(SectionHeaderKey.CHARACTERISTICS),
+				getValue(SectionHeaderKey.CHARACTERISTICS),
 				SECTIONCHARACTERISTICS_SPEC);
 		for (String key : keys) {
 			list.add(SectionCharacteristic.valueOf(key));

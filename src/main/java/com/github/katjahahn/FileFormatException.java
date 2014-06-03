@@ -28,6 +28,11 @@ public class FileFormatException extends IOException {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Creates a FileFormatException instance with the message.
+	 * 
+	 * @param message
+	 */
 	public FileFormatException(String message) {
 		super(message);
 	}

@@ -73,8 +73,8 @@ public class MSDOSLoadModule {
 	 * @return image size
 	 */
 	public int getImageSize() {
-		int filePages = header.get(FILE_PAGES).intValue();
-		int lastPageSize = header.get(LAST_PAGE_SIZE).intValue();
+		int filePages = (int) header.getValue(FILE_PAGES);
+		int lastPageSize = (int) header.getValue(LAST_PAGE_SIZE);
 
 		int imageSize = (filePages - 1) * PAGE_SIZE + lastPageSize;
 		if (lastPageSize == 0) {

@@ -141,7 +141,7 @@ class SignatureScanner(signatures: List[Signature]) {
     val data = PELoader.loadPE(file)
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val section = new SectionLoader(data).getSectionHeaderByRVA(rva)
-    val phystovirt = section.get(SectionHeaderKey.VIRTUAL_ADDRESS) - section.get(SectionHeaderKey.POINTER_TO_RAW_DATA)
+    val phystovirt = section.getValue(SectionHeaderKey.VIRTUAL_ADDRESS) - section.getValue(SectionHeaderKey.POINTER_TO_RAW_DATA)
     rva - phystovirt
   }
 }
