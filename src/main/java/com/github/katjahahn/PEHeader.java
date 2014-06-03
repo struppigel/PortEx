@@ -26,23 +26,9 @@ import com.google.common.base.Optional;
  * @author Katja Hahn
  * 
  */
-public abstract class PEHeader {
+public abstract class PEHeader implements PEModule {
 
     public static final String NL = System.getProperty("line.separator");
-
-    /**
-     * Returns the file offset for the beginning of the module
-     * 
-     * @return file offset for the beginning of the module
-     */
-    public abstract long getOffset();
-
-    /**
-     * Returns a description string of the {@link PEHeader}.
-     * 
-     * @return description string
-     */
-    public abstract String getInfo();
 
     // TODO maybe use factories instead
     /**
