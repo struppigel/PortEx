@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,7 +51,7 @@ public class COFFFileHeader extends PEHeader {
 
     private static final String COFF_SPEC_FILE = "coffheaderspec";
     private final byte[] headerbytes;
-    private List<StandardField> data;
+    private Map<HeaderKey, StandardField> data;
     private Map<String, String[]> specification;
     private final long offset;
 
@@ -95,7 +95,7 @@ public class COFFFileHeader extends PEHeader {
      */
     @Override
     public void read() throws IOException {
-        data = new LinkedList<>();
+        data = new HashMap<>();
         int description = 0;
         int offset = 1;
         int length = 2;
@@ -106,7 +106,7 @@ public class COFFFileHeader extends PEHeader {
                     Integer.parseInt(specs[offset]),
                     Integer.parseInt(specs[length]));
             HeaderKey key = COFFHeaderKey.valueOf(entry.getKey());
-            data.add(new StandardField(key, specs[description], value));
+            data.put(key, new StandardField(key, specs[description], value));
         }
     }
 
@@ -119,7 +119,7 @@ public class COFFFileHeader extends PEHeader {
     public String getInfo() {
         StringBuilder b = new StringBuilder("----------------" + NL
                 + "COFF File Header" + NL + "----------------" + NL);
-        for (StandardField entry : data) {
+        for (StandardField entry : data.values()) {
 
             long value = entry.value;
             HeaderKey key = entry.key;
@@ -180,20 +180,22 @@ public class COFFFileHeader extends PEHeader {
      */
     @Override
     public Optional<Long> get(HeaderKey key) {
-        for (StandardField entry : data) {
-            if (entry.key.equals(key)) {
-                return Optional.of(entry.value);
-            }
+        Optional<StandardField> field = getField(key);
+        if(field.isPresent()) {
+            return Optional.fromNullable(field.get().value);
         }
         return Optional.absent();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getValue(HeaderKey key) {
-        for (StandardField entry : data) {
-            if (entry.key.equals(key)) {
-                return entry.value;
-            }
+        Optional<StandardField> field = getField(key);
+        if(field.isPresent()) {
+            checkNotNull(field.get().value);
+            return field.get().value;
         }
         throw new IllegalArgumentException("invalid key " + key);
     }
@@ -310,12 +312,8 @@ public class COFFFileHeader extends PEHeader {
      */
     @Override
     public Optional<StandardField> getField(HeaderKey key) {
-        for (StandardField entry : data) {
-            if (entry.key.equals(key)) {
-                return Optional.fromNullable(entry);
-            }
-        }
-        return Optional.absent();
+       checkNotNull(data);
+       return Optional.fromNullable(data.get(key));
     }
 
 }

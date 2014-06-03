@@ -98,7 +98,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val ep = opt.getValue(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
     val sizeOfHeaders = opt.getValue(WindowsEntryKey.SIZE_OF_HEADERS)
-    val entry = opt.getStandardFieldEntry(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+    val entry = opt.getStandardFieldEntry(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT).get
     if (ep == 0 && !isDLL) {
       val description = s"Optional Header: address of entry point is ${ep}, but PE is no DLL"
       anomalyList += WrongValueAnomaly(entry, description)
@@ -128,7 +128,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val sectionAlignment = opt.getValue(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.getValue(WindowsEntryKey.FILE_ALIGNMENT)
     if (isLowAlignment(sectionAlignment, fileAlignment)) {
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT).get
       val description = s"Optional Header: Low alignment mode, section alignment = ${sectionAlignment}, file alignment = ${fileAlignment}"
       anomalyList += WrongValueAnomaly(entry, description)
     }
@@ -148,11 +148,11 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
     if (imageSize.isPresent && sectionAlignment.isPresent && imageSize.get % sectionAlignment.get != 0) {
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE).get
       val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${sectionAlignment.get})"
       anomalyList += WrongValueAnomaly(entry, description)
     }
-    val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_HEADERS)
+    val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_HEADERS).get
     if (headerSize.isPresent) {
       if (fileAlignment.isPresent && headerSize.get % fileAlignment.get != 0) {
         val description = s"Optional Header: Size of Headers (${headerSize.get}) must be a multiple of File Alignment (${fileAlignment.get})"
@@ -210,7 +210,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val loaderFlags = opt.get(WindowsEntryKey.LOADER_FLAGS)
     val dllChs = opt.getDllCharacteristics().asScala
     for (ch <- dllChs if ch.isReserved || ch.isDeprecated) {
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.DLL_CHARACTERISTICS)
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.DLL_CHARACTERISTICS).get
       if (ch.isReserved) {
         val description = s"Optional Header: Reserved DllCharacteristic ${ch.toString()} is not 0"
         List(ReservedAnomaly(entry, description))
@@ -221,12 +221,12 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     }
     if (win32version.isPresent() && win32version.get != 0) {
       val description = "Optional Header: Reserved WIN32_VERSION_VALUE is not 0, but " + win32version
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.WIN32_VERSION_VALUE)
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.WIN32_VERSION_VALUE).get
       List(ReservedAnomaly(entry, description))
     }
     if (loaderFlags.isPresent && loaderFlags.get != 0) {
       val description = "Optional Header: Reserved LOADER_FLAGS is not 0, but " + loaderFlags
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.LOADER_FLAGS)
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.LOADER_FLAGS).get
       List(ReservedAnomaly(entry, description))
     }
     anomalyList.toList
@@ -243,8 +243,9 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     def isPowerOfTwo(x: Long): Boolean = (x != 0) && ((x & (x - 1)) == 0)
     val anomalyList = ListBuffer[Anomaly]()
     val sectionAlignment = opt.getValue(WindowsEntryKey.SECTION_ALIGNMENT)
-    val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
-    if (entry != null) {
+    val maybeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
+    if (maybeEntry.isPresent) {
+      val entry = maybeEntry.get
       val fileAlignment = entry.value
       if (!isPowerOfTwo(fileAlignment)) {
         val description = "Optional Header: File Alignment must be a power of 2, but is " + fileAlignment
@@ -274,7 +275,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
     if (sectionAlignment.isPresent && fileAlignment.isPresent && sectionAlignment.get < fileAlignment.get) {
       val description = s"Optional Header: Section Alignment (${sectionAlignment.get}) needs to be >= File Alignment (${fileAlignment.get})"
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SECTION_ALIGNMENT)
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SECTION_ALIGNMENT).get
       List(WrongValueAnomaly(entry, description))
     } else Nil
   }
@@ -288,8 +289,9 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    */
   private def checkImageBase(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val entry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
-    if (entry != null) {
+    val maybeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
+    if (maybeEntry.isPresent) {
+      val entry = maybeEntry.get
       val imageBase = entry.value
       val sizeOfImage = opt.get(WindowsEntryKey.SIZE_OF_IMAGE)
       if (imageBase % 65536 != 0) {
@@ -344,8 +346,9 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val datadirs = opt.getDataDirEntries()
     if (datadirs.size() != 16) {
-      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
-      if (entry != null) {
+      val maybeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
+      if (maybeEntry.isPresent) {
+        val entry = maybeEntry.get
         if (entry.value != 16) {
           val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
           anomalyList += NonDefaultAnomaly(entry, description)

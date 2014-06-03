@@ -14,10 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.optheader;
-
 import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.optheader.WindowsEntryKey.*;
+import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -171,6 +171,7 @@ public class OptionalHeader extends PEHeader {
     public long getValue(HeaderKey key) {
         Optional<StandardField> standardEntry = getField(key);
         if (standardEntry.isPresent()) {
+            checkNotNull(standardEntry.get().value);
             return standardEntry.get().value;
         }
         throw new IllegalArgumentException("No value found for key " + key);
@@ -188,7 +189,7 @@ public class OptionalHeader extends PEHeader {
     public Optional<Long> get(HeaderKey key) {
         Optional<StandardField> standardEntry = getField(key);
         if (standardEntry.isPresent()) {
-            return Optional.of(standardEntry.get().value);
+            return Optional.fromNullable(standardEntry.get().value);
         }
         return Optional.absent();
     }
@@ -221,8 +222,8 @@ public class OptionalHeader extends PEHeader {
      * @return the standard field entry for the given key, null if key doesn't
      *         exist.
      */
-    public StandardField getStandardFieldEntry(StandardFieldEntryKey key) {
-        return standardFields.get(key);
+    public Optional<StandardField> getStandardFieldEntry(StandardFieldEntryKey key) {
+        return Optional.fromNullable(standardFields.get(key));
     }
 
     /**
@@ -232,8 +233,8 @@ public class OptionalHeader extends PEHeader {
      * @return the windows field entry for the given key, null if key doesn't
      *         exist
      */
-    public StandardField getWindowsFieldEntry(WindowsEntryKey key) {
-        return windowsFields.get(key);
+    public Optional<StandardField> getWindowsFieldEntry(WindowsEntryKey key) {
+        return Optional.fromNullable(windowsFields.get(key));
     }
 
     private void loadStandardFields(Map<String, String[]> standardSpec) {

@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.msdos;
-
 import static com.github.katjahahn.ByteArrayUtil.*;
+import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -131,6 +131,7 @@ public class MSDOSHeader extends PEHeader {
     public long getValue(HeaderKey key) {
         Optional<StandardField> field = getField(key);
         if (field.isPresent()) {
+            checkNotNull(field.get().value);
             return field.get().value;
         }
         throw new IllegalArgumentException("value for key not found " + key);
@@ -143,7 +144,7 @@ public class MSDOSHeader extends PEHeader {
     public Optional<Long> get(HeaderKey key) {
         Optional<StandardField> field = getField(key);
         if (field.isPresent()) {
-            return Optional.of(field.get().value);
+            return Optional.fromNullable(field.get().value);
         }
         return Optional.absent();
     }
@@ -153,6 +154,7 @@ public class MSDOSHeader extends PEHeader {
      */
     @Override
     public Optional<StandardField> getField(HeaderKey key) {
+        checkNotNull(headerData);
         return Optional.fromNullable(headerData.get(key));
     }
 

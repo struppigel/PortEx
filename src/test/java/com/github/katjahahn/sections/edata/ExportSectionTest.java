@@ -80,7 +80,7 @@ public class ExportSectionTest {
 	//Patches the expected list to match our RVA that has not the image base added
 	private List<ExportEntry> substractImageBase(List<ExportEntry> expected, PEData datum) {
 		List<ExportEntry> list = new ArrayList<ExportEntry>();
-		long imageBase = datum.getOptionalHeader().getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE).value;
+		long imageBase = datum.getOptionalHeader().getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE).get().value;
 		for(ExportEntry entry : expected) {
 			list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry.name(), entry.ordinal(), false));
 		}
