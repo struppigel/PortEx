@@ -4,6 +4,7 @@
 8;IMAGE_FILE_LOCAL_SYMS_STRIPPED;COFF symbol table entries for local symbols have been removed. DEPRECATED
 10;IMAGE_FILE_AGGRESSIVE_WS_TRIM;Aggressively trim working set. DEPRECATED for Windows 2000 and later.
 20;IMAGE_FILE_LARGE_ADDRESS_AWARE;Application can handle > 2 GB addresses.
+40;RESERVED_40;Value 40, reserved for future use.
 80;IMAGE_FILE_BYTES_REVERSED_LO;little endian. DEPRECATED
 100;IMAGE_FILE_32BIT_MACHINE;Machine is based on a 32-bit-word architecture.
 200;IMAGE_FILE_DEBUG_STRIPPED;Debugging is removed from the image file.

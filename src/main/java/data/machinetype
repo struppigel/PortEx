@@ -2,7 +2,8 @@
 1d3;IMAGE_FILE_MACHINE_AM33;Matsushita AM33
 8664;IMAGE_FILE_MACHINE_AMD64;x64
 1c0;IMAGE_FILE_MACHINE_ARM;ARM little endian
-1c4;IMAGE_FILE_MACHINE_ARMV7;ARMv7 (or higher) Thumb mode only
+1c4;IMAGE_FILE_MACHINE_ARMNT;ARMv7 (or higher) Thumb mode only
+aa64;IMAGE_FILE_MACHINE_ARM64;ARMv8 in 64-bit mode
 ebc;IMAGE_FILE_MACHINE_EBC;EFI byte code
 14c;IMAGE_FILE_MACHINE_I386;Intel 386 or later processors and compatible processors
 200;IMAGE_FILE_MACHINE_IA64;Intel Itanium processor family

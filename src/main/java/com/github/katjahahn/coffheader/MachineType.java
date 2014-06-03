@@ -15,9 +15,103 @@
  ******************************************************************************/
 package com.github.katjahahn.coffheader;
 
+/**
+ * Represents the machine the image file can run on.
+ * <p>
+ * Descriptions are from the PECOFF specification.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum MachineType {
-	UNKNOWN, AM33, AMD64, ARM, ARMV7, EBC, I386, IA64, M32R, MIPS16, MIPSFPU, 
-	MIPSFPU16, POWERPC, POWERPCFP, R4000, SH3, SH3DSP, SH4, SH5, THUMB, WCEMIPSV2;
+	/**
+	 * The contents of this field are assumed to be applicable to any machine type
+	 */
+	UNKNOWN,
+	/**
+	 * Matsushita AM33
+	 */
+	AM33, 
+	/**
+	 * x64
+	 */
+	AMD64, 
+	/**
+	 * ARM little endian
+	 */
+	ARM, 
+	/**
+	 * ARMv7 (or higher) Thumb mode only
+	 */
+	ARMNT, 
+	/**
+	 * ARMv8 in 64-bit mod
+	 */
+	ARM64,
+	/**
+	 * EFI byte code
+	 */
+	EBC, 
+	/**
+	 * Intel 386 or later processors and compatible processors
+	 */
+	I386, 
+	/**
+	 * Intel Itanium processor family
+	 */
+	IA64, 
+	/**
+	 * Mitsubishi M32R little endian
+	 */
+	M32R, 
+	/**
+	 * MIPS16
+	 */
+	MIPS16,
+	/**
+	 * MIPS with FPU
+	 */
+	MIPSFPU, 
+	/**
+	 * MIPS16 with FPU
+	 */
+	MIPSFPU16, 
+	/**
+	 * Power PC little endian
+	 */
+	POWERPC, 
+	/**
+	 * Power PC with floating point support
+	 */
+	POWERPCFP,
+	/**
+	 * MIPS little endian
+	 */
+	R4000, 
+	/**
+	 * Hitachi SH3
+	 */
+	SH3, 
+	/**
+	 * Hitachi SH3 DSP
+	 */
+	SH3DSP,
+	/**
+	 * Hitachi SH4
+	 */
+	SH4, 
+	/**
+	 * Hitachi SH5
+	 */
+	SH5, 
+	/**
+	 * ARM or Thumb ("interworking")
+	 */
+	THUMB, 
+	/**
+	 * MIPS little-endian WCE v2
+	 */
+	WCEMIPSV2;
 	
 	/**
 	 * Returns the key as it is used in the specification.

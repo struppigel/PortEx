@@ -17,7 +17,37 @@ package com.github.katjahahn.sections.rsrc;
 
 import com.github.katjahahn.HeaderKey;
 
+/**
+ * Represents the header key of a resource directory table.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum ResourceDirectoryTableKey implements HeaderKey {
-	CHARACTERISTICS, TIME_DATE_STAMP, MAJOR_VERSION, MINOR_VERSION, 
-	NR_OF_NAME_ENTRIES, NR_OF_ID_ENTRIES;
+	/**
+	 * Resource flags. This field is reserved for future use.
+	 */
+	CHARACTERISTICS, // TODO check as reserved value in anomalies
+	/**
+	 * The time that the resource data was created by the resource compiler.
+	 */
+	TIME_DATE_STAMP,
+	/**
+	 * The major version number, set by the user.
+	 */
+	MAJOR_VERSION,
+	/**
+	 * The minor version number, set by the user.
+	 */
+	MINOR_VERSION,
+	/**
+	 * The number of directory entries immediately following the table that use
+	 * strings to identify Type, Name, or Language entries (depending on the
+	 * level of the table).
+	 */
+	NR_OF_NAME_ENTRIES,
+	/**
+	 * The number of directory entries immediately following the Name entries
+	 */
+	NR_OF_ID_ENTRIES;
 }
