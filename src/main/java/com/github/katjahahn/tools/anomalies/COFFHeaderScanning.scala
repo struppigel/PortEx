@@ -25,6 +25,7 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.IOUtil.{ NL }
+import com.github.katjahahn.coffheader.FileCharacteristic
 
 /**
  * Scans the COFF File Header for anomalies.
@@ -119,18 +120,22 @@ trait COFFHeaderScanning extends AnomalyScanner {
   }
 
   /**
-   * Checks the file characteristics for deprecated flags.
-   * 
+   * Checks the file characteristics for deprecated and reserved flags.
+   *
    * @param coff coff file header
    * @return anomaly list
    */
   private def checkCharacteristics(coff: COFFFileHeader): List[Anomaly] = {
-    val characteristics = coff.getCharacteristicsDescriptions().asScala
+    val characteristics = coff.getCharacteristics().asScala
     characteristics.foldRight(List[Anomaly]())((ch, list) =>
-      if (ch.contains("DEPRECATED")) {
+      if (ch.isDeprecated) {
         val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS)
         val description = "Deprecated Characteristic in COFF File Header: " + ch
         DeprecatedAnomaly(entry, description) :: list
+      } else if (ch.isReserved) {
+        val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS)
+        val description = "Reserved Characteristic in COFF File Header: " + ch
+        ReservedAnomaly(entry, description) :: list
       } else list)
   }
 

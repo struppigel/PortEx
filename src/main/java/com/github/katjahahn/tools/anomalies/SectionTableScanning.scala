@@ -248,7 +248,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val entry = section.getField(SectionHeaderKey.CHARACTERISTICS)
       val sectionName = filteredString(section.getName)
       characteristics.foreach(ch =>
-        if (ch.getDescription.contains("Reserved")) {
+        if (ch.isReserved) {
           val description = s"Section Header ${section.getNumber()} with name ${sectionName}: Reserved characteristic used: ${ch.toString}"
           anomalyList += ReservedAnomaly(entry, description)
         })
@@ -269,6 +269,12 @@ trait SectionTableScanning extends AnomalyScanner {
       val ptrLineNrEntry = section.getField(SectionHeaderKey.POINTER_TO_LINE_NUMBERS)
       val lineNrEntry = section.getField(SectionHeaderKey.NUMBER_OF_LINE_NUMBERS)
       val sectionName = filteredString(section.getName)
+      val characteristics = section.getCharacteristics().asScala
+      for(ch <- characteristics if ch.isDeprecated) {
+        val entry = section.getField(SectionHeaderKey.CHARACTERISTICS)
+        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: Characteristic ${ch.toString} is deprecated"
+        anomalyList += DeprecatedAnomaly(entry, description)
+      }
       for (entry <- List(ptrLineNrEntry, lineNrEntry) if entry.value != 0) {
         val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.key} is deprecated, but has value " + entry.value
         anomalyList += DeprecatedAnomaly(entry, description)

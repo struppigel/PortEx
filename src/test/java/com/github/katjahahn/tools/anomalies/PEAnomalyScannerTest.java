@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.testng.annotations.BeforeClass;
@@ -135,14 +136,15 @@ public class PEAnomalyScannerTest {
 
 	@Test
 	public void deprecated() {
+		System.out.println(Arrays.toString(maxSecXPAnomalies.toArray()));
 		performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,
-				"COFF line numbers have been removed");
+				"IMAGE_FILE_LINE_NUMS_STRIPPED");
 		performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,
-				"COFF symbol table entries");
+				"IMAGE_FILE_LOCAL_SYMS_STRIPPED");
 		performTest(sectionlessAnomalies, AnomalyType.DEPRECATED,
-				"COFF symbol table entries");
+				"IMAGE_FILE_LOCAL_SYMS_STRIPPED");
 		performTest(sectionlessAnomalies, AnomalyType.DEPRECATED,
-				"COFF line numbers have been removed");
+				"IMAGE_FILE_LINE_NUMS_STRIPPED");
 	}
 
 	@Test

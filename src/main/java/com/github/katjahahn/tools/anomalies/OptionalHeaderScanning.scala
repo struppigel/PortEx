@@ -66,7 +66,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def windowsFieldScan(opt: OptionalHeader): List[Anomaly] = {
     checkImageBase(opt) ::: checkSectionAlignment(opt) :::
       checkFileAlignment(opt) ::: checkLowAlignment(opt) :::
-      checkReserved(opt) ::: checkSizes(opt)
+      checkReservedAndDeprecated(opt) ::: checkSizes(opt)
   }
 
   /**
@@ -203,15 +203,20 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    * @param opt optional header
    * @return anomaly list
    */
-  private def checkReserved(opt: OptionalHeader): List[Anomaly] = {
+  private def checkReservedAndDeprecated(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val win32version = opt.get(WindowsEntryKey.WIN32_VERSION_VALUE)
     val loaderFlags = opt.get(WindowsEntryKey.LOADER_FLAGS)
     val dllChs = opt.getDllCharacteristics().asScala
-    for (ch <- dllChs if ch.toString().contains("RESERVED")) {
-      val description = s"Optional Header: Reserved DllCharacteristic ${ch.toString()} is not 0"
+    for (ch <- dllChs if ch.isReserved || ch.isDeprecated) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.DLL_CHARACTERISTICS)
-      List(ReservedAnomaly(entry, description))
+      if (ch.isReserved) {
+        val description = s"Optional Header: Reserved DllCharacteristic ${ch.toString()} is not 0"
+        List(ReservedAnomaly(entry, description))
+      } else {
+        val description = s"Optional Header: Deprecated DllCharacteristic ${ch.toString()} is not 0"
+        List(DeprecatedAnomaly(entry, description))
+      }
     }
     if (win32version != 0) {
       val description = "Optional Header: Reserved WIN32_VERSION_VALUE is not 0, but " + win32version
@@ -327,9 +332,9 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     data.getCOFFFileHeader().getCharacteristics().contains(IMAGE_FILE_DLL)
 
   /**
-   * Scans the data directories for anomalies, including number of entries and 
+   * Scans the data directories for anomalies, including number of entries and
    * reserved entries.
-   * 
+   *
    * @param opt optional header
    * @return anomaly list
    */
