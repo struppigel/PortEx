@@ -29,6 +29,8 @@ The first release will be in December 2014.
 
 #### Including PortEx to a Maven Project
 
+PortEx will be added to the Central Maven Repository with its first release. Until then you can include PortEx as follows:
+
 Create the following portex.pom:
 
 ```
