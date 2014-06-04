@@ -51,7 +51,7 @@ public class MSDOSHeaderTest {
 			for (Entry<MSDOSHeaderKey, String> entry : testdatum.dos.entrySet()) {
 				MSDOSHeaderKey key = entry.getKey();
 				MSDOSHeader dos = pedatum.getMSDOSHeader();
-				int actual = (int) dos.getValue(key);
+				int actual = (int) dos.get(key);
 				String value = entry.getValue().trim();
 				int expected = convertToInt(value);
 				assertEquals(expected, actual);

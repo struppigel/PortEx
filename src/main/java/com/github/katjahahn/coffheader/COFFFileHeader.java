@@ -30,11 +30,10 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.Header;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
-import com.google.common.base.Optional;
 
 /**
  * Represents the COFF File Header
@@ -42,7 +41,7 @@ import com.google.common.base.Optional;
  * @author Katja Hahn
  * 
  */
-public class COFFFileHeader extends PEHeader {
+public class COFFFileHeader extends Header<COFFHeaderKey> {
 
     /**
      * The size of the header is {@value}
@@ -179,25 +178,16 @@ public class COFFFileHeader extends PEHeader {
      * {@inheritDoc}
      */
     @Override
-    public Optional<Long> get(HeaderKey key) {
-        Optional<StandardField> field = getField(key);
-        if(field.isPresent()) {
-            return Optional.fromNullable(field.get().value);
-        }
-        return Optional.absent();
+    public long get(COFFHeaderKey key) {
+        return getField(key).value;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public long getValue(HeaderKey key) {
-        Optional<StandardField> field = getField(key);
-        if(field.isPresent()) {
-            checkNotNull(field.get().value);
-            return field.get().value;
-        }
-        throw new IllegalArgumentException("invalid key " + key);
+    public StandardField getField(COFFHeaderKey key) {
+       return data.get(key); //TODO get rid of null!
     }
 
     /**
@@ -240,7 +230,7 @@ public class COFFFileHeader extends PEHeader {
      */
     public List<FileCharacteristic> getCharacteristics() {
         List<String> keys = IOUtil.getCharacteristicKeys(
-                getValue(CHARACTERISTICS), "characteristics");
+                get(CHARACTERISTICS), "characteristics");
         List<FileCharacteristic> characteristics = new ArrayList<>();
         for (String key : keys) {
             characteristics.add(FileCharacteristic.valueOf(key));
@@ -254,7 +244,7 @@ public class COFFFileHeader extends PEHeader {
      * @return list of characteristic descriptions
      */
     public List<String> getCharacteristicsDescriptions() {
-        return IOUtil.getCharacteristicsDescriptions(getValue(CHARACTERISTICS),
+        return IOUtil.getCharacteristicsDescriptions(get(CHARACTERISTICS),
                 "characteristics");
     }
 
@@ -264,7 +254,7 @@ public class COFFFileHeader extends PEHeader {
      * @return MachineType
      */
     public MachineType getMachineType() {
-        int value = (int) getValue(MACHINE);
+        int value = (int) get(MACHINE);
         try {
             Map<String, String[]> map = IOUtil.readMap("machinetype");
             String hexKey = Integer.toHexString(value);
@@ -286,7 +276,7 @@ public class COFFFileHeader extends PEHeader {
      * @return the date
      */
     public Date getTimeDate() {
-        return convertToDate(getValue(TIME_DATE));
+        return convertToDate(get(TIME_DATE));
     }
 
     /**
@@ -295,7 +285,7 @@ public class COFFFileHeader extends PEHeader {
      * @return size of optional header
      */
     public long getSizeOfOptionalHeader() {
-        return getValue(SIZE_OF_OPT_HEADER);
+        return get(SIZE_OF_OPT_HEADER);
     }
 
     /**
@@ -304,16 +294,7 @@ public class COFFFileHeader extends PEHeader {
      * @return number of sections
      */
     public long getNumberOfSections() {
-        return getValue(SECTION_NR);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<StandardField> getField(HeaderKey key) {
-       checkNotNull(data);
-       return Optional.fromNullable(data.get(key));
+        return get(SECTION_NR);
     }
 
 }

@@ -10,7 +10,7 @@ public interface PEModule {
     public long getOffset();
 
     /**
-     * Returns a description string of the {@link PEHeader}.
+     * Returns a description string of the {@link Header}.
      * 
      * @return description string
      */

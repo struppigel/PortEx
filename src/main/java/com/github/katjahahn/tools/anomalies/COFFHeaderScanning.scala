@@ -72,8 +72,8 @@ trait COFFHeaderScanning extends AnomalyScanner {
    * @return anomaly list
    */
   private def checkSizeOfOptHeader(coff: COFFFileHeader): List[Anomaly] = {
-    val size = coff.getValue(COFFHeaderKey.SIZE_OF_OPT_HEADER)
-    val entry = coff.getField(COFFHeaderKey.SIZE_OF_OPT_HEADER).get
+    val size = coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
+    val entry = coff.getField(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val opt = data.getOptionalHeader()
     if (size < opt.getMinSize) {
       val description = s"COFF File Header: The SizeOfOptionalHeader (${size}) is too small"
@@ -92,9 +92,9 @@ trait COFFHeaderScanning extends AnomalyScanner {
    */
   private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {
     val sectionMax = 96
-    val sectionNr = coff.getValue(COFFHeaderKey.SECTION_NR)
+    val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
     if (sectionNr > sectionMax) {
-      val entry = coff.getField(COFFHeaderKey.SECTION_NR).get
+      val entry = coff.getField(COFFHeaderKey.SECTION_NR)
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
       List(WrongValueAnomaly(entry, description))
     } else Nil
@@ -112,7 +112,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
    * @return anomaly list
    */
   private def checkDeprecated(key: COFFHeaderKey, coff: COFFFileHeader): List[Anomaly] = {
-    val entry = coff.getField(key).get
+    val entry = coff.getField(key)
     if (entry.value != 0) {
       List(DeprecatedAnomaly(entry, "COFF File Header: Deprecated value for " + key.toString + " is " + entry.value))
     } else Nil
@@ -129,11 +129,11 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val characteristics = coff.getCharacteristics().asScala
     characteristics.foldRight(List[Anomaly]())((ch, list) =>
       if (ch.isDeprecated) {
-        val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS).get
+        val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS)
         val description = "Deprecated Characteristic in COFF File Header: " + ch
         DeprecatedAnomaly(entry, description) :: list
       } else if (ch.isReserved) {
-        val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS).get
+        val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS)
         val description = "Reserved Characteristic in COFF File Header: " + ch
         ReservedAnomaly(entry, description) :: list
       } else list)

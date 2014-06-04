@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.HeaderKey;
+import com.github.katjahahn.Header;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
-import com.google.common.base.Optional;
 
 /**
  * Represents an entry of the {@link SectionTable}. The instance is usually
@@ -37,7 +35,7 @@ import com.google.common.base.Optional;
  * @author Katja Hahn
  * 
  */
-public class SectionHeader extends PEHeader {
+public class SectionHeader extends Header<SectionHeaderKey> {
 
 	private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
 	private final HashMap<SectionHeaderKey, StandardField> entries = new HashMap<>();
@@ -63,7 +61,7 @@ public class SectionHeader extends PEHeader {
 	 * @return aligned PointerToRawData
 	 */
 	public long getAlignedPointerToRaw() {
-		return getValue(POINTER_TO_RAW_DATA) & ~0x1ff;
+		return get(POINTER_TO_RAW_DATA) & ~0x1ff;
 	}
 	
 	/**
@@ -72,7 +70,7 @@ public class SectionHeader extends PEHeader {
 	 * @return aligned SizeOfRawData
 	 */
 	public long getAlignedSizeOfRaw() {
-		long sizeOfRaw = getValue(SIZE_OF_RAW_DATA);
+		long sizeOfRaw = get(SIZE_OF_RAW_DATA);
 		if(sizeOfRaw == (sizeOfRaw & ~0xfff)) {
 			return sizeOfRaw;
 		}
@@ -85,7 +83,7 @@ public class SectionHeader extends PEHeader {
 	 * @return aligned VirtualSize
 	 */
 	public long getAlignedVirtualSize() {
-		long virtSize = getValue(VIRTUAL_SIZE);
+		long virtSize = get(VIRTUAL_SIZE);
 		if(virtSize == (virtSize & ~0xfff)) {
 			return virtSize;
 		}
@@ -118,40 +116,13 @@ public class SectionHeader extends PEHeader {
 	public int getNumber() {
 		return number;
 	}
-
-	/**
-	 * Returns the long value that belongs to the given key. Note:
-	 * {@link SectionHeaderKey.NAME} will throw an exception. Use
-	 * {@link #getName()} instead.
-	 * 
-	 * @param key
-	 * @return long value
-	 * @throw {@link IllegalArgumentException} if not found
-	 */
-	@Override
-	public long getValue(HeaderKey key) {
-		Optional<StandardField> entry = getField(key);
-		if (entry.isPresent()) {
-			return entry.get().value;
-		}
-		throw new IllegalArgumentException("key not found " + key);
-	}
 	
 	/**
-     * Returns the long value that belongs to the given key. Note:
-     * {@link SectionHeaderKey.NAME} will return absent. Use
-     * {@link #getName()} instead.
-     * 
-     * @param key
-     * @return optional value, absent if key doesn't exist
+     * {@inheritDoc}
      */
     @Override
-    public Optional<Long> get(HeaderKey key) {
-        Optional<StandardField> entry = getField(key);
-        if (entry.isPresent()) {
-            return Optional.of(entry.get().value);
-        }
-        return Optional.absent();
+    public long get(SectionHeaderKey key) {
+       return getField(key).value;
     }
 
 	/**
@@ -161,8 +132,10 @@ public class SectionHeader extends PEHeader {
 	 * @return standard entry
 	 */
 	@Override
-	public Optional<StandardField> getField(HeaderKey key) {
-		return Optional.fromNullable(entries.get(key));
+	public StandardField getField(SectionHeaderKey key) {
+	    StandardField field = entries.get(key);
+	    assert field != null;
+		return field;
 	}
 
 	/**
@@ -196,7 +169,7 @@ public class SectionHeader extends PEHeader {
 	public List<SectionCharacteristic> getCharacteristics() {
 		List<SectionCharacteristic> list = new ArrayList<>();
 		List<String> keys = IOUtil.getCharacteristicKeys(
-				getValue(SectionHeaderKey.CHARACTERISTICS),
+				get(SectionHeaderKey.CHARACTERISTICS),
 				SECTIONCHARACTERISTICS_SPEC);
 		for (String key : keys) {
 			list.add(SectionCharacteristic.valueOf(key));

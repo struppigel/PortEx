@@ -17,16 +17,13 @@ package com.github.katjahahn;
 
 import java.io.IOException;
 
-import com.google.common.base.Optional;
-
 /**
- * Represents a common structure of a PE like certain headers or the section
- * table
+ * Represents a header of the pe file or a header of a section.
  * 
  * @author Katja Hahn
  * 
  */
-public abstract class PEHeader implements PEModule {
+public abstract class Header <T extends HeaderKey> implements PEModule {
 
     public static final String NL = System.getProperty("line.separator");
 
@@ -40,33 +37,19 @@ public abstract class PEHeader implements PEModule {
     public abstract void read() throws IOException;
 
     /**
-     * Returns the value for the given key or null if there is no value for that
-     * key.
-     * 
-     * @param key
-     * @return long value for the given key or null if value doesn't exist
-     */
-    public abstract Optional<Long> get(HeaderKey key);
-
-    /**
-     * Returns the value for the given key.
+     * Returns the value for the given key
      * 
      * @param key
      * @return long value for the given key
-     * @throws IllegalArgumentException
-     *             if key doesn't exist
      */
-    public abstract long getValue(HeaderKey key)
-            throws IllegalArgumentException;
+    public abstract long get(T key);
 
-    // TODO use Optional instead of returning null!
+
     /**
-     * Returns the optional for the {@link StandardField} for the given key or
-     * absent if there is no value for that key.
+     * Returns the {@link StandardField} for the given key.
      * 
      * @param key
-     * @return {@link StandardField} for the given key or absent if value
-     *         doesn't exist
+     * @return {@link StandardField} for the given key.
      */
-    public abstract Optional<StandardField> getField(HeaderKey key);
+    public abstract StandardField getField(T key);
 }

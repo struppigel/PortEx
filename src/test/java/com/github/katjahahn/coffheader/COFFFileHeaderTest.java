@@ -55,7 +55,7 @@ public class COFFFileHeaderTest {
 			for (Entry<COFFHeaderKey, String> entry : testdatum.coff.entrySet()) {
 				COFFHeaderKey key = entry.getKey();
 				COFFFileHeader coff = pedatum.getCOFFFileHeader();
-				int actual = (int) coff.getValue(key);
+				int actual = (int) coff.get(key);
 				String value = entry.getValue().trim();
 				int expected = convertToInt(value);
 				assertEquals(expected, actual);
@@ -90,7 +90,7 @@ public class COFFFileHeaderTest {
 			String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS)
 					.trim();
 			int expected = convertToInt(value);
-			int actual = (int) pedatum.getCOFFFileHeader().getValue(COFFHeaderKey.CHARACTERISTICS);
+			int actual = (int) pedatum.getCOFFFileHeader().get(COFFHeaderKey.CHARACTERISTICS);
 			assertEquals(expected, actual);
 		}
 	}

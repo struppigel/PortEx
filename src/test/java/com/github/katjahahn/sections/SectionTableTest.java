@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader.TestData;
-import com.google.common.base.Optional;
 
 public class SectionTableTest {
 
@@ -42,8 +41,8 @@ public class SectionTableTest {
 	public void getPointerToRawData() {
 		SectionTable table = pedata.get("strings.exe").getSectionTable();
 		for (SectionHeader section : table.getSectionHeaders()) {
-			Long pointer = section.getValue(POINTER_TO_RAW_DATA);
-			assertEquals(table.getSectionHeader(section.getName()).get(POINTER_TO_RAW_DATA).get(), pointer);
+			long pointer = section.get(POINTER_TO_RAW_DATA);
+			assertEquals(table.getSectionHeader(section.getName()).get(POINTER_TO_RAW_DATA), pointer);
 		}
 	}
 	
@@ -105,14 +104,8 @@ public class SectionTableTest {
 		for (SectionHeader entry : list) {
 			if (entry.getName().equals(section.getName())) {
 				for (SectionHeaderKey key : relevantKeys) {
-					Optional<Long> value1 = entry.get(key);
-					Optional<Long> value2 = section.get(key);
-					if (!value1.isPresent() || !value1.equals(value2)) {
-						logger.warn("comparison failed for key: " + key
-								+ " and value1 " + value1
-								+ " and value2 " + value2);
-					}
-					assertNotNull(value1);
+					long value1 = entry.get(key);
+					long value2 = section.get(key);
 					assertEquals(value1, value2);
 				}
 			}

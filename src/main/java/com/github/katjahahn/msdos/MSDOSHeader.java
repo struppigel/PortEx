@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.msdos;
+
 import static com.github.katjahahn.ByteArrayUtil.*;
-import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.HeaderKey;
+import com.github.katjahahn.Header;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
-import com.google.common.base.Optional;
 
 /**
  * Fetches values from the MSDOS header of the PE.
@@ -36,7 +34,7 @@ import com.google.common.base.Optional;
  * @author Katja Hahn
  * 
  */
-public class MSDOSHeader extends PEHeader {
+public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 
     // Note: This is only the formatted header by now. The actual header may be
     // larger, containing optional values.
@@ -98,7 +96,7 @@ public class MSDOSHeader extends PEHeader {
      * @return size of header
      */
     public long getHeaderSize() {
-        return getValue(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
+        return get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
     }
 
     private boolean hasSignature(byte[] headerbytes) {
@@ -128,34 +126,16 @@ public class MSDOSHeader extends PEHeader {
      * {@inheritDoc}
      */
     @Override
-    public long getValue(HeaderKey key) {
-        Optional<StandardField> field = getField(key);
-        if (field.isPresent()) {
-            checkNotNull(field.get().value);
-            return field.get().value;
-        }
-        throw new IllegalArgumentException("value for key not found " + key);
+    public long get(MSDOSHeaderKey key) {
+        return getField(key).value;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Optional<Long> get(HeaderKey key) {
-        Optional<StandardField> field = getField(key);
-        if (field.isPresent()) {
-            return Optional.fromNullable(field.get().value);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<StandardField> getField(HeaderKey key) {
-        checkNotNull(headerData);
-        return Optional.fromNullable(headerData.get(key));
+    public StandardField getField(MSDOSHeaderKey key) {
+        return headerData.get(key);
     }
 
     /**

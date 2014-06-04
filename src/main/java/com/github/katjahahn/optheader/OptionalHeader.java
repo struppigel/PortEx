@@ -18,7 +18,6 @@ package com.github.katjahahn.optheader;
 import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.optheader.WindowsEntryKey.*;
-import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,13 +29,13 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.Header;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
-import com.github.katjahahn.PEHeader;
 import com.github.katjahahn.StandardField;
 import com.google.common.base.Optional;
 
-public class OptionalHeader extends PEHeader {
+public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     private static final Logger logger = LogManager
             .getLogger(OptionalHeader.class.getName());
@@ -160,84 +159,44 @@ public class OptionalHeader extends PEHeader {
     }
 
     /**
-     * Returns either a windows field entry value or a standard field entry
-     * value, depending on the given key.
-     * 
-     * @param key
-     * @return the windows field entry value or the standard field entry value
-     *         that belongs to the given key
-     * @throws IllegalArgumentException
-     *             if no key not found
+     * {@inheritDoc}
      */
     @Override
-    public long getValue(HeaderKey key) {
-        Optional<StandardField> standardEntry = getField(key);
-        if (standardEntry.isPresent()) {
-            checkNotNull(standardEntry.get().value);
-            return standardEntry.get().value;
-        }
-        throw new IllegalArgumentException("No value found for key " + key);
+    public long get(OptionalHeaderKey key) {
+        return getField(key).value;
     }
 
     /**
-     * Returns either a windows field entry value or a standard field entry
-     * value, depending on the given key.
-     * 
-     * @param key
-     * @return the windows field entry value or the standard field entry value
-     *         that belongs to the given key, absent optional if key not found
+     * {@inheritDoc}
      */
     @Override
-    public Optional<Long> get(HeaderKey key) {
-        Optional<StandardField> standardEntry = getField(key);
-        if (standardEntry.isPresent()) {
-            return Optional.fromNullable(standardEntry.get().value);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Returns either a windows field entry value or a standard field entry
-     * value, depending on the given key.
-     * 
-     * @param key
-     * @return the windows field entry value or the standard field entry value
-     *         that belongs to the given key, absent optional if there is no
-     *         {@link StandardField} for this key available
-     */
-    @Override
-    public Optional<StandardField> getField(HeaderKey key) {
-        StandardField standardEntry = null;
+    public StandardField getField(OptionalHeaderKey key) {
         if (key instanceof StandardFieldEntryKey) {
-            standardEntry = standardFields.get(key);
+            return standardFields.get(key);
 
-        } else {
-            standardEntry = windowsFields.get(key);
         }
-        return Optional.fromNullable(standardEntry);
+        return windowsFields.get(key);
     }
 
     /**
-     * Returns the standard field entry for the given key. //TODO use map
+     * Returns the standard field entry for the given key.
      * 
      * @param key
-     * @return the standard field entry for the given key, absent if key doesn't
-     *         exist.
+     * @return the standard field entry for the given key
      */
-    public Optional<StandardField> getStandardFieldEntry(
+    public StandardField getStandardFieldEntry(
             StandardFieldEntryKey key) {
-        return Optional.fromNullable(standardFields.get(key));
+        return standardFields.get(key);
     }
 
     /**
      * Returns the windows field entry for the given key.
      * 
      * @param key
-     * @return the windows field entry for the given key, absent if key doesn't
-     *         exist
+     * @return the windows field entry for the given key
      */
-    public Optional<StandardField> getWindowsFieldEntry(WindowsEntryKey key) {
-        return Optional.fromNullable(windowsFields.get(key));
+    public StandardField getWindowsFieldEntry(WindowsEntryKey key) {
+        return windowsFields.get(key);
     }
 
     private void loadStandardFields(Map<String, String[]> standardSpec) {
@@ -491,8 +450,8 @@ public class OptionalHeader extends PEHeader {
      * @return relocated image base
      */
     public long getRelocatedImageBase() {
-        long imageBase = getValue(WindowsEntryKey.IMAGE_BASE);
-        long sizeOfImage = getValue(WindowsEntryKey.SIZE_OF_IMAGE);
+        long imageBase = get(WindowsEntryKey.IMAGE_BASE);
+        long sizeOfImage = get(WindowsEntryKey.SIZE_OF_IMAGE);
         if (imageBase + sizeOfImage >= 0x80000000L || imageBase == 0L) {
             return 0x10000L;
         }
@@ -506,13 +465,11 @@ public class OptionalHeader extends PEHeader {
      */
     public List<DllCharacteristic> getDllCharacteristics() {
         List<DllCharacteristic> dllChs = new ArrayList<>();
-        Optional<Long> characteristics = get(DLL_CHARACTERISTICS);
-        if (characteristics.isPresent()) {
-            List<String> keys = IOUtil.getCharacteristicKeys(
-                    characteristics.get(), DLL_CHARACTERISTICS_SPEC);
-            for (String key : keys) {
-                dllChs.add(DllCharacteristic.valueOf(key));
-            }
+        long characteristics = get(DLL_CHARACTERISTICS);
+        List<String> keys = IOUtil.getCharacteristicKeys(characteristics,
+                DLL_CHARACTERISTICS_SPEC);
+        for (String key : keys) {
+            dllChs.add(DllCharacteristic.valueOf(key));
         }
         return dllChs;
     }
@@ -524,7 +481,7 @@ public class OptionalHeader extends PEHeader {
      */
     public List<String> getDllCharacteristicsDescriptions() {
         return IOUtil.getCharacteristicsDescriptions(
-                getValue(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
+                get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
     }
 
     /**
@@ -566,7 +523,7 @@ public class OptionalHeader extends PEHeader {
      * @return subsystem instance
      */
     public Subsystem getSubsystem() {
-        long subsystem = getValue(SUBSYSTEM);
+        long subsystem = get(SUBSYSTEM);
         String key = getSubsystemKey((int) subsystem);
         return Subsystem.valueOf(key);
     }

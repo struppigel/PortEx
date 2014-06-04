@@ -15,9 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.optheader;
 
-import com.github.katjahahn.HeaderKey;
 
-public enum WindowsEntryKey implements HeaderKey {
+public enum WindowsEntryKey implements OptionalHeaderKey {
 
 	IMAGE_BASE, SECTION_ALIGNMENT, FILE_ALIGNMENT, MAJOR_OS_VERSION, 
 	MINOR_OS_VERSION, MAJOR_IMAGE_VERSION, MINOR_IMAGE_VERSION, 

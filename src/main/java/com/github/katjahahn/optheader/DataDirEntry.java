@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.optheader;
 
-import static com.github.katjahahn.PEHeader.*;
+import static com.github.katjahahn.Header.*;
 import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
 import java.util.List;
@@ -92,8 +92,8 @@ public class DataDirEntry {
      */
     public long getFileOffset(SectionTable table) { // TODO not in use?
         SectionHeader section = getSectionTableEntry(table);
-        long sectionRVA = section.getValue(VIRTUAL_ADDRESS);
-        long sectionOffset = section.getValue(POINTER_TO_RAW_DATA);
+        long sectionRVA = section.get(VIRTUAL_ADDRESS);
+        long sectionOffset = section.get(POINTER_TO_RAW_DATA);
         return (virtualAddress - sectionRVA) + sectionOffset;
     }
 
@@ -110,8 +110,8 @@ public class DataDirEntry {
     public SectionHeader getSectionTableEntry(SectionTable table) {
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
-            int vSize = (int) section.getValue(VIRTUAL_SIZE);
-            int vAddress = (int) section.getValue(VIRTUAL_ADDRESS);
+            int vSize = (int) section.get(VIRTUAL_SIZE);
+            int vAddress = (int) section.get(VIRTUAL_ADDRESS);
             if (rvaIsWithin(vAddress, vSize)) {
                 return section;
             }
