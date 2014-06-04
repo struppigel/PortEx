@@ -338,6 +338,10 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val datadirs = opt.getDataDirEntries()
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
+      if(entry.value == 0) {
+        val description = "Optional Header: No data directory present"
+        anomalyList += StructuralAnomaly(description)
+      }
       if (entry.value != 16) {
         val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
         anomalyList += NonDefaultAnomaly(entry, description)

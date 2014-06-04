@@ -50,7 +50,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
 
     private static final String COFF_SPEC_FILE = "coffheaderspec";
     private final byte[] headerbytes;
-    private Map<HeaderKey, StandardField> data;
+    private Map<COFFHeaderKey, StandardField> data;
     private Map<String, String[]> specification;
     private final long offset;
 
@@ -94,7 +94,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Override
     public void read() throws IOException {
-        data = new HashMap<>();
+        data = init();
         int description = 0;
         int offset = 1;
         int length = 2;
@@ -104,9 +104,19 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             long value = getBytesLongValue(headerbytes,
                     Integer.parseInt(specs[offset]),
                     Integer.parseInt(specs[length]));
-            HeaderKey key = COFFHeaderKey.valueOf(entry.getKey());
+            COFFHeaderKey key = COFFHeaderKey.valueOf(entry.getKey());
             data.put(key, new StandardField(key, specs[description], value));
         }
+    }
+    
+    
+
+    private Map<COFFHeaderKey, StandardField> init() {
+        Map<COFFHeaderKey, StandardField> map = new HashMap<>();
+        for(COFFHeaderKey key : COFFHeaderKey.values()) {
+            map.put(key, new StandardField(key, "", 0L));
+        }
+        return map;
     }
 
     /**

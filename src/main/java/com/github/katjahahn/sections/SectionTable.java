@@ -96,7 +96,6 @@ public class SectionTable {
 
                 if (key.equals(SectionHeaderKey.NAME)) {
                     sectionEntry.setName(getUTF8String(section));
-                    continue;
                 }
 
                 sectionEntry.add(new StandardField(key, specs[0], value));

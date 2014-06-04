@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,6 +38,9 @@ import com.github.katjahahn.optheader.OptionalHeader.MagicNumber;
 import com.google.common.base.Optional;
 
 public class OptionalHeaderTest {
+    
+    private static final Logger logger = LogManager
+            .getLogger(OptionalHeaderTest.class.getName());
 
     private List<TestData> testdata;
     private Map<String, PEData> pedata = new HashMap<>();
@@ -161,17 +166,12 @@ public class OptionalHeaderTest {
             assertNotNull(list);
             int expected = StandardFieldEntryKey.values().length;
             int actual = list.size();
-            MagicNumber magic = pedatum.getOptionalHeader().getMagicNumber();
-            if (magic != MagicNumber.PE32) {
-                expected--;
-            }
             if (actual != expected) {
                 for (StandardField entry : list) {
-                    System.err.println(entry.description); // debug purposes
+                    logger.error(entry.description + " | " + entry.key); // debug purposes
                 }
             }
             assertEquals(actual, expected);
-            ;
         }
     }
 

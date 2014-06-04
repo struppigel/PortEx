@@ -32,7 +32,7 @@ import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
 
 public class TestreportsReader {
 
-	private static final Logger logger = LogManager.getLogger(IOUtil.class
+	private static final Logger logger = LogManager.getLogger(TestreportsReader.class
 			.getName());
 	public static final String NL = System.getProperty("line.separator");
 
@@ -154,6 +154,7 @@ public class TestreportsReader {
 	public static TestData readTestData(String filename) throws IOException {
 		TestData data = new TestData();
 		data.filename = filename;
+		logger.debug("reading file report " + filename);
 		Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
 		try (BufferedReader reader = Files.newBufferedReader(testfile,
 				Charset.forName("ISO-8859-1"))) {
@@ -199,6 +200,7 @@ public class TestreportsReader {
 	private static SectionHeader readSectionEntry(BufferedReader reader,
 			String line, int number) throws IOException {
 		SectionHeader entry = new SectionHeader(number, -1);
+		int entryCounter = 0;
 		while (line != null) {
 			String[] split = line.split(":");
 			if (split.length < 2) {
@@ -206,24 +208,22 @@ public class TestreportsReader {
 			}
 			if (split[0].contains("Name")) {
 				String name = split[1].trim();
+				logger.debug("read section name " + name);
 				entry.setName(name);
 			} else {
 				long value = convertToLong(split[1]);
-				SectionHeaderKey key = getSectionKeyFor(split[0].trim());
+				String keyString = split[0].trim();
+				SectionHeaderKey key = getSectionKeyFor(keyString);
 				if (key != null) {
 					entry.add(new StandardField(key, null, value));
-					if (key == SectionHeaderKey.CHARACTERISTICS) {
-						logger.debug("characteristics read: "
-								+ Long.toHexString(value));
-					}
+					entryCounter++;
 				} else {
 					logger.warn("key was null for " + line);
 				}
 			}
 			line = reader.readLine();
 		}
-		if (entry.getEntryMap().size() == 5) { // exactly 5 values are in the
-												// pev report
+		if (entryCounter == 5) { // exactly 5 values are in the pev report
 			return entry;
 		}
 		return null;

@@ -200,7 +200,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     }
 
     private void loadStandardFields(Map<String, String[]> standardSpec) {
-        standardFields = new HashMap<>();
+        standardFields = initStandardFields();
         int description = 0;
         int offsetLoc = 1;
         int lengthLoc = 2;
@@ -218,6 +218,14 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             }
         }
 
+    }
+
+    private Map<StandardFieldEntryKey, StandardField> initStandardFields() {
+        Map<StandardFieldEntryKey, StandardField> map = new HashMap<>();
+        for(StandardFieldEntryKey key : StandardFieldEntryKey.values()) {
+            map.put(key, new StandardField(key, "absent", 0L));
+        }
+        return map;
     }
 
     private void loadDataDirectories(List<String[]> datadirSpec) {
@@ -256,7 +264,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     }
 
     private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec) {
-        windowsFields = new HashMap<>();
+        windowsFields = initWindowsFields();
         int offsetLoc;
         int lengthLoc;
         final int description = 0;
@@ -288,6 +296,14 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 }
             }
         }
+    }
+    
+    private Map<WindowsEntryKey, StandardField> initWindowsFields() {
+        Map<WindowsEntryKey, StandardField> map = new HashMap<>();
+        for(WindowsEntryKey key : WindowsEntryKey.values()) {
+            map.put(key, new StandardField(key, "absent", 0L));
+        }
+        return map;
     }
 
     @Override

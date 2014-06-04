@@ -69,7 +69,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         if (!hasSignature(headerbytes)) {
             throw new IOException("No PE Signature found");
         }
-        headerData = new HashMap<>();
+        headerData = init();
         int offsetLoc = 0;
         int sizeLoc = 1;
         int descriptionLoc = 2;
@@ -88,6 +88,14 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
             e.printStackTrace();
         }
 
+    }
+    
+    private Map<MSDOSHeaderKey, StandardField> init() {
+        Map<MSDOSHeaderKey, StandardField> map = new HashMap<>();
+        for(MSDOSHeaderKey key : MSDOSHeaderKey.values()) {
+            map.put(key, new StandardField(key, "", 0L));
+        }
+        return map;
     }
 
     /**

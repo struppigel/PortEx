@@ -37,182 +37,189 @@ import com.github.katjahahn.StandardField;
  */
 public class SectionHeader extends Header<SectionHeaderKey> {
 
-	private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
-	private final HashMap<SectionHeaderKey, StandardField> entries = new HashMap<>();
-	private String name;
-	private final int number;
-	private final long offset;
+    private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
+    private final Map<SectionHeaderKey, StandardField> entries = initEntries();
+    private String name;
+    private final int number;
+    private final long offset;
 
-	/**
-	 * Creates a Section Table Entry instance.
-	 * 
-	 * @param number
-	 *            the number of the entry, beginning by 1 with the first entry
-	 *            in the Section Headers
-	 */
-	public SectionHeader(int number, long offset) {
-		this.number = number;
-		this.offset = offset;
-	}
-	
-	/**
-	 * Returns the PointerToRawData rounded down to a multiple of 512.
-	 * 
-	 * @return aligned PointerToRawData
-	 */
-	public long getAlignedPointerToRaw() {
-		return get(POINTER_TO_RAW_DATA) & ~0x1ff;
-	}
-	
-	/**
-	 * Returns the SizeOfRawData rounded up to a multiple of 4kb.
-	 * 
-	 * @return aligned SizeOfRawData
-	 */
-	public long getAlignedSizeOfRaw() {
-		long sizeOfRaw = get(SIZE_OF_RAW_DATA);
-		if(sizeOfRaw == (sizeOfRaw & ~0xfff)) {
-			return sizeOfRaw;
-		}
-		return (sizeOfRaw + 0xfff) & ~0xfff;
-	}
-	
-	/**
-	 * Returns the VirtualSize rounded up to a multiple of 4kb.
-	 * 
-	 * @return aligned VirtualSize
-	 */
-	public long getAlignedVirtualSize() {
-		long virtSize = get(VIRTUAL_SIZE);
-		if(virtSize == (virtSize & ~0xfff)) {
-			return virtSize;
-		}
-		return (virtSize + 0xfff) & ~0xfff;
-	}
+    /**
+     * Creates a Section Table Entry instance.
+     * 
+     * @param number
+     *            the number of the entry, beginning by 1 with the first entry
+     *            in the Section Headers
+     */
+    public SectionHeader(int number, long offset) {
+        this.number = number;
+        this.offset = offset;
+    }
 
-	/**
-	 * Sets the name of the section table entry
-	 * 
-	 * @param name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    private Map<SectionHeaderKey, StandardField> initEntries() {
+        Map<SectionHeaderKey, StandardField> map = new HashMap<>();
+        for (SectionHeaderKey key : SectionHeaderKey.values()) {
+            map.put(key, new StandardField(key, "", 0L));
+        }
+        return map;
+    }
 
-	/**
-	 * Returns the name of the section table entry
-	 * 
-	 * @return name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * Returns the PointerToRawData rounded down to a multiple of 512.
+     * 
+     * @return aligned PointerToRawData
+     */
+    public long getAlignedPointerToRaw() {
+        return get(POINTER_TO_RAW_DATA) & ~0x1ff;
+    }
 
-	/**
-	 * Returns the number of the section table entry
-	 * 
-	 * @return number
-	 */
-	public int getNumber() {
-		return number;
-	}
-	
-	/**
+    /**
+     * Returns the SizeOfRawData rounded up to a multiple of 4kb.
+     * 
+     * @return aligned SizeOfRawData
+     */
+    public long getAlignedSizeOfRaw() {
+        long sizeOfRaw = get(SIZE_OF_RAW_DATA);
+        if (sizeOfRaw == (sizeOfRaw & ~0xfff)) {
+            return sizeOfRaw;
+        }
+        return (sizeOfRaw + 0xfff) & ~0xfff;
+    }
+
+    /**
+     * Returns the VirtualSize rounded up to a multiple of 4kb.
+     * 
+     * @return aligned VirtualSize
+     */
+    public long getAlignedVirtualSize() {
+        long virtSize = get(VIRTUAL_SIZE);
+        if (virtSize == (virtSize & ~0xfff)) {
+            return virtSize;
+        }
+        return (virtSize + 0xfff) & ~0xfff;
+    }
+
+    /**
+     * Sets the name of the section table entry
+     * 
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Returns the name of the section table entry
+     * 
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the number of the section table entry
+     * 
+     * @return number
+     */
+    public int getNumber() {
+        return number;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public long get(SectionHeaderKey key) {
-       return getField(key).value;
+        return getField(key).value;
     }
 
-	/**
-	 * Returns the {@link StandardField} for the given key
-	 * 
-	 * @param key
-	 * @return standard entry
-	 */
-	@Override
-	public StandardField getField(SectionHeaderKey key) {
-	    StandardField field = entries.get(key);
-	    assert field != null;
-		return field;
-	}
+    /**
+     * Returns the {@link StandardField} for the given key
+     * 
+     * @param key
+     * @return standard entry
+     */
+    @Override
+    public StandardField getField(SectionHeaderKey key) {
+        StandardField field = entries.get(key);
+        assert field != null;
+        return field;
+    }
 
-	/**
-	 * Returns a map that contains all entries and their
-	 * {@link SectionHeaderKey} as key
-	 * 
-	 * @return a map of all entries
-	 */
-	public Map<SectionHeaderKey, StandardField> getEntryMap() {
-		return new HashMap<>(entries);
-	}
+    /**
+     * Returns a map that contains all entries and their
+     * {@link SectionHeaderKey} as key
+     * 
+     * @return a map of all entries
+     */
+    public Map<SectionHeaderKey, StandardField> getEntryMap() {
+        return new HashMap<>(entries);
+    }
 
-	/**
-	 * Adds a {@link StandardField} to the section table entry
-	 * 
-	 * @param entry
-	 */
-	public void add(StandardField entry) {
-		if (entry.key instanceof SectionHeaderKey) {
-			entries.put((SectionHeaderKey) entry.key, entry);
-		} else {
-			throw new IllegalArgumentException("invalid key");
-		}
-	}
+    /**
+     * Adds a {@link StandardField} to the section table entry
+     * 
+     * @param entry
+     */
+    public void add(StandardField entry) {
+        if (entry.key instanceof SectionHeaderKey) {
+            entries.put((SectionHeaderKey) entry.key, entry);
+        } else {
+            throw new IllegalArgumentException("invalid key");
+        }
+    }
 
-	/**
-	 * Returns a list of all characteristics of that section.
-	 * 
-	 * @return list of all characteristics
-	 */
-	public List<SectionCharacteristic> getCharacteristics() {
-		List<SectionCharacteristic> list = new ArrayList<>();
-		List<String> keys = IOUtil.getCharacteristicKeys(
-				get(SectionHeaderKey.CHARACTERISTICS),
-				SECTIONCHARACTERISTICS_SPEC);
-		for (String key : keys) {
-			list.add(SectionCharacteristic.valueOf(key));
-		}
-		return list;
-	}
+    /**
+     * Returns a list of all characteristics of that section.
+     * 
+     * @return list of all characteristics
+     */
+    public List<SectionCharacteristic> getCharacteristics() {
+        List<SectionCharacteristic> list = new ArrayList<>();
+        List<String> keys = IOUtil.getCharacteristicKeys(
+                get(SectionHeaderKey.CHARACTERISTICS),
+                SECTIONCHARACTERISTICS_SPEC);
+        for (String key : keys) {
+            list.add(SectionCharacteristic.valueOf(key));
+        }
+        return list;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append("Name: " + getName() + IOUtil.NL);
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("Name: " + getName() + IOUtil.NL);
 
-		for (Entry<SectionHeaderKey, StandardField> entry : entries
-				.entrySet()) {
-			Long value = entry.getValue().value;
-			SectionHeaderKey key = entry.getKey();
-			if (key == SectionHeaderKey.CHARACTERISTICS) {
-				b.append(entry.getValue().description
-						+ ": "
-						+ IOUtil.NL
-						+ IOUtil.getCharacteristics(value,
-								SECTIONCHARACTERISTICS_SPEC) + IOUtil.NL);
-			} else {
-				b.append(entry.getValue().description + ": " + value + " (0x"
-						+ Long.toHexString(value) + ")" + IOUtil.NL);
-			}
-		}
-		return b.toString();
-	}
+        for (Entry<SectionHeaderKey, StandardField> entry : entries.entrySet()) {
+            Long value = entry.getValue().value;
+            SectionHeaderKey key = entry.getKey();
+            if (key == SectionHeaderKey.CHARACTERISTICS) {
+                b.append(entry.getValue().description
+                        + ": "
+                        + IOUtil.NL
+                        + IOUtil.getCharacteristics(value,
+                                SECTIONCHARACTERISTICS_SPEC) + IOUtil.NL);
+            } else {
+                b.append(entry.getValue().description + ": " + value + " (0x"
+                        + Long.toHexString(value) + ")" + IOUtil.NL);
+            }
+        }
+        return b.toString();
+    }
 
-	@Override
-	public long getOffset() {
-		return offset;
-	}
+    @Override
+    public long getOffset() {
+        return offset;
+    }
 
-	@Override
-	public String getInfo() {
-		return this.toString();
-	}
+    @Override
+    public String getInfo() {
+        return this.toString();
+    }
 
-	@Override
-	public void read() throws IOException {
-		// TODO Auto-generated method stub
-	}
-	
+    @Override
+    public void read() throws IOException {
+        // TODO Auto-generated method stub
+    }
+
 }

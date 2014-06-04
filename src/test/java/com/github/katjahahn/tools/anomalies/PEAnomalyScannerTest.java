@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -20,6 +22,9 @@ import com.github.katjahahn.sections.SectionHeaderKey;
 
 public class PEAnomalyScannerTest {
 
+    @SuppressWarnings("unused")
+    private static final Logger logger = LogManager
+            .getLogger(PEAnomalyScannerTest.class.getName());
 	private static final String RESOURCE_FOLDER = "src/main/resources/";
 	private static final String UNUSUAL_FOLDER = "src/main/resources/unusualfiles/";
 	private List<Anomaly> tinyAnomalies;
@@ -104,9 +109,9 @@ public class PEAnomalyScannerTest {
 
 	@Test
 	public void noDataDirs() {
-		performTest(tinyAnomalies, AnomalyType.STRUCTURE, "Data Directory");
-		performTest(tinyAnomalies, AnomalyType.STRUCTURE,
-				"NumberOfRVAAndSizes not given");
+		performTest(tinyAnomalies, AnomalyType.STRUCTURE, "No data directory");
+		performTest(tinyAnomalies, AnomalyType.NON_DEFAULT,
+				"NumberOfRVAAndSizes");
 	}
 
 	@Test
