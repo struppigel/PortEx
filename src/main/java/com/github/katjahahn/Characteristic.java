@@ -16,7 +16,7 @@
 package com.github.katjahahn;
 
 /**
- * Represents characteristical flags used by the PE format. These include file
+ * Represents characteristic flags used by the PE format. These include file
  * characteristics, dll characteristics, subsystem, machinetype, resourcetype or
  * similar.
  * 

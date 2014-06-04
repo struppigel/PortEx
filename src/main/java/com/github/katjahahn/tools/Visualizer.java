@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Katja Hahn
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.github.katjahahn.tools;
 
 import java.awt.Color;
@@ -24,7 +39,15 @@ import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
+import com.google.common.base.Optional;
+import com.google.java.contract.Ensures;
+import com.google.java.contract.Requires;
 
+/**
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class Visualizer {
     // TODO make with work with tinype and duplicated sections
 
@@ -41,7 +64,7 @@ public class Visualizer {
      */
     public static final int DEFAULT_PIXEL_SIZE = 5;
     /**
-     * The default length of the legend is {@value}
+     * The default width of the legend is {@value}
      */
     public static final int DEFAULT_LEGEND_WIDTH = 200;
     /**
@@ -61,15 +84,12 @@ public class Visualizer {
     private static final int LEGEND_GAP = 10;
     private static final int LEGEND_ENTRY_HEIGHT = 20;
 
-    private final int additionalGap;
-    private final int pixelSize;
-    private final boolean pixelated;
-    private final int fileWidth;
-    private final int height;
-    private final int imageWidth;
-    private final int legendWidth;
-    private final int xPixels;
-    private final int yPixels;
+    private int additionalGap;
+    private int pixelSize;
+    private boolean pixelated;
+    private int fileWidth;
+    private int height;
+    private int legendWidth;
     private final Color msdosColor = new Color(0, 0, 200);
     private final Color coffColor = new Color(0, 200, 0);
     private final Color optColor = new Color(200, 0, 0);
@@ -158,7 +178,7 @@ public class Visualizer {
     public Visualizer(PEData data, int pixelSize, boolean pixelated,
             int additionalGap) {
         this(data, pixelSize, pixelated, additionalGap, DEFAULT_FILE_WIDTH,
-                DEFAULT_FILE_WIDTH + DEFAULT_LEGEND_WIDTH, DEFAULT_HEIGHT);
+                DEFAULT_LEGEND_WIDTH, DEFAULT_HEIGHT);
     }
 
     /**
@@ -176,19 +196,17 @@ public class Visualizer {
      *            others, e.g. for the resource section
      * @param fileWidth
      *            the width of the shown file
-     * @param imageWidth
-     *            the width of the whole image, fileWidth - imageWidth is the
-     *            width for the legend
+     * @param legendWidth
+     *            the width of the legend
      * @param imageHeight
      *            the height of the image
      */
     public Visualizer(PEData data, int pixelSize, boolean pixelated,
-            int additionalGap, int fileWidth, int imageWidth, int imageHeight) {
+            int additionalGap, int fileWidth, int legendWidth, int imageHeight) {
         this.additionalGap = additionalGap;
         this.fileWidth = fileWidth;
-        this.imageWidth = imageWidth;
+        this.legendWidth = legendWidth;
         this.height = imageHeight;
-        this.legendWidth = imageWidth - fileWidth;
         this.data = data;
         this.pixelated = pixelated;
         if (pixelated && pixelSize < 2 + additionalGap) {
@@ -196,8 +214,6 @@ public class Visualizer {
         } else {
             this.pixelSize = pixelSize;
         }
-        this.xPixels = this.fileWidth / this.pixelSize;
-        this.yPixels = this.height / this.pixelSize;
     }
 
     /**
@@ -207,8 +223,11 @@ public class Visualizer {
      * @throws IOException
      *             if sections can not be read
      */
+    @Ensures({ "result != null",
+            "result.getWidth() == legendWidth + fileWidth",
+            "result.getHeight() == height" })
     public BufferedImage createImage() throws IOException {
-        image = new BufferedImage(imageWidth, height, IMAGE_TYPE);
+        image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
 
         long msdosOffset = 0;
         long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
@@ -239,9 +258,10 @@ public class Visualizer {
         return image;
     }
 
+    @Ensures("result > 0")
     private long withMinLength(long length) {
         double minLength = data.getFile().length()
-                / (double) (xPixels * yPixels);
+                / (double) (getXPixels() * getYPixels());
         if (minLength < 1) {
             minLength = 1;
         }
@@ -283,16 +303,17 @@ public class Visualizer {
             long size = debug.getSize();
             drawPixels(debugColor, offset, size, additionalGap);
         }
-        Long ep = getEntryPoint();
-        if (ep != null) {
+        Optional<Long> ep = getEntryPoint();
+        if (ep.isPresent()) {
             epAvailable = true;
             // draw exactly one pixel
             long size = withMinLength(0);
-            drawPixels(epColor, ep, size, additionalGap);
+            drawPixels(epColor, ep.get(), size, additionalGap);
         }
     }
 
-    private Long getEntryPoint() {
+    @Ensures("result != null")
+    private Optional<Long> getEntryPoint() {
         long rva = data.getOptionalHeader().get(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
         SectionHeader section = new SectionLoader(data)
@@ -300,9 +321,9 @@ public class Visualizer {
         if (section != null) {
             long phystovirt = section.get(SectionHeaderKey.VIRTUAL_ADDRESS)
                     - section.get(SectionHeaderKey.POINTER_TO_RAW_DATA);
-            return rva - phystovirt;
+            return Optional.of(rva - phystovirt);
         }
-        return null;
+        return Optional.absent();
     }
 
     private void drawSections() {
@@ -320,6 +341,8 @@ public class Visualizer {
         }
     }
 
+    @Requires("color != null")
+    @Ensures("result != null")
     private Color variate(Color color) {
         final int diff = 30;
         Color newColor = new Color(color.getRed() - diff, color.getGreen()
@@ -369,10 +392,12 @@ public class Visualizer {
         }
     }
 
+    @Requires({ "description != null", "color != null" })
     private void drawLegendEntry(int number, String description, Color color) {
         drawLegendEntry(number, description, color, false);
     }
 
+    @Requires({ "description != null", "color != null" })
     private void drawLegendEntry(int number, String description, Color color,
             boolean withOutLine) {
         int startX = fileWidth + LEGEND_GAP;
@@ -395,6 +420,7 @@ public class Visualizer {
         g.drawString(description, stringX, stringY);
     }
 
+    @Requires("color != null")
     private void drawRect(Color color, int startX, int startY, int width,
             int height) {
         for (int x = startX; x < startX + width; x++) {
@@ -408,45 +434,51 @@ public class Visualizer {
         }
     }
 
+    @Requires("color != null")
     private void drawPixels(Color color, long fileOffset, long fileLength) {
         drawPixels(color, fileOffset, fileLength, 0);
     }
 
+    @Requires("color != null")
     private void drawPixels(Color color, long fileOffset, long fileLength,
             int additionalGap) {
         int pixelStart = getPixelNumber(fileOffset);
-        //necessary to avoid gaps due to rounding issues (you can't just do getPixelNumber(fileLength))
+        // necessary to avoid gaps due to rounding issues (you can't just do
+        // getPixelNumber(fileLength))
         int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
-        int pixelMax = xPixels * yPixels;
+        int pixelMax = getXPixels() * getYPixels();
         if (pixelStart >= pixelMax) {
             System.err.println("too many pixels");
         }
         for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
-            int x = (i % xPixels) * pixelSize;
-            int y = (i / xPixels) * pixelSize;
+            int x = (i % getXPixels()) * pixelSize;
+            int y = (i / getXPixels()) * pixelSize;
             int gap = pixelated ? additionalGap + 1 : additionalGap;
             int sizemodifier = pixelated ? 2 : 1;
             drawRect(color, x + gap, y + gap, pixelSize - gap * sizemodifier,
                     pixelSize - gap * sizemodifier);
         }
-//        Graphics g = image.getGraphics();
-//        g.drawString(new Long(fileOffset).toString(), (pixelStart % xPixels) * pixelSize,(pixelStart / xPixels) * pixelSize );
+        // Graphics g = image.getGraphics();
+        // g.drawString(new Long(fileOffset).toString(), (pixelStart % xPixels)
+        // * pixelSize,(pixelStart / xPixels) * pixelSize );
     }
 
+    @Requires("fileOffset >= 0")
+    @Ensures("result >= 0")
     private int getPixelNumber(long fileOffset) {
         long fileSize = data.getFile().length();
-        return (int) Math.round(fileOffset * (xPixels * yPixels)
+        return (int) Math.round(fileOffset * (getXPixels() * getYPixels())
                 / (double) fileSize);
     }
 
     public static void main(String[] args) throws IOException {
-//        File file = new File("src/main/resources/testfiles/ntdll.dll");
-//        File file = new File("src/main/resources/testfiles/DLL1.dll");
+        // File file = new File("src/main/resources/testfiles/ntdll.dll");
+        // File file = new File("src/main/resources/testfiles/DLL1.dll");
         File file = new File("Minecraft.exe");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.getInstance(data).scanReport();
         System.out.println(report);
-        Visualizer vi = new Visualizer(data, 8, false, 3, 500, 650, 800);
+        Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();
         show(image);
     }
@@ -463,6 +495,143 @@ public class Visualizer {
                 frame.setVisible(true);
             }
         });
+    }
+
+    /**
+     * Sets the number of file bytes that are represented by one square pixel.
+     * The height of the image is changed accordingly.
+     */
+    @Requires("bytes > 0")
+    public void setBytesPerPixel(int bytes) {
+        long nrOfPixels = data.getFile().length() / bytes;
+        height = (int) (nrOfPixels / fileWidth) * pixelSize; 
+    }
+    
+    /**
+     * @see #setAdditionalGap(int)
+     * @return additional gap
+     */
+    @Ensures("result >= 0")
+    public int getAdditionalGap() {
+        return additionalGap;
+    }
+
+    /**
+     * Sets the reduced size on each side of square pixels that lie on top of
+     * others.
+     * 
+     * @param additionalGap
+     */
+    @Requires("additionalGap >= 0")
+    public void setAdditionalGap(int additionalGap) {
+        this.additionalGap = additionalGap;
+    }
+
+    /**
+     * @see #setPixelSize(int)
+     * @return pixel size
+     */
+    @Ensures("result > 0")
+    public int getPixelSize() {
+        return pixelSize;
+    }
+
+    /**
+     * Sets the length and width of one square pixel.
+     * 
+     * @param pixelSize
+     */
+    @Requires("pixelSize > 0")
+    public void setPixelSize(int pixelSize) {
+        this.pixelSize = pixelSize;
+    }
+
+    /**
+     * @see #setPixelated(boolean)
+     * @return pixelated
+     */
+    public boolean isPixelated() {
+        return pixelated;
+    }
+
+    /**
+     * Sets pixelated mode, meaning every square pixel in the image has borders
+     * if true.
+     * 
+     * @param pixelated
+     */
+    public void setPixelated(boolean pixelated) {
+        this.pixelated = pixelated;
+    }
+
+    /**
+     * @see #setFileWidth(int)
+     * @return file width
+     */
+    @Ensures("result > 0")
+    public int getFileWidth() {
+        return fileWidth;
+    }
+
+    /**
+     * Sets the width of the PE file representation in (real) pixels.
+     * 
+     * @param fileWidth
+     */
+    @Requires("fileWidth > 0")
+    public void setFileWidth(int fileWidth) {
+        this.fileWidth = fileWidth;
+    }
+
+    /**
+     * @see #setHeight(int)
+     * @return height of the image
+     */
+    @Ensures("result > 0")
+    public int getHeight() {
+        return height;
+    }
+
+    /**
+     * Sets the height of the resulting image, thus also the height of the PE
+     * file representation.
+     * 
+     * @param height
+     */
+    @Requires("height > 0")
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    /**
+     * @see #setLegendWidth(int)
+     * @return legend width
+     */
+    @Ensures("result >= 0")
+    public int getLegendWidth() {
+        return legendWidth;
+    }
+
+    /**
+     * Sets the width of the legend.
+     * <p>
+     * Affects only the available space, not font size or similar.
+     * 
+     * @param legendWidth
+     */
+    @Requires("legendWidth >= 0")
+    public void setLegendWidth(int legendWidth) {
+        this.legendWidth = legendWidth;
+    }
+
+    @Ensures("result >= 0")
+    private int getXPixels() {
+        return this.fileWidth / this.pixelSize;
+    }
+
+    @Ensures("result >= 0")
+    private int getYPixels() {
+        return this.height / this.pixelSize;
     }
 
 }
