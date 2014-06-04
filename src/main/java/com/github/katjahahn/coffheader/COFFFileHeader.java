@@ -47,7 +47,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * The size of the header is {@value}
      */
     public static final int HEADER_SIZE = 20;
-
     private static final String COFF_SPEC_FILE = "coffheaderspec";
     private final byte[] headerbytes;
     private Map<COFFHeaderKey, StandardField> data;

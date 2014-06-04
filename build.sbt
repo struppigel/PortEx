@@ -4,6 +4,8 @@ version := "0.4.0"
 
 javadocSettings
 
+libraryDependencies += "com.google.java.contract" % "cofoja" % "1.1-r150"
+
 libraryDependencies += "org.testng" % "testng" % "6.8.8" % "test"
 
 libraryDependencies += "com.google.guava" % "guava" % "17.0"

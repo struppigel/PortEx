@@ -9,6 +9,7 @@ import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
@@ -22,6 +23,7 @@ import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
 public class Visualizer {
     // TODO make with work with tinype and duplicated sections
@@ -283,11 +285,9 @@ public class Visualizer {
         }
         Long ep = getEntryPoint();
         if (ep != null) {
-            System.out.println("ep: " + ep);
             epAvailable = true;
             // draw exactly one pixel
             long size = withMinLength(0);
-            System.out.println("min length for ep: " + size);
             drawPixels(epColor, ep, size, additionalGap);
         }
     }
@@ -415,7 +415,8 @@ public class Visualizer {
     private void drawPixels(Color color, long fileOffset, long fileLength,
             int additionalGap) {
         int pixelStart = getPixelNumber(fileOffset);
-        int pixelLength = getPixelNumber(fileLength);
+        //necessary to avoid gaps due to rounding issues (you can't just do getPixelNumber(fileLength))
+        int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
         int pixelMax = xPixels * yPixels;
         if (pixelStart >= pixelMax) {
             System.err.println("too many pixels");
@@ -428,7 +429,8 @@ public class Visualizer {
             drawRect(color, x + gap, y + gap, pixelSize - gap * sizemodifier,
                     pixelSize - gap * sizemodifier);
         }
-
+//        Graphics g = image.getGraphics();
+//        g.drawString(new Long(fileOffset).toString(), (pixelStart % xPixels) * pixelSize,(pixelStart / xPixels) * pixelSize );
     }
 
     private int getPixelNumber(long fileOffset) {
@@ -438,20 +440,29 @@ public class Visualizer {
     }
 
     public static void main(String[] args) throws IOException {
-        // File file = new File("src/main/resources/testfiles/ntdll.dll");
-        File file = new File("/home/deque/Downloads/Odin307/Odin3 v3.07.exe");
+//        File file = new File("src/main/resources/testfiles/ntdll.dll");
+//        File file = new File("src/main/resources/testfiles/DLL1.dll");
+        File file = new File("Minecraft.exe");
         PEData data = PELoader.loadPE(file);
-        System.out.println(file.length());
-        Visualizer vi = new Visualizer(data, 5, false, 1);
-        BufferedImage image = vi.createImage();
-        // ImageIO.write(image, "png", new File(file.getName().replace(".exe",
-        // ".png")));
-        JFrame frame = new JFrame();
-        frame.setSize(600, 600);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.getContentPane().add(new JLabel(new ImageIcon(image)));
-        frame.pack();
-        frame.setVisible(true);
+        String report = PEAnomalyScanner.getInstance(data).scanReport();
+        System.out.println(report);
+        Visualizer vi = new Visualizer(data, 8, false, 3, 500, 650, 800);
+        final BufferedImage image = vi.createImage();
+        show(image);
+    }
+
+    private static void show(final BufferedImage image) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame();
+                frame.setSize(600, 600);
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+                frame.pack();
+                frame.setVisible(true);
+            }
+        });
     }
 
 }

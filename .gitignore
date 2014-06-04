@@ -1,3 +1,5 @@
+/ignore
+.factorypath
 *.class
 *.sh
 *.py

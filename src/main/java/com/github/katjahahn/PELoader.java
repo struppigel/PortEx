@@ -30,6 +30,7 @@ import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
 import com.github.katjahahn.sections.idata.ImportSection;
+import com.google.java.contract.Requires;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -174,7 +175,8 @@ public class PELoader {
      * @throws IOException
      *             if unable to read the bytes
      */
-    private byte[] loadBytes(long offset, int length, RandomAccessFile raf)
+    @Requires({"length >= 0"})
+    public static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
             throws IOException {
         raf.seek(offset);
         byte[] bytes = new byte[length];
@@ -185,12 +187,14 @@ public class PELoader {
     public static void main(String[] args) throws IOException {
         logger.entry(); // TODO make imports reading work with
                         // normalimports.exe!
-        File file = new File(
-                "src/main/resources/unusualfiles/tinype/collapsedimport.exe");
-        PEData data = PELoader.loadPE(file);
-        // System.out.println(data);
-        ImportSection idata = new SectionLoader(data).loadImportSection();
-        System.out.println(idata.getInfo());
+        loadBytes(0, 0, new RandomAccessFile("WinRar.exe", "r"));
+        System.out.println("done");
+//        File file = new File(
+//                "src/main/resources/unusualfiles/tinype/collapsedimport.exe");
+//        PEData data = PELoader.loadPE(file);
+//        // System.out.println(data);
+//        ImportSection idata = new SectionLoader(data).loadImportSection();
+//        System.out.println(idata.getInfo());
     }
 
 }

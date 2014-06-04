@@ -16,12 +16,12 @@
 package com.github.katjahahn.tools
 
 import java.io.File
-import java.io.ByteArrayInputStream
-import java.io.BufferedInputStream
 import java.io.FileInputStream
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
 import java.io.InputStream
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.PELoader
+import java.io.RandomAccessFile
 
 /**
  * @author Katja Hahn
@@ -35,7 +35,8 @@ import java.io.InputStream
 object StringReader {
 
   def main(args: Array[String]): Unit = {
-    println(readStrings(new File("WinRar.exe"), 4).asScala.mkString("\n"))
+    PELoader.loadBytes(0, 0, new RandomAccessFile("WinRar.exe", "r"));
+    System.out.println("done");
   }
 
   /**
