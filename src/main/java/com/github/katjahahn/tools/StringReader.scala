@@ -34,11 +34,6 @@ import java.io.RandomAccessFile
  */
 object StringReader {
 
-  def main(args: Array[String]): Unit = {
-    PELoader.loadBytes(0, 0, new RandomAccessFile("WinRar.exe", "r"));
-    System.out.println("done");
-  }
-
   /**
    * Reads all 2-byte (Unicode) and 1-byte (ASCII) based character-strings
    * contained in the file. Only printable ASCII characters are determined as string.

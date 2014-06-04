@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
-import static com.google.common.base.Preconditions.*;
-
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.google.java.contract.Requires;
 
 /**
  * Utilities to convert from and to byte arrays.
@@ -71,10 +71,8 @@ public class ByteArrayUtil {
 	 * @throws IllegalArgumentException
 	 *             if length is larger than 4 or smaller than 1
 	 */
+	@Requires({"length <= 4", "length > 0", "bytes != null", "bytes.length >= length + offset"})
 	public static int getBytesIntValue(byte[] bytes, int offset, int length) {
-		checkNotNull(bytes);
-		checkArgument(length <= 4, "integer can not contain more than 4 bytes");
-		checkArgument(length > 0, "length should be greater than 0");
 		byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
 		return bytesToInt(value);
 	}
@@ -98,11 +96,8 @@ public class ByteArrayUtil {
 	 * @throws IllegalArgumentException
 	 *             if length is larger than 8 or smaller than 1
 	 */
+	@Requires({"length <= 8", "length > 0", "bytes != null", "bytes.length >= length + offset"})
 	public static long getBytesLongValue(byte[] bytes, int offset, int length) {
-		checkNotNull(bytes);
-		checkArgument(length <= 8, "integer can not contain more than 8 bytes",
-				length);
-		checkArgument(length > 0, "length must be greater than 0");
 		byte[] value = new byte[length];
 		value = Arrays.copyOfRange(bytes, offset, offset + length);
 		return bytesToLong(value);
@@ -131,12 +126,9 @@ public class ByteArrayUtil {
 	 * @throws IllegalArgumentException
 	 *             if length is larger than 8 or smaller than 0
 	 */
+	@Requires({"length <= 8", "length >= 0", "bytes != null"})
 	public static long getBytesLongValueSafely(byte[] bytes, int offset,
 			int length) {
-		checkNotNull(bytes);
-		checkArgument(length <= 8, "long can not contain more than 8 bytes",
-				length);
-		checkArgument(length >= 0, "length must be greater than 0");
 		byte[] value = new byte[length];
 		if (offset + length > bytes.length) {
 			logger.warn("byte array not large enough for given offset + length");
@@ -158,8 +150,8 @@ public class ByteArrayUtil {
 	 *            byte array to convert
 	 * @return hexadecimal string representation of the byte array
 	 */
+	@Requires("array != null")
 	public static String byteToHex(byte array[]) {
-		checkNotNull(array);
 		StringBuilder buffer = new StringBuilder();
 		for (int i = 0; i < array.length; i++) {
 			if ((array[i] & 0xff) < 0x10) {
@@ -180,10 +172,8 @@ public class ByteArrayUtil {
 	 * @throws IllegalArgumentException
 	 *             if byte array contains more than 4 bytes
 	 */
+	@Requires({"bytes != null", "bytes.length <= 4"})
 	public static int bytesToInt(byte[] bytes) {
-		checkNotNull(bytes);
-		checkArgument(bytes.length <= 4,
-				"byte array is too long to fit into an int", bytes.length);
 		int value = 0;
 		for (int i = 0; i < bytes.length; i++) {
 			int shift = 8 * i;
@@ -202,10 +192,8 @@ public class ByteArrayUtil {
 	 * @throws IllegalArgumentException
 	 *             if byte array contains more than 8 bytes
 	 */
+	@Requires({"bytes != null", "bytes.length <= 8"})
 	public static long bytesToLong(byte[] bytes) {
-		checkNotNull(bytes);
-		checkArgument(bytes.length <= 8,
-				"byte array is too long to fit into a long", bytes.length);
 		long value = 0;
 		for (int i = 0; i < bytes.length; i++) {
 			int shift = 8 * i;

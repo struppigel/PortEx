@@ -17,6 +17,8 @@ package com.github.katjahahn;
 
 import java.io.IOException;
 
+import com.google.java.contract.Ensures;
+
 /**
  * Represents a header of the pe file or a header of a section.
  * 
@@ -51,5 +53,6 @@ public abstract class Header <T extends HeaderKey> implements PEModule {
      * @param key
      * @return {@link StandardField} for the given key.
      */
+    @Ensures("result != null")
     public abstract StandardField getField(T key);
 }

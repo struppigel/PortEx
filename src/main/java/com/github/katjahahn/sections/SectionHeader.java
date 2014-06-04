@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import com.github.katjahahn.Header;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.StandardField;
+import com.google.java.contract.Ensures;
 
 /**
  * Represents an entry of the {@link SectionTable}. The instance is usually
@@ -55,6 +56,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         this.offset = offset;
     }
 
+    @Ensures({ "result != null", "result.size() == SectionHeaderKey.values().length" })
     private Map<SectionHeaderKey, StandardField> initEntries() {
         Map<SectionHeaderKey, StandardField> map = new HashMap<>();
         for (SectionHeaderKey key : SectionHeaderKey.values()) {
@@ -77,6 +79,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned SizeOfRawData
      */
+    @Ensures("result % 4096 == 0")
     public long getAlignedSizeOfRaw() {
         long sizeOfRaw = get(SIZE_OF_RAW_DATA);
         if (sizeOfRaw == (sizeOfRaw & ~0xfff)) {

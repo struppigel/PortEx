@@ -59,8 +59,9 @@ public class SectionTable {
     private final long offset;
 
     /**
-     * @constructor creates the SectionTable with the bytes of the table and the
-     *              number of entries
+     * creates the SectionTable with the bytes of the table and the number of
+     * entries
+     * 
      * @param sectionTableBytes
      * @param numberOfEntries
      */
