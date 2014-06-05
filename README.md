@@ -13,8 +13,9 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
 * Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values
+* Visualize PE files
 * Scan for PEiD signatures or your own signature database
-* Scan for jar2exe or class2exe wrappers
+* Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Scan for Unicode and ASCII strings contained in the file
 * Overlay detection
 
