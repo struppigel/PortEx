@@ -44,8 +44,9 @@ PortEx is written in Java and Scala, but targeted at Java applications.</p>
 <li>Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section</li>
 <li>Dumping of sections, overlay, embedded ZIP, JAR or .class files</li>
 <li>Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values</li>
+<li>Visualize PE files</li>
 <li>Scan for PEiD signatures or your own signature database</li>
-<li>Scan for jar2exe or class2exe wrappers</li>
+<li>Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)</li>
 <li>Scan for Unicode and ASCII strings contained in the file</li>
 <li>Overlay detection</li>
 </ul><p>For more information have a look at <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a> and the <a href="http://katjahahn.github.io/PortEx/javadocs">Documentation</a></p>
@@ -60,6 +61,8 @@ PortEx is written in Java and Scala, but targeted at Java applications.</p>
 
 <h4>
 <a name="user-content-including-portex-to-a-maven-project" class="anchor" href="#including-portex-to-a-maven-project"><span class="octicon octicon-link"></span></a>Including PortEx to a Maven Project</h4>
+
+<p>PortEx will be added to the Central Maven Repository with its first release. Until then you can include PortEx as follows.</p>
 
 <p>Create the following portex.pom:</p>
 
