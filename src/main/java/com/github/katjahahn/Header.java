@@ -18,6 +18,7 @@ package com.github.katjahahn;
 import java.io.IOException;
 
 import com.google.java.contract.Ensures;
+import com.google.java.contract.Requires;
 
 /**
  * Represents a header of the pe file or a header of a section.
@@ -29,7 +30,7 @@ public abstract class Header <T extends HeaderKey> implements PEModule {
 
     public static final String NL = System.getProperty("line.separator");
 
-    // TODO maybe use factories instead
+    // TODO maybe use factory methods instead
     /**
      * Reads the information necessary. This is usually done by the
      * {@link PELoader}
@@ -44,6 +45,7 @@ public abstract class Header <T extends HeaderKey> implements PEModule {
      * @param key
      * @return long value for the given key
      */
+    @Requires("key != null")
     public abstract long get(T key);
 
 

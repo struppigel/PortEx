@@ -124,11 +124,17 @@ public enum MachineType implements Characteristic {
 		return "IMAGE_FILE_MACHINE_" + this.toString();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isReserved() {
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isDeprecated() {
 		return false;

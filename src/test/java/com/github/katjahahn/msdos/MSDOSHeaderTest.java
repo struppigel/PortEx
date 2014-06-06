@@ -71,7 +71,7 @@ public class MSDOSHeaderTest {
 		new MSDOSHeader(headerbytes, 0).read();
 	}
 
-	@Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "No PE Signature found")
+	@Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "No MZ Signature found")
 	public void invalidHeaderBytes() throws IOException {
 		byte[] headerbytes = new byte[28];
 		for (int i = 0; i < headerbytes.length; i++) {

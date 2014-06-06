@@ -27,6 +27,8 @@ import java.util.Map.Entry;
 import com.github.katjahahn.Header;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.StandardField;
+import com.google.java.contract.Ensures;
+import com.google.java.contract.Requires;
 
 /**
  * Fetches values from the MSDOS header of the PE.
@@ -36,8 +38,11 @@ import com.github.katjahahn.StandardField;
  */
 public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 
-    // Note: This is only the formatted header by now. The actual header may be
-    // larger, containing optional values.
+    /**
+     * The size of the formatted header is {@value}
+     * <p>
+     * Note: The actual header may be larger, containing optional values.
+     */
     public static final int FORMATTED_HEADER_SIZE = 28;
     private static final int PARAGRAPH_SIZE = 16; // in Byte
 
@@ -48,6 +53,12 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
     private final byte[] headerbytes;
     private final long offset;
 
+    /**
+     * Creates an instance of the optional header.
+     * 
+     * @param headerbytes
+     * @param offset
+     */
     public MSDOSHeader(byte[] headerbytes, long offset) {
         this.headerbytes = headerbytes.clone();
         this.offset = offset;
@@ -67,9 +78,9 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
     @Override
     public void read() throws IOException {
         if (!hasSignature(headerbytes)) {
-            throw new IOException("No PE Signature found");
+            throw new IOException("No MZ Signature found");
         }
-        headerData = init();
+        initHeaderData();
         int offsetLoc = 0;
         int sizeLoc = 1;
         int descriptionLoc = 2;
@@ -89,13 +100,13 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         }
 
     }
-    
-    private Map<MSDOSHeaderKey, StandardField> init() {
-        Map<MSDOSHeaderKey, StandardField> map = new HashMap<>();
-        for(MSDOSHeaderKey key : MSDOSHeaderKey.values()) {
-            map.put(key, new StandardField(key, "", 0L));
+
+    @Ensures("headerData.size() == MSDOSHeaderKey.values().length")
+    private void initHeaderData() {
+        headerData = new HashMap<>();
+        for (MSDOSHeaderKey key : MSDOSHeaderKey.values()) {
+            headerData.put(key, new StandardField(key, "", 0L));
         }
-        return map;
     }
 
     /**
@@ -103,12 +114,14 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * 
      * @return size of header
      */
+    @Ensures("result >= 0")
     public long getHeaderSize() {
         return get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
     }
 
+    @Requires({"headerbytes != null"})
     private boolean hasSignature(byte[] headerbytes) {
-        if (headerbytes == null || headerbytes.length < 28) {
+        if (headerbytes == null || headerbytes.length < 28) { //TODO collapsed MSDOS header?
             throw new IllegalArgumentException(
                     "not enough headerbytes for MS DOS Header");
         } else {

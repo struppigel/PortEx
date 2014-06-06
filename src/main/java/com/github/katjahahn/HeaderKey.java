@@ -17,7 +17,7 @@ package com.github.katjahahn;
 
 /**
  * 
- * Represents a key for a standard entry
+ * Represents a key for a {@link StandardField}
  * 
  * @author Katja Hahn
  *

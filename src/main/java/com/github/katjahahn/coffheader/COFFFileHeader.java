@@ -34,6 +34,7 @@ import com.github.katjahahn.Header;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.StandardField;
+import com.google.java.contract.Ensures;
 
 /**
  * Represents the COFF File Header
@@ -107,8 +108,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             data.put(key, new StandardField(key, specs[description], value));
         }
     }
-    
-    
 
     private Map<COFFHeaderKey, StandardField> init() {
         Map<COFFHeaderKey, StandardField> map = new HashMap<>();
@@ -119,9 +118,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     }
 
     /**
-     * Constructs a string that summarizes all COFF File Header values.
-     * 
-     * @return information string
+     * {@inheritDoc}
      */
     @Override
     public String getInfo() {
@@ -206,6 +203,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      *            type
      * @return description
      */
+    @Ensures({"result != null", "result.trim().length() > 0"})
     public static String getDescription(MachineType machine) {
         int description = 1;
         int keyString = 0;
@@ -228,6 +226,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return machine type description
      */
+    @Ensures({"result != null", "result.trim().length() > 0"})
     public String getMachineDescription() {
         return getDescription(getMachineType());
     }
@@ -237,6 +236,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return list of file characteristics
      */
+    @Ensures("result != null")
     public List<FileCharacteristic> getCharacteristics() {
         List<String> keys = IOUtil.getCharacteristicKeys(
                 get(CHARACTERISTICS), "characteristics");
@@ -252,6 +252,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return list of characteristic descriptions
      */
+    @Ensures("result != null")
     public List<String> getCharacteristicsDescriptions() {
         return IOUtil.getCharacteristicsDescriptions(get(CHARACTERISTICS),
                 "characteristics");
@@ -262,6 +263,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return MachineType
      */
+    @Ensures("result != null")
     public MachineType getMachineType() {
         int value = (int) get(MACHINE);
         try {

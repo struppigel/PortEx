@@ -28,6 +28,7 @@ import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.msdos.MSDOSHeader;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.SectionTable;
+import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
 /**
@@ -58,6 +59,7 @@ public class PELoader {
      *             if unable to load the file
      * @throws IllegalStateException if no valid PE file
      */
+    @Ensures("result != null")
     public static PEData loadPE(File peFile) throws IOException {
         return new PELoader(peFile).loadData();
     }
@@ -185,12 +187,10 @@ public class PELoader {
     public static void main(String[] args) throws IOException {
         logger.entry(); // TODO make imports reading work with
                         // normalimports.exe!
-        loadBytes(0, 0, new RandomAccessFile("WinRar.exe", "r"));
-        System.out.println("done");
-//        File file = new File(
-//                "src/main/resources/unusualfiles/tinype/collapsedimport.exe");
-//        PEData data = PELoader.loadPE(file);
-//        // System.out.println(data);
+        File file = new File(
+                "src/main/resources/unusualfiles/tinype/collapsedmzheader.exe");
+        PEData data = PELoader.loadPE(file);
+         System.out.println(data);
 //        ImportSection idata = new SectionLoader(data).loadImportSection();
 //        System.out.println(idata.getInfo());
     }

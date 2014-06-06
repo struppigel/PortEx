@@ -32,6 +32,8 @@ import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.java.contract.Ensures;
+
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
  * the data subdirectory of PortEx.
@@ -54,8 +56,10 @@ public class IOUtil {
 	private static final String DELIMITER = ";";
 	private static final String SPEC_DIR = "/data/";
 
-	private IOUtil() {
-	}
+	/**
+	 * Forbidden. This is a utility class.
+	 */
+	private IOUtil() {}
 
 	/**
 	 * Reads the specified file into a map. The first value is used as key. The
@@ -69,6 +73,7 @@ public class IOUtil {
 	 * @throws IOException
 	 *             if unable to read the specification file
 	 */
+	 @Ensures("result != null")
 	public static Map<String, String[]> readMap(String filename)
 			throws IOException {
 		Map<String, String[]> map = new TreeMap<>();
@@ -95,6 +100,7 @@ public class IOUtil {
 	 * @throws IOException
 	 *             if unable to read the specification file
 	 */
+	 @Ensures("result != null")
 	public static List<String[]> readArray(String filename) throws IOException {
 		List<String[]> list = new LinkedList<>();
 		try (InputStreamReader isr = new InputStreamReader(
@@ -121,6 +127,7 @@ public class IOUtil {
 	 * @throws IOException
 	 *             if unable to read the file
 	 */
+	 @Ensures("result != null")
 	public static List<String[]> readArrayFrom(File file) throws IOException {
 		List<String[]> list = new LinkedList<>();
 		try (BufferedReader reader = Files.newBufferedReader(file.toPath(),
@@ -147,6 +154,7 @@ public class IOUtil {
 	 * @return description list, each element is one characteristic flag that
 	 *         was set
 	 */
+	 @Ensures("result != null")
 	public static List<String> getCharacteristicsDescriptions(long value,
 			String filename) {
 		List<String> characteristics = new LinkedList<>();
@@ -181,6 +189,7 @@ public class IOUtil {
 	 *            the name of the specification file (not the path to it)
 	 * @return list of the characteristic's keys that are set
 	 */
+	 @Ensures("result != null")
 	public static List<String> getCharacteristicKeys(long value, String filename) {
 		List<String> keys = new ArrayList<>();
 		try {
@@ -216,6 +225,7 @@ public class IOUtil {
 	 * @return formatted description for all characteristic flags that have been
 	 *         set
 	 */
+	 @Ensures({"result != null", "result.trim().length() > 0"})
 	public static String getCharacteristics(long value, String filename) {
 		StringBuilder b = new StringBuilder();
 		try {
