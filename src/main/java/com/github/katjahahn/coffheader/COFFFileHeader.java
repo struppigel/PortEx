@@ -295,8 +295,8 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return size of optional header
      */
-    public long getSizeOfOptionalHeader() {
-        return get(SIZE_OF_OPT_HEADER);
+    public int getSizeOfOptionalHeader() {
+        return (int) get(SIZE_OF_OPT_HEADER); //2-byte value can be casted
     }
 
     /**
@@ -304,8 +304,8 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return number of sections
      */
-    public long getNumberOfSections() {
-        return get(SECTION_NR);
+    public int getNumberOfSections() {
+        return (int) get(SECTION_NR); //2-byte value can be casted
     }
 
 }
