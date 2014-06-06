@@ -192,6 +192,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         return list;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();

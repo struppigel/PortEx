@@ -22,6 +22,7 @@ import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionLoaderTest;
+import com.google.common.base.Optional;
 
 public class ImportSectionTest {
 
@@ -45,11 +46,11 @@ public class ImportSectionTest {
 				long imageBase = pedatum.getOptionalHeader().get(
 						WindowsEntryKey.IMAGE_BASE);
 				SectionLoader loader = new SectionLoader(pedatum);
-				ImportSection idata = loader.loadImportSection();
-				if (idata == null) {
+				Optional<ImportSection> idata = loader.maybeLoadImportSection();
+				if (!idata.isPresent()) {
 					assertEquals(list.getValue().size(), 0);
 				} else {
-					List<ImportDLL> readImports = idata.getImports();
+					List<ImportDLL> readImports = idata.get().getImports();
 					List<ImportDLL> pefileImports = substractImageBase(
 							list.getValue(), pedatum);
 					for (ImportDLL readDLL : readImports) {

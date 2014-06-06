@@ -64,6 +64,8 @@ public class WikiExampleCodes {
         visualizer.setLegendWidth(300);
         visualizer.setPixelSize(10);
         visualizer.setAdditionalGap(3);
+        //set bytes per pixel
+        visualizer.setBytesPerPixel(10);
     }
     
     public void fileAnomalies() {

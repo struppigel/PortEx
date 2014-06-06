@@ -44,6 +44,7 @@ import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
 /**
+ * Creates an image that represents the structure of your PE file.
  * 
  * @author Katja Hahn
  * 

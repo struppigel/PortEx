@@ -17,6 +17,12 @@ package com.github.katjahahn.sections;
 
 import com.github.katjahahn.HeaderKey;
 
+/**
+ * Represents a key of a section header field
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum SectionHeaderKey implements HeaderKey {
     /**
      * An 8-byte, null-padded UTF-8 encoded string.

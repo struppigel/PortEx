@@ -19,7 +19,7 @@ import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.IOUtil.*;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,15 +30,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardField;
+import com.google.common.base.Optional;
+import com.google.java.contract.Ensures;
+import com.google.java.contract.Requires;
 
 /**
- * Represents the section table of a PE. Is usually constructed by the PELoader.
+ * Represents the section table of a PE.
+ * <p>
+ * Is constructed by the PELoader.
  * 
  * @author Katja Hahn
  * 
  */
-public class SectionTable {
+public class SectionTable implements PEModule {
 
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager
@@ -111,6 +117,7 @@ public class SectionTable {
      * 
      * @return ordered section table entries
      */
+    @Ensures("result != null")
     public List<SectionHeader> getSectionHeaders() {
         return new LinkedList<>(headers);
     }
@@ -125,6 +132,7 @@ public class SectionTable {
      * @throw {@link IllegalArgumentException} if no section header for number
      *        found
      */
+    @Ensures("result != null")
     public SectionHeader getSectionHeader(int number) {
         for (SectionHeader header : headers) {
             if (header.getNumber() == number) {
@@ -145,9 +153,10 @@ public class SectionTable {
      * @param sectionName
      *            name of the section
      * @return the section table entry that has the given sectionName
-     * @throw {@link IllegalArgumentException} if no section header for number
+     * @throw {@link IllegalArgumentException} if no section header for name
      *        found
      */
+    @Ensures("result != null")
     public SectionHeader getSectionHeader(String sectionName) {
         for (SectionHeader entry : headers) {
             if (entry.getName().equals(sectionName)) {
@@ -158,6 +167,10 @@ public class SectionTable {
                 "invalid section name, no section header found");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getInfo() {
         StringBuilder b = new StringBuilder();
         b.append("-----------------" + NL + "Section Table" + NL
@@ -173,6 +186,8 @@ public class SectionTable {
         return b.toString();
     }
 
+    @Requires("section != null")
+    @Ensures("result != null")
     private String getNextEntryInfo(byte[] section) {
         StringBuilder b = new StringBuilder();
         for (Entry<String, String[]> entry : specification.entrySet()) {
@@ -198,36 +213,38 @@ public class SectionTable {
         return b.toString();
     }
 
+    @Ensures("result != null")
     private String getUTF8String(byte[] section) {
         String[] values = specification.get("NAME");
         int from = Integer.parseInt(values[1]);
         int to = from + Integer.parseInt(values[2]);
         byte[] bytes = Arrays.copyOfRange(section, from, to);
-        try {
-            return new String(bytes, "UTF8").trim();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new String(bytes, StandardCharsets.UTF_8).trim();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public long getOffset() {
         return offset;
     }
 
     /**
-     * Returns the first section that has the given name.
+     * Returns an optional of the first section that has the given name.
      * 
      * @param name
-     * @return first section with the given name
+     * @return first section with the given name, absent if no section with that
+     *         name found
      */
-    public SectionHeader getSectionHeaderByName(String name) {
+    @Ensures("result != null")
+    public Optional<SectionHeader> getSectionHeaderByName(String name) {
         for (SectionHeader header : headers) {
             if (header.getName().equals(name)) {
-                return header;
+                return Optional.of(header);
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
@@ -235,6 +252,7 @@ public class SectionTable {
      * 
      * @return size of the section table
      */
+    @Ensures({ "result >= 0", "result % ENTRY_SIZE == 0" })
     public int getSize() {
         return ENTRY_SIZE * numberOfEntries;
     }

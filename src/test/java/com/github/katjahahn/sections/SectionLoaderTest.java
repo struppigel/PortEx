@@ -23,6 +23,7 @@ import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
+import com.google.common.base.Optional;
 
 public class SectionLoaderTest {
 
@@ -56,7 +57,8 @@ public class SectionLoaderTest {
 		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
-		assertNull(loader.loadImportSection());
+		Optional<ImportSection> idata = loader.maybeLoadImportSection();
+		assertFalse(idata.isPresent());
 	}
 
 	@Test
@@ -108,9 +110,9 @@ public class SectionLoaderTest {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
 			for (DataDirEntry testDir : testDirs) {
 				if (testDir.key.equals(DataDirectoryKey.IMPORT_TABLE)) {
-					ImportSection idata = new SectionLoader(pedatum)
-							.loadImportSection();
-					assertNotNull(idata);
+					Optional<ImportSection> idata = new SectionLoader(pedatum)
+							.maybeLoadImportSection();
+					assertTrue(idata.isPresent());
 				}
 			}
 		}
@@ -144,9 +146,9 @@ public class SectionLoaderTest {
 			SectionTable table = datum.getSectionTable();
 			for (SectionHeader header : table.getSectionHeaders()) {
 				String name = header.getName();
-				PESection section = loader.loadSection(name);
-				assertNotNull(section);
-				assertEquals(section.getDump().length,
+				Optional<PESection> section = loader.loadSection(name);
+				assertTrue(section.isPresent());
+				assertEquals(section.get().getDump().length,
 						(int) loader.getReadSize(header));
 			}
 		}
