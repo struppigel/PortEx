@@ -236,7 +236,7 @@ object ExportSection {
    * @param sectionLoader the sectionLoader of the current file
    * @return instance of the export section
    */
-  def getInstance(edataBytes: Array[Byte], virtualAddress: Long,
+  def newInstance(edataBytes: Array[Byte], virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection =
     apply(edataBytes, virtualAddress, opt, sectionLoader, offset)
 

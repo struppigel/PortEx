@@ -472,11 +472,9 @@ public class Visualizer {
     }
 
     public static void main(String[] args) throws IOException {
-        // File file = new File("src/main/resources/testfiles/ntdll.dll");
-        // File file = new File("src/main/resources/testfiles/DLL1.dll");
         File file = new File("Minecraft.exe");
         PEData data = PELoader.loadPE(file);
-        String report = PEAnomalyScanner.getInstance(data).scanReport();
+        String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
         Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();

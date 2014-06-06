@@ -249,7 +249,7 @@ public class SectionLoader {
 					}
 					byte[] rsrcbytes = tuple.bytes;
 					long rsrcOffset = rsrcEntry.getAlignedPointerToRaw();
-					ResourceSection rsrc = ResourceSection.getInstance(file,
+					ResourceSection rsrc = ResourceSection.newInstance(file,
 							rsrcbytes, virtualAddress, rsrcOffset);
 					return rsrc;
 				}
@@ -312,7 +312,7 @@ public class SectionLoader {
 			logger.debug("importsection offset diff: " + importTableOffset);
 			logger.debug("idatalength: " + idatabytes.length);
 			logger.debug("virtual address of ILT: " + virtualAddress);
-			ImportSection idata = ImportSection.getInstance(idatabytes,
+			ImportSection idata = ImportSection.newInstance(idatabytes,
 					virtualAddress, optHeader, importTableOffset,
 					file.length(), offset);
 			return idata;
@@ -435,7 +435,7 @@ public class SectionLoader {
 			}
 			byte[] edatabytes = res.bytes;
 			long offset = res.offset;
-			ExportSection edata = ExportSection.getInstance(edatabytes,
+			ExportSection edata = ExportSection.newInstance(edatabytes,
 					virtualAddress, optHeader, this, offset);
 			return edata;
 		}

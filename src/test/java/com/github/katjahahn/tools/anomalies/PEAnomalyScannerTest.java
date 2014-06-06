@@ -36,19 +36,19 @@ public class PEAnomalyScannerTest {
 	@BeforeClass
 	public void prepare() {
 		File file = new File(UNUSUAL_FOLDER + "tinype/tinyest.exe");
-		PEAnomalyScanner scanner = PEAnomalyScanner.getInstance(file);
+		PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
 		tinyAnomalies = scanner.getAnomalies();
 		file = Paths.get(UNUSUAL_FOLDER, "corkami", "max_secXP.exe").toFile();
-		scanner = PEAnomalyScanner.getInstance(file);
+		scanner = PEAnomalyScanner.newInstance(file);
 		maxSecXPAnomalies = scanner.getAnomalies();
 		file = Paths.get(UNUSUAL_FOLDER, "corkami", "sectionless.exe").toFile();
-		scanner = PEAnomalyScanner.getInstance(file);
+		scanner = PEAnomalyScanner.newInstance(file);
 		sectionlessAnomalies = scanner.getAnomalies();
 		file = Paths.get(UNUSUAL_FOLDER, "corkami", "duplicate_section.exe").toFile();
-		scanner = PEAnomalyScanner.getInstance(file);
+		scanner = PEAnomalyScanner.newInstance(file);
 		dupe = scanner.getAnomalies();
 		file = Paths.get(UNUSUAL_FOLDER, "corkami", "imagebase_null.exe").toFile();
-		scanner = PEAnomalyScanner.getInstance(file);
+		scanner = PEAnomalyScanner.newInstance(file);
 		zeroImageBase = scanner.getAnomalies();
 	}
 
@@ -134,7 +134,7 @@ public class PEAnomalyScannerTest {
 	public void sectionNrAnomaly() {
 		File file = Paths.get(UNUSUAL_FOLDER, "corkami", "max_secW7.exe")
 				.toFile();
-		PEAnomalyScanner scanner = PEAnomalyScanner.getInstance(file);
+		PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
 		List<Anomaly> anomalies = scanner.getAnomalies();
 		performTest(anomalies, AnomalyType.WRONG, "Section Number");
 	}
@@ -164,7 +164,7 @@ public class PEAnomalyScannerTest {
 	public void unusualSectionNames() {
 		File file = Paths.get(RESOURCE_FOLDER, "x64viruses",
 				"VirusShare_6fdfdffeb4b1be2d0036bac49cb0d590").toFile();
-		PEAnomalyScanner scanner = PEAnomalyScanner.getInstance(file);
+		PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
 		List<Anomaly> anomalies = scanner.getAnomalies();
 		performTest(anomalies, SectionHeaderKey.NAME, "control symbols in name", "name is unusual");
 	}

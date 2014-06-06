@@ -98,7 +98,7 @@ trait SectionTableScanning extends AnomalyScanner {
         anomalyList += new NonDefaultAnomaly(entry, description)
       }
       if (!usualNames.contains(section.getName)) {
-        val description = s"Section name is unusual: ${sectionName}";
+        val description = s"Section name is unusual: ${sectionName}\ntest ${section.getName} can you see this?";
         anomalyList += new NonDefaultAnomaly(entry, description)
       }
     }

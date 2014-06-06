@@ -221,7 +221,7 @@ object ImportSection {
    * @param fileSize
    * @return ImportSection instance
    */
-  def getInstance(idatabytes: Array[Byte], virtualAddress: Long,
+  def newInstance(idatabytes: Array[Byte], virtualAddress: Long,
     optHeader: OptionalHeader, offsetDiff: Int, fileSize: Long, fileOffset: Long): ImportSection =
     apply(idatabytes, virtualAddress, optHeader, offsetDiff, fileSize, fileOffset)
     
@@ -247,7 +247,7 @@ object ImportSection {
     } else {
       println("import section null")
     }
-    println(PEAnomalyScanner.getInstance(data).scanReport)
+    println(PEAnomalyScanner.newInstance(data).scanReport)
   }
 
   /**

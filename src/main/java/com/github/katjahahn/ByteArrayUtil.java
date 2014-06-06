@@ -51,6 +51,9 @@ public class ByteArrayUtil {
 	private static final Logger logger = LogManager
 			.getLogger(ByteArrayUtil.class.getName());
 	
+	/**
+	 * Not intended to be used as object.
+	 */
 	private ByteArrayUtil() {}
 
 	/**

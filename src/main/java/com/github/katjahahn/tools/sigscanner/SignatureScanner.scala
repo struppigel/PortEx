@@ -171,14 +171,13 @@ object SignatureScanner {
 
   private type OptionMap = Map[Symbol, String]
 
-  // This name makes more sense to call from Java
   /**
    * Loads default signatures (provided by PEiD) and creates a
    * SignatureScanner that uses these.
    *
    * @return SignatureScanner with default signatures
    */
-  def getInstance(): SignatureScanner = apply()
+  def newInstance(): SignatureScanner = apply()
 
   /**
    * Loads default signatures (provided by PEiD) and creates a

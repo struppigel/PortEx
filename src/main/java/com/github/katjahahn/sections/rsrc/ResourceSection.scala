@@ -102,7 +102,7 @@ object ResourceSection {
    * @param rsrcOffset
    * @return
    */
-  def getInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
+  def newInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
       rsrcOffset: Long): ResourceSection = 
     apply(file, rsrcbytes, virtualAddress, rsrcOffset)
     

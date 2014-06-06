@@ -90,7 +90,7 @@ object DebugSection {
    * @param offset the debug sections starts at
    * @return debugsection instance
    */
-  def getInstance(debugbytes: Array[Byte], offset: Long): DebugSection = apply(debugbytes, offset)
+  def newInstance(debugbytes: Array[Byte], offset: Long): DebugSection = apply(debugbytes, offset)
   
   /**
    * Loads the debug section and returns it.
