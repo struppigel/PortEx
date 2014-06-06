@@ -219,17 +219,33 @@ public class SectionLoader {
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link DebugSection} of the given file, null if file doesn't have
-     *         this section
-     * @throws IOException
-     *             if unable to read the file
+     * @return {@link DebugSection} of the given file
+     * @throws {@link IOException} if unable to read the file
+     * @throws {@link IllegalStateException} if unable to load debug section
      */
     public DebugSection loadDebugSection() throws IOException {
+        Optional<DebugSection> debug = maybeLoadDebugSection();
+        if(debug.isPresent()) {
+            return debug.get();
+        }
+        throw new IllegalStateException("unable to load debug section");
+    }
+
+    /**
+     * Loads all bytes and information of the debug section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link DebugSection} of the given file, absent if file doesn't
+     *         have this section
+     * @throws {@link IOException} if unable to read the file
+     */
+    public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
         BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.DEBUG);
         if (res != null) {
-            return DebugSection.apply(res.bytes, res.offset);
+            return Optional.of(DebugSection.apply(res.bytes, res.offset));
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
@@ -237,13 +253,33 @@ public class SectionLoader {
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link ResourceSection} of the given file, null if file doesn't
+     * @return {@link ResourceSection} of the given file
+     * @throws {@link IOException} if unable to read the file
+     * @throws @{@link IllegalStateException} if section can not be loaded
+     */
+    @Ensures("result != null")
+    public ResourceSection loadResourceSection() throws IOException,
+            FileFormatException {
+        Optional<ResourceSection> rsrc = maybeLoadResourceSection();
+        if (rsrc.isPresent()) {
+            return rsrc.get();
+        }
+        throw new IllegalStateException("unable to load resource section");
+    }
+
+    /**
+     * Loads all bytes and information of the resource section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link ResourceSection} of the given file, absent if file doesn't
      *         have this section
      * @throws IOException
      *             if unable to read the file
      */
-    public ResourceSection loadResourceSection() throws IOException,
-            FileFormatException {
+    @Ensures("result != null")
+    public Optional<ResourceSection> maybeLoadResourceSection()
+            throws IOException, FileFormatException {
         DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
                 DataDirectoryKey.RESOURCE_TABLE);
         if (resourceTable != null) {
@@ -253,17 +289,17 @@ public class SectionLoader {
                 if (virtualAddress != null) {
                     BytesAndOffset tuple = loadSectionBytes(rsrcEntry);
                     if (tuple == null) {
-                        return null;
+                        return Optional.absent();
                     }
                     byte[] rsrcbytes = tuple.bytes;
                     long rsrcOffset = rsrcEntry.getAlignedPointerToRaw();
                     ResourceSection rsrc = ResourceSection.newInstance(file,
                             rsrcbytes, virtualAddress, rsrcOffset);
-                    return rsrc;
+                    return Optional.of(rsrc);
                 }
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
@@ -297,10 +333,8 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the import section
-     * @throws IOException
-     *             if unable to read the file
-     * @throws IllegalStateException
-     *             if unable to load section
+     * @throws {@link IOException} if unable to read the file
+     * @throws {@link IllegalStateException} if unable to load section
      */
     @Ensures("result != null")
     public ImportSection loadImportSection() throws IOException,
@@ -317,8 +351,7 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the import section, absent if section can not be loaded
-     * @throws IOException
-     *             if unable to read the file
+     * @throws {@link IOException} if unable to read the file
      */
     @Ensures("result != null")
     public Optional<ImportSection> maybeLoadImportSection() throws IOException,
@@ -356,8 +389,7 @@ public class SectionLoader {
      * @param dataDirKey
      * @return the difference of the calculated data dir entry file offset to
      *         the pointer_to_raw_data the data dir entry is in
-     * @throws FileFormatException
-     *             if offset can not be determined
+     * @throws {@link FileFormatException} if offset can not be determined
      */
     private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey)
             throws FileFormatException {
@@ -424,11 +456,12 @@ public class SectionLoader {
     }
 
     /**
-     * Returns all bytes of the section where the given data dir entry is in.
+     * Returns all bytes and the file offset of the section where the given data
+     * dir entry is in.
      * 
      * @param dataDirKey
-     * @return
-     * @throws IOException
+     * @return bytes and offset of the section
+     * @throws {@link IOException}
      */
     public BytesAndOffset readSectionBytesFor(DataDirectoryKey dataDirKey)
             throws IOException {
@@ -452,10 +485,8 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the export section
-     * @throws IOException
-     *             if unable to read the file
-     * @throws IllegalStateException
-     *             if unable to load section
+     * @throws {@link IOException} if unable to read the file
+     * @throws {@link IllegalStateException} if unable to load section
      */
     @Ensures("result != null")
     public ExportSection loadExportSection() throws IOException {
@@ -471,8 +502,7 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the export section, null if file doesn't have an export section
-     * @throws IOException
-     *             if unable to read the file
+     * @throws {@link IOException} if unable to read the file
      */
     @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
@@ -508,10 +538,9 @@ public class SectionLoader {
      *            the key of the data directory entry you want the bytes for
      * @return byte array that contains the bytes the data directory entry rva
      *         is pointing to
-     * @throws IOException
-     *             if unable to read the file
-     * @throws FileFormatException
-     *             if unable to load the file, e.g. not virtual address given
+     * @throws {@link IOException} if unable to read the file
+     * @throws {@link FileFormatException} if unable to load the file, e.g. not
+     *         virtual address given
      */
     private BytesAndOffset readDataDirBytesFor(DataDirectoryKey dataDirKey)
             throws IOException, FileFormatException {

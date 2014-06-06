@@ -66,7 +66,7 @@ public class SectionLoaderTest {
 		File file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
-		assertNull(loader.loadResourceSection());
+		assertFalse(loader.maybeLoadResourceSection().isPresent());
 	}
 
 
