@@ -21,6 +21,7 @@ import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionLoader;
+import com.google.common.base.Optional;
 
 public class ExportSectionTest {
 
@@ -64,13 +65,13 @@ public class ExportSectionTest {
 			String filename = file.getName().replace(".txt", "");
 			PEData datum = pedata.get(filename);
 			SectionLoader loader = new SectionLoader(datum);
-			ExportSection edata = loader.loadExportSection();
-			if (edata == null) {
+			Optional<ExportSection> edata = loader.maybeLoadExportSection();
+			if (!edata.isPresent()) {
 				assertTrue(expected.size() == 0);
 			} else {
 				logger.info("testing entries for " + filename);
 				expected = substractImageBase(expected, datum);
-				List<ExportEntry> actual = edata.getExportEntries();
+				List<ExportEntry> actual = edata.get().getExportEntries();
 				assertEquals(actual, expected);
 			}
 

@@ -95,9 +95,9 @@ public class SectionLoaderTest {
 			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
 			for (DataDirEntry testDir : testDirs) {
 				if (testDir.key.equals(DataDirectoryKey.EXPORT_TABLE)) {
-					ExportSection edata = new SectionLoader(pedatum)
-							.loadExportSection();
-					assertNotNull(edata);
+					Optional<ExportSection> edata = new SectionLoader(pedatum)
+							.maybeLoadExportSection();
+					assertTrue(edata.isPresent());
 				}
 			}
 		}

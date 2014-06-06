@@ -172,6 +172,7 @@ public class SectionLoader {
         }
     }
 
+    @Ensures("result % 512 == 0")
     private long fileAligned(long value) {
         long fileAlign = optHeader.get(WindowsEntryKey.FILE_ALIGNMENT);
         // Note: (two's complement of x AND value) rounds down value to a
@@ -183,12 +184,13 @@ public class SectionLoader {
     }
 
     /**
-     * Determines the the number of bytes that is read for the section. --> TODO
-     * include for section loader?
+     * Determines the the number of bytes that is read for the section.
      * 
      * @param section
+     *            header of the section
      * @return section size
      */
+    @Ensures("result >= 0")
     public long getReadSize(SectionHeader section) {
         long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
         long virtSize = section.get(VIRTUAL_SIZE);
@@ -300,6 +302,7 @@ public class SectionLoader {
      * @throws IllegalStateException
      *             if unable to load section
      */
+    @Ensures("result != null")
     public ImportSection loadImportSection() throws IOException,
             FileFormatException {
         Optional<ImportSection> idata = maybeLoadImportSection();
@@ -317,6 +320,7 @@ public class SectionLoader {
      * @throws IOException
      *             if unable to read the file
      */
+    @Ensures("result != null")
     public Optional<ImportSection> maybeLoadImportSection() throws IOException,
             FileFormatException {
         DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
@@ -447,26 +451,46 @@ public class SectionLoader {
      * Loads all bytes and information of the export section. The file on disk
      * is read to fetch the information.
      * 
+     * @return the export section
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if unable to load section
+     */
+    @Ensures("result != null")
+    public ExportSection loadExportSection() throws IOException {
+        Optional<ExportSection> edata = maybeLoadExportSection();
+        if (edata.isPresent()) {
+            return edata.get();
+        }
+        throw new IllegalStateException("unable to read export section");
+    }
+
+    /**
+     * Loads all bytes and information of the export section. The file on disk
+     * is read to fetch the information.
+     * 
      * @return the export section, null if file doesn't have an export section
      * @throws IOException
      *             if unable to read the file
      */
-    public ExportSection loadExportSection() throws IOException {
+    @Ensures("result != null")
+    public Optional<ExportSection> maybeLoadExportSection() throws IOException {
         DataDirEntry exportTable = optHeader.getDataDirEntries().get(
                 DataDirectoryKey.EXPORT_TABLE);
         if (exportTable != null) {
             long virtualAddress = exportTable.virtualAddress;
             BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
             if (res == null) {
-                return null;
+                return Optional.absent();
             }
             byte[] edatabytes = res.bytes;
             long offset = res.offset;
             ExportSection edata = ExportSection.newInstance(edatabytes,
                     virtualAddress, optHeader, this, offset);
-            return edata;
+            return Optional.of(edata);
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
