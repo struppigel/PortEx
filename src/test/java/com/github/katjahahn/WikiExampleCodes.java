@@ -29,6 +29,8 @@ import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 import com.github.katjahahn.sections.rsrc.SubDirEntry;
 import com.github.katjahahn.tools.Overlay;
+import com.github.katjahahn.tools.anomalies.Anomaly;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
 import com.github.katjahahn.tools.sigscanner.MatchedSignature;
 import com.github.katjahahn.tools.sigscanner.Signature;
@@ -44,6 +46,21 @@ import com.github.katjahahn.tools.sigscanner.SignatureScanner;
  * 
  */
 public class WikiExampleCodes {
+    
+    public void fileAnomalies() {
+        File file = new File("filepath");
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        System.out.println(scanner.scanReport());
+        
+        scanner = PEAnomalyScanner.newInstance(file);
+        List<Anomaly> anomalies = scanner.getAnomalies();
+        for(Anomaly anomaly: anomalies) {
+            System.out.println("Anomaly Type: " + anomaly.getType());
+            System.out.println("Entry with anomaly: " + anomaly.field());
+            System.out.println(anomaly.description());
+            System.out.println();
+        }
+    }
 
     public void gettingStarted() throws IOException {
         // Header information
