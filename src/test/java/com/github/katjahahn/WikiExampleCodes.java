@@ -1,10 +1,13 @@
 package com.github.katjahahn;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import com.github.katjahahn.coffheader.COFFFileHeader;
 import com.github.katjahahn.coffheader.MachineType;
@@ -29,6 +32,7 @@ import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 import com.github.katjahahn.sections.rsrc.SubDirEntry;
 import com.github.katjahahn.tools.Overlay;
+import com.github.katjahahn.tools.Visualizer;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
@@ -46,6 +50,21 @@ import com.github.katjahahn.tools.sigscanner.SignatureScanner;
  * 
  */
 public class WikiExampleCodes {
+    
+    public void visualizer() throws IOException {
+        File file = new File("WinRar.exe");
+        PEData data = PELoader.loadPE(file);
+        Visualizer visualizer = new Visualizer(data);
+        BufferedImage image = visualizer.createImage();
+        ImageIO.write(image, "png", new File("image.png"));
+        //use parameters
+        visualizer.setPixelated(true);
+        visualizer.setHeight(800);
+        visualizer.setFileWidth(600);
+        visualizer.setLegendWidth(300);
+        visualizer.setPixelSize(10);
+        visualizer.setAdditionalGap(3);
+    }
     
     public void fileAnomalies() {
         File file = new File("filepath");
