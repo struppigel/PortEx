@@ -34,7 +34,14 @@ import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
 import com.github.katjahahn.StandardField;
 import com.google.common.base.Optional;
+import com.google.java.contract.Ensures;
 
+/**
+ * Represents the optional header of the PE file.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     private static final Logger logger = LogManager
@@ -46,7 +53,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     private static final String STANDARD_SPEC = "optionalheaderstandardspec";
     private static final String WINDOWS_SPEC = "optionalheaderwinspec";
     private static final String DATA_DIR_SPEC = "datadirectoriesspec";
-    // maximum size of the optional header to read all values safely
+    /**
+     * Maximum size of the optional header to read all values safely is {@value}
+     */
     public static final int MAX_SIZE = 240;
     // minimum size of the optional header with magic number taken into account
     private int minSize;
@@ -123,6 +132,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * 
      * @return the data directory entries
      */
+    @Ensures("result != null")
     public Map<DataDirectoryKey, DataDirEntry> getDataDirEntries() {
         return new HashMap<>(dataDirEntries);
     }
@@ -133,6 +143,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * 
      * @return the windows specific fields
      */
+    @Ensures("result != null")
     public Map<WindowsEntryKey, StandardField> getWindowsSpecificFields() {
         return new HashMap<>(windowsFields);
     }
@@ -142,6 +153,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * 
      * @return the standard fields
      */
+    @Ensures("result != null")
     public Map<StandardFieldEntryKey, StandardField> getStandardFields() {
         return new HashMap<>(standardFields);
     }
@@ -154,6 +166,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @return the data directory entry for the given key or absent if entry
      *         doesn't exist.
      */
+    @Ensures("result != null")
     public Optional<DataDirEntry> getDataDirEntry(DataDirectoryKey key) {
         return Optional.fromNullable(dataDirEntries.get(key));
     }
@@ -184,8 +197,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @param key
      * @return the standard field entry for the given key
      */
-    public StandardField getStandardFieldEntry(
-            StandardFieldEntryKey key) {
+    @Ensures("result != null")
+    public StandardField getStandardFieldEntry(StandardFieldEntryKey key) {
         return standardFields.get(key);
     }
 
@@ -195,6 +208,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @param key
      * @return the windows field entry for the given key
      */
+    @Ensures("result != null")
     public StandardField getWindowsFieldEntry(WindowsEntryKey key) {
         return windowsFields.get(key);
     }
@@ -220,9 +234,10 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     }
 
+    @Ensures({"result != null", "result.size() == StandardFieldEntryKey.values().length"})
     private Map<StandardFieldEntryKey, StandardField> initStandardFields() {
         Map<StandardFieldEntryKey, StandardField> map = new HashMap<>();
-        for(StandardFieldEntryKey key : StandardFieldEntryKey.values()) {
+        for (StandardFieldEntryKey key : StandardFieldEntryKey.values()) {
             map.put(key, new StandardField(key, "absent", 0L));
         }
         return map;
@@ -297,10 +312,11 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             }
         }
     }
-    
+
+    @Ensures({"result != null", "result.size() == WindowsEntryKey.values().length"})
     private Map<WindowsEntryKey, StandardField> initWindowsFields() {
         Map<WindowsEntryKey, StandardField> map = new HashMap<>();
-        for(WindowsEntryKey key : WindowsEntryKey.values()) {
+        for (WindowsEntryKey key : WindowsEntryKey.values()) {
             map.put(key, new StandardField(key, "absent", 0L));
         }
         return map;
@@ -496,8 +512,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @return list of DllCharacteristic descriptions
      */
     public List<String> getDllCharacteristicsDescriptions() {
-        return IOUtil.getCharacteristicsDescriptions(
-                get(DLL_CHARACTERISTICS), DLL_CHARACTERISTICS_SPEC);
+        return IOUtil.getCharacteristicsDescriptions(get(DLL_CHARACTERISTICS),
+                DLL_CHARACTERISTICS_SPEC);
     }
 
     /**

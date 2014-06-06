@@ -91,7 +91,7 @@ public enum DataDirectoryKey implements HeaderKey {
 	 */
 	RESERVED("reserved"); 
 	
-	private String fieldName;
+	private String fieldName; //TODO replace with key string in spec
 	
 	private DataDirectoryKey(String fieldName) {
 		this.fieldName= fieldName;
@@ -102,6 +102,6 @@ public enum DataDirectoryKey implements HeaderKey {
 	 */
 	@Override
 	public String toString() {
-		return fieldName; //TODO why the fieldname?
+		return fieldName;
 	}
 }

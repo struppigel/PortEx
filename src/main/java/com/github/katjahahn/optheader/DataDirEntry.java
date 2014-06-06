@@ -17,11 +17,13 @@ package com.github.katjahahn.optheader;
 
 import static com.github.katjahahn.Header.*;
 import static com.github.katjahahn.sections.SectionHeaderKey.*;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
 
 import com.github.katjahahn.sections.SectionHeader;
 import com.github.katjahahn.sections.SectionTable;
+import com.google.java.contract.Invariant;
 
 /**
  * Represents an entry of the data directory table. It is used like a struct.
@@ -29,6 +31,7 @@ import com.github.katjahahn.sections.SectionTable;
  * @author Katja Hahn
  * 
  */
+@Invariant("key != null")
 public class DataDirEntry {
 
     /**
@@ -78,6 +81,7 @@ public class DataDirEntry {
      * @param size
      */
     public DataDirEntry(DataDirectoryKey key, int virtualAddress, int size) {
+        checkArgument(key != null, "key must not be null");
         this.key = key;
         this.virtualAddress = virtualAddress;
         this.size = size;
@@ -91,6 +95,7 @@ public class DataDirEntry {
      * @return file offset of data directory
      */
     public long getFileOffset(SectionTable table) { // TODO not in use?
+        checkArgument(table != null, "table must not be null");
         SectionHeader section = getSectionTableEntry(table);
         long sectionRVA = section.get(VIRTUAL_ADDRESS);
         long sectionOffset = section.get(POINTER_TO_RAW_DATA);
@@ -108,6 +113,7 @@ public class DataDirEntry {
     // this is a duplicate to Sectionloader getSectionByRVA, but intentional for
     // better use of the API
     public SectionHeader getSectionTableEntry(SectionTable table) {
+        checkArgument(table != null, "table must not be null");
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
             int vSize = (int) section.get(VIRTUAL_SIZE);
