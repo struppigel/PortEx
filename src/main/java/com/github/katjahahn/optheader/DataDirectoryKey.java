@@ -24,13 +24,72 @@ import com.github.katjahahn.HeaderKey;
  *
  */
 public enum DataDirectoryKey implements HeaderKey {
-	EXPORT_TABLE("export table"), IMPORT_TABLE("import table"), 
-	RESOURCE_TABLE("resource table"), EXCEPTION_TABLE("exception table"), 
-	CERTIFICATE_TABLE("certificate table"), BASE_RELOCATION_TABLE("base relocation table"), 
-	DEBUG("debug"), ARCHITECTURE("architecture"), GLOBAL_PTR("global ptr"), 
-	TLS_TABLE("TLS table"), LOAD_CONFIG_TABLE("load config table"), 
-	BOUND_IMPORT("bound import"), IAT("IAT"), DELAY_IMPORT_DESCRIPTOR("delay import descriptor"), 
-	CLR_RUNTIME_HEADER("CLR runtime header"), RESERVED("reserved"); 
+    /**
+     * Export table 
+     */
+	EXPORT_TABLE("export table"), 
+	/**
+	 * Import table 
+	 */
+	IMPORT_TABLE("import table"), 
+	/**
+	 * Resource table
+	 */
+	RESOURCE_TABLE("resource table"), 
+	/**
+	 * Exception table
+	 */
+	EXCEPTION_TABLE("exception table"),
+	/**
+	 * Attribute certificate table
+	 */
+	CERTIFICATE_TABLE("certificate table"), 
+	/**
+	 * Base relocation table
+	 */
+	BASE_RELOCATION_TABLE("base relocation table"), 
+	/**
+	 * Debug data
+	 */
+	DEBUG("debug"), 
+	/**
+	 * Reserved, must be 0. //TODO anomaly
+	 */
+	ARCHITECTURE("architecture"), 
+	/**
+	 * The RVA of the value to be stored in the global pointer register.
+	 * <p>
+	 * The size member of this structure must be set to zero. //TODO anomaly
+	 */
+	GLOBAL_PTR("global ptr"), 
+	/**
+	 * Thread local storage (TLS) table.
+	 */
+	TLS_TABLE("TLS table"), 
+	/**
+	 * Load configuration table
+	 */
+	LOAD_CONFIG_TABLE("load config table"), 
+	/**
+	 * Bound import table
+	 */
+	BOUND_IMPORT("bound import"), 
+	/**
+	 * Import address table
+	 */
+	IAT("IAT"), 
+	/**
+	 * Delay import descriptor
+	 */
+	DELAY_IMPORT_DESCRIPTOR("delay import descriptor"), 
+	/**
+	 * CLR runtime header
+	 */
+	CLR_RUNTIME_HEADER("CLR runtime header"), 
+	/**
+	 * Reserved, must be 0
+	 */
+	RESERVED("reserved"); 
 	
 	private String fieldName;
 	
@@ -38,6 +97,9 @@ public enum DataDirectoryKey implements HeaderKey {
 		this.fieldName= fieldName;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return fieldName; //TODO why the fieldname?

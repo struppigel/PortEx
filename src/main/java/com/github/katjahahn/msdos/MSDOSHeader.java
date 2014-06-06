@@ -51,7 +51,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
     private Map<MSDOSHeaderKey, StandardField> headerData;
 
     private final byte[] headerbytes;
-    private final long offset;
+    private final long offset = 0;
 
     /**
      * Creates an instance of the optional header.
@@ -59,9 +59,9 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * @param headerbytes
      * @param offset
      */
-    public MSDOSHeader(byte[] headerbytes, long offset) {
+    @Requires("headerbytes != null")
+    public MSDOSHeader(byte[] headerbytes) {
         this.headerbytes = headerbytes.clone();
-        this.offset = offset;
     }
 
     /**
@@ -119,9 +119,11 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         return get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
     }
 
-    @Requires({"headerbytes != null"})
+    @Requires("headerbytes != null")
     private boolean hasSignature(byte[] headerbytes) {
-        if (headerbytes == null || headerbytes.length < 28) { //TODO collapsed MSDOS header?
+        // TODO collapsed MSDOS header? And wrong responsibility to check this
+        // here!
+        if (headerbytes.length < 28) {
             throw new IllegalArgumentException(
                     "not enough headerbytes for MS DOS Header");
         } else {

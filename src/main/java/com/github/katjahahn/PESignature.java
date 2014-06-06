@@ -140,8 +140,11 @@ public class PESignature {
     }
 
     public String getInfo() {
+        if (!peOffset.isPresent()) {
+            return "No PE signature found";
+        }
         return "-------------" + NL + "PE Signature" + NL + "-------------"
-                + NL + "pe offset: " + peOffset + NL;
+                + NL + "pe offset: " + peOffset.get() + NL;
     }
 
 }

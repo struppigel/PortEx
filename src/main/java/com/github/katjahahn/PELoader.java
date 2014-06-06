@@ -100,7 +100,7 @@ public class PELoader {
             throws IOException {
         byte[] headerbytes = loadBytes(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
                 raf);
-        return new MSDOSHeader(headerbytes, 0);
+        return new MSDOSHeader(headerbytes);
     }
 
     /**
