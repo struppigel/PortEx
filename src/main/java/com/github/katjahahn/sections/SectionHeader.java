@@ -30,8 +30,9 @@ import com.github.katjahahn.StandardField;
 import com.google.java.contract.Ensures;
 
 /**
- * Represents an entry of the {@link SectionTable}. The instance is usually
- * created by the {@link SectionTable}.
+ * Represents an entry of the {@link SectionTable}.
+ * <p>
+ * The instance is usually created by the {@link SectionTable}.
  * 
  * @author Katja Hahn
  * 
@@ -56,7 +57,8 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         this.offset = offset;
     }
 
-    @Ensures({ "result != null", "result.size() == SectionHeaderKey.values().length" })
+    @Ensures({ "result != null",
+            "result.size() == SectionHeaderKey.values().length" })
     private Map<SectionHeaderKey, StandardField> initEntries() {
         Map<SectionHeaderKey, StandardField> map = new HashMap<>();
         for (SectionHeaderKey key : SectionHeaderKey.values()) {
@@ -70,6 +72,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned PointerToRawData
      */
+    @Ensures("result % 512 == 0")
     public long getAlignedPointerToRaw() {
         return get(POINTER_TO_RAW_DATA) & ~0x1ff;
     }
@@ -93,6 +96,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned VirtualSize
      */
+    @Ensures("result % 4096 == 0")
     public long getAlignedVirtualSize() {
         long virtSize = get(VIRTUAL_SIZE);
         if (virtSize == (virtSize & ~0xfff)) {
@@ -124,6 +128,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return number
      */
+    @Ensures("result >= 0")
     public int getNumber() {
         return number;
     }
@@ -137,10 +142,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     }
 
     /**
-     * Returns the {@link StandardField} for the given key
-     * 
-     * @param key
-     * @return standard entry
+     * {@inheritDoc}
      */
     @Override
     public StandardField getField(SectionHeaderKey key) {
@@ -155,6 +157,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return a map of all entries
      */
+    @Ensures("result != null")
     public Map<SectionHeaderKey, StandardField> getEntryMap() {
         return new HashMap<>(entries);
     }
@@ -177,6 +180,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return list of all characteristics
      */
+    @Ensures("result != null")
     public List<SectionCharacteristic> getCharacteristics() {
         List<SectionCharacteristic> list = new ArrayList<>();
         List<String> keys = IOUtil.getCharacteristicKeys(
@@ -210,16 +214,25 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         return b.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getOffset() {
         return offset;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getInfo() {
         return this.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void read() throws IOException {
         // TODO Auto-generated method stub
