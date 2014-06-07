@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -141,7 +140,6 @@ public class PEAnomalyScannerTest {
 
 	@Test
 	public void deprecated() {
-		System.out.println(Arrays.toString(maxSecXPAnomalies.toArray()));
 		performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,
 				"IMAGE_FILE_LINE_NUMS_STRIPPED");
 		performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,

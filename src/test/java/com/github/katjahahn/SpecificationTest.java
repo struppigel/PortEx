@@ -87,7 +87,6 @@ public class SpecificationTest {
 		int keyIndex = 0;
 		for (Entry<HeaderKey[], String> entry : headerspecs.entrySet()) {
 			String specname = entry.getValue();
-			System.out.println("testing spec " + specname);
 			HeaderKey[] fields = entry.getKey();
 			List<String[]> list = IOUtil.readArray(specname);
 			assertEquals(list.size(), fields.length);
