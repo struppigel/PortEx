@@ -111,7 +111,7 @@ public class SectionLoader {
         return Optional.absent();
     }
 
-    //TODO what happens if not section with that number given?
+    // TODO what happens if not section with that number given?
     /**
      * Loads the section with the given number and may patch the size of the
      * section if the {@code patchSize} parameter is set.
@@ -291,14 +291,14 @@ public class SectionLoader {
         Optional<DataDirEntry> resourceTable = optHeader
                 .getDataDirEntry(DataDirectoryKey.RESOURCE_TABLE);
         if (resourceTable.isPresent()) {
-            SectionHeader rsrcEntry = resourceTable.get().getSectionTableEntry(
-                    table);
-            if (rsrcEntry != null) {
-                Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
+            Optional<SectionHeader> rsrcEntry = resourceTable.get()
+                    .maybeGetSectionTableEntry(table);
+            if (rsrcEntry.isPresent()) {
+                Long virtualAddress = rsrcEntry.get().get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
-                    BytesAndOffset tuple = loadSectionBytes(rsrcEntry);
+                    BytesAndOffset tuple = loadSectionBytes(rsrcEntry.get());
                     byte[] rsrcbytes = tuple.bytes;
-                    long rsrcOffset = rsrcEntry.getAlignedPointerToRaw();
+                    long rsrcOffset = rsrcEntry.get().getAlignedPointerToRaw();
                     ResourceSection rsrc = ResourceSection.newInstance(file,
                             rsrcbytes, virtualAddress, rsrcOffset);
                     return Optional.of(rsrc);
@@ -425,8 +425,7 @@ public class SectionLoader {
             DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
-            return Optional.fromNullable(dataDir.get().getSectionTableEntry(
-                    table));
+            return dataDir.get().maybeGetSectionTableEntry(table);
         }
         return Optional.absent();
     }
@@ -520,8 +519,8 @@ public class SectionLoader {
      */
     @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
-        Optional<DataDirEntry> exportTable = optHeader.getDataDirEntry(
-                DataDirectoryKey.EXPORT_TABLE);
+        Optional<DataDirEntry> exportTable = optHeader
+                .getDataDirEntry(DataDirectoryKey.EXPORT_TABLE);
         if (exportTable.isPresent()) {
             long virtualAddress = exportTable.get().virtualAddress;
             Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.EXPORT_TABLE);

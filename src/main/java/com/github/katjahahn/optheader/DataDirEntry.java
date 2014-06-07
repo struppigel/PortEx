@@ -23,6 +23,7 @@ import java.util.List;
 
 import com.github.katjahahn.sections.SectionHeader;
 import com.github.katjahahn.sections.SectionTable;
+import com.google.common.base.Optional;
 import com.google.java.contract.Invariant;
 
 /**
@@ -96,10 +97,13 @@ public class DataDirEntry {
      */
     public long getFileOffset(SectionTable table) { // TODO not in use?
         checkArgument(table != null, "table must not be null");
-        SectionHeader section = getSectionTableEntry(table);
-        long sectionRVA = section.get(VIRTUAL_ADDRESS);
-        long sectionOffset = section.get(POINTER_TO_RAW_DATA);
-        return (virtualAddress - sectionRVA) + sectionOffset;
+        Optional<SectionHeader> section = maybeGetSectionTableEntry(table);
+        if (section.isPresent()) {
+            long sectionRVA = section.get().get(VIRTUAL_ADDRESS);
+            long sectionOffset = section.get().getAlignedPointerToRaw();
+            return (virtualAddress - sectionRVA) + sectionOffset;
+        }
+        return virtualAddress; // TODO should be smaller than file length!
     }
 
     /**
@@ -109,20 +113,40 @@ public class DataDirEntry {
      * @param table
      * @return the section table entry of the section that the data directory
      *         entry is pointing to
+     * @throws {@link IllegalStateException} if data dir entry is not in a
+     *         section
+     */
+    public SectionHeader getSectionTableEntry(SectionTable table) {
+        Optional<SectionHeader> entry = maybeGetSectionTableEntry(table);
+        if (entry.isPresent()) {
+            return entry.get();
+        }
+        throw new IllegalStateException(
+                "there is no section for this data directory entry");
+    }
+
+    /**
+     * Returns the section table entry of the section that the data directory
+     * entry is pointing to.
+     * 
+     * @param table
+     * @return the section table entry of the section that the data directory
+     *         entry is pointing to, or absent if data dir entry doesn't point
+     *         to a section
      */
     // this is a duplicate to Sectionloader getSectionByRVA, but intentional for
     // better use of the API
-    public SectionHeader getSectionTableEntry(SectionTable table) {
+    public Optional<SectionHeader> maybeGetSectionTableEntry(SectionTable table) {
         checkArgument(table != null, "table must not be null");
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
             int vSize = (int) section.get(VIRTUAL_SIZE);
             int vAddress = (int) section.get(VIRTUAL_ADDRESS);
             if (rvaIsWithin(vAddress, vSize)) {
-                return section;
+                return Optional.of(section);
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     private boolean rvaIsWithin(int address, int size) {
