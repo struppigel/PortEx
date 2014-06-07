@@ -317,11 +317,11 @@ public class Visualizer {
     private Optional<Long> getEntryPoint() {
         long rva = data.getOptionalHeader().get(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
-        SectionHeader section = new SectionLoader(data)
-                .getSectionHeaderByRVA(rva);
-        if (section != null) {
-            long phystovirt = section.get(SectionHeaderKey.VIRTUAL_ADDRESS)
-                    - section.get(SectionHeaderKey.POINTER_TO_RAW_DATA);
+        Optional<SectionHeader> section = new SectionLoader(data)
+                .maybeGetSectionHeaderByRVA(rva);
+        if (section.isPresent()) {
+            long phystovirt = section.get().get(SectionHeaderKey.VIRTUAL_ADDRESS)
+                    - section.get().get(SectionHeaderKey.POINTER_TO_RAW_DATA);
             return Optional.of(rva - phystovirt);
         }
         return Optional.absent();

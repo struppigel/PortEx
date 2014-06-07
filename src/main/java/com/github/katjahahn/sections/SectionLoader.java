@@ -111,10 +111,10 @@ public class SectionLoader {
         return Optional.absent();
     }
 
+    //TODO what happens if not section with that number given?
     /**
      * Loads the section with the given number and may patch the size of the
-     * section if the {@code patchSize} parameter is set. If the file doesn't
-     * have a section by this number, it returns null.
+     * section if the {@code patchSize} parameter is set.
      * <p>
      * This does not instantiate special sections. Use methods like
      * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
@@ -228,6 +228,7 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      * @throws {@link IllegalStateException} if unable to load debug section
      */
+    @Ensures("result != null")
     public DebugSection loadDebugSection() throws IOException {
         Optional<DebugSection> debug = maybeLoadDebugSection();
         if (debug.isPresent()) {
@@ -245,10 +246,12 @@ public class SectionLoader {
      *         have this section
      * @throws {@link IOException} if unable to read the file
      */
+    @Ensures("result != null")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
-        BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.DEBUG);
-        if (res != null) {
-            return Optional.of(DebugSection.apply(res.bytes, res.offset));
+        Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.DEBUG);
+        if (res.isPresent()) {
+            return Optional.of(DebugSection.apply(res.get().bytes,
+                    res.get().offset));
         }
         return Optional.absent();
     }
@@ -285,17 +288,15 @@ public class SectionLoader {
     @Ensures("result != null")
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
-        DataDirEntry resourceTable = optHeader.getDataDirEntries().get(
-                DataDirectoryKey.RESOURCE_TABLE);
-        if (resourceTable != null) {
-            SectionHeader rsrcEntry = resourceTable.getSectionTableEntry(table);
+        Optional<DataDirEntry> resourceTable = optHeader
+                .getDataDirEntry(DataDirectoryKey.RESOURCE_TABLE);
+        if (resourceTable.isPresent()) {
+            SectionHeader rsrcEntry = resourceTable.get().getSectionTableEntry(
+                    table);
             if (rsrcEntry != null) {
                 Long virtualAddress = rsrcEntry.get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
                     BytesAndOffset tuple = loadSectionBytes(rsrcEntry);
-                    if (tuple == null) {
-                        return Optional.absent();
-                    }
                     byte[] rsrcbytes = tuple.bytes;
                     long rsrcOffset = rsrcEntry.getAlignedPointerToRaw();
                     ResourceSection rsrc = ResourceSection.newInstance(file,
@@ -316,16 +317,17 @@ public class SectionLoader {
      *            the relative virtual address
      * @return the {@link SectionHeader} of the section the rva is pointing into
      */
-    public SectionHeader getSectionHeaderByRVA(long rva) {
+    @Ensures("result != null")
+    public Optional<SectionHeader> maybeGetSectionHeaderByRVA(long rva) {
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
             long vSize = section.get(VIRTUAL_SIZE);
             long vAddress = section.get(VIRTUAL_ADDRESS);
             if (rvaIsWithin(vAddress, vSize, rva)) {
-                return section;
+                return Optional.of(section);
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     private static boolean rvaIsWithin(long address, long size, long rva) {
@@ -366,12 +368,12 @@ public class SectionLoader {
                 .getDataDirEntry(dataDirKey);
         if (importTable.isPresent()) {
             long virtualAddress = importTable.get().virtualAddress;
-            BytesAndOffset tuple = readSectionBytesFor(dataDirKey);
-            if (tuple == null) {
+            Optional<BytesAndOffset> tuple = maybeReadSectionBytesFor(dataDirKey);
+            if (!tuple.isPresent()) {
                 return Optional.absent();
             }
-            byte[] idatabytes = tuple.bytes;
-            long offset = tuple.offset;
+            byte[] idatabytes = tuple.get().bytes;
+            long offset = tuple.get().offset;
             int importTableOffset = getOffsetDiffFor(dataDirKey);
             logger.debug("importsection offset diff: " + importTableOffset);
             logger.debug("idatalength: " + idatabytes.length);
@@ -416,7 +418,7 @@ public class SectionLoader {
      * @param dataDirKey
      *            the data directory key
      * @return the section table entry the data directory entry of that key
-     *         points into or null if there is no data dir entry for the key
+     *         points into or absent if there is no data dir entry for the key
      *         available
      */
     private Optional<SectionHeader> maybeGetSectionHeader(
@@ -436,31 +438,37 @@ public class SectionLoader {
      * @param dataDirKey
      *            the key of the data directory entry
      * @return file offset of the rva that is in the data directory entry with
-     *         the given key, null if file offset can not be determined
+     *         the given key, absent if file offset can not be determined
      */
     @Ensures("result != null")
     public Optional<Long> getFileOffsetFor(DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
             long rva = dataDir.get().virtualAddress;
-            return Optional.fromNullable(getFileOffsetFor(rva));
+            return maybeGetFileOffset(rva);
         }
         return Optional.absent();
     }
 
-    public Long getFileOffsetFor(long rva) {
-        SectionHeader section = getSectionHeaderByRVA(rva);
-        if (section != null) {
-            Long virtualAddress = section.get(VIRTUAL_ADDRESS);
-            Long pointerToRawData = section.get(POINTER_TO_RAW_DATA);
-            if (virtualAddress != null && pointerToRawData != null) {
-                return rva - (virtualAddress - pointerToRawData);
-            }
+    /**
+     * Returns the file offset for the RVA.
+     * 
+     * @param rva
+     *            the relative virtual address that shall be converted
+     * @return file offset optional, absent if it can not be determined.
+     */
+    @Ensures("result != null")
+    public Optional<Long> maybeGetFileOffset(long rva) {
+        Optional<SectionHeader> section = maybeGetSectionHeaderByRVA(rva);
+        if (section.isPresent()) {
+            long virtualAddress = section.get().get(VIRTUAL_ADDRESS);
+            long pointerToRawData = section.get().get(POINTER_TO_RAW_DATA);
+            return Optional.of(rva - (virtualAddress - pointerToRawData));
         } else if (rva <= file.length()) {
             // data is not located within a section
-            return rva;
+            return Optional.of(rva);
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
@@ -471,20 +479,19 @@ public class SectionLoader {
      * @return bytes and offset of the section
      * @throws {@link IOException}
      */
-    public BytesAndOffset readSectionBytesFor(DataDirectoryKey dataDirKey)
-            throws IOException {
+    public Optional<BytesAndOffset> maybeReadSectionBytesFor(
+            DataDirectoryKey dataDirKey) throws IOException {
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
         if (header.isPresent()) {
             try {
-                return loadSectionBytes(header.get());
+                return Optional.fromNullable(loadSectionBytes(header.get()));
             } catch (IllegalArgumentException e) {
                 logger.warn(e);
-                return null;
             }
         } else {
             logger.warn("unable to load header for datadirkey " + dataDirKey);
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
@@ -508,21 +515,21 @@ public class SectionLoader {
      * Loads all bytes and information of the export section. The file on disk
      * is read to fetch the information.
      * 
-     * @return the export section, null if file doesn't have an export section
+     * @return the export section, absent if file doesn't have an export section
      * @throws {@link IOException} if unable to read the file
      */
     @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
-        DataDirEntry exportTable = optHeader.getDataDirEntries().get(
+        Optional<DataDirEntry> exportTable = optHeader.getDataDirEntry(
                 DataDirectoryKey.EXPORT_TABLE);
-        if (exportTable != null) {
-            long virtualAddress = exportTable.virtualAddress;
-            BytesAndOffset res = readDataDirBytesFor(DataDirectoryKey.EXPORT_TABLE);
-            if (res == null) {
+        if (exportTable.isPresent()) {
+            long virtualAddress = exportTable.get().virtualAddress;
+            Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.EXPORT_TABLE);
+            if (!res.isPresent()) {
                 return Optional.absent();
             }
-            byte[] edatabytes = res.bytes;
-            long offset = res.offset;
+            byte[] edatabytes = res.get().bytes;
+            long offset = res.get().offset;
             ExportSection edata = ExportSection.newInstance(edatabytes,
                     virtualAddress, optHeader, this, offset);
             return Optional.of(edata);
@@ -549,8 +556,10 @@ public class SectionLoader {
      * @throws {@link FileFormatException} if unable to load the file, e.g. not
      *         virtual address given
      */
-    private BytesAndOffset readDataDirBytesFor(DataDirectoryKey dataDirKey)
-            throws IOException, FileFormatException {
+    @Ensures("result != null")
+    private Optional<BytesAndOffset> maybeReadDataDirBytes(
+            DataDirectoryKey dataDirKey) throws IOException,
+            FileFormatException {
         Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
         if (header.isPresent() && dataDir.isPresent()) {
@@ -573,7 +582,7 @@ public class SectionLoader {
                     // TODO cast to int is insecure. actual int is unsigned
                     byte[] bytes = new byte[(int) size];
                     raf.readFully(bytes);
-                    return new BytesAndOffset(bytes, offset);
+                    return Optional.of(new BytesAndOffset(bytes, offset));
                 }
             } else {
                 logger.warn("virtual address is null for data dir: "
@@ -582,7 +591,7 @@ public class SectionLoader {
         } else {
             logger.warn("invalid dataDirKey");
         }
-        return null;
+        return Optional.absent();
     }
 
     /**

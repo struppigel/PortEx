@@ -66,9 +66,9 @@ class ExportSection private (
     // "if the function's RVA is inside the exports section (as given by the
     // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
     def isForwarderRVA(rva: Long): Boolean = { //TODO is that approach accurate?
-      val header = sectionLoader.getSectionHeaderByRVA(rva)
-      if (header == null) false
-      else header == exportHeader
+      val header = sectionLoader.maybeGetSectionHeaderByRVA(rva)
+      if (!header.isPresent) false
+      else header.get == exportHeader
     }
     val names = namePointerTable.pointerNameList.map(_._2)
     names map { name =>
@@ -195,7 +195,7 @@ object ExportSection {
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
     val edataTable = ExportDirTable(edataBytes)
     val maybeExportDir = opt.getDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
-    val exportSection = sectionLoader.getSectionHeaderByRVA(maybeExportDir.get.virtualAddress)
+    val exportSection = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
