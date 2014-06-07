@@ -39,6 +39,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Invariant;
+import com.google.java.contract.Requires;
 
 /**
  * Responsible for computing section related values and loading sections with
@@ -60,9 +61,8 @@ public class SectionLoader {
     private final OptionalHeader optHeader;
 
     /**
-     * @constructor Creates a SectionLoader instance with a file and the
-     *              corresponding section table and optional Header of that
-     *              file.
+     * Creates a SectionLoader instance with a file and the corresponding
+     * section table and optional Header of that file.
      * 
      * @param table
      * @param optHeader
@@ -75,8 +75,9 @@ public class SectionLoader {
     }
 
     /**
-     * @constructor Creates a SectionLoader instance taking all information from
-     *              the given {@link PEData} object
+     * Creates a SectionLoader instance taking all information from the given
+     * {@link PEData} object
+     * 
      * @param data
      */
     public SectionLoader(PEData data) {
@@ -88,20 +89,19 @@ public class SectionLoader {
     /**
      * Loads the first section with the given name. If the file doesn't have a
      * section by this name, it returns absent.
-     * 
-     * This does not instantiate subclasses of {@link PESection}. Use methods
-     * like {@link #loadImportSection()} or {@link #loadResourceSection()}
-     * instead.
-     * 
+     * <p>
+     * This does not instantiate special sections. Use methods like
+     * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
+     * <p>
      * The file on disk is read to fetch the information
      * 
      * @param name
      *            the section's name
-     * @return PESection of the given name, absent if section isn't contained in
-     *         file
-     * @throws IOException
-     *             if unable to read the file
+     * @return {@link PESection} of the given name, absent if section isn't
+     *         contained in file
+     * @throws {@link IOException} if unable to read the file
      */
+    @Ensures("result != null")
     public Optional<PESection> maybeLoadSection(String name) throws IOException {
         Optional<SectionHeader> section = table.getSectionHeaderByName(name);
         if (section.isPresent()) {
@@ -115,20 +115,18 @@ public class SectionLoader {
      * Loads the section with the given number and may patch the size of the
      * section if the {@code patchSize} parameter is set. If the file doesn't
      * have a section by this number, it returns null.
-     * 
-     * This does not instantiate subclasses of {@link PESection}. Use methods
-     * like {@link #loadImportSection()} or {@link #loadResourceSection()}
-     * instead.
-     * 
+     * <p>
+     * This does not instantiate special sections. Use methods like
+     * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
+     * <p>
      * The file on disk is read to fetch the information
      * 
      * @param sectionNr
      *            the section's name
-     * @return PESection of the given number, null if there is no section with
-     *         that number
-     * @throws IOException
-     *             if unable to read the file
+     * @return {@link PESection} of the given number
+     * @throws {@link IOException} if unable to read the file
      */
+    @Ensures("result != null")
     public PESection loadSection(int sectionNr) throws IOException {
         BytesAndOffset tuple = loadSectionBytes(sectionNr);
         byte[] bytes = tuple.bytes;
@@ -145,24 +143,26 @@ public class SectionLoader {
      */
     @Ensures("result != null")
     public BytesAndOffset loadSectionBytes(int sectionNr) throws IOException {
-        SectionHeader section = table.getSectionHeader(sectionNr);
-        return loadSectionBytes(section);
+        SectionHeader header = table.getSectionHeader(sectionNr);
+        return loadSectionBytes(header);
     }
 
     /**
-     * Loads the bytes of the section.
+     * Loads the bytes of the section and returns bytes and file offset.
      * 
-     * @param section
-     * @return
-     * @throws IOException
+     * @param header
+     *            of the section
+     * @return bytes and file offset of the section
+     * @throws {@link IOException} if file can not be read
      */
+    @Requires("header != null")
     @Ensures("result != null")
-    public BytesAndOffset loadSectionBytes(SectionHeader section)
+    public BytesAndOffset loadSectionBytes(SectionHeader header)
             throws IOException {
-        Preconditions.checkArgument(section != null, "given section was null");
+        Preconditions.checkArgument(header != null, "given section was null");
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            long alignedPointerToRaw = section.getAlignedPointerToRaw();
-            long readSize = getReadSize(section);
+            long alignedPointerToRaw = header.getAlignedPointerToRaw();
+            long readSize = getReadSize(header);
             raf.seek(alignedPointerToRaw);
             logger.debug("reading section bytes from " + alignedPointerToRaw
                     + " to " + readSize);
@@ -172,13 +172,18 @@ public class SectionLoader {
         }
     }
 
+    /**
+     * Rounds up the value to the file alignment of the optional header.
+     * 
+     * @param value
+     * @return file aligned value
+     */
     @Ensures("result % 512 == 0")
     private long fileAligned(long value) {
         long fileAlign = optHeader.get(WindowsEntryKey.FILE_ALIGNMENT);
-        // Note: (two's complement of x AND value) rounds down value to a
-        // multiple of x if x is a power of 2
-        if (value % fileAlign != 0) {
-            value = ((value) + fileAlign - 1) & ~(fileAlign - 1);
+        long rest = value % fileAlign;
+        if (rest != 0) {
+            value = value - rest + fileAlign;
         }
         return value;
     }
@@ -186,27 +191,27 @@ public class SectionLoader {
     /**
      * Determines the the number of bytes that is read for the section.
      * 
-     * @param section
+     * @param header
      *            header of the section
      * @return section size
      */
     @Ensures("result >= 0")
-    public long getReadSize(SectionHeader section) {
-        long pointerToRaw = section.get(POINTER_TO_RAW_DATA);
-        long virtSize = section.get(VIRTUAL_SIZE);
-        long sizeOfRaw = section.get(SIZE_OF_RAW_DATA);
-        long alignedPointerToRaw = section.getAlignedPointerToRaw();
+    public long getReadSize(SectionHeader header) {
+        long pointerToRaw = header.get(POINTER_TO_RAW_DATA);
+        long virtSize = header.get(VIRTUAL_SIZE);
+        long sizeOfRaw = header.get(SIZE_OF_RAW_DATA);
+        long alignedPointerToRaw = header.getAlignedPointerToRaw();
         // see Peter Ferrie's answer in:
         // https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
         long readSize = fileAligned(pointerToRaw + sizeOfRaw)
                 - alignedPointerToRaw;
-        readSize = Math.min(readSize, section.getAlignedSizeOfRaw());
+        readSize = Math.min(readSize, header.getAlignedSizeOfRaw());
         // see https://code.google.com/p/corkami/wiki/PE#section_table:
         // "if bigger than virtual size, then virtual size is taken. "
         // and:
         // "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
         if (virtSize != 0) {
-            readSize = Math.min(readSize, section.getAlignedVirtualSize());
+            readSize = Math.min(readSize, header.getAlignedVirtualSize());
         }
         if (readSize + alignedPointerToRaw > file.length()) {
             readSize = file.length() - alignedPointerToRaw;
@@ -554,7 +559,8 @@ public class SectionLoader {
             if (virtualAddress != null) {
                 long rva = dataDir.get().virtualAddress;
                 long offset = rva - (virtualAddress - pointerToRawData);
-                long size = (getReadSize(header.get()) + pointerToRawData) - rva;
+                long size = (getReadSize(header.get()) + pointerToRawData)
+                        - rva;
                 if (size < dataDir.get().size) {
                     size = dataDir.get().size;
                 }
