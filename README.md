@@ -32,32 +32,7 @@ The first release will be in December 2014.
 
 PortEx will be added to the Central Maven Repository with its first release. Until then you can include PortEx as follows:
 
-Create the following portex.pom:
-
-```
-<?xml version='1.0' encoding='UTF-8'?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>default</groupId>
-    <artifactId>portex_2.10</artifactId>
-    <packaging>jar</packaging>
-    <description>portex</description>
-    <version>0.4.0</version>
-    <name>portex</name>
-    <organization>
-        <name>default</name>
-    </organization>
-    <dependencies>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>2.10.3</version>
-        </dependency>
-    </dependencies>
-</project>
-```
-
-Download portex.jar and install portex to your local Maven repository as follows:
+Download portex.pom and portex.jar and install portex to your local Maven repository as follows:
 
 ```
 $ mvn install:install-file -Dfile=portex.jar -DpomFile=portex.pom
@@ -67,9 +42,9 @@ Now you can include PortEx to your project by adding the following Maven depende
 
 ```
 <dependency>
-  		<groupId>default</groupId>
+  		<groupId>portex</groupId>
   		<artifactId>portex_2.10</artifactId>
-  		<version>0.4.0</version>
+  		<version>0.5.0</version>
 </dependency>
 ```
 
