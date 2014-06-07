@@ -193,7 +193,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Override
     public StandardField getField(COFFHeaderKey key) {
-       return data.get(key); //TODO get rid of null!
+       return data.get(key);
     }
 
     /**

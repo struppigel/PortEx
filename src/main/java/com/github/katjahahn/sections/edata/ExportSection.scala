@@ -32,21 +32,20 @@ import com.github.katjahahn.sections.SectionHeader
 import com.github.katjahahn.PEData
 
 /**
- * @author Katja Hahn
- *
  * Represents the export section of a PE file and provides access to lists of
  * it's inner structures (export address table, ordinal table, name pointer table,
  * data directory table) as well as access to a list of export entries fetched
  * from these structures.
- *
+ * <p>
  * The export section instance should be created with the {@link SectionLoader}
  *
- * @constructor creates an export section instance
+ * @author Katja Hahn
+ *
+ * Creates an export section instance
  * @param edataTable the data directory table
  * @param exportAddressTable contains addresses to exported functions
  * @param namePointerTable containes addresses to names of exported functions
  * @param ordinalTable contains ordinal number of exported functions
- *
  */
 class ExportSection private (
   private val edataTable: ExportDirTable,

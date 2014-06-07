@@ -38,10 +38,10 @@ import com.github.katjahahn.PEData
 /**
  * Represents the import section, fetches information about the data directory
  * entries and their lookup table entries.
- * TODO forwarder addresses
- * TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
+ * 
  * @author Katja Hahn
  */
+//TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
 class ImportSection private (
   private val directoryTable: List[DirectoryTableEntry],
   val offset: Long,

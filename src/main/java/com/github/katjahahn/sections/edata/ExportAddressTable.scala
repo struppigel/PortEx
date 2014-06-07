@@ -20,12 +20,12 @@ package com.github.katjahahn.sections.edata
 import com.github.katjahahn.ByteArrayUtil._
 import scala.collection.mutable.ListBuffer
 /**
- * @author Katja Hahn
- *
  * The export address table contains all relative virtual addresses in the order
  * they are found in the export section.
- *
- * @constructor creates the export table with the addresses found
+ * 
+ * @author Katja Hahn
+ * 
+ * Creates the export table with the addresses found
  * @param addresses of the export section
  */
 class ExportAddressTable private (val addresses: List[Long]) {

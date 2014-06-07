@@ -29,7 +29,7 @@ class ExportNamePointerTable private (val pointerNameList: List[(Address, String
 
   def apply(i: Int): Long = pointerNameList(i)._1
 
-  //TODO binary search!
+  //TODO binary search
   def apply(name: String): Int = pointerNameList.indexWhere(_._2 == name)
 
   override def toString(): String =

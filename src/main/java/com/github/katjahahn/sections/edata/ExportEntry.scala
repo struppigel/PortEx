@@ -15,15 +15,15 @@
  ******************************************************************************/
 package com.github.katjahahn.sections.edata
 
-/**
- * @author Katja Hahn
- * 
+/** 
  * Represents one entry of the export section. 
- * 
+ * <p>
  * Is created by the export section instance ans used for easy access to the 
  * export information without knowing the details of the internal structure.
  * 
- * @constructor creates an instance of an export entry with the name, ordinal 
+ * @author Katja Hahn
+ * 
+ * Creates an instance of an export entry with the name, ordinal 
  * and relative virtual address
  * 
  * @param symbolRVA the relative virtual address that points to the function

@@ -25,14 +25,14 @@ import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.HeaderKey
 
 /**
- * @author Katja Hahn
- *
  * Represents the directory table of the export section and provides access to the
  * header values.
- *
+ * <p>
  * The export directory table should be loaded by an {@link ExportSection} instance.
- *
- * @constructor instanciates an export directory table.
+ * 
+ * @author Katja Hahn
+ * 
+ * instanciates an export directory table.
  */
 class ExportDirTable private (
   private val entries: Map[ExportDirTableKey, StandardField]) {
