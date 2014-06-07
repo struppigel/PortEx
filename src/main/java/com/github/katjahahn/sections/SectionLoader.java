@@ -111,7 +111,8 @@ public class SectionLoader {
         return Optional.absent();
     }
 
-    // TODO what happens if not section with that number given?
+    // TODO what happens if no section with that number given? --> add to
+    // javadoc
     /**
      * Loads the section with the given number and may patch the size of the
      * section if the {@code patchSize} parameter is set.
@@ -197,6 +198,7 @@ public class SectionLoader {
      */
     @Ensures("result >= 0")
     public long getReadSize(SectionHeader header) {
+        Preconditions.checkArgument(header != null);
         long pointerToRaw = header.get(POINTER_TO_RAW_DATA);
         long virtSize = header.get(VIRTUAL_SIZE);
         long sizeOfRaw = header.get(SIZE_OF_RAW_DATA);
@@ -403,7 +405,7 @@ public class SectionLoader {
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
         if (header.isPresent()) {
             long pointerToRawData = header.get().getAlignedPointerToRaw();
-            Optional<Long> offset = getFileOffsetFor(dataDirKey);
+            Optional<Long> offset = maybeGetFileOffsetFor(dataDirKey);
             if (offset.isPresent()) {
                 return (int) (offset.get() - pointerToRawData);
             }
@@ -440,7 +442,7 @@ public class SectionLoader {
      *         the given key, absent if file offset can not be determined
      */
     @Ensures("result != null")
-    public Optional<Long> getFileOffsetFor(DataDirectoryKey dataDirKey) {
+    public Optional<Long> maybeGetFileOffsetFor(DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
             long rva = dataDir.get().virtualAddress;

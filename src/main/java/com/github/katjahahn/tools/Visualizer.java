@@ -274,34 +274,34 @@ public class Visualizer {
 
     private void drawSpecials() throws IOException {
         SectionLoader loader = new SectionLoader(data);
-        ImportSection idata = loader.loadImportSection();
-        if (idata != null) {
+        Optional<ImportSection> idata = loader.maybeLoadImportSection();
+        if (idata.isPresent()) {
             importsAvailable = true;
-            long ilt = idata.getOffset();
-            long size = idata.getSize();
+            long ilt = idata.get().getOffset();
+            long size = idata.get().getSize();
             drawPixels(importColor, ilt, size, additionalGap);
         }
-        ExportSection edata = loader.loadExportSection();
-        if (edata != null) {
+        Optional<ExportSection> edata = loader.maybeLoadExportSection();
+        if (edata.isPresent()) {
             exportsAvailable = true;
-            long offset = edata.getOffset();
-            long size = edata.getSize();
+            long offset = edata.get().getOffset();
+            long size = edata.get().getSize();
             drawPixels(exportColor, offset, size, additionalGap);
         }
 
-        ResourceSection rsrc = loader.loadResourceSection();
-        if (rsrc != null) {
+        Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
+        if (rsrc.isPresent()) {
             resourcesAvailable = true;
-            long offset = rsrc.getOffset();
-            long size = rsrc.getSize();
+            long offset = rsrc.get().getOffset();
+            long size = rsrc.get().getSize();
             drawPixels(rsrcColor, offset, size, additionalGap);
         }
 
-        DebugSection debug = loader.loadDebugSection();
-        if (debug != null) {
+        Optional<DebugSection> debug = loader.maybeLoadDebugSection();
+        if (debug.isPresent()) {
             debugAvailable = true;
-            long offset = debug.getOffset();
-            long size = debug.getSize();
+            long offset = debug.get().getOffset();
+            long size = debug.get().getSize();
             drawPixels(debugColor, offset, size, additionalGap);
         }
         Optional<Long> ep = getEntryPoint();
