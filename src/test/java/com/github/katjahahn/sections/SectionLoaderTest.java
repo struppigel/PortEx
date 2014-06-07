@@ -46,8 +46,8 @@ public class SectionLoaderTest {
 		SectionLoader loader2 = new SectionLoader(datum.getSectionTable(),
 				datum.getOptionalHeader(), datum.getFile());
 		for (DataDirectoryKey key : DataDirectoryKey.values()) {
-			Long offset1 = loader1.getFileOffsetFor(key);
-			Long offset2 = loader2.getFileOffsetFor(key);
+			Optional<Long> offset1 = loader1.getFileOffsetFor(key);
+			Optional<Long> offset2 = loader2.getFileOffsetFor(key);
 			assertEquals(offset1, offset2);
 		}
 	}
@@ -136,7 +136,7 @@ public class SectionLoaderTest {
 	@Test
 	public void loadSectionWithSizeAnomaly() throws IOException {
 		PEData datum = pedata.get("Lab05-01.dll");
-		new SectionLoader(datum).loadSection(".reloc");
+		new SectionLoader(datum).maybeLoadSection(".reloc");
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class SectionLoaderTest {
 			SectionTable table = datum.getSectionTable();
 			for (SectionHeader header : table.getSectionHeaders()) {
 				String name = header.getName();
-				Optional<PESection> section = loader.loadSection(name);
+				Optional<PESection> section = loader.maybeLoadSection(name);
 				assertTrue(section.isPresent());
 				assertEquals(section.get().getDump().length,
 						(int) loader.getReadSize(header));

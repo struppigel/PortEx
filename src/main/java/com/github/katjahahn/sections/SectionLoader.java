@@ -102,7 +102,7 @@ public class SectionLoader {
      * @throws IOException
      *             if unable to read the file
      */
-    public Optional<PESection> loadSection(String name) throws IOException {
+    public Optional<PESection> maybeLoadSection(String name) throws IOException {
         Optional<SectionHeader> section = table.getSectionHeaderByName(name);
         if (section.isPresent()) {
             int sectionNr = section.get().getNumber();
@@ -225,7 +225,7 @@ public class SectionLoader {
      */
     public DebugSection loadDebugSection() throws IOException {
         Optional<DebugSection> debug = maybeLoadDebugSection();
-        if(debug.isPresent()) {
+        if (debug.isPresent()) {
             return debug.get();
         }
         throw new IllegalStateException("unable to load debug section");
@@ -357,10 +357,10 @@ public class SectionLoader {
     public Optional<ImportSection> maybeLoadImportSection() throws IOException,
             FileFormatException {
         DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
-        DataDirEntry importTable = optHeader.getDataDirEntries()
-                .get(dataDirKey);
-        if (importTable != null) {
-            long virtualAddress = importTable.virtualAddress;
+        Optional<DataDirEntry> importTable = optHeader
+                .getDataDirEntry(dataDirKey);
+        if (importTable.isPresent()) {
+            long virtualAddress = importTable.get().virtualAddress;
             BytesAndOffset tuple = readSectionBytesFor(dataDirKey);
             if (tuple == null) {
                 return Optional.absent();
@@ -393,12 +393,12 @@ public class SectionLoader {
      */
     private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey)
             throws FileFormatException {
-        SectionHeader header = getSectionHeaderFor(dataDirKey);
-        if (header != null) {
-            long pointerToRawData = header.getAlignedPointerToRaw();
-            Long offset = getFileOffsetFor(dataDirKey);
-            if (offset != null) {
-                return (int) (offset - pointerToRawData);
+        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
+        if (header.isPresent()) {
+            long pointerToRawData = header.get().getAlignedPointerToRaw();
+            Optional<Long> offset = getFileOffsetFor(dataDirKey);
+            if (offset.isPresent()) {
+                return (int) (offset.get() - pointerToRawData);
             }
         }
         throw new FileFormatException("unable to load " + dataDirKey);
@@ -414,12 +414,14 @@ public class SectionLoader {
      *         points into or null if there is no data dir entry for the key
      *         available
      */
-    private SectionHeader getSectionHeaderFor(DataDirectoryKey dataDirKey) {
+    private Optional<SectionHeader> maybeGetSectionHeader(
+            DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
-            return dataDir.get().getSectionTableEntry(table);
+            return Optional.fromNullable(dataDir.get().getSectionTableEntry(
+                    table));
         }
-        return null;
+        return Optional.absent();
     }
 
     /**
@@ -431,13 +433,14 @@ public class SectionLoader {
      * @return file offset of the rva that is in the data directory entry with
      *         the given key, null if file offset can not be determined
      */
-    public Long getFileOffsetFor(DataDirectoryKey dataDirKey) {
-        DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
-        if (dataDir != null) {
-            long rva = dataDir.virtualAddress;
-            return getFileOffsetFor(rva);
+    @Ensures("result != null")
+    public Optional<Long> getFileOffsetFor(DataDirectoryKey dataDirKey) {
+        Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+        if (dataDir.isPresent()) {
+            long rva = dataDir.get().virtualAddress;
+            return Optional.fromNullable(getFileOffsetFor(rva));
         }
-        return null;
+        return Optional.absent();
     }
 
     public Long getFileOffsetFor(long rva) {
@@ -465,17 +468,16 @@ public class SectionLoader {
      */
     public BytesAndOffset readSectionBytesFor(DataDirectoryKey dataDirKey)
             throws IOException {
-        Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
-        if (dataDir.isPresent()) {
-            SectionHeader header = getSectionHeaderFor(dataDirKey);
+        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
+        if (header.isPresent()) {
             try {
-                return loadSectionBytes(header);
+                return loadSectionBytes(header.get());
             } catch (IllegalArgumentException e) {
                 logger.warn(e);
                 return null;
             }
         } else {
-            logger.warn("invalid data dir key");
+            logger.warn("unable to load header for datadirkey " + dataDirKey);
         }
         return null;
     }
@@ -544,17 +546,17 @@ public class SectionLoader {
      */
     private BytesAndOffset readDataDirBytesFor(DataDirectoryKey dataDirKey)
             throws IOException, FileFormatException {
-        DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
-        if (dataDir != null) {
-            SectionHeader header = getSectionHeaderFor(dataDirKey);
-            long pointerToRawData = header.getAlignedPointerToRaw();
-            Long virtualAddress = header.get(VIRTUAL_ADDRESS);
+        Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
+        if (header.isPresent() && dataDir.isPresent()) {
+            long pointerToRawData = header.get().getAlignedPointerToRaw();
+            Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
             if (virtualAddress != null) {
-                long rva = dataDir.virtualAddress;
+                long rva = dataDir.get().virtualAddress;
                 long offset = rva - (virtualAddress - pointerToRawData);
-                long size = (getReadSize(header) + pointerToRawData) - rva;
-                if (size < dataDir.size) {
-                    size = dataDir.size;
+                long size = (getReadSize(header.get()) + pointerToRawData) - rva;
+                if (size < dataDir.get().size) {
+                    size = dataDir.get().size;
                 }
                 if (size + offset > file.length()) {
                     size = file.length() - offset;
