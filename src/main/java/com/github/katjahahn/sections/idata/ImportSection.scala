@@ -51,6 +51,8 @@ class ImportSection private (
   
   def getSize(): Long = size
 
+  def isEmpty(): Boolean = directoryTable.isEmpty || (directoryTable.forall(_.getEntries.isEmpty))
+  
   /**
    * Returns the directory table entries of the import section.
    * Each entry contains the lookup table entries that belong to it.
@@ -236,7 +238,6 @@ object ImportSection {
     new SectionLoader(data).loadImportSection()
 
   def main(args: Array[String]): Unit = {
-    //    val file = new File("src/main/resources/x64viruses/VirusShare_baed21297974b6adf3298585baa78691")
     val file = new File("src/main/resources/unusualfiles/tinype/downloader.exe")
     val data = PELoader.loadPE(file)
     println(data)

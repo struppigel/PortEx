@@ -58,6 +58,9 @@ public class SectionLoaderTest {
 		PEData data = PELoader.loadPE(file);
 		SectionLoader loader = new SectionLoader(data);
 		Optional<ImportSection> idata = loader.maybeLoadImportSection();
+		if(idata.isPresent()) {
+		    System.out.println(idata.get().getInfo());
+		}
 		assertFalse(idata.isPresent());
 	}
 

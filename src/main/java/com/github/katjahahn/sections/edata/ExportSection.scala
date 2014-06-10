@@ -193,7 +193,7 @@ object ExportSection {
   def apply(edataBytes: Array[Byte], virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
     val edataTable = ExportDirTable(edataBytes)
-    val maybeExportDir = opt.getDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
+    val maybeExportDir = opt.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
     val exportSection = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)

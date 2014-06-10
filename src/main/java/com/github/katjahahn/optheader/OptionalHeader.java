@@ -167,7 +167,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      *         doesn't exist.
      */
     @Ensures("result != null")
-    public Optional<DataDirEntry> getDataDirEntry(DataDirectoryKey key) {
+    public Optional<DataDirEntry> maybeGetDataDirEntry(DataDirectoryKey key) {
         return Optional.fromNullable(dataDirEntries.get(key));
     }
 

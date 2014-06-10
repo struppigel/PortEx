@@ -15,12 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.sections;
 
-import static com.github.katjahahn.sections.SectionHeaderKey.POINTER_TO_RAW_DATA;
-import static com.github.katjahahn.sections.SectionHeaderKey.SIZE_OF_RAW_DATA;
-import static com.github.katjahahn.sections.SectionHeaderKey.VIRTUAL_ADDRESS;
-import static com.github.katjahahn.sections.SectionHeaderKey.VIRTUAL_SIZE;
+import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
@@ -170,6 +168,7 @@ public class SectionLoader {
     public BytesAndOffset loadSectionBytes(SectionHeader header)
             throws IOException {
         Preconditions.checkArgument(header != null, "given section was null");
+        logger.debug("reading section bytes for header " + header.getName());
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             long alignedPointerToRaw = header.getAlignedPointerToRaw();
             long readSize = getReadSize(header);
@@ -319,7 +318,7 @@ public class SectionLoader {
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
         Optional<DataDirEntry> resourceTable = optHeader
-                .getDataDirEntry(DataDirectoryKey.RESOURCE_TABLE);
+                .maybeGetDataDirEntry(DataDirectoryKey.RESOURCE_TABLE);
         if (resourceTable.isPresent()) {
             Optional<SectionHeader> rsrcEntry = resourceTable.get()
                     .maybeGetSectionTableEntry(table);
@@ -375,7 +374,7 @@ public class SectionLoader {
     public Optional<ExceptionSection> maybeLoadExceptionSection()
             throws IOException, FileFormatException {
         Optional<DataDirEntry> exceptionTable = optHeader
-                .getDataDirEntry(DataDirectoryKey.EXCEPTION_TABLE);
+                .maybeGetDataDirEntry(DataDirectoryKey.EXCEPTION_TABLE);
         if (exceptionTable.isPresent()) {
             Optional<SectionHeader> header = exceptionTable.get()
                     .maybeGetSectionTableEntry(table);
@@ -456,12 +455,23 @@ public class SectionLoader {
             FileFormatException {
         DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
         Optional<DataDirEntry> importTable = optHeader
-                .getDataDirEntry(dataDirKey);
+                .maybeGetDataDirEntry(dataDirKey);
         if (importTable.isPresent()) {
             long virtualAddress = importTable.get().virtualAddress;
             Optional<BytesAndOffset> tuple = maybeReadSectionBytesFor(dataDirKey);
             if (!tuple.isPresent()) {
-                return Optional.absent();
+                // read at RVA
+                logger.warn("unable to read section bytes for " + dataDirKey);
+                long offset = importTable.get().virtualAddress;
+                logger.info("loading import section at physical offset "
+                        + offset);
+                ImportSection idata = loadImportTableAt(offset,
+                        importTable.get().size);
+                if(idata.isEmpty()) {
+                    logger.warn("empty import section");
+                    return Optional.absent();
+                }
+                return Optional.of(idata);
             }
             byte[] idatabytes = tuple.get().bytes;
             if (idatabytes.length == 0) {
@@ -476,9 +486,25 @@ public class SectionLoader {
             ImportSection idata = ImportSection.newInstance(idatabytes,
                     virtualAddress, optHeader, importTableOffset,
                     file.length(), offset);
+            if (idata.isEmpty()) {
+                logger.warn("empty import section");
+                return Optional.absent();
+            }
             return Optional.of(idata);
         }
         return Optional.absent();
+    }
+
+    private ImportSection loadImportTableAt(long offset, long size)
+            throws FileNotFoundException, IOException {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+            raf.seek(offset);
+            // TODO cast to int is insecure. actual int is unsigned
+            byte[] bytes = new byte[(int) size];
+            raf.readFully(bytes);
+            return ImportSection.newInstance(bytes, offset, optHeader, 0,
+                    file.length(), offset);
+        }
     }
 
     /**
@@ -518,10 +544,12 @@ public class SectionLoader {
      */
     private Optional<SectionHeader> maybeGetSectionHeader(
             DataDirectoryKey dataDirKey) {
-        Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+        Optional<DataDirEntry> dataDir = optHeader
+                .maybeGetDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
             return dataDir.get().maybeGetSectionTableEntry(table);
         }
+        logger.warn("data dir entry " + dataDirKey + " doesn't exist");
         return Optional.absent();
     }
 
@@ -536,7 +564,8 @@ public class SectionLoader {
      */
     @Ensures("result != null")
     public Optional<Long> maybeGetFileOffsetFor(DataDirectoryKey dataDirKey) {
-        Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+        Optional<DataDirEntry> dataDir = optHeader
+                .maybeGetDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
             long rva = dataDir.get().virtualAddress;
             return maybeGetFileOffset(rva);
@@ -580,7 +609,7 @@ public class SectionLoader {
             try {
                 return Optional.fromNullable(loadSectionBytes(header.get()));
             } catch (IllegalArgumentException e) {
-                logger.warn(e);
+                logger.warn(e.getMessage());
             }
         } else {
             logger.warn("unable to load header for datadirkey " + dataDirKey);
@@ -615,7 +644,7 @@ public class SectionLoader {
     @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
         Optional<DataDirEntry> exportTable = optHeader
-                .getDataDirEntry(DataDirectoryKey.EXPORT_TABLE);
+                .maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE);
         if (exportTable.isPresent()) {
             long virtualAddress = exportTable.get().virtualAddress;
             Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.EXPORT_TABLE);
@@ -658,7 +687,8 @@ public class SectionLoader {
     private Optional<BytesAndOffset> maybeReadDataDirBytes(
             DataDirectoryKey dataDirKey) throws IOException,
             FileFormatException {
-        Optional<DataDirEntry> dataDir = optHeader.getDataDirEntry(dataDirKey);
+        Optional<DataDirEntry> dataDir = optHeader
+                .maybeGetDataDirEntry(dataDirKey);
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
         if (header.isPresent() && dataDir.isPresent()) {
             long pointerToRawData = header.get().getAlignedPointerToRaw();

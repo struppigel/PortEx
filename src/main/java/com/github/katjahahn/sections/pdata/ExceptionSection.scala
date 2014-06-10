@@ -53,6 +53,9 @@ object ExceptionSection {
   //TODO wincespec!
   def apply(sectionbytes: Array[Byte], machine: MachineType,
     virtualAddress: Long, offset: Long): ExceptionSection = {
+    if(!machineToSpec.contains(machine)) {
+      throw new IllegalArgumentException("spec for machine type not found: " + machine)
+    }
     val spec = machineToSpec(machine)
     println("using spec: " + spec)
     val specification = readMap(spec).asScala.toMap
@@ -75,7 +78,7 @@ object ExceptionSection {
     apply(sectionbytes, machine, virtualAddress, offset)
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("src/main/resources/x64viruses/")
+    val folder = new File("src/main/resources/testfiles/")
     for (file <- folder.listFiles) {
       val data = PELoader.loadPE(file)
       val entries = data.getOptionalHeader().getDataDirEntries()

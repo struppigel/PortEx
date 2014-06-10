@@ -82,7 +82,7 @@ public class OptionalHeaderTest {
 		DataDirectoryKey[] existant = { IMPORT_TABLE, RESOURCE_TABLE,
 				CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT };
 		for (DataDirectoryKey key : DataDirectoryKey.values()) {
-			Optional<DataDirEntry> entry = header.getDataDirEntry(key);
+			Optional<DataDirEntry> entry = header.maybeGetDataDirEntry(key);
 			assertTrue((entry.isPresent() && isIn(existant, key)) || !entry.isPresent());
 		}
 	}

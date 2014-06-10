@@ -41,7 +41,7 @@ public class DotNetCheck {
      */
     public boolean isDotNetPE() {
         Optional<DataDirEntry> entry = data.getOptionalHeader()
-                .getDataDirEntry(DataDirectoryKey.CLR_RUNTIME_HEADER);
+                .maybeGetDataDirEntry(DataDirectoryKey.CLR_RUNTIME_HEADER);
         return entry.isPresent() && entry.get().virtualAddress != 0;
     }
 

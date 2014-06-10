@@ -21,6 +21,9 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.sections.SectionHeader;
 import com.github.katjahahn.sections.SectionTable;
 import com.google.common.base.Optional;
@@ -34,6 +37,9 @@ import com.google.java.contract.Invariant;
  */
 @Invariant("key != null")
 public class DataDirEntry {
+
+    private static final Logger logger = LogManager
+            .getLogger(DataDirEntry.class.getName());
 
     /**
      * The key of the entry
@@ -140,17 +146,26 @@ public class DataDirEntry {
         checkArgument(table != null, "table must not be null");
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
-            int vSize = (int) section.get(VIRTUAL_SIZE);
-            int vAddress = (int) section.get(VIRTUAL_ADDRESS);
+            long vSize = section.getAlignedVirtualSize();
+            //corkami: "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
+            //see: https://code.google.com/p/corkami/wiki/PE#section_table
+            if(vSize == 0) {
+                vSize = section.getAlignedSizeOfRaw();
+            }
+            long vAddress = section.get(VIRTUAL_ADDRESS);
+            logger.debug("check if rva is within " + vAddress + " and "
+                    + (vAddress + vSize));
             if (rvaIsWithin(vAddress, vSize)) {
                 return Optional.of(section);
             }
         }
+        logger.warn("there is no entry that matches data dir entry RVA "
+                + virtualAddress);
         return Optional.absent();
     }
 
-    private boolean rvaIsWithin(int address, int size) {
-        int endpoint = address + size;
+    private boolean rvaIsWithin(long address, long size) {
+        long endpoint = address + size;
         return virtualAddress >= address && virtualAddress < endpoint;
     }
 
