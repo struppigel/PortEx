@@ -44,7 +44,7 @@ public class SectionLoaderTest {
 		PEData datum = pedata.get("strings.exe");
 		SectionLoader loader1 = new SectionLoader(datum);
 		SectionLoader loader2 = new SectionLoader(datum.getSectionTable(),
-				datum.getOptionalHeader(), datum.getFile());
+				datum.getOptionalHeader(), datum.getCOFFFileHeader(), datum.getFile());
 		for (DataDirectoryKey key : DataDirectoryKey.values()) {
 			Optional<Long> offset1 = loader1.maybeGetFileOffsetFor(key);
 			Optional<Long> offset2 = loader2.maybeGetFileOffsetFor(key);

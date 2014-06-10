@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.sections;
 
-import static com.github.katjahahn.sections.SectionHeaderKey.*;
+import static com.github.katjahahn.sections.SectionHeaderKey.POINTER_TO_RAW_DATA;
+import static com.github.katjahahn.sections.SectionHeaderKey.SIZE_OF_RAW_DATA;
+import static com.github.katjahahn.sections.SectionHeaderKey.VIRTUAL_ADDRESS;
+import static com.github.katjahahn.sections.SectionHeaderKey.VIRTUAL_SIZE;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,12 +30,15 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.FileFormatException;
 import com.github.katjahahn.PEData;
+import com.github.katjahahn.coffheader.COFFFileHeader;
+import com.github.katjahahn.coffheader.MachineType;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
 import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
+import com.github.katjahahn.sections.pdata.ExceptionSection;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -58,6 +64,7 @@ public class SectionLoader {
     private final SectionTable table;
     private final File file;
     private final OptionalHeader optHeader;
+    private final COFFFileHeader coffHeader;
 
     /**
      * Creates a SectionLoader instance with a file and the corresponding
@@ -67,10 +74,12 @@ public class SectionLoader {
      * @param optHeader
      * @param file
      */
-    public SectionLoader(SectionTable table, OptionalHeader optHeader, File file) {
+    public SectionLoader(SectionTable table, OptionalHeader optHeader,
+            COFFFileHeader coffHeader, File file) {
         this.table = table;
         this.file = file;
         this.optHeader = optHeader;
+        this.coffHeader = coffHeader;
     }
 
     /**
@@ -83,6 +92,7 @@ public class SectionLoader {
         this.table = data.getSectionTable();
         this.optHeader = data.getOptionalHeader();
         this.file = data.getFile();
+        this.coffHeader = data.getCOFFFileHeader();
     }
 
     /**
@@ -266,6 +276,10 @@ public class SectionLoader {
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
         Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.DEBUG);
         if (res.isPresent()) {
+            if (res.get().bytes.length == 0) {
+                logger.warn("unable to read debug section, readsize is 0");
+                return Optional.absent();
+            }
             return Optional.of(DebugSection.apply(res.get().bytes,
                     res.get().offset));
         }
@@ -314,10 +328,71 @@ public class SectionLoader {
                 if (virtualAddress != null) {
                     BytesAndOffset tuple = loadSectionBytes(rsrcEntry.get());
                     byte[] rsrcbytes = tuple.bytes;
+                    if (rsrcbytes.length == 0) {
+                        logger.warn("unable to read resource section, readsize is 0");
+                        return Optional.absent();
+                    }
                     long rsrcOffset = rsrcEntry.get().getAlignedPointerToRaw();
                     ResourceSection rsrc = ResourceSection.newInstance(file,
                             rsrcbytes, virtualAddress, rsrcOffset);
                     return Optional.of(rsrc);
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Loads all bytes and information of the exception section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link ExceptionSection} of the given file
+     * @throws {@link IOException} if unable to read the file
+     * @throws @{@link IllegalStateException} if section can not be loaded
+     */
+    @Ensures("result != null")
+    public ExceptionSection loadExceptionSection() throws IOException,
+            FileFormatException {
+        Optional<ExceptionSection> pdata = maybeLoadExceptionSection();
+        if (pdata.isPresent()) {
+            return pdata.get();
+        }
+        throw new IllegalStateException("unable to load resource section");
+    }
+
+    /**
+     * Loads all bytes and information of the resource section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link ResourceSection} of the given file, absent if file doesn't
+     *         have this section
+     * @throws IOException
+     *             if unable to read the file
+     */
+    @Ensures("result != null")
+    public Optional<ExceptionSection> maybeLoadExceptionSection()
+            throws IOException, FileFormatException {
+        Optional<DataDirEntry> exceptionTable = optHeader
+                .getDataDirEntry(DataDirectoryKey.EXCEPTION_TABLE);
+        if (exceptionTable.isPresent()) {
+            Optional<SectionHeader> header = exceptionTable.get()
+                    .maybeGetSectionTableEntry(table);
+            if (header.isPresent()) {
+                Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
+                if (virtualAddress != null) {
+                    BytesAndOffset tuple = loadSectionBytes(header.get());
+                    byte[] bytes = tuple.bytes;
+                    if (bytes.length == 0) {
+                        logger.warn("unable to read exception section, readsize is 0");
+                        return Optional.absent();
+                    }
+                    long offset = header.get().getAlignedPointerToRaw();
+                    MachineType machine = coffHeader.getMachineType();
+                    ExceptionSection section = ExceptionSection.newInstance(
+                            bytes, machine, virtualAddress, offset);
+                    return Optional.of(section);
                 }
             }
         }
@@ -389,6 +464,10 @@ public class SectionLoader {
                 return Optional.absent();
             }
             byte[] idatabytes = tuple.get().bytes;
+            if (idatabytes.length == 0) {
+                logger.warn("unable to read import section, readsize is 0");
+                return Optional.absent();
+            }
             long offset = tuple.get().offset;
             int importTableOffset = getOffsetDiffFor(dataDirKey);
             logger.debug("importsection offset diff: " + importTableOffset);
@@ -544,6 +623,10 @@ public class SectionLoader {
                 return Optional.absent();
             }
             byte[] edatabytes = res.get().bytes;
+            if (edatabytes.length == 0) {
+                logger.warn("unable to read export section, readsize is 0");
+                return Optional.absent();
+            }
             long offset = res.get().offset;
             ExportSection edata = ExportSection.newInstance(edatabytes,
                     virtualAddress, optHeader, this, offset);
