@@ -9,7 +9,19 @@ import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
 
 /**
- * Tool to calculate Shannon's Entropy for entire files, byte arrays or sections of a PE
+ * Tool to calculate Shannon's Entropy for entire files, byte arrays or sections
+ * of a PE.
+ *
+ * Example code:
+ * <pre>
+ * {@code
+ * File file = new File("WinRar.exe");
+ * PEData data = PELoader.loadPE(file);
+ * ShannonEntropy entropy = new ShannonEntropy(data);
+ * int sectionNr = 1;
+ * System.out.println("Entropy for section " + sectionNr + ": " + entropy.forSection(sectionNr));
+ * }
+ * </pre>
  *
  * @author Katja Hahn
  */
@@ -21,8 +33,8 @@ class ShannonEntropy(private val data: PEData) {
    * @param sectioNumber number of the section
    * @return entropy of the section
    */
-  def sectionEntropy(sectionNumber: Int): Double = {
-    val bytesAndOffset = new SectionLoader(data).loadSectionBytes(sectionNumber)
+  def forSection(sectionNumber: Int): Double = {
+    val bytesAndOffset = (new SectionLoader(data)).loadSectionBytes(sectionNumber)
     entropy(bytesAndOffset.bytes)
   }
 
@@ -31,9 +43,9 @@ class ShannonEntropy(private val data: PEData) {
    *
    * @return map with section number as keys and entropy as values
    */
-  def sectionEntropies(): Map[Int, Double] = {
+  def forSections(): Map[Int, Double] = {
     val sectionNr = data.getCOFFFileHeader().getNumberOfSections()
-    (for (i <- 1 to sectionNr) yield (i, sectionEntropy(i))) toMap
+    (for (i <- 1 to sectionNr) yield (i, forSection(i))) toMap
   }
 }
 
@@ -46,7 +58,7 @@ object ShannonEntropy {
     val file = new File("WinRar.exe")
     val data = PELoader.loadPE(file)
     val ent = new ShannonEntropy(data)
-    ent.sectionEntropies.foreach(println)
+    ent.forSections.foreach(println)
     println(data.getSectionTable().getInfo())
   }
 
