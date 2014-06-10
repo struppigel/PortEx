@@ -5,6 +5,7 @@ import com.github.katjahahn.PEData
 import java.io.File
 import java.util.Random
 import ShannonEntropy._
+import scala.collection.JavaConverters._
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.PELoader
 
@@ -43,7 +44,14 @@ class ShannonEntropy(private val data: PEData) {
    *
    * @return map with section number as keys and entropy as values
    */
-  def forSections(): Map[Int, Double] = {
+  def forSections(): java.util.Map[Int, Double] = _forSections().asJava
+
+  /**
+   * Calculates the entropy for all sections of the file
+   *
+   * @return map with section number as keys and entropy as values
+   */
+  private def _forSections(): Map[Int, Double] = {
     val sectionNr = data.getCOFFFileHeader().getNumberOfSections()
     (for (i <- 1 to sectionNr) yield (i, forSection(i))) toMap
   }
@@ -58,7 +66,7 @@ object ShannonEntropy {
     val file = new File("WinRar.exe")
     val data = PELoader.loadPE(file)
     val ent = new ShannonEntropy(data)
-    ent.forSections.foreach(println)
+    ent._forSections.foreach(println)
     println(data.getSectionTable().getInfo())
   }
 
