@@ -14,6 +14,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
 * Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values
 * Visualize PE files
+* Calculate Shannon Entropy for sections
 * Scan for PEiD signatures or your own signature database
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Scan for Unicode and ASCII strings contained in the file
