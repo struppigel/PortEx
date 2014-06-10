@@ -29,7 +29,7 @@ import com.github.katjahahn.PELoader
 class ShannonEntropy(private val data: PEData) {
 
   /**
-   * Calculates the entropy for the section with the sectionNumber
+   * Calculates the entropy for the section with the sectionNumber.
    *
    * @param sectioNumber number of the section
    * @return entropy of the section
@@ -40,7 +40,8 @@ class ShannonEntropy(private val data: PEData) {
   }
 
   /**
-   * Calculates the entropy for all sections of the file
+   * Calculates the entropy for all sections of the file and returns a map with
+   * the section numbers as keys and their entropy as values.
    *
    * @return map with section number as keys and entropy as values
    */
@@ -92,16 +93,13 @@ object ShannonEntropy {
     entropy(byteCounts, total)
   }
 
-  private def entropy(byteCounts: Array[Long], total: Long): Double = {
-    var entropy: Double = 0.0
-    List.fromArray(byteCounts).foreach { counter =>
+  private def entropy(byteCounts: Array[Long], total: Long): Double =
+    List.fromArray(byteCounts).foldRight(0.0) { (counter, entropy) =>
       if (counter != 0) {
         val p: Double = 1.0 * counter / total
-        entropy -= p * (math.log(p) / math.log(byteSize))
-      }
+        entropy - p * (math.log(p) / math.log(byteSize))
+      } else entropy
     }
-    entropy
-  }
 
   private def countBytes(bytes: Array[Byte]): (Array[Long], Long) = {
     val byteCounts = Array.fill[Long](byteSize)(0L)
