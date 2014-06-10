@@ -64,11 +64,15 @@ object ShannonEntropy {
   private val byteSize = 256
 
   def main(args: Array[String]): Unit = {
-    val file = new File("WinRar.exe")
-    val data = PELoader.loadPE(file)
-    val ent = new ShannonEntropy(data)
-    ent._forSections.foreach(println)
-    println(data.getSectionTable().getInfo())
+    val folder = new File("src/main/resources/testfiles")
+    for (file <- folder.listFiles) {
+      println("file: " + file.getName)
+      val data = PELoader.loadPE(file)
+      val ent = new ShannonEntropy(data)
+      ent._forSections.foreach(println)
+      println(data.getSectionTable().getInfo)
+      println()
+    }
   }
 
   /**

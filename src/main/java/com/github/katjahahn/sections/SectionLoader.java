@@ -495,6 +495,8 @@ public class SectionLoader {
         return Optional.absent();
     }
 
+    @Requires("size != 0")
+    @Ensures("result != null")
     private ImportSection loadImportTableAt(long offset, long size)
             throws FileNotFoundException, IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
