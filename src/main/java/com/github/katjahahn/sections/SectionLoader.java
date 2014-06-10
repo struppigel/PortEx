@@ -178,7 +178,8 @@ public class SectionLoader {
      * @param value
      * @return file aligned value
      */
-    @Ensures({ "optHeader.isLowAlignmentMode() || result % 512 == 0", "result >= value" })
+    @Ensures({ "optHeader.isLowAlignmentMode() || result % 512 == 0",
+            "result >= value" })
     private long fileAligned(long value) {
         long fileAlign = optHeader.getAdjustedFileAlignment();
         long rest = value % fileAlign;
@@ -186,7 +187,7 @@ public class SectionLoader {
         if (rest != 0) {
             result = value - rest + fileAlign;
         }
-        if(!(optHeader.isLowAlignmentMode() || result % 512 == 0)) {
+        if (!(optHeader.isLowAlignmentMode() || result % 512 == 0)) {
             logger.error("file aligning went wrong");
             logger.error("value: " + value);
             logger.error("filealign: " + fileAlign);
@@ -223,6 +224,13 @@ public class SectionLoader {
         }
         if (readSize + alignedPointerToRaw > file.length()) {
             readSize = file.length() - alignedPointerToRaw;
+        }
+        if (readSize < 0) {
+            // TODO VirusShare_6fdfdffeb4b1be2d0036bac49cb0d590 negative
+            // readsize -> add in anomalies
+            logger.warn("invalid readsize: " + readSize + " for file "
+                    + file.getName() + " adjusting readsize to 0");
+            readSize = 0;
         }
         return readSize;
     }
