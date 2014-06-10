@@ -234,7 +234,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     }
 
-    @Ensures({"result != null", "result.size() == StandardFieldEntryKey.values().length"})
+    @Ensures({ "result != null",
+            "result.size() == StandardFieldEntryKey.values().length" })
     private Map<StandardFieldEntryKey, StandardField> initStandardFields() {
         Map<StandardFieldEntryKey, StandardField> map = new HashMap<>();
         for (StandardFieldEntryKey key : StandardFieldEntryKey.values()) {
@@ -313,7 +314,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    @Ensures({"result != null", "result.size() == WindowsEntryKey.values().length"})
+    @Ensures({ "result != null",
+            "result.size() == WindowsEntryKey.values().length" })
     private Map<WindowsEntryKey, StandardField> initWindowsFields() {
         Map<WindowsEntryKey, StandardField> map = new HashMap<>();
         for (WindowsEntryKey key : WindowsEntryKey.values()) {
@@ -575,5 +577,42 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     public long getSize() {
         return headerbytes.length;
+    }
+
+    /**
+     * Adjusts the file alignment to low alignment mode if necessary.
+     * 
+     * @return 1 if low alignment mode, file alignment value otherwise
+     */
+    public long getAdjustedFileAlignment() {
+        long fileAlign = get(FILE_ALIGNMENT);
+        if (isLowAlignmentMode()) {
+            return 1;
+        }
+        return fileAlign;
+    }
+
+    /**
+     * Determines if the file is in low alignment mode.
+     * 
+     * @see <a href="https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment">corkami Wiki PE</a>
+     * @return true iff file is in low alignment mode
+     */
+    public boolean isLowAlignmentMode() {
+        long fileAlign = get(FILE_ALIGNMENT);
+        long sectionAlign = get(SECTION_ALIGNMENT);
+        return 1 <= fileAlign && fileAlign == sectionAlign && fileAlign <= 0x800;
+    }
+    
+    /**
+     * Determines if the file is in standard alignment mode.
+     * 
+     * @see <a href="https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment">corkami Wiki PE</a>
+     * @return true iff file is in standard alignment mode
+     */
+    public boolean isStandardAlignmentMode() {
+        long fileAlign = get(FILE_ALIGNMENT);
+        long sectionAlign = get(SECTION_ALIGNMENT);
+        return 0x200 <= fileAlign && fileAlign <= sectionAlign && 0x1000 <= sectionAlign;
     }
 }

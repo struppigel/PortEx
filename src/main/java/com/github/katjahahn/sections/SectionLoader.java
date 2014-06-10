@@ -30,7 +30,6 @@ import com.github.katjahahn.PEData;
 import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.optheader.OptionalHeader;
-import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
 import com.github.katjahahn.sections.idata.ImportSection;
@@ -179,14 +178,21 @@ public class SectionLoader {
      * @param value
      * @return file aligned value
      */
-    @Ensures("result % 512 == 0")
+    @Ensures({ "optHeader.isLowAlignmentMode() || result % 512 == 0", "result >= value" })
     private long fileAligned(long value) {
-        long fileAlign = optHeader.get(WindowsEntryKey.FILE_ALIGNMENT);
+        long fileAlign = optHeader.getAdjustedFileAlignment();
         long rest = value % fileAlign;
+        long result = value;
         if (rest != 0) {
-            value = value - rest + fileAlign;
+            result = value - rest + fileAlign;
         }
-        return value;
+        if(!(optHeader.isLowAlignmentMode() || result % 512 == 0)) {
+            logger.error("file aligning went wrong");
+            logger.error("value: " + value);
+            logger.error("filealign: " + fileAlign);
+            logger.error("result: " + result);
+        }
+        return result;
     }
 
     /**
