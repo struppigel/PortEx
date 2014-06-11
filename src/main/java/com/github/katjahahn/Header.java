@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
-import java.io.IOException;
-
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -29,15 +27,6 @@ import com.google.java.contract.Requires;
 public abstract class Header <T extends HeaderKey> implements PEModule {
 
     public static final String NL = System.getProperty("line.separator");
-
-    // TODO maybe use factory methods instead
-    /**
-     * Reads the information necessary. This is usually done by the
-     * {@link PELoader}
-     * 
-     * @throws IOException
-     */
-    public abstract void read() throws IOException;
 
     /**
      * Returns the value for the given key

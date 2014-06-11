@@ -31,7 +31,6 @@ import DebugDirectoryKey._
 import java.util.Date
 import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.PEData
-import com.github.katjahahn.TestreportsReader
 import com.github.katjahahn.IOUtil
 
 /**
@@ -95,7 +94,7 @@ object DebugSection {
   private val debugspec = "debugdirentryspec"
 
   def main(args: Array[String]): Unit = {
-    val file = new File(TestreportsReader.RESOURCE_DIR + "/testfiles/ntdll.dll")
+    val file = new File("/home/deque/portextestfiles/testfiles/ntdll.dll")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
     val debug = loader.loadDebugSection()

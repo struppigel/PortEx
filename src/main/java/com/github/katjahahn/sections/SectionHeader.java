@@ -17,7 +17,6 @@ package com.github.katjahahn.sections;
 
 import static com.github.katjahahn.sections.SectionHeaderKey.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +59,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         this.entries = entries;
         this.name = name;
     }
-
+    
     /**
      * Returns the PointerToRawData rounded down to a multiple of 512.
      * 
@@ -203,14 +202,6 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     @Override
     public String getInfo() {
         return this.toString();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void read() throws IOException {
-        // TODO Auto-generated method stub
     }
 
 }

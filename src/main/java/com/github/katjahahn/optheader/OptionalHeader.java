@@ -99,13 +99,18 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @param headerbytes
      * @param offset
      */
-    public OptionalHeader(byte[] headerbytes, long offset) {
+    private OptionalHeader(byte[] headerbytes, long offset) {
         this.headerbytes = headerbytes.clone();
         this.offset = offset;
     }
+    
+    public static OptionalHeader newInstance(byte[] headerbytes, long offset) throws IOException {
+        OptionalHeader header = new OptionalHeader(headerbytes, offset);
+        header.read();
+        return header;
+    }
 
-    @Override
-    public void read() throws IOException {
+    private void read() throws IOException {
         Map<String, String[]> standardSpec = IOUtil.readMap(STANDARD_SPEC);
         Map<String, String[]> windowsSpec = IOUtil.readMap(WINDOWS_SPEC);
         List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);

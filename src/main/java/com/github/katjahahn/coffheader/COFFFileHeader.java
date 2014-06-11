@@ -66,7 +66,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @throws IllegalArgumentException
      *             if length of the array != {@link #HEADER_SIZE}
      */
-    public COFFFileHeader(byte[] headerbytes, long offset) {
+    private COFFFileHeader(byte[] headerbytes, long offset) {
         checkNotNull(headerbytes);
         checkArgument(headerbytes.length == HEADER_SIZE);
         this.headerbytes = headerbytes.clone();
@@ -81,11 +81,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         return offset;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void read() throws IOException {
+    private void read() throws IOException {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
                 COFF_SPEC_FILE, headerbytes);
@@ -283,4 +279,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         return (int) get(SECTION_NR); // 2-byte value can be casted
     }
 
+    public static COFFFileHeader newInstance(byte[] headerbytes, long offset) throws IOException {
+        COFFFileHeader header = new COFFFileHeader(headerbytes, offset);
+        header.read();
+        return header;
+    }
 }

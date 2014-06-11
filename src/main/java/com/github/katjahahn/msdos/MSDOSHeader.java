@@ -57,7 +57,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * @param offset
      */
     @Requires("headerbytes != null")
-    public MSDOSHeader(byte[] headerbytes) {
+    private MSDOSHeader(byte[] headerbytes) {
         this.headerbytes = headerbytes.clone();
     }
 
@@ -69,11 +69,8 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         return offset;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void read() throws IOException {
+    //TODO remove read
+    private void read() throws IOException {
         if (!hasSignature(headerbytes)) {
             throw new IOException("No MZ Signature found");
         }
@@ -149,6 +146,12 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
             }
             return b.toString();
         }
+    }
+    
+    public static MSDOSHeader newInstance(byte[] headerbytes) throws IOException {
+        MSDOSHeader header = new MSDOSHeader(headerbytes);
+        header.read();
+        return header;
     }
 
 }

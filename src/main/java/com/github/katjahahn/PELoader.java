@@ -78,11 +78,8 @@ public class PELoader {
                 "no valid pe file, signature not found");
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             MSDOSHeader msdos = loadMSDOSHeader(raf);
-            msdos.read();
             COFFFileHeader coff = loadCOFFFileHeader(pesig, raf);
-            coff.read();
             OptionalHeader opt = loadOptionalHeader(pesig, coff, raf);
-            opt.read();
             SectionTable table = loadSectionTable(pesig, coff, raf);
             table.read();
             return new PEData(msdos, pesig, coff, opt, table, file);
@@ -100,7 +97,7 @@ public class PELoader {
             throws IOException {
         byte[] headerbytes = loadBytes(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
                 raf);
-        return new MSDOSHeader(headerbytes);
+        return MSDOSHeader.newInstance(headerbytes);
     }
 
     /**
@@ -136,7 +133,7 @@ public class PELoader {
         long offset = pesig.getOffset().get() + PESignature.PE_SIG_LENGTH;
         logger.info("COFF Header offset: " + offset);
         byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
-        return new COFFFileHeader(headerbytes, offset);
+        return COFFFileHeader.newInstance(headerbytes, offset);
     }
 
     /**
@@ -158,7 +155,7 @@ public class PELoader {
             size = (int) (file.length() - offset);
         }
         byte[] headerbytes = loadBytes(offset, size, raf);
-        return new OptionalHeader(headerbytes, offset);
+        return OptionalHeader.newInstance(headerbytes, offset);
     }
 
     /**
