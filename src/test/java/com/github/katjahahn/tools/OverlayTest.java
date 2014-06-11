@@ -24,54 +24,66 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
+import com.github.katjahahn.TestreportsReader;
+
 public class OverlayTest {
-	//TODO test the testfiles
-	@SuppressWarnings("unused")
-	private static final Logger logger = LogManager
-			.getLogger(OverlayTest.class.getName());
+    // TODO test the testfiles
+    @SuppressWarnings("unused")
+    private static final Logger logger = LogManager.getLogger(OverlayTest.class
+            .getName());
 
-	@Test(timeOut = 9000)
-	public void hasOverlayTest() throws IOException {
-		String[] files = {
-				"src/main/resources/testfiles/Lab03-04.exe" }; //TODO more files
-		for (String file : files) {
-			File infile = new File(file);
-			Overlay overlay = new Overlay(infile);
-			assertFalse(overlay.exists());
-		}
-		String[] overfiles = { "Holiday_Island.exe", "WinRar.exe", "joined.exe" };
-		for (String file : overfiles) {
-			File infile = new File(file);
-			Overlay overlay = new Overlay(infile);
-			assertTrue(overlay.exists());
-		}
-	}
+    @Test(timeOut = 9000)
+    public void hasOverlayTest() throws IOException {
+        String[] files = { TestreportsReader.RESOURCE_DIR
+                + "/testfiles/Lab03-04.exe" }; // TODO
+        // more
+        // files
+        for (String file : files) {
+            File infile = new File(file);
+            Overlay overlay = new Overlay(infile);
+            assertFalse(overlay.exists());
+        }
+        String[] overfiles = {
+                TestreportsReader.RESOURCE_DIR + "/Holiday_Island.exe",
+                TestreportsReader.RESOURCE_DIR + "/WinRar.exe",
+                TestreportsReader.RESOURCE_DIR + "/joined.exe" };
+        for (String file : overfiles) {
+            File infile = new File(file);
+            Overlay overlay = new Overlay(infile);
+            assertTrue(overlay.exists());
+        }
+    }
 
-	@Test(timeOut = 9000)
-	public void eofNoOverlayTest() throws IOException {
-		String[] noOverFiles = {
-				"src/main/resources/testfiles/Lab03-04.exe" }; //TODO more files
-		for (String file : noOverFiles) {
-			File infile = new File(file);
-			Overlay overlay = new Overlay(infile);
-			long eof = overlay.getOffset();
-			assertEquals(infile.length(), eof);
-		}
-	}
+    @Test(timeOut = 9000)
+    public void eofNoOverlayTest() throws IOException {
+        String[] noOverFiles = { TestreportsReader.RESOURCE_DIR
+                + "/testfiles/Lab03-04.exe" }; // TODO
+        // more
+        // files
+        for (String file : noOverFiles) {
+            File infile = new File(file);
+            Overlay overlay = new Overlay(infile);
+            long eof = overlay.getOffset();
+            assertEquals(infile.length(), eof);
+        }
+    }
 
-	@Test
-	public void dumpTo() throws IOException {
-		String[] mixedFiles = { "src/main/resources/testfiles/Lab03-01.exe",
-				"src/main/resources/testfiles/Lab03-04.exe",
-				"src/main/resources/testfiles/Lab03-03.exe",
-				"Holiday_Island.exe", "WinRar.exe", "joined.exe" };
-		File outfile = new File("out");
-		for (String file : mixedFiles) {
-			File infile = new File(file);
-			Overlay overlay = new Overlay(infile);
-			overlay.dumpTo(outfile);
-		}
-		outfile.delete();
-	}
+    @Test
+    public void dumpTo() throws IOException {
+        String[] mixedFiles = {
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-01.exe",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-04.exe",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-03.exe",
+                TestreportsReader.RESOURCE_DIR + "/Holiday_Island.exe",
+                TestreportsReader.RESOURCE_DIR + "/WinRar.exe",
+                TestreportsReader.RESOURCE_DIR + "/joined.exe" };
+        File outfile = new File("out");
+        for (String file : mixedFiles) {
+            File infile = new File(file);
+            Overlay overlay = new Overlay(infile);
+            overlay.dumpTo(outfile);
+        }
+        outfile.delete();
+    }
 
 }

@@ -36,7 +36,7 @@ public class TestreportsReader {
 			.getName());
 	public static final String NL = System.getProperty("line.separator");
 
-	public static final String RESOURCE_DIR = "src/main/resources";
+	public static final String RESOURCE_DIR = "/home/deque/portextestfiles";
 	public static final String TEST_FILE_DIR = "/testfiles";
 	private static final String TEST_REPORTS_DIR = "/reports";
 	private static final String EXPORT_REPORTS_DIR = "/exportreports";

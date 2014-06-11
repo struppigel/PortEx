@@ -25,44 +25,45 @@ import org.testng.annotations.Test;
 
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
+import com.github.katjahahn.TestreportsReader;
 
 public class MSDOSLoadModuleTest {
-	
-	private MSDOSLoadModule module;
-	private File file;
 
-	@BeforeClass
-	public void prepare() throws IOException {
-		file = new File("WinRar.exe");
-		PEData data = PELoader.loadPE(file);
-		MSDOSHeader header = data.getMSDOSHeader();
-		module = new MSDOSLoadModule(header, file);
-		module.read();
-	}
+    private MSDOSLoadModule module;
+    private File file;
 
-	@Test
-	public void getDump() throws IOException {
-		byte[] bytes = module.getDump();
-		assertNotNull(bytes);
-		assertTrue(bytes.length > 0);
-	}
+    @BeforeClass
+    public void prepare() throws IOException {
+        file = new File(TestreportsReader.RESOURCE_DIR + "/WinRar.exe");
+        PEData data = PELoader.loadPE(file);
+        MSDOSHeader header = data.getMSDOSHeader();
+        module = new MSDOSLoadModule(header, file);
+        module.read();
+    }
 
-	@Test
-	public void getLoadModuleSize() {
-		int size = module.getLoadModuleSize();
-		assertTrue(size > 0 && size < file.length());
-	}
+    @Test
+    public void getDump() throws IOException {
+        byte[] bytes = module.getDump();
+        assertNotNull(bytes);
+        assertTrue(bytes.length > 0);
+    }
 
-	@Test
-	public void getImageSize() {
-		int size = module.getImageSize();
-		assertTrue(size > 0 && size < file.length());
-	}
-	
-	@Test
-	public void getInfo() {
-		String info = module.getInfo();
-		assertNotNull(info);
-		assertTrue(info.length() > 0);
-	}
+    @Test
+    public void getLoadModuleSize() {
+        int size = module.getLoadModuleSize();
+        assertTrue(size > 0 && size < file.length());
+    }
+
+    @Test
+    public void getImageSize() {
+        int size = module.getImageSize();
+        assertTrue(size > 0 && size < file.length());
+    }
+
+    @Test
+    public void getInfo() {
+        String info = module.getInfo();
+        assertNotNull(info);
+        assertTrue(info.length() > 0);
+    }
 }

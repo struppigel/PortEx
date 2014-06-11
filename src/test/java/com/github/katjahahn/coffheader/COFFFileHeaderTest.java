@@ -32,113 +32,116 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
+import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 
 public class COFFFileHeaderTest {
-	
-	private COFFFileHeader winRarCoff;
-	private List<TestData> testdata;
-	private Map<String, PEData> pedata = new HashMap<>();
 
-	@BeforeClass
-	public void prepare() throws IOException {
-		testdata = PELoaderTest.getTestData();
-		pedata = PELoaderTest.getPEData();
-		winRarCoff = PELoader.loadPE(new File("WinRar.exe"))
-				.getCOFFFileHeader();
-	}
+    private COFFFileHeader winRarCoff;
+    private List<TestData> testdata;
+    private Map<String, PEData> pedata = new HashMap<>();
 
-	@Test
-	public void get() {
-		for (TestData testdatum : testdata) {
-			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			for (Entry<COFFHeaderKey, String> entry : testdatum.coff.entrySet()) {
-				COFFHeaderKey key = entry.getKey();
-				COFFFileHeader coff = pedatum.getCOFFFileHeader();
-				int actual = (int) coff.get(key);
-				String value = entry.getValue().trim();
-				int expected = convertToInt(value);
-				assertEquals(expected, actual);
-			}
-		}
-	}
+    @BeforeClass
+    public void prepare() throws IOException {
+        testdata = PELoaderTest.getTestData();
+        pedata = PELoaderTest.getPEData();
+        winRarCoff = PELoader.loadPE(
+                new File(TestreportsReader.RESOURCE_DIR + "/WinRar.exe"))
+                .getCOFFFileHeader();
+    }
 
-	private int convertToInt(String value) {
-		if (value.startsWith("0x")) {
-			value = value.replace("0x", "");
-			return Integer.parseInt(value, 16);
-		} else {
-			return Integer.parseInt(value);
-		}
-	}
+    @Test
+    public void get() {
+        for (TestData testdatum : testdata) {
+            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+            for (Entry<COFFHeaderKey, String> entry : testdatum.coff.entrySet()) {
+                COFFHeaderKey key = entry.getKey();
+                COFFFileHeader coff = pedatum.getCOFFFileHeader();
+                int actual = (int) coff.get(key);
+                String value = entry.getValue().trim();
+                int expected = convertToInt(value);
+                assertEquals(expected, actual);
+            }
+        }
+    }
 
-	@Test
-	public void getMachineDescription() {
-		assertEquals(winRarCoff.getMachineDescription(),
-				"Intel 386 or later processors and compatible processors");
-	}
+    private int convertToInt(String value) {
+        if (value.startsWith("0x")) {
+            value = value.replace("0x", "");
+            return Integer.parseInt(value, 16);
+        } else {
+            return Integer.parseInt(value);
+        }
+    }
 
-	@Test
-	public void getMachineType() {
-		assertEquals(winRarCoff.getMachineType(), MachineType.I386);
-	}
+    @Test
+    public void getMachineDescription() {
+        assertEquals(winRarCoff.getMachineDescription(),
+                "Intel 386 or later processors and compatible processors");
+    }
 
-	@Test
-	public void getCharacteristics() {
-		for (TestData testdatum : testdata) {
-			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS)
-					.trim();
-			int expected = convertToInt(value);
-			int actual = (int) pedatum.getCOFFFileHeader().get(COFFHeaderKey.CHARACTERISTICS);
-			assertEquals(expected, actual);
-		}
-	}
+    @Test
+    public void getMachineType() {
+        assertEquals(winRarCoff.getMachineType(), MachineType.I386);
+    }
 
-	@Test
-	public void getInfo() {
-		String info = winRarCoff.getInfo();
-		assertNotNull(info);
-		assertTrue(info.length() > 0);
-	}
+    @Test
+    public void getCharacteristics() {
+        for (TestData testdatum : testdata) {
+            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+            String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS)
+                    .trim();
+            int expected = convertToInt(value);
+            int actual = (int) pedatum.getCOFFFileHeader().get(
+                    COFFHeaderKey.CHARACTERISTICS);
+            assertEquals(expected, actual);
+        }
+    }
 
-	@Test
-	public void getCharacteristicsDescription() {
-		List<String> description = winRarCoff.getCharacteristicsDescriptions();
-		assertEquals(description.size(), 5);
-	}
+    @Test
+    public void getInfo() {
+        String info = winRarCoff.getInfo();
+        assertNotNull(info);
+        assertTrue(info.length() > 0);
+    }
 
-	@Test
-	public void getNumberOfSections() {
-		for (TestData testdatum : testdata) {
-			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			String value = testdatum.coff.get(COFFHeaderKey.SECTION_NR).trim();
-			int expected = convertToInt(value);
-			int actual = (int) pedatum.getCOFFFileHeader().getNumberOfSections();
-			assertEquals(expected, actual);
-		}
-		assertEquals(winRarCoff.getNumberOfSections(), 0x04);
-	}
+    @Test
+    public void getCharacteristicsDescription() {
+        List<String> description = winRarCoff.getCharacteristicsDescriptions();
+        assertEquals(description.size(), 5);
+    }
 
-	@Test
-	public void getSizeOfOptionalHeader() {
-		for (TestData testdatum : testdata) {
-			PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-			String value = testdatum.coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
-					.trim();
-			int expected = convertToInt(value);
-			int actual = (int) pedatum.getCOFFFileHeader().getSizeOfOptionalHeader();
-			assertEquals(expected, actual);
-		}
-		assertEquals(winRarCoff.getSizeOfOptionalHeader(), 0x00e0);
-	}
+    @Test
+    public void getNumberOfSections() {
+        for (TestData testdatum : testdata) {
+            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+            String value = testdatum.coff.get(COFFHeaderKey.SECTION_NR).trim();
+            int expected = convertToInt(value);
+            int actual = pedatum.getCOFFFileHeader().getNumberOfSections();
+            assertEquals(expected, actual);
+        }
+        assertEquals(winRarCoff.getNumberOfSections(), 0x04);
+    }
 
-	@Test
-	public void getTimeDate() {
-		Date date = winRarCoff.getTimeDate();
-		Calendar calendar = Calendar.getInstance();
-		calendar.clear();
-		calendar.set(2007, Calendar.JANUARY, 17, 11, 36, 54);
-		assertEquals(calendar.getTime().compareTo(date), 0);
-	}
+    @Test
+    public void getSizeOfOptionalHeader() {
+        for (TestData testdatum : testdata) {
+            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+            String value = testdatum.coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
+                    .trim();
+            int expected = convertToInt(value);
+            int actual = pedatum.getCOFFFileHeader().getSizeOfOptionalHeader();
+            assertEquals(expected, actual);
+        }
+        assertEquals(winRarCoff.getSizeOfOptionalHeader(), 0x00e0);
+    }
+
+    @Test
+    public void getTimeDate() {
+        Date date = winRarCoff.getTimeDate();
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(2007, Calendar.JANUARY, 17, 11, 36, 54);
+        assertEquals(calendar.getTime().compareTo(date), 0);
+    }
 }
