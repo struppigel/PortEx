@@ -45,7 +45,8 @@ class ShannonEntropy(private val data: PEData) {
    *
    * @return map with section number as keys and entropy as values
    */
-  def forSections(): java.util.Map[Int, Double] = _forSections().asJava
+  def forSections(): java.util.Map[java.lang.Integer, java.lang.Double] = 
+    _forSections().map(t => (t._1: java.lang.Integer, t._2: java.lang.Double)).asJava
 
   /**
    * Calculates the entropy for all sections of the file
