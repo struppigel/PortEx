@@ -27,7 +27,7 @@ import com.github.katjahahn.PELoader
 import java.io.File
 import com.github.katjahahn.HeaderKey
 import com.github.katjahahn.sections.SectionLoader
-import DebugDirTableKey._
+import DebugDirectoryKey._
 import java.util.Date
 import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.PEData
@@ -40,7 +40,7 @@ import com.github.katjahahn.IOUtil
  * Represents the debug section of the PE.
  */
 class DebugSection private (
-  private val directoryTable: DebugDirectoryTable,
+  private val directoryTable: DebugDirectory,
   private val typeDescription: String,
   val offset: Long,
   val size: Long) extends SpecialSection {
@@ -75,7 +75,7 @@ class DebugSection private (
    * @param key the header key
    * @return long value for the given key of null if it doesn't exist.
    */
-  def get(key: DebugDirTableKey): java.lang.Long =
+  def get(key: DebugDirectoryKey): java.lang.Long =
     if (directoryTable.contains(key))
       directoryTable(key).value else null
 
@@ -90,7 +90,7 @@ class DebugSection private (
 
 object DebugSection {
 
-  type DebugDirectoryTable = Map[DebugDirTableKey, StandardField]
+  type DebugDirectory = Map[DebugDirectoryKey, StandardField]
 
   private val debugspec = "debugdirentryspec"
 
@@ -123,9 +123,9 @@ object DebugSection {
 
   def apply(debugbytes: Array[Byte], offset: Long): DebugSection = {
     val format = new SpecificationFormat(0, 1, 2, 3)
-    val entries = IOUtil.readHeaderEntries(classOf[DebugDirTableKey],
+    val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes.clone).asScala.toMap
-    val types = getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
+    val types = getCharacteristicsDescriptions(entries(DebugDirectoryKey.TYPE).value, "debugtypes").asScala.toList
     new DebugSection(entries, types(0), offset, debugbytes.length)
   }
 }

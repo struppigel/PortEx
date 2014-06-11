@@ -21,10 +21,10 @@ public class NameImport implements Import {
 	public long nameRVA;
 	public String name;
 	public int hint;
-	private final DirectoryTableEntry parent;
+	private final DirectoryEntry parent;
 
 	public NameImport(long rva, String name, int hint, long nameRVA,
-			DirectoryTableEntry parent) {
+			DirectoryEntry parent) {
 		this.rva = rva;
 		this.hint = hint;
 		this.name = name;
@@ -32,7 +32,7 @@ public class NameImport implements Import {
 		this.parent = parent;
 	}
 
-	public Long getDirEntry(DirectoryTableEntryKey key) {
+	public Long getDirEntry(DirectoryEntryKey key) {
 		return parent.get(key);
 	}
 

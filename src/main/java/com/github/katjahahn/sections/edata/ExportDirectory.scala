@@ -36,18 +36,18 @@ import com.github.katjahahn.IOUtil.SpecificationFormat
  *
  * instanciates an export directory table.
  */
-class ExportDirTable private (
-  private val entries: Map[ExportDirTableKey, StandardField]) {
+class ExportDirectory private (
+  private val entries: Map[ExportDirectoryKey, StandardField]) {
 
-  def apply(key: ExportDirTableKey): Long = entries(key).value
+  def apply(key: ExportDirectoryKey): Long = entries(key).value
 
   /**
-   * Returns the {@link StandardEntry} for a given {@link ExportDirTableKey}
+   * Returns the {@link StandardEntry} for a given {@link ExportDirectoryKey}
    *
    * @param key a key of the export directory table
    * @return the standard entry for the given key
    */
-  def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[ExportDirTableKey])
+  def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[ExportDirectoryKey])
 
   def getInfo(): String = entries.values.mkString(NL)
 
@@ -55,7 +55,7 @@ class ExportDirTable private (
 
 }
 
-object ExportDirTable {
+object ExportDirectory {
 
   private val edataTableSpec = "edatadirtablespec"
 
@@ -66,11 +66,11 @@ object ExportDirTable {
    * @param entrybytes
    * @return export directory table instance
    */
-  def apply(entrybytes: Array[Byte]): ExportDirTable = {
+  def apply(entrybytes: Array[Byte]): ExportDirectory = {
     val format = new SpecificationFormat(0, 1, 2, 3)
-    val entries = IOUtil.readHeaderEntries(classOf[ExportDirTableKey], format, 
+    val entries = IOUtil.readHeaderEntries(classOf[ExportDirectoryKey], format, 
         edataTableSpec, entrybytes.clone).asScala.toMap
-    new ExportDirTable(entries)
+    new ExportDirectory(entries)
   }
 
 }

@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn.sections.debug;
+package com.github.katjahahn.sections.idata;
 
 import com.github.katjahahn.HeaderKey;
 
-public enum DebugDirTableKey implements HeaderKey {
-	CHARACTERISTICS, TIME_DATE_STAMP, MAJOR_VERSION, MINOR_VERSION, TYPE, 
-	SIZE_OF_DATA, ADDR_OF_RAW_DATA, POINTER_TO_RAW_DATA;
+/**
+ * Represents a key for a value of a directory table entry.
+ * 
+ * @author Katja Hahn
+ *
+ */
+public enum DirectoryEntryKey implements HeaderKey {
 
+	NAME_RVA, I_LOOKUP_TABLE_RVA, TIME_DATE_STAMP, FORWARDER_CHAIN, I_ADDR_TABLE_RVA;
 }

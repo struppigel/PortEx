@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.StandardField
 import Function.tupled
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.sections.debug.DebugDirTableKey
+import com.github.katjahahn.sections.debug.DebugDirectoryKey
 import java.io.File
 import com.github.katjahahn.PELoader
 import com.github.katjahahn.sections.SectionLoader

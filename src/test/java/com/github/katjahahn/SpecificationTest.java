@@ -23,9 +23,9 @@ import com.github.katjahahn.optheader.Subsystem;
 import com.github.katjahahn.optheader.WindowsEntryKey;
 import com.github.katjahahn.sections.SectionCharacteristic;
 import com.github.katjahahn.sections.SectionHeaderKey;
-import com.github.katjahahn.sections.debug.DebugDirTableKey;
-import com.github.katjahahn.sections.edata.ExportDirTableKey;
-import com.github.katjahahn.sections.idata.DirectoryTableEntryKey;
+import com.github.katjahahn.sections.debug.DebugDirectoryKey;
+import com.github.katjahahn.sections.edata.ExportDirectoryKey;
+import com.github.katjahahn.sections.idata.DirectoryEntryKey;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntryKey;
 import com.github.katjahahn.sections.rsrc.ResourceDirectoryKey;
 
@@ -51,9 +51,9 @@ public class SpecificationTest {
 
 		headerspecs.put(COFFHeaderKey.values(), "coffheaderspec");
 		headerspecs.put(DataDirectoryKey.values(), "datadirectoriesspec");
-		headerspecs.put(DebugDirTableKey.values(), "debugdirentryspec");
-		headerspecs.put(ExportDirTableKey.values(), "edatadirtablespec");
-		headerspecs.put(DirectoryTableEntryKey.values(), "idataentryspec");
+		headerspecs.put(DebugDirectoryKey.values(), "debugdirentryspec");
+		headerspecs.put(ExportDirectoryKey.values(), "edatadirtablespec");
+		headerspecs.put(DirectoryEntryKey.values(), "idataentryspec");
 		headerspecs.put(MSDOSHeaderKey.values(), "msdosheaderspec");
 		headerspecs.put(StandardFieldEntryKey.values(),
 				"optionalheaderstandardspec");

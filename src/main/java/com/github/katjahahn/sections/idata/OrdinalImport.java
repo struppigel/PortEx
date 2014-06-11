@@ -19,15 +19,15 @@ public class OrdinalImport implements Import {
 
 	public int ordinal;
 	public long rva;
-	private final DirectoryTableEntry parent;
+	private final DirectoryEntry parent;
 	
-	public OrdinalImport(int ordinal, long rva, DirectoryTableEntry parent) {
+	public OrdinalImport(int ordinal, long rva, DirectoryEntry parent) {
 		this.ordinal = ordinal;
 		this.rva = rva;
 		this.parent = parent;
 	}
 	
-	public Long getDirEntry(DirectoryTableEntryKey key) {
+	public Long getDirEntry(DirectoryEntryKey key) {
 		return parent.get(key);
 	}
 	@Override

@@ -15,11 +15,11 @@ import com.github.katjahahn.optheader.DataDirEntry;
 import com.github.katjahahn.optheader.DataDirectoryKey;
 import com.github.katjahahn.sections.SectionLoader;
 import com.github.katjahahn.sections.SectionTable;
-import com.github.katjahahn.sections.debug.DebugDirTableKey;
+import com.github.katjahahn.sections.debug.DebugDirectoryKey;
 import com.github.katjahahn.sections.debug.DebugSection;
 import com.github.katjahahn.sections.edata.ExportSection;
-import com.github.katjahahn.sections.idata.DirectoryTableEntry;
-import com.github.katjahahn.sections.idata.DirectoryTableEntryKey;
+import com.github.katjahahn.sections.idata.DirectoryEntry;
+import com.github.katjahahn.sections.idata.DirectoryEntryKey;
 import com.github.katjahahn.sections.idata.ImportDLL;
 import com.github.katjahahn.sections.idata.ImportSection;
 import com.github.katjahahn.sections.idata.NameImport;
@@ -178,9 +178,9 @@ public class WikiExampleCodes {
             System.out.println();
         }
         // Access to ImportSection structures
-        List<DirectoryTableEntry> dirTable = idata.getDirectoryTable();
-        for (DirectoryTableEntry tableEntry : dirTable) {
-            Map<DirectoryTableEntryKey, StandardField> map = tableEntry
+        List<DirectoryEntry> dirTable = idata.getDirectory();
+        for (DirectoryEntry tableEntry : dirTable) {
+            Map<DirectoryEntryKey, StandardField> map = tableEntry
                     .getEntries();
 
             for (StandardField field : map.values()) {
@@ -206,8 +206,8 @@ public class WikiExampleCodes {
         DebugSection debug = loader.loadDebugSection();
         System.out.println(debug.getInfo());
         // Get specific values
-        Long address = debug.get(DebugDirTableKey.ADDR_OF_RAW_DATA);
-        Long size = debug.get(DebugDirTableKey.SIZE_OF_DATA);
+        Long address = debug.get(DebugDirectoryKey.ADDR_OF_RAW_DATA);
+        Long size = debug.get(DebugDirectoryKey.SIZE_OF_DATA);
         String type = debug.getTypeDescription();
         Date stamp = debug.getTimeDateStamp();
     }

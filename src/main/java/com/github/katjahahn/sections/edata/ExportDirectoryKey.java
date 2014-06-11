@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn.sections.idata;
+package com.github.katjahahn.sections.edata;
 
 import com.github.katjahahn.HeaderKey;
 
 /**
- * Represents a key for a value of a directory table entry.
  * 
  * @author Katja Hahn
  *
+ * Header keys for the {@link ExportDirectory}
+ *
  */
-public enum DirectoryTableEntryKey implements HeaderKey {
+public enum ExportDirectoryKey implements HeaderKey {
 
-	NAME_RVA, I_LOOKUP_TABLE_RVA, TIME_DATE_STAMP, FORWARDER_CHAIN, I_ADDR_TABLE_RVA;
+	EXPORT_FLAGS, TIME_DATE_STAMP, MAJOR_VERSION, MINOR_VERSION, NAME_RVA, 
+	ORDINAL_BASE, ADDR_TABLE_ENTRIES, NR_OF_NAME_POINTERS, 
+	EXPORT_ADDR_TABLE_RVA, NAME_POINTER_RVA, ORDINAL_TABLE_RVA;
+
 }

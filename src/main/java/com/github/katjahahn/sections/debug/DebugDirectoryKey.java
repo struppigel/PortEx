@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn.sections.edata;
+package com.github.katjahahn.sections.debug;
 
 import com.github.katjahahn.HeaderKey;
 
-/**
- * 
- * @author Katja Hahn
- *
- * Header keys for the {@link ExportDirTable}
- *
- */
-public enum ExportDirTableKey implements HeaderKey {
-
-	EXPORT_FLAGS, TIME_DATE_STAMP, MAJOR_VERSION, MINOR_VERSION, NAME_RVA, 
-	ORDINAL_BASE, ADDR_TABLE_ENTRIES, NR_OF_NAME_POINTERS, 
-	EXPORT_ADDR_TABLE_RVA, NAME_POINTER_RVA, ORDINAL_TABLE_RVA;
+public enum DebugDirectoryKey implements HeaderKey {
+	CHARACTERISTICS, TIME_DATE_STAMP, MAJOR_VERSION, MINOR_VERSION, TYPE, 
+	SIZE_OF_DATA, ADDR_OF_RAW_DATA, POINTER_TO_RAW_DATA;
 
 }

@@ -24,7 +24,7 @@ import com.github.katjahahn.PELoader
 import scala.collection.JavaConverters._
 import java.io.File
 import com.github.katjahahn.optheader.WindowsEntryKey
-import ExportDirTableKey._
+import ExportDirectoryKey._
 import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.sections.SectionTable
 import com.github.katjahahn.optheader.DataDirectoryKey
@@ -48,7 +48,7 @@ import com.github.katjahahn.PEData
  * @param ordinalTable contains ordinal number of exported functions
  */
 class ExportSection private (
-  private val edataTable: ExportDirTable,
+  private val edataTable: ExportDirectory,
   private val exportAddressTable: ExportAddressTable,
   private val namePointerTable: ExportNamePointerTable,
   private val ordinalTable: ExportOrdinalTable,
@@ -82,7 +82,7 @@ class ExportSection private (
    *
    * @return the export directory table
    */
-  def getExportDirTable(): ExportDirTable = edataTable
+  def getExportDirectory(): ExportDirectory = edataTable
 
   /**
    * Returns the export addresses that are in the export address table.
@@ -192,7 +192,7 @@ object ExportSection {
 
   def apply(edataBytes: Array[Byte], virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
-    val edataTable = ExportDirTable(edataBytes)
+    val edataTable = ExportDirectory(edataBytes)
     val maybeExportDir = opt.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
     val exportSection = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
@@ -202,7 +202,7 @@ object ExportSection {
       ordinalTable, exportSection, sectionLoader, offset, edataBytes.length)
   }
 
-  private def loadOrdinalTable(edataTable: ExportDirTable,
+  private def loadOrdinalTable(edataTable: ExportDirectory,
     edataBytes: Array[Byte], virtualAddress: Long): ExportOrdinalTable = {
     val base = edataTable(ORDINAL_BASE)
     val rva = edataTable(ORDINAL_TABLE_RVA)
@@ -210,14 +210,14 @@ object ExportSection {
     ExportOrdinalTable(edataBytes, base.toInt, rva, entries.toInt, virtualAddress)
   }
 
-  private def loadNamePointerTable(edataTable: ExportDirTable,
+  private def loadNamePointerTable(edataTable: ExportDirectory,
     edataBytes: Array[Byte], virtualAddress: Long): ExportNamePointerTable = {
     val nameTableRVA = edataTable(NAME_POINTER_RVA)
     val namePointers = edataTable(NR_OF_NAME_POINTERS).toInt
     ExportNamePointerTable(edataBytes, nameTableRVA, namePointers, virtualAddress)
   }
 
-  private def loadExportAddressTable(edataTable: ExportDirTable,
+  private def loadExportAddressTable(edataTable: ExportDirectory,
     edataBytes: Array[Byte], virtualAddress: Long): ExportAddressTable = {
     val addrTableRVA = edataTable(EXPORT_ADDR_TABLE_RVA)
     val entries = edataTable(ADDR_TABLE_ENTRIES).toInt

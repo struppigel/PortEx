@@ -41,7 +41,7 @@ abstract class LookupTableEntry {
  * @param ordNumber
  */
 case class OrdinalEntry(val ordNumber: Int, val rva: Long,
-  dirEntry: DirectoryTableEntry) extends LookupTableEntry {
+  dirEntry: DirectoryEntry) extends LookupTableEntry {
   override def toString(): String = s"ordinal: $ordNumber RVA: $rva (0x${toHexString(rva)})"
   override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry)
 }
@@ -52,7 +52,7 @@ case class OrdinalEntry(val ordNumber: Int, val rva: Long,
  * @param hintNameEntry
  */
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
-  val rva: Long, val dirEntry: DirectoryTableEntry) extends LookupTableEntry {
+  val rva: Long, val dirEntry: DirectoryEntry) extends LookupTableEntry {
   override def toString(): String =
     s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, nameRVA: $nameRVA (0x${toHexString(nameRVA)}), RVA: $rva (0x${toHexString(rva)})"
 
@@ -84,7 +84,7 @@ object LookupTableEntry {
    * @return lookup table entry
    */
   def apply(idatabytes: Array[Byte], offset: Int, entrySize: Int,
-    virtualAddress: Long, importTableOffset: Int, rva: Long, dirEntry: DirectoryTableEntry): LookupTableEntry = {
+    virtualAddress: Long, importTableOffset: Int, rva: Long, dirEntry: DirectoryEntry): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     try {
       val value = getBytesLongValue(idatabytes, offset + importTableOffset, entrySize)
@@ -104,7 +104,7 @@ object LookupTableEntry {
 
   private def createNameEntry(value: Long, idatabytes: Array[Byte],
     virtualAddress: Long, importTableOffset: Int, rva: Long,
-    dirEntry: DirectoryTableEntry): LookupTableEntry = {
+    dirEntry: DirectoryEntry): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
     val nameRVA = (addrMask & value)
     logger.debug("rva: " + nameRVA)
@@ -117,7 +117,7 @@ object LookupTableEntry {
     NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry)
   }
 
-  private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryTableEntry): OrdinalEntry = {
+  private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryEntry): OrdinalEntry = {
     val ordMask = 0xFFFFL
     val ord = (ordMask & value).toInt
     OrdinalEntry(ord, rva, dirEntry)

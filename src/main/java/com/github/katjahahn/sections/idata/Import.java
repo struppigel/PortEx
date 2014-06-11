@@ -17,6 +17,6 @@ package com.github.katjahahn.sections.idata;
 
 public interface Import {
 	
-	public Long getDirEntry(DirectoryTableEntryKey key);
+	public Long getDirEntry(DirectoryEntryKey key);
 
 }

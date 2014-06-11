@@ -55,8 +55,8 @@ import com.github.katjahahn.IOUtil.SpecificationFormat
  *
  * @param entries that represent the information of the directory table entry
  */
-class DirectoryTableEntry private (
-  private val entries: Map[DirectoryTableEntryKey, StandardField]) {
+class DirectoryEntry private (
+  private val entries: Map[DirectoryEntryKey, StandardField]) {
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -66,7 +66,7 @@ class DirectoryTableEntry private (
     lookupTableEntries = lookupTableEntries :+ e
   }
 
-  def apply(key: DirectoryTableEntryKey): Long = {
+  def apply(key: DirectoryEntryKey): Long = {
     entries(key).value
   }
 
@@ -76,9 +76,9 @@ class DirectoryTableEntry private (
     new ImportDLL(name, nameImports.asJava, ordImports.asJava)
   }
 
-  def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryTableEntryKey])
+  def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryEntryKey])
 
-  def getEntries(): java.util.Map[DirectoryTableEntryKey, StandardField] = entries.asJava
+  def getEntries(): java.util.Map[DirectoryEntryKey, StandardField] = entries.asJava
 
   def getLookupTableEntries(): java.util.List[LookupTableEntry] = lookupTableEntries.asJava
 
@@ -94,7 +94,7 @@ class DirectoryTableEntry private (
 
 }
 
-object DirectoryTableEntry {
+object DirectoryEntry {
 
   private final val I_DIR_ENTRY_SPEC = "idataentryspec"
 
@@ -105,10 +105,10 @@ object DirectoryTableEntry {
    * used to read the information
    * @return the constructed directory table entry
    */
-  def apply(entrybytes: Array[Byte]): DirectoryTableEntry = {
+  def apply(entrybytes: Array[Byte]): DirectoryEntry = {
     val format = new SpecificationFormat(0, 1, 2, 3)
-    val entries = IOUtil.readHeaderEntries(classOf[DirectoryTableEntryKey], 
+    val entries = IOUtil.readHeaderEntries(classOf[DirectoryEntryKey], 
         format, I_DIR_ENTRY_SPEC, entrybytes.clone).asScala.toMap
-    new DirectoryTableEntry(entries)
+    new DirectoryEntry(entries)
   }
 }

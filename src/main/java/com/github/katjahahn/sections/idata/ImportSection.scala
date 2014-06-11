@@ -20,7 +20,7 @@ package com.github.katjahahn.sections.idata
 import com.github.katjahahn.sections.PESection
 import com.github.katjahahn.IOUtil.{ NL }
 import ImportSection._
-import DirectoryTableEntryKey._
+import DirectoryEntryKey._
 import com.github.katjahahn.StandardField
 import scala.collection.JavaConverters._
 import com.github.katjahahn.optheader.OptionalHeader
@@ -43,7 +43,7 @@ import com.github.katjahahn.PEData
  */
 //TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
 class ImportSection private (
-  private val directoryTable: List[DirectoryTableEntry],
+  private val directoryTable: List[DirectoryEntry],
   val offset: Long,
   val size: Long) extends SpecialSection {
   
@@ -59,7 +59,7 @@ class ImportSection private (
    *
    * @return a list of the directory table entries of the import section
    */
-  def getDirectoryTable(): java.util.List[DirectoryTableEntry] = directoryTable.asJava
+  def getDirectory(): java.util.List[DirectoryEntry] = directoryTable.asJava
 
   /**
    * Generates a description string of all entries
@@ -111,7 +111,7 @@ object ImportSection {
    * Parses all lookup table entries for all entries in the directory table
    * and adds the lookup table entries to the directory table entry they belong to
    */
-  private def readLookupTableEntries(directoryTable: List[DirectoryTableEntry],
+  private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
     virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte], importTableOffset: Int, fileSize: Long): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
@@ -144,8 +144,8 @@ object ImportSection {
    * Parses all entries of the import section and writes them into the
    * {@link #directoryTable}
    */
-  private def readDirEntries(idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): List[DirectoryTableEntry] = {
-    val directoryTable = ListBuffer[DirectoryTableEntry]()
+  private def readDirEntries(idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): List[DirectoryEntry] = {
+    val directoryTable = ListBuffer[DirectoryEntry]()
     var isLastEntry = false
     var i = 0
     do {
@@ -184,7 +184,7 @@ object ImportSection {
    * @return Some entry if the entry at the given nr is not the null entry,
    * None otherwise
    */
-  private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): Option[DirectoryTableEntry] = {
+  private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): Option[DirectoryEntry] = {
     val from = nr * ENTRY_SIZE + importTableOffset
     logger.debug("reading from: " + from)
     val until = from + ENTRY_SIZE
@@ -196,12 +196,12 @@ object ImportSection {
     /**
      * @return true iff the given entry is not the last empty entry or null entry
      */
-    def isEmpty(entry: DirectoryTableEntry): Boolean =
+    def isEmpty(entry: DirectoryEntry): Boolean =
       //this was my first try based on the spec, but didn't always work
       //entry.entries.values.forall(v => v == 0) 
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
-    val entry = DirectoryTableEntry(entrybytes)
+    val entry = DirectoryEntry(entrybytes)
     logger.debug("entry info ---> \n" + entry.getInfo + "\n ----> end of entry info\n")
     entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, idatabytes, importTableOffset)
     logger.debug("entry name: " + entry.name)
