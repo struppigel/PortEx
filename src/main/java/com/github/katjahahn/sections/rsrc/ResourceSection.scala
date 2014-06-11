@@ -35,7 +35,7 @@ import com.github.katjahahn.PEData
  *   of the resource section
  */
 class ResourceSection(
-    val resourceTable: ResourceDirectoryTable, 
+    val resourceTable: ResourceDirectory, 
     private val rsrcBytes: Array[Byte], 
     val virtualAddress: Long,
     val offset: Long,
@@ -48,12 +48,12 @@ class ResourceSection(
   override def getOffset(): Long = offset
 
   /**
-   * Returns the {@link ResourceDirectoryTable} that is the root of the
+   * Returns the {@link ResourceDirectory} that is the root of the
    * resource tree
    *
    * @return the root node of the resource tree that makes up the resource section
    */
-  def getResourceTable(): ResourceDirectoryTable = resourceTable
+  def getResourceTable(): ResourceDirectory = resourceTable
 
   /**
    * Collects the resources from the root resource directory table and
@@ -88,7 +88,7 @@ object ResourceSection {
       rsrcOffset: Long): ResourceSection = {
     val initialLevel = Level()
     val initialOffset = 0
-    val resourceTable = ResourceDirectoryTable(file, initialLevel, rsrcbytes, 
+    val resourceTable = ResourceDirectory(file, initialLevel, rsrcbytes, 
         initialOffset, virtualAddress, rsrcOffset)
     new ResourceSection(resourceTable, rsrcbytes, virtualAddress, rsrcOffset, rsrcbytes.length)
   }

@@ -27,7 +27,7 @@ import com.github.katjahahn.sections.debug.DebugDirTableKey;
 import com.github.katjahahn.sections.edata.ExportDirTableKey;
 import com.github.katjahahn.sections.idata.DirectoryTableEntryKey;
 import com.github.katjahahn.sections.rsrc.ResourceDataEntryKey;
-import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey;
+import com.github.katjahahn.sections.rsrc.ResourceDirectoryKey;
 
 /**
  * Tests the specification files and their enums for coherence.
@@ -59,7 +59,7 @@ public class SpecificationTest {
 				"optionalheaderstandardspec");
 		headerspecs.put(WindowsEntryKey.values(), "optionalheaderwinspec");
 		headerspecs.put(ResourceDataEntryKey.values(), "resourcedataentryspec");
-		headerspecs.put(ResourceDirectoryTableKey.values(), "rsrcdirspec");
+		headerspecs.put(ResourceDirectoryKey.values(), "rsrcdirspec");
 		headerspecs.put(SectionHeaderKey.values(), "sectiontablespec");
 		// TODO resourcetype, machinetype (covered by MachineTypeTest so far), debugtypes
 	}

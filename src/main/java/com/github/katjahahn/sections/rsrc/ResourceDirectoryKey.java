@@ -23,7 +23,7 @@ import com.github.katjahahn.HeaderKey;
  * @author Katja Hahn
  *
  */
-public enum ResourceDirectoryTableKey implements HeaderKey {
+public enum ResourceDirectoryKey implements HeaderKey {
 	/**
 	 * Resource flags. This field is reserved for future use.
 	 */

@@ -18,7 +18,7 @@ package com.github.katjahahn.sections.rsrc
 import Level._
 
 /**
- * Represents the level of a {@link ResourceDirectoryTable}).
+ * Represents the level of a {@link ResourceDirectory}).
  * Windows usually has three levels, that are type, name and language.
  * 
  * @constructor creates an instance of the level with levelNr

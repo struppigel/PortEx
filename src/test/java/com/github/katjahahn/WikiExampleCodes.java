@@ -27,8 +27,8 @@ import com.github.katjahahn.sections.idata.OrdinalImport;
 import com.github.katjahahn.sections.rsrc.DataEntry;
 import com.github.katjahahn.sections.rsrc.Resource;
 import com.github.katjahahn.sections.rsrc.ResourceDirectoryEntry;
-import com.github.katjahahn.sections.rsrc.ResourceDirectoryTable;
-import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey;
+import com.github.katjahahn.sections.rsrc.ResourceDirectory;
+import com.github.katjahahn.sections.rsrc.ResourceDirectoryKey;
 import com.github.katjahahn.sections.rsrc.ResourceSection;
 import com.github.katjahahn.sections.rsrc.SubDirEntry;
 import com.github.katjahahn.tools.Overlay;
@@ -138,14 +138,14 @@ public class WikiExampleCodes {
             System.out.println(r);
         }
         // Access to structures of the resource tree
-        ResourceDirectoryTable table = rsrc.getResourceTable();
+        ResourceDirectory table = rsrc.getResourceTable();
         // Resource directory table header
-        Map<ResourceDirectoryTableKey, StandardField> header = table
+        Map<ResourceDirectoryKey, StandardField> header = table
                 .getHeader();
-        long majorVersion = header.get(ResourceDirectoryTableKey.MAJOR_VERSION).value;
+        long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION).value;
         // Get values directly
         long majorVers = table
-                .getHeaderValue(ResourceDirectoryTableKey.MAJOR_VERSION);
+                .getHeaderValue(ResourceDirectoryKey.MAJOR_VERSION);
         // Resource directory table entries
         // get a list of all entries, regardless which subtype
         List<ResourceDirectoryEntry> entries = table.getTableEntries();

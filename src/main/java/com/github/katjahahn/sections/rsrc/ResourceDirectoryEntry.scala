@@ -30,7 +30,7 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.optheader.WindowsEntryKey
 
 /**
- * The entry of a {@link ResourceDirectoryTable}
+ * The entry of a {@link ResourceDirectory}
  *
  * There are two types of resource directory entries. They either point to another
  * resource directory table or to data.
@@ -39,13 +39,13 @@ import com.github.katjahahn.optheader.WindowsEntryKey
 abstract class ResourceDirectoryEntry
 
 /**
- * An entry that points to another {@link ResourceDirectoryTable}
+ * An entry that points to another {@link ResourceDirectory}
  *
  * @param id the ID or Name of the entry
  * @param table the table the entry points to
- * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
+ * @param entryNr the number of the entry within the {@link ResourceDirectory}
  */
-case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int) extends ResourceDirectoryEntry {
+case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int) extends ResourceDirectoryEntry {
   override def toString(): String =
     s"""Sub Dir Entry $entryNr
        |+++++++++++++++
@@ -61,7 +61,7 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectoryTable, entryNr: Int
  *
  * @param id the ID or Name of the entry
  * @param data the resource data entry
- * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
+ * @param entryNr the number of the entry within the {@link ResourceDirectory}
  */
 case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extends ResourceDirectoryEntry {
 
@@ -102,11 +102,11 @@ object ResourceDirectoryEntry {
    *
    * @param isNameEntry indicates whether the ID is a number id or points to a name
    * @param entryBytes the array of bytes this entry is made of
-   * @param entryNr the number of the entry within the {@link ResourceDirectoryTable}
+   * @param entryNr the number of the entry within the {@link ResourceDirectory}
    * @param tableBytes the array of bytes the whole table is made of
    *   where this is entry is a member of
-   * @param offset of the {@link ResourceDirectoryTable} this entry is a member of
-   * @param level the level of the {@link ResourceDirectoryTable} this entry is a member of
+   * @param offset of the {@link ResourceDirectory} this entry is a member of
+   * @param level the level of the {@link ResourceDirectory} this entry is a member of
    * @return {@link ResourceDirectoryEntry}
    */
   def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
@@ -178,7 +178,7 @@ object ResourceDirectoryEntry {
     virtualAddress: Long, rsrcOffset: Long): SubDirEntry = {
     val address = removeHighestIntBit(rva)
     val resourceBytes = tableBytes.slice((address - offset).toInt, tableBytes.length)
-    val table = ResourceDirectoryTable(file, level.up, resourceBytes, address, virtualAddress, rsrcOffset)
+    val table = ResourceDirectory(file, level.up, resourceBytes, address, virtualAddress, rsrcOffset)
     SubDirEntry(id, table, entryNr)
   }
 

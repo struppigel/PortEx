@@ -21,9 +21,9 @@ import com.github.katjahahn.IOUtil
 import com.github.katjahahn.StandardField
 import com.github.katjahahn.ByteArrayUtil._
 import scala.collection.JavaConverters._
-import com.github.katjahahn.sections.rsrc.ResourceDirectoryTableKey._
+import com.github.katjahahn.sections.rsrc.ResourceDirectoryKey._
 import scala.collection.mutable.ListBuffer
-import ResourceDirectoryTable._
+import ResourceDirectory._
 import java.io.File
 import org.apache.logging.log4j.LogManager
 
@@ -32,7 +32,7 @@ import org.apache.logging.log4j.LogManager
  *
  * Header and the entries which point to either data or other resource directory
  * tables.
- * Each ResourceDirectoryTable therefore is also a tree consisting of more
+ * Each ResourceDirectory therefore is also a tree consisting of more
  * tables or resource data entries as leaves
  *
  * @constructor creates an instance of the resource directory table with level,
@@ -41,7 +41,7 @@ import org.apache.logging.log4j.LogManager
  * @param header the table header
  * @param entries the table entries
  */
-class ResourceDirectoryTable(private val level: Level,
+class ResourceDirectory(private val level: Level,
   private val header: Header,
   private val entries: List[ResourceDirectoryEntry]) {
 
@@ -78,7 +78,7 @@ class ResourceDirectoryTable(private val level: Level,
    *
    * @return header map
    */
-  def getHeader(): java.util.Map[ResourceDirectoryTableKey, StandardField] = header.asJava
+  def getHeader(): java.util.Map[ResourceDirectoryKey, StandardField] = header.asJava
 
   /**
    * Returns the Long value for the given key
@@ -86,7 +86,7 @@ class ResourceDirectoryTable(private val level: Level,
    * @param key
    * @return The value for the given resource directory table key
    */
-  def getHeaderValue(key: ResourceDirectoryTableKey): Long = header(key).value
+  def getHeaderValue(key: ResourceDirectoryKey): Long = header(key).value
 
   /**
    * Collects and returns all resources that this resource table tree has.
@@ -124,18 +124,18 @@ class ResourceDirectoryTable(private val level: Level,
   }
 }
 
-object ResourceDirectoryTable {
+object ResourceDirectory {
 
-  type Header = Map[ResourceDirectoryTableKey, StandardField]
+  type Header = Map[ResourceDirectoryKey, StandardField]
   type Specification = Map[String, Array[String]]
 
-  private val logger = LogManager.getLogger(ResourceDirectoryTable.getClass().getName());
+  private val logger = LogManager.getLogger(ResourceDirectory.getClass().getName());
   private val entrySize = 8;
   private val resourceDirOffset = 16;
   private val specLocation = "rsrcdirspec"
 
   def apply(file: File, level: Level, tableBytes: Array[Byte], offset: Long,
-    virtualAddress: Long, rsrcOffset: Long): ResourceDirectoryTable = {
+    virtualAddress: Long, rsrcOffset: Long): ResourceDirectory = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
     val maybeHeader = readHeader(spec, tableBytes)
     maybeHeader match {
@@ -145,14 +145,14 @@ object ResourceDirectoryTable {
         val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
         val entries = readEntries(file, header, nameEntries, idEntries, tableBytes,
           offset, level, virtualAddress, rsrcOffset)
-        new ResourceDirectoryTable(level, header, entries)
+        new ResourceDirectory(level, header, entries)
     }
   }
 
   private def readHeader(spec: Specification,
     tableBytes: Array[Byte]): Option[Header] = {
     val list = (for ((s1, s2) <- spec) yield {
-      val key = ResourceDirectoryTableKey.valueOf(s1)
+      val key = ResourceDirectoryKey.valueOf(s1)
       val offset = Integer.parseInt(s2(1))
       val length = Integer.parseInt(s2(2))
       if (offset + length > tableBytes.length) None else {
