@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.IOUtil.SpecificationFormat;
 import com.github.katjahahn.PEModule;
 import com.github.katjahahn.StandardField;
 import com.google.common.base.Optional;
@@ -89,24 +90,16 @@ public class SectionTable implements PEModule {
         for (int i = 0; i < numberOfEntries; i++) {
             int sectionNumber = i + 1;
             int sectionOffset = i * ENTRY_SIZE;
-            SectionHeader sectionEntry = new SectionHeader(sectionNumber,
-                    sectionOffset);
-            byte[] section = Arrays.copyOfRange(sectionTableBytes,
+
+            byte[] headerbytes = Arrays.copyOfRange(sectionTableBytes,
                     sectionOffset, sectionOffset + ENTRY_SIZE);
 
-            for (Entry<String, String[]> entry : specification.entrySet()) {
-
-                String[] specs = entry.getValue();
-                long value = getBytesLongValue(section,
-                        Integer.parseInt(specs[1]), Integer.parseInt(specs[2]));
-                SectionHeaderKey key = SectionHeaderKey.valueOf(entry.getKey());
-
-                if (key.equals(SectionHeaderKey.NAME)) {
-                    sectionEntry.setName(getUTF8String(section));
-                }
-
-                sectionEntry.add(new StandardField(key, specs[0], value));
-            }
+            SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
+            Map<SectionHeaderKey, StandardField> entries = IOUtil
+                    .readHeaderEntries(SectionHeaderKey.class, format,
+                            SECTION_TABLE_SPEC, headerbytes);
+            SectionHeader sectionEntry = new SectionHeader(entries,
+                    sectionNumber, sectionOffset, getUTF8String(headerbytes));
             headers.add(sectionEntry);
         }
     }
@@ -121,7 +114,7 @@ public class SectionTable implements PEModule {
     public List<SectionHeader> getSectionHeaders() {
         return new LinkedList<>(headers);
     }
-    
+
     /**
      * Returns the number of sections
      * 

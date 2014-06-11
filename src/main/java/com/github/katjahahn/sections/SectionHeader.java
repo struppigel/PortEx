@@ -40,31 +40,25 @@ import com.google.java.contract.Ensures;
 public class SectionHeader extends Header<SectionHeaderKey> {
 
     private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
-    private final Map<SectionHeaderKey, StandardField> entries = initEntries();
+    private final Map<SectionHeaderKey, StandardField> entries;
     private String name;
     private final int number;
     private final long offset;
 
     /**
      * Creates a Section Table Entry instance.
+     * @param entries 
      * 
      * @param number
      *            the number of the entry, beginning by 1 with the first entry
      *            in the Section Headers
+     * @param name 
      */
-    public SectionHeader(int number, long offset) {
+    public SectionHeader(Map<SectionHeaderKey, StandardField> entries, int number, long offset, String name) {
         this.number = number;
         this.offset = offset;
-    }
-
-    @Ensures({ "result != null",
-            "result.size() == SectionHeaderKey.values().length" })
-    private Map<SectionHeaderKey, StandardField> initEntries() {
-        Map<SectionHeaderKey, StandardField> map = new HashMap<>();
-        for (SectionHeaderKey key : SectionHeaderKey.values()) {
-            map.put(key, new StandardField(key, "", 0L));
-        }
-        return map;
+        this.entries = entries;
+        this.name = name;
     }
 
     /**
@@ -103,15 +97,6 @@ public class SectionHeader extends Header<SectionHeaderKey> {
             return virtSize;
         }
         return (virtSize + 0xfff) & ~0xfff;
-    }
-
-    /**
-     * Sets the name of the section table entry
-     * 
-     * @param name
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**
@@ -160,19 +145,6 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     @Ensures("result != null")
     public Map<SectionHeaderKey, StandardField> getEntryMap() {
         return new HashMap<>(entries);
-    }
-
-    /**
-     * Adds a {@link StandardField} to the section table entry
-     * 
-     * @param entry
-     */
-    public void add(StandardField entry) {
-        if (entry.key instanceof SectionHeaderKey) {
-            entries.put((SectionHeaderKey) entry.key, entry);
-        } else {
-            throw new IllegalArgumentException("invalid key");
-        }
     }
 
     /**

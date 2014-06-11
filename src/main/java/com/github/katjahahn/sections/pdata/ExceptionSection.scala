@@ -15,6 +15,7 @@ import java.io.File
 import com.github.katjahahn.PELoader
 import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.optheader.DataDirectoryKey
+import com.github.katjahahn.IOUtil
 
 class ExceptionSection private (
   offset: Long,
@@ -58,18 +59,9 @@ object ExceptionSection {
     }
     val spec = machineToSpec(machine)
     println("using spec: " + spec)
-    val specification = readMap(spec).asScala.toMap
-    val buffer = ListBuffer.empty[StandardField]
-    for ((key, specs) <- specification) {
-      val description = specs(0)
-      val offset = Integer.parseInt(specs(1))
-      val size = Integer.parseInt(specs(2))
-      val value = getBytesLongValue(sectionbytes.clone, offset, size)
-      val ekey = ExceptionEntryKey.valueOf(key)
-      val entry = new StandardField(ekey, description, value)
-      buffer += entry
-    }
-    val directory: ExceptionDirectory = (buffer map { t => (t.key.asInstanceOf[ExceptionEntryKey], t) }).toMap;
+    val format = new SpecificationFormat(0,1,2,3)
+    val directory = IOUtil.readHeaderEntries(classOf[ExceptionEntryKey], 
+        format, spec, sectionbytes.clone).asScala.toMap
     new ExceptionSection(offset, directory)
   }
 

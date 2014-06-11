@@ -41,6 +41,7 @@ import com.github.katjahahn.IOUtil
 import com.github.katjahahn.IOUtil.{ NL }
 import com.github.katjahahn.StandardField
 import com.github.katjahahn.HeaderKey
+import com.github.katjahahn.IOUtil.SpecificationFormat
 
 /**
  * Represents a directory table entry. Contains all lookup table entries that
@@ -105,20 +106,9 @@ object DirectoryTableEntry {
    * @return the constructed directory table entry
    */
   def apply(entrybytes: Array[Byte]): DirectoryTableEntry = {
-    val specification = IOUtil.readMap(I_DIR_ENTRY_SPEC).asScala.toMap
-    val buffer = ListBuffer.empty[StandardField]
-    for ((key, specs) <- specification) {
-      val description = specs(0)
-      val offset = Integer.parseInt(specs(1))
-      val size = Integer.parseInt(specs(2))
-      if (offset + size <= entrybytes.length) {
-        val value = getBytesLongValue(entrybytes.clone, offset, size)
-        val ekey = DirectoryTableEntryKey.valueOf(key)
-        val entry = new StandardField(ekey, description, value)
-        buffer += entry
-      } else throw new IllegalArgumentException("invalid entrybytes length, length: " + entrybytes.length)
-    }
-    val entries: Map[DirectoryTableEntryKey, StandardField] = (buffer map { t => (t.key.asInstanceOf[DirectoryTableEntryKey], t) }).toMap;
+    val format = new SpecificationFormat(0, 1, 2, 3)
+    val entries = IOUtil.readHeaderEntries(classOf[DirectoryTableEntryKey], 
+        format, I_DIR_ENTRY_SPEC, entrybytes.clone).asScala.toMap
     new DirectoryTableEntry(entries)
   }
 }

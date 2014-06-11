@@ -15,17 +15,14 @@
  ******************************************************************************/
 package com.github.katjahahn.msdos;
 
-import static com.github.katjahahn.ByteArrayUtil.*;
-
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.github.katjahahn.Header;
 import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.IOUtil.SpecificationFormat;
 import com.github.katjahahn.StandardField;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
@@ -47,7 +44,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
     private static final int PARAGRAPH_SIZE = 16; // in Byte
 
     private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
-    private static final String specification = "msdosheaderspec";
+    private static final String SPEC_LOCATION = "msdosheaderspec";
     private Map<MSDOSHeaderKey, StandardField> headerData;
 
     private final byte[] headerbytes;
@@ -80,33 +77,8 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         if (!hasSignature(headerbytes)) {
             throw new IOException("No MZ Signature found");
         }
-        initHeaderData();
-        int offsetLoc = 0;
-        int sizeLoc = 1;
-        int descriptionLoc = 2;
-        try {
-            Map<String, String[]> map = IOUtil.readMap(specification);
-            for (Entry<String, String[]> entry : map.entrySet()) {
-                MSDOSHeaderKey key = MSDOSHeaderKey.valueOf(entry.getKey());
-                String[] spec = entry.getValue();
-                long value = getBytesLongValue(headerbytes,
-                        Integer.parseInt(spec[offsetLoc]),
-                        Integer.parseInt(spec[sizeLoc]));
-                headerData.put(key, new StandardField(key,
-                        spec[descriptionLoc], value));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Ensures("headerData.size() == MSDOSHeaderKey.values().length")
-    private void initHeaderData() {
-        headerData = new HashMap<>();
-        for (MSDOSHeaderKey key : MSDOSHeaderKey.values()) {
-            headerData.put(key, new StandardField(key, "", 0L));
-        }
+        SpecificationFormat format = new SpecificationFormat(0, 3, 1, 2);
+        headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format, SPEC_LOCATION, headerbytes);
     }
 
     /**

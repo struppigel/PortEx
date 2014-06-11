@@ -199,7 +199,8 @@ public class TestreportsReader {
 
 	private static SectionHeader readSectionEntry(BufferedReader reader,
 			String line, int number) throws IOException {
-		SectionHeader entry = new SectionHeader(number, -1);
+		String name = "";
+		Map<SectionHeaderKey, StandardField> entries = new HashMap<>();
 		int entryCounter = 0;
 		while (line != null) {
 			String[] split = line.split(":");
@@ -207,15 +208,14 @@ public class TestreportsReader {
 				break;
 			}
 			if (split[0].contains("Name")) {
-				String name = split[1].trim();
+				name = split[1].trim();
 				logger.debug("read section name " + name);
-				entry.setName(name);
 			} else {
 				long value = convertToLong(split[1]);
 				String keyString = split[0].trim();
 				SectionHeaderKey key = getSectionKeyFor(keyString);
 				if (key != null) {
-					entry.add(new StandardField(key, null, value));
+					entries.put(key, new StandardField(key, null, value));
 					entryCounter++;
 				} else {
 					logger.warn("key was null for " + line);
@@ -224,7 +224,7 @@ public class TestreportsReader {
 			line = reader.readLine();
 		}
 		if (entryCounter == 5) { // exactly 5 values are in the pev report
-			return entry;
+			return new SectionHeader(entries, number, -1, name);
 		}
 		return null;
 	}

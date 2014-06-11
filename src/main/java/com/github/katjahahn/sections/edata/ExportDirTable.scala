@@ -23,15 +23,17 @@ import com.github.katjahahn.IOUtil.{ NL, readMap }
 import scala.collection.JavaConverters._
 import com.github.katjahahn.ByteArrayUtil._
 import com.github.katjahahn.HeaderKey
+import com.github.katjahahn.IOUtil
+import com.github.katjahahn.IOUtil.SpecificationFormat
 
 /**
  * Represents the directory table of the export section and provides access to the
  * header values.
  * <p>
  * The export directory table should be loaded by an {@link ExportSection} instance.
- * 
+ *
  * @author Katja Hahn
- * 
+ *
  * instanciates an export directory table.
  */
 class ExportDirTable private (
@@ -65,18 +67,9 @@ object ExportDirTable {
    * @return export directory table instance
    */
   def apply(entrybytes: Array[Byte]): ExportDirTable = {
-    val specification = readMap(edataTableSpec).asScala.toMap
-    val buffer = ListBuffer.empty[StandardField]
-    for ((key, specs) <- specification) {
-      val description = specs(0)
-      val offset = Integer.parseInt(specs(1))
-      val size = Integer.parseInt(specs(2))
-      val value = getBytesLongValue(entrybytes.clone, offset, size)
-      val ekey = ExportDirTableKey.valueOf(key)
-      val entry = new StandardField(ekey, description, value)
-      buffer += entry
-    }
-    val entries: Map[ExportDirTableKey, StandardField] = (buffer map { t => (t.key.asInstanceOf[ExportDirTableKey], t) }).toMap;
+    val format = new SpecificationFormat(0, 1, 2, 3)
+    val entries = IOUtil.readHeaderEntries(classOf[ExportDirTableKey], format, 
+        edataTableSpec, entrybytes.clone).asScala.toMap
     new ExportDirTable(entries)
   }
 

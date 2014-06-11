@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.Header;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.IOUtil.SpecificationFormat;
 import com.github.katjahahn.StandardField;
 import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
@@ -69,7 +69,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     private final byte[] headerbytes;
     private MagicNumber magicNumber;
-    private int rvaNumber;
+    private long rvaNumber;
     private final long offset;
 
     /**
@@ -213,25 +213,11 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return windowsFields.get(key);
     }
 
-    private void loadStandardFields(Map<String, String[]> standardSpec) {
-        standardFields = initStandardFields();
-        int description = 0;
-        int offsetLoc = 1;
-        int lengthLoc = 2;
-
-        for (Entry<String, String[]> entry : standardSpec.entrySet()) {
-            String[] specs = entry.getValue();
-            int offset = Integer.parseInt(specs[offsetLoc]);
-            int length = Integer.parseInt(specs[lengthLoc]);
-            if (headerbytes.length >= offset + length) {
-                long value = getBytesLongValue(headerbytes, offset, length);
-                StandardFieldEntryKey key = StandardFieldEntryKey.valueOf(entry
-                        .getKey());
-                standardFields.put(key, new StandardField(key,
-                        specs[description], value));
-            }
-        }
-
+    private void loadStandardFields(Map<String, String[]> standardSpec)
+            throws IOException {
+        SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
+        standardFields = IOUtil.readHeaderEntries(StandardFieldEntryKey.class,
+                format, STANDARD_SPEC, headerbytes);
     }
 
     @Ensures({ "result != null",
@@ -279,49 +265,28 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec) {
-        windowsFields = initWindowsFields();
+    private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec) throws IOException {
         int offsetLoc;
         int lengthLoc;
-        final int description = 0;
+        final int description = 1;
 
         if (magicNumber == MagicNumber.PE32) {
-            offsetLoc = 1;
-            lengthLoc = 3;
-        } else if (magicNumber == MagicNumber.PE32_PLUS) {
             offsetLoc = 2;
             lengthLoc = 4;
+        } else if (magicNumber == MagicNumber.PE32_PLUS) {
+            offsetLoc = 3;
+            lengthLoc = 5;
         } else {
             return; // no fields
         }
-
-        for (Entry<String, String[]> entry : windowsSpec.entrySet()) {
-            String[] specs = entry.getValue();
-            int offset = Integer.parseInt(specs[offsetLoc]);
-            int length = Integer.parseInt(specs[lengthLoc]);
-            if (headerbytes.length >= offset + length) {
-                long value = getBytesLongValue(headerbytes, offset, length);
-                WindowsEntryKey key = WindowsEntryKey.valueOf(entry.getKey());
-                windowsFields.put(key, new StandardField(key,
-                        specs[description], value));
-                if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
-                    this.rvaNumber = (int) value; // always 4 Bytes
-                    if (rvaNumber > 16) {
-                        rvaNumber = 16;
-                    }
-                }
-            }
+        SpecificationFormat format = new SpecificationFormat(0, description,
+                offsetLoc, lengthLoc);
+        windowsFields = IOUtil.readHeaderEntries(WindowsEntryKey.class, format,
+                WINDOWS_SPEC, headerbytes);
+        rvaNumber = windowsFields.get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES).value;
+        if (rvaNumber > 16) {
+            rvaNumber = 16;
         }
-    }
-
-    @Ensures({ "result != null",
-            "result.size() == WindowsEntryKey.values().length" })
-    private Map<WindowsEntryKey, StandardField> initWindowsFields() {
-        Map<WindowsEntryKey, StandardField> map = new HashMap<>();
-        for (WindowsEntryKey key : WindowsEntryKey.values()) {
-            map.put(key, new StandardField(key, "absent", 0L));
-        }
-        return map;
     }
 
     @Override
@@ -384,7 +349,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 b.append(description + ": " + value + " (0x"
                         + Long.toHexString(value) + ")" + NL);
                 if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
-                    rvaNumber = (int) value; // rva nr has always 4 Bytes
+                    rvaNumber = value;
                 }
             }
         }
@@ -595,24 +560,30 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     /**
      * Determines if the file is in low alignment mode.
      * 
-     * @see <a href="https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment">corkami Wiki PE</a>
+     * @see <a
+     *      href="https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment">corkami
+     *      Wiki PE</a>
      * @return true iff file is in low alignment mode
      */
     public boolean isLowAlignmentMode() {
         long fileAlign = get(FILE_ALIGNMENT);
         long sectionAlign = get(SECTION_ALIGNMENT);
-        return 1 <= fileAlign && fileAlign == sectionAlign && fileAlign <= 0x800;
+        return 1 <= fileAlign && fileAlign == sectionAlign
+                && fileAlign <= 0x800;
     }
-    
+
     /**
      * Determines if the file is in standard alignment mode.
      * 
-     * @see <a href="https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment">corkami Wiki PE</a>
+     * @see <a
+     *      href="https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment">corkami
+     *      Wiki PE</a>
      * @return true iff file is in standard alignment mode
      */
     public boolean isStandardAlignmentMode() {
         long fileAlign = get(FILE_ALIGNMENT);
         long sectionAlign = get(SECTION_ALIGNMENT);
-        return 0x200 <= fileAlign && fileAlign <= sectionAlign && 0x1000 <= sectionAlign;
+        return 0x200 <= fileAlign && fileAlign <= sectionAlign
+                && 0x1000 <= sectionAlign;
     }
 }

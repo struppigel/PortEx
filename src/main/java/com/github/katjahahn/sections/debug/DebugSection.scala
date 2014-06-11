@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.sections.debug
 
 import com.github.katjahahn.IOUtil._
@@ -29,6 +31,8 @@ import DebugDirTableKey._
 import java.util.Date
 import com.github.katjahahn.sections.SpecialSection
 import com.github.katjahahn.PEData
+import com.github.katjahahn.TestreportsReader
+import com.github.katjahahn.IOUtil
 
 /**
  * @author Katja Hahn
@@ -40,11 +44,11 @@ class DebugSection private (
   private val typeDescription: String,
   val offset: Long,
   val size: Long) extends SpecialSection {
-  
+
   override def getOffset(): Long = offset
-	
+
   def getSize(): Long = size
-  
+
   override def getInfo(): String =
     s"""|-------------
         |Debug Section
@@ -71,13 +75,13 @@ class DebugSection private (
    * @param key the header key
    * @return long value for the given key of null if it doesn't exist.
    */
-  def get(key: HeaderKey): java.lang.Long =
+  def get(key: DebugDirTableKey): java.lang.Long =
     if (directoryTable.contains(key))
       directoryTable(key).value else null
 
   /**
    * Returns a string of the type description
-   * 
+   *
    * @return type description string
    */
   def getTypeDescription(): String = typeDescription
@@ -86,50 +90,41 @@ class DebugSection private (
 
 object DebugSection {
 
-  type DebugDirectoryTable = Map[HeaderKey, StandardField]
+  type DebugDirectoryTable = Map[DebugDirTableKey, StandardField]
 
   private val debugspec = "debugdirentryspec"
 
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/testfiles/ntdll.dll")
+    val file = new File(TestreportsReader.RESOURCE_DIR + "/testfiles/ntdll.dll")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
     val debug = loader.loadDebugSection()
     println(debug.getInfo())
   }
-  
+
   /**
    * Creates an instance of the DebugSection for the given debug bytes.
-   * 
+   *
    * @param debugbytes the byte array that represents the debug section
    * @param offset the debug sections starts at
    * @return debugsection instance
    */
   def newInstance(debugbytes: Array[Byte], offset: Long): DebugSection = apply(debugbytes, offset)
-  
+
   /**
    * Loads the debug section and returns it.
-   * 
+   *
    * This is just a shortcut to loading the section using the {@link SectionLoader}
-   * 
+   *
    * @return instance of the debug section
    */
-  def load(data: PEData): DebugSection = 
+  def load(data: PEData): DebugSection =
     new SectionLoader(data).loadDebugSection()
 
   def apply(debugbytes: Array[Byte], offset: Long): DebugSection = {
-    val specification = readMap("debugdirentryspec").asScala.toMap
-    val buffer = ListBuffer.empty[StandardField]
-    for ((key, specs) <- specification) {
-      val description = specs(0)
-      val offset = Integer.parseInt(specs(1))
-      val size = Integer.parseInt(specs(2))
-      val value = getBytesLongValue(debugbytes.clone, offset, size)
-      val ekey = DebugDirTableKey.valueOf(key)
-      val entry = new StandardField(ekey, description, value)
-      buffer += entry
-    }
-    val entries: DebugDirectoryTable = (buffer map { t => (t.key, t) }).toMap;
+    val format = new SpecificationFormat(0, 1, 2, 3)
+    val entries = IOUtil.readHeaderEntries(classOf[DebugDirTableKey],
+      format, debugspec, debugbytes.clone).asScala.toMap
     val types = getCharacteristicsDescriptions(entries(DebugDirTableKey.TYPE).value, "debugtypes").asScala.toList
     new DebugSection(entries, types(0), offset, debugbytes.length)
   }
