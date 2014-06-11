@@ -135,7 +135,7 @@ public class SectionLoader {
                 sectionNr > 0 && sectionNr <= table.getNumberOfSections(),
                 "invalid section number");
         SectionHeader header = table.getSectionHeader(sectionNr);
-        return loadSection(header);
+        return loadSectionFrom(header);
     }
     
     /**
@@ -149,7 +149,7 @@ public class SectionLoader {
      * @return {@link PESection} that belongs to the header
      */
     @Ensures("result != null")
-    public PESection loadSection(SectionHeader header) {
+    public PESection loadSectionFrom(SectionHeader header) {
         long size = getReadSize(header);
         long offset = header.getAlignedPointerToRaw();
         return new PESection(size, offset, header, file);
@@ -168,7 +168,7 @@ public class SectionLoader {
     @Ensures("result != null")
     public BytesAndOffset loadSectionBytes(int sectionNr) throws IOException {
         SectionHeader header = table.getSectionHeader(sectionNr);
-        return loadSectionBytes(header);
+        return loadSectionBytesFor(header);
     }
 
     /**
@@ -183,7 +183,7 @@ public class SectionLoader {
      */
     @Requires("header != null")
     @Ensures("result != null")
-    public BytesAndOffset loadSectionBytes(SectionHeader header)
+    public BytesAndOffset loadSectionBytesFor(SectionHeader header)
             throws IOException {
         Preconditions.checkArgument(header != null, "given section was null");
         logger.debug("reading section bytes for header " + header.getName());
@@ -345,7 +345,7 @@ public class SectionLoader {
             if (rsrcEntry.isPresent()) {
                 Long virtualAddress = rsrcEntry.get().get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
-                    BytesAndOffset tuple = loadSectionBytes(rsrcEntry.get());
+                    BytesAndOffset tuple = loadSectionBytesFor(rsrcEntry.get());
                     byte[] rsrcbytes = tuple.bytes;
                     if (rsrcbytes.length == 0) {
                         logger.warn("unable to read resource section, readsize is 0");
@@ -401,7 +401,7 @@ public class SectionLoader {
             if (header.isPresent()) {
                 Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
-                    BytesAndOffset tuple = loadSectionBytes(header.get());
+                    BytesAndOffset tuple = loadSectionBytesFor(header.get());
                     byte[] bytes = tuple.bytes;
                     if (bytes.length == 0) {
                         logger.warn("unable to read exception section, readsize is 0");
@@ -630,7 +630,7 @@ public class SectionLoader {
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
         if (header.isPresent()) {
             try {
-                return Optional.fromNullable(loadSectionBytes(header.get()));
+                return Optional.fromNullable(loadSectionBytesFor(header.get()));
             } catch (IllegalArgumentException e) {
                 logger.warn(e.getMessage());
             }

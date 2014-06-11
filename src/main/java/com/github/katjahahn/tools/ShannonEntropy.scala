@@ -95,7 +95,7 @@ object ShannonEntropy {
    * @param the file to calculate the entropy from
    * @return Shannon's Entropy for the file
    */
-  def entropy(file: File): Double = {
+  def fileEntropy(file: File): Double = {
     val (byteCounts, total) = countBytes(file)
     entropy(byteCounts, total)
   }
