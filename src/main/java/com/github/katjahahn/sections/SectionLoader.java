@@ -119,30 +119,40 @@ public class SectionLoader {
     }
 
     /**
-     * Loads the section with the given number and may patch the size of the
-     * section if the {@code patchSize} parameter is set.
+     * Loads the section with the sectionNr.
      * <p>
      * This does not instantiate special sections. Use methods like
      * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
-     * <p>
-     * The file on disk is read to fetch the information
      * 
      * @param sectionNr
-     *            the section's name
+     *            the section's number
      * @return {@link PESection} of the given number
-     * @throws {@link IOException} if unable to read the file
-     * @throws {@link IllegalArgumentException} if invalid sectionNr 
+     * @throws {@link IllegalArgumentException} if invalid sectionNr
      */
     @Ensures("result != null")
-    public PESection loadSection(int sectionNr) throws IOException {
+    public PESection loadSection(int sectionNr) {
         Preconditions.checkArgument(
                 sectionNr > 0 && sectionNr <= table.getNumberOfSections(),
                 "invalid section number");
-        BytesAndOffset tuple = loadSectionBytes(sectionNr);
-        byte[] bytes = tuple.bytes;
-        long offset = tuple.offset;
         SectionHeader header = table.getSectionHeader(sectionNr);
-        return new PESection(bytes, offset, header, file);
+        return loadSection(header);
+    }
+    
+    /**
+     * Loads the section that belongs to the header.
+     * <p>
+     * This does not instantiate special sections. Use methods like
+     * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
+     * 
+     * @param header
+     *            the section's header
+     * @return {@link PESection} that belongs to the header
+     */
+    @Ensures("result != null")
+    public PESection loadSection(SectionHeader header) {
+        long size = getReadSize(header);
+        long offset = header.getAlignedPointerToRaw();
+        return new PESection(size, offset, header, file);
     }
 
     /**
@@ -152,6 +162,8 @@ public class SectionLoader {
      *            the number of the section
      * @return bytes that represent the section with the given section number
      * @throws {@link IOException}
+     * @throws {@link IllegalStateException} if section too large to fit into a
+     *         byte array
      */
     @Ensures("result != null")
     public BytesAndOffset loadSectionBytes(int sectionNr) throws IOException {
@@ -166,6 +178,8 @@ public class SectionLoader {
      *            of the section
      * @return bytes and file offset of the section
      * @throws {@link IOException} if file can not be read
+     * @throws {@link IllegalStateException} if section too large to fit into a
+     *         byte array
      */
     @Requires("header != null")
     @Ensures("result != null")
@@ -176,6 +190,8 @@ public class SectionLoader {
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             long alignedPointerToRaw = header.getAlignedPointerToRaw();
             long readSize = getReadSize(header);
+            Preconditions.checkState(readSize == (int) readSize,
+                    "read size too large to load section into byte array");
             raf.seek(alignedPointerToRaw);
             logger.debug("reading section bytes from " + alignedPointerToRaw
                     + " to " + readSize);
@@ -503,9 +519,10 @@ public class SectionLoader {
     @Ensures("result != null")
     private ImportSection loadImportTableAt(long offset, long size)
             throws FileNotFoundException, IOException {
+        Preconditions.checkState(size == (int) size,
+                "table size too large to load into a byte array");
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             raf.seek(offset);
-            // TODO cast to int is insecure. actual int is unsigned
             byte[] bytes = new byte[(int) size];
             raf.readFully(bytes);
             return ImportSection.newInstance(bytes, offset, optHeader, 0,
@@ -710,10 +727,12 @@ public class SectionLoader {
                 if (size + offset > file.length()) {
                     size = file.length() - offset;
                 }
+                Preconditions
+                        .checkState(size == (int) size,
+                                "readsize of section too large to load into a byte array");
                 try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
                     raf.seek(offset);
                     virtualAddress = rva;
-                    // TODO cast to int is insecure. actual int is unsigned
                     byte[] bytes = new byte[(int) size];
                     raf.readFully(bytes);
                     return Optional.of(new BytesAndOffset(bytes, offset));

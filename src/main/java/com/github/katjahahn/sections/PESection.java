@@ -22,6 +22,8 @@ import java.io.RandomAccessFile;
 import com.github.katjahahn.IOUtil;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.java.contract.Ensures;
+import com.google.java.contract.Invariant;
 
 /**
  * Holds header, size, offset and optional bytes of a PESection.
@@ -31,16 +33,14 @@ import com.google.common.base.Preconditions;
  * @author Katja Hahn
  *
  */
+@Invariant({ "file != null", "header != null", "sectionbytes != null" })
 public class PESection {
 
     private Optional<byte[]> sectionbytes = Optional.absent();
-    private SectionHeader header;
-    private long offset;
-    private long size;
-    private File file;
-
-    protected PESection() {
-    }
+    private final SectionHeader header;
+    private final long offset;
+    private final long size;
+    private final File file;
 
     /**
      * Creates a PE section.
@@ -62,7 +62,6 @@ public class PESection {
         this.file = file;
     }
 
-    // TODO PE section without the bytes?
     /**
      * Creates a PE section.
      * 
@@ -91,6 +90,7 @@ public class PESection {
      * 
      * @return the number of bytes in the section
      */
+    @Ensures("result >= 0")
     public long getSize() {
         return size;
     }
@@ -100,6 +100,7 @@ public class PESection {
      * 
      * @return file offset
      */
+    @Ensures("result >= 0")
     public long getOffset() {
         return offset;
     }
@@ -109,6 +110,7 @@ public class PESection {
      * 
      * @return section header
      */
+    @Ensures("result != null")
     public SectionHeader getHeader() {
         return header;
     }
@@ -118,11 +120,13 @@ public class PESection {
      * already loaded.
      * 
      * @return bytes of the section
-     * @throws IOException if file can not be read
+     * @throws IOException
+     *             if file can not be read
      * @throws IllegalStateException
      *             if section is too large to fit into a byte array. This
      *             happens if the size is larger than int can hold.
      */
+    @Ensures("result != null")
     public byte[] getDump() throws IOException {
         if (sectionbytes.isPresent()) {
             return sectionbytes.get().clone();
@@ -134,7 +138,8 @@ public class PESection {
     /**
      * Loads the section bytes from the file using offset and size.
      * 
-     * @throws IOException if file can not be read
+     * @throws IOException
+     *             if file can not be read
      * @throws IllegalStateException
      *             if section is too large to fit into a byte array. This
      *             happens if the size is larger than int can hold.
