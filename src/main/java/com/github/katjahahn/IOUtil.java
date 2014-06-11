@@ -36,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.java.contract.Ensures;
+import com.google.java.contract.Requires;
 
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
@@ -65,10 +66,31 @@ public class IOUtil {
     private IOUtil() {
     }
 
+    /**
+     * Reads the entries of a Header and returns a map containing the
+     * {@link HeaderKey} as key and {@link StandardField} as value.
+     * <p>
+     * The map is initialized with all possible HeaderKeys of the subtype and
+     * empty fields.
+     * 
+     * @param clazz
+     *            the concrete subclass of the HeaderKey
+     * @param specFormat
+     *            the format of the specification file
+     * @param specName
+     *            the name of the specification file (not the path to it)
+     * @param headerbytes
+     *            the bytes of the header
+     * @return header entries
+     * @throws {@link IOException} if specification file can not be read
+     */
+    @Ensures("result != null")
+    @Requires({ "clazz != null", "specFormat != null",
+            "specName != null && specName.trim().length() > 0",
+            "headerbytes != null" })
     public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
             Class<T> clazz, SpecificationFormat specFormat, String specName,
             byte[] headerbytes) throws IOException {
-
         EnumSolver<T> enumSolver = new EnumSolver<>(clazz);
         Map<T, StandardField> data = initFullEnumMap(enumSolver);
         List<String[]> specification = readArray(specName);
@@ -293,12 +315,40 @@ public class IOUtil {
         return b.toString();
     }
 
+    /**
+     * Describes the format/indices of the specification file.
+     *
+     */
     public static class SpecificationFormat {
+        /**
+         * the index of the key
+         */
         public int key;
+        /**
+         * the index of the entry's description
+         */
         public int description;
+        /**
+         * the index of the value's offset
+         */
         public int offset;
+        /**
+         * the index of the value's length
+         */
         public int length;
 
+        /**
+         * Creates a specification format with the given indices.
+         * 
+         * @param key
+         *            the index of the key
+         * @param description
+         *            the index of the entry's description
+         * @param offset
+         *            the index of the value's offset
+         * @param length
+         *            the index of the value's length
+         */
         public SpecificationFormat(int key, int description, int offset,
                 int length) {
             this.description = description;
@@ -308,7 +358,15 @@ public class IOUtil {
         }
     }
 
-    public static class EnumSolver<T extends Enum<T>> {
+    /**
+     * Used by
+     * {@link IOUtil#readHeaderEntries(Class, SpecificationFormat, String, byte[])}
+     * to be able to use Enum static methods based on a class.
+     *
+     * @param <T>
+     *            the Enum type
+     */
+    private static class EnumSolver<T extends Enum<T>> {
 
         private Class<T> clazz;
 

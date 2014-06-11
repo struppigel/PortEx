@@ -65,15 +65,17 @@ object ShannonEntropy {
   private val byteSize = 256
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("src/main/resources/testfiles")
-    for (file <- folder.listFiles) {
-      println("file: " + file.getName)
-      val data = PELoader.loadPE(file)
-      val ent = new ShannonEntropy(data)
-      ent._forSections.foreach(println)
-      println(data.getSectionTable().getInfo)
-      println()
-    }
+//    val folder = new File("src/main/resources/testfiles")
+//    for (file <- folder.listFiles) {
+//      println("file: " + file.getName)
+//      val data = PELoader.loadPE(file)
+//      val ent = new ShannonEntropy(data)
+//      ent._forSections.foreach(println)
+//      println(data.getSectionTable().getInfo)
+//      println()
+//    }
+    val str = "bla"
+    println(List("", "bla").contains(str))
   }
 
   /**
