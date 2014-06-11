@@ -121,6 +121,15 @@ public class SectionTable implements PEModule {
     public List<SectionHeader> getSectionHeaders() {
         return new LinkedList<>(headers);
     }
+    
+    /**
+     * Returns the number of sections
+     * 
+     * @return number of sections and section headers
+     */
+    public int getNumberOfSections() {
+        return numberOfEntries;
+    }
 
     /**
      * Returns the section entry that has the given number or null if there is

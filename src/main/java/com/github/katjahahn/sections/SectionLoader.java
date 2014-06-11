@@ -118,8 +118,6 @@ public class SectionLoader {
         return Optional.absent();
     }
 
-    // TODO what happens if no section with that number given? --> add to
-    // javadoc
     /**
      * Loads the section with the given number and may patch the size of the
      * section if the {@code patchSize} parameter is set.
@@ -133,12 +131,18 @@ public class SectionLoader {
      *            the section's name
      * @return {@link PESection} of the given number
      * @throws {@link IOException} if unable to read the file
+     * @throws {@link IllegalArgumentException} if invalid sectionNr 
      */
     @Ensures("result != null")
     public PESection loadSection(int sectionNr) throws IOException {
+        Preconditions.checkArgument(
+                sectionNr > 0 && sectionNr <= table.getNumberOfSections(),
+                "invalid section number");
         BytesAndOffset tuple = loadSectionBytes(sectionNr);
         byte[] bytes = tuple.bytes;
-        return new PESection(bytes);
+        long offset = tuple.offset;
+        SectionHeader header = table.getSectionHeader(sectionNr);
+        return new PESection(bytes, offset, header, file);
     }
 
     /**
@@ -147,7 +151,7 @@ public class SectionLoader {
      * @param sectionNr
      *            the number of the section
      * @return bytes that represent the section with the given section number
-     * @throws IOException
+     * @throws {@link IOException}
      */
     @Ensures("result != null")
     public BytesAndOffset loadSectionBytes(int sectionNr) throws IOException {
@@ -467,7 +471,7 @@ public class SectionLoader {
                         + offset);
                 ImportSection idata = loadImportTableAt(offset,
                         importTable.get().size);
-                if(idata.isEmpty()) {
+                if (idata.isEmpty()) {
                     logger.warn("empty import section");
                     return Optional.absent();
                 }

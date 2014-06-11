@@ -2,6 +2,7 @@ package com.github.katjahahn.sections;
 
 import static org.testng.Assert.*;
 
+import java.io.IOException;
 import java.util.Random;
 
 import org.testng.annotations.Test;
@@ -9,11 +10,11 @@ import org.testng.annotations.Test;
 public class PESectionTest {
 
 	@Test
-	public void getDump() {
+	public void getDump() throws IOException {
 		Random rand = new Random();
 		byte[] randomBytes = new byte[20];
 		rand.nextBytes(randomBytes);
-		byte[] dump = new PESection(randomBytes).getDump();
+		byte[] dump = new PESection(randomBytes, 0, null, null).getDump();
 		assertEquals(randomBytes, dump);
 	}
 
@@ -22,7 +23,7 @@ public class PESectionTest {
 		Random rand = new Random();
 		byte[] randomBytes = new byte[20];
 		rand.nextBytes(randomBytes);
-		PESection section = new PESection(randomBytes);
+		PESection section = new PESection(randomBytes, 0, null, null);
 		String info = section.toString();
 		assertNotNull(info);
 		assertTrue(info.length() > 0);
