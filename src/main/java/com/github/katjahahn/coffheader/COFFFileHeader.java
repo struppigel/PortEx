@@ -15,17 +15,14 @@
  ******************************************************************************/
 package com.github.katjahahn.coffheader;
 
-import static com.github.katjahahn.ByteArrayUtil.*;
 import static com.github.katjahahn.coffheader.COFFHeaderKey.*;
 import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.Header;
 import com.github.katjahahn.HeaderKey;
 import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.IOUtil.SpecificationFormat;
 import com.github.katjahahn.StandardField;
 import com.google.java.contract.Ensures;
 
@@ -51,9 +49,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     private static final String COFF_SPEC_FILE = "coffheaderspec";
     private final byte[] headerbytes;
     private Map<COFFHeaderKey, StandardField> data;
-    private Map<String, String[]> specification;
     private final long offset;
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LogManager
             .getLogger(COFFFileHeader.class.getName());
 
@@ -73,12 +71,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         checkArgument(headerbytes.length == HEADER_SIZE);
         this.headerbytes = headerbytes.clone();
         this.offset = offset;
-        try {
-            specification = IOUtil.readMap(COFF_SPEC_FILE);
-        } catch (NumberFormatException | IOException e) {
-            logger.error(e);
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -94,27 +86,10 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Override
     public void read() throws IOException {
-        data = init();
-        int description = 0;
-        int offset = 1;
-        int length = 2;
-        for (Entry<String, String[]> entry : specification.entrySet()) {
-
-            String[] specs = entry.getValue();
-            long value = getBytesLongValue(headerbytes,
-                    Integer.parseInt(specs[offset]),
-                    Integer.parseInt(specs[length]));
-            COFFHeaderKey key = COFFHeaderKey.valueOf(entry.getKey());
-            data.put(key, new StandardField(key, specs[description], value));
-        }
-    }
-
-    private Map<COFFHeaderKey, StandardField> init() {
-        Map<COFFHeaderKey, StandardField> map = new HashMap<>();
-        for(COFFHeaderKey key : COFFHeaderKey.values()) {
-            map.put(key, new StandardField(key, "", 0L));
-        }
-        return map;
+        SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
+        data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
+                COFF_SPEC_FILE, headerbytes);
+      
     }
 
     /**
@@ -193,7 +168,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Override
     public StandardField getField(COFFHeaderKey key) {
-       return data.get(key);
+        return data.get(key);
     }
 
     /**
@@ -203,7 +178,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      *            type
      * @return description
      */
-    @Ensures({"result != null", "result.trim().length() > 0"})
+    @Ensures({ "result != null", "result.trim().length() > 0" })
     public static String getDescription(MachineType machine) {
         int description = 1;
         int keyString = 0;
@@ -226,7 +201,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return machine type description
      */
-    @Ensures({"result != null", "result.trim().length() > 0"})
+    @Ensures({ "result != null", "result.trim().length() > 0" })
     public String getMachineDescription() {
         return getDescription(getMachineType());
     }
@@ -238,8 +213,8 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Ensures("result != null")
     public List<FileCharacteristic> getCharacteristics() {
-        List<String> keys = IOUtil.getCharacteristicKeys(
-                get(CHARACTERISTICS), "characteristics");
+        List<String> keys = IOUtil.getCharacteristicKeys(get(CHARACTERISTICS),
+                "characteristics");
         List<FileCharacteristic> characteristics = new ArrayList<>();
         for (String key : keys) {
             characteristics.add(FileCharacteristic.valueOf(key));
@@ -296,7 +271,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return size of optional header
      */
     public int getSizeOfOptionalHeader() {
-        return (int) get(SIZE_OF_OPT_HEADER); //2-byte value can be casted
+        return (int) get(SIZE_OF_OPT_HEADER); // 2-byte value can be casted
     }
 
     /**
@@ -305,7 +280,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return number of sections
      */
     public int getNumberOfSections() {
-        return (int) get(SECTION_NR); //2-byte value can be casted
+        return (int) get(SECTION_NR); // 2-byte value can be casted
     }
 
 }
