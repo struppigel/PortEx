@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.tools;
 
-import com.github.katjahahn.PEData;
-import com.github.katjahahn.optheader.DataDirEntry;
-import com.github.katjahahn.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.optheader.DataDirEntry;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.google.common.base.Optional;
 
 /**

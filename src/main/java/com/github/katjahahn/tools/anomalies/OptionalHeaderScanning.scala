@@ -18,24 +18,20 @@
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.coffheader.FileCharacteristic
-import com.github.katjahahn.coffheader.FileCharacteristic._
-import com.github.katjahahn.optheader.OptionalHeader
-import com.github.katjahahn.PEData
-import com.github.katjahahn.optheader.DataDirectoryKey
 import java.util.Map
-import com.github.katjahahn.IOUtil
-import com.github.katjahahn.optheader.Subsystem
-import com.github.katjahahn.optheader.WindowsEntryKey
-import com.github.katjahahn.optheader.StandardFieldEntryKey
-import com.github.katjahahn.optheader.DllCharacteristic
 import scala.collection.JavaConverters._
-import com.github.katjahahn.coffheader.COFFFileHeader
-import com.github.katjahahn.PESignature
-import com.github.katjahahn.sections.SectionTable
-import com.github.katjahahn.IOUtil._
-import com.github.katjahahn.StandardField
-import com.github.katjahahn.sections.SectionHeaderKey
+import com.github.katjahahn.parser.optheader.Subsystem
+import com.github.katjahahn.parser.optheader.OptionalHeader
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.PESignature
+import com.github.katjahahn.parser.sections.SectionHeaderKey
+import com.github.katjahahn.parser.sections.SectionTable
+import com.github.katjahahn.parser.IOUtil._
+import com.github.katjahahn.parser.coffheader.COFFFileHeader
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
+import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import com.github.katjahahn.parser.optheader.DllCharacteristic
+import com.github.katjahahn.parser.coffheader.FileCharacteristic
 
 /**
  * Scans the Optional Header for anomalies.
@@ -324,7 +320,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    * characteristic set
    */
   private def isDLL(): Boolean =
-    data.getCOFFFileHeader().getCharacteristics().contains(IMAGE_FILE_DLL)
+    data.getCOFFFileHeader().getCharacteristics().contains(FileCharacteristic.IMAGE_FILE_DLL)
 
   /**
    * Scans the data directories for anomalies, including number of entries and
@@ -349,7 +345,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     }
     if (datadirs.containsKey(DataDirectoryKey.RESERVED)) {
       val entry = datadirs.get(DataDirectoryKey.RESERVED)
-      val description = "Reserved Data Directory Entry is not 0. Entry --> " + IOUtil.NL + entry.toString
+      val description = "Reserved Data Directory Entry is not 0. Entry --> " + NL + entry.toString
       anomalyList += ReservedDataDirAnomaly(entry, description)
     }
     anomalyList.toList

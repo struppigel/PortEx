@@ -1,13 +1,14 @@
 package com.github.katjahahn.tools
 
-import java.io.FileInputStream
-import com.github.katjahahn.PEData
 import java.io.File
-import java.util.Random
+import java.io.FileInputStream
+
+import scala.collection.JavaConverters.mapAsJavaMapConverter
+
+import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.sections.SectionLoader
+
 import ShannonEntropy._
-import scala.collection.JavaConverters._
-import com.github.katjahahn.sections.SectionLoader
-import com.github.katjahahn.PELoader
 
 /**
  * Tool to calculate Shannon's Entropy for entire files, byte arrays or sections

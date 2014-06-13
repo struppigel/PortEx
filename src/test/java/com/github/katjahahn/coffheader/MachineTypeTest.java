@@ -7,7 +7,8 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.IOUtil;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.coffheader.MachineType;
 
 public class MachineTypeTest {
 	@Test

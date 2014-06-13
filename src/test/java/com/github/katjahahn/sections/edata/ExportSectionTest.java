@@ -15,12 +15,14 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PEData;
-import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.optheader.WindowsEntryKey;
-import com.github.katjahahn.sections.SectionLoader;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.edata.ExportEntry;
+import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.google.common.base.Optional;
 
 public class ExportSectionTest {

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.optheader;
 
-import static com.github.katjahahn.optheader.DataDirectoryKey.*;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
 import static org.testng.Assert.*;
 
 import java.io.IOException;
@@ -30,11 +30,16 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
-import com.github.katjahahn.StandardField;
 import com.github.katjahahn.TestreportsReader.TestData;
-import com.github.katjahahn.optheader.OptionalHeader.MagicNumber;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.StandardField;
+import com.github.katjahahn.parser.optheader.DataDirEntry;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
 import com.google.common.base.Optional;
 
 public class OptionalHeaderTest {

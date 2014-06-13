@@ -23,9 +23,11 @@ import java.io.IOException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PEData;
-import com.github.katjahahn.PELoader;
 import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.msdos.MSDOSHeader;
+import com.github.katjahahn.parser.msdos.MSDOSLoadModule;
 
 public class MSDOSLoadModuleTest {
 

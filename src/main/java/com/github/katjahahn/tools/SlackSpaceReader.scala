@@ -17,13 +17,13 @@
  */
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.PEData
-import com.github.katjahahn.PELoader
 import java.io.File
 import java.io.RandomAccessFile
-import com.github.katjahahn.ByteArrayUtil
-import com.github.katjahahn.msdos.MSDOSHeaderKey
 import com.google.common.base.Optional
+import com.github.katjahahn.parser.ByteArrayUtil
+import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.msdos.MSDOSHeaderKey
 
 class SlackSpaceReader(private val data: PEData) {
 

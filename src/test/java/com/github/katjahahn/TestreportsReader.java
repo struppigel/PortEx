@@ -16,19 +16,21 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.katjahahn.coffheader.COFFHeaderKey;
-import com.github.katjahahn.msdos.MSDOSHeaderKey;
-import com.github.katjahahn.optheader.DataDirEntry;
-import com.github.katjahahn.optheader.DataDirectoryKey;
-import com.github.katjahahn.optheader.StandardFieldEntryKey;
-import com.github.katjahahn.optheader.WindowsEntryKey;
-import com.github.katjahahn.sections.SectionHeader;
-import com.github.katjahahn.sections.SectionHeaderKey;
-import com.github.katjahahn.sections.edata.ExportEntry;
-import com.github.katjahahn.sections.idata.ImportDLL;
-import com.github.katjahahn.sections.idata.NameImport;
-import com.github.katjahahn.sections.idata.OrdinalImport;
-import com.github.katjahahn.sections.rsrc.ResourceDataEntry;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.StandardField;
+import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
+import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
+import com.github.katjahahn.parser.optheader.DataDirEntry;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionHeader;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
+import com.github.katjahahn.parser.sections.edata.ExportEntry;
+import com.github.katjahahn.parser.sections.idata.ImportDLL;
+import com.github.katjahahn.parser.sections.idata.NameImport;
+import com.github.katjahahn.parser.sections.idata.OrdinalImport;
+import com.github.katjahahn.parser.sections.rsrc.ResourceDataEntry;
 
 public class TestreportsReader {
 

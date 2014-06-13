@@ -24,6 +24,8 @@ import java.util.Map;
 import org.testng.annotations.BeforeSuite;
 
 import com.github.katjahahn.TestreportsReader.TestData;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
 
 public class PELoaderTest {
 

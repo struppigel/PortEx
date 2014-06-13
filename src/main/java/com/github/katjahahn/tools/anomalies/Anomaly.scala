@@ -15,8 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.anomalies
 
-import com.github.katjahahn.StandardField
-import com.github.katjahahn.optheader.DataDirEntry
+import com.github.katjahahn.parser.StandardField
+import com.github.katjahahn.parser.optheader.DataDirEntry
 
 /**
  * PE file anomaly or malformation.

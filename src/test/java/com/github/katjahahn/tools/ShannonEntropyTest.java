@@ -12,8 +12,9 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PEData;
 import com.github.katjahahn.PELoaderTest;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.tools.ShannonEntropy;
 
 public class ShannonEntropyTest {
 

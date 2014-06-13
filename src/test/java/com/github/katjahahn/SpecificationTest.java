@@ -13,21 +13,24 @@ import org.testng.annotations.Test;
 
 import scala.actors.threadpool.Arrays;
 
-import com.github.katjahahn.coffheader.COFFHeaderKey;
-import com.github.katjahahn.coffheader.FileCharacteristic;
-import com.github.katjahahn.msdos.MSDOSHeaderKey;
-import com.github.katjahahn.optheader.DataDirectoryKey;
-import com.github.katjahahn.optheader.DllCharacteristic;
-import com.github.katjahahn.optheader.StandardFieldEntryKey;
-import com.github.katjahahn.optheader.Subsystem;
-import com.github.katjahahn.optheader.WindowsEntryKey;
-import com.github.katjahahn.sections.SectionCharacteristic;
-import com.github.katjahahn.sections.SectionHeaderKey;
-import com.github.katjahahn.sections.debug.DebugDirectoryKey;
-import com.github.katjahahn.sections.edata.ExportDirectoryKey;
-import com.github.katjahahn.sections.idata.DirectoryEntryKey;
-import com.github.katjahahn.sections.rsrc.ResourceDataEntryKey;
-import com.github.katjahahn.sections.rsrc.ResourceDirectoryKey;
+import com.github.katjahahn.parser.Characteristic;
+import com.github.katjahahn.parser.HeaderKey;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
+import com.github.katjahahn.parser.coffheader.FileCharacteristic;
+import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.optheader.DllCharacteristic;
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.parser.optheader.Subsystem;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionCharacteristic;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
+import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
+import com.github.katjahahn.parser.sections.edata.ExportDirectoryKey;
+import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey;
+import com.github.katjahahn.parser.sections.rsrc.ResourceDataEntryKey;
+import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey;
 
 /**
  * Tests the specification files and their enums for coherence.

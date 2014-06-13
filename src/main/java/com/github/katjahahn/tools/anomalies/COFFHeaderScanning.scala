@@ -17,15 +17,12 @@
  */
 package com.github.katjahahn.tools.anomalies
 
-import com.github.katjahahn.PEData
-import com.github.katjahahn.coffheader.COFFFileHeader
-import com.github.katjahahn.coffheader.COFFHeaderKey
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
-import com.github.katjahahn.optheader.OptionalHeader
 import com.github.katjahahn.tools.Overlay
-import com.github.katjahahn.IOUtil.{ NL }
-import com.github.katjahahn.coffheader.FileCharacteristic
+import com.github.katjahahn.parser.IOUtil.{ NL }
+import com.github.katjahahn.parser.coffheader.COFFFileHeader
+import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 
 /**
  * Scans the COFF File Header for anomalies.

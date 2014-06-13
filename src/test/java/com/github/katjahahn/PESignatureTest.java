@@ -27,6 +27,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.TestreportsReader.TestData;
+import com.github.katjahahn.parser.FileFormatException;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PESignature;
 
 public class PESignatureTest {
 

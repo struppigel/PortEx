@@ -13,12 +13,15 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.HeaderKey;
-import com.github.katjahahn.StandardField;
 import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.coffheader.COFFHeaderKey;
-import com.github.katjahahn.optheader.WindowsEntryKey;
-import com.github.katjahahn.sections.SectionHeaderKey;
+import com.github.katjahahn.parser.HeaderKey;
+import com.github.katjahahn.parser.StandardField;
+import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
+import com.github.katjahahn.tools.anomalies.Anomaly;
+import com.github.katjahahn.tools.anomalies.AnomalyType;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
 public class PEAnomalyScannerTest {
 

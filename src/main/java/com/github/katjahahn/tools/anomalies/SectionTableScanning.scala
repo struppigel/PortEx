@@ -18,17 +18,17 @@
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.optheader.WindowsEntryKey
 import scala.collection.JavaConverters._
-import com.github.katjahahn.sections.SectionHeaderKey
-import com.github.katjahahn.IOUtil.{ NL }
-import com.github.katjahahn.sections.SectionCharacteristic._
-import com.github.katjahahn.sections.SectionCharacteristic
+import com.github.katjahahn.parser.IOUtil.{ NL }
 import java.util.Arrays
-import com.github.katjahahn.sections.SectionHeader
-import com.github.katjahahn.StandardField
-import com.github.katjahahn.sections.SectionLoader
 import com.github.katjahahn.tools.Overlay
+import com.github.katjahahn.parser.sections.SectionCharacteristic
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.sections.SectionHeader
+import com.github.katjahahn.parser.StandardField
+import com.github.katjahahn.parser.sections.SectionHeaderKey
+import com.github.katjahahn.parser.sections.SectionCharacteristic._
 
 /**
  * Scans the Section Table for anomalies.

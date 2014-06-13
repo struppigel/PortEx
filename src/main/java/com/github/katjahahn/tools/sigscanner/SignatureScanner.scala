@@ -22,15 +22,13 @@ import scala.PartialFunction._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ Map, ListBuffer }
 import scala.io.Codec
-import com.github.katjahahn.PEData
-import com.github.katjahahn.PELoader
-import com.github.katjahahn.optheader.StandardFieldEntryKey._
-import com.github.katjahahn.sections.SectionLoader
-import com.github.katjahahn.sections.SectionTable
-import com.github.katjahahn.sections.SectionHeaderKey
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey._
 import Signature._
 import SignatureScanner._
-import com.github.katjahahn.FileFormatException
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.FileFormatException
+import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.sections.SectionHeaderKey
 
 /**
  * Scans PE files for compiler and packer signatures.

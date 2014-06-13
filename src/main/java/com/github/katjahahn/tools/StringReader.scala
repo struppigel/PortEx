@@ -20,7 +20,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.PELoader
+import com.github.katjahahn.parser.PELoader
 import java.io.RandomAccessFile
 
 /**

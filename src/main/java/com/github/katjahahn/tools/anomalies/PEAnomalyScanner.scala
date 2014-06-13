@@ -18,15 +18,13 @@
 package com.github.katjahahn.tools.anomalies
 
 import java.io.File
-
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
-
-import com.github.katjahahn.IOUtil._
-import com.github.katjahahn.PEData
-import com.github.katjahahn.PELoader
-import com.github.katjahahn.sections.SectionLoader
+import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.tools.Overlay
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.PEData
 
 /**
  * Scans for anomalies and malformations in a PE file.

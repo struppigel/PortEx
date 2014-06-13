@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.anomalies
 
-import com.github.katjahahn.PEData
+import com.github.katjahahn.parser.PEData
 
 /**
  * Looks for certain anomalies in the given data parameter

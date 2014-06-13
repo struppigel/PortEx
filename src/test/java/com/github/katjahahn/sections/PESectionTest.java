@@ -7,6 +7,8 @@ import java.util.Random;
 
 import org.testng.annotations.Test;
 
+import com.github.katjahahn.parser.sections.PESection;
+
 public class PESectionTest {
 
 	@Test

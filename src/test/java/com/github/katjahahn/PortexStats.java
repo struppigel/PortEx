@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import com.github.katjahahn.optheader.DataDirEntry;
-import com.github.katjahahn.optheader.DataDirectoryKey;
-import com.github.katjahahn.sections.SectionLoader;
+import com.github.katjahahn.parser.FileFormatException;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PESignature;
+import com.github.katjahahn.parser.optheader.DataDirEntry;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.sections.SectionLoader;
 
 public class PortexStats {
 

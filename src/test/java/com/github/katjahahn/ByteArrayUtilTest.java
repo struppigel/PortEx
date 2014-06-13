@@ -9,6 +9,8 @@ import java.util.Random;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.github.katjahahn.parser.ByteArrayUtil;
+
 /**
  * Random based testclass
  * 

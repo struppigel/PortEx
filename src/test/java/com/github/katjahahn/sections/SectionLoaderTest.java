@@ -13,17 +13,22 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.FileFormatException;
-import com.github.katjahahn.PEData;
-import com.github.katjahahn.PELoader;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
-import com.github.katjahahn.optheader.DataDirEntry;
-import com.github.katjahahn.optheader.DataDirectoryKey;
-import com.github.katjahahn.sections.edata.ExportSection;
-import com.github.katjahahn.sections.idata.ImportSection;
-import com.github.katjahahn.sections.rsrc.ResourceSection;
+import com.github.katjahahn.parser.FileFormatException;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.optheader.DataDirEntry;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.sections.PESection;
+import com.github.katjahahn.parser.sections.SectionHeader;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.google.common.base.Optional;
 
 public class SectionLoaderTest {

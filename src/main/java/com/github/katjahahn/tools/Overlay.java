@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
-import com.github.katjahahn.PEData;
-import com.github.katjahahn.PELoader;
-import com.github.katjahahn.sections.SectionHeader;
-import com.github.katjahahn.sections.SectionLoader;
-import com.github.katjahahn.sections.SectionTable;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.sections.SectionHeader;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.SectionTable;
 
 /**
  * Recognizes and dumps overlay in a PE file.

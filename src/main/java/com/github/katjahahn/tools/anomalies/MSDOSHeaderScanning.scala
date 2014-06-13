@@ -16,7 +16,7 @@
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.IOUtil._
+import com.github.katjahahn.parser.IOUtil._
 import scala.collection.JavaConverters._
 
 /**
