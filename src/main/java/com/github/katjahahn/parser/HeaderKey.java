@@ -17,7 +17,7 @@ package com.github.katjahahn.parser;
 
 /**
  * 
- * Represents a key for a {@link StandardField}
+ * Represents a key for a {@link StandardField}.
  * 
  * @author Katja Hahn
  *

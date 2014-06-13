@@ -38,7 +38,7 @@ import com.google.java.contract.Requires;
  * @author Katja Hahn
  * 
  */
-public class PELoader {
+public final class PELoader {
 
     private static final Logger logger = LogManager.getLogger(PELoader.class
             .getName());
@@ -172,7 +172,7 @@ public class PELoader {
      * @throws IOException
      *             if unable to read the bytes
      */
-    @Requires({"length >= 0"})
+    @Requires({ "length >= 0" })
     private static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
             throws IOException {
         raf.seek(offset);

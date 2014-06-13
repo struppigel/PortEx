@@ -19,9 +19,6 @@ import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
-import com.github.katjahahn.tools.anomalies.Anomaly;
-import com.github.katjahahn.tools.anomalies.AnomalyType;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
 public class PEAnomalyScannerTest {
 

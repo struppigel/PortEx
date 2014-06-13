@@ -14,7 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 /**
- * This is the main package for the parser.
+ * This is the main package for the Portable Executable format parser.
+ * <p>
+ * This is the heart of PortEx.
  * 
  * @author Katja Hahn
  *

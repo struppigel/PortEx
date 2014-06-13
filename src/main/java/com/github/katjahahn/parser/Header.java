@@ -23,25 +23,26 @@ import com.google.java.contract.Requires;
  * 
  * @author Katja Hahn
  * 
+ * @param <T>
+ *            Key type for the header
  */
-public abstract class Header <T extends HeaderKey> implements PEModule {
+public abstract class Header<T extends HeaderKey> implements PEModule {
 
     public static final String NL = System.getProperty("line.separator");
 
     /**
-     * Returns the value for the given key
+     * Returns the value for the key.
      * 
-     * @param key
-     * @return long value for the given key
+     * @param key the header key
+     * @return long value for the key
      */
     @Requires("key != null")
     public abstract long get(T key);
 
-
     /**
      * Returns the {@link StandardField} for the given key.
      * 
-     * @param key
+     * @param key the header key
      * @return {@link StandardField} for the given key.
      */
     @Ensures("result != null")

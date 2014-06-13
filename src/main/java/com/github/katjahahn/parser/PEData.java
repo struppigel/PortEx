@@ -25,12 +25,13 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.msdos.MSDOSLoadModule;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.google.common.annotations.Beta;
 
 /**
  * Container that collects and holds the main information of a PE file.
  * <p>
- * It is usually constructed by the PELoader and returned to the caller as
- * result from scanning the PE File information.
+ * It is constructed by the PELoader and returned to the caller as result from
+ * scanning the PE File information.
  * 
  * @author Katja Hahn
  * 
@@ -57,6 +58,8 @@ public class PEData {
      *            the Optional Header
      * @param table
      *            the Section Table
+     * @param file
+     *            the file the header information was read from
      */
     public PEData(MSDOSHeader msdos, PESignature pesig, COFFFileHeader coff,
             OptionalHeader opt, SectionTable table, File file) {
@@ -69,7 +72,7 @@ public class PEData {
     }
 
     /**
-     * Returns the {@link MSDOSHeader}
+     * Returns the {@link MSDOSHeader}.
      * 
      * @return msdos header
      */
@@ -78,7 +81,7 @@ public class PEData {
     }
 
     /**
-     * Returns the {@link PESignature}
+     * Returns the {@link PESignature}.
      * 
      * @return pe signature
      */
@@ -87,7 +90,7 @@ public class PEData {
     }
 
     /**
-     * Returns the {@link SectionTable}
+     * Returns the {@link SectionTable}.
      * 
      * @return section table
      */
@@ -96,7 +99,7 @@ public class PEData {
     }
 
     /**
-     * Returns the {@link COFFFileHeader}
+     * Returns the {@link COFFFileHeader}.
      * 
      * @return coff file header
      */
@@ -105,7 +108,7 @@ public class PEData {
     }
 
     /**
-     * Returns the {@link OptionalHeader}
+     * Returns the {@link OptionalHeader}.
      * 
      * @return optional header
      */
@@ -114,11 +117,12 @@ public class PEData {
     }
 
     /**
-     * Reads and returns the {@link MSDOSLoadModule}
+     * Reads and returns the {@link MSDOSLoadModule}.
      * 
      * @return msdos load module
-     * @throws IOException
+     * @throws IOException if load module can not be read.
      */
+    @Beta
     // TODO maybe load with PELoader
     public MSDOSLoadModule readMSDOSLoadModule() throws IOException {
         MSDOSLoadModule module = new MSDOSLoadModule(msdos, file);

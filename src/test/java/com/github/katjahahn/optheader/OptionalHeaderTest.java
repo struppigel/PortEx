@@ -37,9 +37,9 @@ import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
-import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
 import com.google.common.base.Optional;
 
 public class OptionalHeaderTest {

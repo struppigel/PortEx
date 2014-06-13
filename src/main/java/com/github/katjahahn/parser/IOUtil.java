@@ -48,7 +48,7 @@ import com.google.java.contract.Requires;
  * @author Katja Hahn
  * 
  */
-public class IOUtil {
+public final class IOUtil {
 
     private static final Logger logger = LogManager.getLogger(IOUtil.class
             .getName());
@@ -81,8 +81,11 @@ public class IOUtil {
      *            the name of the specification file (not the path to it)
      * @param headerbytes
      *            the bytes of the header
+     * @param <T>
+     *            the type for the header key that the returned map shall use
      * @return header entries
-     * @throws {@link IOException} if specification file can not be read
+     * @throws IOException
+     *             if specification file can not be read
      */
     @Ensures("result != null")
     @Requires({ "clazz != null", "specFormat != null",
@@ -317,7 +320,7 @@ public class IOUtil {
 
     /**
      * Describes the format/indices of the specification file.
-     *
+     * 
      */
     public static class SpecificationFormat {
         /**
@@ -362,7 +365,7 @@ public class IOUtil {
      * Used by
      * {@link IOUtil#readHeaderEntries(Class, SpecificationFormat, String, byte[])}
      * to be able to use Enum static methods based on a class.
-     *
+     * 
      * @param <T>
      *            the Enum type
      */

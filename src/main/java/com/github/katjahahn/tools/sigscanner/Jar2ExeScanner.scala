@@ -32,18 +32,20 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
+import java.io.EOFException
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
-import java.util.zip.ZipInputStream
 import java.nio.channels.Channels
+import java.util.zip.ZipInputStream
+
+import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable.ListBuffer
-import java.io.FileNotFoundException
-import java.io.EOFException
-import scala.collection.JavaConverters._
-import SignatureScanner._
-import java.util.Comparator
-import org.apache.logging.log4j.LogManager
+
+import SignatureScanner.Address
+import SignatureScanner.ScanResult
+import SignatureScanner._loadSignatures
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for

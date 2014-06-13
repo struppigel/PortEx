@@ -18,24 +18,24 @@ package com.github.katjahahn.parser;
 import com.google.java.contract.Invariant;
 
 /**
- * A data class for a typical entry of PE Headers
+ * A data class for a typical entry of PE Headers.
  * 
  * @author Katja Hahn
  * 
  */
-@Invariant({"key != null"}) 
+@Invariant("key != null") 
 public class StandardField {
 
 	/**
-	 * The key that describes the field
+	 * The key that describes the field.
 	 */
 	public final HeaderKey key;
 	/**
-	 * A description of the field, usually a better readable name for the key
+	 * A description of the field, usually a better readable name for the key.
 	 */
 	public final String description;
 	/**
-	 * The actual value of the field entry
+	 * The actual value of the field entry.
 	 */
 	public final Long value;
 

@@ -18,23 +18,24 @@ package com.github.katjahahn.parser;
 import java.io.IOException;
 
 /**
- * Is thrown if a specification file doesn't have the expected formatting,
- * for example wrong delimiters.
+ * Is thrown if a specification file doesn't have the expected formatting, for
+ * example wrong delimiters.
  * 
  * @author Katja Hahn
  * 
  */
 public class FileFormatException extends IOException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Creates a FileFormatException instance with the message.
-	 * 
-	 * @param message
-	 */
-	public FileFormatException(String message) {
-		super(message);
-	}
+    /**
+     * Creates a FileFormatException instance with the message.
+     * 
+     * @param message
+     *            description message of the exception
+     */
+    public FileFormatException(String message) {
+        super(message);
+    }
 
 }

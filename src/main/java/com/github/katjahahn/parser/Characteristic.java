@@ -25,18 +25,18 @@ package com.github.katjahahn.parser;
  */
 public interface Characteristic {
 
-	/**
-	 * Indicates whether the flag is reserved for future use.
-	 * 
-	 * @return true iff reserved
-	 */
-	public boolean isReserved();
+    /**
+     * Indicates whether the flag is reserved for future use.
+     * 
+     * @return true iff reserved
+     */
+    boolean isReserved();
 
-	/**
-	 * Indicates whether the flag is deprecated.
-	 * 
-	 * @return true iff deprecated
-	 */
-	public boolean isDeprecated();
+    /**
+     * Indicates whether the flag is deprecated.
+     * 
+     * @return true iff deprecated
+     */
+    boolean isDeprecated();
 
 }

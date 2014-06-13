@@ -44,17 +44,17 @@ public class PESignature {
             .getName());
 
     /**
-     * The location of the PE signature offset is {@value}
+     * The location of the PE signature offset is {@value} .
      */
     public static final int PE_OFFSET_LOCATION = 0x3c;
 
     /**
-     * The signature bytes of the string PE\0\0
+     * The signature bytes of the string PE\0\0.
      */
     public static final byte[] PE_SIG = "PE\0\0".getBytes();
 
     /**
-     * The length of the PE signature is {@value}
+     * The length of the PE signature is {@value}.
      */
     public static final int PE_SIG_LENGTH = 4;
 
@@ -62,7 +62,7 @@ public class PESignature {
     private final File file;
 
     /**
-     * Creates a PESignature instance with the input file
+     * Creates a PESignature instance with the input file.
      * 
      * @param file
      *            the PE file that should be checked for the signature
@@ -79,7 +79,7 @@ public class PESignature {
      * @throws IOException
      *             if something went wrong while trying to read the file
      */
-    public void read() throws FileFormatException, IOException {
+    public void read() throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             throwIf(file.length() < PE_OFFSET_LOCATION + 2);
             raf.seek(PE_OFFSET_LOCATION);
@@ -115,7 +115,7 @@ public class PESignature {
     }
 
     /**
-     * Throws FileFormatException and sets peOffset to absent iff b is true
+     * Throws FileFormatException and sets peOffset to absent iff b is true.
      * 
      * @param b
      * @throws FileFormatException
@@ -139,6 +139,11 @@ public class PESignature {
         return peOffset;
     }
 
+    /**
+     * Returns a description string.
+     * 
+     * @return description string of the pe signature
+     */
     public String getInfo() {
         if (!peOffset.isPresent()) {
             return "No PE signature found";

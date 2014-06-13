@@ -25,8 +25,6 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
-import com.github.katjahahn.tools.sigscanner.MatchedSignature;
 
 public class Jar2ExeScannerTest {
 

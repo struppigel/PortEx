@@ -21,7 +21,7 @@ import com.google.java.contract.Ensures;
  * Represents a structure in the PE file.
  * 
  * @author Katja Hahn
- *
+ * 
  */
 public interface PEModule {
 
@@ -31,13 +31,13 @@ public interface PEModule {
      * @return file offset for the beginning of the module
      */
     @Ensures("result >= 0")
-    public long getOffset();
+    long getOffset();
 
     /**
      * Returns a description string of the {@link Header}.
      * 
      * @return description string
      */
-    @Ensures({"result != null", "result.trim().length() > 0"})
-    public String getInfo();
+    @Ensures({ "result != null", "result.trim().length() > 0" })
+    String getInfo();
 }
