@@ -124,6 +124,7 @@ trait SectionTableScanning extends AnomalyScanner {
    *
    * @return anomaly list
    */
+  //TODO tell if VA is used instead of rawdatasize.
   private def checkTooLargeSizes(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable

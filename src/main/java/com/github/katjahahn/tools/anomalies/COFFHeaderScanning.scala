@@ -23,6 +23,7 @@ import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.coffheader.COFFFileHeader
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
+import com.github.katjahahn.parser.sections.SectionHeaderKey
 
 /**
  * Scans the COFF File Header for anomalies.
@@ -90,9 +91,12 @@ trait COFFHeaderScanning extends AnomalyScanner {
   private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {
     val sectionMax = 96
     val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
+    val entry = coff.getField(COFFHeaderKey.SECTION_NR)
     if (sectionNr > sectionMax) {
-      val entry = coff.getField(COFFHeaderKey.SECTION_NR)
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
+      List(WrongValueAnomaly(entry, description))
+    } else if (sectionNr == 0) {
+      val description = "COFF File Header: Sectionless PE"
       List(WrongValueAnomaly(entry, description))
     } else Nil
   }

@@ -1,4 +1,5 @@
 /ignore
+/portexstats
 .factorypath
 *.class
 *.sh

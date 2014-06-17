@@ -154,7 +154,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       anomalyList += WrongValueAnomaly(headerSizeEntry, description)
     } //TODO headerSize >= MSDOS + PEHeader + Section Headers size
     if (headerSize < headerSizeMin) {
-      val description = s"Optional Header: Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize}"
+      val description = s"Optional Header: Possibly Dual PE Header malformation. Size of Headers should be greater than or equal to ${headerSizeMin}, but is ${headerSize}."
       anomalyList += WrongValueAnomaly(headerSizeEntry, description)
     }
     if (headerSize != roundedUpHeaderSize) {
