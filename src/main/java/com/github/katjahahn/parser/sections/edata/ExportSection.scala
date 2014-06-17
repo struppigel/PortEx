@@ -50,29 +50,12 @@ class ExportSection private (
   private val exportAddressTable: ExportAddressTable,
   private val namePointerTable: ExportNamePointerTable,
   private val ordinalTable: ExportOrdinalTable,
-  exportHeader: SectionHeader,
-  sectionLoader: SectionLoader,
+  val exportEntries: List[ExportEntry],
   val offset: Long,
   val size: Long) extends SpecialSection {
 
   override def getOffset(): Long = offset
   def getSize(): Long = size
-
-  lazy val exportEntries = { //TODO only returns named entries so far
-    // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
-    // "if the function's RVA is inside the exports section (as given by the
-    // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
-    def isForwarderRVA(rva: Long): Boolean = { //TODO is that approach accurate?
-      val header = sectionLoader.maybeGetSectionHeaderByRVA(rva)
-      if (!header.isPresent) false
-      else header.get == exportHeader
-    }
-    val names = namePointerTable.pointerNameList.map(_._2)
-    names map { name =>
-      val rva = getSymbolRVAForName(name)
-      new ExportEntry(rva, name, getOrdinalForName(name), isForwarderRVA(rva))
-    }
-  }
 
   /**
    * Returns the export directory table which contains general information and
@@ -192,12 +175,14 @@ object ExportSection {
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
     val edataTable = ExportDirectory(edataBytes)
     val maybeExportDir = opt.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
-    val exportSection = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
+    val exportHeader = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
     val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
     val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
+    val exportEntries = loadExportEntries(sectionLoader, namePointerTable, opt,
+      ordinalTable, exportAddressTable, edataBytes, virtualAddress)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
-      ordinalTable, exportSection, sectionLoader, offset, edataBytes.length)
+      ordinalTable, exportEntries, offset, edataBytes.length)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirectory,
@@ -220,6 +205,74 @@ object ExportSection {
     val addrTableRVA = edataTable(EXPORT_ADDR_TABLE_RVA)
     val entries = edataTable(ADDR_TABLE_ENTRIES).toInt
     ExportAddressTable(edataBytes, addrTableRVA, entries, virtualAddress)
+  }
+
+  //TODO only returns named entries so far
+  //TODO this parameter list is horrible!
+  private def loadExportEntries(sectionLoader: SectionLoader,
+    namePointerTable: ExportNamePointerTable, optHeader: OptionalHeader,
+    ordinalTable: ExportOrdinalTable,
+    exportAddressTable: ExportAddressTable, edataBytes: Array[Byte],
+    virtualAddress: Long): List[ExportEntry] = {
+    // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
+    // "if the function's RVA is inside the exports section (as given by the
+    // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
+    //TODO is that approach accurate?
+    def isForwarderRVA(rva: Long): Boolean = {
+      val maybeEdata = optHeader.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
+      if (maybeEdata.isPresent) {
+        val edata = maybeEdata.get
+        rva >= edata.virtualAddress && rva <= edata.virtualAddress + edata.size
+      } else false
+    }
+
+    def getForwarder(rva: Long): Option[String] = if (isForwarderRVA(rva)) {
+      Some(getASCIIName(rva, virtualAddress, edataBytes))
+    } else None
+
+    val names = namePointerTable.pointerNameList.map(_._2)
+    names map { name =>
+      val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
+      val forwarder = getForwarder(rva)
+      val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
+      new ExportEntry(rva, name, ordinal, forwarder)
+    }
+  }
+
+  /**
+   * Returns the name for a given ordinal.
+   *
+   * This maps a given name of the name pointer table to the ordinal in the
+   * ordinal table.
+   *
+   * @param name the name of an exported function
+   * @return the ordinal for the given function name
+   */
+  private def getOrdinalForName(name: String, ordinalTable: ExportOrdinalTable,
+    namePointerTable: ExportNamePointerTable): Int =
+    ordinalTable.ordinals(namePointerTable(name))
+
+  /**
+   * Returns the relative virtual address for a given function name.
+   *
+   * This maps a name of the name pointer table the corresponding address of
+   * the export address table.
+   *
+   * @param name the name of the exported function
+   * @return the rva out of the address table for a function name
+   */
+  private def getSymbolRVAForName(name: String, exportAddressTable: ExportAddressTable,
+    ordinalTable: ExportOrdinalTable, namePointerTable: ExportNamePointerTable): Long = {
+    val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
+    if (ordinal == -1) -1 else exportAddressTable(ordinal - ordinalTable.base)
+  }
+
+  private def getASCIIName(nameRVA: Long, virtualAddress: Long,
+    bytes: Array[Byte]): String = {
+    val offset = nameRVA - virtualAddress
+    //TODO cast to int is insecure. actual int is unsigned, java int is signed
+    val nullindex = bytes.indexWhere(_ == 0, offset.toInt)
+    new String(bytes.slice(offset.toInt, nullindex))
   }
 
   /**

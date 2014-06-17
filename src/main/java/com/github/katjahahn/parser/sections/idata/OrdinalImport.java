@@ -32,6 +32,6 @@ public class OrdinalImport implements Import {
 	}
 	@Override
 	public String toString() {
-		return "ordinal: " + ordinal + ", RVA: " + rva;
+		return "ordinal: " + ordinal + ", rva: " + rva + " (0x" + Long.toHexString(rva) + ")";
 	}
 }

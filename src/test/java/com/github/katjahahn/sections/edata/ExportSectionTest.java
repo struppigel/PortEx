@@ -91,7 +91,7 @@ public class ExportSectionTest {
                 WindowsEntryKey.IMAGE_BASE).value;
         for (ExportEntry entry : expected) {
             list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry
-                    .name(), entry.ordinal(), false));
+                    .name(), entry.ordinal()));
         }
         return list;
     }

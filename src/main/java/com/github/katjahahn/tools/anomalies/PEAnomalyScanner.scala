@@ -91,18 +91,24 @@ object PEAnomalyScanner {
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("/home/deque/portextestfiles/x64viruses/")
-    for (file <- folder.listFiles()) {
+    val file = new File("/home/deque/portextestfiles/unusualfiles/corkami/own_exports.exe")
+//    for (file <- folder.listFiles()) {
       val data = PELoader.loadPE(file)
       val loader = new SectionLoader(data)
       val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
       val over = new Overlay(data)
+      println("Exports")
+      new SectionLoader(data).loadExportSection().getExportEntries.asScala.foreach(println)
+      println()
+      println("Imports")
+      new SectionLoader(data).loadImportSection().getImports.asScala.foreach(println)
+      println()
       println(scanner.scanReport)
       println("has overlay: " + over.exists())
       println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
       println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
       println()
-    }
+//    }
   }
 
 }

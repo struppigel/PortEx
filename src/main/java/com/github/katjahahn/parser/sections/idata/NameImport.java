@@ -38,6 +38,6 @@ public class NameImport implements Import {
 
 	@Override
 	public String toString() {
-		return "rva: " + rva + ", name: " + name + ", hint: " + hint;
+		return "rva: " + rva + " (0x" + Long.toHexString(rva) + "), name: " + name + ", hint: " + hint;
 	}
 }
