@@ -35,7 +35,7 @@ import com.github.katjahahn.parser.StandardField;
 import com.google.java.contract.Ensures;
 
 /**
- * Represents the COFF File Header
+ * Represents the COFF File Header.
  * 
  * @author Katja Hahn
  * 
@@ -43,7 +43,7 @@ import com.google.java.contract.Ensures;
 public class COFFFileHeader extends Header<COFFHeaderKey> {
 
     /**
-     * The size of the header is {@value}
+     * The size of the header is {@value} .
      */
     public static final int HEADER_SIZE = 20;
     private static final String COFF_SPEC_FILE = "coffheaderspec";
@@ -85,7 +85,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
                 COFF_SPEC_FILE, headerbytes);
-      
+
     }
 
     /**
@@ -219,6 +219,18 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     }
 
     /**
+     * Returns whether the characteristic is set.
+     * 
+     * @param characteristic
+     *            a file characteristic
+     * @return true if characteristic is set, false otherwise
+     */
+    @Ensures("result != null")
+    public boolean hasCharacteristic(FileCharacteristic characteristic) {
+        return getCharacteristics().contains(characteristic);
+    }
+
+    /**
      * Returns a list of the characteristics.
      * 
      * @return list of characteristic descriptions
@@ -279,7 +291,19 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         return (int) get(SECTION_NR); // 2-byte value can be casted
     }
 
-    public static COFFFileHeader newInstance(byte[] headerbytes, long offset) throws IOException {
+    /**
+     * Creates an instance of the COFF File Header based on the headerbytes and
+     * offset.
+     * 
+     * @param headerbytes
+     *            the bytes that make up the COFF File Header
+     * @param offset
+     *            the file offset to the beginning of the header
+     * @return COFFFileHeader instance
+     * @throws IOException
+     */
+    public static COFFFileHeader newInstance(byte[] headerbytes, long offset)
+            throws IOException {
         COFFFileHeader header = new COFFFileHeader(headerbytes, offset);
         header.read();
         return header;

@@ -18,7 +18,7 @@ package com.github.katjahahn.parser.coffheader;
 import com.github.katjahahn.parser.HeaderKey;
 
 /**
- * Keys for entries you can read from the COFF File Header
+ * These are the keys for entries you can read from the COFF File Header.
  * 
  * @author Katja Hahn
  * 

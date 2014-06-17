@@ -21,6 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -473,12 +474,13 @@ public class Visualizer {
     }
 
     public static void main(String[] args) throws IOException {
-        File file = new File("Minecraft.exe");
+        File file = new File("/home/deque/portextestfiles/Minecraft.exe");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
         Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();
+        ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
 

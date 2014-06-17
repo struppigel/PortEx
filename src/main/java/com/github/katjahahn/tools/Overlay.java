@@ -78,6 +78,10 @@ public class Overlay {
             }
             for (SectionHeader section : headers) {
                 long alignedPointerToRaw = section.getAlignedPointerToRaw();
+                //ignore invalid sections
+                if(alignedPointerToRaw >= file.length()) {
+                    continue;
+                }
                 long readSize = loader.getReadSize(section);
                 long endPoint = readSize + alignedPointerToRaw;
                 if (offset < endPoint) { // determine largest endPoint

@@ -25,6 +25,7 @@ import PartialFunction._
  * @author Katja Hahn
  *
  */
+//TODO use Triemap instead?
 abstract class SignatureTree {
 
   /**

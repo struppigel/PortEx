@@ -72,7 +72,7 @@ public enum FileCharacteristic implements Characteristic {
 	 */
 	IMAGE_FILE_BYTES_REVERSED_LO(false, true),
 	/**
-	 * Machine is based on a 32-bit-word architecture
+	 * Machine is based on a 32-bit-word architecture.
 	 */
 	IMAGE_FILE_32BIT_MACHINE,
 	/**
