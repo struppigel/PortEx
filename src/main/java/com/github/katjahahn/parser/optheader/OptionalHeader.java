@@ -559,6 +559,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         if (isLowAlignmentMode()) {
             return 1;
         }
+        if (fileAlign < 512) { //TODO correct?
+        	fileAlign = 512;
+        }
         return fileAlign;
     }
 

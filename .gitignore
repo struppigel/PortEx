@@ -1,5 +1,7 @@
 /ignore
 /portexstats
+/lib
+/project/plugins.sbt
 .factorypath
 *.class
 *.sh
@@ -66,3 +68,4 @@ test-output
 arbeit/.svn
 arbeit/appendix
 arbeit/dia1
+/.apt_generated
