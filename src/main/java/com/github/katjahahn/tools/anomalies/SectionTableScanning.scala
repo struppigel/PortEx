@@ -106,7 +106,7 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   /**
-   * Filteres control code and extended code from the given string. Returns a
+   * Filters control code and extended code from the given string. Returns a
    * list of the filtered symbols.
    *
    * @param str the string to filter the symbols from
