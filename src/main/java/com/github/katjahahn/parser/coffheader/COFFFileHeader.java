@@ -225,7 +225,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      *            a file characteristic
      * @return true if characteristic is set, false otherwise
      */
-    @Ensures("result != null")
     public boolean hasCharacteristic(FileCharacteristic characteristic) {
         return getCharacteristics().contains(characteristic);
     }
