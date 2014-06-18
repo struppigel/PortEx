@@ -53,10 +53,15 @@ public class PortexStats {
 	private static int written = 0;
 
 	public static void main(String[] args) throws IOException {
-		anomalyStatsForFileList();
+		fileTypeCountForFileList();
 	}
-
-	public static void anomalyStatsForFileList() throws IOException {
+	
+	public static void fileTypeCountForFileList() throws IOException {
+		List<File> files = readFileList();
+		fileTypeCount(files.toArray((new File[files.size()])));
+	}
+	
+	public static List<File> readFileList() throws IOException {
 		System.out.println("reading file list");
 		Path filelist = Paths.get(STATS_FOLDER, "pefilelist");
 		List<File> files = new ArrayList<File>();
@@ -67,8 +72,18 @@ public class PortexStats {
 				files.add(new File(line));
 			}
 		}
-		System.out.println("Done reading, starting analysis");
-		anomalyStats(files.toArray( (new File[files.size()]) ));
+		System.out.println("Done reading");
+		return files;
+	}
+
+	public static void overlayPrevalenceForFileList() throws IOException {
+		List<File> files = readFileList();
+		overlayPrevalence(files.toArray((new File[files.size()])));
+	}
+
+	public static void anomalyStatsForFileList() throws IOException {
+		List<File> files = readFileList();
+		anomalyStats(files.toArray((new File[files.size()])));
 	}
 
 	public static void createPEFileList(File startFolder) {
@@ -155,7 +170,8 @@ public class PortexStats {
 							+ files.length);
 				}
 			} catch (Exception e) {
-				logger.error("problem with file " + file.getAbsolutePath() + " file was not loaded!");
+				logger.error("problem with file " + file.getAbsolutePath()
+						+ " file was not loaded!");
 				e.printStackTrace();
 				notLoaded++;
 			}
@@ -216,9 +232,7 @@ public class PortexStats {
 		writeStats(report);
 	}
 
-	public static void overlayPrevalence() {
-		File folder = new File(PE_FOLDER);
-		File[] files = folder.listFiles();
+	public static void overlayPrevalence(File[] files) {
 		int hasOverlay = 0;
 		int hasNoOverlay = 0;
 		int notLoaded = 0;
@@ -242,16 +256,16 @@ public class PortexStats {
 				notLoaded++;
 			}
 		}
+		double percentage = total / (double) hasOverlay;
 		String stats = "total: " + total + "\nhas overlay: " + hasOverlay
-				+ "\nno overlay: " + hasNoOverlay + "\nNot loaded: "
-				+ notLoaded + "\nDone\n";
+				+ "\nno overlay: " + hasNoOverlay
+				+ "\npercentage files with overlay: " + percentage
+				+ "\nNot loaded: " + notLoaded + "\nDone\n";
 		System.out.println(stats);
 		writeStats(stats);
 	}
 
-	public static void fileTypeCount() {
-		File folder = new File(PE_FOLDER);
-		File[] files = folder.listFiles();
+	public static void fileTypeCount(File[] files) {
 		int dllCount = 0;
 		int pe32PlusCount = 0;
 		int pe32Count = 0;
