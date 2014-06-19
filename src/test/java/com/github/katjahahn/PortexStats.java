@@ -14,9 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +35,7 @@ import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.anomalies.Anomaly;
+import com.github.katjahahn.tools.anomalies.AnomalySubType;
 import com.github.katjahahn.tools.anomalies.AnomalyType;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
@@ -237,49 +240,26 @@ public class PortexStats {
 	//TODO equality of anomalies is nuts, correct it. value differences shouldn't count.
 	public static void anomalyCount(File[] files) {
 		System.out.println("starting anomaly count");
-		Map<Anomaly, Integer> counter = new HashMap<>();
-		int filesWUnusualSecNames = 0;
-		int filesWCtrlSymbInSec = 0;
-		int filesWOverlappingSec = 0;
-		int filesWDuplicatedSec = 0;
-		int filesWTooLargeSec = 0;
-		int filesWZeroVirtSecSize = 0;
-		int filesWZeroRawSecSize = 0;
+		Map<AnomalySubType, Integer> counter = new HashMap<>();
 		int total = 0;
+		int notLoaded = 0;
 		for (File file : files) {
 			try {
 				total++;
 				PEData data = PELoader.loadPE(file);
 				PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
 				List<Anomaly> list = scanner.getAnomalies();
+				Set<AnomalySubType> set = new HashSet<>();
 				for (Anomaly anomaly : list) {
-					if (counter.containsKey(anomaly)) {
-						int prev = counter.get(anomaly);
-						counter.put(anomaly, prev + 1);
-					} else {
-						counter.put(anomaly, 1);
-					}
+					set.add(anomaly.subtype());
 				}
-				if (anyAnomalyContains(list, "Section name is unusual")) {
-					filesWUnusualSecNames++;
-				}
-				if (anyAnomalyContains(list, "has control symbols in name")) {
-					filesWCtrlSymbInSec++;
-				}
-				if (anyAnomalyContains(list, "overlaps with section")) {
-					filesWOverlappingSec++;
-				}
-				if (anyAnomalyContains(list, "is a duplicate of section")) {
-					filesWDuplicatedSec++;
-				}
-				if (anyAnomalyContains(list, "aligned pointer to raw data is larger")) {
-					filesWTooLargeSec++;
-				}
-				if (anyAnomalyContains(list, "VIRTUAL_SIZE is 0")) {
-					filesWZeroVirtSecSize++;
-				}
-				if (anyAnomalyContains(list, "SIZE_OF_RAW_DATA is 0")) {
-					filesWZeroRawSecSize++;
+				for(AnomalySubType subtype : set) {
+				    if(counter.containsKey(subtype)) {
+				        Integer prev = counter.get(subtype);
+				        counter.put(subtype, prev + 1);
+				    } else {
+				        counter.put(subtype, 1);
+				    }
 				}
 				if (total % 1000 == 0) {
 					System.out.println("Files read: " + total + "/"
@@ -292,40 +272,22 @@ public class PortexStats {
 				notLoaded++;
 			}
 		}
-		String preamble = "Files with Anomalies Counted: \n\n"
-				+ "section(s) with zero virtual size: " + filesWZeroVirtSecSize
-				+ "\nsection(s) with zero raw size: " + filesWZeroRawSecSize
-				+ "\nsection(s) with unusual names: " + filesWUnusualSecNames
-				+ "\nsection(s) with control symbols in names: "
-				+ filesWCtrlSymbInSec + "\nsection(s) too large: "
-				+ filesWTooLargeSec + "\nsections duplicated: "
-				+ filesWDuplicatedSec + "\nsections overlapping: "
-				+ filesWOverlappingSec;
-		String report = preamble + "\n\nAnomalies Counted: \n\n"
-				+ createReport(counter) + "\n total files: " + total
-				+ "\n not loaded: " + notLoaded + "\nDone\n\n";
+		String report = "Anomalies Counted: \n\n"
+				+ createReport(counter, total - notLoaded) + "\ntotal files: " + total
+				+ "\nnot loaded: " + notLoaded + "\nDone\n\n";
 		System.out.println(report);
 		writeStats(report);
 		System.out.println("anomaly count done");
 	}
 
-	private static boolean anyAnomalyContains(List<Anomaly> list,
-			String description) {
-		for (Anomaly anomaly : list) {
-			if (anomaly.description().contains(description)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static String createReport(Map<Anomaly, Integer> map) {
+	private static String createReport(Map<AnomalySubType, Integer> map, int total) {
 		StringBuilder b = new StringBuilder();
-		for (Entry<Anomaly, Integer> entry : map.entrySet()) {
-			Anomaly anomaly = entry.getKey();
+		for (Entry<AnomalySubType, Integer> entry : map.entrySet()) {
+			AnomalySubType type = entry.getKey();
 			Integer counter = entry.getValue();
-			b.append(counter + " times " + anomaly.getType() + " "
-					+ anomaly.description() + "\n");
+			double percent = counter * 100 / (double) total;
+			b.append(type + ";" + counter + ";" + percent + "\n");
+//			b.append(counter + " times / " + percent + "% " + type + "\n");
 		}
 		return b.toString();
 	}

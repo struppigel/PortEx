@@ -174,9 +174,9 @@ public class PEAnomalyScannerTest {
     @Test
     public void sectionAlignment() {
         performTest(maxSecXPAnomalies, AnomalyType.WRONG, "Size of Image");
-        performTest(maxSecXPAnomalies, AnomalyType.WRONG, "Size of Headers");
+        performTest(maxSecXPAnomalies, AnomalyType.NON_DEFAULT, "Size of Headers");
         performTest(sectionlessAnomalies, AnomalyType.WRONG, "Size of Image");
-        performTest(sectionlessAnomalies, AnomalyType.WRONG, "Size of Headers");
+        performTest(sectionlessAnomalies, AnomalyType.NON_DEFAULT, "Size of Headers");
     }
 
     @Test
