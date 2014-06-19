@@ -55,8 +55,7 @@ public class PortexStats {
 	private static int written = 0;
 
 	public static void main(String[] args) throws IOException {
-		List<File> files = readFileList();
-		anomalyCount(files.toArray((new File[files.size()])));
+		anomalyCount(new File(PE_FOLDER).listFiles());
 	}
 
 	public static void fileTypeCountForFileList() throws IOException {

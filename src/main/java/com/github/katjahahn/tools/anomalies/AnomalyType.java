@@ -17,6 +17,8 @@ package com.github.katjahahn.tools.anomalies;
 
 /**
  * Represents the semantics of an anomaly.
+ * <p>
+ * The type is a rough description of the anomaly.
  * 
  * @author Katja Hahn
  *
