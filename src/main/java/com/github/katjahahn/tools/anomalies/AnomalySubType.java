@@ -18,24 +18,24 @@ package com.github.katjahahn.tools.anomalies;
 /**
  * Represent the semantics of an anomaly.
  * <p>
- * The subtype is a specific description for the anomaly. This avoids having to 
+ * The subtype is a specific description for the anomaly. This avoids having to
  * search for parts of the description string to find certain anomalies.
  * 
  * @author Katja Hahn
  */
 public enum AnomalySubType {
-    
-    /**MSDOS Header*/
-    
+
+    /** MSDOS Header */
+
     /**
      * The MSDOS header is collapsed, i.e. parts are missing.
      */
     COLLAPSED_MSDOS_HEADER,
 
-    /**COFF File Header*/
-    
+    /** COFF File Header */
+
     /**
-     * The PE File Header was moved to overlay, this is the result of 
+     * The PE File Header was moved to overlay, this is the result of
      * manipulating e_lfanew to point to the overlay.
      */
     PE_HEADER_IN_OVERLAY,
@@ -44,13 +44,13 @@ public enum AnomalySubType {
      */
     COLLAPSED_OPTIONAL_HEADER,
     /**
-     * The SIZE_OF_OPTIONAL_HEADER is too large. 
+     * The SIZE_OF_OPTIONAL_HEADER is too large.
      * <p>
      * This may result in a SEC_TABLE_IN_OVERLAY anomaly.
      */
     TOO_LARGE_OPTIONAL_HEADER,
     /**
-     * The optional header is too small //TODO same as collapsed?
+     * The optional header is too small //TODO same as collapsed
      */
     TOO_SMALL_OPTIONAL_HEADER,
     /**
@@ -77,9 +77,9 @@ public enum AnomalySubType {
      * Deprecated file characteristics are set.
      */
     DEPRECATED_FILE_CHARACTERISTICS,
-    
-    /**Optional Header*/
-    
+
+    /** Optional Header */
+
     /**
      * The image base is too large.
      */
@@ -105,6 +105,10 @@ public enum AnomalySubType {
      */
     UNUSUAL_DATA_DIR_NR,
     /**
+     * No data directory present
+     */
+    NO_DATA_DIR,
+    /**
      * Reserved data directories are present.
      */
     RESERVED_DATA_DIR,
@@ -116,6 +120,10 @@ public enum AnomalySubType {
      * SIZE_OF_HEADERS is not alinged to FILE_ALIGNMENT.
      */
     NOT_FILEALIGNED_SIZE_OF_HEADERS,
+    /**
+     * SIZE_OF_HEADERS is not the rounded up header size.
+     */
+    NON_DEFAULT_SIZE_OF_HEADERS,
     /**
      * Reserved DLL Characteristics are set.
      */
@@ -162,19 +170,24 @@ public enum AnomalySubType {
     TOO_SMALL_EP,
     /**
      * The ADDRESS_OF_ENTRY_POINT is zero.
-     *
+     */
     ZERO_EP,
     /**
      * The ADDRESS_OF_ENTRY_POINT points into virtual space.
-     *
+     */
     VIRTUAL_EP,
-    
-    /**Section Table*/
-    
+
+    /** Section Table */
+
     /**
      * The section name is unusual.
      */
     UNUSUAL_SEC_NAME,
+    /**
+     * Control symbols in section name. This is a special case of
+     * UNUSUAL_SEC_NAME.
+     */
+    CTRL_SYMB_IN_SEC_NAME,
     /**
      * The section table is moved to overlay.
      */
@@ -206,7 +219,7 @@ public enum AnomalySubType {
     /**
      * The virtual addresses of the sections are not in ascending order.
      */
-    SEC_VA_NOT_ASCENDING,
+    NOT_ASCENDING_SEC_VA,
     /**
      * Deprecated POINTER_TO_LINE_NUMBER set
      */
@@ -230,8 +243,8 @@ public enum AnomalySubType {
     /**
      * TODO POINTER_TO_RELOCATIONS is zero ??
      */
-    ZERO_POINTER_TO_RELOC, //TODO must be zero?
-    ZERO_NR_OF_RELOC, //TODO must be zero? correct in thesis as well
+    ZERO_POINTER_TO_RELOC, // TODO must be zero?
+    ZERO_NR_OF_RELOC, // TODO must be zero? correct in thesis as well
     /**
      * TODO
      */
@@ -243,5 +256,7 @@ public enum AnomalySubType {
     /**
      * POINTER_TO_RAW_DATA is not a multiple of file alignment
      */
-    NOT_FILEALIGNED_PTR_TO_RAW;
+    NOT_FILEALIGNED_PTR_TO_RAW, 
+    DEPRECATED_NR_OF_RELOC, // TODO add to thesis
+    DEPRECATED_PTR_TO_RELOC; // TODO add to thesis
 }
