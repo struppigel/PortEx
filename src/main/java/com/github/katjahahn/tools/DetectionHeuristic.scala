@@ -10,7 +10,7 @@ import Function.tupled
 import com.github.katjahahn.parser.IOUtil
 
 //TODO remove dependend anomalies from /data/stats file
-//TODO test this more (seems to work for now), also ask Schönherr
+//TODO test this more, also ask Schönherr
 
 class DetectionHeuristic(
   private val anomalies: List[Anomaly],
@@ -18,69 +18,31 @@ class DetectionHeuristic(
 
   def malwareProbability(): Double = {
     val subtypes = anomalies.map(a => a.subtype).distinct
-    val anProb = subtypes.foldRight(AnomalyProb(0.5, 0.5)){(t, prob) => 
-      connectedProb(prob, probabilities(t))
-    }
-    anProb.malicious
-  }
-  
-  private def connectedProb(cProb: AnomalyProb, dProb: AnomalyProb): AnomalyProb = {
-    val malicious = connectMaliciousProb(cProb, dProb)
-    val good = connectGoodProb(cProb, dProb)
-    AnomalyProb(malicious, good)
+    val probs = subtypes.map(subtype => probabilities(subtype))
+    val allBad = probs.foldRight(1.0) { (p, bad) => p.bad * bad }
+    val allGood = probs.foldRight(1.0) { (p, good) => p.good * good }
+    val bayes = allBad * 0.5 / (allGood * 0.5 + allBad * 0.5)
+    bayes
   }
 
-  private def malwareProbabilityOf(subtype: AnomalySubType): Double = {
-    val cBad = probabilities(subtype).malicious
-    val cGood = probabilities(subtype).good
-    conditionalProbOfBForC(cBad, cGood)
-  }
-
-  private def conditionalProbOfBForC(cB: Double, cA: Double): Double = {
-    val a = 0.5
-    val b = 0.5
-    (cB * b) / (cB * b + cA * a)
-  }
-
-  private def connectMaliciousProb(cProb: AnomalyProb, dProb: AnomalyProb): Double = {
-    val cBad = cProb.malicious
-    val dBad = dProb.malicious
-    val cGood = cProb.good
-    val dGood = dProb.good
-    connectMalicousProb(cGood, cBad, dGood, dBad)
-  }
-
-  private def goodProbabilityOf(subtype: AnomalySubType): Double = {
-    val cGood = probabilities(subtype).good
-    val cBad = probabilities(subtype).malicious
-    conditionalProbOfBForC(cGood, cBad)
-  }
-
-  private def connectGoodProb(cProb: AnomalyProb, dProb: AnomalyProb): Double = {
-    val cBad = cProb.malicious
-    val dBad = dProb.malicious
-    val cGood = cProb.good
-    val dGood = dProb.good
-    connectMalicousProb(cBad, cGood, dBad, dGood)
-  }
-
-  private def connectMalicousProb(cGood: Double, cBad: Double, dGood: Double,
-    dBad: Double): Double = {
-    val bad = 0.5
-    val good = 0.5
-    val badC = (cBad * bad) / (cBad * bad + cGood * good)
-    val goodC = (cGood * good) / (cGood * good + cBad * bad)
-    (dBad * badC) / (dBad * badC + dGood * goodC)
-  }
 }
 
-case class AnomalyProb(malicious: Double, good: Double)
+/**
+ * Represents the percentage of the two file sets, good and bad, to have one or
+ * several certain anomalies.
+ * This is equal to P(Anomaly|BAD) and P(Anomaly|GOOD)
+ */
+case class AnomalyProb(bad: Double, good: Double)
 
 object DetectionHeuristic {
 
   def main(args: Array[String]): Unit = {
-    val p = DetectionHeuristic(new File("/home/deque/portextestfiles/launch4jexe.exe")).malwareProbability
-    println("probability to be malicious: " + (p * 100) + " %")
+    val folder = new File("/home/deque/portextestfiles/testfiles")
+    for (file <- folder.listFiles()) {
+      val p = DetectionHeuristic(file).malwareProbability
+      println(file.getName())
+      println("probability to be malicious: " + (p * 100) + " %")
+    }
   }
 
   def apply(file: File): DetectionHeuristic = {
@@ -94,10 +56,10 @@ object DetectionHeuristic {
   private def readProbabilities(): Map[AnomalySubType, AnomalyProb] = {
     val malprobs = IOUtil.readMap("malwareanomalystats").asScala.toMap
     val goodprobs = IOUtil.readMap("goodwareanomalystats").asScala.toMap
-    malprobs map tupled {(key, arr) => 
+    malprobs map tupled { (key, arr) =>
       val subtype = AnomalySubType.valueOf(key)
       val malicious = arr(1).toDouble
-      val good = goodprobs(key)(1).toDouble
+      val good = goodprobs.getOrElse(key, Array("", "0.5"))(1).toDouble
       val prob = AnomalyProb(malicious, good)
       (subtype, prob)
     }
