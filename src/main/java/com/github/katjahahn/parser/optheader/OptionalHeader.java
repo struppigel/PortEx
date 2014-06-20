@@ -514,7 +514,13 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     public static String getSubsystemKey(int value) {
         try {
             Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
-            return map.get(String.valueOf(value))[0];
+            String[] array = map.get(String.valueOf(value));
+            if(array == null) {
+                logger.warn("No subsystem key for " + value + " 0x" + Integer.toHexString(value) + "! Set to UNKNOWN.");
+                return "IMAGE_SUBSYSTEM_UNKNOWN";
+            } else {
+                return array[0];
+            }
         } catch (IOException e) {
             logger.error(e);
         }

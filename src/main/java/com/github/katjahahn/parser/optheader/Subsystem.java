@@ -14,7 +14,7 @@ public enum Subsystem implements Characteristic {
     /**
      * An unknown subsystem
      */
-    IMAGE_SYSTEM_UNKNOWN,
+    IMAGE_SUBSYSTEM_UNKNOWN,
     /**
      * Device drivers and native Windows processes
      */
@@ -27,6 +27,10 @@ public enum Subsystem implements Characteristic {
      * The Windows character subsystem
      */
     IMAGE_SUBSYSTEM_WINDOWS_CUI,
+    /**
+     * OS/2 CUI subsystem
+     */
+    IMAGE_SUBSYSTEM_OS2_CUI,
     /**
      * The Posix character subsystem
      */
@@ -54,8 +58,12 @@ public enum Subsystem implements Characteristic {
     /**
      * XBOX
      */
-    IMAGE_SUBSYSTEM_XBOX;
-
+    IMAGE_SUBSYSTEM_XBOX,
+    /**
+     * Boot application
+     */
+    IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION;
+    
     /**
      * {@inheritDoc}
      */

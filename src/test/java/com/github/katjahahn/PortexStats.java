@@ -50,6 +50,7 @@ public class PortexStats {
 	private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
 	private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
 	private static final String STATS_FOLDER = "portexstats/";
+	private static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
 	private static int noPE = 0;
 	private static int notLoaded = 0;
 	private static int dirsRead = 0;
@@ -58,7 +59,7 @@ public class PortexStats {
 	private static int written = 0;
 
 	public static void main(String[] args) throws IOException {
-		anomalyCount(new File(PE_FOLDER).listFiles());
+		anomalyCount(new File(GOOD_FILES).listFiles(), GOOD_FILES);
 	}
 
 	public static void fileTypeCountForFileList() throws IOException {
@@ -238,7 +239,7 @@ public class PortexStats {
 	}
 
 	//TODO equality of anomalies is nuts, correct it. value differences shouldn't count.
-	public static void anomalyCount(File[] files) {
+	public static void anomalyCount(File[] files, String base) {
 		System.out.println("starting anomaly count");
 		Map<AnomalySubType, Integer> counter = new HashMap<>();
 		int total = 0;
@@ -272,7 +273,7 @@ public class PortexStats {
 				notLoaded++;
 			}
 		}
-		String report = "Anomalies Counted: \n\n"
+		String report = "Anomalies Counted: \n\nBase folder: " + base + "\n"
 				+ createReport(counter, total - notLoaded) + "\ntotal files: " + total
 				+ "\nnot loaded: " + notLoaded + "\nDone\n\n";
 		System.out.println(report);
