@@ -37,12 +37,27 @@ case class AnomalyProb(bad: Double, good: Double)
 object DetectionHeuristic {
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("/home/deque/portextestfiles/testfiles")
+    val folder = new File("/home/deque/virusshare128/pe")
+    val threshhold = 0.90
+    var malcounter = 0
+    var total = 0
     for (file <- folder.listFiles()) {
-      val p = DetectionHeuristic(file).malwareProbability
-      println(file.getName())
-      println("probability to be malicious: " + (p * 100) + " %")
+      try {
+        val p = DetectionHeuristic(file).malwareProbability
+        val malicious = p > threshhold
+        total += 1
+        malcounter += 1
+        if(total % 1000 == 0) {
+          println("files read: " + total)
+          println("malicious: " + malcounter)
+        }
+      }catch{
+        case e: Exception => System.err.println(e.getMessage());
+      }
     }
+    println("total: " + total)
+    println("malicious: " + malcounter)
+    println("detection ratio: " + (total / malcounter.toDouble))
   }
 
   def apply(file: File): DetectionHeuristic = {
