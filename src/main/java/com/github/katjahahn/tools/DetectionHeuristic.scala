@@ -73,14 +73,14 @@ object DetectionHeuristic {
 
   private val version = """version: 0.1
     |author: Katja Hahn
-    |last update: 20.Jun 2014""".stripMargin
+    |last update: 21.Jun 2014""".stripMargin
 
   private val title = """MalDet v0.1
                         |-----------    
                     |Please note: 
                     |MalDet uses statistical information about file anomalies to assign a probability to a file for being malicious.
                     |A probability of 50% means there is no knowledge about the file.
-                    |Files with 90% probability may still be non-malicious and vice versa for files with 10% probability.
+                    |Files with 99% probability may still be non-malicious and vice versa for files with 1% probability.
                     |MalDet is still experimental and not a substitute for any antivirus software!
                     |MalDet is made with PortEx: https://github.com/katjahahn/PortEx
                     |""".stripMargin
@@ -190,8 +190,8 @@ object DetectionHeuristic {
         if (total % 1000 == 0) {
           println("files read: " + total)
           println("malicious by threshhold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
-          println("malicious by threshhold 0.95: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
-          println("malicious by threshhold 0.80: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
+          println("malicious by threshhold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
+          println("malicious by threshhold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
         }
       } catch {
         case e: Exception => notLoaded += 1; System.err.println(e.getMessage);
@@ -200,8 +200,8 @@ object DetectionHeuristic {
     total -= notLoaded
     println("files read: " + total)
     println("malicious by threshhold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
-    println("malicious by threshhold 0.95: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
-    println("malicious by threshhold 0.80: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
+    println("malicious by threshhold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
+    println("malicious by threshhold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
   }
 
   def newInstance(file: File): DetectionHeuristic = apply(file)
@@ -232,7 +232,7 @@ object DetectionHeuristic {
   }
 
   /**
-   * Reads the probability statistics files for malware and non-malicious programs..
+   * Reads the probability statistics files for malware and non-malicious programs.
    * Cleans the probabilities from insignificant values based on the threshold.
    */
   private def readProbabilities(): Map[AnomalySubType, AnomalyProb] = {
