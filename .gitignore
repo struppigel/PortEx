@@ -1,4 +1,6 @@
 arbeit
+/ignore
+/portexstats
 *.sh
 *.py
 Virus.Tirtas
