@@ -93,7 +93,7 @@ object DetectionHeuristic {
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
 
   def main(args: Array[String]): Unit = {
-    invokeCLI(args)
+    testHeuristics();
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -166,7 +166,7 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/badfiles")
+    val folder = new File("/home/deque/portextestfiles/x64viruses")
     val threshholdA = 0.99
     val threshholdB = 0.80
     val threshholdC = 0.50
@@ -190,9 +190,9 @@ object DetectionHeuristic {
         }
         if (total % 1000 == 0) {
           println("files read: " + total)
-          println("malicious by threshhold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
-          println("malicious by threshhold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
-          println("malicious by threshhold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
+          println("malicious by threshold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
+          println("malicious by threshold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
+          println("malicious by threshold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
         }
       } catch {
         case e: FileFormatException => notLoaded +=1; System.err.println("file is no PE file: " + file.getName());
@@ -201,9 +201,9 @@ object DetectionHeuristic {
     }
     total -= notLoaded
     println("files read: " + total)
-    println("malicious by threshhold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
-    println("malicious by threshhold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
-    println("malicious by threshhold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
+    println("malicious by threshold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
+    println("malicious by threshold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
+    println("malicious by threshold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
   }
 
   def newInstance(file: File): DetectionHeuristic = apply(file)
