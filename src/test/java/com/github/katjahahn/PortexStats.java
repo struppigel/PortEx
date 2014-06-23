@@ -41,8 +41,8 @@ import com.github.katjahahn.tools.anomalies.AnomalyType;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
 public class PortexStats {
-    
-    //TODO add D:\\ partition files from Win 7 machine!
+
+    // TODO add D:\\ partition files from Win 7 machine!
 
     private static final Logger logger = LogManager.getLogger(PortexStats.class
             .getName());
@@ -62,9 +62,9 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-       anomalyCount(new File(GOOD_FILES).listFiles(), "GOOD FILES");
+        anomalyCount(new File(GOOD_FILES).listFiles(), "GOOD FILES");
     }
-    
+
     public static void entropies(File[] files) {
         int total = 0;
         int hasHighE = 0;
@@ -91,15 +91,19 @@ public class PortexStats {
                 if (entropies.size() != 0) {
                     entAverage += (entSum / entropies.size());
                 }
-                if (hasHighEFlag) hasHighE++;
-                if (hasLowEFlag) hasLowE++;
+                if (hasHighEFlag)
+                    hasHighE++;
+                if (hasLowEFlag)
+                    hasLowE++;
                 total++;
                 if (total % 1000 == 0) {
                     double highPercent = hasHighE / (double) total;
                     double lowPercent = hasLowE / (double) total;
                     System.out.println("files read: " + total);
-                    System.out.println("has high entropy: " + hasHighE + " " + highPercent);
-                    System.out.println("has low entropy: " + hasLowE + " " + lowPercent);
+                    System.out.println("has high entropy: " + hasHighE + " "
+                            + highPercent);
+                    System.out.println("has low entropy: " + hasLowE + " "
+                            + lowPercent);
                     System.out.println();
                 }
             } catch (Exception e) {
@@ -319,6 +323,16 @@ public class PortexStats {
                     System.out.println("Files read: " + total + "/"
                             + files.length);
                 }
+            } catch (FileFormatException e) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                    logger.error("file " + file.getAbsolutePath()
+                            + " deleted, no PE");
+                } else {
+                    logger.error("problem with file " + file.getAbsolutePath()
+                            + " file was not loaded!");
+                }
+                notLoaded++;
             } catch (Exception e) {
                 logger.error("problem with file " + file.getAbsolutePath()
                         + " file was not loaded!");

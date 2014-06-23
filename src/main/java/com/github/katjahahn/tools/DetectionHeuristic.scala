@@ -27,6 +27,7 @@ import scala.None
 import scala.None
 import scala.None
 import com.github.katjahahn.parser.PESignature
+import com.github.katjahahn.parser.FileFormatException
 
 //TODO implement new good file stats
 //TODO remove dependend anomalies from /data/stats file
@@ -71,11 +72,11 @@ object DetectionHeuristic {
   val threshold = 500
   lazy val probabilities = readProbabilities()
 
-  private val version = """version: 0.1
+  private val version = """version: 0.2
     |author: Katja Hahn
     |last update: 21.Jun 2014""".stripMargin
 
-  private val title = """MalDet v0.1
+  private val title = """MalDet v0.2
                         |-----------    
                     |Please note: 
                     |MalDet uses statistical information about file anomalies to assign a probability to a file for being malicious.
@@ -92,7 +93,7 @@ object DetectionHeuristic {
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
 
   def main(args: Array[String]): Unit = {
-    testHeuristics();
+    invokeCLI(args)
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -165,7 +166,7 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/goodfiles")
+    val folder = new File("/home/deque/portextestfiles/badfiles")
     val threshholdA = 0.99
     val threshholdB = 0.80
     val threshholdC = 0.50
@@ -194,7 +195,8 @@ object DetectionHeuristic {
           println("malicious by threshhold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
         }
       } catch {
-        case e: Exception => notLoaded += 1; System.err.println(e.getMessage);
+        case e: FileFormatException => notLoaded +=1; System.err.println("file is no PE file: " + file.getName());
+        case e: Exception => notLoaded += 1; e.printStackTrace();
       }
     }
     total -= notLoaded
