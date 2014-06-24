@@ -166,10 +166,10 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/x64viruses")
-    val threshholdA = 0.99
-    val threshholdB = 0.80
-    val threshholdC = 0.50
+    val folder = new File("/home/deque/portextestfiles/goodfiles")
+    val thresholdA = 0.99
+    val thresholdB = 0.80
+    val thresholdC = 0.50
     var malcounterA = 0
     var malcounterB = 0
     var malcounterC = 0
@@ -179,13 +179,13 @@ object DetectionHeuristic {
       try {
         val p = DetectionHeuristic(file).malwareProbability
         total += 1
-        if (p > threshholdA) {
+        if (p > thresholdA) {
           malcounterA += 1
         }
-        if (p > threshholdB) {
+        if (p > thresholdB) {
           malcounterB += 1
         }
-        if (p > threshholdC) {
+        if (p > thresholdC) {
           malcounterC += 1
         }
         if (total % 1000 == 0) {
