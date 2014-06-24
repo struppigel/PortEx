@@ -486,7 +486,7 @@ public class SectionLoader {
                 // read at RVA
                 logger.warn("unable to read section bytes for " + dataDirKey);
                 long offset = importTable.get().virtualAddress;
-                logger.info("loading import section at physical offset "
+                logger.debug("loading import section at physical offset "
                         + offset);
                 idata = loadImportTableAt(offset,
                         importTable.get().size);
@@ -498,9 +498,9 @@ public class SectionLoader {
                 }
                 long offset = tuple.get().offset;
                 int importTableOffset = getOffsetDiffFor(dataDirKey);
-                logger.info("importsection offset diff: " + importTableOffset);
-                logger.info("idatalength: " + idatabytes.length);
-                logger.info("virtual address of ILT: " + virtualAddress);
+                logger.debug("importsection offset diff: " + importTableOffset);
+                logger.debug("idatalength: " + idatabytes.length);
+                logger.debug("virtual address of ILT: " + virtualAddress);
                 idata = ImportSection.newInstance(idatabytes,
                         virtualAddress, optHeader, importTableOffset,
                         file.length(), offset);

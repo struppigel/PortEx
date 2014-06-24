@@ -92,16 +92,14 @@ object ImportSection {
 
   def apply(idatabytes: Array[Byte], virtualAddress: Long,
     optHeader: OptionalHeader, importTableOffsetDiff: Int, fileSize: Long, fileOffset: Long): ImportSection = {
-    logger.debug("reading direntries for root table")
+    logger.debug("reading directory entries for root table ...")
     var directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffsetDiff)
-    try {
-      readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffsetDiff, fileSize)
-    } catch {
-      case e: FailureEntryException =>
-        //filter empty directoryTableEntries, they are of no use and probably because
-        //of collapsed imports or other malformations, example: tinype
-        directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
-    }
+    logger.debug(directoryTable.size + " directory entries read")
+    logger.debug("reading lookup table entries ...")
+    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffsetDiff, fileSize)
+    //filter empty directoryTableEntries, they are of no use and probably because
+    //of collapsed imports or other malformations, example: tinype
+    directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
     new ImportSection(directoryTable, fileOffset, idatabytes.length)
   }
 
@@ -110,7 +108,8 @@ object ImportSection {
    * and adds the lookup table entries to the directory table entry they belong to
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
-    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte], importTableOffset: Int, fileSize: Long): Unit = {
+    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte],
+    importTableOffset: Int, fileSize: Long): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
@@ -128,13 +127,18 @@ object ImportSection {
         case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException("ROM file format not covered by PortEx")
       }
-      do {
-        entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset, relOffset, dirEntry)
-        if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
-        offset += EntrySize
-        relOffset += EntrySize
-        if (relOffsetMax < relOffset) relOffsetMax = relOffset;
-      } while (!entry.isInstanceOf[NullEntry])
+      try {
+        do {
+          entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset, relOffset, dirEntry)
+          if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
+          offset += EntrySize
+          relOffset += EntrySize
+          if (relOffsetMax < relOffset) relOffsetMax = relOffset;
+        } while (!entry.isInstanceOf[NullEntry])
+      } catch {
+        case e: FailureEntryException =>
+          logger.info("removing invalid directory entry with name '" + dirEntry.name + "'")
+      }
     }
   }
 
@@ -200,7 +204,6 @@ object ImportSection {
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
     val entry = DirectoryEntry(entrybytes)
-    logger.debug("entry info ---> \n" + entry.getInfo + "\n ----> end of entry info\n")
     entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, idatabytes, importTableOffset)
     logger.debug("entry name: " + entry.name)
     if (entry(FORWARDER_CHAIN) != 0) {

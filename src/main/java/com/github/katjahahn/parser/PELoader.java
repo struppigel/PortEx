@@ -30,7 +30,6 @@ import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -206,9 +205,9 @@ public final class PELoader {
         File file = new File(
                 "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
         PEData data = PELoader.loadPE(file);
-        System.out.println(data);
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-        System.out.println(scanner.scanReport());
+//        System.out.println(data);
+//        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+//        System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
 //        ResourceSection rsrc = loader.loadResourceSection();
 //        ExportSection edata = loader.loadExportSection();
