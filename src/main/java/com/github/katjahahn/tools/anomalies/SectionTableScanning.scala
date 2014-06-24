@@ -191,10 +191,10 @@ trait SectionTableScanning extends AnomalyScanner {
         val sec = sectionTable.getSectionHeader(i)
         val range2 = physicalSectionRange(sec)
         if (isDuplicate(section, sec)) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (${range1._1}/${range2._2}) is a duplicate of section ${sec.getNumber()} with name ${filteredString(sec.getName)}"
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (${range1._1}/${range1._2}) is a duplicate of section ${sec.getNumber()} with name ${filteredString(sec.getName)}"
           anomalyList += StructuralAnomaly(description, DUPLICATE_SEC)
         } else if (overlaps(range2, range1)) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (${range1._1}/${range2._2}) overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (${range2._1}/${range2._2})"
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (${range1._1}/${range1._2}) overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (${range2._1}/${range2._2})"
           anomalyList += StructuralAnomaly(description, OVERLAPPING_SEC)
         }
       }

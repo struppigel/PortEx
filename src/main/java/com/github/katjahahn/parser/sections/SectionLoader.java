@@ -273,8 +273,10 @@ public class SectionLoader {
      * The file on disk is read to fetch the information.
      * 
      * @return {@link DebugSection} of the given file
-     * @throws IOException if unable to read the file
-     * @throws IllegalStateException if unable to load debug section
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if unable to load debug section
      */
     @Ensures("result != null")
     public DebugSection loadDebugSection() throws IOException {
@@ -479,33 +481,30 @@ public class SectionLoader {
         if (importTable.isPresent()) {
             long virtualAddress = importTable.get().virtualAddress;
             Optional<BytesAndOffset> tuple = maybeReadSectionBytesFor(dataDirKey);
+            ImportSection idata = null;
             if (!tuple.isPresent()) {
                 // read at RVA
                 logger.warn("unable to read section bytes for " + dataDirKey);
                 long offset = importTable.get().virtualAddress;
                 logger.info("loading import section at physical offset "
                         + offset);
-                ImportSection idata = loadImportTableAt(offset,
+                idata = loadImportTableAt(offset,
                         importTable.get().size);
-                if (idata.isEmpty()) {
-                    logger.warn("empty import section");
+            } else {
+                byte[] idatabytes = tuple.get().bytes;
+                if (idatabytes.length == 0) {
+                    logger.warn("unable to read import section, readsize is 0");
                     return Optional.absent();
                 }
-                return Optional.of(idata);
+                long offset = tuple.get().offset;
+                int importTableOffset = getOffsetDiffFor(dataDirKey);
+                logger.info("importsection offset diff: " + importTableOffset);
+                logger.info("idatalength: " + idatabytes.length);
+                logger.info("virtual address of ILT: " + virtualAddress);
+                idata = ImportSection.newInstance(idatabytes,
+                        virtualAddress, optHeader, importTableOffset,
+                        file.length(), offset);
             }
-            byte[] idatabytes = tuple.get().bytes;
-            if (idatabytes.length == 0) {
-                logger.warn("unable to read import section, readsize is 0");
-                return Optional.absent();
-            }
-            long offset = tuple.get().offset;
-            int importTableOffset = getOffsetDiffFor(dataDirKey);
-            logger.debug("importsection offset diff: " + importTableOffset);
-            logger.debug("idatalength: " + idatabytes.length);
-            logger.debug("virtual address of ILT: " + virtualAddress);
-            ImportSection idata = ImportSection.newInstance(idatabytes,
-                    virtualAddress, optHeader, importTableOffset,
-                    file.length(), offset);
             if (idata.isEmpty()) {
                 logger.warn("empty import section");
                 return Optional.absent();
@@ -685,6 +684,9 @@ public class SectionLoader {
             long offset = res.get().offset;
             ExportSection edata = ExportSection.newInstance(edatabytes,
                     virtualAddress, optHeader, this, offset);
+            if (edata.isEmpty()) {
+                logger.warn("empty export section");
+            }
             return Optional.of(edata);
         }
         return Optional.absent();

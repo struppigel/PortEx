@@ -24,6 +24,8 @@ import java.io.File
 import java.io.RandomAccessFile
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil
+import com.github.katjahahn.parser.FileFormatException
+import org.apache.logging.log4j.LogManager
 
 /**
  * The entry of a {@link ResourceDirectory}
@@ -88,6 +90,8 @@ case class Name(rva: Long, name: String) extends IDOrName {
 
 object ResourceDirectoryEntry {
 
+  private val logger = LogManager
+            .getLogger(ResourceDirectoryEntry.getClass().getName());
   private val specLocation = "resourcedirentryspec";
   private val typeSpecLocation = "resourcetypeid"
   val typeIDMap = IOUtil.readArray(typeSpecLocation).asScala.map(a => (a(0).toInt, a(2))).toMap
@@ -134,26 +138,37 @@ object ResourceDirectoryEntry {
   private def getID(value: Long, isNameEntry: Boolean, level: Level,
     tablebytes: Array[Byte], virtualAddress: Long, offset: Long, rsrcOffset: Long): IDOrName =
     if (isNameEntry) {
-      val name = getStringAtRVA(value, tablebytes, virtualAddress, offset, rsrcOffset) //TODO
-      Name(value, name)
+      val name = getStringAtRVA(value, tablebytes, virtualAddress, offset, rsrcOffset) //TODO ?
+      name match {
+        case None => throw new FileFormatException("unable to read name entry")
+        case Some(str) => Name(value, str)
+      }
     } else {
       ID(value, level)
     }
 
   private def getStringAtRVA(rva: Long, tablebytes: Array[Byte],
-    virtualAddress: Long, offset: Long, rsrcOffset: Long): String = {
+    virtualAddress: Long, offset: Long, rsrcOffset: Long): Option[String] = {
     val nameRVA = removeHighestIntBit(rva)
     val address = nameRVA - offset
     readStringAtOffset(tablebytes, address)
   }
 
-  private def readStringAtOffset(tablebytes: Array[Byte], address: Long): String = {
+  private def readStringAtOffset(tablebytes: Array[Byte], address: Long): Option[String] = {
     val length = 2
-    val strLength = getBytesIntValue(tablebytes, address.toInt, length)
+    if (address + length > tablebytes.length) {
+      logger.warn("couldn't read string at offset " + address)
+      //          return None
+    }
+    val strLength = getBytesLongValueSafely(tablebytes, address.toInt, length).toInt
     val strBytes = strLength * 2 //wg UTF-16 --> 2 Byte
     val stringAddress = (address + length).toInt
+    if (stringAddress + strBytes > tablebytes.length) {
+      logger.warn("couldn't read string at offset " + address)
+      //      return None
+    }
     val bytes = tablebytes.slice(stringAddress, stringAddress + strBytes)
-    new String(bytes, "UTF-16LE")
+    Some(new String(bytes, "UTF-16LE"))
   }
 
   private def removeHighestIntBit(value: Long): Long = {

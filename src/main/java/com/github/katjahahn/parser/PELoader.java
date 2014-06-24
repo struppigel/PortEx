@@ -27,7 +27,10 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -57,7 +60,8 @@ public final class PELoader {
      * @return data header data of the PE file
      * @throws IOException
      *             if unable to load the file
-     * @throws IllegalStateException if no valid PE file
+     * @throws IllegalStateException
+     *             if no valid PE file
      */
     @Ensures("result != null")
     public static PEData loadPE(File peFile) throws IOException {
@@ -68,8 +72,10 @@ public final class PELoader {
      * Loads the PE file header data into a PEData instance.
      * 
      * @return header data
-     * @throws IOException if file can not be read
-     * @throws IllegalStateException if no valid PE file
+     * @throws IOException
+     *             if file can not be read
+     * @throws IllegalStateException
+     *             if no valid PE file
      */
     private PEData loadData() throws IOException {
         PESignature pesig = new PESignature(file);
@@ -89,9 +95,11 @@ public final class PELoader {
     /**
      * Loads the MSDOS header.
      * 
-     * @param raf the random access file instance
+     * @param raf
+     *            the random access file instance
      * @return msdos header
-     * @throws IOException if unable to read header
+     * @throws IOException
+     *             if unable to read header
      */
     private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf)
             throws IOException {
@@ -103,17 +111,21 @@ public final class PELoader {
     /**
      * Loads the section table. Presumes a valid PE file.
      * 
-     * @param pesig pe signature
-     * @param coff coff file header
-     * @param raf the random access file instance
+     * @param pesig
+     *            pe signature
+     * @param coff
+     *            coff file header
+     * @param raf
+     *            the random access file instance
      * @return section table
-     * @throws IOException if unable to read header
+     * @throws IOException
+     *             if unable to read header
      */
     private SectionTable loadSectionTable(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
         long offset = pesig.getOffset().get() + PESignature.PE_SIG_LENGTH
                 + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
-        logger.info("SectionTable offset" + offset);
+        logger.info("SectionTable offset: " + offset);
         int numberOfEntries = (int) coff.getNumberOfSections();
         byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
                 * numberOfEntries, raf);
@@ -123,10 +135,13 @@ public final class PELoader {
     /**
      * Loads the coff file header. Presumes a valid PE file.
      * 
-     * @param pesig pe signature
-     * @param raf the random access file instance
+     * @param pesig
+     *            pe signature
+     * @param raf
+     *            the random access file instance
      * @return coff file header
-     * @throws IOException if unable to read header
+     * @throws IOException
+     *             if unable to read header
      */
     private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
             RandomAccessFile raf) throws IOException {
@@ -139,11 +154,15 @@ public final class PELoader {
     /**
      * Loads the optional header. Presumes a valid PE file.
      * 
-     * @param pesig pe signature
-     * @param coff coff file header
-     * @param raf the random access file instance
+     * @param pesig
+     *            pe signature
+     * @param coff
+     *            coff file header
+     * @param raf
+     *            the random access file instance
      * @return optional header
-     * @throws IOException if unable to read header
+     * @throws IOException
+     *             if unable to read header
      */
     private OptionalHeader loadOptionalHeader(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
@@ -173,8 +192,8 @@ public final class PELoader {
      *             if unable to read the bytes
      */
     @Requires({ "length >= 0" })
-    private static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
-            throws IOException {
+    private static byte[] loadBytes(long offset, int length,
+            RandomAccessFile raf) throws IOException {
         raf.seek(offset);
         byte[] bytes = new byte[length];
         raf.readFully(bytes);
@@ -185,11 +204,18 @@ public final class PELoader {
         logger.entry(); // TODO make imports reading work with
                         // normalimports.exe!
         File file = new File(
-                "src/main/resources/unusualfiles/tinype/collapsedmzheader.exe");
+                "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
         PEData data = PELoader.loadPE(file);
-         System.out.println(data);
-//        ImportSection idata = new SectionLoader(data).loadImportSection();
-//        System.out.println(idata.getInfo());
+        System.out.println(data);
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        System.out.println(scanner.scanReport());
+        SectionLoader loader = new SectionLoader(data);
+//        ResourceSection rsrc = loader.loadResourceSection();
+//        ExportSection edata = loader.loadExportSection();
+        ImportSection idata = loader.loadImportSection();
+        System.out.println(idata.getInfo());
+//        System.out.println(rsrc.getInfo());
+//        System.out.println(edata.getInfo());
     }
 
 }

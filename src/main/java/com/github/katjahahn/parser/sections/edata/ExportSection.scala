@@ -56,6 +56,8 @@ class ExportSection private (
 
   override def getOffset(): Long = offset
   def getSize(): Long = size
+  
+  def isEmpty(): Boolean = exportEntries.isEmpty
 
   /**
    * Returns the export directory table which contains general information and

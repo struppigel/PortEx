@@ -54,6 +54,7 @@ public class PortexStats {
     private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
     private static final String STATS_FOLDER = "portexstats/";
     private static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
+    private static final String BAD_FILES = "/home/deque/portextestfiles/badfiles/";
     private static int noPE = 0;
     private static int notLoaded = 0;
     private static int dirsRead = 0;
@@ -62,7 +63,7 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-        anomalyCount(new File(GOOD_FILES).listFiles(), "GOOD FILES");
+        ableToLoadSections();
     }
 
     public static void entropies(File[] files) {
@@ -463,7 +464,8 @@ public class PortexStats {
         int ableToLoad = 0;
         int unableToLoad = 0;
         int filesReadCounter = 0;
-        File folder = new File(PE_FOLDER);
+        List<File> problemPEs = new ArrayList<>();
+        File folder = new File(BAD_FILES);
         File[] files = folder.listFiles();
         for (File file : files) {
             try {
@@ -482,7 +484,8 @@ public class PortexStats {
                 }
                 ableToLoad++;
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage() + " file: " + file.getName());
+                problemPEs.add(file);
                 unableToLoad++;
             }
             filesReadCounter++;
@@ -493,38 +496,47 @@ public class PortexStats {
                 System.out.println();
             }
         }
-        System.out.println("Files read: " + filesReadCounter);
-        System.out.println("Able to load: " + ableToLoad);
-        System.out.println("Unable to load: " + unableToLoad);
+        String report = "Files read: " + filesReadCounter + "\nAble to load: "
+                + ableToLoad + "\nUnable to load: " + unableToLoad;
+        for (File file : problemPEs) {
+            report += "\n" + file.getName();
+        }
+        System.out.println(report);
+        writeStats(report);
         return ableToLoad;
     }
 
     public static int ableToLoad() {
         int ableToLoad = 0;
         int unableToLoad = 0;
+        List<File> problemPEs = new ArrayList<>();
         int filesReadCounter = 0;
-        File folder = new File(PE_FOLDER);
+        File folder = new File(BAD_FILES);
         File[] files = folder.listFiles();
         for (File file : files) {
             try {
                 PELoader.loadPE(file);
                 ableToLoad++;
             } catch (Exception e) {
-                System.out.println(e.getMessage());
                 e.printStackTrace();
+                problemPEs.add(file);
                 unableToLoad++;
             }
             filesReadCounter++;
-            if (filesReadCounter % 100 == 0) {
+            if (filesReadCounter % 1000 == 0) {
                 System.out.println("Files read: " + filesReadCounter);
                 System.out.println("Able to load: " + ableToLoad);
                 System.out.println("Unable to load: " + unableToLoad);
                 System.out.println();
             }
         }
-        System.out.println("Files read: " + filesReadCounter);
-        System.out.println("Able to load: " + ableToLoad);
-        System.out.println("Unable to load: " + unableToLoad);
+        String report = "Files read: " + filesReadCounter + "\nAble to load: "
+                + ableToLoad + "\nUnable to load: " + unableToLoad;
+        for (File file : problemPEs) {
+            report += "\n" + file.getName();
+        }
+        System.out.println(report);
+        writeStats(report);
         return ableToLoad;
     }
 
