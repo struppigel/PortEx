@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
-import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
@@ -43,20 +42,6 @@ public class SectionLoaderTest {
     public void prepare() throws IOException {
         testdata = PELoaderTest.getTestData();
         pedata = PELoaderTest.getPEData();
-    }
-
-    @Test
-    public void constructorTest() throws FileFormatException {
-        PEData datum = pedata.get("strings.exe");
-        SectionLoader loader1 = new SectionLoader(datum);
-        SectionLoader loader2 = new SectionLoader(datum.getSectionTable(),
-                datum.getOptionalHeader(), datum.getCOFFFileHeader(),
-                datum.getFile());
-        for (DataDirectoryKey key : DataDirectoryKey.values()) {
-            Optional<Long> offset1 = loader1.maybeGetFileOffsetFor(key);
-            Optional<Long> offset2 = loader2.maybeGetFileOffsetFor(key);
-            assertEquals(offset1, offset2);
-        }
     }
 
     @Test

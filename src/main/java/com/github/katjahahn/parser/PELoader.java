@@ -228,7 +228,7 @@ public final class PELoader {
         // ResourceSection rsrc = loader.loadResourceSection();
         // ExportSection edata = loader.loadExportSection();
         ExportSection edata = loader.loadExportSection();
-        System.out.println(edata.getDetailedInfo());
+        System.out.println(edata.getInfo());
         // System.out.println(rsrc.getInfo());
         // System.out.println(edata.getInfo());
     }

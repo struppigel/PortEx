@@ -57,7 +57,7 @@ class ExportSection private (
 
   override def getOffset(): Long = offset
   def getSize(): Long = size
-  
+
   def isEmpty(): Boolean = exportEntries.isEmpty
 
   /**
@@ -166,7 +166,7 @@ class ExportSection private (
 object ExportSection {
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("src/main/resources/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
+    val data = PELoader.loadPE(new File("/home/deque/portextestfiles/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
     val loader = new SectionLoader(data)
     val edata = loader.loadExportSection()
     println(edata.getDetailedInfo)
@@ -185,7 +185,7 @@ object ExportSection {
     val namePointerTable = loadNamePointerTable(edataTable, mmBytes, virtualAddress)
     val ordinalTable = loadOrdinalTable(edataTable, mmBytes, virtualAddress)
     val exportEntries = loadExportEntries(sectionLoader, namePointerTable, opt,
-      ordinalTable, exportAddressTable, mmBytes, virtualAddress)
+      ordinalTable, exportAddressTable, mmBytes, virtualAddress, edataTable)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
       ordinalTable, exportEntries, offset, mmBytes.length)
   }
@@ -218,7 +218,7 @@ object ExportSection {
     namePointerTable: ExportNamePointerTable, optHeader: OptionalHeader,
     ordinalTable: ExportOrdinalTable,
     exportAddressTable: ExportAddressTable, mmBytes: MemoryMappedPE,
-    virtualAddress: Long): List[ExportEntry] = {
+    virtualAddress: Long, edataTable: ExportDirectory): List[ExportEntry] = {
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
     // "if the function's RVA is inside the exports section (as given by the
     // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
@@ -236,13 +236,29 @@ object ExportSection {
     } else None
 
     val names = namePointerTable.pointerNameList.map(_._2)
-    val nameEntries = names map { name =>
+    val nameEntries: List[ExportEntry] = names map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
       val forwarder = getForwarder(rva)
       val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
-      new ExportEntry(rva, name, ordinal, forwarder)
+      new ExportNameEntry(rva, name, ordinal, forwarder)
     }
-    nameEntries
+    val addresses = exportAddressTable.addresses
+    val ordinalBase = edataTable.get(ExportDirectoryKey.ORDINAL_BASE)
+    val ordEntries = for (
+      i <- 0 until addresses.length;
+      if !ordinalTable.ordinals.contains(i + ordinalBase)
+    ) yield {
+      val rva = addresses(i)
+      val forwarder = getForwarder(rva)
+      val ordinal = (i + ordinalBase).toInt
+      new ExportEntry(rva, ordinal, forwarder)
+    }
+
+    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
+      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+
+    ordEntries.toList ::: nameEntries.toList
   }
 
   /**

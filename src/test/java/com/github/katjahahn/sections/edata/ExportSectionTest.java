@@ -22,11 +22,13 @@ import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.edata.ExportEntry;
+import com.github.katjahahn.parser.sections.edata.ExportNameEntry;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.google.common.base.Optional;
 
 public class ExportSectionTest {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LogManager
             .getLogger(ExportSectionTest.class.getName());
     private Map<File, List<ExportEntry>> exportEntries;
@@ -89,8 +91,13 @@ public class ExportSectionTest {
         long imageBase = datum.getOptionalHeader().getWindowsFieldEntry(
                 WindowsEntryKey.IMAGE_BASE).value;
         for (ExportEntry entry : expected) {
-            list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry
-                    .name(), entry.ordinal()));
+            if (entry instanceof ExportNameEntry) {
+                list.add(new ExportNameEntry(entry.symbolRVA() - imageBase,
+                        ((ExportNameEntry) entry).name(), entry.ordinal()));
+            } else {
+                list.add(new ExportEntry(entry.symbolRVA() - imageBase, entry
+                        .ordinal()));
+            }
         }
         return list;
     }
