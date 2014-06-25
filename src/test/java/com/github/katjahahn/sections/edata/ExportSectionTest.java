@@ -73,7 +73,6 @@ public class ExportSectionTest {
             if (!edata.isPresent()) {
                 assertTrue(expected.size() == 0);
             } else {
-                logger.info("testing entries for " + filename);
                 expected = substractImageBase(expected, datum);
                 List<ExportEntry> actual = edata.get().getExportEntries();
                 assertEquals(actual, expected);

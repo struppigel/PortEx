@@ -473,15 +473,17 @@ public class PortexStats {
                 SectionLoader loader = new SectionLoader(data);
                 Map<DataDirectoryKey, DataDirEntry> map = data
                         .getOptionalHeader().getDataDirEntries();
-                if (map.containsKey(DataDirectoryKey.RESOURCE_TABLE)) {
-                    loader.loadResourceSection();
-                }
-                if (map.containsKey(DataDirectoryKey.IMPORT_TABLE)) {
+                // if (map.containsKey(DataDirectoryKey.RESOURCE_TABLE)) {
+                // loader.loadResourceSection();
+                // }
+                if (map.containsKey(DataDirectoryKey.IMPORT_TABLE)
+                        && loader
+                                .pointsToValidSection(DataDirectoryKey.IMPORT_TABLE)) {
                     loader.loadImportSection();
                 }
-                if (map.containsKey(DataDirectoryKey.EXPORT_TABLE)) {
-                    loader.loadExportSection();
-                }
+                // if (map.containsKey(DataDirectoryKey.EXPORT_TABLE)) {
+                // loader.loadExportSection();
+                // }
                 ableToLoad++;
             } catch (Exception e) {
                 System.err.println(e.getMessage() + " file: " + file.getName());

@@ -19,6 +19,7 @@ package com.github.katjahahn.parser.sections.edata
 
 import com.github.katjahahn.parser.ByteArrayUtil._
 import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.parser.MemoryMappedPE
 /**
  * The export address table contains all relative virtual addresses in the order
  * they are found in the export section.
@@ -59,13 +60,13 @@ object ExportAddressTable {
    * @param virtualAddress the virtual address the rva is relative to
    * @return an instance for the export address table
    */
-  def apply(edataBytes: Array[Byte], rva: Long, entries: Int, virtualAddress: Long): ExportAddressTable = {
+  def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int, virtualAddress: Long): ExportAddressTable = {
     val length = 4
     val initialOffset = (rva - virtualAddress).toInt
     val addresses = new ListBuffer[Long]()
     val end = initialOffset + entries * length
     for (offset <- initialOffset until end by length) {
-      addresses += getBytesLongValue(edataBytes, offset, length)
+      addresses += getBytesLongValue(mmBytes.getArray(), (offset + virtualAddress).toInt, length)
     }
     new ExportAddressTable(addresses.toList)
   }

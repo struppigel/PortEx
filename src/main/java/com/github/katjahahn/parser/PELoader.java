@@ -31,7 +31,8 @@ import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -206,12 +207,14 @@ public final class PELoader {
                         // normalimports.exe!
         File file = new File(
                 "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
+//        File file = new File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
         System.out.println(data);
-        // PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-        // System.out.println(scanner.scanReport());
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
         SectionTable table = data.getSectionTable();
+        System.out.println("file size: " + file.length());
         for (SectionHeader header : table.getSectionHeaders()) {
             long start = header.getAlignedPointerToRaw();
             long end = loader.getReadSize(header) + start;
@@ -224,8 +227,8 @@ public final class PELoader {
         }
         // ResourceSection rsrc = loader.loadResourceSection();
         // ExportSection edata = loader.loadExportSection();
-        ImportSection idata = loader.loadImportSection();
-        System.out.println(idata.getInfo());
+        ExportSection edata = loader.loadExportSection();
+        System.out.println(edata.getDetailedInfo());
         // System.out.println(rsrc.getInfo());
         // System.out.println(edata.getInfo());
     }

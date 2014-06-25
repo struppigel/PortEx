@@ -20,6 +20,7 @@ package com.github.katjahahn.parser.sections.edata
 import com.github.katjahahn.parser.ByteArrayUtil._
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil.{ NL }
+import com.github.katjahahn.parser.MemoryMappedPE
 
 class ExportOrdinalTable private (
   val ordinals: List[Int],
@@ -37,14 +38,14 @@ class ExportOrdinalTable private (
 
 object ExportOrdinalTable {
 
-  def apply(edataBytes: Array[Byte], base: Int, rva: Long, entries: Int,
+  def apply(mmBytes: MemoryMappedPE, base: Int, rva: Long, entries: Int,
     virtualAddress: Long): ExportOrdinalTable = {
     val entrySize = 2 //in Byte
     val initialOffset = (rva - virtualAddress).toInt
     val end = entrySize * entries + initialOffset
     val ordinals = new ListBuffer[Int]
     for (offset <- initialOffset until end by entrySize) {
-      val ordinal = getBytesIntValue(edataBytes, offset, entrySize)
+      val ordinal = getBytesIntValue(mmBytes.getArray(), (offset + virtualAddress).toInt, entrySize)
       ordinals += (ordinal + base)
     }
     new ExportOrdinalTable(ordinals.toList, base)

@@ -22,6 +22,7 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import java.io.File
 import ExportNamePointerTable._
+import com.github.katjahahn.parser.MemoryMappedPE
 
 class ExportNamePointerTable private (val pointerNameList: List[(Address, String)]) {
 
@@ -46,25 +47,25 @@ object ExportNamePointerTable {
 
   type Address = Long
 
-  def apply(edataBytes: Array[Byte], rva: Long, entries: Int,
+  def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int,
     virtualAddress: Long): ExportNamePointerTable = {
     val length = 4
     val initialOffset = (rva - virtualAddress).toInt
     val addresses = new ListBuffer[(Address, String)]
     val end = initialOffset + entries * length
     for (offset <- initialOffset until end by length) {
-      val address = getBytesLongValue(edataBytes, offset, length)
-      val name = getName(edataBytes, (address - virtualAddress).toInt)
+      val address = getBytesLongValue(mmBytes.getArray(), (offset + virtualAddress).toInt, length)
+      val name = getName(mmBytes.getArray(), address.toInt)
       addresses += ((address, name))
     }
 
     new ExportNamePointerTable(addresses.toList)
   }
 
-  private def getName(edataBytes: Array[Byte], address: Int): String = {
-    val end = edataBytes.indexOf('\0'.toByte, address)
-    val bytes = edataBytes.slice(address, end)
-    new String(bytes)
+  private def getName(bytes: Array[Byte], address: Int): String = {
+    val end = bytes.indexOf('\0'.toByte, address)
+    val nameBytes = bytes.slice(address, end)
+    new String(nameBytes)
   }
 
 }

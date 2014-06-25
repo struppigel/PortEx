@@ -54,25 +54,27 @@ object MemoryMappedPE {
     if (optHeader.isLowAlignmentMode()) {
       Files.readAllBytes(data.getFile.toPath)
     } else {
-      val maxVA = getMaxVA(table)
+      val maxVA = getMaxVA(table, secLoader)
       //TODO here is the problem -- it might be that it doesn't fit in an Int
       val bytes = Array.fill(maxVA.toInt)(0.toByte)
       for (header <- table.getSectionHeaders().asScala) {
-        val start = header.get(VIRTUAL_ADDRESS)
-        val end = header.get(VIRTUAL_ADDRESS) + header.getAlignedVirtualSize()
-        val secBytes = secLoader.loadSectionBytes(header.getNumber()).bytes
-        for (i <- start until Math.min(end, secBytes.length + start)) {
-          bytes(i.toInt) = secBytes((i - start).toInt)
+        if (secLoader.isValidSection(header)) {
+          val start = header.get(VIRTUAL_ADDRESS)
+          val end = header.get(VIRTUAL_ADDRESS) + header.getAlignedVirtualSize()
+          val secBytes = secLoader.loadSectionBytes(header.getNumber()).bytes
+          for (i <- start until Math.min(end, secBytes.length + start)) {
+            bytes(i.toInt) = secBytes((i - start).toInt)
+          }
         }
       }
       bytes
     }
   }
 
-  private def getMaxVA(table: SectionTable): Long =
+  private def getMaxVA(table: SectionTable, secLoader: SectionLoader): Long =
     table.getSectionHeaders().asScala.foldRight(0L) { (header, max) =>
       val headerEnd = header.get(VIRTUAL_ADDRESS) + header.getAlignedVirtualSize()
-      if (headerEnd > max) headerEnd else max
+      if (secLoader.isValidSection(header) && headerEnd > max) headerEnd else max
     }
 
 }

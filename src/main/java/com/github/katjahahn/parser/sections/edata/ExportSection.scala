@@ -28,6 +28,7 @@ import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import com.github.katjahahn.parser.MemoryMappedPE
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -173,40 +174,42 @@ object ExportSection {
     println(edata.getInfo)
   }
 
-  def apply(edataBytes: Array[Byte], virtualAddress: Long,
+  def apply(mmBytes: MemoryMappedPE, virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
-    val edataTable = ExportDirectory(edataBytes)
+    //TODO slice only headerbytes for ExportDir
+    val exportBytes = mmBytes.slice(virtualAddress, mmBytes.length + virtualAddress);
+    val edataTable = ExportDirectory(exportBytes)
     val maybeExportDir = opt.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
     val exportHeader = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
-    val exportAddressTable = loadExportAddressTable(edataTable, edataBytes, virtualAddress)
-    val namePointerTable = loadNamePointerTable(edataTable, edataBytes, virtualAddress)
-    val ordinalTable = loadOrdinalTable(edataTable, edataBytes, virtualAddress)
+    val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, virtualAddress)
+    val namePointerTable = loadNamePointerTable(edataTable, mmBytes, virtualAddress)
+    val ordinalTable = loadOrdinalTable(edataTable, mmBytes, virtualAddress)
     val exportEntries = loadExportEntries(sectionLoader, namePointerTable, opt,
-      ordinalTable, exportAddressTable, edataBytes, virtualAddress)
+      ordinalTable, exportAddressTable, mmBytes, virtualAddress)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
-      ordinalTable, exportEntries, offset, edataBytes.length)
+      ordinalTable, exportEntries, offset, mmBytes.length)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirectory,
-    edataBytes: Array[Byte], virtualAddress: Long): ExportOrdinalTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long): ExportOrdinalTable = {
     val base = edataTable(ORDINAL_BASE)
     val rva = edataTable(ORDINAL_TABLE_RVA)
     val entries = edataTable(NR_OF_NAME_POINTERS)
-    ExportOrdinalTable(edataBytes, base.toInt, rva, entries.toInt, virtualAddress)
+    ExportOrdinalTable(mmBytes, base.toInt, rva, entries.toInt, virtualAddress)
   }
 
   private def loadNamePointerTable(edataTable: ExportDirectory,
-    edataBytes: Array[Byte], virtualAddress: Long): ExportNamePointerTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long): ExportNamePointerTable = {
     val nameTableRVA = edataTable(NAME_POINTER_RVA)
     val namePointers = edataTable(NR_OF_NAME_POINTERS).toInt
-    ExportNamePointerTable(edataBytes, nameTableRVA, namePointers, virtualAddress)
+    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress)
   }
 
   private def loadExportAddressTable(edataTable: ExportDirectory,
-    edataBytes: Array[Byte], virtualAddress: Long): ExportAddressTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long): ExportAddressTable = {
     val addrTableRVA = edataTable(EXPORT_ADDR_TABLE_RVA)
     val entries = edataTable(ADDR_TABLE_ENTRIES).toInt
-    ExportAddressTable(edataBytes, addrTableRVA, entries, virtualAddress)
+    ExportAddressTable(mmBytes, addrTableRVA, entries, virtualAddress)
   }
 
   //TODO only returns named entries so far
@@ -214,7 +217,7 @@ object ExportSection {
   private def loadExportEntries(sectionLoader: SectionLoader,
     namePointerTable: ExportNamePointerTable, optHeader: OptionalHeader,
     ordinalTable: ExportOrdinalTable,
-    exportAddressTable: ExportAddressTable, edataBytes: Array[Byte],
+    exportAddressTable: ExportAddressTable, mmBytes: MemoryMappedPE,
     virtualAddress: Long): List[ExportEntry] = {
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
     // "if the function's RVA is inside the exports section (as given by the
@@ -229,16 +232,17 @@ object ExportSection {
     }
 
     def getForwarder(rva: Long): Option[String] = if (isForwarderRVA(rva)) {
-      Some(getASCIIName(rva, virtualAddress, edataBytes))
+      Some(getASCIIName(rva, virtualAddress, mmBytes))
     } else None
 
     val names = namePointerTable.pointerNameList.map(_._2)
-    names map { name =>
+    val nameEntries = names map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
       val forwarder = getForwarder(rva)
       val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
       new ExportEntry(rva, name, ordinal, forwarder)
     }
+    nameEntries
   }
 
   /**
@@ -270,11 +274,11 @@ object ExportSection {
   }
 
   private def getASCIIName(nameRVA: Long, virtualAddress: Long,
-    bytes: Array[Byte]): String = {
-    val offset = nameRVA - virtualAddress
+    mmBytes: MemoryMappedPE): String = {
+    val offset = nameRVA
     //TODO cast to int is insecure. actual int is unsigned, java int is signed
-    val nullindex = bytes.indexWhere(_ == 0, offset.toInt)
-    new String(bytes.slice(offset.toInt, nullindex))
+    val nullindex = mmBytes.indexWhere(_ == 0, offset.toInt)
+    new String(mmBytes.slice(offset.toInt, nullindex))
   }
 
   /**
@@ -288,7 +292,7 @@ object ExportSection {
    * @param sectionLoader the sectionLoader of the current file
    * @return instance of the export section
    */
-  def newInstance(edataBytes: Array[Byte], virtualAddress: Long,
+  def newInstance(edataBytes: MemoryMappedPE, virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection =
     apply(edataBytes, virtualAddress, opt, sectionLoader, offset)
 

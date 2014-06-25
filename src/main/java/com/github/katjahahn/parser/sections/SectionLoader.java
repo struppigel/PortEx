@@ -30,7 +30,6 @@ import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
-import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
@@ -407,16 +406,17 @@ public class SectionLoader {
                 Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
                     BytesAndOffset tuple = loadSectionBytesFor(header.get());
-                    byte[] bytes = tuple.bytes;
-                    if (bytes.length == 0) {
+                    //TODO remove loadPE call, save data instance here instead
+                    MemoryMappedPE bytes = MemoryMappedPE.newInstance(PELoader.loadPE(file), this);
+                    if (bytes.length() == 0) {
                         logger.warn("unable to read exception section, readsize is 0");
                         return Optional.absent();
                     }
                     long offset = header.get().getAlignedPointerToRaw();
-                    MachineType machine = coffHeader.getMachineType();
-                    ExceptionSection section = ExceptionSection.newInstance(
-                            bytes, machine, virtualAddress, offset);
-                    return Optional.of(section);
+//                    MachineType machine = coffHeader.getMachineType();
+//                    ExceptionSection section = ExceptionSection.newInstance(
+//                            bytes, machine, virtualAddress, offset);
+//                    return Optional.of(section); TODO
                 }
             }
         }
@@ -628,13 +628,15 @@ public class SectionLoader {
             if (!res.isPresent()) {
                 return Optional.absent();
             }
-            byte[] edatabytes = res.get().bytes;
-            if (edatabytes.length == 0) {
+            //TODO don't load data, save it
+            MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(PELoader.loadPE(file), this);
+            if (mmbytes.length() == 0) {
                 logger.warn("unable to read export section, readsize is 0");
                 return Optional.absent();
             }
-            long offset = res.get().offset;
-            ExportSection edata = ExportSection.newInstance(edatabytes,
+            //TODO correct offset, directory doesn't always start at section start
+            long offset = res.get().offset; 
+            ExportSection edata = ExportSection.newInstance(mmbytes,
                     virtualAddress, optHeader, this, offset);
             if (edata.isEmpty()) {
                 logger.warn("empty export section");
@@ -722,6 +724,18 @@ public class SectionLoader {
             this.offset = offset;
             this.bytes = bytes;
         }
+    }
+
+    public boolean pointsToValidSection(DataDirectoryKey dataDirKey) {
+        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
+        if(header.isPresent()) {
+            return isValidSection(header.get());
+        }
+        return false;
+    }
+    
+    public boolean isValidSection(SectionHeader header) {
+        return getReadSize(header) > 0 && header.getAlignedPointerToRaw() < file.length();
     }
 
 }
