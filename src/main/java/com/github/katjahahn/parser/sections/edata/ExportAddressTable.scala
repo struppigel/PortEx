@@ -62,10 +62,16 @@ object ExportAddressTable {
    */
   def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int, virtualAddress: Long): ExportAddressTable = {
     val length = 4
-    val initialOffset = (rva - virtualAddress).toInt
+    val initialOffset = rva - virtualAddress
     val addresses = new ListBuffer[Long]()
     val end = initialOffset + entries * length
     for (offset <- initialOffset until end by length) {
+//      println("offset: " + offset)
+//      println("offset + va: " + (offset + virtualAddress))
+//      println("offset + va as Int: " + (offset + virtualAddress).toInt)
+//      println("array length: " + length)
+//      println("actual mmBytes length: " + mmBytes.length)
+      //TODO int conversion problem here!
       addresses += getBytesLongValue(mmBytes.getArray(), (offset + virtualAddress).toInt, length)
     }
     new ExportAddressTable(addresses.toList)

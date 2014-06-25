@@ -32,7 +32,6 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -206,12 +205,13 @@ public final class PELoader {
         logger.entry(); // TODO make imports reading work with
                         // normalimports.exe!
         File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
-//        File file = new File("/home/deque/portextestfiles/testfiles/DLL2.dll");
+                "/home/deque/portextestfiles/badfiles/VirusShare_a0b4789d7f7e69a3c93b605741c891f4");
+        // File file = new
+        // File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
-        System.out.println(data);
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-        System.out.println(scanner.scanReport());
+//        System.out.println(data);
+//        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+//        System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
         SectionTable table = data.getSectionTable();
         System.out.println("file size: " + file.length());
@@ -226,11 +226,11 @@ public final class PELoader {
                     + vEnd);
         }
         // ResourceSection rsrc = loader.loadResourceSection();
-        // ExportSection edata = loader.loadExportSection();
         ExportSection edata = loader.loadExportSection();
+        // ImportSection idata = loader.loadImportSection();
         System.out.println(edata.getInfo());
         // System.out.println(rsrc.getInfo());
-        // System.out.println(edata.getInfo());
+        // System.out.println(idata.getInfo());
     }
 
 }

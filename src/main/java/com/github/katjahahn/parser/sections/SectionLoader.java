@@ -183,7 +183,7 @@ public class SectionLoader {
                     "read size too large to load section into byte array");
             raf.seek(alignedPointerToRaw);
             logger.debug("reading section bytes from " + alignedPointerToRaw
-                    + " to " + readSize);
+                    + " to " + (readSize + alignedPointerToRaw));
             byte[] sectionbytes = new byte[(int) readSize];
             raf.readFully(sectionbytes);
             return new BytesAndOffset(sectionbytes, alignedPointerToRaw);

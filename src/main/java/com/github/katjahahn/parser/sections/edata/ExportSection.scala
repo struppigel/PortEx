@@ -29,6 +29,7 @@ import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.FileFormatException
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -209,6 +210,9 @@ object ExportSection {
     mmBytes: MemoryMappedPE, virtualAddress: Long): ExportAddressTable = {
     val addrTableRVA = edataTable(EXPORT_ADDR_TABLE_RVA)
     val entries = edataTable(ADDR_TABLE_ENTRIES).toInt
+    if (addrTableRVA > mmBytes.length) {
+      throw new FileFormatException("invalid address table rva, can not parse export section")
+    }
     ExportAddressTable(mmBytes, addrTableRVA, entries, virtualAddress)
   }
 

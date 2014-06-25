@@ -64,7 +64,7 @@ public class ExportSectionTest {
 
     @Test
     public void getExportEntries() throws IOException {
-        // assertEquals(pedata.size(), exportEntries.size());
+        assertEquals(pedata.size(), exportEntries.size());
         for (Entry<File, List<ExportEntry>> set : exportEntries.entrySet()) {
             File file = set.getKey();
             List<ExportEntry> expected = set.getValue();
