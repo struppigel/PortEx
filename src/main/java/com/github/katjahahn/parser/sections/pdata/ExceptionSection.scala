@@ -15,6 +15,7 @@ import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import com.github.katjahahn.parser.MemoryMappedPE
 
 class ExceptionSection private (
   offset: Long,
@@ -51,7 +52,7 @@ object ExceptionSection {
       ARMNT -> armv7spec)
 
   //TODO wincespec!
-  def apply(sectionbytes: Array[Byte], machine: MachineType,
+  def apply(mmbytes: MemoryMappedPE, machine: MachineType,
     virtualAddress: Long, offset: Long): ExceptionSection = {
     if (!machineToSpec.contains(machine)) {
       throw new IllegalArgumentException("spec for machine type not found: " + machine)
@@ -59,17 +60,18 @@ object ExceptionSection {
     val spec = machineToSpec(machine)
     println("using spec: " + spec)
     val format = new SpecificationFormat(0, 1, 2, 3)
+    val pdatabytes = mmbytes.slice(virtualAddress, mmbytes.length + virtualAddress)
     val directory = IOUtil.readHeaderEntries(classOf[ExceptionEntryKey],
-      format, spec, sectionbytes.clone).asScala.toMap
+      format, spec, pdatabytes.clone).asScala.toMap
     new ExceptionSection(offset, directory)
   }
 
-  def newInstance(sectionbytes: Array[Byte], machine: MachineType,
+  def newInstance(mmbytes: MemoryMappedPE, machine: MachineType,
     virtualAddress: Long, offset: Long): ExceptionSection =
-    apply(sectionbytes, machine, virtualAddress, offset)
+    apply(mmbytes, machine, virtualAddress, offset)
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("src/main/resources/testfiles/")
+    val folder = new File("/home/deque/portextestfiles/testfiles/")
     for (file <- folder.listFiles) {
       val data = PELoader.loadPE(file)
       val entries = data.getOptionalHeader().getDataDirEntries()

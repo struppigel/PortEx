@@ -30,6 +30,7 @@ import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
+import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
@@ -381,7 +382,7 @@ public class SectionLoader {
         if (pdata.isPresent()) {
             return pdata.get();
         }
-        throw new IllegalStateException("unable to load resource section");
+        throw new IllegalStateException("unable to load exception section");
     }
 
     /**
@@ -413,10 +414,10 @@ public class SectionLoader {
                         return Optional.absent();
                     }
                     long offset = header.get().getAlignedPointerToRaw();
-//                    MachineType machine = coffHeader.getMachineType();
-//                    ExceptionSection section = ExceptionSection.newInstance(
-//                            bytes, machine, virtualAddress, offset);
-//                    return Optional.of(section); TODO
+                    MachineType machine = coffHeader.getMachineType();
+                    ExceptionSection section = ExceptionSection.newInstance(
+                            bytes, machine, virtualAddress, offset);
+                    return Optional.of(section); 
                 }
             }
         }
