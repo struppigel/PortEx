@@ -27,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionHeader;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
@@ -205,16 +207,27 @@ public final class PELoader {
         File file = new File(
                 "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
         PEData data = PELoader.loadPE(file);
-//        System.out.println(data);
-//        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-//        System.out.println(scanner.scanReport());
+        System.out.println(data);
+        // PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        // System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
-//        ResourceSection rsrc = loader.loadResourceSection();
-//        ExportSection edata = loader.loadExportSection();
+        SectionTable table = data.getSectionTable();
+        for (SectionHeader header : table.getSectionHeaders()) {
+            long start = header.getAlignedPointerToRaw();
+            long end = loader.getReadSize(header) + start;
+            System.out.println(header.getName() + " start: " + start + " end: "
+                    + end);
+            long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
+            long vEnd = header.getAlignedVirtualSize() + vStart;
+            System.out.println("virtual start: " + vStart + " virtual end: "
+                    + vEnd);
+        }
+        // ResourceSection rsrc = loader.loadResourceSection();
+        // ExportSection edata = loader.loadExportSection();
         ImportSection idata = loader.loadImportSection();
         System.out.println(idata.getInfo());
-//        System.out.println(rsrc.getInfo());
-//        System.out.println(edata.getInfo());
+        // System.out.println(rsrc.getInfo());
+        // System.out.println(edata.getInfo());
     }
 
 }

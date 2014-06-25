@@ -32,6 +32,7 @@ import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.IOUtil.{ NL }
+import com.github.katjahahn.parser.MemoryMappedPE
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -90,17 +91,17 @@ object ImportSection {
    */
   private var relOffsetMax = 0L
 
-  def apply(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader, importTableOffsetDiff: Int, fileSize: Long, fileOffset: Long): ImportSection = {
+  def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
+    optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {
     logger.debug("reading directory entries for root table ...")
-    var directoryTable = readDirEntries(idatabytes, virtualAddress, importTableOffsetDiff)
+    var directoryTable = readDirEntries(mmbytes, virtualAddress)
     logger.debug(directoryTable.size + " directory entries read")
     logger.debug("reading lookup table entries ...")
-    readLookupTableEntries(directoryTable, virtualAddress, optHeader, idatabytes, importTableOffsetDiff, fileSize)
+    readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, fileSize)
     //filter empty directoryTableEntries, they are of no use and probably because
     //of collapsed imports or other malformations, example: tinype
     directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
-    new ImportSection(directoryTable, fileOffset, idatabytes.length)
+    new ImportSection(directoryTable, fileOffset, mmbytes.length())
   }
 
   /**
@@ -108,8 +109,8 @@ object ImportSection {
    * and adds the lookup table entries to the directory table entry they belong to
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
-    virtualAddress: Long, optHeader: OptionalHeader, idatabytes: Array[Byte],
-    importTableOffset: Int, fileSize: Long): Unit = {
+    virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE, 
+    fileSize: Long): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
@@ -121,7 +122,7 @@ object ImportSection {
       }
       var offset = iRVA - virtualAddress
       var relOffset = iRVA
-      logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + idatabytes.length + " virtualAddress " + virtualAddress)
+      logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + mmbytes.length() + " virtualAddress " + virtualAddress)
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
@@ -129,7 +130,7 @@ object ImportSection {
       }
       try {
         do {
-          entry = LookupTableEntry(idatabytes, offset.toInt, EntrySize, virtualAddress, importTableOffset, relOffset, dirEntry)
+          entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, virtualAddress, relOffset, dirEntry)
           if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
           offset += EntrySize
           relOffset += EntrySize
@@ -146,13 +147,13 @@ object ImportSection {
    * Parses all entries of the import section and writes them into the
    * {@link #directoryTable}
    */
-  private def readDirEntries(idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): List[DirectoryEntry] = {
+  private def readDirEntries(mmbytes: MemoryMappedPE, virtualAddress: Long): List[DirectoryEntry] = {
     val directoryTable = ListBuffer[DirectoryEntry]()
     var isLastEntry = false
     var i = 0
     do {
       logger.debug(s"reading ${i + 1}. entry")
-      readDirEntry(i, idatabytes, virtualAddress, importTableOffset) match {
+      readDirEntry(i, mmbytes, virtualAddress) match {
         case Some(entry) =>
           logger.debug("------------start-----------")
           logger.debug("dir entry read: " + entry)
@@ -172,11 +173,11 @@ object ImportSection {
    * @return string
    */
   private def getASCIIName(nameRVA: Int, virtualAddress: Long,
-    idatabytes: Array[Byte], importTableOffset: Int): String = {
-    val offset = nameRVA - virtualAddress + importTableOffset
+    mmbytes: MemoryMappedPE): String = {
+    val offset = nameRVA
     //TODO cast to int is insecure. actual int is unsigned, java int is signed
-    val nullindex = idatabytes.indexWhere(_ == 0, offset.toInt)
-    new String(idatabytes.slice(offset.toInt, nullindex))
+    val nullindex = mmbytes.indexWhere(_ == 0, offset.toInt)
+    new String(mmbytes.slice(offset, nullindex))
   }
 
   /**
@@ -186,13 +187,13 @@ object ImportSection {
    * @return Some entry if the entry at the given nr is not the null entry,
    * None otherwise
    */
-  private def readDirEntry(nr: Int, idatabytes: Array[Byte], virtualAddress: Long, importTableOffset: Int): Option[DirectoryEntry] = {
-    val from = nr * ENTRY_SIZE + importTableOffset
+  private def readDirEntry(nr: Int, mmbytes: MemoryMappedPE, virtualAddress: Long): Option[DirectoryEntry] = {
+    val from = nr * ENTRY_SIZE + virtualAddress
     logger.debug("reading from: " + from)
     val until = from + ENTRY_SIZE
     if (relOffsetMax < until) relOffsetMax = until
     logger.debug("reading until: " + until)
-    val entrybytes = idatabytes.slice(from, until)
+    val entrybytes = mmbytes.slice(from, until)
     if (entrybytes.length < ENTRY_SIZE) return None
 
     /**
@@ -204,10 +205,10 @@ object ImportSection {
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
     val entry = DirectoryEntry(entrybytes)
-    entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, idatabytes, importTableOffset)
+    entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, mmbytes)
     logger.debug("entry name: " + entry.name)
     if (entry(FORWARDER_CHAIN) != 0) {
-      entry.forwarderString = getASCIIName(entry(FORWARDER_CHAIN).toInt, virtualAddress, idatabytes, importTableOffset)
+      entry.forwarderString = getASCIIName(entry(FORWARDER_CHAIN).toInt, virtualAddress, mmbytes)
       logger.debug("forwarder string: " + entry.forwarderString)
     }
     if (isEmpty(entry)) None else
@@ -220,13 +221,12 @@ object ImportSection {
    * @param idatabytes the bytes that belong to the import section
    * @param virtualAddress the address all rva values in the import section are relative to
    * @param optHeader the optional header of the file
-   * @param importTableOffset
    * @param fileSize
    * @return ImportSection instance
    */
-  def newInstance(idatabytes: Array[Byte], virtualAddress: Long,
-    optHeader: OptionalHeader, offsetDiff: Int, fileSize: Long, fileOffset: Long): ImportSection =
-    apply(idatabytes, virtualAddress, optHeader, offsetDiff, fileSize, fileOffset)
+  def newInstance(mmbytes: MemoryMappedPE, virtualAddress: Long,
+    optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection =
+    apply(mmbytes, virtualAddress, optHeader, fileSize, fileOffset)
 
   /**
    * Loads the import section and returns it.

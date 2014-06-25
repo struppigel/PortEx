@@ -18,7 +18,6 @@ package com.github.katjahahn.parser.sections;
 import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
@@ -27,7 +26,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.parser.FileFormatException;
+import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
@@ -480,78 +481,29 @@ public class SectionLoader {
                 .maybeGetDataDirEntry(dataDirKey);
         if (importTable.isPresent()) {
             long virtualAddress = importTable.get().virtualAddress;
-            Optional<BytesAndOffset> tuple = maybeReadSectionBytesFor(dataDirKey);
-            ImportSection idata = null;
-            if (!tuple.isPresent()) {
-                // read at RVA
-                logger.warn("unable to read section bytes for " + dataDirKey);
-                long offset = importTable.get().virtualAddress;
-                logger.debug("loading import section at physical offset "
-                        + offset);
-                idata = loadImportTableAt(offset,
-                        importTable.get().size);
-            } else {
-                byte[] idatabytes = tuple.get().bytes;
-                if (idatabytes.length == 0) {
-                    logger.warn("unable to read import section, readsize is 0");
-                    return Optional.absent();
-                }
-                long offset = tuple.get().offset;
-                int importTableOffset = getOffsetDiffFor(dataDirKey);
-                logger.debug("importsection offset diff: " + importTableOffset);
-                logger.debug("idatalength: " + idatabytes.length);
-                logger.debug("virtual address of ILT: " + virtualAddress);
-                idata = ImportSection.newInstance(idatabytes,
-                        virtualAddress, optHeader, importTableOffset,
-                        file.length(), offset);
-            }
-            if (idata.isEmpty()) {
-                logger.warn("empty import section");
+            PEData data = PELoader.loadPE(file); // TODO remove this, store data
+            MemoryMappedPE memoryMapped = MemoryMappedPE
+                    .newInstance(data, this);
+            if (memoryMapped.length() == 0) {
+                logger.warn("unable to read import section, readsize is 0");
                 return Optional.absent();
             }
-            return Optional.of(idata);
-        }
-        return Optional.absent();
-    }
-
-    @Requires("size != 0")
-    @Ensures("result != null")
-    private ImportSection loadImportTableAt(long offset, long size)
-            throws FileNotFoundException, IOException {
-        Preconditions.checkState(size == (int) size,
-                "table size too large to load into a byte array");
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            raf.seek(offset);
-            byte[] bytes = new byte[(int) size];
-            raf.readFully(bytes);
-            return ImportSection.newInstance(bytes, offset, optHeader, 0,
-                    file.length(), offset);
-        }
-    }
-
-    /**
-     * Returns the difference between the offset the data directory entry and
-     * the begin of the section the entry is in.
-     * 
-     * E.g. the difference between file offset of the import table and the
-     * pointer_to_raw_data of the idata section the table is in.
-     * 
-     * @param dataDirKey
-     * @return the difference of the calculated data dir entry file offset to
-     *         the pointer_to_raw_data the data dir entry is in
-     * @throws {@link FileFormatException} if offset can not be determined
-     */
-    private Integer getOffsetDiffFor(DataDirectoryKey dataDirKey)
-            throws FileFormatException {
-        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
-        if (header.isPresent()) {
-            long pointerToRawData = header.get().getAlignedPointerToRaw();
-            Optional<Long> offset = maybeGetFileOffsetFor(dataDirKey);
-            if (offset.isPresent()) {
-                return (int) (offset.get() - pointerToRawData);
+            // TODO read offset only
+            Optional<BytesAndOffset> optTup = maybeReadSectionBytesFor(dataDirKey);
+            if (optTup.isPresent()) {
+                long offset = optTup.get().offset;
+                logger.debug("idatalength: " + memoryMapped.length());
+                logger.debug("virtual address of ILT: " + virtualAddress);
+                ImportSection idata = ImportSection.newInstance(memoryMapped,
+                        virtualAddress, optHeader, file.length(), offset);
+                if (idata.isEmpty()) {
+                    logger.warn("empty import section");
+                    return Optional.absent();
+                }
+                return Optional.of(idata);
             }
         }
-        throw new FileFormatException("unable to load " + dataDirKey);
+        return Optional.absent();
     }
 
     /**

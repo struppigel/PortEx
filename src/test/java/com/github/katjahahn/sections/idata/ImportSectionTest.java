@@ -53,6 +53,9 @@ public class ImportSectionTest {
 				SectionLoader loader = new SectionLoader(pedatum);
 				Optional<ImportSection> idata = loader.maybeLoadImportSection();
 				if (!idata.isPresent()) {
+				    for(ImportDLL im : list.getValue()) {
+				        System.out.println(im);
+				    }
 					assertEquals(list.getValue().size(), 0);
 				} else {
 					List<ImportDLL> readImports = idata.get().getImports();
