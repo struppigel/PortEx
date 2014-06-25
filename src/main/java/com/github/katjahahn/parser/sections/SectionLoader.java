@@ -28,7 +28,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
@@ -63,23 +62,8 @@ public class SectionLoader {
     private final SectionTable table;
     private final File file;
     private final OptionalHeader optHeader;
+    private final PEData data;
     private final COFFFileHeader coffHeader;
-
-    /**
-     * Creates a SectionLoader instance with a file and the corresponding
-     * section table and optional Header of that file.
-     * 
-     * @param table
-     * @param optHeader
-     * @param file
-     */
-    public SectionLoader(SectionTable table, OptionalHeader optHeader,
-            COFFFileHeader coffHeader, File file) {
-        this.table = table;
-        this.file = file;
-        this.optHeader = optHeader;
-        this.coffHeader = coffHeader;
-    }
 
     /**
      * Creates a SectionLoader instance taking all information from the given
@@ -92,6 +76,7 @@ public class SectionLoader {
         this.optHeader = data.getOptionalHeader();
         this.file = data.getFile();
         this.coffHeader = data.getCOFFFileHeader();
+        this.data = data;
     }
 
     /**
@@ -259,8 +244,6 @@ public class SectionLoader {
             readSize = file.length() - alignedPointerToRaw;
         }
         if (readSize < 0) {
-            // TODO VirusShare_6fdfdffeb4b1be2d0036bac49cb0d590 negative
-            // readsize -> add in anomalies
             logger.warn("invalid readsize: " + readSize + " for file "
                     + file.getName() + " adjusting readsize to 0");
             readSize = 0;
@@ -406,9 +389,7 @@ public class SectionLoader {
             if (header.isPresent()) {
                 Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
-                    BytesAndOffset tuple = loadSectionBytesFor(header.get());
-                    //TODO remove loadPE call, save data instance here instead
-                    MemoryMappedPE bytes = MemoryMappedPE.newInstance(PELoader.loadPE(file), this);
+                    MemoryMappedPE bytes = MemoryMappedPE.newInstance(data, this);
                     if (bytes.length() == 0) {
                         logger.warn("unable to read exception section, readsize is 0");
                         return Optional.absent();
@@ -482,7 +463,6 @@ public class SectionLoader {
                 .maybeGetDataDirEntry(dataDirKey);
         if (importTable.isPresent()) {
             long virtualAddress = importTable.get().virtualAddress;
-            PEData data = PELoader.loadPE(file); // TODO remove this, store data
             MemoryMappedPE memoryMapped = MemoryMappedPE
                     .newInstance(data, this);
             if (memoryMapped.length() == 0) {
@@ -629,8 +609,7 @@ public class SectionLoader {
             if (!res.isPresent()) {
                 return Optional.absent();
             }
-            //TODO don't load data, save it
-            MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(PELoader.loadPE(file), this);
+            MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(data, this);
             if (mmbytes.length() == 0) {
                 logger.warn("unable to read export section, readsize is 0");
                 return Optional.absent();
