@@ -133,8 +133,8 @@ object MemoryMappedPE {
       val bytes = Array.fill(maxVA.toInt)(0.toByte)
       for (header <- table.getSectionHeaders().asScala) {
         if (secLoader.isValidSection(header)) {
-          val start = header.get(VIRTUAL_ADDRESS)
-          val end = header.get(VIRTUAL_ADDRESS) + header.getAlignedVirtualSize()
+          val start = header.getAlignedVirtualAddress()
+          val end = start + header.getAlignedVirtualSize()
           val secBytes = secLoader.loadSectionBytes(header.getNumber()).bytes
           for (i <- start until Math.min(end, secBytes.length + start)) {
             bytes(i.toInt) = secBytes((i - start).toInt)
@@ -147,7 +147,7 @@ object MemoryMappedPE {
 
   private def getMaxVA(table: SectionTable, secLoader: SectionLoader): Long =
     table.getSectionHeaders().asScala.foldRight(0L) { (header, max) =>
-      val headerEnd = header.get(VIRTUAL_ADDRESS) + header.getAlignedVirtualSize()
+      val headerEnd = header.getAlignedVirtualAddress() + header.getAlignedVirtualSize()
       if (secLoader.isValidSection(header) && headerEnd > max) headerEnd else max
     }
 

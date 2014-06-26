@@ -97,6 +97,20 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         }
         return (virtSize + 0xfff) & ~0xfff;
     }
+    
+    /**
+     * Returns the VirtualAddress rounded up to a multiple of 4kb.
+     * 
+     * @return aligned VirtualAddress
+     */
+    @Ensures("result % 4096 == 0")
+    public long getAlignedVirtualAddress() {
+        long virtAddr = get(VIRTUAL_ADDRESS);
+        if (virtAddr == (virtAddr & ~0xfff)) {
+            return virtAddr;
+        }
+        return (virtAddr + 0xfff) & ~0xfff;
+    }
 
     /**
      * Returns the name of the section table entry
