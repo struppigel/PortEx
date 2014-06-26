@@ -54,17 +54,17 @@ object ExportNamePointerTable {
     val addresses = new ListBuffer[(Address, String)]
     val end = initialOffset + entries * length
     for (offset <- initialOffset until end by length) {
-      val address = getBytesLongValue(mmBytes.getArray(), (offset + virtualAddress).toInt, length)
-      val name = getName(mmBytes.getArray(), address.toInt)
+      val address = mmBytes.getBytesLongValue(offset + virtualAddress, length)
+      val name = getName(mmBytes, address)
       addresses += ((address, name))
     }
 
     new ExportNamePointerTable(addresses.toList)
   }
 
-  private def getName(bytes: Array[Byte], address: Int): String = {
-    val end = bytes.indexOf('\0'.toByte, address)
-    val nameBytes = bytes.slice(address, end)
+  private def getName(mmBytes: MemoryMappedPE, address: Long): String = {
+    val end = mmBytes.indexOf('\0'.toByte, address)
+    val nameBytes = mmBytes.slice(address, end)
     new String(nameBytes)
   }
 

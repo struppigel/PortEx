@@ -35,8 +35,11 @@ abstract class LookupTableEntry {
 }
 
 /**
- * @constructor instantiates an ordinal entry
- * @param ordNumber
+ * Instantiates an ordinal entry
+ * 
+ * @param ordNumber the ordinal of the entry
+ * @param rva
+ * @param dirEntry
  */
 case class OrdinalEntry(val ordNumber: Int, val rva: Long,
   dirEntry: DirectoryEntry) extends LookupTableEntry {
@@ -45,9 +48,11 @@ case class OrdinalEntry(val ordNumber: Int, val rva: Long,
 }
 
 /**
- * @constructor instantiates a name entry.
+ * Instantiates a name entry.
  * @param nameRVA
  * @param hintNameEntry
+ * @param rva
+ * @param dirEntry
  */
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
   val rva: Long, val dirEntry: DirectoryEntry) extends LookupTableEntry {
@@ -58,7 +63,7 @@ case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
 }
 
 /**
- * @constructor instantiates a null entry, which is an empty entry that
+ * Instantiates a null entry, which is an empty entry that
  * indicates the end of the lookup table
  */
 case class NullEntry() extends LookupTableEntry {
@@ -86,7 +91,7 @@ object LookupTableEntry {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     try {
       //TODO remove get array call
-      val value = getBytesLongValue(mmbytes.getArray(), (offset + virtualAddress).toInt, entrySize)
+      val value = mmbytes.getBytesLongValue(offset + virtualAddress, entrySize)
       if (value == 0) {
         NullEntry()
       } else if ((value & ordFlagMask) != 0) {
@@ -111,7 +116,7 @@ object LookupTableEntry {
     logger.debug("address: " + address)
     logger.debug("idata length: " + mmbytes.length)
     //TODO remove getArray call
-    val hint = getBytesIntValue(mmbytes.getArray, address.toInt, 2)
+    val hint = mmbytes.getBytesIntValue(address, 2)
     val name = getASCII(address.toInt + 2, mmbytes)
     NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry)
   }

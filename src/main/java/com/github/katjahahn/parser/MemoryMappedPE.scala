@@ -1,3 +1,20 @@
+/**
+ * *****************************************************************************
+ * Copyright 2014 Katja Hahn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ****************************************************************************
+ */
 package com.github.katjahahn.parser
 
 import com.github.katjahahn.parser.sections.SectionTable
@@ -18,20 +35,74 @@ class MemoryMappedPE(private val bytes: Array[Byte]) {
 
   private var relativeVA = 0
 
-  //Java getters and setters
+  /**Java getters and setters**/
+
   def getRelativeVA() = relativeVA
   def setRelativeVA(value: Int): Unit = relativeVA = value
 
-  def apply(i: Int): Byte = bytes(relativeVA + i)
-  def get(i: Int): Byte = apply(i)
+  /**Array-like methods**/
 
+  /**
+   * Returns byte at position i relative to relativeVA.
+   * <p>
+   * Scala only.
+   * @param i index/position
+   * @return byte at position i
+   */
+  def apply(i: Long): Byte = bytes((relativeVA + i).toInt)
+  /**
+   * Returns byte at position i relative to relativeVA.
+   *
+   * @param i index/position
+   * @return byte at position i
+   */
+  def get(i: Long): Byte = apply(i)
+
+  /**
+   * Returns the size of the memory mapped information.
+   * <p>
+   * Bytes above that size are always 0.
+   *
+   * @return size of memory mapped information
+   */
   def length(): Int = bytes.length
 
+  /**
+   * Creates an array of the specified segment.
+   * <p>
+   * The distance until-from has to be in Integer range.
+   *
+   * @param from
+   * @param until
+   * @return byte array containing the bytes from the specified segment
+   */
   def slice(from: Long, until: Long): Array[Byte] = bytes.slice(from.toInt, until.toInt)
-  def indexWhere(p: Byte => Boolean, from: Int): Long = bytes.indexWhere(p, from)
 
-  //TODO remove
-  def getArray(): Array[Byte] = bytes
+  /**
+   * Returns the index of the first byte that satisfies the condition.
+   *
+   * @param p the function that specifies the condition
+   * @param from offset to start searching from
+   * @return index of the first byte that satisfies the condition
+   */
+  def indexWhere(p: Byte => Boolean, from: Int): Long = bytes.indexWhere(p, from)
+  
+  /**
+   * Returns the index of the first byte that has the value.
+   *
+   * @param value value of the byte searched for
+   * @param from offset to start searching from
+   * @return index of the first byte that has the value
+   */
+  def indexOf(elem: Byte, from: Long): Long = bytes.indexOf(elem, from.toInt)
+
+  /**ByteArrayUtil methods**/
+
+  def getBytesIntValue(offset: Long, length: Int): Int =
+    ByteArrayUtil.bytesToInt(this.slice(offset, offset + length))
+
+  def getBytesLongValue(offset: Long, length: Int): Long =
+    ByteArrayUtil.bytesToLong(this.slice(offset, offset + length))
 
 }
 
@@ -40,6 +111,9 @@ object MemoryMappedPE {
   def newInstance(data: PEData, secLoader: SectionLoader): MemoryMappedPE =
     apply(data, secLoader)
 
+  /**
+   * Creates a representation of the PE content as it is mapped into memory
+   */
   def apply(data: PEData, secLoader: SectionLoader): MemoryMappedPE = {
     val bytes = readMemoryMappedSectionBytes(data, secLoader)
     new MemoryMappedPE(bytes)

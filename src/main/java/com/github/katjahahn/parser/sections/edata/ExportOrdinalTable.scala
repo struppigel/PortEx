@@ -45,7 +45,7 @@ object ExportOrdinalTable {
     val end = entrySize * entries + initialOffset
     val ordinals = new ListBuffer[Int]
     for (offset <- initialOffset until end by entrySize) {
-      val ordinal = getBytesIntValue(mmBytes.getArray(), (offset + virtualAddress).toInt, entrySize)
+      val ordinal = mmBytes.getBytesIntValue(offset + virtualAddress, entrySize)
       ordinals += (ordinal + base)
     }
     new ExportOrdinalTable(ordinals.toList, base)

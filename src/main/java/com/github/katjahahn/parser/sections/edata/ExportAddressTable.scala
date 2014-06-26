@@ -72,7 +72,7 @@ object ExportAddressTable {
 //      println("array length: " + length)
 //      println("actual mmBytes length: " + mmBytes.length)
       //TODO int conversion problem here!
-      addresses += getBytesLongValue(mmBytes.getArray(), (offset + virtualAddress).toInt, length)
+      addresses += mmBytes.getBytesLongValue(offset + virtualAddress, length)
     }
     new ExportAddressTable(addresses.toList)
   }
