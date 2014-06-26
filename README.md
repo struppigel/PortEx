@@ -12,7 +12,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
-* Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values
+* Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values
 * Visualize PE files
 * Calculate Shannon Entropy for sections
 * Scan for PEiD signatures or your own signature database
