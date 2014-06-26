@@ -102,7 +102,7 @@ object LookupTableEntry {
     } catch {
       case e: Exception =>
         logger.warn("invalid lookup table entry at rva " + rva)
-        throw new FailureEntryException()
+        throw new FailureEntryException("invalid lookup table entry at rva " + rva)
     }
   }
 
@@ -111,13 +111,13 @@ object LookupTableEntry {
     val addrMask = 0xFFFFFFFFL
     val nameRVA = (addrMask & value)
     logger.debug("rva: " + nameRVA)
-    val address = (nameRVA) //- virtualAddress) + importTableOffset
+    val address = nameRVA
     logger.debug("virtual addr: " + virtualAddress)
     logger.debug("address: " + address)
     logger.debug("idata length: " + mmbytes.length)
-    //TODO remove getArray call
+    if(address + 2 > mmbytes.length) throw new FailureEntryException()
     val hint = mmbytes.getBytesIntValue(address, 2)
-    val name = getASCII(address.toInt + 2, mmbytes)
+    val name = getASCII(address + 2, mmbytes)
     NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry)
   }
 
@@ -127,7 +127,7 @@ object LookupTableEntry {
     OrdinalEntry(ord, rva, dirEntry)
   }
 
-  private def getASCII(offset: Int, mmbytes: MemoryMappedPE): String = {
+  private def getASCII(offset: Long, mmbytes: MemoryMappedPE): String = {
     val nullindex = mmbytes.indexWhere(_ == 0, offset)
     new String(mmbytes.slice(offset, nullindex))
   }

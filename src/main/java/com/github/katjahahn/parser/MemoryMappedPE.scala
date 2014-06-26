@@ -76,7 +76,14 @@ class MemoryMappedPE(private val bytes: Array[Byte]) {
    * @param until
    * @return byte array containing the bytes from the specified segment
    */
-  def slice(from: Long, until: Long): Array[Byte] = bytes.slice(from.toInt, until.toInt)
+  def slice(from: Long, until: Long): Array[Byte] = {
+    if (from > length) {
+      Array.fill((until - from).toInt)(0.toByte)
+    } else if (until > length) {
+      bytes.slice(from.toInt, length) ++ Array.fill((until - length).toInt)(0.toByte)
+    } else
+      bytes.slice(from.toInt, until.toInt)
+  }
 
   /**
    * Returns the index of the first byte that satisfies the condition.
@@ -85,8 +92,8 @@ class MemoryMappedPE(private val bytes: Array[Byte]) {
    * @param from offset to start searching from
    * @return index of the first byte that satisfies the condition
    */
-  def indexWhere(p: Byte => Boolean, from: Int): Long = bytes.indexWhere(p, from)
-  
+  def indexWhere(p: Byte => Boolean, from: Long): Long = bytes.indexWhere(p, from.toInt)
+
   /**
    * Returns the index of the first byte that has the value.
    *

@@ -142,7 +142,11 @@ public class ImportSectionTest {
 		for (OrdinalImport pefileImport : ordinalImports) {
 			long rva1 = pefileImport.rva - iat;
 			long rva2 = readImport.rva - ilt;
-			if (pefileImport.ordinal == readImport.ordinal && rva1 == rva2) {
+			logger.info("rva1: " + rva1 + " rva2: " + rva2);
+			logger.info("pefileImport ord: " + pefileImport.ordinal);
+			logger.info("readImport ord: " + readImport.ordinal);
+			//second condition to work with lowalignment mode
+			if (pefileImport.ordinal == readImport.ordinal && rva1 == rva2 || pefileImport.toString().equals(readImport.toString())) {
 				return pefileImport;
 			}
 		}

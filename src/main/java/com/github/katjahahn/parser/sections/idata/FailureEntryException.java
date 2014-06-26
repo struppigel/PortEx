@@ -24,5 +24,13 @@ package com.github.katjahahn.parser.sections.idata;
 public class FailureEntryException extends Exception {
 
 	private static final long serialVersionUID = 1L;
+	
+	public FailureEntryException() {
+	    super();
+	}
+	
+	public FailureEntryException(String message) {
+	    super(message);
+	}
 
 }

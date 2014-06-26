@@ -97,7 +97,11 @@ object ImportSection {
     var directoryTable = readDirEntries(mmbytes, virtualAddress)
     logger.debug(directoryTable.size + " directory entries read")
     logger.debug("reading lookup table entries ...")
-    readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, fileSize)
+    try {
+      readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, fileSize)
+    } catch {
+      case e: FailureEntryException => logger.warn("Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
+    }
     //filter empty directoryTableEntries, they are of no use and probably because
     //of collapsed imports or other malformations, example: tinype
     directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
@@ -109,7 +113,7 @@ object ImportSection {
    * and adds the lookup table entries to the directory table entry they belong to
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
-    virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE, 
+    virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE,
     fileSize: Long): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
@@ -128,18 +132,13 @@ object ImportSection {
         case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException("ROM file format not covered by PortEx")
       }
-      try {
-        do {
-          entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, virtualAddress, relOffset, dirEntry)
-          if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
-          offset += EntrySize
-          relOffset += EntrySize
-          if (relOffsetMax < relOffset) relOffsetMax = relOffset;
-        } while (!entry.isInstanceOf[NullEntry])
-      } catch {
-        case e: FailureEntryException =>
-          logger.info("removing invalid directory entry with name '" + dirEntry.name + "'")
-      }
+      do {
+        entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, virtualAddress, relOffset, dirEntry)
+        if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
+        offset += EntrySize
+        relOffset += EntrySize
+        if (relOffsetMax < relOffset) relOffsetMax = relOffset;
+      } while (!entry.isInstanceOf[NullEntry])
     }
   }
 

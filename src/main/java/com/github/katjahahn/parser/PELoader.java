@@ -31,7 +31,8 @@ import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.ImportDLL;
+import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -205,13 +206,13 @@ public final class PELoader {
         logger.entry(); // TODO make imports reading work with
                         // normalimports.exe!
         File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_a0b4789d7f7e69a3c93b605741c891f4");
+                "/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe");
         // File file = new
         // File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
-//        System.out.println(data);
-//        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-//        System.out.println(scanner.scanReport());
+        // System.out.println(data);
+        // PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        // System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
         SectionTable table = data.getSectionTable();
         System.out.println("file size: " + file.length());
@@ -226,11 +227,14 @@ public final class PELoader {
                     + vEnd);
         }
         // ResourceSection rsrc = loader.loadResourceSection();
-        ExportSection edata = loader.loadExportSection();
-        // ImportSection idata = loader.loadImportSection();
-        System.out.println(edata.getInfo());
+        // ExportSection edata = loader.loadExportSection();
+        ImportSection idata = loader.loadImportSection();
+        // System.out.println(edata.getInfo());
         // System.out.println(rsrc.getInfo());
-        // System.out.println(idata.getInfo());
+//        System.out.println(idata.getInfo());
+        for (ImportDLL dll : idata.getImports()) {
+            System.out.println(dll.toString());
+        }
     }
 
 }
