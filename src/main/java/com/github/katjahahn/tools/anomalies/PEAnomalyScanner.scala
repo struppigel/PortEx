@@ -91,7 +91,7 @@ object PEAnomalyScanner {
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("/home/deque/portextestfiles/goodfiles/")
+    val folder = new File("/home/deque/portextestfiles/badfiles/")
     for (file <- folder.listFiles()) {
       val data = PELoader.loadPE(file)
 //      println(data)

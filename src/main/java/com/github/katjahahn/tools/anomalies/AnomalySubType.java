@@ -219,13 +219,17 @@ public enum AnomalySubType {
      */
     UNUSUAL_SEC_CHARACTERISTICS,
     /**
+     * Sections are physically shuffled.
+     */
+    PHYSICALLY_SHUFFLED_SEC, //TODO add to thesis
+    /**
      * Sections are physically overlapping.
      */
-    OVERLAPPING_SEC,
+    PHYSICALLY_OVERLAPPING_SEC,
     /**
-     * Sections are duplicated. This is a special case of OVERLAPPING_SEC.
+     * Sections are duplicated. This is a special case of {@link #PHYSICALLY_OVERLAPPING_SEC}.
      */
-    DUPLICATE_SEC,
+    PHYSICALLY_DUPLICATED_SEC,
     /**
      * The virtual addresses of the sections are not in ascending order.
      */
