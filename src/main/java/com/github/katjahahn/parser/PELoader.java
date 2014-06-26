@@ -205,7 +205,7 @@ public final class PELoader {
         logger.entry(); // TODO make imports reading work with
                         // normalimports.exe!
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/tinype/tinyest.exe");
+                "/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
         // File file = new
         // File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);

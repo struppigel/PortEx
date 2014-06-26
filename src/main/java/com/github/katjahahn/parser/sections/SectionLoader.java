@@ -389,7 +389,8 @@ public class SectionLoader {
             if (header.isPresent()) {
                 Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
                 if (virtualAddress != null) {
-                    MemoryMappedPE bytes = MemoryMappedPE.newInstance(data, this);
+                    MemoryMappedPE bytes = MemoryMappedPE.newInstance(data,
+                            this);
                     if (bytes.length() == 0) {
                         logger.warn("unable to read exception section, readsize is 0");
                         return Optional.absent();
@@ -398,7 +399,7 @@ public class SectionLoader {
                     MachineType machine = coffHeader.getMachineType();
                     ExceptionSection section = ExceptionSection.newInstance(
                             bytes, machine, virtualAddress, offset);
-                    return Optional.of(section); 
+                    return Optional.of(section);
                 }
             }
         }
@@ -471,18 +472,19 @@ public class SectionLoader {
             }
             // TODO read offset only
             Optional<BytesAndOffset> optTup = maybeReadSectionBytesFor(dataDirKey);
+            long offset = 0;
             if (optTup.isPresent()) {
-                long offset = optTup.get().offset;
-                logger.debug("idatalength: " + memoryMapped.length());
-                logger.debug("virtual address of ILT: " + virtualAddress);
-                ImportSection idata = ImportSection.newInstance(memoryMapped,
-                        virtualAddress, optHeader, file.length(), offset);
-                if (idata.isEmpty()) {
-                    logger.warn("empty import section");
-                    return Optional.absent();
-                }
-                return Optional.of(idata);
+                offset = optTup.get().offset;
+            } 
+            logger.debug("idatalength: " + memoryMapped.length());
+            logger.debug("virtual address of ILT: " + virtualAddress);
+            ImportSection idata = ImportSection.newInstance(memoryMapped,
+                    virtualAddress, optHeader, file.length(), offset);
+            if (idata.isEmpty()) {
+                logger.warn("empty import section");
+                return Optional.absent();
             }
+            return Optional.of(idata);
         }
         return Optional.absent();
     }
@@ -614,8 +616,9 @@ public class SectionLoader {
                 logger.warn("unable to read export section, readsize is 0");
                 return Optional.absent();
             }
-            //TODO correct offset, directory doesn't always start at section start
-            long offset = res.get().offset; 
+            // TODO correct offset, directory doesn't always start at section
+            // start
+            long offset = res.get().offset;
             ExportSection edata = ExportSection.newInstance(mmbytes,
                     virtualAddress, optHeader, this, offset);
             if (edata.isEmpty()) {
@@ -708,14 +711,15 @@ public class SectionLoader {
 
     public boolean pointsToValidSection(DataDirectoryKey dataDirKey) {
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
-        if(header.isPresent()) {
+        if (header.isPresent()) {
             return isValidSection(header.get());
         }
         return false;
     }
-    
+
     public boolean isValidSection(SectionHeader header) {
-        return getReadSize(header) > 0 && header.getAlignedPointerToRaw() < file.length();
+        return getReadSize(header) > 0
+                && header.getAlignedPointerToRaw() < file.length();
     }
 
 }
