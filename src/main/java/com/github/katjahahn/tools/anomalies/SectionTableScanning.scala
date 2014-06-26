@@ -53,11 +53,70 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkTooLargeSizes
     anomalyList ++= checkSectionNames
     anomalyList ++= checkOverlappingSections
+    anomalyList ++= checkNameCharacteristicsMatch
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
   }
 
-  //TODO test this
+  private def checkNameCharacteristicsMatch(): List[Anomaly] = {
+
+    val charSecNameMap = Map(
+      ".bss" -> List(IMAGE_SCN_CNT_UNINITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".cormeta" -> List(IMAGE_SCN_LNK_INFO),
+      ".data" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".debug" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_DISCARDABLE),
+      ".drective" -> List(IMAGE_SCN_LNK_INFO),
+      ".edata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ),
+      ".idata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ, IMAGE_SCN_MEM_WRITE),
+      ".idlsym" -> List(IMAGE_SCN_LNK_INFO),
+      ".pdata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ),
+      ".rdata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ),
+      ".reloc" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_DISCARDABLE),
+      ".rsrc" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ),
+      ".sbss" -> List(IMAGE_SCN_CNT_UNINITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".sdata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".srdata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ),
+      ".sxdata" -> List(IMAGE_SCN_LNK_INFO),
+      ".text" -> List(IMAGE_SCN_CNT_CODE, IMAGE_SCN_MEM_EXECUTE, IMAGE_SCN_MEM_READ),
+      ".tls" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".tls$" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".vsdata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ,
+        IMAGE_SCN_MEM_WRITE),
+      ".xdata" -> List(IMAGE_SCN_CNT_INITIALIZED_DATA, IMAGE_SCN_MEM_READ))
+
+    val anomalyList = ListBuffer[Anomaly]()
+    val headers = data.getSectionTable.getSectionHeaders.asScala
+    for (header <- headers) {
+      val sectionName = filteredString(header.getName)
+      val characs = header.getCharacteristics.asScala.toList
+      val entry = header.getField(SectionHeaderKey.CHARACTERISTICS)
+      if (charSecNameMap.contains(header.getName)) {
+        val mustHaveCharac = charSecNameMap(header.getName)
+        //Note: Almost all files don't have IMAGE_SCN_MEM_READ activated, so 
+        //this is not an indicator for anything
+        val notContainedCharac = mustHaveCharac.filterNot(c => c == IMAGE_SCN_MEM_READ || characs.contains(c))
+        val superfluousCharac = characs.filterNot(mustHaveCharac.contains(_))
+        if (!notContainedCharac.isEmpty) {
+          val description = s"Section Header ${header.getNumber()} with name ${sectionName} should (but doesn't) contain the characteristics: ${notContainedCharac.mkString(", ")}"
+          anomalyList += NonDefaultAnomaly(entry, description, UNUSUAL_SEC_CHARACTERISTICS)
+        }
+        if (!superfluousCharac.isEmpty) {
+          val description = s"Section Header ${header.getNumber()} with name ${sectionName} has unusual characteristics, that shouldn't be there: ${superfluousCharac.mkString(", ")}"
+          anomalyList += NonDefaultAnomaly(entry, description, UNUSUAL_SEC_CHARACTERISTICS)
+        }
+      }
+    }
+    anomalyList.toList
+  }
+
   private def sectionTableInOverlay(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable

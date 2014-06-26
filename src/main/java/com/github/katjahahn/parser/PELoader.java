@@ -203,8 +203,7 @@ public final class PELoader {
     }
 
     public static void main(String[] args) throws IOException {
-        logger.entry(); // TODO make imports reading work with
-                        // normalimports.exe!
+        logger.entry(); 
         File file = new File(
                 "/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
         // File file = new

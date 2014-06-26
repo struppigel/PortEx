@@ -166,7 +166,7 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/goodfiles")
+    val folder = new File("/home/deque/portextestfiles/goodcontrolgroup")
     val thresholdA = 0.99
     val thresholdB = 0.80
     val thresholdC = 0.50

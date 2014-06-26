@@ -214,6 +214,11 @@ public enum AnomalySubType {
      */
     DEPRECATED_SEC_CHARACTERISTICS,
     /**
+     * Section characteristics are either missing or superfluous. (Based on
+     * conventions given by section name, see PECOFF spec) //TODO add to thesis
+     */
+    UNUSUAL_SEC_CHARACTERISTICS,
+    /**
      * Sections are physically overlapping.
      */
     OVERLAPPING_SEC,
