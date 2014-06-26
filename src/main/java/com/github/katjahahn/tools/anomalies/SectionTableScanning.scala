@@ -239,7 +239,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val range2 = physicalSectionRange(sec2)
       return range1 == range2
     }
-    def notEmpty(range: SectionRange): Boolean = range._2 != 0
+    def notEmpty(range: SectionRange): Boolean = range._1 != range._2
 
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable

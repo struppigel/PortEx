@@ -94,15 +94,17 @@ object PEAnomalyScanner {
     val folder = new File("/home/deque/portextestfiles/badfiles/")
     for (file <- folder.listFiles()) {
       val data = PELoader.loadPE(file)
-//      println(data)
+      //      println(data)
       val loader = new SectionLoader(data)
       val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
       val over = new Overlay(data)
-      println(scanner.scanReport)
-      println("has overlay: " + over.exists())
-      println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-      println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-      println()
+      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.PHYSICALLY_SHUFFLED_SEC).isEmpty) {
+        println(scanner.scanReport)
+        println("has overlay: " + over.exists())
+        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+        println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+        println()
+      }
     }
   }
 

@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
@@ -278,9 +279,12 @@ public class Visualizer {
         Optional<ImportSection> idata = loader.maybeLoadImportSection();
         if (idata.isPresent()) {
             importsAvailable = true;
-            long ilt = idata.get().getOffset();
-            long size = idata.get().getSize();
-            drawPixels(importColor, ilt, size, additionalGap);
+            for (Location loc : idata.get().getLocations()) {
+                long start = loc.from;
+                long size = loc.size;
+                System.out.println("start: " + start + " size: " + size);
+                drawPixels(importColor, start, size, additionalGap);
+            }
         }
         Optional<ExportSection> edata = loader.maybeLoadExportSection();
         if (edata.isPresent()) {
@@ -321,7 +325,8 @@ public class Visualizer {
         Optional<SectionHeader> section = new SectionLoader(data)
                 .maybeGetSectionHeaderByRVA(rva);
         if (section.isPresent()) {
-            long phystovirt = section.get().get(SectionHeaderKey.VIRTUAL_ADDRESS)
+            long phystovirt = section.get().get(
+                    SectionHeaderKey.VIRTUAL_ADDRESS)
                     - section.get().get(SectionHeaderKey.POINTER_TO_RAW_DATA);
             return Optional.of(rva - phystovirt);
         }
@@ -475,7 +480,7 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
+                "/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
@@ -506,9 +511,9 @@ public class Visualizer {
     @Requires("bytes > 0")
     public void setBytesPerPixel(int bytes) {
         long nrOfPixels = data.getFile().length() / bytes;
-        height = (int) (nrOfPixels / fileWidth) * pixelSize; 
+        height = (int) (nrOfPixels / fileWidth) * pixelSize;
     }
-    
+
     /**
      * @see #setAdditionalGap(int)
      * @return additional gap

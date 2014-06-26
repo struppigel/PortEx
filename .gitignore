@@ -10,6 +10,7 @@ UserDB.TXT
 userdb.jclausing.txt
 testuserdb.txt
 filenotes.txt
+*.png
 
 # tex files # 
 *.acn

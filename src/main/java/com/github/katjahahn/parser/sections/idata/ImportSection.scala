@@ -33,6 +33,7 @@ import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.Location
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -67,8 +68,37 @@ class ImportSection private (
     (for (e <- directoryTable)
       yield e.getInfo() + NL + NL).mkString
 
+  /**
+   * @return a list of all import entries found
+   */
   def getImports(): java.util.List[ImportDLL] =
     directoryTable.map(e => e.toImportDLL).asJava
+
+  /**
+   *
+   * @return a list with all locations the import information has been written to.
+   */
+  //TODO include IAT and ILT, add lookuptable entries, add hint-name-table entries, maybe add string locations
+  def getLocations(): java.util.List[Location] = {
+    val ranges = mergeContinuous(directoryTable.foldRight(List[Location]())((entry, list) => entry.getLocations ::: list))
+    ranges.toList.asJava
+  }
+
+  //TODO test this! Seems to create errors!
+  private def mergeContinuous(locs: List[Location]): List[Location] = {
+    def merge(loc1: Location, loc2: Location): Location =
+      new Location(loc1.from, loc2.from + loc2.size)
+
+    def isContinuous(loc1: Location, loc2: Location): Boolean =
+      loc1.from + loc1.size == loc2.from
+
+    locs.foldLeft(List[Location]()) { (list, loc) =>
+      if (list.isEmpty) List(loc)
+      else if (isContinuous(list.last, loc)) list.take(list.length - 2) :+ merge(list.last, loc)
+      else list :+ loc
+    }
+    locs
+  }
 
   /**
    * Returns a decription of all entries in the import section.
@@ -94,11 +124,11 @@ object ImportSection {
   def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
     optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {
     logger.debug("reading directory entries for root table ...")
-    var directoryTable = readDirEntries(mmbytes, virtualAddress)
+    var directoryTable = readDirEntries(mmbytes, virtualAddress, fileOffset)
     logger.debug(directoryTable.size + " directory entries read")
     logger.debug("reading lookup table entries ...")
     try {
-      readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, fileSize)
+      readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, fileSize, fileOffset)
     } catch {
       case e: FailureEntryException => logger.warn("Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
     }
@@ -114,7 +144,7 @@ object ImportSection {
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
     virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE,
-    fileSize: Long): Unit = {
+    fileSize: Long, fileOffset: Long): Unit = {
     for (dirEntry <- directoryTable) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
@@ -133,7 +163,7 @@ object ImportSection {
         case ROM => throw new IllegalArgumentException("ROM file format not covered by PortEx")
       }
       do {
-        entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, virtualAddress, relOffset, dirEntry)
+        entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, virtualAddress, relOffset, dirEntry, fileOffset + offset)
         if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
         relOffset += EntrySize
@@ -146,13 +176,14 @@ object ImportSection {
    * Parses all entries of the import section and writes them into the
    * {@link #directoryTable}
    */
-  private def readDirEntries(mmbytes: MemoryMappedPE, virtualAddress: Long): List[DirectoryEntry] = {
+  private def readDirEntries(mmbytes: MemoryMappedPE,
+    virtualAddress: Long, fileOffset: Long): List[DirectoryEntry] = {
     val directoryTable = ListBuffer[DirectoryEntry]()
     var isLastEntry = false
     var i = 0
     do {
       logger.debug(s"reading ${i + 1}. entry")
-      readDirEntry(i, mmbytes, virtualAddress) match {
+      readDirEntry(i, mmbytes, virtualAddress, fileOffset) match {
         case Some(entry) =>
           logger.debug("------------start-----------")
           logger.debug("dir entry read: " + entry)
@@ -186,7 +217,8 @@ object ImportSection {
    * @return Some entry if the entry at the given nr is not the null entry,
    * None otherwise
    */
-  private def readDirEntry(nr: Int, mmbytes: MemoryMappedPE, virtualAddress: Long): Option[DirectoryEntry] = {
+  private def readDirEntry(nr: Int, mmbytes: MemoryMappedPE,
+    virtualAddress: Long, fileOffset: Long): Option[DirectoryEntry] = {
     val from = nr * ENTRY_SIZE + virtualAddress
     logger.debug("reading from: " + from)
     val until = from + ENTRY_SIZE
@@ -203,7 +235,7 @@ object ImportSection {
       //entry.entries.values.forall(v => v == 0) 
       entry(I_LOOKUP_TABLE_RVA) == 0 && entry(I_ADDR_TABLE_RVA) == 0
 
-    val entry = DirectoryEntry(entrybytes)
+    val entry = DirectoryEntry(entrybytes, fileOffset + (nr * ENTRY_SIZE))
     entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, mmbytes)
     logger.debug("entry name: " + entry.name)
     if (entry(FORWARDER_CHAIN) != 0) {

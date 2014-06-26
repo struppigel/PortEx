@@ -42,6 +42,7 @@ import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.HeaderKey
 import com.github.katjahahn.parser.IOUtil
+import com.github.katjahahn.parser.Location
 
 /**
  * Represents a directory table entry. Contains all lookup table entries that
@@ -49,14 +50,19 @@ import com.github.katjahahn.parser.IOUtil
  *
  * @author Katja Hahn
  *
- * @constructor instanciates a directory table entry with the map of entries that
+ * Instanciates a directory table entry with the map of entries that
  * represent the information belonging to the directory table entry. This map is
  * created by the {@link #apply} method of companion object
  *
  * @param entries that represent the information of the directory table entry
  */
 class DirectoryEntry private (
-  private val entries: Map[DirectoryEntryKey, StandardField]) {
+  private val entries: Map[DirectoryEntryKey, StandardField], val offset: Long) {
+
+  /**
+   * The size of a directory entry
+   */
+  val size = 20
 
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
@@ -65,6 +71,9 @@ class DirectoryEntry private (
   def addLookupTableEntry(e: LookupTableEntry): Unit = {
     lookupTableEntries = lookupTableEntries :+ e
   }
+  
+  def getLocations(): List[Location] = new Location(offset, size) :: 
+   (for(entry <- lookupTableEntries) yield new Location(entry.offset, entry.size))
 
   def apply(key: DirectoryEntryKey): Long = {
     entries(key).value
@@ -105,10 +114,10 @@ object DirectoryEntry {
    * used to read the information
    * @return the constructed directory table entry
    */
-  def apply(entrybytes: Array[Byte]): DirectoryEntry = {
+  def apply(entrybytes: Array[Byte], offset: Long): DirectoryEntry = {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val entries = IOUtil.readHeaderEntries(classOf[DirectoryEntryKey], 
         format, I_DIR_ENTRY_SPEC, entrybytes.clone).asScala.toMap
-    new DirectoryEntry(entries)
+    new DirectoryEntry(entries, offset)
   }
 }

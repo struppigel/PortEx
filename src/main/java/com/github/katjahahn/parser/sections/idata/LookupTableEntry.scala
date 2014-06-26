@@ -30,19 +30,20 @@ import com.github.katjahahn.parser.MemoryMappedPE
  *
  * @author Katja Hahn
  */
-abstract class LookupTableEntry {
+abstract class LookupTableEntry(val size: Int, val offset: Long) {
   def toImport(): Import
 }
 
 /**
  * Instantiates an ordinal entry
- * 
+ *
  * @param ordNumber the ordinal of the entry
  * @param rva
  * @param dirEntry
+ * @param entrySize, val entrySize: Int
  */
 case class OrdinalEntry(val ordNumber: Int, val rva: Long,
-  dirEntry: DirectoryEntry) extends LookupTableEntry {
+  dirEntry: DirectoryEntry, override val size: Int, override val offset: Long) extends LookupTableEntry(size, offset) {
   override def toString(): String = s"ordinal: $ordNumber RVA: $rva (0x${toHexString(rva)})"
   override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry)
 }
@@ -53,20 +54,24 @@ case class OrdinalEntry(val ordNumber: Int, val rva: Long,
  * @param hintNameEntry
  * @param rva
  * @param dirEntry
+ * @param entrySize
  */
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
-  val rva: Long, val dirEntry: DirectoryEntry) extends LookupTableEntry {
+  val rva: Long, val dirEntry: DirectoryEntry, override val size: Int, override val offset: Long)
+  extends LookupTableEntry(size, offset) {
   override def toString(): String =
     s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, nameRVA: $nameRVA (0x${toHexString(nameRVA)}), RVA: $rva (0x${toHexString(rva)})"
 
-  override def toImport(): Import = new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry)
+  override def toImport(): Import =
+    new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry)
 }
 
 /**
  * Instantiates a null entry, which is an empty entry that
  * indicates the end of the lookup table
  */
-case class NullEntry() extends LookupTableEntry {
+case class NullEntry(override val size: Int, override val offset: Long)
+  extends LookupTableEntry(size, offset) {
   override def toImport(): Import = null
 }
 
@@ -87,17 +92,17 @@ object LookupTableEntry {
    * @return lookup table entry
    */
   def apply(mmbytes: MemoryMappedPE, offset: Int, entrySize: Int,
-    virtualAddress: Long, rva: Long, dirEntry: DirectoryEntry): LookupTableEntry = {
+    virtualAddress: Long, rva: Long, dirEntry: DirectoryEntry, fileOffset: Long): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     try {
       //TODO remove get array call
       val value = mmbytes.getBytesLongValue(offset + virtualAddress, entrySize)
       if (value == 0) {
-        NullEntry()
+        NullEntry(entrySize, fileOffset)
       } else if ((value & ordFlagMask) != 0) {
-        createOrdEntry(value, rva, dirEntry)
+        createOrdEntry(value, rva, dirEntry, entrySize, fileOffset)
       } else {
-        createNameEntry(value, mmbytes, virtualAddress, rva, dirEntry)
+        createNameEntry(value, mmbytes, virtualAddress, rva, dirEntry, entrySize, fileOffset)
       }
     } catch {
       case e: Exception =>
@@ -107,7 +112,7 @@ object LookupTableEntry {
   }
 
   private def createNameEntry(value: Long, mmbytes: MemoryMappedPE,
-    virtualAddress: Long, rva: Long, dirEntry: DirectoryEntry): LookupTableEntry = {
+    virtualAddress: Long, rva: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
     val nameRVA = (addrMask & value)
     logger.debug("rva: " + nameRVA)
@@ -115,16 +120,16 @@ object LookupTableEntry {
     logger.debug("virtual addr: " + virtualAddress)
     logger.debug("address: " + address)
     logger.debug("idata length: " + mmbytes.length)
-    if(address + 2 > mmbytes.length) throw new FailureEntryException()
+    if (address + 2 > mmbytes.length) throw new FailureEntryException()
     val hint = mmbytes.getBytesIntValue(address, 2)
     val name = getASCII(address + 2, mmbytes)
-    NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry)
+    NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry, entrySize, offset: Long)
   }
 
-  private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryEntry): OrdinalEntry = {
+  private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): OrdinalEntry = {
     val ordMask = 0xFFFFL
     val ord = (ordMask & value).toInt
-    OrdinalEntry(ord, rva, dirEntry)
+    OrdinalEntry(ord, rva, dirEntry, entrySize, offset)
   }
 
   private def getASCII(offset: Long, mmbytes: MemoryMappedPE): String = {
