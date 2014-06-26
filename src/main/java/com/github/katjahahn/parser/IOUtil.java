@@ -107,12 +107,16 @@ public final class IOUtil {
             T key = enumSolver.valueFor(specs[keyIndex]);
             int offset = Integer.parseInt(specs[offsetIndex]);
             int length = Integer.parseInt(specs[lengthIndex]);
+            String description = specs[descriptionIndex];
             if (headerbytes.length >= offset + length) {
                 long value = getBytesLongValue(headerbytes, offset, length);
-                data.put(key, new StandardField(key, specs[descriptionIndex],
+                data.put(key, new StandardField(key, description,
                         value));
             } else {
+                long value = 0;
                 // TODO replace with getbyteslongvaluesafely?
+                data.put(key, new StandardField(key, description,
+                        value));
                 logger.warn("offset + length larger than headerbytes given");
             }
         }

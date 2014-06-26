@@ -338,12 +338,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                         + Long.toHexString(value) + "), "
                         + getImageBaseDescription(value) + NL);
             } else if (key.equals(SUBSYSTEM)) {
+                //subsystem has only 2 bytes
                 b.append(description + ": "
-                        + getSubsystemDescription((int) value) + NL); // subsystem
-                                                                      // has
-                                                                      // only
-                                                                      // 2
-                                                                      // Bytes
+                        + getSubsystemDescription((int) value) + NL);
             } else if (key.equals(DLL_CHARACTERISTICS)) {
                 b.append(NL + description + ": " + NL);
                 b.append(IOUtil.getCharacteristics(value,
