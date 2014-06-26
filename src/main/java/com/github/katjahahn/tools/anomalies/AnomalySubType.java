@@ -113,6 +113,11 @@ public enum AnomalySubType {
      */
     RESERVED_DATA_DIR,
     /**
+     * Data directory entry doesn't point to a valid location, i.e. outside the
+     * file
+     */
+    INVALID_DATA_DIR,
+    /**
      * SIZE_OF_HEADERS is too small.
      */
     TOO_SMALL_SIZE_OF_HEADERS,
@@ -256,7 +261,6 @@ public enum AnomalySubType {
     /**
      * POINTER_TO_RAW_DATA is not a multiple of file alignment
      */
-    NOT_FILEALIGNED_PTR_TO_RAW, 
-    DEPRECATED_NR_OF_RELOC, // TODO add to thesis
+    NOT_FILEALIGNED_PTR_TO_RAW, DEPRECATED_NR_OF_RELOC, // TODO add to thesis
     DEPRECATED_PTR_TO_RELOC; // TODO add to thesis
 }

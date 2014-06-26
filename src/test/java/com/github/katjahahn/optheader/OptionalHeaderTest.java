@@ -62,7 +62,7 @@ public class OptionalHeaderTest {
             Collection<DataDirEntry> coll = pedatum.getOptionalHeader()
                     .getDataDirEntries().values();
             assertNotNull(coll);
-            assertTrue(coll.size() > 0);
+            assertTrue(coll.size() >= 0);
         }
     }
 
@@ -74,6 +74,7 @@ public class OptionalHeaderTest {
             OptionalHeader opt = pedatum.getOptionalHeader();
             Collection<DataDirEntry> peDataEntries = opt.getDataDirEntries()
                     .values();
+            
             assertEquals(peDataEntries.size(), testDirs.size());
             for (DataDirEntry expected : testDirs) {
                 assertTrue(peDataEntries.contains(expected));

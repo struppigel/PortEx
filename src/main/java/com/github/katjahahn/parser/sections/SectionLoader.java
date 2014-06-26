@@ -384,24 +384,22 @@ public class SectionLoader {
         Optional<DataDirEntry> exceptionTable = optHeader
                 .maybeGetDataDirEntry(DataDirectoryKey.EXCEPTION_TABLE);
         if (exceptionTable.isPresent()) {
+            long virtualAddress = exceptionTable.get().virtualAddress;
             Optional<SectionHeader> header = exceptionTable.get()
                     .maybeGetSectionTableEntry(table);
-            if (header.isPresent()) {
-                Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
-                if (virtualAddress != null) {
-                    MemoryMappedPE bytes = MemoryMappedPE.newInstance(data,
-                            this);
-                    if (bytes.length() == 0) {
-                        logger.warn("unable to read exception section, readsize is 0");
-                        return Optional.absent();
-                    }
-                    long offset = header.get().getAlignedPointerToRaw();
-                    MachineType machine = coffHeader.getMachineType();
-                    ExceptionSection section = ExceptionSection.newInstance(
-                            bytes, machine, virtualAddress, offset);
-                    return Optional.of(section);
-                }
+            MemoryMappedPE bytes = MemoryMappedPE.newInstance(data, this);
+            if (bytes.length() == 0) {
+                logger.warn("unable to read exception section, readsize is 0");
+                return Optional.absent();
             }
+            MachineType machine = coffHeader.getMachineType();
+            long offset = 0;
+            if (header.isPresent()) {
+                offset = header.get().getAlignedPointerToRaw();
+            }
+            ExceptionSection section = ExceptionSection.newInstance(bytes,
+                    machine, virtualAddress, offset);
+            return Optional.of(section);
         }
         return Optional.absent();
     }
@@ -475,7 +473,7 @@ public class SectionLoader {
             long offset = 0;
             if (optTup.isPresent()) {
                 offset = optTup.get().offset;
-            } 
+            }
             logger.debug("idatalength: " + memoryMapped.length());
             logger.debug("virtual address of ILT: " + virtualAddress);
             ImportSection idata = ImportSection.newInstance(memoryMapped,

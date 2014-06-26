@@ -32,6 +32,7 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -210,8 +211,8 @@ public final class PELoader {
         // File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
          System.out.println(data);
-        // PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-        // System.out.println(scanner.scanReport());
+         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+         System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
         SectionTable table = data.getSectionTable();
         System.out.println("file size: " + file.length());

@@ -32,6 +32,7 @@ import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.optheader.DllCharacteristic
 import com.github.katjahahn.parser.coffheader.FileCharacteristic
+import com.github.katjahahn.parser.sections.SectionLoader
 
 /**
  * Scans the Optional Header for anomalies.
@@ -245,7 +246,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     }
     if (fileAlignment < 512 || fileAlignment > 65536) {
       val description = "Optional Header: File Alignment must be between 512 and 64 K, but is " + fileAlignment
-      val subtype = if(fileAlignment < 512) TOO_SMALL_FILEALIGN else TOO_LARGE_FILEALIGN
+      val subtype = if (fileAlignment < 512) TOO_SMALL_FILEALIGN else TOO_LARGE_FILEALIGN
       anomalyList += WrongValueAnomaly(entry, description, subtype)
     }
     if (fileAlignment != 512) {
@@ -335,7 +336,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val datadirs = opt.getDataDirEntries()
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
-      if(entry.value == 0) {
+      if (entry.value == 0) {
         val description = "Optional Header: No data directory present"
         anomalyList += StructuralAnomaly(description, NO_DATA_DIR)
       }
@@ -348,6 +349,18 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val entry = datadirs.get(DataDirectoryKey.RESERVED)
       val description = "Reserved Data Directory Entry is not 0. Entry --> " + NL + entry.toString
       anomalyList += ReservedDataDirAnomaly(entry, description, RESERVED_DATA_DIR)
+    }
+    for (datadir <- datadirs.values().asScala) {
+      def isValid: Boolean = {
+        val secTable = data.getSectionTable
+        val fileOffset = datadir.getFileOffset(secTable)
+        fileOffset >= 0 && fileOffset < data.getFile.length
+      }
+      val loader = new SectionLoader(data)
+      if (!isValid) {
+        val description = s"Optional Header: Invalid Data Directory Entry ${datadir.key}, entry points outside of file"
+        anomalyList += StructuralAnomaly(description, INVALID_DATA_DIR)
+      }
     }
     anomalyList.toList
   }
