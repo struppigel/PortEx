@@ -44,7 +44,7 @@ public class ResourceSectionTest {
                 for (Resource res : resources) {
                     String type = res.getType();
                     IDOrName id = res.getLevelIDs().get(Level.typeLevel());
-                    if (!testdatum.resTypes.contains(type) || id instanceof Name) {
+                    if (!(testdatum.resTypes.contains(type) || id instanceof Name)) {
                         System.out.println(res);
                         System.out.println("FAIL: searched for resource type "
                                 + type);
