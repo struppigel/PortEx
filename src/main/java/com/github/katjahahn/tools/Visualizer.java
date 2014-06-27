@@ -38,6 +38,7 @@ import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.rsrc.Resource;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
@@ -485,14 +486,18 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         File file = new File(
-                "/home/deque/portextestfiles/testfiles/DLL1.dll");
+                "/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
+        ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
+        for(Resource res : rsrc.getResources()){
+            System.out.println(res);
+        }
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
-        Visualizer vi = new Visualizer(data);
-        final BufferedImage image = vi.createImage();
-        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
-        show(image);
+//        Visualizer vi = new Visualizer(data);
+//        final BufferedImage image = vi.createImage();
+//        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
+//        show(image);
     }
 
     private static void show(final BufferedImage image) {

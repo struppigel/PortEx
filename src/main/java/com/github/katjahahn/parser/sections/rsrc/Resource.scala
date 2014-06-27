@@ -18,37 +18,39 @@
 package com.github.katjahahn.parser.sections.rsrc
 
 import java.awt.image.BufferedImage
+import scala.collection.JavaConverters._
 
 /**
  * Holds the most information of a resource, which is the information provided
  * by the level IDs and the bytes that make up the resource.
  * This is the return datatype for the API user.
  *
- * @constructor
  * @param
  * @param
  */
 class Resource(
   val resourceBytes: Array[Byte],
   var levelIDs: Map[Level, IDOrName]) {
+  
+  def getLevelIDs: java.util.Map[Level, IDOrName] = levelIDs.asJava
 
-  /**
-   * @constructor
-   * @param
-   * @param
-   */
+  def getType(): String = levelIDs(Level.typeLevel) match {
+    case Name(rva, name) => name
+    case id: ID => id.idString
+  }
+
   def this(resourceBytes: Array[Byte]) = this(resourceBytes, Map.empty)
-  
-  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
-  
-  //TODO implement, probably need to do that manually
-//  def getResourceAsIcon(): BufferedImage = null 
-  
-//  def isIcon(): Boolean = {
-//    levelIDs(new Level(1)).toString.contains("icon")
-//  }
 
-  override def toString(): String = 
+  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
+
+  //TODO implement, probably need to do that manually
+  //  def getResourceAsIcon(): BufferedImage = null 
+
+  //  def isIcon(): Boolean = {
+  //    levelIDs(new Level(1)).toString.contains("icon")
+  //  }
+
+  override def toString(): String =
     levelIDs.mkString(" || ")
 
 }

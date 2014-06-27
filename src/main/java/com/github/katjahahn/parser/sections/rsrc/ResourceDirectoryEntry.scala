@@ -79,8 +79,11 @@ case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extend
 abstract class IDOrName
 
 case class ID(id: Long, level: Level) extends IDOrName {
+  
+  def idString: String = typeIDMap.getOrElse(id.toInt, id.toString)
+  
   override def toString(): String =
-    "ID: " + { if (level.levelNr == 1) typeIDMap.getOrElse(id.toInt, id.toString) else id.toString }
+    "ID: " + { if (level.levelNr == 1) idString else id.toString }
 
 }
 
@@ -94,7 +97,7 @@ object ResourceDirectoryEntry {
             .getLogger(ResourceDirectoryEntry.getClass().getName());
   private val specLocation = "resourcedirentryspec";
   private val typeSpecLocation = "resourcetypeid"
-  val typeIDMap = IOUtil.readArray(typeSpecLocation).asScala.map(a => (a(0).toInt, a(2))).toMap
+  val typeIDMap = IOUtil.readArray(typeSpecLocation).asScala.map(a => (a(0).toInt, a(1))).toMap
   //TODO languageIDMap, nameIDMap
 
   /**

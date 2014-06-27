@@ -44,7 +44,7 @@ public class TestreportsReader {
     private static final String TEST_REPORTS_DIR = "/reports";
     private static final String EXPORT_REPORTS_DIR = "/exportreports";
     private static final String IMPORT_REPORTS_DIR = "/importreports";
-
+    
     public static Map<File, List<ImportDLL>> readImportEntries()
             throws IOException {
         Map<File, List<ImportDLL>> data = new HashMap<>();
@@ -181,11 +181,23 @@ public class TestreportsReader {
                 if (line.contains("Data directories")) {
                     readDataDirs(data, reader);
                     readSections(data, reader);
+                    readResourceTypes(data, reader);
                 }
             }
 
         }
         return data;
+    }
+
+    private static void readResourceTypes(TestData data, BufferedReader reader) throws IOException {
+        data.resTypes = new ArrayList<>();
+        String line = null;
+        while((line = reader.readLine()) != null) {
+            if(line.contains("Type")) {
+                String[] split = line.split(":");
+                data.resTypes.add(split[1].trim());
+            }
+        }
     }
 
     private static void readSections(TestData data, BufferedReader reader)
@@ -643,6 +655,7 @@ public class TestreportsReader {
         public List<ResourceDataEntry> resources;
         public String filename;
         public int peoffset;
+        public List<String> resTypes;
     }
 
 }

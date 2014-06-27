@@ -61,4 +61,10 @@ object Level {
   private val levelDescription = Map(1 -> "type", 2 -> "name", 3 -> "language")
 
   def apply(): Level = new Level(1)
+
+  def typeLevel(): Level = new Level(1)
+  
+  def nameLevel(): Level = new Level(2)
+  
+  def languageLevel(): Level = new Level(3)
 }
