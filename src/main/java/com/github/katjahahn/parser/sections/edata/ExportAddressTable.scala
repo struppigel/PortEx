@@ -29,8 +29,10 @@ import com.github.katjahahn.parser.MemoryMappedPE
  * Creates the export table with the addresses found
  * @param addresses of the export section
  */
-class ExportAddressTable private (val addresses: List[Long]) {
+class ExportAddressTable private (val addresses: List[Long], val fileOffset: Long) {
 
+  def size(): Long = addresses.length * ExportAddressTable.addressLength
+  
   /**
    * Returns the address at the given index
    *
@@ -49,6 +51,8 @@ class ExportAddressTable private (val addresses: List[Long]) {
 
 object ExportAddressTable {
 
+  val addressLength = 4
+  
   /**
    * Creates an instanceo of the export address table by loading the addresses
    * from the given export section bytes.
@@ -58,23 +62,18 @@ object ExportAddressTable {
    *   (found in the data directory table)
    * @param entries number of entries in the export address table
    * @param virtualAddress the virtual address the rva is relative to
+   * @param fileOffset the file offset where the EAT starts
    * @return an instance for the export address table
    */
-  def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int, virtualAddress: Long): ExportAddressTable = {
-    val length = 4
+  def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int, 
+      virtualAddress: Long, fileOffset: Long): ExportAddressTable = {
     val initialOffset = rva - virtualAddress
     val addresses = new ListBuffer[Long]()
-    val end = initialOffset + entries * length
-    for (offset <- initialOffset until end by length) {
-//      println("offset: " + offset)
-//      println("offset + va: " + (offset + virtualAddress))
-//      println("offset + va as Int: " + (offset + virtualAddress).toInt)
-//      println("array length: " + length)
-//      println("actual mmBytes length: " + mmBytes.length)
-      //TODO int conversion problem here!
-      addresses += mmBytes.getBytesLongValue(offset + virtualAddress, length)
+    val end = initialOffset + entries * addressLength
+    for (offset <- initialOffset until end by addressLength) {
+      addresses += mmBytes.getBytesLongValue(offset + virtualAddress, addressLength)
     }
-    new ExportAddressTable(addresses.toList)
+    new ExportAddressTable(addresses.toList, fileOffset)
   }
 
 }

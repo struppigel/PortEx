@@ -40,12 +40,11 @@ import com.github.katjahahn.parser.IOUtil
 class DebugSection private (
   private val directoryTable: DebugDirectory,
   private val typeDescription: String,
-  val offset: Long,
-  val size: Long) extends SpecialSection {
+  val offset: Long) extends SpecialSection {
 
   override def getOffset(): Long = offset
 
-  def getSize(): Long = size
+  def getSize(): Long = 28
 
   override def getInfo(): String =
     s"""|-------------
@@ -124,6 +123,6 @@ object DebugSection {
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes.clone).asScala.toMap
     val types = getCharacteristicsDescriptions(entries(DebugDirectoryKey.TYPE).value, "debugtypes").asScala.toList
-    new DebugSection(entries, types(0), offset, debugbytes.length)
+    new DebugSection(entries, types(0), offset)
   }
 }

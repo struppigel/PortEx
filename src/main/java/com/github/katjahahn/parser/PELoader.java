@@ -85,7 +85,7 @@ public final class PELoader {
         checkState(pesig.hasSignature(),
                 "no valid pe file, signature not found");
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            MSDOSHeader msdos = loadMSDOSHeader(raf);
+            MSDOSHeader msdos = loadMSDOSHeader(raf, pesig.getOffset().get());
             COFFFileHeader coff = loadCOFFFileHeader(pesig, raf);
             OptionalHeader opt = loadOptionalHeader(pesig, coff, raf);
             SectionTable table = loadSectionTable(pesig, coff, raf);
@@ -103,11 +103,11 @@ public final class PELoader {
      * @throws IOException
      *             if unable to read header
      */
-    private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf)
+    private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf, long peSigOffset)
             throws IOException {
         byte[] headerbytes = loadBytes(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
                 raf);
-        return MSDOSHeader.newInstance(headerbytes);
+        return MSDOSHeader.newInstance(headerbytes, peSigOffset);
     }
 
     /**

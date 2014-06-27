@@ -49,6 +49,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 
     private final byte[] headerbytes;
     private final long offset = 0;
+    private final long peSigOffset;
 
     /**
      * Creates an instance of the optional header.
@@ -57,8 +58,9 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * @param offset
      */
     @Requires("headerbytes != null")
-    private MSDOSHeader(byte[] headerbytes) {
+    private MSDOSHeader(byte[] headerbytes, long peSigOffset) {
         this.headerbytes = headerbytes.clone();
+        this.peSigOffset = peSigOffset;
     }
 
     /**
@@ -85,7 +87,11 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      */
     @Ensures("result >= 0")
     public long getHeaderSize() {
-        return get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
+        long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
+        if(headerSize > peSigOffset) {
+            return peSigOffset;
+        }
+        return headerSize;
     }
 
     @Requires("headerbytes != null")
@@ -148,8 +154,8 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         }
     }
     
-    public static MSDOSHeader newInstance(byte[] headerbytes) throws IOException {
-        MSDOSHeader header = new MSDOSHeader(headerbytes);
+    public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset) throws IOException {
+        MSDOSHeader header = new MSDOSHeader(headerbytes, peSigOffset);
         header.read();
         return header;
     }

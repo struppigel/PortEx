@@ -24,7 +24,10 @@ import java.io.File
 import ExportNamePointerTable._
 import com.github.katjahahn.parser.MemoryMappedPE
 
-class ExportNamePointerTable private (val pointerNameList: List[(Address, String)]) {
+class ExportNamePointerTable private (val pointerNameList: List[(Address, String)], 
+    val fileOffset: Long) {
+  
+  def size(): Long = pointerNameList.length * ExportNamePointerTable.entryLength 
 
   def getMap(): Map[Address, String] = pointerNameList.toMap
 
@@ -46,20 +49,20 @@ class ExportNamePointerTable private (val pointerNameList: List[(Address, String
 object ExportNamePointerTable {
 
   type Address = Long
+  val entryLength = 4
 
   def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int,
-    virtualAddress: Long): ExportNamePointerTable = {
-    val length = 4
+    virtualAddress: Long, fileOffset: Long): ExportNamePointerTable = {
     val initialOffset = (rva - virtualAddress).toInt
     val addresses = new ListBuffer[(Address, String)]
-    val end = initialOffset + entries * length
-    for (offset <- initialOffset until end by length) {
-      val address = mmBytes.getBytesLongValue(offset + virtualAddress, length)
+    val end = initialOffset + entries * entryLength
+    for (offset <- initialOffset until end by entryLength) {
+      val address = mmBytes.getBytesLongValue(offset + virtualAddress, entryLength)
       val name = getName(mmBytes, address)
       addresses += ((address, name))
     }
 
-    new ExportNamePointerTable(addresses.toList)
+    new ExportNamePointerTable(addresses.toList, fileOffset)
   }
 
   private def getName(mmBytes: MemoryMappedPE, address: Long): String = {

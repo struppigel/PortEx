@@ -30,6 +30,7 @@ import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.FileFormatException
+import com.github.katjahahn.parser.Location
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -54,12 +55,24 @@ class ExportSection private (
   private val ordinalTable: ExportOrdinalTable,
   val exportEntries: List[ExportEntry],
   val offset: Long,
-  val size: Long) extends SpecialSection {
+  val secLoader: SectionLoader) extends SpecialSection {
 
   override def getOffset(): Long = offset
-  def getSize(): Long = size
 
   def isEmpty(): Boolean = exportEntries.isEmpty
+
+  private def nameLocations(): List[Location] = {
+    namePointerTable.pointerNameList.map(p =>
+      new Location(secLoader.maybeGetFileOffset(p._1).get, ExportNamePointerTable.entryLength))
+  }
+
+  def getLocations(): java.util.List[Location] =
+    Location.mergeContinuous(
+      List(new Location(edataTable.fileOffset, edataTable.size),
+        new Location(exportAddressTable.fileOffset, exportAddressTable.size),
+        new Location(namePointerTable.fileOffset, namePointerTable.size),
+        new Location(ordinalTable.fileOffset, ordinalTable.size)) 
+        ::: nameLocations).asJava
 
   /**
    * Returns the export directory table which contains general information and
@@ -179,44 +192,51 @@ object ExportSection {
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
     //TODO slice only headerbytes for ExportDir
     val exportBytes = mmBytes.slice(virtualAddress, mmBytes.length + virtualAddress);
-    val edataTable = ExportDirectory(exportBytes)
+    val edataTable = ExportDirectory(exportBytes, offset)
     val maybeExportDir = opt.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
     val exportHeader = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
-    val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, virtualAddress)
-    val namePointerTable = loadNamePointerTable(edataTable, mmBytes, virtualAddress)
-    val ordinalTable = loadOrdinalTable(edataTable, mmBytes, virtualAddress)
+    val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, virtualAddress, offset)
+    val namePointerTable = loadNamePointerTable(edataTable, mmBytes, virtualAddress, offset)
+    val ordinalTable = loadOrdinalTable(edataTable, mmBytes, virtualAddress, offset)
     val exportEntries = loadExportEntries(sectionLoader, namePointerTable, opt,
       ordinalTable, exportAddressTable, mmBytes, virtualAddress, edataTable)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
-      ordinalTable, exportEntries, offset, mmBytes.length)
+      ordinalTable, exportEntries, offset, sectionLoader)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirectory,
-    mmBytes: MemoryMappedPE, virtualAddress: Long): ExportOrdinalTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long, edataOffset: Long): ExportOrdinalTable = {
     val base = edataTable(ORDINAL_BASE)
     val rva = edataTable(ORDINAL_TABLE_RVA)
     val entries = edataTable(NR_OF_NAME_POINTERS)
-    ExportOrdinalTable(mmBytes, base.toInt, rva, entries.toInt, virtualAddress)
+    val fileOffset = edataOffset + rva - virtualAddress
+    ExportOrdinalTable(mmBytes, base.toInt, rva, entries.toInt, virtualAddress, fileOffset)
   }
 
   private def loadNamePointerTable(edataTable: ExportDirectory,
-    mmBytes: MemoryMappedPE, virtualAddress: Long): ExportNamePointerTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long, offset: Long): ExportNamePointerTable = {
     val nameTableRVA = edataTable(NAME_POINTER_RVA)
     val namePointers = edataTable(NR_OF_NAME_POINTERS).toInt
-    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress)
+    val fileOffset = offset + nameTableRVA - virtualAddress
+    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress, fileOffset)
   }
 
+  /**
+   * Loads the EAT.
+   *
+   * @param offset file offset of the export directory table
+   */
   private def loadExportAddressTable(edataTable: ExportDirectory,
-    mmBytes: MemoryMappedPE, virtualAddress: Long): ExportAddressTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long, offset: Long): ExportAddressTable = {
     val addrTableRVA = edataTable(EXPORT_ADDR_TABLE_RVA)
     val entries = edataTable(ADDR_TABLE_ENTRIES).toInt
     if (addrTableRVA > mmBytes.length) {
       throw new FileFormatException("invalid address table rva, can not parse export section")
     }
-    ExportAddressTable(mmBytes, addrTableRVA, entries, virtualAddress)
+    val fileOffset = offset + addrTableRVA - virtualAddress
+    ExportAddressTable(mmBytes, addrTableRVA, entries, virtualAddress, fileOffset)
   }
 
-  //TODO only returns named entries so far
   //TODO this parameter list is horrible!
   private def loadExportEntries(sectionLoader: SectionLoader,
     namePointerTable: ExportNamePointerTable, optHeader: OptionalHeader,

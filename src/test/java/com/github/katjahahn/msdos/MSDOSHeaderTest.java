@@ -70,7 +70,7 @@ public class MSDOSHeaderTest {
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "not enough headerbytes for MS DOS Header")
     public void headerBytesTooShort() throws IOException {
         byte[] headerbytes = { 1, 2, 3 };
-        MSDOSHeader.newInstance(headerbytes);
+        MSDOSHeader.newInstance(headerbytes, 200);
     }
 
     @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "No MZ Signature found")
@@ -79,7 +79,7 @@ public class MSDOSHeaderTest {
         for (int i = 0; i < headerbytes.length; i++) {
             headerbytes[i] = (byte) i;
         }
-        MSDOSHeader.newInstance(headerbytes);
+        MSDOSHeader.newInstance(headerbytes, 200);
     }
 
     private int convertToInt(String value) {

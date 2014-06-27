@@ -37,9 +37,11 @@ import com.github.katjahahn.parser.IOUtil
  * instanciates an export directory table.
  */
 class ExportDirectory private (
-  private val entries: Map[ExportDirectoryKey, StandardField]) {
-
+  private val entries: Map[ExportDirectoryKey, StandardField], 
+  val fileOffset: Long) {
+  
   def apply(key: ExportDirectoryKey): Long = entries(key).value
+  def size(): Long = 40
 
   /**
    * Returns the {@link StandardEntry} for a given {@link ExportDirectoryKey}
@@ -66,11 +68,11 @@ object ExportDirectory {
    * @param entrybytes
    * @return export directory table instance
    */
-  def apply(entrybytes: Array[Byte]): ExportDirectory = {
+  def apply(entrybytes: Array[Byte], fileOffset: Long): ExportDirectory = {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val entries = IOUtil.readHeaderEntries(classOf[ExportDirectoryKey], format, 
         edataTableSpec, entrybytes.clone).asScala.toMap
-    new ExportDirectory(entries)
+    new ExportDirectory(entries, fileOffset)
   }
 
 }

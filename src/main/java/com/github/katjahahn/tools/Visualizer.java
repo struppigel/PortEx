@@ -21,7 +21,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -234,6 +233,7 @@ public class Visualizer {
 
         long msdosOffset = 0;
         long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
+        System.out.println("MSDOS size: " + msdosSize);
         drawPixels(msdosColor, msdosOffset, msdosSize);
 
         long optOffset = data.getOptionalHeader().getOffset();
@@ -280,18 +280,21 @@ public class Visualizer {
         if (idata.isPresent()) {
             importsAvailable = true;
             for (Location loc : idata.get().getLocations()) {
-                long start = loc.from;
-                long size = loc.size;
-                System.out.println("start: " + start + " size: " + size);
+                long start = loc.from();
+                long size = loc.size();
+                System.out.println("import loc: " + loc);
                 drawPixels(importColor, start, size, additionalGap);
             }
         }
         Optional<ExportSection> edata = loader.maybeLoadExportSection();
         if (edata.isPresent()) {
             exportsAvailable = true;
-            long offset = edata.get().getOffset();
-            long size = edata.get().getSize();
-            drawPixels(exportColor, offset, size, additionalGap);
+            for (Location loc : edata.get().getLocations()) {
+                long start = loc.from();
+                long size = loc.size();
+                System.out.println("export loc: " + loc);
+                drawPixels(exportColor, start, size, additionalGap);
+            }
         }
 
         Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
@@ -299,6 +302,7 @@ public class Visualizer {
             resourcesAvailable = true;
             long offset = rsrc.get().getOffset();
             long size = rsrc.get().getSize();
+            System.out.println("rsrc loc: " + offset + "/" + size);
             drawPixels(rsrcColor, offset, size, additionalGap);
         }
 
@@ -307,6 +311,7 @@ public class Visualizer {
             debugAvailable = true;
             long offset = debug.get().getOffset();
             long size = debug.get().getSize();
+            System.out.println("debug loc: " + offset + "/" + size);
             drawPixels(debugColor, offset, size, additionalGap);
         }
         Optional<Long> ep = getEntryPoint();
@@ -341,7 +346,6 @@ public class Visualizer {
         Color sectionColor = new Color(sectionColorStart.getRGB());
         for (SectionHeader header : table.getSectionHeaders()) {
             long sectionOffset = header.getAlignedPointerToRaw();
-            // TODO put readSize to sectiontable or sectionheader
             long sectionSize = new SectionLoader(data).getReadSize(header);
             drawPixels(sectionColor, sectionOffset, sectionSize);
             sectionColor = variate(sectionColor);
@@ -455,7 +459,8 @@ public class Visualizer {
         int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
         int pixelMax = getXPixels() * getYPixels();
         if (pixelStart >= pixelMax) {
-            System.err.println("too many pixels");
+            System.err.println("too many pixels, max is: " + pixelMax
+                    + " and trying to set: " + pixelStart);
         }
         for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
             int x = (i % getXPixels()) * pixelSize;
@@ -480,13 +485,13 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         File file = new File(
-                "/home/deque/portextestfiles/testfiles/strings.exe");
+                "/home/deque/portextestfiles/testfiles/DLL1.dll");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
         Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();
-        ImageIO.write(image, "png", new File(file.getName() + ".png"));
+        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
 
@@ -510,8 +515,15 @@ public class Visualizer {
      */
     @Requires("bytes > 0")
     public void setBytesPerPixel(int bytes) {
-        long nrOfPixels = data.getFile().length() / bytes;
-        height = (int) (nrOfPixels / fileWidth) * pixelSize;
+        double nrOfPixels = Math.ceil(data.getFile().length() / (double) bytes);
+        System.out.println("pixel nr:" + nrOfPixels);
+        double pixelsPerRow = Math.ceil(fileWidth / pixelSize);
+        System.out.println("pixels per row: " + pixelsPerRow);
+        double pixelsPerCol = Math.ceil(nrOfPixels / pixelsPerRow);
+        System.out.println("pixels per col: " + pixelsPerCol);
+        height = (int) Math.ceil(pixelsPerCol * pixelSize);
+        System.out.println("height: " + height);
+        System.out.println("pixelsize: " + pixelSize);
     }
 
     /**
@@ -633,12 +645,12 @@ public class Visualizer {
 
     @Ensures("result >= 0")
     private int getXPixels() {
-        return this.fileWidth / this.pixelSize;
+        return (int) Math.ceil(this.fileWidth / (double) this.pixelSize);
     }
 
     @Ensures("result >= 0")
     private int getYPixels() {
-        return this.height / this.pixelSize;
+        return (int) Math.ceil(this.height / (double) this.pixelSize);
     }
 
 }

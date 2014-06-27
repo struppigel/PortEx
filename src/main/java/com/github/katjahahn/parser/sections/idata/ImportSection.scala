@@ -78,26 +78,10 @@ class ImportSection private (
    *
    * @return a list with all locations the import information has been written to.
    */
-  //TODO include IAT and ILT, add lookuptable entries, add hint-name-table entries, maybe add string locations
+  //TODO include IAT and ILT, add string locations
   def getLocations(): java.util.List[Location] = {
-    val ranges = mergeContinuous(directoryTable.foldRight(List[Location]())((entry, list) => entry.getLocations ::: list))
+    val ranges = Location.mergeContinuous(directoryTable.foldRight(List[Location]())((entry, list) => entry.getLocations ::: list))
     ranges.toList.asJava
-  }
-
-  //TODO test this! Seems to create errors!
-  private def mergeContinuous(locs: List[Location]): List[Location] = {
-    def merge(loc1: Location, loc2: Location): Location =
-      new Location(loc1.from, loc2.from + loc2.size)
-
-    def isContinuous(loc1: Location, loc2: Location): Boolean =
-      loc1.from + loc1.size == loc2.from
-
-    locs.foldLeft(List[Location]()) { (list, loc) =>
-      if (list.isEmpty) List(loc)
-      else if (isContinuous(list.last, loc)) list.take(list.length - 2) :+ merge(list.last, loc)
-      else list :+ loc
-    }
-    locs
   }
 
   /**

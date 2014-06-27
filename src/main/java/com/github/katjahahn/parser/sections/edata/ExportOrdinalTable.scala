@@ -21,11 +21,15 @@ import com.github.katjahahn.parser.ByteArrayUtil._
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.MemoryMappedPE
+import ExportOrdinalTable.entrySize
 
 class ExportOrdinalTable private (
   val ordinals: List[Int],
-  val base: Int) {
+  val base: Int,
+  val fileOffset: Long) {
 
+  def size(): Long = entrySize * ordinals.length
+  
   def apply(i: Int): Int = ordinals(i)
 
   override def toString(): String =
@@ -37,10 +41,11 @@ class ExportOrdinalTable private (
 }
 
 object ExportOrdinalTable {
+  
+  val entrySize = 2 //in Byte
 
   def apply(mmBytes: MemoryMappedPE, base: Int, rva: Long, entries: Int,
-    virtualAddress: Long): ExportOrdinalTable = {
-    val entrySize = 2 //in Byte
+    virtualAddress: Long, fileOffset: Long): ExportOrdinalTable = {
     val initialOffset = (rva - virtualAddress).toInt
     val end = entrySize * entries + initialOffset
     val ordinals = new ListBuffer[Int]
@@ -48,7 +53,7 @@ object ExportOrdinalTable {
       val ordinal = mmBytes.getBytesIntValue(offset + virtualAddress, entrySize)
       ordinals += (ordinal + base)
     }
-    new ExportOrdinalTable(ordinals.toList, base)
+    new ExportOrdinalTable(ordinals.toList, base, fileOffset)
   }
 
 }
