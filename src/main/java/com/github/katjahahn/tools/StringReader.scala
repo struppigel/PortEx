@@ -35,8 +35,8 @@ import java.io.RandomAccessFile
 object StringReader {
 
   def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("WinRar.exe"))
-    new Visualizer(data).createImage()
+    val file = new File("/home/deque/portextestfiles/testfiles/WinRar.exe")
+    println(readStrings(file, 4).asScala.mkString(", "))
   }
   
   /**
