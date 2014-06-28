@@ -45,7 +45,7 @@ public class SectionLoaderTest {
     }
 
     @Test
-    public void unableToLoadImports() throws IOException {
+    public void emptyImportSection() throws IOException {
         File file = new File(TestreportsReader.RESOURCE_DIR
                 + "/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
         PEData data = PELoader.loadPE(file);
@@ -54,7 +54,7 @@ public class SectionLoaderTest {
         if (idata.isPresent()) {
             System.out.println(idata.get().getInfo());
         }
-        assertFalse(idata.isPresent());
+        assertTrue(idata.get().isEmpty());
     }
 
     @Test

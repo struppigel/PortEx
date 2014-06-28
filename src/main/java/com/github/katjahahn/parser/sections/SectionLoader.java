@@ -480,7 +480,7 @@ public class SectionLoader {
                     virtualAddress, optHeader, file.length(), offset);
             if (idata.isEmpty()) {
                 logger.warn("empty import section");
-                return Optional.absent();
+//                return Optional.absent();
             }
             return Optional.of(idata);
         }

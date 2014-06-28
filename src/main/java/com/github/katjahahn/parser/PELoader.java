@@ -203,23 +203,23 @@ public final class PELoader {
     }
 
     public static void main(String[] args) throws IOException {
-        logger.entry(); 
+        logger.entry();
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
+                "/home/deque/portextestfiles/badfiles/VirusShare_d7b5da61591482dc4b1c511b14adc99f");
         // File file = new
         // File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
-         System.out.println(data);
-         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-         System.out.println(scanner.scanReport());
+        System.out.println(data);
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        System.out.println(scanner.scanReport());
         SectionLoader loader = new SectionLoader(data);
         SectionTable table = data.getSectionTable();
         System.out.println("file size: " + file.length());
         for (SectionHeader header : table.getSectionHeaders()) {
             long start = header.getAlignedPointerToRaw();
             long end = loader.getReadSize(header) + start;
-            System.out.println(header.getName() + " start: " + start + " end: "
-                    + end);
+            System.out.println(header.getNumber() + ". "
+                    + header.getName() + " start: " + start + " end: " + end);
             long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
             long vEnd = header.getAlignedVirtualSize() + vStart;
             System.out.println("virtual start: " + vStart + " virtual end: "
@@ -231,9 +231,9 @@ public final class PELoader {
         // System.out.println(edata.getInfo());
         // System.out.println(rsrc.getInfo());
         System.out.println(idata.getInfo());
-//        for (ImportDLL dll : idata.getImports()) {
-//            System.out.println(dll.toString());
-//        }
+        // for (ImportDLL dll : idata.getImports()) {
+        // System.out.println(dll.toString());
+        // }
     }
 
 }
