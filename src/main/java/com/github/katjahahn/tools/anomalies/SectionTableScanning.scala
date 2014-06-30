@@ -52,7 +52,7 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkExtendedReloc
     anomalyList ++= checkTooLargeSizes
     anomalyList ++= checkSectionNames
-    anomalyList ++= checkPhysOverlappingOrShuffledSections
+    anomalyList ++= checkOverlappingOrShuffledSections
     anomalyList ++= checkNameCharacteristicsMatch
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
@@ -132,6 +132,12 @@ trait SectionTableScanning extends AnomalyScanner {
     val loader = new SectionLoader(data)
     val start = section.getAlignedPointerToRaw()
     val end = loader.getReadSize(section) + start
+    return (start, end)
+  }
+  
+  private def virtualSectionRange(section: SectionHeader): SectionRange = {
+    val start = section.getAlignedVirtualAddress()
+    val end = section.getAlignedVirtualSize() + start
     return (start, end)
   }
 
@@ -230,15 +236,10 @@ trait SectionTableScanning extends AnomalyScanner {
    *
    * @return anomaly list
    */
-  private def checkPhysOverlappingOrShuffledSections(): List[Anomaly] = {
+  private def checkOverlappingOrShuffledSections(): List[Anomaly] = {
     def overlaps(t1: SectionRange, t2: SectionRange): Boolean =
       !(((t1._1 < t2._1) && (t1._2 <= t2._1)) || ((t2._1 < t1._1) && (t2._2 <= t1._1)))
 
-    def isDuplicate(sec1: SectionHeader, sec2: SectionHeader): Boolean = {
-      val range1 = physicalSectionRange(sec1)
-      val range2 = physicalSectionRange(sec2)
-      return range1 == range2
-    }
     def notEmpty(range: SectionRange): Boolean = range._1 != range._2
 
     val anomalyList = ListBuffer[Anomaly]()
@@ -247,20 +248,29 @@ trait SectionTableScanning extends AnomalyScanner {
     for (section <- sections) {
       val sectionName = filteredString(section.getName)
       val range1 = physicalSectionRange(section)
+      val vrange1 = virtualSectionRange(section)
       for (i <- section.getNumber() + 1 to sections.length) { //correct?
         val sec = sectionTable.getSectionHeader(i)
         val range2 = physicalSectionRange(sec)
+        val vrange2 = virtualSectionRange(sec)
         //ignore empty sections for shuffle analysis, these get their own anomaly
         if (range1._1 > range2._1 && notEmpty(range1) && notEmpty(range2)) {
           val description = s"Physically shuffled sections: section ${section.getNumber()} has range ${range1._1}--${range1._2}, section ${sec.getNumber()} has range ${range2._1}--${range2._2}"
           anomalyList += StructuralAnomaly(description, PHYSICALLY_SHUFFLED_SEC)
         }
-        if (isDuplicate(section, sec)) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) is a duplicate of section ${sec.getNumber()} with name ${filteredString(sec.getName)}"
+        if (range1 == range2) {
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) has same physical location as section ${sec.getNumber()} with name ${filteredString(sec.getName)}"
           anomalyList += StructuralAnomaly(description, PHYSICALLY_DUPLICATED_SEC)
         } else if (overlaps(range2, range1)) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${range2._1}--${range2._2})"
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) physically overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${range2._1}--${range2._2})"
           anomalyList += StructuralAnomaly(description, PHYSICALLY_OVERLAPPING_SEC)
+        }
+        if(vrange1 == vrange2){
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${vrange1._1}--${vrange1._2}) has same virtual location as section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
+          anomalyList += StructuralAnomaly(description, VIRTUALLY_DUPLICATED_SEC)
+        } else if(overlaps(vrange1, vrange2)) {
+          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${vrange1._1}--${vrange1._2}) virtually overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
+          anomalyList += StructuralAnomaly(description, VIRTUALLY_OVERLAPPING_SEC)
         }
       }
     }

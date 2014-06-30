@@ -21,6 +21,8 @@ import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 
 public class PEAnomalyScannerTest {
+    
+    //TODO use the new subtypes for tests instead of description strings
 
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager
@@ -181,7 +183,7 @@ public class PEAnomalyScannerTest {
 
     @Test
     public void overlappingSections() {
-        performTest(dupe, AnomalyType.STRUCTURE, "duplicate of section");
+        performTest(dupe, AnomalyType.STRUCTURE, "same physical location as");
         // TODO overlap
         // TODO use customized section table structure --> section table
         // factory?

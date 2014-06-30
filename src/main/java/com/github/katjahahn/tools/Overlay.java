@@ -24,6 +24,7 @@ import java.util.List;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.sections.SectionHeader;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 
@@ -38,6 +39,28 @@ public class Overlay {
     private final File file;
     private Long offset;
     private PEData data;
+    
+    public static void main(String[] args) throws IOException {
+       File file = new File("/home/deque/portextestfiles/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb");
+       PEData data = PELoader.loadPE(file);
+       System.out.println(data);
+       Overlay overlay = new Overlay(file);
+       long offset = overlay.getOffset();
+       System.out.println("offset: " + offset);
+       System.out.println("file length: " + file.length());
+       SectionLoader loader = new SectionLoader(data);
+       SectionTable table = data.getSectionTable();
+       for (SectionHeader header : table.getSectionHeaders()) {
+           long start = header.getAlignedPointerToRaw();
+           long end = loader.getReadSize(header) + start;
+           System.out.println(header.getNumber() + ". "
+                   + header.getName() + " start: " + start + " end: " + end);
+           long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
+           long vEnd = header.getAlignedVirtualSize() + vStart;
+           System.out.println("virtual start: " + vStart + " virtual end: "
+                   + vEnd);
+       }
+    }
 
     /**
      * Creates an Overlay instance with the input file and output file specified
@@ -89,7 +112,7 @@ public class Overlay {
                 }
             }
         }
-        if (offset > file.length()) {
+        if (offset > file.length() || offset == 0) {
             offset = file.length();
         }
         return offset;

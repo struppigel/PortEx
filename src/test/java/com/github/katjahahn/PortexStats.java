@@ -48,11 +48,11 @@ public class PortexStats {
             .getName());
 
     private static final String BASE_MALW_FOLDER = "/home/deque/virusshare128";
-    @SuppressWarnings("unused")
     private static final String ANOMALY_FOLDER = "/home/deque/portextestfiles/unusualfiles/corkami";
     private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
     private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
     private static final String STATS_FOLDER = "portexstats/";
+    @SuppressWarnings("unused")
     private static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
     private static final String BAD_FILES = "/home/deque/portextestfiles/badfiles/";
     private static int noPE = 0;
@@ -465,7 +465,7 @@ public class PortexStats {
         int unableToLoad = 0;
         int filesReadCounter = 0;
         List<File> problemPEs = new ArrayList<>();
-        File folder = new File(BAD_FILES);
+        File folder = new File(ANOMALY_FOLDER);
         File[] files = folder.listFiles();
         for (File file : files) {
             try {
@@ -517,7 +517,7 @@ public class PortexStats {
         int unableToLoad = 0;
         List<File> problemPEs = new ArrayList<>();
         int filesReadCounter = 0;
-        File folder = new File(BAD_FILES);
+        File folder = new File(ANOMALY_FOLDER);
         File[] files = folder.listFiles();
         for (File file : files) {
             try {

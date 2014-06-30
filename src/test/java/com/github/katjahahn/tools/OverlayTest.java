@@ -34,10 +34,10 @@ public class OverlayTest {
 
     @Test(timeOut = 9000)
     public void hasOverlayTest() throws IOException {
-        String[] files = { TestreportsReader.RESOURCE_DIR
-                + "/testfiles/Lab03-04.exe" }; // TODO
-        // more
-        // files
+        String[] files = {
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-04.exe",
+                TestreportsReader.RESOURCE_DIR
+                        + "/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb" };
         for (String file : files) {
             File infile = new File(file);
             Overlay overlay = new Overlay(infile);
@@ -56,10 +56,10 @@ public class OverlayTest {
 
     @Test(timeOut = 9000)
     public void eofNoOverlayTest() throws IOException {
-        String[] noOverFiles = { TestreportsReader.RESOURCE_DIR
-                + "/testfiles/Lab03-04.exe" }; // TODO
-        // more
-        // files
+        String[] noOverFiles = {
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-04.exe",
+                TestreportsReader.RESOURCE_DIR
+                        + "/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb" };
         for (String file : noOverFiles) {
             File infile = new File(file);
             Overlay overlay = new Overlay(infile);

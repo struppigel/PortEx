@@ -221,15 +221,25 @@ public enum AnomalySubType {
     /**
      * Sections are physically shuffled.
      */
-    PHYSICALLY_SHUFFLED_SEC, //TODO add to thesis
+    PHYSICALLY_SHUFFLED_SEC, // TODO add to thesis
     /**
      * Sections are physically overlapping.
      */
     PHYSICALLY_OVERLAPPING_SEC,
     /**
-     * Sections are duplicated. This is a special case of {@link #PHYSICALLY_OVERLAPPING_SEC}.
+     * Sections are duplicated. This is a special case of
+     * {@link #PHYSICALLY_OVERLAPPING_SEC}.
      */
     PHYSICALLY_DUPLICATED_SEC,
+    /**
+     * Sections are overlapping in virtual space
+     */
+    VIRTUALLY_OVERLAPPING_SEC,
+    /**
+     * Sections have are mapped to the same virtual location. This is a special
+     * case of {@link #VIRTUALLY_OVERLAPPING_SEC}
+     */
+    VIRTUALLY_DUPLICATED_SEC,
     /**
      * The virtual addresses of the sections are not in ascending order.
      */
