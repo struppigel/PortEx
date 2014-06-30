@@ -98,7 +98,7 @@ object PEAnomalyScanner {
       val loader = new SectionLoader(data)
       val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
       val over = new Overlay(data)
-      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.VIRTUALLY_OVERLAPPING_SEC).isEmpty) {
+      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.SEC_TABLE_IN_OVERLAY).isEmpty) {
         println(scanner.scanReport)
         println("has overlay: " + over.exists())
         println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")

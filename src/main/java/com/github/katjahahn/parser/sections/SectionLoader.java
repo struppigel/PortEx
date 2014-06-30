@@ -240,11 +240,18 @@ public class SectionLoader {
         if (virtSize != 0) {
             readSize = Math.min(readSize, header.getAlignedVirtualSize());
         }
+        // end of section outside the file
         if (readSize + alignedPointerToRaw > file.length()) {
             readSize = file.length() - alignedPointerToRaw;
         }
+        // start of section outside the file --> nothing is read
+        if (alignedPointerToRaw > file.length()) {
+            logger.error("invalid section: starts outside the file, readsize set to 0");
+            readSize = 0;
+        }
+        //shouldn't happen
         if (readSize < 0) {
-            logger.warn("invalid readsize: " + readSize + " for file "
+            logger.error("Invalid readsize: " + readSize + " for file "
                     + file.getName() + " adjusting readsize to 0");
             readSize = 0;
         }

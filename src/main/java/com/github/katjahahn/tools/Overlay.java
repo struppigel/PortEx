@@ -96,6 +96,7 @@ public class Overlay {
             SectionLoader loader = new SectionLoader(data);
             offset = 0L;
             List<SectionHeader> headers = table.getSectionHeaders();
+            //TODO low alingment check instead?
             if (headers.size() == 0) { // offset for sectionless PE's
                 offset = file.length();
             }
