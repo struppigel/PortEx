@@ -17,6 +17,7 @@
  */
 package com.github.katjahahn.parser.sections.debug
 
+import DebugSection._
 import com.github.katjahahn.parser.IOUtil._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -31,6 +32,8 @@ import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil
+import com.github.katjahahn.parser.MemoryMappedPE
+import org.apache.logging.log4j.LogManager
 
 /**
  * @author Katja Hahn
@@ -44,7 +47,7 @@ class DebugSection private (
 
   override def getOffset(): Long = offset
 
-  def getSize(): Long = 28
+  def getSize(): Long = debugDirSize
 
   override def getInfo(): String =
     s"""|-------------
@@ -86,8 +89,12 @@ class DebugSection private (
 }
 
 object DebugSection {
+  
+  val logger = LogManager.getLogger(DebugSection.getClass().getName())
 
   type DebugDirectory = Map[DebugDirectoryKey, StandardField]
+
+  val debugDirSize = 28
 
   private val debugspec = "debugdirentryspec"
 
@@ -106,7 +113,8 @@ object DebugSection {
    * @param offset the debug sections starts at
    * @return debugsection instance
    */
-  def newInstance(debugbytes: Array[Byte], offset: Long): DebugSection = apply(debugbytes, offset)
+  def newInstance(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long): DebugSection = 
+    apply(mmbytes, offset, virtualAddress)
 
   /**
    * Loads the debug section and returns it.
@@ -118,11 +126,17 @@ object DebugSection {
   def load(data: PEData): DebugSection =
     new SectionLoader(data).loadDebugSection()
 
-  def apply(debugbytes: Array[Byte], offset: Long): DebugSection = {
+  def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long): DebugSection = {
     val format = new SpecificationFormat(0, 1, 2, 3)
+    val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
-      format, debugspec, debugbytes.clone).asScala.toMap
+      format, debugspec, debugbytes).asScala.toMap
     val types = getCharacteristicsDescriptions(entries(DebugDirectoryKey.TYPE).value, "debugtypes").asScala.toList
+    if(types.size == 0) {
+      logger.warn("no debug type description found!")
+      val description = s"${entries(DebugDirectoryKey.TYPE).value} no description available"
+      new DebugSection(entries, description, offset)
+    } else 
     new DebugSection(entries, types(0), offset)
   }
 }

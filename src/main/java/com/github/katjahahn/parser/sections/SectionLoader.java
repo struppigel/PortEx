@@ -249,7 +249,7 @@ public class SectionLoader {
             logger.info("invalid section: starts outside the file, readsize set to 0");
             readSize = 0;
         }
-        //shouldn't happen
+        // shouldn't happen
         if (readSize < 0) {
             logger.error("Invalid readsize: " + readSize + " for file "
                     + file.getName() + " adjusting readsize to 0");
@@ -289,14 +289,20 @@ public class SectionLoader {
      */
     @Ensures("result != null")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
-        Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.DEBUG);
-        if (res.isPresent()) {
-            if (res.get().bytes.length == 0) {
+        DataDirectoryKey debugKey = DataDirectoryKey.DEBUG;
+        Optional<DataDirEntry> debugEntry = optHeader
+                .maybeGetDataDirEntry(debugKey);
+        Optional<Long> offset = maybeGetFileOffsetFor(debugKey);
+        // TODO account for debug directory not in any section
+        if (offset.isPresent() && debugEntry.isPresent()) {
+            MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(data, this);
+            if (mmbytes.length() == 0) {
                 logger.warn("unable to read debug section, readsize is 0");
                 return Optional.absent();
             }
-            return Optional.of(DebugSection.apply(res.get().bytes,
-                    res.get().offset));
+            long virtualAddress = debugEntry.get().virtualAddress;
+            return Optional.of(DebugSection.apply(mmbytes, offset.get(),
+                    virtualAddress));
         }
         return Optional.absent();
     }
@@ -487,7 +493,7 @@ public class SectionLoader {
                     virtualAddress, optHeader, file.length(), offset);
             if (idata.isEmpty()) {
                 logger.warn("empty import section");
-//                return Optional.absent();
+                // return Optional.absent();
             }
             return Optional.of(idata);
         }
