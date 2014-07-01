@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright 2014 Katja Hahn
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
 package com.github.katjahahn.parser.sections.pdata
 
 import ExceptionSection._
@@ -17,6 +33,7 @@ import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.MemoryMappedPE
 
+//TODO getInfo shows empty values, separate different formats, test different formats
 class ExceptionSection private (
   offset: Long,
   private val directory: ExceptionDirectory) extends SpecialSection {
@@ -58,7 +75,7 @@ object ExceptionSection {
       throw new IllegalArgumentException("spec for machine type not found: " + machine)
     }
     val spec = machineToSpec(machine)
-    println("using spec: " + spec)
+    //    println("using spec: " + spec)
     val format = new SpecificationFormat(0, 1, 2, 3)
     val pdatabytes = mmbytes.slice(virtualAddress, mmbytes.length + virtualAddress)
     val directory = IOUtil.readHeaderEntries(classOf[ExceptionEntryKey],

@@ -31,8 +31,9 @@ import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.pdata.ExceptionSection;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
+import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -204,10 +205,11 @@ public final class PELoader {
 
     public static void main(String[] args) throws IOException {
         logger.entry();
-        File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_d7b5da61591482dc4b1c511b14adc99f");
+        // File file = new File(
+        // "/home/deque/portextestfiles/badfiles/VirusShare_d7b5da61591482dc4b1c511b14adc99f");
         // File file = new
-        // File("/home/deque/portextestfiles/testfiles/DLL2.dll");
+        // File("/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
+        File file = new File("/home/deque/portextestfiles/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
         System.out.println(data);
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
@@ -218,22 +220,17 @@ public final class PELoader {
         for (SectionHeader header : table.getSectionHeaders()) {
             long start = header.getAlignedPointerToRaw();
             long end = loader.getReadSize(header) + start;
-            System.out.println(header.getNumber() + ". "
-                    + header.getName() + " start: " + start + " end: " + end);
+            System.out.println(header.getNumber() + ". " + header.getName()
+                    + " start: " + start + " end: " + end);
             long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
             long vEnd = header.getAlignedVirtualSize() + vStart;
             System.out.println("virtual start: " + vStart + " virtual end: "
                     + vEnd);
         }
-        // ResourceSection rsrc = loader.loadResourceSection();
-        // ExportSection edata = loader.loadExportSection();
-        ImportSection idata = loader.loadImportSection();
-        // System.out.println(edata.getInfo());
-        // System.out.println(rsrc.getInfo());
-        System.out.println(idata.getInfo());
-        // for (ImportDLL dll : idata.getImports()) {
-        // System.out.println(dll.toString());
-        // }
+        Optional<ExceptionSection> maybePData = loader.maybeLoadExceptionSection();
+        if(maybePData.isPresent()) {
+            System.out.println(maybePData.get().getInfo());
+        }
     }
 
 }

@@ -246,7 +246,7 @@ public class SectionLoader {
         }
         // start of section outside the file --> nothing is read
         if (alignedPointerToRaw > file.length()) {
-            logger.error("invalid section: starts outside the file, readsize set to 0");
+            logger.info("invalid section: starts outside the file, readsize set to 0");
             readSize = 0;
         }
         //shouldn't happen
