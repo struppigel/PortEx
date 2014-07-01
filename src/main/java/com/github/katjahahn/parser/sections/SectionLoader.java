@@ -293,7 +293,6 @@ public class SectionLoader {
         Optional<DataDirEntry> debugEntry = optHeader
                 .maybeGetDataDirEntry(debugKey);
         Optional<Long> offset = maybeGetFileOffsetFor(debugKey);
-        // TODO account for debug directory not in any section
         if (offset.isPresent() && debugEntry.isPresent()) {
             MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(data, this);
             if (mmbytes.length() == 0) {
@@ -469,6 +468,7 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      */
     @Ensures("result != null")
+    //TODO unify data directory loading
     public Optional<ImportSection> maybeLoadImportSection() throws IOException {
         DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
         Optional<DataDirEntry> importTable = optHeader
@@ -482,11 +482,8 @@ public class SectionLoader {
                 return Optional.absent();
             }
             // TODO read offset only
-            Optional<BytesAndOffset> optTup = maybeReadSectionBytesFor(dataDirKey);
-            long offset = 0;
-            if (optTup.isPresent()) {
-                offset = optTup.get().offset;
-            }
+            Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
+            long offset = maybeOffset.or(0L);
             logger.debug("idatalength: " + memoryMapped.length());
             logger.debug("virtual address of ILT: " + virtualAddress);
             ImportSection idata = ImportSection.newInstance(memoryMapped,
