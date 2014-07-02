@@ -147,7 +147,7 @@ public class SectionLoaderTest {
                 String name = header.getName();
                 Optional<PESection> section = loader.maybeLoadSection(name);
                 assertTrue(section.isPresent());
-                assertEquals(section.get().getDump().length,
+                assertEquals(section.get().getBytes().length,
                         (int) loader.getReadSize(header));
             }
         }
@@ -161,7 +161,7 @@ public class SectionLoaderTest {
             for (SectionHeader header : table.getSectionHeaders()) {
                 PESection section = loader.loadSection(header.getNumber());
                 assertNotNull(section);
-                assertEquals(section.getDump().length,
+                assertEquals(section.getBytes().length,
                         (int) loader.getReadSize(header));
             }
         }

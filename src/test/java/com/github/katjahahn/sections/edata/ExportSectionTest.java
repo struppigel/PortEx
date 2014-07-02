@@ -45,7 +45,7 @@ public class ExportSectionTest {
         File forwarder = new File(TestreportsReader.RESOURCE_DIR
                 + "/unusualfiles/corkami/forwarder.dll");
         PEData data = PELoader.loadPE(forwarder);
-        ExportSection edata = ExportSection.load(data);
+        ExportSection edata = new SectionLoader(data).loadExportSection();
         List<ExportEntry> exportEntries = edata.getExportEntries();
         for (ExportEntry export : exportEntries) {
             assertTrue(export.forwarded());
@@ -54,7 +54,7 @@ public class ExportSectionTest {
         File nonforwarder = new File(TestreportsReader.RESOURCE_DIR
                 + "/testfiles/DLL2.dll");
         data = PELoader.loadPE(nonforwarder);
-        edata = ExportSection.load(data);
+        edata = new SectionLoader(data).loadExportSection();
         exportEntries = edata.getExportEntries();
         for (ExportEntry export : exportEntries) {
             assertFalse(export.forwarded());

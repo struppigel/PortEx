@@ -34,6 +34,7 @@ import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.MemoryMappedPE
 import org.apache.logging.log4j.LogManager
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 
 /**
  * @author Katja Hahn
@@ -48,6 +49,8 @@ class DebugSection private (
   override def getOffset(): Long = offset
 
   def getSize(): Long = debugDirSize
+  
+  def isEmpty: Boolean = directoryTable.isEmpty
 
   override def getInfo(): String =
     s"""|-------------
@@ -109,12 +112,11 @@ object DebugSection {
   /**
    * Creates an instance of the DebugSection for the given debug bytes.
    *
-   * @param debugbytes the byte array that represents the debug section
-   * @param offset the debug sections starts at
+   * @param loadInfo the load information
    * @return debugsection instance
    */
-  def newInstance(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long): DebugSection = 
-    apply(mmbytes, offset, virtualAddress)
+  def newInstance(li: LoadInfo): DebugSection = 
+    apply(li.memoryMapped, li.fileOffset, li.rva)
 
   /**
    * Loads the debug section and returns it.

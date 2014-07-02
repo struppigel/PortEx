@@ -31,6 +31,7 @@ import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -187,6 +188,9 @@ object ExportSection {
     println()
     println(edata.getInfo)
   }
+  
+  def apply(li: LoadInfo): ExportSection = 
+    apply(li.memoryMapped, li.rva, li.data.getOptionalHeader(), li.loader, li.fileOffset)
 
   def apply(mmBytes: MemoryMappedPE, virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
@@ -325,25 +329,9 @@ object ExportSection {
    * Creates an instance of the export section by loading all necessary
    * information from the given export section bytes
    *
-   * @param edataBytes the bytes of the export section
-   * @param virtualAddress the virtual address from the data directory entry
-   * table that points to the export section
-   * @param opt optional header of the file
-   * @param sectionLoader the sectionLoader of the current file
+   * @param loadInfo the load information
    * @return instance of the export section
    */
-  def newInstance(edataBytes: MemoryMappedPE, virtualAddress: Long,
-    opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection =
-    apply(edataBytes, virtualAddress, opt, sectionLoader, offset)
-
-  /**
-   * Loads the export section and returns it.
-   *
-   * This is just a shortcut to loading the section using the {@link SectionLoader}
-   *
-   * @return instance of the export section
-   */
-  def load(data: PEData): ExportSection =
-    new SectionLoader(data).loadExportSection()
+  def newInstance(loadInfo: LoadInfo): ExportSection = apply(loadInfo)
 
 }

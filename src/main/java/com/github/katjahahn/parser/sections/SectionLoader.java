@@ -28,8 +28,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.coffheader.COFFFileHeader;
-import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
@@ -38,6 +36,7 @@ import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.pdata.ExceptionSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
+import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.java.contract.Ensures;
@@ -45,8 +44,9 @@ import com.google.java.contract.Invariant;
 import com.google.java.contract.Requires;
 
 /**
- * Responsible for computing section related values and loading sections with
- * the given section header information.
+ * Responsible for computing section related values that are necessary for
+ * loading a section---for example conversion between relative virtual addresses
+ * and file offset---, loading data directories, and loading sections.
  * <p>
  * The section loader is able to load special sections like the
  * {@link ImportSection}, {@link ExportSection} and {@link ResourceSection}
@@ -63,7 +63,7 @@ public class SectionLoader {
     private final File file;
     private final OptionalHeader optHeader;
     private final PEData data;
-    private final COFFFileHeader coffHeader;
+    private Optional<MemoryMappedPE> memoryMapped = Optional.absent();
 
     /**
      * Creates a SectionLoader instance taking all information from the given
@@ -72,21 +72,22 @@ public class SectionLoader {
      * @param data
      */
     public SectionLoader(PEData data) {
+        // extract data for easier access ;)
         this.table = data.getSectionTable();
         this.optHeader = data.getOptionalHeader();
         this.file = data.getFile();
-        this.coffHeader = data.getCOFFFileHeader();
         this.data = data;
     }
 
     /**
-     * Loads the first section with the given name. If the file doesn't have a
-     * section by this name, it returns absent.
+     * Loads the first section with the given name (given the order of the
+     * section headers). If the file doesn't have a section by this name, it
+     * returns absent.
      * <p>
      * This does not instantiate special sections. Use methods like
      * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
      * <p>
-     * The file on disk is read to fetch the information
+     * The file on disk is read to fetch the information.
      * 
      * @param name
      *            the section's name
@@ -96,6 +97,8 @@ public class SectionLoader {
      *             if unable to read the file
      */
     @Ensures("result != null")
+    @Beta
+    // TODO remove? This seems not necessary
     public Optional<PESection> maybeLoadSection(String name) throws IOException {
         Optional<SectionHeader> section = table.getSectionHeaderByName(name);
         if (section.isPresent()) {
@@ -106,18 +109,19 @@ public class SectionLoader {
     }
 
     /**
-     * Loads the section with the sectionNr.
+     * Loads the section that has the sectionNr.
      * <p>
      * This does not instantiate special sections. Use methods like
      * {@link #loadImportSection()} or {@link #loadResourceSection()} instead.
      * 
      * @param sectionNr
      *            the section's number
-     * @return {@link PESection} of the given number
+     * @return {@link PESection} instance of the given number
      * @throws IllegalArgumentException
      *             if invalid sectionNr
      */
     @Ensures("result != null")
+    @Requires("sectionNr > 0")
     public PESection loadSection(int sectionNr) {
         Preconditions.checkArgument(
                 sectionNr > 0 && sectionNr <= table.getNumberOfSections(),
@@ -144,22 +148,6 @@ public class SectionLoader {
     }
 
     /**
-     * Returns the bytes of the section with the specified number.
-     * 
-     * @param sectionNr
-     *            the number of the section
-     * @return bytes that represent the section with the given section number
-     * @throws IOException
-     * @throws IllegalStateException
-     *             if section too large to fit into a byte array
-     */
-    @Ensures("result != null")
-    public BytesAndOffset loadSectionBytes(int sectionNr) throws IOException {
-        SectionHeader header = table.getSectionHeader(sectionNr);
-        return loadSectionBytesFor(header);
-    }
-
-    /**
      * Loads the bytes of the section and returns bytes and file offset.
      * 
      * @param header
@@ -172,7 +160,9 @@ public class SectionLoader {
      */
     @Requires("header != null")
     @Ensures("result != null")
-    public BytesAndOffset loadSectionBytesFor(SectionHeader header)
+    @Beta
+    // TODO maybe remove
+    private BytesAndOffset loadSectionBytesFor(SectionHeader header)
             throws IOException {
         Preconditions.checkArgument(header != null, "given section was null");
         logger.debug("reading section bytes for header " + header.getName());
@@ -216,12 +206,17 @@ public class SectionLoader {
 
     /**
      * Determines the the number of bytes that is read for the section.
+     * <p>
+     * This is the actual section size.
      * 
      * @param header
      *            header of the section
      * @return section size
+     * @throws IllegalArgumentException
+     *             if header is null
      */
     @Ensures("result >= 0")
+    @Requires("header != null")
     public long getReadSize(SectionHeader header) {
         Preconditions.checkArgument(header != null);
         long pointerToRaw = header.get(POINTER_TO_RAW_DATA);
@@ -240,7 +235,27 @@ public class SectionLoader {
         if (virtSize != 0) {
             readSize = Math.min(readSize, header.getAlignedVirtualSize());
         }
-        // end of section outside the file
+        readSize = fileSizeAdjusted(alignedPointerToRaw, readSize);
+        // must not happen
+        if (readSize < 0) {
+            logger.error("Invalid readsize: " + readSize + " for file "
+                    + file.getName() + " adjusting readsize to 0");
+            readSize = 0;
+        }
+        return readSize;
+    }
+
+    /**
+     * Adjusts the readsize of a section to the size of the file.
+     * 
+     * @param alignedPointerToRaw
+     *            the file offset of the start of the section
+     * @param readSize
+     *            the determined readsize without file adjustments
+     * @return adjusted readsize
+     */
+    private long fileSizeAdjusted(long alignedPointerToRaw, long readSize) {
+        // end of section outside the file --> cut at file.length()
         if (readSize + alignedPointerToRaw > file.length()) {
             readSize = file.length() - alignedPointerToRaw;
         }
@@ -249,13 +264,120 @@ public class SectionLoader {
             logger.info("invalid section: starts outside the file, readsize set to 0");
             readSize = 0;
         }
-        // shouldn't happen
-        if (readSize < 0) {
-            logger.error("Invalid readsize: " + readSize + " for file "
-                    + file.getName() + " adjusting readsize to 0");
-            readSize = 0;
-        }
         return readSize;
+    }
+
+    /**
+     * Fetches the {@link SectionHeader} of the section the data directory entry
+     * for the dataDirKey points into.
+     * <p>
+     * Returns absent if the data directory doesn't exist.
+     * 
+     * @param dataDirKey
+     *            the data directory key
+     * @return the section table entry the data directory entry of that key
+     *         points into or absent if there is no data dir entry for the key
+     *         available
+     */
+    private Optional<SectionHeader> maybeGetSectionHeader(
+            DataDirectoryKey dataDirKey) {
+        Optional<DataDirEntry> dataDir = optHeader
+                .maybeGetDataDirEntry(dataDirKey);
+        if (dataDir.isPresent()) {
+            return dataDir.get().maybeGetSectionTableEntry(table);
+        }
+        logger.warn("data dir entry " + dataDirKey + " doesn't exist");
+        return Optional.absent();
+    }
+
+    /**
+     * Returns the file offset of the data directory entry the given key belongs
+     * to.
+     * <p>
+     * Returns absent if data directory doesn't exist.
+     * 
+     * @param dataDirKey
+     *            the key of the data directory entry
+     * @return file offset of the rva that is in the data directory entry with
+     *         the given key, absent if file offset can not be determined
+     */
+    @Ensures("result != null")
+    public Optional<Long> maybeGetFileOffsetFor(DataDirectoryKey dataDirKey) {
+        Optional<DataDirEntry> dataDir = optHeader
+                .maybeGetDataDirEntry(dataDirKey);
+        if (dataDir.isPresent()) {
+            long rva = dataDir.get().virtualAddress;
+            return maybeGetFileOffset(rva);
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Returns the file offset for the given RVA.
+     * <p>
+     * Returns absent if determined offset would point outside the file.
+     * 
+     * @param rva
+     *            the relative virtual address that shall be converted to a
+     *            plain file offset
+     * @return file offset optional, absent if file offset can not be
+     *         determined.
+     */
+    @Ensures("result != null")
+    public Optional<Long> maybeGetFileOffset(long rva) {
+        Optional<SectionHeader> section = maybeGetSectionHeaderByRVA(rva);
+        // standard value if rva doesn't point into a section
+        long fileOffset = rva;
+        // rva is located within a section
+        if (section.isPresent()) {
+            long virtualAddress = section.get().get(VIRTUAL_ADDRESS);
+            long pointerToRawData = section.get().get(POINTER_TO_RAW_DATA);
+            fileOffset = rva - (virtualAddress - pointerToRawData);
+        }
+        // file offset is valid
+        if (rva <= file.length()) {
+            return Optional.of(fileOffset);
+        }
+        // file offset is invalid
+        return Optional.absent();
+    }
+
+    /**
+     * Returns the section entry of the section table the rva is pointing into.
+     * 
+     * @param table
+     *            the section table of the file
+     * @param rva
+     *            the relative virtual address
+     * @return the {@link SectionHeader} of the section the rva is pointing into
+     */
+    @Ensures("result != null")
+    public Optional<SectionHeader> maybeGetSectionHeaderByRVA(long rva) {
+        List<SectionHeader> sections = table.getSectionHeaders();
+        for (SectionHeader section : sections) {
+            long vSize = section.get(VIRTUAL_SIZE);
+            long vAddress = section.get(VIRTUAL_ADDRESS);
+            if (rvaIsWithin(vAddress, vSize, rva)) {
+                return Optional.of(section);
+            }
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Returns true if rva is within address and size of a section
+     * 
+     * @param address
+     *            start of a section
+     * @param size
+     *            size of a section
+     * @param rva
+     *            a relative virtual address that may point into the section
+     * @return true iff rva is within section range
+     */
+    private static boolean rvaIsWithin(long address, long size, long rva) {
+        long endpoint = address + size;
+        return rva >= address && rva < endpoint;
     }
 
     /**
@@ -290,18 +412,13 @@ public class SectionLoader {
     @Ensures("result != null")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
         DataDirectoryKey debugKey = DataDirectoryKey.DEBUG;
-        Optional<DataDirEntry> debugEntry = optHeader
-                .maybeGetDataDirEntry(debugKey);
-        Optional<Long> offset = maybeGetFileOffsetFor(debugKey);
-        if (offset.isPresent() && debugEntry.isPresent()) {
-            MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(data, this);
-            if (mmbytes.length() == 0) {
-                logger.warn("unable to read debug section, readsize is 0");
-                return Optional.absent();
+        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(debugKey);
+        if (loadInfo.isPresent()) {
+            DebugSection sec = DebugSection.newInstance(loadInfo.get());
+            if (sec.isEmpty()) {
+                logger.warn("empty debug section");
             }
-            long virtualAddress = debugEntry.get().virtualAddress;
-            return Optional.of(DebugSection.apply(mmbytes, offset.get(),
-                    virtualAddress));
+            return Optional.of(sec);
         }
         return Optional.absent();
     }
@@ -336,6 +453,7 @@ public class SectionLoader {
      *             if unable to read the file
      */
     @Ensures("result != null")
+    //TODO use MemoryMappedPE and loadInfo
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
         Optional<DataDirEntry> resourceTable = optHeader
@@ -393,54 +511,16 @@ public class SectionLoader {
     @Ensures("result != null")
     public Optional<ExceptionSection> maybeLoadExceptionSection()
             throws IOException {
-        Optional<DataDirEntry> exceptionTable = optHeader
-                .maybeGetDataDirEntry(DataDirectoryKey.EXCEPTION_TABLE);
-        if (exceptionTable.isPresent()) {
-            long virtualAddress = exceptionTable.get().virtualAddress;
-            Optional<SectionHeader> header = exceptionTable.get()
-                    .maybeGetSectionTableEntry(table);
-            MemoryMappedPE bytes = MemoryMappedPE.newInstance(data, this);
-            if (bytes.length() == 0) {
-                logger.warn("unable to read exception section, readsize is 0");
-                return Optional.absent();
+        DataDirectoryKey dataDirKey = DataDirectoryKey.EXCEPTION_TABLE;
+        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(dataDirKey);
+        if (loadInfo.isPresent()) {
+            ExceptionSection pdata = ExceptionSection.newInstance(loadInfo.get());
+            if (pdata.isEmpty()) {
+                logger.warn("empty exception section");
             }
-            MachineType machine = coffHeader.getMachineType();
-            long offset = 0;
-            if (header.isPresent()) {
-                offset = header.get().getAlignedPointerToRaw();
-            }
-            ExceptionSection section = ExceptionSection.newInstance(bytes,
-                    machine, virtualAddress, offset);
-            return Optional.of(section);
+            return Optional.of(pdata);
         }
         return Optional.absent();
-    }
-
-    /**
-     * Returns the section entry of the section table the rva is pointing into.
-     * 
-     * @param table
-     *            the section table of the file
-     * @param rva
-     *            the relative virtual address
-     * @return the {@link SectionHeader} of the section the rva is pointing into
-     */
-    @Ensures("result != null")
-    public Optional<SectionHeader> maybeGetSectionHeaderByRVA(long rva) {
-        List<SectionHeader> sections = table.getSectionHeaders();
-        for (SectionHeader section : sections) {
-            long vSize = section.get(VIRTUAL_SIZE);
-            long vAddress = section.get(VIRTUAL_ADDRESS);
-            if (rvaIsWithin(vAddress, vSize, rva)) {
-                return Optional.of(section);
-            }
-        }
-        return Optional.absent();
-    }
-
-    private static boolean rvaIsWithin(long address, long size, long rva) {
-        long endpoint = address + size;
-        return rva >= address && rva < endpoint;
     }
 
     /**
@@ -457,7 +537,7 @@ public class SectionLoader {
         if (idata.isPresent()) {
             return idata.get();
         }
-        throw new IllegalStateException("unable to load section");
+        throw new IllegalStateException("unable to load import section");
     }
 
     /**
@@ -468,116 +548,15 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      */
     @Ensures("result != null")
-    //TODO unify data directory loading
     public Optional<ImportSection> maybeLoadImportSection() throws IOException {
         DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
-        Optional<DataDirEntry> importTable = optHeader
-                .maybeGetDataDirEntry(dataDirKey);
-        if (importTable.isPresent()) {
-            long virtualAddress = importTable.get().virtualAddress;
-            MemoryMappedPE memoryMapped = MemoryMappedPE
-                    .newInstance(data, this);
-            if (memoryMapped.length() == 0) {
-                logger.warn("unable to read import section, readsize is 0");
-                return Optional.absent();
-            }
-            // TODO read offset only
-            Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
-            long offset = maybeOffset.or(0L);
-            logger.debug("idatalength: " + memoryMapped.length());
-            logger.debug("virtual address of ILT: " + virtualAddress);
-            ImportSection idata = ImportSection.newInstance(memoryMapped,
-                    virtualAddress, optHeader, file.length(), offset);
+        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(dataDirKey);
+        if (loadInfo.isPresent()) {
+            ImportSection idata = ImportSection.newInstance(loadInfo.get());
             if (idata.isEmpty()) {
                 logger.warn("empty import section");
-                // return Optional.absent();
             }
             return Optional.of(idata);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Fetches the {@link SectionHeader} of the section the data directory entry
-     * for the given key points into.
-     * 
-     * @param dataDirKey
-     *            the data directory key
-     * @return the section table entry the data directory entry of that key
-     *         points into or absent if there is no data dir entry for the key
-     *         available
-     */
-    private Optional<SectionHeader> maybeGetSectionHeader(
-            DataDirectoryKey dataDirKey) {
-        Optional<DataDirEntry> dataDir = optHeader
-                .maybeGetDataDirEntry(dataDirKey);
-        if (dataDir.isPresent()) {
-            return dataDir.get().maybeGetSectionTableEntry(table);
-        }
-        logger.warn("data dir entry " + dataDirKey + " doesn't exist");
-        return Optional.absent();
-    }
-
-    /**
-     * Returns the file offset of the data directory entry the given key belongs
-     * to.
-     * 
-     * @param dataDirKey
-     *            the key of the data directory entry
-     * @return file offset of the rva that is in the data directory entry with
-     *         the given key, absent if file offset can not be determined
-     */
-    @Ensures("result != null")
-    public Optional<Long> maybeGetFileOffsetFor(DataDirectoryKey dataDirKey) {
-        Optional<DataDirEntry> dataDir = optHeader
-                .maybeGetDataDirEntry(dataDirKey);
-        if (dataDir.isPresent()) {
-            long rva = dataDir.get().virtualAddress;
-            return maybeGetFileOffset(rva);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Returns the file offset for the RVA.
-     * 
-     * @param rva
-     *            the relative virtual address that shall be converted
-     * @return file offset optional, absent if it can not be determined.
-     */
-    @Ensures("result != null")
-    public Optional<Long> maybeGetFileOffset(long rva) {
-        Optional<SectionHeader> section = maybeGetSectionHeaderByRVA(rva);
-        if (section.isPresent()) {
-            long virtualAddress = section.get().get(VIRTUAL_ADDRESS);
-            long pointerToRawData = section.get().get(POINTER_TO_RAW_DATA);
-            return Optional.of(rva - (virtualAddress - pointerToRawData));
-        } else if (rva <= file.length()) {
-            // data is not located within a section
-            return Optional.of(rva);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Returns all bytes and the file offset of the section where the given data
-     * dir entry is in.
-     * 
-     * @param dataDirKey
-     * @return bytes and offset of the section
-     * @throws IOException
-     */
-    public Optional<BytesAndOffset> maybeReadSectionBytesFor(
-            DataDirectoryKey dataDirKey) throws IOException {
-        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
-        if (header.isPresent()) {
-            try {
-                return Optional.fromNullable(loadSectionBytesFor(header.get()));
-            } catch (IllegalArgumentException e) {
-                logger.warn(e.getMessage());
-            }
-        } else {
-            logger.warn("unable to load header for datadirkey " + dataDirKey);
         }
         return Optional.absent();
     }
@@ -598,7 +577,7 @@ public class SectionLoader {
         if (edata.isPresent()) {
             return edata.get();
         }
-        throw new IllegalStateException("unable to read export section");
+        throw new IllegalStateException("unable to load export section");
     }
 
     /**
@@ -611,24 +590,9 @@ public class SectionLoader {
      */
     @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
-        Optional<DataDirEntry> exportTable = optHeader
-                .maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE);
-        if (exportTable.isPresent()) {
-            long virtualAddress = exportTable.get().virtualAddress;
-            Optional<BytesAndOffset> res = maybeReadDataDirBytes(DataDirectoryKey.EXPORT_TABLE);
-            if (!res.isPresent()) {
-                return Optional.absent();
-            }
-            MemoryMappedPE mmbytes = MemoryMappedPE.newInstance(data, this);
-            if (mmbytes.length() == 0) {
-                logger.warn("unable to read export section, readsize is 0");
-                return Optional.absent();
-            }
-            // TODO correct offset, directory doesn't always start at section
-            // start
-            long offset = res.get().offset;
-            ExportSection edata = ExportSection.newInstance(mmbytes,
-                    virtualAddress, optHeader, this, offset);
+        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(DataDirectoryKey.EXPORT_TABLE);
+        if (loadInfo.isPresent()) {
+            ExportSection edata = ExportSection.newInstance(loadInfo.get());
             if (edata.isEmpty()) {
                 logger.warn("empty export section");
             }
@@ -637,63 +601,22 @@ public class SectionLoader {
         return Optional.absent();
     }
 
-    /**
-     * Reads and returns the bytes that belong to the given data directory entry
-     * as well as the offset the bytes where read from.
-     * 
-     * The data directory entry rva points into section. This section is
-     * determined and the file offset for the rva calculated. This file offset
-     * is different from the beginning of the determined section, as the section
-     * may contain more than the data directory. The returned bytes start at
-     * that file offset and end at the end of the section the data directory is
-     * in.
-     * 
-     * @param dataDirKey
-     *            the key of the data directory entry you want the bytes for
-     * @return byte array that contains the bytes the data directory entry rva
-     *         is pointing to
-     * @throws IOException
-     *             if unable to read the file
-     * @throws FileFormatException
-     *             if unable to load the file, e.g. not virtual address given
-     */
-    @Ensures("result != null")
-    private Optional<BytesAndOffset> maybeReadDataDirBytes(
-            DataDirectoryKey dataDirKey) throws IOException,
-            FileFormatException {
-        Optional<DataDirEntry> dataDir = optHeader
+    private MemoryMappedPE getMemoryMappedPE() {
+        if (!memoryMapped.isPresent()) {
+            memoryMapped = Optional.of(MemoryMappedPE.newInstance(data, this));
+        }
+        return memoryMapped.get();
+    }
+
+    private Optional<LoadInfo> maybeGetLoadInfo(DataDirectoryKey dataDirKey) {
+        Optional<DataDirEntry> dirEntry = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
-        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
-        if (header.isPresent() && dataDir.isPresent()) {
-            long pointerToRawData = header.get().getAlignedPointerToRaw();
-            Long virtualAddress = header.get().get(VIRTUAL_ADDRESS);
-            if (virtualAddress != null) {
-                long rva = dataDir.get().virtualAddress;
-                long offset = rva - (virtualAddress - pointerToRawData);
-                long size = (getReadSize(header.get()) + pointerToRawData)
-                        - rva;
-                if (size < dataDir.get().size) {
-                    size = dataDir.get().size;
-                }
-                if (size + offset > file.length()) {
-                    size = file.length() - offset;
-                }
-                Preconditions
-                        .checkState(size == (int) size,
-                                "readsize of section too large to load into a byte array");
-                try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-                    raf.seek(offset);
-                    virtualAddress = rva;
-                    byte[] bytes = new byte[(int) size];
-                    raf.readFully(bytes);
-                    return Optional.of(new BytesAndOffset(bytes, offset));
-                }
-            } else {
-                logger.warn("virtual address is null for data dir: "
-                        + dataDirKey);
-            }
-        } else {
-            logger.warn("invalid dataDirKey");
+        if (dirEntry.isPresent()) {
+            long virtualAddress = dirEntry.get().virtualAddress;
+            Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
+            long offset = maybeOffset.or(0L);
+            return Optional.of(new LoadInfo(offset, virtualAddress,
+                    getMemoryMappedPE(), data, this));
         }
         return Optional.absent();
     }
@@ -706,6 +629,8 @@ public class SectionLoader {
      * 
      */
     @Invariant({ "bytes != null", "offset >= 0" })
+    @Beta
+    // TODO remove
     public static class BytesAndOffset {
         public final long offset;
         public final byte[] bytes;
@@ -717,6 +642,38 @@ public class SectionLoader {
         }
     }
 
+    public static class LoadInfo {
+
+        public final long fileOffset;
+        public final long rva;
+        public final PEData data;
+        public final MemoryMappedPE memoryMapped;
+        public final SectionLoader loader;
+
+        public LoadInfo(long fileOffset, long rva, MemoryMappedPE memoryMapped,
+                PEData data, SectionLoader loader) {
+            this.fileOffset = fileOffset;
+            this.rva = rva;
+            this.memoryMapped = memoryMapped;
+            this.data = data;
+            this.loader = loader;
+        }
+
+    }
+
+    /**
+     * Returns whether the data directory entry points into a valid section.
+     * <p>
+     * Returns false if no data directory entry is present for the key or the
+     * section is invalid.
+     * 
+     * @see #isValidSection()
+     * @param dataDirKey
+     *            the key for the data directory entry
+     * @return true if the data directory entry for the key points into a valid
+     *         section. False if no data directory entry present for the key or
+     *         section invalid.
+     */
     public boolean pointsToValidSection(DataDirectoryKey dataDirKey) {
         Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
         if (header.isPresent()) {
@@ -725,7 +682,21 @@ public class SectionLoader {
         return false;
     }
 
+    /**
+     * Returns whether the section is valid.
+     * <p>
+     * A section is valid if the readsize is greater than 0 and the section
+     * start is within the file.
+     * 
+     * @see #getReadSize()
+     * @param header
+     *            the section's header
+     * @return true iff section is valid
+     */
     public boolean isValidSection(SectionHeader header) {
+        // sidenote: the readsize should never be > 0 if the section starts
+        // outside the file
+        // but we make sure that everything is alright
         return getReadSize(header) > 0
                 && header.getAlignedPointerToRaw() < file.length();
     }

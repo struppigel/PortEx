@@ -26,7 +26,7 @@ import com.google.java.contract.Ensures;
 import com.google.java.contract.Invariant;
 
 /**
- * Holds header, size, offset and optional bytes of a PESection.
+ * Holds header, size, offset and bytes of a PESection.
  * <p>
  * Section bytes are loaded lazily.
  * 
@@ -116,7 +116,7 @@ public class PESection {
     }
 
     /**
-     * Dumps the section into a byte array. The file is read if the bytes aren't
+     * Returns the section bytes. The file is read if the bytes aren't
      * already loaded.
      * 
      * @return bytes of the section
@@ -127,7 +127,7 @@ public class PESection {
      *             happens if the size is larger than int can hold.
      */
     @Ensures("result != null")
-    public byte[] getDump() throws IOException {
+    public byte[] getBytes() throws IOException {
         if (sectionbytes.isPresent()) {
             return sectionbytes.get().clone();
         }

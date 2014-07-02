@@ -46,20 +46,23 @@ public class SectionHeader extends Header<SectionHeaderKey> {
 
     /**
      * Creates a Section Table Entry instance.
-     * @param entries 
+     * 
+     * @param entries
      * 
      * @param number
      *            the number of the entry, beginning by 1 with the first entry
      *            in the Section Headers
-     * @param name 
+     * @param offset the file offset for the start of the section
+     * @param name
      */
-    public SectionHeader(Map<SectionHeaderKey, StandardField> entries, int number, long offset, String name) {
+    public SectionHeader(Map<SectionHeaderKey, StandardField> entries,
+            int number, long offset, String name) {
         this.number = number;
         this.offset = offset;
         this.entries = entries;
         this.name = name;
     }
-    
+
     /**
      * Returns the PointerToRawData rounded down to a multiple of 512.
      * 
@@ -97,7 +100,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         }
         return (virtSize + 0xfff) & ~0xfff;
     }
-    
+
     /**
      * Returns the VirtualAddress rounded up to a multiple of 4kb.
      * 

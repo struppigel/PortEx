@@ -500,6 +500,7 @@ public class Visualizer {
 //        show(image);
     }
 
+    @SuppressWarnings("unused")
     private static void show(final BufferedImage image) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

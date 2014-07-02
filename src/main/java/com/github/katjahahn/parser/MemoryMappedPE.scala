@@ -142,7 +142,7 @@ object MemoryMappedPE {
         if (secLoader.isValidSection(header)) {
           val start = header.getAlignedVirtualAddress()
           val end = start + header.getAlignedVirtualSize()
-          val secBytes = secLoader.loadSectionBytes(header.getNumber()).bytes
+          val secBytes = secLoader.loadSectionFrom(header).getBytes()
           for (i <- start until Math.min(end, secBytes.length + start)) {
             bytes(i.toInt) = secBytes((i - start).toInt)
           }

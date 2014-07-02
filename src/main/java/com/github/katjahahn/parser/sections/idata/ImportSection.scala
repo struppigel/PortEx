@@ -34,6 +34,7 @@ import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -104,6 +105,10 @@ object ImportSection {
    * Maximum offset the import section has values in (used to determine the accurate size)
    */
   private var relOffsetMax = 0L
+
+  //TODO refactor
+  def apply(li: LoadInfo): ImportSection =
+    apply(li.memoryMapped, li.rva, li.data.getOptionalHeader(), li.data.getFile().length(), li.fileOffset)
 
   def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
     optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {
@@ -233,15 +238,10 @@ object ImportSection {
   /**
    * The instance of this class is usually created by the section loader.
    *
-   * @param idatabytes the bytes that belong to the import section
-   * @param virtualAddress the address all rva values in the import section are relative to
-   * @param optHeader the optional header of the file
-   * @param fileSize
+   * @param loadInfo
    * @return ImportSection instance
    */
-  def newInstance(mmbytes: MemoryMappedPE, virtualAddress: Long,
-    optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection =
-    apply(mmbytes, virtualAddress, optHeader, fileSize, fileOffset)
+  def newInstance(loadInfo: LoadInfo): ImportSection = apply(loadInfo)
 
   /**
    * Loads the import section and returns it.

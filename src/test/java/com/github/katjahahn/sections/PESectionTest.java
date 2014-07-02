@@ -16,7 +16,7 @@ public class PESectionTest {
 		Random rand = new Random();
 		byte[] randomBytes = new byte[20];
 		rand.nextBytes(randomBytes);
-		byte[] dump = new PESection(randomBytes, 0, null, null).getDump();
+		byte[] dump = new PESection(randomBytes, 0, null, null).getBytes();
 		assertEquals(randomBytes, dump);
 	}
 

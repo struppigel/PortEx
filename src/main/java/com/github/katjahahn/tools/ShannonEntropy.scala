@@ -36,8 +36,8 @@ class ShannonEntropy(private val data: PEData) {
    * @return entropy of the section
    */
   def forSection(sectionNumber: Int): Double = {
-    val bytesAndOffset = (new SectionLoader(data)).loadSectionBytes(sectionNumber)
-    entropy(bytesAndOffset.bytes)
+    val bytes = (new SectionLoader(data)).loadSection(sectionNumber).getBytes()
+    entropy(bytes)
   }
 
   /**
