@@ -19,39 +19,42 @@ package com.github.katjahahn.parser
 
 import java.io.RandomAccessFile
 import java.nio.file.Files
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-
 import com.github.katjahahn.parser.optheader.OptionalHeader
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.SectionTable
-
 import MemoryMappedPE._
+import java.io.File
 
 /**
  * Represents the PE file content as it is mapped to memory.
  * <p>
- * Only maps section bytes for now. This is the first test with the content loaded
- * all at once. Will be changed later.
+ * The bytes are read from file only on request, making it possible to map large files.
+ * Only maps section bytes for now. No file headers.
+ *
+ * @author Katja Hahn
+ *
+ * @param mappings A list of section mappings
+ * @param data the PEData instance of the file
  */
 class MemoryMappedPE(
-  private val bytes: Array[Byte],
   private val mappings: List[Mapping],
   private val data: PEData) {
+
+  /**currently only used for indexWhere and indexOf**/
+  private val chunkSize = 512
 
   /**Array-like methods**/
 
   /**
    * Returns byte at position i.
    * <p>
-   * Scala only.
+   * Scala method. Use get() for Java.
    * @param i index/position
    * @return byte at position i
    */
-  //TODO test this
   def apply(i: Long): Byte = {
-
     val mapping = mappings.find(m => isWithin(i, m.va))
     mapping match {
       case Some(m) => readByteAt(m, i)
@@ -59,10 +62,26 @@ class MemoryMappedPE(
     }
   }
 
+  /**
+   * Returns byte at position i.
+   *
+   * @param i index/position
+   * @return byte at position i
+   */
+  def get(i: Long): Byte = apply(i)
+
+  /**
+   * Returns whether the value is within the range
+   */
   private def isWithin(value: Long, range: Range): Boolean =
     range.start <= value && range.end >= value
 
+  /**
+   * Returns the byte at the virtual offset.
+   * Requires the offset to be within the mapping. See {@link #isWithin}
+   */
   private def readByteAt(m: Mapping, virtOffset: Long): Byte = {
+    require(isWithin(virtOffset, m.va))
     val pStart = m.physA.start
     val relOffset = virtOffset - m.va.start
     val readLocation = pStart + relOffset
@@ -73,29 +92,27 @@ class MemoryMappedPE(
     }
   }
 
+  /**
+   * Returns size number of bytes at the virtual offset from mapping m.
+   * Requires the offset + size to be within the mapping. See {@link #isWithin}
+   */
   private def readBytesAt(m: Mapping, virtOffset: Long, size: Int): Array[Byte] = {
+    require(isWithin(virtOffset, m.va) && isWithin(virtOffset + size, m.va))
     val pStart = m.physA.start
     val relOffset = virtOffset - m.va.start
     val readLocation = pStart + relOffset
     val file = data.getFile
     using(new RandomAccessFile(file, "r")) { raf =>
       raf.seek(readLocation)
-      val bytes = Array.fill(size)(0.toByte)
+      val length = (Math.min(readLocation + size, file.length) - readLocation).toInt
+      val bytes = zeroBytes(length)
       raf.readFully(bytes)
-      bytes
+      bytes ++ zeroBytes(size - length)
     }
   }
 
   private def using[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A =
     try { f(closeable) } finally { closeable.close() }
-
-  /**
-   * Returns byte at position i.
-   *
-   * @param i index/position
-   * @return byte at position i
-   */
-  def get(i: Long): Byte = apply(i)
 
   /**
    * Returns the size of the memory mapped information.
@@ -107,23 +124,45 @@ class MemoryMappedPE(
   def length(): Long = mappings.last.va.end
 
   /**
-   * Creates an array of the specified segment.
+   * Returns a byte array of the specified segment.
    * <p>
    * The distance until-from has to be in Integer range.
    *
-   * @param from
-   * @param until
-   * @return byte array containing the bytes from the specified segment
+   * @param from the virtual start offset
+   * @param until the virtual end offset
+   * @return byte array containing the elements greater than or equal to index
+   * from extending up to (but not including) index until
    */
-  //TODO
   def slice(from: Long, until: Long): Array[Byte] = {
-    if (from > length) {
-      Array.fill((until - from).toInt)(0.toByte)
-    } else if (until > length) {
-      bytes.slice(from.toInt, length.toInt) ++ Array.fill((until - length).toInt)(0.toByte)
-    } else
-      bytes.slice(from.toInt, until.toInt)
+    val sliceMappings = mappingsInRange(new VirtRange(from, until))
+    val bytes = zeroBytes((until - from).toInt)
+    sliceMappings.foreach { m =>
+      val start = Math.max(m.va.start, from)
+      val end = Math.min(m.va.end, until)
+      val mapBytes = readBytesAt(m, start, (end - start).toInt)
+      for (i <- 0 until mapBytes.length) {
+        val index = (start - from).toInt + i
+        bytes(index) = mapBytes(i)
+      }
+    }
+    bytes
   }
+
+  /**
+   * Filters all mappings that are relevant for the range.
+   */
+  private def mappingsInRange(range: VirtRange): List[Mapping] = {
+    val (from, until) = range.unpack
+    mappings.filter(m => m.va.end > from && m.va.start < until)
+  }
+
+  /**
+   * Fills an array with 0 bytes of the size
+   */
+  private def zeroBytes(size: Int): Array[Byte] =
+    if (size >= 0) {
+      Array.fill(size)(0.toByte)
+    } else Array()
 
   /**
    * Returns the index of the first byte that satisfies the condition.
@@ -132,8 +171,19 @@ class MemoryMappedPE(
    * @param from offset to start searching from
    * @return index of the first byte that satisfies the condition
    */
-  //TODO
-  def indexWhere(p: Byte => Boolean, from: Long): Long = bytes.indexWhere(p, from.toInt)
+  def indexWhere(p: Byte => Boolean, from: Long): Long = {
+    if (from > length) -1
+    else {
+      val bytes = slice(from, from + chunkSize)
+      val index = bytes.indexWhere(p)
+      if (index == -1) {
+        val nextIndex = this.indexWhere(p, from + chunkSize)
+        if (nextIndex == -1) -1 else chunkSize + nextIndex
+      } else {
+        from + index
+      }
+    }
+  }
 
   /**
    * Returns the index of the first byte that has the value.
@@ -142,7 +192,8 @@ class MemoryMappedPE(
    * @param from offset to start searching from
    * @return index of the first byte that has the value
    */
-  def indexOf(elem: Byte, from: Long): Long = bytes.indexOf(elem, from.toInt)
+  def indexOf(elem: Byte, from: Long): Long =
+    indexWhere(((b: Byte) => b == elem), from)
 
   /**ByteArrayUtil methods**/
 
@@ -156,15 +207,39 @@ class MemoryMappedPE(
 
 object MemoryMappedPE {
 
-  //in byte
-  val chunkSize = 512
+  /**
+   * Simply a range.
+   */
+  abstract class Range(val start: Long, val end: Long) {
+    def unpack(): (Long, Long) = (start, end)
+  }
 
-  /**defines largest parts for mapping physical -> virtual**/
-  abstract class Range(val start: Long, val end: Long)
+  /**
+   * Represents a range of virtual addresses
+   */
   class VirtRange(start: Long, end: Long) extends Range(start, end)
+
+  /**
+   * Represents a range of physical addresses
+   */
   class PhysRange(start: Long, end: Long) extends Range(start, end)
 
-  case class Mapping(va: VirtRange, physA: PhysRange)
+  /**
+   * Maps all addresses of a virtual range to all addresses of the physical range.
+   * Both ranges have to be of the same size.
+   */
+  case class Mapping(va: VirtRange, physA: PhysRange) {
+    require(va.end - va.start == physA.end - physA.start)
+  }
+
+  def main(args: Array[String]): Unit = {
+    val file = new File("/home/deque/portextestfiles/testfiles/DLL1.dll")
+    val data = PELoader.loadPE(file)
+    println(data)
+    val loader = new SectionLoader(data)
+    val mmpe = apply(data, loader)
+    mmpe.slice(31616, 31622).foreach(println)
+  }
 
   def newInstance(data: PEData, secLoader: SectionLoader): MemoryMappedPE =
     apply(data, secLoader)
@@ -173,9 +248,8 @@ object MemoryMappedPE {
    * Creates a representation of the PE content as it is mapped into memory
    */
   def apply(data: PEData, secLoader: SectionLoader): MemoryMappedPE = {
-    val bytes = readMemoryMappedSectionBytes(data, secLoader)
     val mappings = readMemoryMappings(data, secLoader)
-    new MemoryMappedPE(bytes, mappings, data)
+    new MemoryMappedPE(mappings, data)
   }
 
   /**
@@ -192,42 +266,17 @@ object MemoryMappedPE {
       val maxVA = getMaxVA(table, secLoader)
       for (header <- table.getSectionHeaders().asScala) {
         if (secLoader.isValidSection(header)) {
-          val start = header.getAlignedVirtualAddress()
-          val end = start + header.getAlignedVirtualSize()
-          val virtRange = new VirtRange(start, end)
           val pStart = header.getAlignedPointerToRaw()
-          val pEnd = pStart + secLoader.getReadSize(header)
+          val readSize = secLoader.getReadSize(header)
+          val pEnd = pStart + readSize
           val physRange = new PhysRange(pStart, pEnd)
+          val vStart = header.getAlignedVirtualAddress()
+          val vEnd = vStart + readSize
+          val virtRange = new VirtRange(vStart, vEnd)
           mappings += Mapping(virtRange, physRange)
         }
       }
       mappings.toList
-    }
-  }
-
-  /**
-   * Reads all section bytes at once into a byte array.
-   */
-  private def readMemoryMappedSectionBytes(data: PEData, secLoader: SectionLoader): Array[Byte] = {
-    val optHeader = data.getOptionalHeader
-    val table = data.getSectionTable
-    if (optHeader.isLowAlignmentMode()) {
-      Files.readAllBytes(data.getFile.toPath)
-    } else {
-      val maxVA = getMaxVA(table, secLoader)
-      //TODO here is the problem -- it might be that it doesn't fit in an Int
-      val bytes = Array.fill(maxVA.toInt)(0.toByte)
-      for (header <- table.getSectionHeaders().asScala) {
-        if (secLoader.isValidSection(header)) {
-          val start = header.getAlignedVirtualAddress()
-          val end = start + header.getAlignedVirtualSize()
-          val secBytes = secLoader.loadSectionFrom(header).getBytes()
-          for (i <- start until Math.min(end, secBytes.length + start)) {
-            bytes(i.toInt) = secBytes((i - start).toInt)
-          }
-        }
-      }
-      bytes
     }
   }
 
