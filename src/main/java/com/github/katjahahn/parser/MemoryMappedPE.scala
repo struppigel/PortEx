@@ -42,8 +42,11 @@ class MemoryMappedPE(
   private val mappings: List[Mapping],
   private val data: PEData) {
 
-  /**currently only used for indexWhere and indexOf**/
-  private val chunkSize = 512
+  /**
+   * Determines how many bytes are read at once.
+   * Currently only used for indexWhere and indexOf.
+   */
+  private val chunkSize = 1024
 
   /**Array-like methods**/
 
@@ -134,6 +137,7 @@ class MemoryMappedPE(
    * from extending up to (but not including) index until
    */
   def slice(from: Long, until: Long): Array[Byte] = {
+    require((from - until) == (from - until).toInt)
     val sliceMappings = mappingsInRange(new VirtRange(from, until))
     val bytes = zeroBytes((until - from).toInt)
     sliceMappings.foreach { m =>
@@ -257,9 +261,12 @@ object MemoryMappedPE {
    */
   private def readMemoryMappings(data: PEData, secLoader: SectionLoader): List[Mapping] = {
     val optHeader = data.getOptionalHeader
+    //in low alignment mode all virtual addresses equal their physical counterparts
+    //so basically no mapping has to be done
     if (optHeader.isLowAlignmentMode()) {
       val filesize = data.getFile.length
       List(Mapping(new VirtRange(0, filesize), new PhysRange(0, filesize)))
+    //not low alignment mode, so mappings are applied per section
     } else {
       val table = data.getSectionTable
       val mappings = ListBuffer[Mapping]()
