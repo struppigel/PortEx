@@ -253,7 +253,7 @@ object MemoryMappedPE {
   }
 
   /**
-   * Reads memory mappings for the sections. This shall replace the bytes read
+   * Reads memory mappings for the sections.
    */
   private def readMemoryMappings(data: PEData, secLoader: SectionLoader): List[Mapping] = {
     val optHeader = data.getOptionalHeader
@@ -263,7 +263,6 @@ object MemoryMappedPE {
     } else {
       val table = data.getSectionTable
       val mappings = ListBuffer[Mapping]()
-      val maxVA = getMaxVA(table, secLoader)
       for (header <- table.getSectionHeaders().asScala) {
         if (secLoader.isValidSection(header)) {
           val pStart = header.getAlignedPointerToRaw()
@@ -279,11 +278,5 @@ object MemoryMappedPE {
       mappings.toList
     }
   }
-
-  private def getMaxVA(table: SectionTable, secLoader: SectionLoader): Long =
-    table.getSectionHeaders().asScala.foldRight(0L) { (header, max) =>
-      val headerEnd = header.getAlignedVirtualAddress() + header.getAlignedVirtualSize()
-      if (secLoader.isValidSection(header) && headerEnd > max) headerEnd else max
-    }
 
 }
