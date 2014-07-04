@@ -43,8 +43,7 @@ class MemoryMappedPE(
   private val data: PEData) {
 
   /**
-   * Determines how many bytes are read at once.
-   * Currently only used for indexWhere and indexOf.
+   * Determines how many bytes are read at once while checking indexWhere and indexOf.
    */
   private val chunkSize = 1024
 
@@ -99,10 +98,10 @@ class MemoryMappedPE(
     sliceMappings.foreach { m =>
       val start = Math.max(m.va.start, from)
       val end = Math.min(m.va.end, until)
-      val mapBytes = m(start, (end - start).toInt)
-      for (i <- 0 until mapBytes.length) {
+      val mappedBytes = m(start, (end - start).toInt)
+      for (i <- 0 until mappedBytes.length) {
         val index = (start - from).toInt + i
-        bytes(index) = mapBytes(i)
+        bytes(index) = mappedBytes(i)
       }
     }
     bytes
