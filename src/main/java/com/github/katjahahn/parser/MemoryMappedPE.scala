@@ -58,9 +58,9 @@ class MemoryMappedPE(
    * @return byte at position i
    */
   def apply(i: Long): Byte = {
-    val mapping = mappings.find(m => isWithin(i, m.va))
+    val mapping = mappings.find(m => m.va.contains(i))
     mapping match {
-      case Some(m) => readByteAt(m, i)
+      case Some(m) => m(i)
       case None => 0.toByte
     }
   }
@@ -72,50 +72,6 @@ class MemoryMappedPE(
    * @return byte at position i
    */
   def get(i: Long): Byte = apply(i)
-
-  /**
-   * Returns whether the value is within the range
-   */
-  private def isWithin(value: Long, range: Range): Boolean =
-    range.start <= value && range.end >= value
-
-  /**
-   * Returns the byte at the virtual offset.
-   * Requires the offset to be within the mapping. See {@link #isWithin}
-   */
-  private def readByteAt(m: Mapping, virtOffset: Long): Byte = {
-    require(isWithin(virtOffset, m.va))
-    val pStart = m.physA.start
-    val relOffset = virtOffset - m.va.start
-    val readLocation = pStart + relOffset
-    val file = data.getFile
-    using(new RandomAccessFile(file, "r")) { raf =>
-      raf.seek(readLocation)
-      raf.readByte()
-    }
-  }
-
-  /**
-   * Returns size number of bytes at the virtual offset from mapping m.
-   * Requires the offset + size to be within the mapping. See {@link #isWithin}
-   */
-  private def readBytesAt(m: Mapping, virtOffset: Long, size: Int): Array[Byte] = {
-    require(isWithin(virtOffset, m.va) && isWithin(virtOffset + size, m.va))
-    val pStart = m.physA.start
-    val relOffset = virtOffset - m.va.start
-    val readLocation = pStart + relOffset
-    val file = data.getFile
-    using(new RandomAccessFile(file, "r")) { raf =>
-      raf.seek(readLocation)
-      val length = (Math.min(readLocation + size, file.length) - readLocation).toInt
-      val bytes = zeroBytes(length)
-      raf.readFully(bytes)
-      bytes ++ zeroBytes(size - length)
-    }
-  }
-
-  private def using[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A =
-    try { f(closeable) } finally { closeable.close() }
 
   /**
    * Returns the size of the memory mapped information.
@@ -139,11 +95,11 @@ class MemoryMappedPE(
   def slice(from: Long, until: Long): Array[Byte] = {
     require((from - until) == (from - until).toInt)
     val sliceMappings = mappingsInRange(new VirtRange(from, until))
-    val bytes = zeroBytes((until - from).toInt)
+    val bytes = Array.fill((until - from).toInt)(0.toByte)
     sliceMappings.foreach { m =>
       val start = Math.max(m.va.start, from)
       val end = Math.min(m.va.end, until)
-      val mapBytes = readBytesAt(m, start, (end - start).toInt)
+      val mapBytes = m(start, (end - start).toInt)
       for (i <- 0 until mapBytes.length) {
         val index = (start - from).toInt + i
         bytes(index) = mapBytes(i)
@@ -159,14 +115,6 @@ class MemoryMappedPE(
     val (from, until) = range.unpack
     mappings.filter(m => m.va.end > from && m.va.start < until)
   }
-
-  /**
-   * Fills an array with 0 bytes of the size
-   */
-  private def zeroBytes(size: Int): Array[Byte] =
-    if (size >= 0) {
-      Array.fill(size)(0.toByte)
-    } else Array()
 
   /**
    * Returns the index of the first byte that satisfies the condition.
@@ -211,31 +159,6 @@ class MemoryMappedPE(
 
 object MemoryMappedPE {
 
-  /**
-   * Simply a range.
-   */
-  abstract class Range(val start: Long, val end: Long) {
-    def unpack(): (Long, Long) = (start, end)
-  }
-
-  /**
-   * Represents a range of virtual addresses
-   */
-  class VirtRange(start: Long, end: Long) extends Range(start, end)
-
-  /**
-   * Represents a range of physical addresses
-   */
-  class PhysRange(start: Long, end: Long) extends Range(start, end)
-
-  /**
-   * Maps all addresses of a virtual range to all addresses of the physical range.
-   * Both ranges have to be of the same size.
-   */
-  case class Mapping(va: VirtRange, physA: PhysRange) {
-    require(va.end - va.start == physA.end - physA.start)
-  }
-
   def main(args: Array[String]): Unit = {
     val file = new File("/home/deque/portextestfiles/testfiles/DLL1.dll")
     val data = PELoader.loadPE(file)
@@ -265,8 +188,8 @@ object MemoryMappedPE {
     //so basically no mapping has to be done
     if (optHeader.isLowAlignmentMode()) {
       val filesize = data.getFile.length
-      List(Mapping(new VirtRange(0, filesize), new PhysRange(0, filesize)))
-    //not low alignment mode, so mappings are applied per section
+      List(new Mapping(new VirtRange(0, filesize), new PhysRange(0, filesize), data))
+      //not low alignment mode, so mappings are applied per section
     } else {
       val table = data.getSectionTable
       val mappings = ListBuffer[Mapping]()
@@ -279,11 +202,10 @@ object MemoryMappedPE {
           val vStart = header.getAlignedVirtualAddress()
           val vEnd = vStart + readSize
           val virtRange = new VirtRange(vStart, vEnd)
-          mappings += Mapping(virtRange, physRange)
+          mappings += new Mapping(virtRange, physRange, data)
         }
       }
       mappings.toList
     }
   }
-
 }

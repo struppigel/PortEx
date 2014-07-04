@@ -16,6 +16,9 @@
 package com.github.katjahahn.parser.optheader;
 
 import com.github.katjahahn.parser.HeaderKey;
+import com.github.katjahahn.parser.sections.SpecialSection;
+import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.google.common.annotations.Beta;
 
 /**
  * Key for the data directory table.
@@ -95,6 +98,12 @@ public enum DataDirectoryKey implements HeaderKey {
 	
 	private DataDirectoryKey(String fieldName) {
 		this.fieldName= fieldName;
+	}
+	
+	@Beta
+	@SuppressWarnings("unchecked") //TODO this is used for a test
+    public <T extends SpecialSection> Class<T> getSpecialSectionClass() {
+	    return (Class<T>) ImportSection.class;
 	}
 	
 	/**

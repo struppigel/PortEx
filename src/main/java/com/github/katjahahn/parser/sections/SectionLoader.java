@@ -20,6 +20,8 @@ import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -453,7 +455,7 @@ public class SectionLoader {
      *             if unable to read the file
      */
     @Ensures("result != null")
-    //TODO use MemoryMappedPE and loadInfo
+    // TODO use MemoryMappedPE and loadInfo
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
         Optional<DataDirEntry> resourceTable = optHeader
@@ -514,7 +516,8 @@ public class SectionLoader {
         DataDirectoryKey dataDirKey = DataDirectoryKey.EXCEPTION_TABLE;
         Optional<LoadInfo> loadInfo = maybeGetLoadInfo(dataDirKey);
         if (loadInfo.isPresent()) {
-            ExceptionSection pdata = ExceptionSection.newInstance(loadInfo.get());
+            ExceptionSection pdata = ExceptionSection.newInstance(loadInfo
+                    .get());
             if (pdata.isEmpty()) {
                 logger.warn("empty exception section");
             }
@@ -538,6 +541,29 @@ public class SectionLoader {
             return idata.get();
         }
         throw new IllegalStateException("unable to load import section");
+    }
+
+    //TODO is this bad? Use abstract factory pattern?
+    @Beta
+    @SuppressWarnings("unchecked")
+    public <T extends SpecialSection> Optional<T> maybeLoadDataDirectory(
+            DataDirectoryKey key) {
+        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(key);
+        if (loadInfo.isPresent()) {
+            Class<T> clazz = key.getSpecialSectionClass();
+            Method method;
+            try {
+                method = clazz.getMethod("newInstance", LoadInfo.class);
+                Object o = method.invoke(null, loadInfo.get());
+                return Optional.of((T) o);
+            } catch (NoSuchMethodException | SecurityException
+                    | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException e) {
+                logger.error(e);
+                return Optional.absent();
+            }
+        }
+        return Optional.absent();
     }
 
     /**
