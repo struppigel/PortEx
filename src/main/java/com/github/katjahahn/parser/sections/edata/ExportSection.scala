@@ -197,8 +197,6 @@ object ExportSection {
     //TODO slice only headerbytes for ExportDir
     val exportBytes = mmBytes.slice(virtualAddress, mmBytes.length + virtualAddress);
     val edataTable = ExportDirectory(exportBytes, offset)
-    val maybeExportDir = opt.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
-    val exportHeader = sectionLoader.maybeGetSectionHeaderByRVA(maybeExportDir.get.virtualAddress).get
     val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, virtualAddress, offset)
     val namePointerTable = loadNamePointerTable(edataTable, mmBytes, virtualAddress, offset)
     val ordinalTable = loadOrdinalTable(edataTable, mmBytes, virtualAddress, offset)
