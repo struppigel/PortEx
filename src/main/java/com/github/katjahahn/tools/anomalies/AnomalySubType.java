@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.anomalies;
 
+import static com.github.katjahahn.tools.anomalies.AnomalyType.*;
+
 /**
  * Represent the semantics of an anomaly.
  * <p>
@@ -30,7 +32,7 @@ public enum AnomalySubType {
     /**
      * The MSDOS header is collapsed, i.e. parts are missing.
      */
-    COLLAPSED_MSDOS_HEADER,
+    COLLAPSED_MSDOS_HEADER(STRUCTURE),
 
     /** COFF File Header */
 
@@ -38,248 +40,262 @@ public enum AnomalySubType {
      * The PE File Header was moved to overlay, this is the result of
      * manipulating e_lfanew to point to the overlay.
      */
-    PE_HEADER_IN_OVERLAY,
+    PE_HEADER_IN_OVERLAY(STRUCTURE),
     /**
-     * The optional header is collapsed.
+     * The optional header size is too small, thus the Optional Header overlaps 
+     * with the Section Table.
      */
-    COLLAPSED_OPTIONAL_HEADER,
+    COLLAPSED_OPTIONAL_HEADER(STRUCTURE),
     /**
      * The SIZE_OF_OPTIONAL_HEADER is too large.
      * <p>
      * This may result in a SEC_TABLE_IN_OVERLAY anomaly.
      */
-    TOO_LARGE_OPTIONAL_HEADER,
-    /**
-     * The optional header is too small //TODO same as collapsed
-     */
-    TOO_SMALL_OPTIONAL_HEADER,
+    TOO_LARGE_OPTIONAL_HEADER(WRONG),
     /**
      * The file has more than 96 sections.
      */
-    TOO_MANY_SECTIONS,
+    TOO_MANY_SECTIONS(STRUCTURE),
     /**
      * The file has no sections.
      */
-    SECTIONLESS,
+    SECTIONLESS(STRUCTURE),
     /**
      * Deprecated NR_OF_SYMBOLS is set.
      */
-    DEPRECATED_NR_OF_SYMB,
+    DEPRECATED_NR_OF_SYMB(DEPRECATED),
     /**
      * Deprecated POINTER_TO_SYMBOL_TABLE is set.
      */
-    DEPRECATED_PTR_TO_SYMB_TABLE,
+    DEPRECATED_PTR_TO_SYMB_TABLE(DEPRECATED),
     /**
      * Reserved file characteristics are set.
      */
-    RESERVED_FILE_CHARACTERISTICS,
+    RESERVED_FILE_CHARACTERISTICS(RESERVED),
     /**
      * Deprecated file characteristics are set.
      */
-    DEPRECATED_FILE_CHARACTERISTICS,
+    DEPRECATED_FILE_CHARACTERISTICS(DEPRECATED),
 
     /** Optional Header */
 
     /**
      * The image base is too large.
      */
-    TOO_LARGE_IMAGE_BASE,
+    TOO_LARGE_IMAGE_BASE(WRONG),
     /**
      * The image base is zero.
      */
-    ZERO_IMAGE_BASE,
+    ZERO_IMAGE_BASE(WRONG),
     /**
      * The image base has a non-default value.
      */
-    NON_DEFAULT_IMAGE_BASE,
+    NON_DEFAULT_IMAGE_BASE(NON_DEFAULT),
     /**
      * The image base is not a multiple of 64K.
      */
-    NOT_MULT_OF_64K_IMAGE_BASE,
+    NOT_MULT_OF_64K_IMAGE_BASE(WRONG),
     /**
      * SIZE_OF_IMAGE is not aligned to SECTION_ALIGNMENT.
      */
-    NOT_SEC_ALIGNED_SIZE_OF_IMAGE,
+    NOT_SEC_ALIGNED_SIZE_OF_IMAGE(WRONG),
     /**
      * Unusual number of data directories.
      */
-    UNUSUAL_DATA_DIR_NR,
+    UNUSUAL_DATA_DIR_NR(NON_DEFAULT),
     /**
      * No data directory present
      */
-    NO_DATA_DIR,
+    NO_DATA_DIR(WRONG),
     /**
      * Reserved data directories are present.
      */
-    RESERVED_DATA_DIR,
+    RESERVED_DATA_DIR(RESERVED),
     /**
      * Data directory entry doesn't point to a valid location, i.e. outside the
      * file
      */
-    INVALID_DATA_DIR,
+    INVALID_DATA_DIR(WRONG),
     /**
      * SIZE_OF_HEADERS is too small.
      */
-    TOO_SMALL_SIZE_OF_HEADERS,
+    TOO_SMALL_SIZE_OF_HEADERS(WRONG),
     /**
      * SIZE_OF_HEADERS is not alinged to FILE_ALIGNMENT.
      */
-    NOT_FILEALIGNED_SIZE_OF_HEADERS,
+    NOT_FILEALIGNED_SIZE_OF_HEADERS(WRONG),
     /**
      * SIZE_OF_HEADERS is not the rounded up header size.
      */
-    NON_DEFAULT_SIZE_OF_HEADERS,
+    NON_DEFAULT_SIZE_OF_HEADERS(NON_DEFAULT),
     /**
      * Reserved DLL Characteristics are set.
      */
-    RESERVED_DLL_CHARACTERISTICS,
+    RESERVED_DLL_CHARACTERISTICS(RESERVED),
     /**
      * Deprecated DLL Characteristics are set.
      */
-    DEPRECATED_DLL_CHARACTERISTICS,
+    DEPRECATED_DLL_CHARACTERISTICS(DEPRECATED),
     /**
      * Reserved Win32Version is set.
      */
-    RESERVED_WIN32VERSION,
+    RESERVED_WIN32VERSION(RESERVED),
     /**
      * Reserved LoaderFlags are set.
      */
-    RESERVED_LOADER_FLAGS,
+    RESERVED_LOADER_FLAGS(RESERVED),
     /**
      * FILE_ALIGNMENT is not a power of two.
      */
-    NOT_POW_OF_TWO_FILEALIGN,
+    NOT_POW_OF_TWO_FILEALIGN(WRONG),
     /**
      * FILE_ALIGNMENT is smaller than 512.
      */
-    TOO_SMALL_FILEALIGN,
+    TOO_SMALL_FILEALIGN(NON_DEFAULT),
     /**
      * FILE_ALIGNMENT is larger than 65536.
      */
-    TOO_LARGE_FILEALIGN,
+    TOO_LARGE_FILEALIGN(WRONG),
     /**
      * FILE_ALIGNMENT is not 512.
      */
-    NON_DEFAULT_FILEALIGN,
+    NON_DEFAULT_FILEALIGN(NON_DEFAULT),
     /**
      * SECTION_ALIGNMENT is smaller than FILE_ALIGNMENT.
      */
-    TOO_SMALL_SECALIGN,
+    TOO_SMALL_SECALIGN(WRONG),
     /**
      * Low alignment mode is set.
      */
-    LOW_ALIGNMENT_MODE,
+    LOW_ALIGNMENT_MODE(NON_DEFAULT),
     /**
      * The ADDRESS_OF_ENTRY_POINT is too small.
      */
-    TOO_SMALL_EP,
+    TOO_SMALL_EP(WRONG),
     /**
      * The ADDRESS_OF_ENTRY_POINT is zero.
      */
-    ZERO_EP,
+    ZERO_EP(WRONG),
     /**
      * The ADDRESS_OF_ENTRY_POINT points into virtual space.
      */
-    VIRTUAL_EP,
+    VIRTUAL_EP(WRONG),
 
     /** Section Table */
 
     /**
      * The section name is unusual.
      */
-    UNUSUAL_SEC_NAME,
+    UNUSUAL_SEC_NAME(NON_DEFAULT),
     /**
      * Control symbols in section name. This is a special case of
      * UNUSUAL_SEC_NAME.
      */
-    CTRL_SYMB_IN_SEC_NAME,
+    CTRL_SYMB_IN_SEC_NAME(NON_DEFAULT),
     /**
      * The section table is moved to overlay.
      */
-    SEC_TABLE_IN_OVERLAY,
+    SEC_TABLE_IN_OVERLAY(STRUCTURE),
     /**
      * The SIZE_OF_RAW_DATA is larger than the file size permits.
      */
-    TOO_LARGE_SIZE_OF_RAW,
+    TOO_LARGE_SIZE_OF_RAW(WRONG),
     /**
      * Contraints for extendec reloc have been violated.
      */
-    EXTENDED_RELOC_VIOLATIONS,
+    EXTENDED_RELOC_VIOLATIONS(WRONG),
     /**
      * Reserved section characteristics are set.
      */
-    RESERVED_SEC_CHARACTERISTICS,
+    RESERVED_SEC_CHARACTERISTICS(RESERVED),
     /**
      * Deprecated section characteristics are set.
      */
-    DEPRECATED_SEC_CHARACTERISTICS,
+    DEPRECATED_SEC_CHARACTERISTICS(DEPRECATED),
     /**
      * Section characteristics are either missing or superfluous. (Based on
      * conventions given by section name, see PECOFF spec) //TODO add to thesis
      */
-    UNUSUAL_SEC_CHARACTERISTICS,
+    UNUSUAL_SEC_CHARACTERISTICS(NON_DEFAULT),
     /**
      * Sections are physically shuffled.
      */
-    PHYSICALLY_SHUFFLED_SEC, // TODO add to thesis
+    PHYSICALLY_SHUFFLED_SEC(STRUCTURE), // TODO add to thesis
     /**
      * Sections are physically overlapping.
      */
-    PHYSICALLY_OVERLAPPING_SEC,
+    PHYSICALLY_OVERLAPPING_SEC(STRUCTURE),
     /**
      * Sections are duplicated. This is a special case of
      * {@link #PHYSICALLY_OVERLAPPING_SEC}.
      */
-    PHYSICALLY_DUPLICATED_SEC,
+    PHYSICALLY_DUPLICATED_SEC(STRUCTURE),
     /**
      * Sections are overlapping in virtual space
      */
-    VIRTUALLY_OVERLAPPING_SEC,
+    VIRTUALLY_OVERLAPPING_SEC(STRUCTURE),
     /**
      * Sections have are mapped to the same virtual location. This is a special
      * case of {@link #VIRTUALLY_OVERLAPPING_SEC}
      */
-    VIRTUALLY_DUPLICATED_SEC,
+    VIRTUALLY_DUPLICATED_SEC(STRUCTURE),
     /**
      * The virtual addresses of the sections are not in ascending order.
      */
-    NOT_ASCENDING_SEC_VA,
+    NOT_ASCENDING_SEC_VA(STRUCTURE),
     /**
      * Deprecated POINTER_TO_LINE_NUMBER set
      */
-    DEPRECATED_PTR_OF_LINE_NR,
+    DEPRECATED_PTR_OF_LINE_NR(DEPRECATED),
     /**
      * Deprecated NUMBER_OF_LINE_NUMBERS set.
      */
-    DEPRECATED_NR_OF_LINE_NR,
+    DEPRECATED_NR_OF_LINE_NR(DEPRECATED),
     /**
      * The section has a zero virtual size.
      */
-    ZERO_VIRTUAL_SIZE,
+    ZERO_VIRTUAL_SIZE(WRONG),
     /**
      * The section has a zero size of raw data.
      */
-    ZERO_SIZE_OF_RAW_DATA,
+    ZERO_SIZE_OF_RAW_DATA(WRONG),
     /**
      * Section characteristics that are only valid for object files are set.
      */
-    OBJECT_ONLY_SEC_CHARACTERISTICS,
+    OBJECT_ONLY_SEC_CHARACTERISTICS(WRONG),
     /**
      * TODO POINTER_TO_RELOCATIONS is zero ??
      */
-    ZERO_POINTER_TO_RELOC, // TODO must be zero?
-    ZERO_NR_OF_RELOC, // TODO must be zero? correct in thesis as well
+    ZERO_POINTER_TO_RELOC(WRONG), // TODO must be zero?
+    ZERO_NR_OF_RELOC(WRONG), // TODO must be zero? correct in thesis as well
     /**
      * TODO
      */
-    UNINIT_DATA_CONTRAINTS_VIOLATION,
+    UNINIT_DATA_CONTRAINTS_VIOLATION(WRONG),
     /**
      * SIZE_OF_RAW_DATA is not a multiple of file alignment
      */
-    NOT_FILEALIGNED_SIZE_OF_RAW,
+    NOT_FILEALIGNED_SIZE_OF_RAW(WRONG),
     /**
      * POINTER_TO_RAW_DATA is not a multiple of file alignment
      */
-    NOT_FILEALIGNED_PTR_TO_RAW, DEPRECATED_NR_OF_RELOC, // TODO add to thesis
-    DEPRECATED_PTR_TO_RELOC; // TODO add to thesis
+    NOT_FILEALIGNED_PTR_TO_RAW(WRONG), 
+    /**
+     * TODO
+     */
+    DEPRECATED_NR_OF_RELOC(DEPRECATED), // TODO add to thesis
+    /**
+     * TODO
+     */
+    DEPRECATED_PTR_TO_RELOC(DEPRECATED); // TODO add to thesis
+    
+    private final AnomalyType superType;
+    
+    private AnomalySubType(AnomalyType superType) {
+        this.superType = superType;
+    }
+    
+    public AnomalyType getSuperType() {
+        return superType;
+    }
 }

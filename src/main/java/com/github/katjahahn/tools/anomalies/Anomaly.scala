@@ -33,14 +33,14 @@ abstract class Anomaly() {
   def description(): String
 
   /**
-   * Represents a field this anomaly is associated with
+   * Represents a field or structure this anomaly is associated with
    */
-  def field(): StandardField
+  def key(): FieldOrStructureKey
 
   /**
    * The anomaly type
    */
-  def getType(): AnomalyType
+  def getType(): AnomalyType = subtype.getSuperType
 
   /**
    * The subtype of the anomaly
@@ -53,59 +53,34 @@ abstract class Anomaly() {
  * Represents unusual location, order, number or size of PE structures, e.g.
  * collapsed, overlapping, moved to overlay
  */
-case class StructuralAnomaly(
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
-  override def field = null
-  override def getType = AnomalyType.STRUCTURE
+case class StructureAnomaly(
+  structure: PEStructure,
+  override val description: String,
+  override val subtype: AnomalySubType) extends Anomaly {
+  require(subtype.getSuperType == AnomalyType.STRUCTURE)
+  
+  override def key = structure
 }
 
 /**
  * A deprectated value is not zero as expected.
  */
-case class DeprecatedAnomaly(field: StandardField, 
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
-  override def getType = AnomalyType.DEPRECATED
-}
-
-/**
- * A value is wrong according to the pecoff specification, e.g. it is incoherent
- * or doesn't fulfull alignment specifications.
- */
-case class WrongValueAnomaly(field: StandardField, 
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
-  override def getType = AnomalyType.WRONG;
-}
-
-/**
- * A non standard value has been used. This is not against the pecoff specification,
- * it is just unusual.
- */
-case class NonDefaultAnomaly(field: StandardField, 
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
-  override def getType = AnomalyType.NON_DEFAULT
-}
-
-/**
- * A reserved value has been used.
- */
-case class ReservedAnomaly(field: StandardField, 
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
-  override def getType = AnomalyType.RESERVED
+case class FieldAnomaly(
+  val field: StandardField,
+  override val description: String,
+  override val subtype: AnomalySubType) extends Anomaly {
+  require(subtype.getSuperType != AnomalyType.STRUCTURE)
+  
+  override def key = field.key
 }
 
 /**
  * A reserved datadir value has been used.
  */
-case class ReservedDataDirAnomaly(dataDirEntry: DataDirEntry, 
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
+case class DataDirAnomaly(
+  val dataDirEntry: DataDirEntry,
+  override val description: String,
+  override val subtype: AnomalySubType) extends Anomaly {
 
-  override val field = new StandardField(dataDirEntry.key, dataDirEntry.toString(), null)
-
-  override def getType = AnomalyType.RESERVED
+  override val key = dataDirEntry.key
 }

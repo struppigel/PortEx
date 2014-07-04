@@ -66,12 +66,14 @@ class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData)
     val pStart = physA.start
     val relOffset = virtOffset - va.start
     val readLocation = pStart + relOffset
+    //read using the chunks
     if (useChunks) {
       val chunkIndex = (relOffset / defaultChunkSize).toInt
       val chunk = chunks(chunkIndex)
       assert(chunk.physStart <= readLocation && chunk.physStart + chunk.size > readLocation)
       val byteIndex = (readLocation - chunk.physStart).toInt
       chunk.bytes(byteIndex)
+    //read directly from file
     } else { //TODO test chunk use and remove the body with worse performance
       val file = data.getFile
       using(new RandomAccessFile(file, "r")) { raf =>
@@ -91,12 +93,14 @@ class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData)
    */
   def apply(virtOffset: Long, size: Int): Array[Byte] = {
     require(va.contains(virtOffset) && va.contains(virtOffset + size))
+    //read using the chunks
     if (useChunks) {
       val bytes = zeroBytes(size)
       for (i <- 0 until size) {
         bytes(i) = apply(virtOffset + i)
       }
       bytes
+    //read directly from file
     } else { //TODO test chunk use and remove body with worse performance
       val pStart = physA.start
       val relOffset = virtOffset - va.start
@@ -116,7 +120,6 @@ class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData)
 
 object Mapping {
 
-  //TODO this is for testing if chunk use improves performance
   /**
    * Turn chunk usage on or off.
    * TODO remove non-chunk usage entirely after testing this throughoughly
@@ -125,6 +128,9 @@ object Mapping {
 
   /**
    * The default size of a chunk.
+   * This turned out to be a good value after some performance tests.
+   * 
+   * TODO make this a val after performance tests are done
    */
   var defaultChunkSize = 8192
 

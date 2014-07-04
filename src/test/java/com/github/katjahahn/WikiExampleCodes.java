@@ -55,7 +55,11 @@ import com.github.katjahahn.tools.sigscanner.SignatureScanner;
  */
 public class WikiExampleCodes {
     
-    public void visualizer() throws IOException {
+    public static void main(String[] args) {
+        fileAnomalies();
+    }
+    
+    public static void visualizer() throws IOException {
         File file = new File("WinRar.exe");
         PEData data = PELoader.loadPE(file);
         Visualizer visualizer = new Visualizer(data);
@@ -72,8 +76,8 @@ public class WikiExampleCodes {
         visualizer.setBytesPerPixel(10);
     }
     
-    public void fileAnomalies() {
-        File file = new File("filepath");
+    public static void fileAnomalies() {
+        File file = new File("/home/deque/portextestfiles/testfiles/WinRar.exe");
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         System.out.println(scanner.scanReport());
         
@@ -81,13 +85,13 @@ public class WikiExampleCodes {
         List<Anomaly> anomalies = scanner.getAnomalies();
         for(Anomaly anomaly: anomalies) {
             System.out.println("Anomaly Type: " + anomaly.getType());
-            System.out.println("Entry with anomaly: " + anomaly.field());
+            System.out.println("Field or structure with anomaly: " + anomaly.key());
             System.out.println(anomaly.description());
             System.out.println();
         }
     }
 
-    public void gettingStarted() throws IOException {
+    public static void gettingStarted() throws IOException {
         // Header information
         // load the PE file data
         PEData data = PELoader.loadPE(new File("myfile"));
@@ -131,7 +135,7 @@ public class WikiExampleCodes {
     }
 
     @SuppressWarnings("unused")
-    public void resourceSection() throws IOException {
+    public static void resourceSection() throws IOException {
         // Loading
         File file = new File("WinRar.exe");
         PEData data = PELoader.loadPE(file);
@@ -159,7 +163,7 @@ public class WikiExampleCodes {
         List<SubDirEntry> subdirEntries = table.getSubDirEntries();
     }
 
-    public void importSection() throws FileFormatException, IOException {
+    public static void importSection() throws FileFormatException, IOException {
         File file = new File("WinRar.exe");
         // Print Information
         PEData data = PELoader.loadPE(file);
@@ -193,7 +197,7 @@ public class WikiExampleCodes {
         }
     }
 
-    public void exportSection() throws IOException {
+    public static void exportSection() throws IOException {
         // Show Information
         File file = new File("src/main/resources/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
@@ -202,7 +206,7 @@ public class WikiExampleCodes {
     }
 
     @SuppressWarnings("unused")
-    public void debugSection() throws IOException {
+    public static void debugSection() throws IOException {
         File file = new File("src/main/resources/testfiles/ntdll.dll");
         // Print Information
         PEData data = PELoader.loadPE(file);
@@ -217,7 +221,7 @@ public class WikiExampleCodes {
     }
 
     @SuppressWarnings("unused")
-    public void overlay() throws IOException {
+    public static void overlay() throws IOException {
         // Overlay recognition
         File file = new File("myfile");
         Overlay overlay = new Overlay(file);
@@ -234,7 +238,7 @@ public class WikiExampleCodes {
         overlay.dumpTo(outFile);
     }
 
-    public void signatureScanning() {
+    public static void signatureScanning() {
         // Signature scanning
         SignatureScanner scanner = SignatureScanner.newInstance();
         boolean epOnly = true;

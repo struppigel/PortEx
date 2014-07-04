@@ -58,7 +58,8 @@ trait COFFHeaderScanning extends AnomalyScanner {
   private def checkPEHeaderLocation(coff: COFFFileHeader): List[Anomaly] = {
     val overlayLoc = new Overlay(data.getFile()).getOffset
     if (coff.getOffset() >= overlayLoc) {
-      List(StructuralAnomaly("PE Header moved to Overlay.", PE_HEADER_IN_OVERLAY))
+      List(StructureAnomaly(PEStructure.PE_FILE_HEADER,
+        "PE Header moved to Overlay.", PE_HEADER_IN_OVERLAY))
     } else Nil
   }
 
@@ -75,12 +76,12 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val opt = data.getOptionalHeader()
     if (size < opt.getMinSize) {
       val description = s"COFF File Header: The SizeOfOptionalHeader (${size}) is too small"
-      List(WrongValueAnomaly(entry, description, TOO_SMALL_OPTIONAL_HEADER),
-        StructuralAnomaly("Collapsed Optional Header, Section Table entries might not be valid.", 
-            COLLAPSED_OPTIONAL_HEADER))
+      List(StructureAnomaly(PEStructure.OPTIONAL_HEADER,
+        "Collapsed Optional Header, Section Table entries might not be valid.",
+        COLLAPSED_OPTIONAL_HEADER))
     } else if (size > opt.getMaxSize) {
       val description = "COFF File Header: SizeOfOptionalHeader is too large, namely: " + size
-      List(WrongValueAnomaly(entry, description, TOO_LARGE_OPTIONAL_HEADER))
+      List(FieldAnomaly(entry, description, TOO_LARGE_OPTIONAL_HEADER))
     } else Nil
   }
 
@@ -96,10 +97,10 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val entry = coff.getField(COFFHeaderKey.SECTION_NR)
     if (sectionNr > sectionMax) {
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
-      List(WrongValueAnomaly(entry, description, TOO_MANY_SECTIONS))
+      List(FieldAnomaly(entry, description, TOO_MANY_SECTIONS))
     } else if (sectionNr == 0) {
       val description = "COFF File Header: Sectionless PE"
-      List(WrongValueAnomaly(entry, description, SECTIONLESS))
+      List(FieldAnomaly(entry, description, SECTIONLESS))
     } else Nil
   }
 
@@ -118,7 +119,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val entry = coff.getField(key)
     if (entry.value != 0) {
       val description = "COFF File Header: Deprecated value for " + key.toString + " is " + entry.value
-      List(DeprecatedAnomaly(entry, description, subtype))
+      List(FieldAnomaly(entry, description, subtype))
     } else Nil
 
   }
@@ -135,11 +136,11 @@ trait COFFHeaderScanning extends AnomalyScanner {
       if (ch.isDeprecated) {
         val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS)
         val description = "Deprecated Characteristic in COFF File Header: " + ch
-        DeprecatedAnomaly(entry, description, DEPRECATED_FILE_CHARACTERISTICS) :: list
+        FieldAnomaly(entry, description, DEPRECATED_FILE_CHARACTERISTICS) :: list
       } else if (ch.isReserved) {
         val entry = coff.getField(COFFHeaderKey.CHARACTERISTICS)
         val description = "Reserved Characteristic in COFF File Header: " + ch
-        ReservedAnomaly(entry, description, RESERVED_FILE_CHARACTERISTICS) :: list
+        FieldAnomaly(entry, description, RESERVED_FILE_CHARACTERISTICS) :: list
       } else list)
   }
 

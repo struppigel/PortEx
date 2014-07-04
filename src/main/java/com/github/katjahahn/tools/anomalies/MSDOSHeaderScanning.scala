@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
@@ -21,11 +23,11 @@ import scala.collection.JavaConverters._
 
 /**
  * Scans the MSDOS Header for anomalies
- * 
+ *
  * @author Katja Hahn
  */
 trait MSDOSHeaderScanning extends AnomalyScanner {
-  
+
   //TODO recognize non-standard header
 
   abstract override def scanReport(): String =
@@ -36,21 +38,22 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
     anomalyList ++= checkCollapsedHeader()
     super.scan ::: anomalyList.toList
   }
-  
+
   /**
    * Checks if the MSDOS header is collapsed. Returns a structural anomaly if true.
-   * 
+   *
    * @return anomaly list
    */
   private def checkCollapsedHeader(): List[Anomaly] = {
     val sig = data.getPESignature
     val e_lfanew = sig.getOffset
-    if(e_lfanew.isPresent && e_lfanew.get < 0x40) { 
+    if (e_lfanew.isPresent && e_lfanew.get < 0x40) {
       val description = "Collapsed MSDOS Header, PE Signature offset is at 0x" + java.lang.Long.toHexString(e_lfanew.get)
-      List(StructuralAnomaly(description, AnomalySubType.COLLAPSED_MSDOS_HEADER))
+      List(StructureAnomaly(PEStructure.MSDOS_HEADER, description, 
+          AnomalySubType.COLLAPSED_MSDOS_HEADER))
     } else Nil
   }
-  
+
   //TODO non-default stub
 
 }
