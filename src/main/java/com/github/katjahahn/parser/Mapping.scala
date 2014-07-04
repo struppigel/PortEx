@@ -19,6 +19,9 @@ import Mapping._
 class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData) {
   require(va.end - va.start == physA.end - physA.start)
 
+  /**
+   * The chunks of bytes that make up the Mapping
+   */
   private val chunks = {
     val nrOfChunks = Math.ceil((physA.end - physA.start) / defaultChunkSize.toDouble).toInt
     var start = physA.start
@@ -97,9 +100,9 @@ class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData)
 object Mapping {
 
   //TODO this is for testing if chunk use improves performance
-  private val useChunks = true
-
-  private val defaultChunkSize = 1024
+  var useChunks = true
+  
+  var defaultChunkSize = 8192
 
   /**
    * Fills an array with 0 bytes of the size
@@ -112,6 +115,11 @@ object Mapping {
   private def using[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A =
     try { f(closeable) } finally { closeable.close() }
 
+  /**
+   * A chunk of bytes with the given size. Loads the bytes lazily.
+   * Improves performance for repeated access to bytes in the same area compared 
+   * to reading the file for every tiny slice of bytes.
+   */
   private class Chunk(val physStart: Long, val size: Int, private val data: PEData) {
     lazy val bytes = {
       using(new RandomAccessFile(data.getFile, "r")) { raf =>
