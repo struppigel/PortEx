@@ -97,10 +97,10 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val entry = coff.getField(COFFHeaderKey.SECTION_NR)
     if (sectionNr > sectionMax) {
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
-      List(FieldAnomaly(entry, description, TOO_MANY_SECTIONS))
+      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, TOO_MANY_SECTIONS))
     } else if (sectionNr == 0) {
       val description = "COFF File Header: Sectionless PE"
-      List(FieldAnomaly(entry, description, SECTIONLESS))
+      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, SECTIONLESS))
     } else Nil
   }
 

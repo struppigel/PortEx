@@ -32,7 +32,7 @@ import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
@@ -228,7 +228,7 @@ public final class PELoader {
             System.out.println("virtual start: " + vStart + " virtual end: "
                     + vEnd);
         }
-        Optional<ImportSection> idata = loader.maybeLoadDataDirectory(DataDirectoryKey.IMPORT_TABLE);
+        Optional<ExportSection> idata = loader.maybeLoadDataDirectory(DataDirectoryKey.IMPORT_TABLE);
         System.out.println(idata.get().getInfo());
 //        Optional<ExceptionSection> maybePData = loader.maybeLoadExceptionSection();
 //        if(maybePData.isPresent()) {

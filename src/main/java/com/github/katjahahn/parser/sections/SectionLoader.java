@@ -544,8 +544,8 @@ public class SectionLoader {
     }
 
     //TODO is this bad? Use abstract factory pattern?
-    @Beta
     @SuppressWarnings("unchecked")
+    @Beta
     public <T extends SpecialSection> Optional<T> maybeLoadDataDirectory(
             DataDirectoryKey key) {
         Optional<LoadInfo> loadInfo = maybeGetLoadInfo(key);

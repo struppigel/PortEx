@@ -106,7 +106,7 @@ public enum AnomalySubType {
     /**
      * No data directory present
      */
-    NO_DATA_DIR(WRONG),
+    NO_DATA_DIR(STRUCTURE),
     /**
      * Reserved data directories are present.
      */

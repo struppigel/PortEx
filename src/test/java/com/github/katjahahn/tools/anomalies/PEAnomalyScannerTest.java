@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.parser.HeaderKey;
-import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 
@@ -58,8 +57,6 @@ public class PEAnomalyScannerTest {
 
     @Test
     public void collapsedOptionalHeader() throws IOException {
-        performTest(tinyAnomalies, COFFHeaderKey.SIZE_OF_OPT_HEADER,
-                "SizeOfOptionalHeader");
         performTest(tinyAnomalies, AnomalyType.STRUCTURE,
                 "Collapsed Optional Header");
     }
@@ -139,7 +136,7 @@ public class PEAnomalyScannerTest {
                 .toFile();
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         List<Anomaly> anomalies = scanner.getAnomalies();
-        performTest(anomalies, AnomalyType.WRONG, "Section Number");
+        performTest(anomalies, AnomalyType.STRUCTURE, "Section Number");
     }
 
     @Test
@@ -194,18 +191,4 @@ public class PEAnomalyScannerTest {
         performTest(zeroImageBase, AnomalyType.NON_DEFAULT, description);
     }
 
-    // @Test
-    // public void getAnomalies() {
-    // throw new RuntimeException("Test not implemented");
-    // }
-    //
-    // @Test
-    // public void scan() {
-    // throw new RuntimeException("Test not implemented");
-    // }
-    //
-    // @Test
-    // public void scanReport() {
-    // throw new RuntimeException("Test not implemented");
-    // }
 }

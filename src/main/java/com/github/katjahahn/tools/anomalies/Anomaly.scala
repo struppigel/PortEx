@@ -57,7 +57,8 @@ case class StructureAnomaly(
   structure: PEStructure,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
-  require(subtype.getSuperType == AnomalyType.STRUCTURE)
+  require(subtype.getSuperType == AnomalyType.STRUCTURE, 
+      subtype + " must have anomaly type STRUCTURE!")
   
   override def key = structure
 }
@@ -69,7 +70,8 @@ case class FieldAnomaly(
   val field: StandardField,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
-  require(subtype.getSuperType != AnomalyType.STRUCTURE)
+  require(subtype.getSuperType != AnomalyType.STRUCTURE, 
+      subtype + " must not have anomaly type STRUCTURE!")
   
   override def key = field.key
 }
