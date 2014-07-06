@@ -293,7 +293,7 @@ public class PortexStats {
         String report = stats1 + "\n\n" + stats2 + "\n\n" + stats3 + "\n\n"
                 + stats4;
         System.out.println(report);
-        writeStats(report);
+        writeStats(report, "anomalytype");
     }
 
     // TODO equality of anomalies is nuts, correct it. value differences
@@ -346,7 +346,7 @@ public class PortexStats {
                 + createReport(counter, total - notLoaded) + "\ntotal files: "
                 + total + "\nnot loaded: " + notLoaded + "\nDone\n\n";
         System.out.println(report);
-        writeStats(report);
+        writeStats(report, "anomalycount");
         System.out.println("anomaly count done");
     }
 
@@ -393,7 +393,7 @@ public class PortexStats {
                 + "\npercentage files with overlay: " + percentage
                 + "\nNot loaded: " + notLoaded + "\nDone\n";
         System.out.println(stats);
-        writeStats(stats);
+        writeStats(stats, "overlay");
     }
 
     public static void fileTypeCount(File[] files) {
@@ -439,13 +439,13 @@ public class PortexStats {
                 + dllCount + "\nSystem files: " + sysCount + "\nExe files: "
                 + exeCount + "\nNot loaded: " + notLoaded + "\nDone\n";
         System.out.println(stats);
-        writeStats(stats);
+        writeStats(stats, "filetypecount");
     }
 
-    private static void writeStats(String stats) {
+    private static void writeStats(String stats, String statname) {
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy-MM-dd_HH-mm-ss");
+                statname + "-yyyy-MM-dd_HH-mm-ss");
         String filename = dateFormat.format(date) + ".stat";
         Path path = Paths.get(STATS_FOLDER, filename);
         writeToFile(path, stats);
@@ -465,8 +465,8 @@ public class PortexStats {
         int ableToLoad = 0;
         int unableToLoad = 0;
         int filesReadCounter = 0;
-        List<File> problemPEs = new ArrayList<>();
-        File folder = new File(ANOMALY_FOLDER);
+        List<String> problemPEs = new ArrayList<>();
+        File folder = new File(BAD_FILES);
         File[] files = folder.listFiles();
         for (File file : files) {
             try {
@@ -474,11 +474,11 @@ public class PortexStats {
                 SectionLoader loader = new SectionLoader(data);
                 Map<DataDirectoryKey, DataDirEntry> map = data
                         .getOptionalHeader().getDataDirEntries();
-                // if (map.containsKey(DataDirectoryKey.RESOURCE_TABLE)
-                // && loader
-                // .pointsToValidSection(DataDirectoryKey.RESOURCE_TABLE)) {
-                // loader.loadResourceSection();
-                // }
+                if (map.containsKey(DataDirectoryKey.RESOURCE_TABLE)
+                        && loader
+                                .pointsToValidSection(DataDirectoryKey.RESOURCE_TABLE)) {
+                    loader.loadResourceSection();
+                }
                 if (map.containsKey(DataDirectoryKey.IMPORT_TABLE)
                         && loader
                                 .pointsToValidSection(DataDirectoryKey.IMPORT_TABLE)) {
@@ -492,7 +492,7 @@ public class PortexStats {
                 ableToLoad++;
             } catch (Exception e) {
                 System.err.println(e.getMessage() + " file: " + file.getName());
-                problemPEs.add(file);
+                problemPEs.add(file.getName() + ": " + e.getMessage());
                 unableToLoad++;
             }
             filesReadCounter++;
@@ -505,11 +505,11 @@ public class PortexStats {
         }
         String report = "Files read: " + filesReadCounter + "\nAble to load: "
                 + ableToLoad + "\nUnable to load: " + unableToLoad;
-        for (File file : problemPEs) {
-            report += "\n" + file.getName();
+        for (String message : problemPEs) {
+            report += "\n" + message;
         }
         System.out.println(report);
-        writeStats(report);
+        writeStats(report, "sectionload");
         return ableToLoad;
     }
 
@@ -543,7 +543,7 @@ public class PortexStats {
             report += "\n" + file.getName();
         }
         System.out.println(report);
-        writeStats(report);
+        writeStats(report, "peload");
         return ableToLoad;
     }
 

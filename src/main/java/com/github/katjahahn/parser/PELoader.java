@@ -31,7 +31,10 @@ import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.pdata.ExceptionSection;
+import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
@@ -209,7 +212,7 @@ public final class PELoader {
         // "/home/deque/portextestfiles/badfiles/VirusShare_d7b5da61591482dc4b1c511b14adc99f");
         // File file = new
         // File("/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
-        File file = new File("/home/deque/portextestfiles/testfiles/DLL2.dll");
+        File file = new File("/home/deque/portextestfiles/badfiles/VirusShare_9057e6c2fb3e2c74eef82bfaa907f80f");
         PEData data = PELoader.loadPE(file);
         System.out.println(data);
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
@@ -229,7 +232,9 @@ public final class PELoader {
         }
         Optional<ImportSection> idata = loader.maybeLoadImportSection();
         System.out.println(idata.get().getInfo());
-//        Optional<ExceptionSection> maybePData = loader.maybeLoadExceptionSection();
+        Optional<ExceptionSection> maybePData = loader.maybeLoadExceptionSection();
+        Optional<ExportSection> edata = loader.maybeLoadExportSection();
+        Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
 //        if(maybePData.isPresent()) {
 //            System.out.println(maybePData.get().getInfo());
 //        }

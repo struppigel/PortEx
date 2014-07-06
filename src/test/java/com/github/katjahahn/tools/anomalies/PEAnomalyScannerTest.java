@@ -26,7 +26,7 @@ public class PEAnomalyScannerTest {
     private static final Logger logger = LogManager
             .getLogger(PEAnomalyScannerTest.class.getName());
     private static final String RESOURCE_FOLDER = TestreportsReader.RESOURCE_DIR;
-    private static final String UNUSUAL_FOLDER = TestreportsReader.RESOURCE_DIR
+    public static final String UNUSUAL_FOLDER = RESOURCE_FOLDER
             + "/unusualfiles/";
     private List<Anomaly> tinyAnomalies;
     private List<Anomaly> maxSecXPAnomalies;
