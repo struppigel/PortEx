@@ -52,7 +52,7 @@ class ImportSection private (
 
   def getSize(): Long = size
 
-  def isEmpty(): Boolean = directoryTable.isEmpty || (directoryTable.forall(_.getEntries.isEmpty))
+  override def isEmpty(): Boolean = directoryTable.isEmpty || (directoryTable.forall(_.getEntries.isEmpty))
 
   /**
    * Returns the directory table entries of the import section.

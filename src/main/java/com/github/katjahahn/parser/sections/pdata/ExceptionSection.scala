@@ -41,7 +41,7 @@ class ExceptionSection private (
   offset: Long,
   private val directory: ExceptionDirectory) extends SpecialSection {
   
-  def isEmpty(): Boolean = directory.isEmpty
+  override def isEmpty(): Boolean = directory.isEmpty
 
   def getField(key: ExceptionEntryKey): StandardField = directory(key)
 

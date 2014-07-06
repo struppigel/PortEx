@@ -60,7 +60,7 @@ class ExportSection private (
 
   override def getOffset(): Long = offset
 
-  def isEmpty(): Boolean = exportEntries.isEmpty
+  override def isEmpty(): Boolean = exportEntries.isEmpty
 
   private def nameLocations(): List[Location] = {
     namePointerTable.pointerNameList.map(p =>

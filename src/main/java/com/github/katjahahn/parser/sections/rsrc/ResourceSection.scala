@@ -38,6 +38,8 @@ class ResourceSection(
     val virtualAddress: Long,
     val offset: Long,
     val size: Long) extends SpecialSection {
+  
+  override def isEmpty(): Boolean = false
 
   override def getInfo(): String = resourceTable.getInfo
   

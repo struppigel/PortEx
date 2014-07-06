@@ -25,4 +25,6 @@ import com.github.katjahahn.parser.PEModule;
  */
 public interface SpecialSection extends PEModule {
 
+    boolean isEmpty();
+
 }

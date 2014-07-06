@@ -113,8 +113,7 @@ public final class IOUtil {
                 data.put(key, new StandardField(key, description,
                         value));
             } else {
-                long value = 0;
-                // TODO replace with getbyteslongvaluesafely?
+                long value = getBytesLongValueSafely(headerbytes, offset, length);
                 data.put(key, new StandardField(key, description,
                         value));
                 logger.warn("offset + length larger than headerbytes given");

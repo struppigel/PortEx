@@ -20,8 +20,6 @@ import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +72,7 @@ public class SectionLoader {
      * @param data
      */
     public SectionLoader(PEData data) {
-        // extract data for easier access ;)
+        // extract data for easier access
         this.table = data.getSectionTable();
         this.optHeader = data.getOptionalHeader();
         this.file = data.getFile();
@@ -383,6 +381,63 @@ public class SectionLoader {
     }
 
     /**
+     * To get rid of code repetition in the maybeLoadXSection() methods, this
+     * abtracts the behaviour of assembling the LoadInfo and calling the factory
+     * methods of the special sections based on the data directory key.
+     * <p>
+     * This results in having to cast the return value to the appropriate type,
+     * but correct types are well tested with unit tests.
+     * 
+     * @param key
+     * @return the special section optional that belongs to the key.
+     */
+    private Optional<? extends SpecialSection> maybeLoadSpecialSection(
+            DataDirectoryKey key) {
+        Optional<LoadInfo> maybeLoadInfo = maybeGetLoadInfo(key);
+        if (maybeLoadInfo.isPresent()) {
+            LoadInfo loadInfo = maybeLoadInfo.get();
+            SpecialSection section = null;
+            switch (key) {
+            case IMPORT_TABLE:
+                section = ImportSection.newInstance(loadInfo);
+                break;
+            case EXCEPTION_TABLE:
+                section = ExceptionSection.newInstance(loadInfo);
+                break;
+            case EXPORT_TABLE:
+                section = ExportSection.newInstance(loadInfo);
+                break;
+            case DEBUG:
+                section = DebugSection.newInstance(loadInfo);
+                break;
+            default:
+                return Optional.absent();
+            }
+            if (section.isEmpty()) {
+                logger.warn("empty data directory: " + key);
+            }
+            return Optional.of(section);
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Shortens the loadXSection() methods by handling an empty Optional with an
+     * IllegalStateException.
+     * 
+     * @param optional
+     * @param message
+     * @return
+     */
+    private SpecialSection getOrThrow(
+            Optional<? extends SpecialSection> optional, String message) {
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+        throw new IllegalStateException(message);
+    }
+
+    /**
      * Loads all bytes and information of the debug section.
      * 
      * The file on disk is read to fetch the information.
@@ -396,10 +451,7 @@ public class SectionLoader {
     @Ensures("result != null")
     public DebugSection loadDebugSection() throws IOException {
         Optional<DebugSection> debug = maybeLoadDebugSection();
-        if (debug.isPresent()) {
-            return debug.get();
-        }
-        throw new IllegalStateException("unable to load debug section");
+        return (DebugSection) getOrThrow(debug, "unable to load debug section");
     }
 
     /**
@@ -411,18 +463,10 @@ public class SectionLoader {
      *         have this section
      * @throws {@link IOException} if unable to read the file
      */
+    @SuppressWarnings("unchecked")
     @Ensures("result != null")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
-        DataDirectoryKey debugKey = DataDirectoryKey.DEBUG;
-        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(debugKey);
-        if (loadInfo.isPresent()) {
-            DebugSection sec = DebugSection.newInstance(loadInfo.get());
-            if (sec.isEmpty()) {
-                logger.warn("empty debug section");
-            }
-            return Optional.of(sec);
-        }
-        return Optional.absent();
+        return (Optional<DebugSection>) maybeLoadSpecialSection(DataDirectoryKey.DEBUG);
     }
 
     /**
@@ -438,10 +482,8 @@ public class SectionLoader {
     public ResourceSection loadResourceSection() throws IOException,
             FileFormatException {
         Optional<ResourceSection> rsrc = maybeLoadResourceSection();
-        if (rsrc.isPresent()) {
-            return rsrc.get();
-        }
-        throw new IllegalStateException("unable to load resource section");
+        return (ResourceSection) getOrThrow(rsrc,
+                "unable to load resource section");
     }
 
     /**
@@ -494,10 +536,8 @@ public class SectionLoader {
     @Ensures("result != null")
     public ExceptionSection loadExceptionSection() throws IOException {
         Optional<ExceptionSection> pdata = maybeLoadExceptionSection();
-        if (pdata.isPresent()) {
-            return pdata.get();
-        }
-        throw new IllegalStateException("unable to load exception section");
+        return (ExceptionSection) getOrThrow(pdata,
+                "unable to load exception section");
     }
 
     /**
@@ -510,20 +550,11 @@ public class SectionLoader {
      * @throws IOException
      *             if unable to read the file
      */
+    @SuppressWarnings("unchecked")
     @Ensures("result != null")
     public Optional<ExceptionSection> maybeLoadExceptionSection()
             throws IOException {
-        DataDirectoryKey dataDirKey = DataDirectoryKey.EXCEPTION_TABLE;
-        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(dataDirKey);
-        if (loadInfo.isPresent()) {
-            ExceptionSection pdata = ExceptionSection.newInstance(loadInfo
-                    .get());
-            if (pdata.isEmpty()) {
-                logger.warn("empty exception section");
-            }
-            return Optional.of(pdata);
-        }
-        return Optional.absent();
+        return (Optional<ExceptionSection>) maybeLoadSpecialSection(DataDirectoryKey.EXCEPTION_TABLE);
     }
 
     /**
@@ -537,33 +568,8 @@ public class SectionLoader {
     @Ensures("result != null")
     public ImportSection loadImportSection() throws IOException {
         Optional<ImportSection> idata = maybeLoadImportSection();
-        if (idata.isPresent()) {
-            return idata.get();
-        }
-        throw new IllegalStateException("unable to load import section");
-    }
-
-    //TODO is this bad? Use abstract factory pattern?
-    @SuppressWarnings("unchecked")
-    @Beta
-    public <T extends SpecialSection> Optional<T> maybeLoadDataDirectory(
-            DataDirectoryKey key) {
-        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(key);
-        if (loadInfo.isPresent()) {
-            Class<T> clazz = key.getSpecialSectionClass();
-            Method method;
-            try {
-                method = clazz.getMethod("newInstance", LoadInfo.class);
-                Object o = method.invoke(null, loadInfo.get());
-                return Optional.of((T) o);
-            } catch (NoSuchMethodException | SecurityException
-                    | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException e) {
-                logger.error(e);
-                return Optional.absent();
-            }
-        }
-        return Optional.absent();
+        return (ImportSection) getOrThrow(idata,
+                "unable to load import section");
     }
 
     /**
@@ -573,18 +579,10 @@ public class SectionLoader {
      * @return the import section, absent if section can not be loaded
      * @throws {@link IOException} if unable to read the file
      */
+    @SuppressWarnings("unchecked")
     @Ensures("result != null")
     public Optional<ImportSection> maybeLoadImportSection() throws IOException {
-        DataDirectoryKey dataDirKey = DataDirectoryKey.IMPORT_TABLE;
-        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(dataDirKey);
-        if (loadInfo.isPresent()) {
-            ImportSection idata = ImportSection.newInstance(loadInfo.get());
-            if (idata.isEmpty()) {
-                logger.warn("empty import section");
-            }
-            return Optional.of(idata);
-        }
-        return Optional.absent();
+        return (Optional<ImportSection>) maybeLoadSpecialSection(DataDirectoryKey.IMPORT_TABLE);
     }
 
     /**
@@ -600,10 +598,8 @@ public class SectionLoader {
     @Ensures("result != null")
     public ExportSection loadExportSection() throws IOException {
         Optional<ExportSection> edata = maybeLoadExportSection();
-        if (edata.isPresent()) {
-            return edata.get();
-        }
-        throw new IllegalStateException("unable to load export section");
+        return (ExportSection) getOrThrow(edata,
+                "unable to load export section");
     }
 
     /**
@@ -614,19 +610,18 @@ public class SectionLoader {
      * @throws IOException
      *             if unable to read the file
      */
+    @SuppressWarnings("unchecked")
     @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
-        Optional<LoadInfo> loadInfo = maybeGetLoadInfo(DataDirectoryKey.EXPORT_TABLE);
-        if (loadInfo.isPresent()) {
-            ExportSection edata = ExportSection.newInstance(loadInfo.get());
-            if (edata.isEmpty()) {
-                logger.warn("empty export section");
-            }
-            return Optional.of(edata);
-        }
-        return Optional.absent();
+        return (Optional<ExportSection>) maybeLoadSpecialSection(DataDirectoryKey.EXPORT_TABLE);
     }
 
+    /**
+     * Creates new instance of MemoryMappedPE or just returns it, if it is
+     * already there.
+     * 
+     * @return memory mapped PE
+     */
     private MemoryMappedPE getMemoryMappedPE() {
         if (!memoryMapped.isPresent()) {
             memoryMapped = Optional.of(MemoryMappedPE.newInstance(data, this));
@@ -634,6 +629,13 @@ public class SectionLoader {
         return memoryMapped.get();
     }
 
+    /**
+     * Assembles the loadInfo object for the dataDirKey.
+     * 
+     * @param dataDirKey
+     *            data directory key
+     * @return loading information
+     */
     private Optional<LoadInfo> maybeGetLoadInfo(DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dirEntry = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
@@ -648,10 +650,7 @@ public class SectionLoader {
     }
 
     /**
-     * 
      * Data structure to return or pass a bytes and offset pair.
-     * 
-     * @author Katja Hahn
      * 
      */
     @Invariant({ "bytes != null", "offset >= 0" })
@@ -668,6 +667,9 @@ public class SectionLoader {
         }
     }
 
+    /**
+     * Contains the load information for a certain data directory.
+     */
     public static class LoadInfo {
 
         public final long fileOffset;

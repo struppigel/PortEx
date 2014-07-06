@@ -26,13 +26,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
-import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
@@ -228,7 +227,7 @@ public final class PELoader {
             System.out.println("virtual start: " + vStart + " virtual end: "
                     + vEnd);
         }
-        Optional<ExportSection> idata = loader.maybeLoadDataDirectory(DataDirectoryKey.IMPORT_TABLE);
+        Optional<ImportSection> idata = loader.maybeLoadImportSection();
         System.out.println(idata.get().getInfo());
 //        Optional<ExceptionSection> maybePData = loader.maybeLoadExceptionSection();
 //        if(maybePData.isPresent()) {

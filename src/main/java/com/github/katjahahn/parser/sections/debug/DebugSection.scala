@@ -50,7 +50,7 @@ class DebugSection private (
 
   def getSize(): Long = debugDirSize
   
-  def isEmpty: Boolean = directoryTable.isEmpty
+  override def isEmpty: Boolean = directoryTable.isEmpty
 
   override def getInfo(): String =
     s"""|-------------
