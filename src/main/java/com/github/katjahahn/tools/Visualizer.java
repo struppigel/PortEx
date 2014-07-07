@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -106,8 +107,8 @@ public class Visualizer {
     private final Color rsrcColor = new Color(100, 250, 100);
     private final Color debugColor = new Color(0, 0, 220);
     private final Color epColor = new Color(255, 80, 80);
-    private final Color anomalyColor = new Color(168, 0, 224);
-//    private final Color anomalyColor = new Color(255, 0, 0);
+//    private final Color anomalyColor = new Color(168, 0, 224);
+    private final Color anomalyColor = new Color(255, 255, 255);
     private final PEData data;
     private BufferedImage image;
 
@@ -251,6 +252,10 @@ public class Visualizer {
         long coffOffset = data.getCOFFFileHeader().getOffset();
         long coffSize = withMinLength(COFFFileHeader.HEADER_SIZE);
         drawPixels(coffColor, coffOffset, coffSize);
+        
+        long tableOffset = data.getSectionTable().getOffset();
+        long tableSize = withMinLength(data.getSectionTable().getSize());
+        drawPixels(sectionTableColor, tableOffset, tableSize);
 
         Overlay overlay = new Overlay(data);
         if (overlay.exists()) {
@@ -500,11 +505,12 @@ public class Visualizer {
     //TODO temporary almost-duplicate of drawRect
     private void drawCross(Color color, int startX, int startY, int width,
             int height) {
+        final int thickness = 2;
         for (int x = startX; x < startX + width; x++) {
             for (int y = startY; y < startY + height; y++) {
                 try {
-                    if (Math.abs((x - startX) - (y - startY)) < 2
-                            || Math.abs((width - (x - startX)) - (y - startY)) < 2) {
+                    if (Math.abs((x - startX) - (y - startY)) < thickness
+                            || Math.abs((width - (x - startX)) - (y - startY)) < thickness) {
                         image.setRGB(x, y, color.getRGB());
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -578,16 +584,15 @@ public class Visualizer {
         File file = new File(
                 "/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe");
         PEData data = PELoader.loadPE(file);
-        System.out.println(new SectionLoader(data).loadExportSection()
-                .getInfo());
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
         Visualizer vi = new Visualizer(data);
+        vi.setAdditionalGap(3);
         vi.setFileWidth(160);
         vi.setPixelSize(20);
         vi.setBytesPerPixel(1);
         final BufferedImage image = vi.createImage();
-        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
+         ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
 
