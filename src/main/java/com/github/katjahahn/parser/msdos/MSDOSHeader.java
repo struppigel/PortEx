@@ -71,13 +71,14 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         return offset;
     }
 
-    //TODO remove read
+    // TODO remove read
     private void read() throws IOException {
         if (!hasSignature(headerbytes)) {
             throw new IOException("No MZ Signature found");
         }
         SpecificationFormat format = new SpecificationFormat(0, 3, 1, 2);
-        headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format, SPEC_LOCATION, headerbytes);
+        headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format,
+                SPEC_LOCATION, headerbytes, getOffset());
     }
 
     /**
@@ -87,8 +88,9 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      */
     @Ensures("result >= 0")
     public long getHeaderSize() {
-        long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS) * PARAGRAPH_SIZE;
-        if(headerSize > peSigOffset) {
+        long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS)
+                * PARAGRAPH_SIZE;
+        if (headerSize > peSigOffset) {
             return peSigOffset;
         }
         return headerSize;
@@ -153,8 +155,9 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
             return b.toString();
         }
     }
-    
-    public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset) throws IOException {
+
+    public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset)
+            throws IOException {
         MSDOSHeader header = new MSDOSHeader(headerbytes, peSigOffset);
         header.read();
         return header;

@@ -89,7 +89,7 @@ public final class PELoader {
         checkState(pesig.hasSignature(),
                 "no valid pe file, signature not found");
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            MSDOSHeader msdos = loadMSDOSHeader(raf, pesig.getOffset().get());
+            MSDOSHeader msdos = loadMSDOSHeader(raf, pesig.getOffset());
             COFFFileHeader coff = loadCOFFFileHeader(pesig, raf);
             OptionalHeader opt = loadOptionalHeader(pesig, coff, raf);
             SectionTable table = loadSectionTable(pesig, coff, raf);
@@ -129,7 +129,7 @@ public final class PELoader {
      */
     private SectionTable loadSectionTable(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-        long offset = pesig.getOffset().get() + PESignature.PE_SIG_LENGTH
+        long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
                 + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
         logger.info("SectionTable offset: " + offset);
         int numberOfEntries = (int) coff.getNumberOfSections();
@@ -151,7 +151,7 @@ public final class PELoader {
      */
     private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
             RandomAccessFile raf) throws IOException {
-        long offset = pesig.getOffset().get() + PESignature.PE_SIG_LENGTH;
+        long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH;
         logger.info("COFF Header offset: " + offset);
         byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
         return COFFFileHeader.newInstance(headerbytes, offset);
@@ -172,7 +172,7 @@ public final class PELoader {
      */
     private OptionalHeader loadOptionalHeader(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-        long offset = pesig.getOffset().get() + PESignature.PE_SIG_LENGTH
+        long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
                 + COFFFileHeader.HEADER_SIZE;
         logger.info("Optional Header offset: " + offset);
         int size = OptionalHeader.MAX_SIZE;

@@ -33,6 +33,7 @@ import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.optheader.DllCharacteristic
 import com.github.katjahahn.parser.coffheader.FileCharacteristic
 import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.Location
 
 /**
  * Scans the Optional Header for anomalies.
@@ -175,7 +176,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val coff = data.getCOFFFileHeader()
     val pesig = data.getPESignature()
     val sectionTableSize = SectionTable.ENTRY_SIZE * coff.getNumberOfSections()
-    val pesigOffset = pesig.getOffset.get
+    val pesigOffset = pesig.getOffset
     val coffOffset = +PESignature.PE_SIG_LENGTH
     coffOffset + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader() + sectionTableSize
   }
@@ -337,8 +338,9 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
       if (entry.value == 0) {
+        val locations = List(new Location(entry.getOffset(), entry.getSize()))
         val description = "Optional Header: No data directory present"
-        anomalyList += StructureAnomaly(PEStructure.DATA_DIRECTORY, description, NO_DATA_DIR)
+        anomalyList += StructureAnomaly(PEStructure.DATA_DIRECTORY, description, NO_DATA_DIR, locations)
       }
       if (entry.value != 16) {
         val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
@@ -358,7 +360,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       }
       val loader = new SectionLoader(data)
       if (!isValid) {
-        val description = s"Optional Header: Invalid Data Directory Entry ${datadir.key}, entry points outside of file"
+        val description = s"Optional Header: Invalid Data Directory Entry ${datadir.getKey}, entry points outside of file"
         anomalyList += DataDirAnomaly(datadir, description,
           INVALID_DATA_DIR)
       }

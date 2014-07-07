@@ -93,7 +93,7 @@ public final class IOUtil {
             "headerbytes != null" })
     public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
             Class<T> clazz, SpecificationFormat specFormat, String specName,
-            byte[] headerbytes) throws IOException {
+            byte[] headerbytes, long headerOffset) throws IOException {
         EnumSolver<T> enumSolver = new EnumSolver<>(clazz);
         Map<T, StandardField> data = initFullEnumMap(enumSolver);
         List<String[]> specification = readArray(specName);
@@ -108,14 +108,17 @@ public final class IOUtil {
             int offset = Integer.parseInt(specs[offsetIndex]);
             int length = Integer.parseInt(specs[lengthIndex]);
             String description = specs[descriptionIndex];
+            // TODO is this correct?
+            long fieldOffset = headerOffset + offset;
             if (headerbytes.length >= offset + length) {
                 long value = getBytesLongValue(headerbytes, offset, length);
-                data.put(key, new StandardField(key, description,
-                        value));
+                data.put(key, new StandardField(key, description, value,
+                        fieldOffset, length));
             } else {
-                long value = getBytesLongValueSafely(headerbytes, offset, length);
-                data.put(key, new StandardField(key, description,
-                        value));
+                long value = getBytesLongValueSafely(headerbytes, offset,
+                        length);
+                data.put(key, new StandardField(key, description, value,
+                        fieldOffset, length));
                 logger.warn("offset + length larger than headerbytes given");
             }
         }
@@ -126,7 +129,7 @@ public final class IOUtil {
             EnumSolver<T> enumSolver) {
         Map<T, StandardField> map = new HashMap<>();
         for (T key : enumSolver.values()) {
-            map.put(key, new StandardField(key, "", 0L));
+            map.put(key, new StandardField(key, "", 0L, 0L, 0L));
         }
         return map;
     }

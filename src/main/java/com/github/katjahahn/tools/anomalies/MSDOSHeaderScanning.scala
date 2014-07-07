@@ -20,6 +20,7 @@ package com.github.katjahahn.tools.anomalies
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil._
 import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.Location
 
 /**
  * Scans the MSDOS Header for anomalies
@@ -47,10 +48,11 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
   private def checkCollapsedHeader(): List[Anomaly] = {
     val sig = data.getPESignature
     val e_lfanew = sig.getOffset
-    if (e_lfanew.isPresent && e_lfanew.get < 0x40) {
-      val description = "Collapsed MSDOS Header, PE Signature offset is at 0x" + java.lang.Long.toHexString(e_lfanew.get)
+    if (e_lfanew < 0x40) {
+      val locations = List(new Location(0, e_lfanew))
+      val description = "Collapsed MSDOS Header, PE Signature offset is at 0x" + java.lang.Long.toHexString(e_lfanew)
       List(StructureAnomaly(PEStructure.MSDOS_HEADER, description, 
-          AnomalySubType.COLLAPSED_MSDOS_HEADER))
+          AnomalySubType.COLLAPSED_MSDOS_HEADER, locations))
     } else Nil
   }
 

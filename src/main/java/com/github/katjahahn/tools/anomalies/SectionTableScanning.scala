@@ -29,6 +29,7 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.sections.SectionCharacteristic._
+import com.github.katjahahn.parser.Location
 
 /**
  * Scans the Section Table for anomalies.
@@ -123,8 +124,9 @@ trait SectionTableScanning extends AnomalyScanner {
     val overlay = new Overlay(data)
     if (sectionTable.getOffset >= overlay.getOffset) {
       val description = s"Section Table (offset: ${sectionTable.getOffset}) moved to Overlay"
-      anomalyList += StructureAnomaly(PEStructure.SECTION_TABLE, description, 
-          SEC_TABLE_IN_OVERLAY)
+      val locations = List(new Location(sectionTable.getOffset, sectionTable.getSize))
+      anomalyList += StructureAnomaly(PEStructure.SECTION_TABLE, description,
+        SEC_TABLE_IN_OVERLAY, locations)
     }
     anomalyList.toList
   }
@@ -158,14 +160,13 @@ trait SectionTableScanning extends AnomalyScanner {
       ".xdata", ".debug$F", ".debug$P", ".debug$S", ".debug$T", ".tls$")
     for (section <- sections) {
       val sectionName = filteredString(section.getName)
-      val entry = new StandardField(SectionHeaderKey.NAME, section.getName, null);
       if (sectionName != section.getName) {
         val description = s"Section Header ${section.getNumber()} has control symbols in name: ${filteredSymbols(section.getName).mkString(", ")}"
-        anomalyList += new FieldAnomaly(entry, description, CTRL_SYMB_IN_SEC_NAME)
+        anomalyList += new SectionNameAnomaly(section, description, CTRL_SYMB_IN_SEC_NAME)
       }
       if (!usualNames.contains(section.getName)) {
         val description = s"Section name is unusual: ${sectionName}";
-        anomalyList += new FieldAnomaly(entry, description, UNUSUAL_SEC_NAME)
+        anomalyList += new SectionNameAnomaly(section, description, UNUSUAL_SEC_NAME)
       }
     }
     anomalyList.toList
@@ -254,24 +255,25 @@ trait SectionTableScanning extends AnomalyScanner {
         val sec = sectionTable.getSectionHeader(i)
         val range2 = physicalSectionRange(sec)
         val vrange2 = virtualSectionRange(sec)
+        val locations = List(range1, range2).map(r => new Location(r._1, r._2 - r._1))
         //ignore empty sections for shuffle analysis, these get their own anomaly
         if (range1._1 > range2._1 && notEmpty(range1) && notEmpty(range2)) {
           val description = s"Physically shuffled sections: section ${section.getNumber()} has range ${range1._1}--${range1._2}, section ${sec.getNumber()} has range ${range2._1}--${range2._2}"
-          anomalyList += StructureAnomaly(PEStructure.SECTION, description, PHYSICALLY_SHUFFLED_SEC)
+          anomalyList += StructureAnomaly(PEStructure.SECTION, description, PHYSICALLY_SHUFFLED_SEC, locations)
         }
         if (range1 == range2) {
           val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) has same physical location as section ${sec.getNumber()} with name ${filteredString(sec.getName)}"
-          anomalyList += StructureAnomaly(PEStructure.SECTION, description, PHYSICALLY_DUPLICATED_SEC)
+          anomalyList += StructureAnomaly(PEStructure.SECTION, description, PHYSICALLY_DUPLICATED_SEC, locations)
         } else if (overlaps(range2, range1)) {
           val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) physically overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${range2._1}--${range2._2})"
-          anomalyList += StructureAnomaly(PEStructure.SECTION, description, PHYSICALLY_OVERLAPPING_SEC)
+          anomalyList += StructureAnomaly(PEStructure.SECTION, description, PHYSICALLY_OVERLAPPING_SEC, locations)
         }
         if (vrange1 == vrange2) {
           val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${vrange1._1}--${vrange1._2}) has same virtual location as section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
-          anomalyList += StructureAnomaly(PEStructure.SECTION, description, VIRTUALLY_DUPLICATED_SEC)
+          anomalyList += StructureAnomaly(PEStructure.SECTION, description, VIRTUALLY_DUPLICATED_SEC, locations)
         } else if (overlaps(vrange1, vrange2)) {
           val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${vrange1._1}--${vrange1._2}) virtually overlaps with section ${filteredString(sec.getName)} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
-          anomalyList += StructureAnomaly(PEStructure.SECTION, description, VIRTUALLY_OVERLAPPING_SEC)
+          anomalyList += StructureAnomaly(PEStructure.SECTION, description, VIRTUALLY_OVERLAPPING_SEC, locations)
         }
       }
     }
@@ -293,8 +295,10 @@ trait SectionTableScanning extends AnomalyScanner {
       val entry = section.getField(SectionHeaderKey.VIRTUAL_ADDRESS)
       val sectionVA = entry.value
       if (sectionVA <= prevVA) {
+        val range = physicalSectionRange(section)
+        val locations = List(new Location(range._1, range._2 - range._1))
         val description = s"Section Header ${section.getNumber()} with name ${sectionName}: VIRTUAL_ADDRESS (${sectionVA}) should be greater than of the previous entry (${prevVA})"
-        anomalyList += StructureAnomaly(PEStructure.SECTION, description, NOT_ASCENDING_SEC_VA)
+        anomalyList += StructureAnomaly(PEStructure.SECTION, description, NOT_ASCENDING_SEC_VA, locations)
       }
     }
     anomalyList.toList

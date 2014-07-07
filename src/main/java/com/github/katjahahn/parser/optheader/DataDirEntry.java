@@ -44,18 +44,28 @@ public class DataDirEntry {
     /**
      * The key of the entry
      */
-    public DataDirectoryKey key;
+    private DataDirectoryKey key;
 
     /**
      * The virtual address of the entry
      */
-    public long virtualAddress; // RVA actually, but called like this in spec
+    private final long virtualAddress; // RVA actually, but called like this in spec
 
     /**
      * The size of the entry
      */
-    public long size;
-
+    private final long directorySize;
+    
+    /**
+     * Physical offset of the entry in the data directory table
+     */
+    private final long tableEntryOffset;
+    
+    /**
+     * Size of the entry in the table in bytes
+     */
+    private final long tableEntrySize = 8;
+    
     /**
      * Creates a data dir entry with the fieldName, which is used to retrieve
      * the corresponding {@link DataDirectoryKey}, and the virtualAddress and
@@ -67,7 +77,7 @@ public class DataDirEntry {
      * @param virtualAddress
      * @param size
      */
-    public DataDirEntry(String fieldName, long virtualAddress, long size) {
+    public DataDirEntry(String fieldName, long virtualAddress, long directorySize, long tableEntryOffset) {
         for (DataDirectoryKey key : DataDirectoryKey.values()) {
             if (key.toString().equals(fieldName)) {
                 this.key = key;
@@ -77,7 +87,8 @@ public class DataDirEntry {
             throw new IllegalArgumentException(
                     "no enum constant for given field name: " + fieldName);
         this.virtualAddress = virtualAddress;
-        this.size = size;
+        this.directorySize = directorySize;
+        this.tableEntryOffset = tableEntryOffset;
     }
 
     /**
@@ -87,11 +98,12 @@ public class DataDirEntry {
      * @param virtualAddress
      * @param size
      */
-    public DataDirEntry(DataDirectoryKey key, int virtualAddress, int size) {
+    public DataDirEntry(DataDirectoryKey key, int virtualAddress, int directorySize, long tableEntryOffset) {
         checkArgument(key != null, "key must not be null");
         this.key = key;
         this.virtualAddress = virtualAddress;
-        this.size = size;
+        this.directorySize = directorySize;
+        this.tableEntryOffset = tableEntryOffset;
     }
 
     /**
@@ -172,7 +184,7 @@ public class DataDirEntry {
     @Override
     public String toString() {
         return "field name: " + key + NL + "virtual address: " + virtualAddress
-                + NL + "size: " + size;
+                + NL + "size: " + directorySize;
     }
 
     @Override
@@ -186,7 +198,7 @@ public class DataDirEntry {
         DataDirEntry other = (DataDirEntry) obj;
         if (key != other.key)
             return false;
-        if (size != other.size)
+        if (directorySize != other.directorySize)
             return false;
         if (virtualAddress != other.virtualAddress)
             return false;
@@ -198,9 +210,29 @@ public class DataDirEntry {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((key == null) ? 0 : key.hashCode());
-        result = prime * result + (int) (size ^ (size >>> 32));
+        result = prime * result + (int) (directorySize ^ (directorySize >>> 32));
         result = prime * result
                 + (int) (virtualAddress ^ (virtualAddress >>> 32));
         return result;
+    }
+
+    public DataDirectoryKey getKey() {
+        return key;
+    }
+
+    public long getVirtualAddress() {
+        return virtualAddress;
+    }
+
+    public long getDirectorySize() {
+        return directorySize;
+    }
+
+    public long getTableEntryOffset() {
+        return tableEntryOffset;
+    }
+
+    public long getTableEntrySize() {
+        return tableEntrySize;
     }
 }

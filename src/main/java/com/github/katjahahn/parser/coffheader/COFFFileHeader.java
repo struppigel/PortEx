@@ -84,7 +84,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     private void read() throws IOException {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
-                COFF_SPEC_FILE, headerbytes);
+                COFF_SPEC_FILE, headerbytes, getOffset());
 
     }
 

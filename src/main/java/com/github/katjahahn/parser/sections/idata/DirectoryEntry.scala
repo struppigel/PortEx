@@ -117,7 +117,7 @@ object DirectoryEntry {
   def apply(entrybytes: Array[Byte], offset: Long): DirectoryEntry = {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val entries = IOUtil.readHeaderEntries(classOf[DirectoryEntryKey], 
-        format, I_DIR_ENTRY_SPEC, entrybytes.clone).asScala.toMap
+        format, I_DIR_ENTRY_SPEC, entrybytes.clone, offset).asScala.toMap
     new DirectoryEntry(entries, offset)
   }
 }

@@ -97,9 +97,12 @@ public class SectionTable implements PEModule {
             SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
             Map<SectionHeaderKey, StandardField> entries = IOUtil
                     .readHeaderEntries(SectionHeaderKey.class, format,
-                            SECTION_TABLE_SPEC, headerbytes);
+                            SECTION_TABLE_SPEC, headerbytes, getOffset());
+            
+            //TODO is this calculation correct? make unit tests
+            long nameOffset = getOffset() + getRelativeNameOffset(headerbytes);
             SectionHeader sectionEntry = new SectionHeader(entries,
-                    sectionNumber, sectionOffset, getUTF8String(headerbytes));
+                    sectionNumber, sectionOffset, getUTF8String(headerbytes), nameOffset);
             headers.add(sectionEntry);
         }
     }
@@ -218,10 +221,16 @@ public class SectionTable implements PEModule {
     @Ensures("result != null")
     private String getUTF8String(byte[] section) {
         String[] values = specification.get("NAME");
-        int from = Integer.parseInt(values[1]);
+        int from = getRelativeNameOffset(section);
         int to = from + Integer.parseInt(values[2]);
         byte[] bytes = Arrays.copyOfRange(section, from, to);
         return new String(bytes, StandardCharsets.UTF_8).trim();
+    }
+    
+    private int getRelativeNameOffset(byte[] section) {
+        String[] values = specification.get("NAME");
+        int from = Integer.parseInt(values[1]);
+        return from;
     }
 
     /**

@@ -93,7 +93,7 @@ public class SectionLoaderTest {
             List<DataDirEntry> testDirs = testdatum.dataDir;
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             for (DataDirEntry testDir : testDirs) {
-                if (testDir.key.equals(DataDirectoryKey.EXPORT_TABLE)) {
+                if (testDir.getKey().equals(DataDirectoryKey.EXPORT_TABLE)) {
                     Optional<ExportSection> edata = new SectionLoader(pedatum)
                             .maybeLoadExportSection();
                     assertTrue(edata.isPresent());
@@ -108,7 +108,7 @@ public class SectionLoaderTest {
             List<DataDirEntry> testDirs = testdatum.dataDir;
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             for (DataDirEntry testDir : testDirs) {
-                if (testDir.key.equals(DataDirectoryKey.IMPORT_TABLE)) {
+                if (testDir.getKey().equals(DataDirectoryKey.IMPORT_TABLE)) {
                     Optional<ImportSection> idata = new SectionLoader(pedatum)
                             .maybeLoadImportSection();
                     assertTrue(idata.isPresent());
@@ -123,7 +123,7 @@ public class SectionLoaderTest {
             List<DataDirEntry> testDirs = testdatum.dataDir;
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             for (DataDirEntry testDir : testDirs) {
-                if (testDir.key.equals(DataDirectoryKey.RESOURCE_TABLE)) {
+                if (testDir.getKey().equals(DataDirectoryKey.RESOURCE_TABLE)) {
                     ResourceSection rsrc = new SectionLoader(pedatum)
                             .loadResourceSection();
                     assertNotNull(rsrc);

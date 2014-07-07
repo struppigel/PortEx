@@ -24,6 +24,8 @@ import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.coffheader.COFFFileHeader
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.sections.SectionHeaderKey
+import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PESignature
 
 /**
  * Scans the COFF File Header for anomalies.
@@ -57,9 +59,15 @@ trait COFFHeaderScanning extends AnomalyScanner {
    */
   private def checkPEHeaderLocation(coff: COFFFileHeader): List[Anomaly] = {
     val overlayLoc = new Overlay(data.getFile()).getOffset
-    if (coff.getOffset() >= overlayLoc) {
+    val peOffset = data.getPESignature().getOffset()
+    if (peOffset >= overlayLoc) {
+      //the real physical size of all headers
+      val locSize = PESignature.PE_SIG_LENGTH + COFFFileHeader.HEADER_SIZE +
+        coff.getSizeOfOptionalHeader() + data.getSectionTable().getSize()
+
+      val locations = List(new Location(peOffset, locSize))
       List(StructureAnomaly(PEStructure.PE_FILE_HEADER,
-        "PE Header moved to Overlay.", PE_HEADER_IN_OVERLAY))
+        "PE Header moved to Overlay.", PE_HEADER_IN_OVERLAY, locations))
     } else Nil
   }
 
@@ -74,14 +82,20 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val size = coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val entry = coff.getField(COFFHeaderKey.SIZE_OF_OPT_HEADER)
     val opt = data.getOptionalHeader()
+
     if (size < opt.getMinSize) {
-      val description = s"COFF File Header: The SizeOfOptionalHeader (${size}) is too small"
+      val locations = List(new Location(opt.getOffset(), size),
+        new Location(entry.getOffset(), entry.getSize()))
+
       List(StructureAnomaly(PEStructure.OPTIONAL_HEADER,
         "Collapsed Optional Header, Section Table entries might not be valid.",
-        COLLAPSED_OPTIONAL_HEADER))
+        COLLAPSED_OPTIONAL_HEADER, locations))
+
     } else if (size > opt.getMaxSize) {
+
       val description = "COFF File Header: SizeOfOptionalHeader is too large, namely: " + size
       List(FieldAnomaly(entry, description, TOO_LARGE_OPTIONAL_HEADER))
+
     } else Nil
   }
 
@@ -95,12 +109,15 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val sectionMax = 96
     val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
     val entry = coff.getField(COFFHeaderKey.SECTION_NR)
+    val locations = List(new Location(entry.getOffset(), entry.getSize()))
     if (sectionNr > sectionMax) {
+      val secTable = data.getSectionTable()
+      val secTableLoc = new Location(secTable.getOffset(), secTable.getSize())
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
-      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, TOO_MANY_SECTIONS))
+      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, TOO_MANY_SECTIONS, secTableLoc :: locations))
     } else if (sectionNr == 0) {
       val description = "COFF File Header: Sectionless PE"
-      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, SECTIONLESS))
+      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, SECTIONLESS, locations))
     } else Nil
   }
 

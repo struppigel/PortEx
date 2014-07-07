@@ -43,6 +43,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     private String name;
     private final int number;
     private final long offset;
+    private final long nameOffset;
 
     /**
      * Creates a Section Table Entry instance.
@@ -52,15 +53,30 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * @param number
      *            the number of the entry, beginning by 1 with the first entry
      *            in the Section Headers
-     * @param offset the file offset for the start of the section
+     * @param offset
+     *            the file offset for the start of the section
      * @param name
      */
     public SectionHeader(Map<SectionHeaderKey, StandardField> entries,
-            int number, long offset, String name) {
+            int number, long offset, String name, long nameOffset) {
         this.number = number;
         this.offset = offset;
         this.entries = entries;
         this.name = name;
+        this.nameOffset = nameOffset;
+    }
+
+    /**
+     * Returns the file offset of the NAME entry
+     * 
+     * @return
+     */
+    public long getNameOffset() {
+        return nameOffset;
+    }
+
+    public int getNameSize() {
+        return name.length();
     }
 
     /**

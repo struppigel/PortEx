@@ -132,7 +132,7 @@ object DebugSection {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
-      format, debugspec, debugbytes).asScala.toMap
+      format, debugspec, debugbytes, offset).asScala.toMap
     val types = getCharacteristicsDescriptions(entries(DebugDirectoryKey.TYPE).value, "debugtypes").asScala.toList
     if(types.size == 0) {
       logger.warn("no debug type description found!")

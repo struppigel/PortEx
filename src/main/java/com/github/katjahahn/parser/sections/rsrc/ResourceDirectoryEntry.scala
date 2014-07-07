@@ -120,7 +120,7 @@ object ResourceDirectoryEntry {
     val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level,
       tableBytes, virtualAddress, offset, rsrcOffset)
     if (isDataEntryRVA(rva)) {
-      createDataEntry(rva, id, tableBytes, offset, entryNr)
+      createDataEntry(rva, id, tableBytes, offset, entryNr, rsrcOffset)
     } else {
       createSubDirEntry(file, rva, id, tableBytes, offset, entryNr, level, virtualAddress, rsrcOffset)
     }
@@ -180,10 +180,12 @@ object ResourceDirectoryEntry {
   }
 
   private def createDataEntry(rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long, entryNr: Int): DataEntry = {
+    tableBytes: Array[Byte], offset: Long, entryNr: Int, rsrcOffset: Long): DataEntry = {
     val entryBytes = tableBytes.slice((rva - offset).toInt,
       (rva - offset + ResourceDataEntry.size).toInt)
-    val data = ResourceDataEntry(entryBytes)
+    //TODO is this file offset calculation correct?
+    val entryOffset = (rva - offset) + rsrcOffset
+    val data = ResourceDataEntry(entryBytes, entryOffset)
     DataEntry(id, data, entryNr)
   }
 

@@ -236,7 +236,7 @@ public class TestreportsReader {
                 String keyString = split[0].trim();
                 SectionHeaderKey key = getSectionKeyFor(keyString);
                 if (key != null) {
-                    entries.put(key, new StandardField(key, null, value));
+                    entries.put(key, new StandardField(key, null, value, 0, 0));
                     entryCounter++;
                 } else {
                     logger.warn("key was null for " + line);
@@ -245,7 +245,7 @@ public class TestreportsReader {
             line = reader.readLine();
         }
         if (entryCounter == 5) { // exactly 5 values are in the pev report
-            return new SectionHeader(entries, number, -1, name);
+            return new SectionHeader(entries, number, -1, name, -1);
         }
         return null;
     }
@@ -284,7 +284,7 @@ public class TestreportsReader {
                 reader.readLine(); // last empty line
                 DataDirectoryKey key = getDataDirKeyForName(name);
                 if (key != null) {
-                    return new DataDirEntry(key, virtualAddress, size);
+                    return new DataDirEntry(key, virtualAddress, size, -1);
                 } else {
                     logger.warn("null data dir key returned for: " + name
                             + " and " + line);

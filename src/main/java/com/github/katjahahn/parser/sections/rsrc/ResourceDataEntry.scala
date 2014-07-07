@@ -41,18 +41,23 @@ object ResourceDataEntry {
   val size = 16
   private val specLocation = "resourcedataentryspec"
 
-  def apply(entryBytes: Array[Byte]): ResourceDataEntry = {
+  /**
+   * @param entryBytes the byte array containing the entry
+   * @param entryOffset the file offset of the entry start
+   */
+  def apply(entryBytes: Array[Byte], entryOffset: Long): ResourceDataEntry = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
     val data = for ((sKey, sVal) <- spec) yield {
       val key = ResourceDataEntryKey.valueOf(sKey)
-      val offset = Integer.parseInt(sVal(1))
+      val relFieldOffset = Integer.parseInt(sVal(1))
       val length = Integer.parseInt(sVal(2))
-      if (offset + length > entryBytes.length) {
+      if (relFieldOffset + length > entryBytes.length) {
         throw new IllegalArgumentException("unable to read resource data entry")
       }
-      val value = getBytesLongValue(entryBytes, offset, length)
+      val value = getBytesLongValue(entryBytes, relFieldOffset, length)
       val description = sVal(0)
-      (key, new StandardField(key, description, value))
+      val absFieldOffset = relFieldOffset + entryOffset
+      (key, new StandardField(key, description, value, absFieldOffset, length))
     }
     new ResourceDataEntry(data)
   }

@@ -306,7 +306,7 @@ public class SectionLoader {
         Optional<DataDirEntry> dataDir = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
-            long rva = dataDir.get().virtualAddress;
+            long rva = dataDir.get().getVirtualAddress();
             return maybeGetFileOffset(rva);
         }
         return Optional.absent();
@@ -640,7 +640,7 @@ public class SectionLoader {
         Optional<DataDirEntry> dirEntry = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
         if (dirEntry.isPresent()) {
-            long virtualAddress = dirEntry.get().virtualAddress;
+            long virtualAddress = dirEntry.get().getVirtualAddress();
             Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
             long offset = maybeOffset.or(0L);
             return Optional.of(new LoadInfo(offset, virtualAddress,

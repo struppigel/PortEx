@@ -71,7 +71,7 @@ object ExportDirectory {
   def apply(entrybytes: Array[Byte], fileOffset: Long): ExportDirectory = {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val entries = IOUtil.readHeaderEntries(classOf[ExportDirectoryKey], format, 
-        edataTableSpec, entrybytes.clone).asScala.toMap
+        edataTableSpec, entrybytes.clone, fileOffset).asScala.toMap
     new ExportDirectory(entries, fileOffset)
   }
 

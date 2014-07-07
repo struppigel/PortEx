@@ -253,7 +253,7 @@ object ExportSection {
       val maybeEdata = optHeader.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
       if (maybeEdata.isPresent) {
         val edata = maybeEdata.get
-        rva >= edata.virtualAddress && rva <= edata.virtualAddress + edata.size
+        rva >= edata.getVirtualAddress && rva <= edata.getVirtualAddress + edata.getDirectorySize
       } else false
     }
 

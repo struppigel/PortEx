@@ -222,7 +222,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             throws IOException {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         standardFields = IOUtil.readHeaderEntries(StandardFieldEntryKey.class,
-                format, STANDARD_SPEC, headerbytes);
+                format, STANDARD_SPEC, headerbytes, getOffset());
     }
 
     @Ensures({ "result != null",
@@ -230,7 +230,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     private Map<StandardFieldEntryKey, StandardField> initStandardFields() {
         Map<StandardFieldEntryKey, StandardField> map = new HashMap<>();
         for (StandardFieldEntryKey key : StandardFieldEntryKey.values()) {
-            map.put(key, new StandardField(key, "absent", 0L));
+            map.put(key, new StandardField(key, "absent", 0L, 0L, 0L));
         }
         return map;
     }
@@ -260,10 +260,12 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                         length);
                 long size = getBytesLongValueSafely(headerbytes, offset
                         + length, length);
+                //TODO test if this is correct
+                long tableEntryOffset = offset + getOffset();
                 if (address != 0) {
                     DataDirEntry entry = new DataDirEntry(specs[description],
-                            address, size);
-                    dataDirEntries.put(entry.key, entry);
+                            address, size, tableEntryOffset);
+                    dataDirEntries.put(entry.getKey(), entry);
                 }
             }
             counter++;
@@ -287,7 +289,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         SpecificationFormat format = new SpecificationFormat(0, description,
                 offsetLoc, lengthLoc);
         windowsFields = IOUtil.readHeaderEntries(WindowsEntryKey.class, format,
-                WINDOWS_SPEC, headerbytes);
+                WINDOWS_SPEC, headerbytes, getOffset());
         rvaNumber = windowsFields.get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES).value;
         if (rvaNumber > 16) {
             rvaNumber = 16;
@@ -313,9 +315,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     public String getDataDirInfo() {
         StringBuilder b = new StringBuilder();
         for (DataDirEntry entry : dataDirEntries.values()) {
-            b.append(entry.key + ": " + entry.virtualAddress + "(0x"
-                    + Long.toHexString(entry.virtualAddress) + ")/"
-                    + entry.size + "(0x" + Long.toHexString(entry.size) + ")"
+            b.append(entry.getKey() + ": " + entry.getVirtualAddress() + "(0x"
+                    + Long.toHexString(entry.getVirtualAddress()) + ")/"
+                    + entry.getDirectorySize() + "(0x" + Long.toHexString(entry.getDirectorySize()) + ")"
                     + NL);
         }
         return b.toString();

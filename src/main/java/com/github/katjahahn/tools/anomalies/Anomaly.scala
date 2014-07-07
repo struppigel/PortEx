@@ -17,8 +17,12 @@
  */
 package com.github.katjahahn.tools.anomalies
 
+import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.optheader.DataDirEntry
+import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.sections.SectionHeader
+import com.github.katjahahn.parser.sections.SectionHeaderKey
 
 /**
  * PE file anomaly or malformation.
@@ -31,6 +35,11 @@ abstract class Anomaly() {
    * The description of the anomaly
    */
   def description(): String
+
+  /**
+   * Returns a list of all locations relevant for the anomaly
+   */
+  def locations(): java.util.List[Location]
 
   /**
    * Represents a field or structure this anomaly is associated with
@@ -56,10 +65,12 @@ abstract class Anomaly() {
 case class StructureAnomaly(
   structure: PEStructure,
   override val description: String,
-  override val subtype: AnomalySubType) extends Anomaly {
-  require(subtype.getSuperType == AnomalyType.STRUCTURE, 
-      subtype + " must have anomaly type STRUCTURE!")
-  
+  override val subtype: AnomalySubType,
+  slocations: List[Location]) extends Anomaly {
+  require(subtype.getSuperType == AnomalyType.STRUCTURE,
+    subtype + " must have anomaly type STRUCTURE!")
+
+  override def locations = slocations.asJava
   override def key = structure
 }
 
@@ -70,9 +81,10 @@ case class FieldAnomaly(
   val field: StandardField,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
-  require(subtype.getSuperType != AnomalyType.STRUCTURE, 
-      subtype + " must not have anomaly type STRUCTURE!")
-  
+  require(subtype.getSuperType != AnomalyType.STRUCTURE,
+    subtype + " must not have anomaly type STRUCTURE!")
+
+  override def locations = List(new Location(field.getOffset(), field.getSize())).asJava
   override def key = field.key
 }
 
@@ -84,5 +96,14 @@ case class DataDirAnomaly(
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
 
-  override val key = dataDirEntry.key
+  override def locations = List(new Location(dataDirEntry.getTableEntryOffset, dataDirEntry.getTableEntrySize)).asJava
+  override val key = dataDirEntry.getKey
+}
+
+case class SectionNameAnomaly(val header: SectionHeader, 
+    override val description: String, 
+    override val subtype: AnomalySubType) extends Anomaly {
+  
+  override def locations = List(new Location(header.getNameOffset, header.getNameSize)).asJava
+  override def key = SectionHeaderKey.NAME
 }

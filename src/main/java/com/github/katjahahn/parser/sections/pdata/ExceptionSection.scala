@@ -84,7 +84,7 @@ object ExceptionSection {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val pdatabytes = mmbytes.slice(virtualAddress, mmbytes.length + virtualAddress)
     val directory = IOUtil.readHeaderEntries(classOf[ExceptionEntryKey],
-      format, spec, pdatabytes.clone).asScala.toMap
+      format, spec, pdatabytes.clone, offset).asScala.toMap
     new ExceptionSection(offset, directory)
   }
 

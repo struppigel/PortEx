@@ -137,7 +137,8 @@ object ResourceDirectory {
   def apply(file: File, level: Level, tableBytes: Array[Byte], offset: Long,
     virtualAddress: Long, rsrcOffset: Long): ResourceDirectory = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
-    val maybeHeader = readHeader(spec, tableBytes)
+    //TODO is offset the file offset of the table?
+    val maybeHeader = readHeader(spec, tableBytes, offset)
     maybeHeader match {
       case None => throw new IllegalArgumentException("unable to read resource directory table")
       case Some(header) =>
@@ -150,14 +151,15 @@ object ResourceDirectory {
   }
 
   private def readHeader(spec: Specification,
-    tableBytes: Array[Byte]): Option[Header] = {
+    tableBytes: Array[Byte], tableOffset: Long): Option[Header] = {
     val list = (for ((s1, s2) <- spec) yield {
       val key = ResourceDirectoryKey.valueOf(s1)
-      val offset = Integer.parseInt(s2(1))
+      val relOffset = Integer.parseInt(s2(1))
       val length = Integer.parseInt(s2(2))
-      if (offset + length > tableBytes.length) None else {
-        val value = getBytesLongValue(tableBytes, offset, length)
-        val standardEntry = new StandardField(key, s2(0), value)
+      if (relOffset + length > tableBytes.length) None else {
+        val value = getBytesLongValue(tableBytes, relOffset, length)
+        val absFieldOffset = relOffset + tableOffset
+        val standardEntry = new StandardField(key, s2(0), value, absFieldOffset, length)
         Some((key, standardEntry))
       }
     }).toList

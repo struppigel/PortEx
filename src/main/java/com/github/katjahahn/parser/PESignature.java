@@ -54,7 +54,7 @@ public class PESignature {
     public static final byte[] PE_SIG = "PE\0\0".getBytes();
 
     /**
-     * The length of the PE signature is {@value}.
+     * The length of the PE signature is {@value} .
      */
     public static final int PE_SIG_LENGTH = 4;
 
@@ -128,15 +128,15 @@ public class PESignature {
     }
 
     /**
-     * Returns the optional offset of the PE signature. Returns absent option if
-     * file hasn't been read yet or the read file was no PE file.
+     * Returns the offset of the PE signature.
      * 
-     * @return optional offset of PE signature, absent if file not read or file
-     *         is no PE
+     * @return optional offset of PE signature
+     * @throws IllegalStateException
+     *             if file hasn't been read yet or the read file was no PE file.
      */
-    @Ensures("result != null")
-    public Optional<Long> getOffset() {
-        return peOffset;
+    @Ensures("result > 0")
+    public long getOffset() {
+        return peOffset.get();
     }
 
     /**
