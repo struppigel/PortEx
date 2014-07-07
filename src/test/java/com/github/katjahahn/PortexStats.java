@@ -54,7 +54,6 @@ public class PortexStats {
     private static final String STATS_FOLDER = "portexstats/";
     @SuppressWarnings("unused")
     private static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
-    @SuppressWarnings("unused")
     private static final String BAD_FILES = "/home/deque/portextestfiles/badfiles/";
     private static int noPE = 0;
     private static int notLoaded = 0;

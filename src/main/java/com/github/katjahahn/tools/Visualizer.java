@@ -20,6 +20,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -38,8 +39,8 @@ import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
-import com.github.katjahahn.parser.sections.rsrc.Resource;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
+import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
@@ -52,7 +53,8 @@ import com.google.java.contract.Requires;
  * 
  */
 public class Visualizer {
-    // TODO make with work with tinype and duplicated sections
+    // TODO handling duplicated sections
+    // TODO anomaly visualizing in separate class
 
     /**
      * The default width of the file shown is {@value}
@@ -104,6 +106,8 @@ public class Visualizer {
     private final Color rsrcColor = new Color(100, 250, 100);
     private final Color debugColor = new Color(0, 0, 220);
     private final Color epColor = new Color(255, 80, 80);
+    private final Color anomalyColor = new Color(168, 0, 224);
+//    private final Color anomalyColor = new Color(255, 0, 0);
     private final PEData data;
     private BufferedImage image;
 
@@ -232,22 +236,21 @@ public class Visualizer {
     public BufferedImage createImage() throws IOException {
         image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
 
+        // TODO getSize for every module
+        drawSections();
+
         long msdosOffset = 0;
         long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
         System.out.println("MSDOS size: " + msdosSize);
         drawPixels(msdosColor, msdosOffset, msdosSize);
 
         long optOffset = data.getOptionalHeader().getOffset();
-        // TODO inaccurate
         long optSize = withMinLength(data.getOptionalHeader().getSize());
         drawPixels(optColor, optOffset, optSize);
 
         long coffOffset = data.getCOFFFileHeader().getOffset();
         long coffSize = withMinLength(COFFFileHeader.HEADER_SIZE);
         drawPixels(coffColor, coffOffset, coffSize);
-
-        // TODO getSize for every module
-        drawSections();
 
         Overlay overlay = new Overlay(data);
         if (overlay.exists()) {
@@ -258,8 +261,24 @@ public class Visualizer {
         }
 
         drawSpecials();
+        drawAnomalies();
         drawLegend();
         return image;
+    }
+
+    // TODO create own visualizer for that task, maybe with decorator pattern
+    private void drawAnomalies() {
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
+        List<Anomaly> anomalies = scanner.getAnomalies();
+        System.out.println("anomalies: " + anomalies.size());
+        for (Anomaly anomaly : anomalies) {
+            List<Location> locs = anomaly.locations();
+            System.out.println("anomaly location nr: " + locs.size());
+            for (Location loc : locs) {
+                System.out.println("Anomaly loc: " + loc);
+                drawCrosses(anomalyColor, loc.from(), withMinLength(loc.size()));
+            }
+        }
     }
 
     @Ensures("result > 0")
@@ -357,12 +376,25 @@ public class Visualizer {
     @Ensures("result != null")
     private Color variate(Color color) {
         final int diff = 30;
-        Color newColor = new Color(color.getRed() - diff, color.getGreen()
-                - diff, color.getBlue() - diff);
+        int newRed = shiftColorPart(color.getRed() - diff);
+        int newGreen = shiftColorPart(color.getGreen() - diff);
+        int newBlue = shiftColorPart(color.getBlue() - diff);
+        Color newColor = new Color(newRed, newGreen, newBlue);
         if (newColor.equals(Color.black)) {
             newColor = sectionColorStart;
         }
         return newColor;
+    }
+
+    private int shiftColorPart(int colorPart) {
+        if (colorPart < 0) {
+            return 255;
+        }
+        if (colorPart > 255) {
+            return 0;
+        }
+
+        return colorPart;
     }
 
     private void drawLegend() {
@@ -402,6 +434,24 @@ public class Visualizer {
             drawLegendEntry(number, "Overlay", overlayColor);
             number++;
         }
+        drawLegendCrossEntry(number, "Anomalies", anomalyColor);
+    }
+    
+    @Requires({ "description != null", "color != null" })
+    //TODO temporary almost-duplicate of drawLegendEntry
+    private void drawLegendCrossEntry(int number, String description, Color color) {
+        int startX = fileWidth + LEGEND_GAP;
+        int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
+        if (startY >= height) {
+            startX = startX + legendWidth / 2;
+            startY = startY - (height);
+        }
+        drawCross(color, startX, startY, LEGEND_SAMPLE_SIZE, LEGEND_SAMPLE_SIZE);
+        int stringX = startX + LEGEND_SAMPLE_SIZE + LEGEND_GAP;
+        int stringY = startY + LEGEND_SAMPLE_SIZE;
+        Graphics g = image.getGraphics();
+        g.setColor(Color.white);
+        g.drawString(description, stringX, stringY);
     }
 
     @Requires({ "description != null", "color != null" })
@@ -447,6 +497,45 @@ public class Visualizer {
     }
 
     @Requires("color != null")
+    //TODO temporary almost-duplicate of drawRect
+    private void drawCross(Color color, int startX, int startY, int width,
+            int height) {
+        for (int x = startX; x < startX + width; x++) {
+            for (int y = startY; y < startY + height; y++) {
+                try {
+                    if (Math.abs((x - startX) - (y - startY)) < 2
+                            || Math.abs((width - (x - startX)) - (y - startY)) < 2) {
+                        image.setRGB(x, y, color.getRGB());
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.err.println("tried to set x/y = " + x + "/" + y);
+                }
+            }
+        }
+    }
+
+    @Requires("color != null")
+    //TODO temporary almost-duplicate of drawPixels
+    private void drawCrosses(Color color, long fileOffset, long fileLength) {
+        int pixelStart = getPixelNumber(fileOffset);
+        // necessary to avoid gaps due to rounding issues (you can't just do
+        // getPixelNumber(fileLength))
+        int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
+        int pixelMax = getXPixels() * getYPixels();
+        if (pixelStart >= pixelMax) {
+            System.err.println("too many pixels, max is: " + pixelMax
+                    + " and trying to set: " + pixelStart);
+        }
+        for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
+            int x = (i % getXPixels()) * pixelSize;
+            int y = (i / getXPixels()) * pixelSize;
+            int sizemodifier = pixelated ? 2 : 1;
+            drawCross(color, x, y, pixelSize * sizemodifier, pixelSize
+                    * sizemodifier);
+        }
+    }
+
+    @Requires("color != null")
     private void drawPixels(Color color, long fileOffset, long fileLength) {
         drawPixels(color, fileOffset, fileLength, 0);
     }
@@ -485,22 +574,23 @@ public class Visualizer {
     }
 
     public static void main(String[] args) throws IOException {
+        // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/testfiles/strings.exe");
+                "/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe");
         PEData data = PELoader.loadPE(file);
-        ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
-        for(Resource res : rsrc.getResources()){
-            System.out.println(res);
-        }
+        System.out.println(new SectionLoader(data).loadExportSection()
+                .getInfo());
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
-//        Visualizer vi = new Visualizer(data);
-//        final BufferedImage image = vi.createImage();
-//        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
-//        show(image);
+        Visualizer vi = new Visualizer(data);
+        vi.setFileWidth(160);
+        vi.setPixelSize(20);
+        vi.setBytesPerPixel(1);
+        final BufferedImage image = vi.createImage();
+        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
+        show(image);
     }
 
-    @SuppressWarnings("unused")
     private static void show(final BufferedImage image) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -521,6 +611,7 @@ public class Visualizer {
      */
     @Requires("bytes > 0")
     public void setBytesPerPixel(int bytes) {
+        System.out.println("file length: " + data.getFile().length());
         double nrOfPixels = Math.ceil(data.getFile().length() / (double) bytes);
         System.out.println("pixel nr:" + nrOfPixels);
         double pixelsPerRow = Math.ceil(fileWidth / pixelSize);

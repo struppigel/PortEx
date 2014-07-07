@@ -67,12 +67,12 @@ class ExportSection private (
       new Location(secLoader.maybeGetFileOffset(p._1).get, ExportNamePointerTable.entryLength))
   }
 
-  def getLocations(): java.util.List[Location] =
+  def getLocations(): java.util.List[Location] = if (isEmpty) List[Location]().asJava else
     Location.mergeContinuous(
       List(new Location(edataTable.fileOffset, edataTable.size),
         new Location(exportAddressTable.fileOffset, exportAddressTable.size),
         new Location(namePointerTable.fileOffset, namePointerTable.size),
-        new Location(ordinalTable.fileOffset, ordinalTable.size)) 
+        new Location(ordinalTable.fileOffset, ordinalTable.size))
         ::: nameLocations).asJava
 
   /**
@@ -188,8 +188,8 @@ object ExportSection {
     println()
     println(edata.getInfo)
   }
-  
-  def apply(li: LoadInfo): ExportSection = 
+
+  def apply(li: LoadInfo): ExportSection =
     apply(li.memoryMapped, li.rva, li.data.getOptionalHeader(), li.loader, li.fileOffset)
 
   def apply(mmBytes: MemoryMappedPE, virtualAddress: Long,
