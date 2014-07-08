@@ -36,6 +36,8 @@ public class ResourceSectionTest {
     @Test
     public void readResourceTypes() throws FileFormatException, IOException {
         for (TestData testdatum : testdata) {
+            //this file can not be parsed correctly by pev
+            if(testdatum.filename.equals("VirusShare_05e261d74d06dd8d35583614def3f22e.txt")) continue;
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             SectionLoader loader = new SectionLoader(pedatum);
             Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
@@ -45,6 +47,7 @@ public class ResourceSectionTest {
                     String type = res.getType();
                     IDOrName id = res.getLevelIDs().get(Level.typeLevel());
                     if (!(testdatum.resTypes.contains(type) || id instanceof Name)) {
+                        System.out.println("file: " + testdatum.filename);
                         System.out.println(res);
                         System.out.println("FAIL: searched for resource type "
                                 + type);

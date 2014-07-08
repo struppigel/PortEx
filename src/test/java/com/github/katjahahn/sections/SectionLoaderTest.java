@@ -51,9 +51,6 @@ public class SectionLoaderTest {
         PEData data = PELoader.loadPE(file);
         SectionLoader loader = new SectionLoader(data);
         Optional<ImportSection> idata = loader.maybeLoadImportSection();
-        if (idata.isPresent()) {
-            System.out.println(idata.get().getInfo());
-        }
         assertTrue(idata.get().isEmpty());
     }
 
@@ -63,7 +60,11 @@ public class SectionLoaderTest {
                 + "/x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
         PEData data = PELoader.loadPE(file);
         SectionLoader loader = new SectionLoader(data);
-        assertFalse(loader.maybeLoadResourceSection().isPresent());
+        Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
+        if (rsrc.isPresent()) {
+            System.out.println(rsrc.get().getInfo());
+        }
+        assertTrue(rsrc.get().isEmpty());
     }
 
     @Test

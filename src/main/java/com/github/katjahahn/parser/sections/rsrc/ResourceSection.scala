@@ -40,7 +40,7 @@ class ResourceSection(
   val offset: Long,
   private val mmBytes: MemoryMappedPE) extends SpecialSection {
 
-  override def isEmpty(): Boolean = false
+  override def isEmpty(): Boolean = getResources.isEmpty()
 
   override def getInfo(): String = resourceTable.getInfo
 

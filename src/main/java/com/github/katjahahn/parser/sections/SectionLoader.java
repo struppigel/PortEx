@@ -19,7 +19,6 @@ import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +39,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.java.contract.Ensures;
-import com.google.java.contract.Invariant;
 import com.google.java.contract.Requires;
 
 /**
@@ -145,39 +143,6 @@ public class SectionLoader {
         long size = getReadSize(header);
         long offset = header.getAlignedPointerToRaw();
         return new PESection(size, offset, header, file);
-    }
-
-    /**
-     * Loads the bytes of the section and returns bytes and file offset.
-     * 
-     * @param header
-     *            of the section
-     * @return bytes and file offset of the section
-     * @throws IOException
-     *             if file can not be read
-     * @throws IllegalStateException
-     *             if section too large to fit into a byte array
-     */
-    @Requires("header != null")
-    @Ensures("result != null")
-    @Beta
-    // TODO maybe remove
-    private BytesAndOffset loadSectionBytesFor(SectionHeader header)
-            throws IOException {
-        Preconditions.checkArgument(header != null, "given section was null");
-        logger.debug("reading section bytes for header " + header.getName());
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            long alignedPointerToRaw = header.getAlignedPointerToRaw();
-            long readSize = getReadSize(header);
-            Preconditions.checkState(readSize == (int) readSize,
-                    "read size too large to load section into byte array");
-            raf.seek(alignedPointerToRaw);
-            logger.debug("reading section bytes from " + alignedPointerToRaw
-                    + " to " + (readSize + alignedPointerToRaw));
-            byte[] sectionbytes = new byte[(int) readSize];
-            raf.readFully(sectionbytes);
-            return new BytesAndOffset(sectionbytes, alignedPointerToRaw);
-        }
     }
 
     /**
@@ -630,25 +595,7 @@ public class SectionLoader {
         }
         return Optional.absent();
     }
-
-    /**
-     * Data structure to return or pass a bytes and offset pair.
-     * 
-     */
-    @Invariant({ "bytes != null", "offset >= 0" })
-    @Beta
-    // TODO remove
-    public static class BytesAndOffset {
-        public final long offset;
-        public final byte[] bytes;
-
-        public BytesAndOffset(byte[] bytes, long offset) {
-            Preconditions.checkArgument(bytes != null, "bytes are null");
-            this.offset = offset;
-            this.bytes = bytes;
-        }
-    }
-
+    
     /**
      * Contains the load information for a certain data directory.
      */
