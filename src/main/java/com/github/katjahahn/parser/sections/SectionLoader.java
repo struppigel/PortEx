@@ -410,6 +410,9 @@ public class SectionLoader {
             case DEBUG:
                 section = DebugSection.newInstance(loadInfo);
                 break;
+            case RESOURCE_TABLE:
+                section = ResourceSection.newInstance(loadInfo);
+                break;
             default:
                 return Optional.absent();
             }
@@ -496,32 +499,11 @@ public class SectionLoader {
      * @throws IOException
      *             if unable to read the file
      */
+    @SuppressWarnings("unchecked")
     @Ensures("result != null")
-    // TODO use MemoryMappedPE and loadInfo
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
-        Optional<DataDirEntry> resourceTable = optHeader
-                .maybeGetDataDirEntry(DataDirectoryKey.RESOURCE_TABLE);
-        if (resourceTable.isPresent()) {
-            Optional<SectionHeader> rsrcEntry = resourceTable.get()
-                    .maybeGetSectionTableEntry(table);
-            if (rsrcEntry.isPresent()) {
-                Long virtualAddress = rsrcEntry.get().get(VIRTUAL_ADDRESS);
-                if (virtualAddress != null) {
-                    BytesAndOffset tuple = loadSectionBytesFor(rsrcEntry.get());
-                    byte[] rsrcbytes = tuple.bytes;
-                    if (rsrcbytes.length == 0) {
-                        logger.warn("unable to read resource section, readsize is 0");
-                        return Optional.absent();
-                    }
-                    long rsrcOffset = rsrcEntry.get().getAlignedPointerToRaw();
-                    ResourceSection rsrc = ResourceSection.newInstance(file,
-                            rsrcbytes, virtualAddress, rsrcOffset);
-                    return Optional.of(rsrc);
-                }
-            }
-        }
-        return Optional.absent();
+       return (Optional<ResourceSection>) maybeLoadSpecialSection(DataDirectoryKey.RESOURCE_TABLE);
     }
 
     /**

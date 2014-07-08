@@ -20,6 +20,7 @@ import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.ByteArrayUtil._
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil
+import com.github.katjahahn.parser.MemoryMappedPE
 
 class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardField]) {
   override def toString(): String =
@@ -29,10 +30,10 @@ class ResourceDataEntry(val data: Map[ResourceDataEntryKey, StandardField]) {
        |${data.values.map(_.toString()).mkString("\n")}
        |""".stripMargin
 
-  def readResourceBytes(virtualAddress: Long, rsrcBytes: Array[Byte]): Array[Byte] = {
-    val address = data(ResourceDataEntryKey.DATA_RVA).value - virtualAddress
+  def readResourceBytes(virtualAddress: Long, mmBytes: MemoryMappedPE): Array[Byte] = {
+    val address = data(ResourceDataEntryKey.DATA_RVA).value
     val length = data(ResourceDataEntryKey.SIZE).value + address
-    rsrcBytes.slice(address.toInt, length.toInt)
+    mmBytes.slice(address, length)
   }
 
 }

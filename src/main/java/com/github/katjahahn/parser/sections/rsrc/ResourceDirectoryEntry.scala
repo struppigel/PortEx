@@ -26,6 +26,7 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
 import org.apache.logging.log4j.LogManager
+import com.github.katjahahn.parser.MemoryMappedPE
 
 /**
  * The entry of a {@link ResourceDirectory}
@@ -79,9 +80,9 @@ case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extend
 abstract class IDOrName
 
 case class ID(id: Long, level: Level) extends IDOrName {
-  
+
   def idString: String = typeIDMap.getOrElse(id.toInt, id.toString)
-  
+
   override def toString(): String =
     "ID: " + { if (level.levelNr == 1) idString else id.toString }
 
@@ -94,7 +95,7 @@ case class Name(rva: Long, name: String) extends IDOrName {
 object ResourceDirectoryEntry {
 
   private val logger = LogManager
-            .getLogger(ResourceDirectoryEntry.getClass().getName());
+    .getLogger(ResourceDirectoryEntry.getClass().getName());
   private val specLocation = "resourcedirentryspec";
   private val typeSpecLocation = "resourcetypeid"
   val typeIDMap = IOUtil.readArray(typeSpecLocation).asScala.map(a => (a(0).toInt, a(1))).toMap
@@ -113,16 +114,16 @@ object ResourceDirectoryEntry {
    * @return {@link ResourceDirectoryEntry}
    */
   def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
-    entryNr: Int, tableBytes: Array[Byte], offset: Long, level: Level,
-    virtualAddress: Long, rsrcOffset: Long): ResourceDirectoryEntry = {
+    entryNr: Int, offset: Long, level: Level,
+    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
-    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level,
-      tableBytes, virtualAddress, offset, rsrcOffset)
+    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
     if (isDataEntryRVA(rva)) {
-      createDataEntry(rva, id, tableBytes, offset, entryNr, rsrcOffset)
+      createDataEntry(rva, id, entryNr, rsrcOffset, mmBytes)
     } else {
-      createSubDirEntry(file, rva, id, tableBytes, offset, entryNr, level, virtualAddress, rsrcOffset)
+      createSubDirEntry(file, rva, id, offset, entryNr, level,
+        virtualAddress, rsrcOffset, mmBytes)
     }
   }
 
@@ -138,39 +139,34 @@ object ResourceDirectoryEntry {
     }
   }
 
-  private def getID(value: Long, isNameEntry: Boolean, level: Level,
-    tablebytes: Array[Byte], virtualAddress: Long, offset: Long, rsrcOffset: Long): IDOrName =
+  private def getID(rva: Long, isNameEntry: Boolean, level: Level,
+    mmBytes: MemoryMappedPE): IDOrName =
     if (isNameEntry) {
-      val name = getStringAtRVA(value, tablebytes, virtualAddress, offset, rsrcOffset) //TODO ?
+      val name = getStringAtRVA(rva, mmBytes) //TODO ?
       name match {
         case None => throw new FileFormatException("unable to read name entry")
-        case Some(str) => Name(value, str)
+        case Some(str) => Name(rva, str)
       }
     } else {
-      ID(value, level)
+      ID(rva, level)
     }
 
-  private def getStringAtRVA(rva: Long, tablebytes: Array[Byte],
-    virtualAddress: Long, offset: Long, rsrcOffset: Long): Option[String] = {
+  private def getStringAtRVA(rva: Long, mmBytes: MemoryMappedPE): Option[String] = {
     val nameRVA = removeHighestIntBit(rva)
-    val address = nameRVA - offset
-    readStringAtOffset(tablebytes, address)
-  }
-
-  private def readStringAtOffset(tablebytes: Array[Byte], address: Long): Option[String] = {
+    val address = nameRVA
     val length = 2
-    if (address + length > tablebytes.length) {
+    if (address + length > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
       //          return None
     }
-    val strLength = getBytesLongValueSafely(tablebytes, address.toInt, length).toInt
+    val strLength = mmBytes.getBytesIntValue(address, length)
     val strBytes = strLength * 2 //wg UTF-16 --> 2 Byte
     val stringAddress = (address + length).toInt
-    if (stringAddress + strBytes > tablebytes.length) {
+    if (stringAddress + strBytes > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
       //      return None
     }
-    val bytes = tablebytes.slice(stringAddress, stringAddress + strBytes)
+    val bytes = mmBytes.slice(stringAddress, stringAddress + strBytes)
     Some(new String(bytes, "UTF-16LE"))
   }
 
@@ -179,22 +175,20 @@ object ResourceDirectoryEntry {
     (value & mask)
   }
 
-  private def createDataEntry(rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long, entryNr: Int, rsrcOffset: Long): DataEntry = {
-    val entryBytes = tableBytes.slice((rva - offset).toInt,
-      (rva - offset + ResourceDataEntry.size).toInt)
+  private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int,
+    rsrcOffset: Long, mmBytes: MemoryMappedPE): DataEntry = {
+    val entryBytes = mmBytes.slice(rva, rva + ResourceDataEntry.size)
     //TODO is this file offset calculation correct?
-    val entryOffset = (rva - offset) + rsrcOffset
+    val entryOffset = rva + rsrcOffset
     val data = ResourceDataEntry(entryBytes, entryOffset)
     DataEntry(id, data, entryNr)
   }
 
   private def createSubDirEntry(file: File, rva: Long, id: IDOrName,
-    tableBytes: Array[Byte], offset: Long, entryNr: Int, level: Level,
-    virtualAddress: Long, rsrcOffset: Long): SubDirEntry = {
+    offset: Long, entryNr: Int, level: Level,
+    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): SubDirEntry = {
     val address = removeHighestIntBit(rva)
-    val resourceBytes = tableBytes.slice((address - offset).toInt, tableBytes.length)
-    val table = ResourceDirectory(file, level.up, resourceBytes, address, virtualAddress, rsrcOffset)
+    val table = ResourceDirectory(file, level.up, address, virtualAddress, rsrcOffset, mmBytes)
     SubDirEntry(id, table, entryNr)
   }
 

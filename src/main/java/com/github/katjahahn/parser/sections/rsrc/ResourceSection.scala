@@ -23,28 +23,30 @@ import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.MemoryMappedPE
 
 /**
  * Holds the root resource directory table and provides access to the resources.
  *
- * @constructor creates an instance of the resource section with the resource 
+ * @constructor creates an instance of the resource section with the resource
  *   directory table
- * @param resourceTable the root resource directory table that makes up the tree 
+ * @param resourceTable the root resource directory table that makes up the tree
  *   of the resource section
  */
 class ResourceSection(
-    val resourceTable: ResourceDirectory, 
-    private val rsrcBytes: Array[Byte], 
-    val virtualAddress: Long,
-    val offset: Long,
-    val size: Long) extends SpecialSection {
-  
+  val resourceTable: ResourceDirectory,
+  val virtualAddress: Long,
+  val offset: Long,
+  private val mmBytes: MemoryMappedPE) extends SpecialSection {
+
   override def isEmpty(): Boolean = false
 
   override def getInfo(): String = resourceTable.getInfo
-  
-  def getSize(): Long = size
-  
+
+  //TODO size missing
+  def getSize(): Long = 0
+
   override def getOffset(): Long = offset
 
   /**
@@ -61,36 +63,20 @@ class ResourceSection(
    *
    * @return a List of {@link Resource} instances
    */
-  def getResources(): java.util.List[Resource] = 
-    resourceTable.getResources(virtualAddress, rsrcBytes)
+  def getResources(): java.util.List[Resource] =
+    resourceTable.getResources(virtualAddress, mmBytes)
 
 }
 
 object ResourceSection {
-  
+
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/unusualfiles/corkami/resource_loop.exe")
+    val file = new File("/home/deque/portextestfiles/testfiles/WinRar.exe")
     val pedata = PELoader.loadPE(file)
     val rsrc = new SectionLoader(pedata).loadResourceSection()
-    println(rsrc.getResources.asScala.mkString("\n"))
-  }
-
-  /**
-   * Creates an instance of the ResourceSection
-   *
-   * @param file 
-   * @param rsrcbytes the array of bytes the section is made up of
-   * @param virtualAddress the virtual address all RVAs are relative to
-   * @param rsrcOffset
-   * @return
-   */
-  def apply(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
-      rsrcOffset: Long): ResourceSection = {
-    val initialLevel = Level()
-    val initialOffset = 0
-    val resourceTable = ResourceDirectory(file, initialLevel, rsrcbytes, 
-        initialOffset, virtualAddress, rsrcOffset)
-    new ResourceSection(resourceTable, rsrcbytes, virtualAddress, rsrcOffset, rsrcbytes.length)
+    val res = rsrc.getResources.asScala
+    println(res.mkString("\n"))
+    println("nr of res: " + res.size)
   }
 
   /**
@@ -102,18 +88,36 @@ object ResourceSection {
    * @param rsrcOffset
    * @return
    */
-  def newInstance(file: File, rsrcbytes: Array[Byte], virtualAddress: Long, 
-      rsrcOffset: Long): ResourceSection = 
-    apply(file, rsrcbytes, virtualAddress, rsrcOffset)
-    
+  def apply(file: File, virtualAddress: Long,
+    rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceSection = {
+    val initialLevel = Level()
+    val initialOffset = 0
+    val resourceTable = ResourceDirectory(file, initialLevel,
+      initialOffset, virtualAddress, rsrcOffset, mmBytes)
+    new ResourceSection(resourceTable, virtualAddress, rsrcOffset,
+      mmBytes)
+  }
+
+  /**
+   * Creates an instance of the ResourceSection
+   *
+   * @param file
+   * @param rsrcbytes the array of bytes the section is made up of
+   * @param virtualAddress the virtual address all RVAs are relative to
+   * @param rsrcOffset
+   * @return
+   */
+  def newInstance(loadInfo: LoadInfo): ResourceSection =
+    apply(loadInfo.data.getFile, loadInfo.rva, loadInfo.fileOffset, loadInfo.memoryMapped)
+
   /**
    * Loads the resource section and returns it.
-   * 
+   *
    * This is just a shortcut to loading the section using the {@link SectionLoader}
-   * 
+   *
    * @return instance of the resource section
    */
-  def load(data: PEData): ResourceSection = 
+  def load(data: PEData): ResourceSection =
     new SectionLoader(data).loadResourceSection()
 
 }
