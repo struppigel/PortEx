@@ -60,7 +60,7 @@ class DirectoryEntry private (
   private val entries: Map[DirectoryEntryKey, StandardField], val offset: Long) {
 
   /**
-   * The size of a directory entry
+   * The size of a directory entry is {@value}
    */
   val size = 20
 
@@ -68,10 +68,16 @@ class DirectoryEntry private (
   var name: String = _
   var forwarderString: String = _
 
+  /**
+   * adds a lookup table entry to the directory entry
+   */
   def addLookupTableEntry(e: LookupTableEntry): Unit = {
     lookupTableEntries = lookupTableEntries :+ e
   }
   
+  /**
+   * Returns a list of all file locations where directory entries are found
+   */
   def getLocations(): List[Location] = new Location(offset, size) :: 
    (for(entry <- lookupTableEntries) yield new Location(entry.offset, entry.size))
 

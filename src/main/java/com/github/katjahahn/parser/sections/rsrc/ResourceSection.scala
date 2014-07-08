@@ -29,15 +29,17 @@ import com.github.katjahahn.parser.MemoryMappedPE
 /**
  * Holds the root resource directory table and provides access to the resources.
  *
- * @constructor creates an instance of the resource section with the resource
- *   directory table
+ * @author Katja Hahn
+ *
+ * Creates an instance of the resource section with the resource
+ * directory table
  * @param resourceTable the root resource directory table that makes up the tree
  *   of the resource section
+ *
  */
 class ResourceSection(
   val resourceTable: ResourceDirectory,
-  val virtualAddress: Long,
-  val offset: Long,
+  private val offset: Long,
   private val mmBytes: MemoryMappedPE) extends SpecialSection {
 
   override def isEmpty(): Boolean = getResources.isEmpty()
@@ -64,7 +66,7 @@ class ResourceSection(
    * @return a List of {@link Resource} instances
    */
   def getResources(): java.util.List[Resource] =
-    resourceTable.getResources(virtualAddress, mmBytes)
+    resourceTable.getResources(mmBytes)
 
 }
 
@@ -80,13 +82,13 @@ object ResourceSection {
   }
 
   /**
-   * Creates an instance of the ResourceSection
+   * Creates an instance of the ResourceSection.
    *
-   * @param file
-   * @param rsrcbytes the array of bytes the section is made up of
+   * @param file the PE file
    * @param virtualAddress the virtual address all RVAs are relative to
-   * @param rsrcOffset
-   * @return
+   * @param rsrcOffset the file offset to the rsrc section
+   * @param mmBytes the memory mapped PE
+   * @return instance of the resource section
    */
   def apply(file: File, virtualAddress: Long,
     rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceSection = {
@@ -94,30 +96,16 @@ object ResourceSection {
     val initialOffset = 0
     val resourceTable = ResourceDirectory(file, initialLevel,
       initialOffset, virtualAddress, rsrcOffset, mmBytes)
-    new ResourceSection(resourceTable, virtualAddress, rsrcOffset,
-      mmBytes)
+    new ResourceSection(resourceTable, rsrcOffset, mmBytes)
   }
 
   /**
-   * Creates an instance of the ResourceSection
+   * Creates an instance of the ResourceSection.
    *
-   * @param file
-   * @param rsrcbytes the array of bytes the section is made up of
-   * @param virtualAddress the virtual address all RVAs are relative to
-   * @param rsrcOffset
-   * @return
+   * @param loadInfo the load information
+   * @return instance of the resource section
    */
   def newInstance(loadInfo: LoadInfo): ResourceSection =
     apply(loadInfo.data.getFile, loadInfo.rva, loadInfo.fileOffset, loadInfo.memoryMapped)
-
-  /**
-   * Loads the resource section and returns it.
-   *
-   * This is just a shortcut to loading the section using the {@link SectionLoader}
-   *
-   * @return instance of the resource section
-   */
-  def load(data: PEData): ResourceSection =
-    new SectionLoader(data).loadResourceSection()
 
 }

@@ -27,25 +27,31 @@ import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 
 /**
- * @author Katja Hahn
- *
  * Header and the entries which point to either data or other resource directory
  * tables.
+ * <p>
  * Each ResourceDirectory therefore is also a tree consisting of more
- * tables or resource data entries as leaves
+ * tables or resource data entries as leaves.
  *
- * @constructor creates an instance of the resource directory table with level,
- * header and entries
+ * @author Katja Hahn
+ *
+ * Creates an instance of the resource directory table with level,
+ * header and entries.
+ *
  * @param level the level of the table in the tree (where the table is a node)
  * @param header the table header
  * @param entries the table entries
  */
-class ResourceDirectory(private val level: Level,
+class ResourceDirectory private (private val level: Level,
   private val header: Header,
   private val entries: List[ResourceDirectoryEntry]) {
 
+  /**
+   * @return resource directory information string
+   */
   def getInfo(): String =
     s"""|Resource Dir Table Header
         |-------------------------
@@ -84,7 +90,7 @@ class ResourceDirectory(private val level: Level,
   /**
    * Returns the Long value for the given key
    *
-   * @param key
+   * @param key the resource directory key
    * @return The value for the given resource directory table key
    */
   def getHeaderValue(key: ResourceDirectoryKey): Long = header(key).value
@@ -92,33 +98,39 @@ class ResourceDirectory(private val level: Level,
   /**
    * Collects and returns all resources that this resource table tree has.
    *
-   * @param virtualAddress the virtual address of the root(?) resource table
-   * @param rsrcBytes the bytes of the resource section
+   * @param mmBytes the memory mapped PE
    * @return a list of all resources
    */
-  def getResources(virtualAddress: Long, mmBytes: MemoryMappedPE): java.util.List[Resource] =
-    _getResources(virtualAddress, mmBytes).asJava
-
-  def _getResources(virtualAddress: Long, mmBytes: MemoryMappedPE): List[Resource] =
-    entries.flatMap(getResources(_, virtualAddress, mmBytes))
+  def getResources(mmBytes: MemoryMappedPE): java.util.List[Resource] =
+    _getResources(mmBytes).asJava
 
   /**
-   * Collects all the resources of one table entry
+   * Collects and returns all resources that this resource table tree has.
+   * <p>
+   * Scala only.
+   *
+   * @param mmBytes the memory mapped PE
+   * @return a list of all resources
+   */
+  def _getResources(mmBytes: MemoryMappedPE): List[Resource] =
+    entries.flatMap(getResources(_, mmBytes))
+
+  /**
+   * Collects all the resources of one table entry.
    *
    * @param entry the table directory entry
-   * @param virtualAddress
-   * @param rsrcBytes
+   * @param mmBytes the memory mapped PE
    * @return a list of all resources that can be found with this entry
    */
-  private def getResources(entry: ResourceDirectoryEntry, virtualAddress: Long,
+  private def getResources(entry: ResourceDirectoryEntry,
     mmBytes: MemoryMappedPE): List[Resource] = {
     entry match {
       case e: DataEntry =>
-        val resourceBytes = e.data.readResourceBytes(virtualAddress, mmBytes)
+        val resourceBytes = e.data.readResourceBytes(mmBytes)
         val levelIDs = Map(level -> e.id)
         List(new Resource(resourceBytes, levelIDs))
       case s: SubDirEntry =>
-        val res = s.table._getResources(virtualAddress, mmBytes)
+        val res = s.table._getResources(mmBytes)
         res.foreach(r => r.levelIDs ++= Map(level -> s.id))
         res
     }
@@ -127,52 +139,79 @@ class ResourceDirectory(private val level: Level,
 
 object ResourceDirectory {
 
+  /**
+   * Represents a resource directory header
+   */
   type Header = Map[ResourceDirectoryKey, StandardField]
-  type Specification = Map[String, Array[String]]
 
   private val logger = LogManager.getLogger(ResourceDirectory.getClass().getName());
+  
+  /**
+   * The size of a resource directory entry 
+   */
   private val entrySize = 8;
+  
+  /**
+   * The size of the resource directory header
+   */
   private val resourceDirSize = 16;
+  
+  /**
+   * The name of resource directory specification file
+   */
   private val specLocation = "rsrcdirspec"
 
+  /**
+   * Creates a resource directory.
+   *
+   * @param file the PE file
+   * @param rva the relative virtual address to the resource directory
+   * @param level the level in the resource tree of the resource directory to create
+   * @param virtualAddress the rva to the resource table
+   * @param rsrcOffset the file offset to the resource table
+   * @param mmBytes the memory mapped PE
+   * @return resource directory
+   */
   def apply(file: File, level: Level, rva: Long,
     virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceDirectory = {
-    val spec = IOUtil.readMap(specLocation).asScala.toMap
-    //TODO is offset the file offset of the table?
     val headerBytes = mmBytes.slice(virtualAddress + rva, resourceDirSize + rva + virtualAddress)
-    val maybeHeader = readHeader(spec, headerBytes, rva)
-    maybeHeader match {
-      case None => throw new IllegalArgumentException("unable to read resource directory table")
-      case Some(header) =>
-        val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
-        val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
-        val entries = readEntries(file, header, nameEntries, idEntries,
-          rva, level, virtualAddress, rsrcOffset, mmBytes)
-        new ResourceDirectory(level, header, entries)
-    }
+    val header = readHeader(headerBytes, rva)
+    val entries = readEntries(file, header,
+      rva, level, virtualAddress, rsrcOffset, mmBytes)
+    new ResourceDirectory(level, header, entries)
   }
 
-  private def readHeader(spec: Specification,
-    tableBytes: Array[Byte], tableOffset: Long): Option[Header] = {
-    val list = (for ((s1, s2) <- spec) yield {
-      val key = ResourceDirectoryKey.valueOf(s1)
-      val relOffset = Integer.parseInt(s2(1))
-      val length = Integer.parseInt(s2(2))
-      if (relOffset + length > tableBytes.length) None else {
-        val value = getBytesLongValue(tableBytes, relOffset, length)
-        val absFieldOffset = relOffset + tableOffset
-        val standardEntry = new StandardField(key, s2(0), value, absFieldOffset, length)
-        Some((key, standardEntry))
-      }
-    }).toList
-    if (list.contains(None)) None else {
-      val map = list.collect { case Some(tuple) => tuple } toMap;
-      Some(map)
-    }
+  /**
+   * Returns the resource directory header.
+   * 
+   * @param tableBytes the bytes representing the table header
+   * @param the file offset to the directory header
+   * @return resource directory header
+   */
+  private def readHeader(tableBytes: Array[Byte], tableOffset: Long): Header = {
+    val specformat = new SpecificationFormat(0, 1, 2, 3)
+    //TODO read header from memory mapped PE?
+    IOUtil.readHeaderEntries(classOf[ResourceDirectoryKey], specformat,
+      specLocation, tableBytes, tableOffset).asScala.toMap
   }
 
-  private def readEntries(file: File, header: Header, nameEntries: Int, idEntries: Int, tableOffset: Long, level: Level,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): List[ResourceDirectoryEntry] = {
+  /**
+   * Reads and returns all resource directory entries.
+   * 
+   * @param file the PE file
+   * @param header the resource directory header
+   * @param tableOffset the rva to the resource directory
+   * @param level the level of the current directory within the resource tree
+   * @param virtualAddress the rva to the resource table
+   * @param rsrcOffset the file offset to the resource table
+   * @param mmBytes the memory mapped PE
+   * @return a list of resource directory entries
+   */
+  private def readEntries(file: File, header: Header, tableOffset: Long,
+    level: Level, virtualAddress: Long, rsrcOffset: Long,
+    mmBytes: MemoryMappedPE): List[ResourceDirectoryEntry] = {
+    val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
+    val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
     val entriesSum = nameEntries + idEntries
     var entries = ListBuffer.empty[ResourceDirectoryEntry]
     try {
@@ -183,7 +222,7 @@ object ResourceDirectory {
         val entryBytes = mmBytes.slice(offset, endpoint)
         val isNameEntry = i < nameEntries
         entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
-          tableOffset, level, virtualAddress, rsrcOffset, mmBytes)
+          level, virtualAddress, rsrcOffset, mmBytes)
       }
     } catch {
       case e: IllegalArgumentException =>

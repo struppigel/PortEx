@@ -30,9 +30,10 @@ import com.github.katjahahn.parser.MemoryMappedPE
 
 /**
  * The entry of a {@link ResourceDirectory}
- *
+ * <p>
  * There are two types of resource directory entries. They either point to another
  * resource directory table or to data.
+ * <p>
  * The entries have either an {@link ID} or a {@link Name}
  */
 abstract class ResourceDirectoryEntry
@@ -96,8 +97,20 @@ object ResourceDirectoryEntry {
 
   private val logger = LogManager
     .getLogger(ResourceDirectoryEntry.getClass().getName());
+
+  /**
+   * The specification file name of the resource directory entry
+   */
   private val specLocation = "resourcedirentryspec";
+
+  /**
+   * The specification file name of the resource type
+   */
   private val typeSpecLocation = "resourcetypeid"
+
+  /**
+   * Maps resource ids to the corresponding resource type
+   */
   val typeIDMap = IOUtil.readArray(typeSpecLocation).asScala.map(a => (a(0).toInt, a(1))).toMap
   //TODO languageIDMap, nameIDMap
 
@@ -107,26 +120,30 @@ object ResourceDirectoryEntry {
    * @param isNameEntry indicates whether the ID is a number id or points to a name
    * @param entryBytes the array of bytes this entry is made of
    * @param entryNr the number of the entry within the {@link ResourceDirectory}
-   * @param tableBytes the array of bytes the whole table is made of
-   *   where this is entry is a member of
-   * @param offset of the {@link ResourceDirectory} this entry is a member of
    * @param level the level of the {@link ResourceDirectory} this entry is a member of
+   * @param virtualAddress the rva to the resource table
+   * @param rsrcOffset the relative offset from the resource table to the resource directory entry
+   * @param mmBytes the memory mapped PE
    * @return {@link ResourceDirectoryEntry}
    */
   def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
-    entryNr: Int, offset: Long, level: Level,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceDirectoryEntry = {
+    entryNr: Int, level: Level, virtualAddress: Long, rsrcOffset: Long,
+    mmBytes: MemoryMappedPE): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
-    val id = getID(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
+    val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
     if (isDataEntryRVA(rva)) {
       createDataEntry(rva, id, entryNr, rsrcOffset, mmBytes)
     } else {
-      createSubDirEntry(file, rva, id, offset, entryNr, level,
+      createSubDirEntry(file, rva, id, entryNr, level,
         virtualAddress, rsrcOffset, mmBytes)
     }
   }
 
+  /**
+   * @param entryBytes an array representing the bytes of the resource directory entry
+   * @return map of the entry fields
+   */
   private def readEntries(entryBytes: Array[Byte]): Map[String, Long] = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
     val valueOffset = 2
@@ -139,7 +156,14 @@ object ResourceDirectoryEntry {
     }
   }
 
-  private def getID(rva: Long, isNameEntry: Boolean, level: Level,
+  /**
+   * @param rva the relative virtual address to the IDOrName entry
+   * @param isNameEntry true if name entry is returned, false if ID entry is returned
+   * @param level the level of the entry within the resource tree
+   * @param mmBytes the memory mapped PE
+   * @return ID entry or name entry
+   */
+  private def getIDOrName(rva: Long, isNameEntry: Boolean, level: Level,
     mmBytes: MemoryMappedPE): IDOrName =
     if (isNameEntry) {
       val name = getStringAtRVA(rva, mmBytes) //TODO ?
@@ -151,6 +175,14 @@ object ResourceDirectoryEntry {
       ID(rva, level)
     }
 
+  /**
+   * Returns the string at the specified rva.
+   * <p>
+   * The first two bytes at the given rva specify the length of following string.
+   * @param rva the relative virtual address to the string
+   * @param mmbytes the memory mapped PE
+   * @return string at rva
+   */
   private def getStringAtRVA(rva: Long, mmBytes: MemoryMappedPE): Option[String] = {
     val nameRVA = removeHighestIntBit(rva)
     val address = nameRVA
@@ -170,11 +202,29 @@ object ResourceDirectoryEntry {
     Some(new String(bytes, "UTF-16LE"))
   }
 
+  /**
+   * Removes the highest bit in an int value and returns the result.
+   *
+   * @param value the value to remove the bit from
+   * @return the value with the highest integer bit removed
+   */
   private def removeHighestIntBit(value: Long): Long = {
     val mask = 0x7FFFFFFF
     (value & mask)
   }
 
+  /**
+   * Creates a data entry instance from the directory at the specified
+   * rsrcOffset and with the entryNr.
+   *
+   * @param rva the relative virtual address to the resource table
+   * @param id the ID or Name entry
+   * @param entryNr the number of the entry
+   * @param rsrcOffset the relative offset from the beginning of the
+   *        resource table to the entry
+   * @param mmBytes the memory mapped PE
+   * @return a data entry
+   */
   private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int,
     rsrcOffset: Long, mmBytes: MemoryMappedPE): DataEntry = {
     val entryBytes = mmBytes.slice(rva, rva + ResourceDataEntry.size)
@@ -184,8 +234,7 @@ object ResourceDirectoryEntry {
     DataEntry(id, data, entryNr)
   }
 
-  private def createSubDirEntry(file: File, rva: Long, id: IDOrName,
-    offset: Long, entryNr: Int, level: Level,
+  private def createSubDirEntry(file: File, rva: Long, id: IDOrName, entryNr: Int, level: Level,
     virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): SubDirEntry = {
     val address = removeHighestIntBit(rva)
     val table = ResourceDirectory(file, level.up, address, virtualAddress, rsrcOffset, mmBytes)
