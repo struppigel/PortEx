@@ -13,7 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * *****************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.parser
 
 import java.io.RandomAccessFile
@@ -45,6 +46,18 @@ class MemoryMappedPE(
    * Determines how many bytes are read at once while checking indexWhere and indexOf.
    */
   private val chunkSize = 1024
+
+  /**
+   * Returns the physical offset for the given virtual address, if it is within 
+   * a mapping. Otherwise -1 is returned.
+   */
+  def getPhysforVir(va: Long): Long = {
+    val optMapping = mappings.find(m => m.va.contains(va))
+    optMapping match {
+      case Some(m) => m.physA.start + (va - m.va.start)
+      case None => -1
+    }
+  }
 
   /**Array-like methods**/
 

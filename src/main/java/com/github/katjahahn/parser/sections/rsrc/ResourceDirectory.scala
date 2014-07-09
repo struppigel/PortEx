@@ -28,6 +28,7 @@ import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
+import com.github.katjahahn.parser.Location
 
 /**
  * Header and the entries which point to either data or other resource directory
@@ -47,7 +48,12 @@ import com.github.katjahahn.parser.IOUtil.SpecificationFormat
  */
 class ResourceDirectory private (private val level: Level,
   private val header: Header,
-  private val entries: List[ResourceDirectoryEntry]) {
+  private val entries: List[ResourceDirectoryEntry],
+  private val fileOffset: Long) {
+  
+  private val headerLoc = new Location(fileOffset, resourceDirSize)
+  
+  def locations(): List[Location] = headerLoc :: entries.flatMap(e => e.locations)
 
   /**
    * @return resource directory information string
@@ -101,8 +107,8 @@ class ResourceDirectory private (private val level: Level,
    * @param mmBytes the memory mapped PE
    * @return a list of all resources
    */
-  def getResources(mmBytes: MemoryMappedPE): java.util.List[Resource] =
-    _getResources(mmBytes).asJava
+  def getResources(): java.util.List[Resource] =
+    _getResources().asJava
 
   /**
    * Collects and returns all resources that this resource table tree has.
@@ -112,8 +118,8 @@ class ResourceDirectory private (private val level: Level,
    * @param mmBytes the memory mapped PE
    * @return a list of all resources
    */
-  def _getResources(mmBytes: MemoryMappedPE): List[Resource] =
-    entries.flatMap(getResources(_, mmBytes))
+  def _getResources(): List[Resource] =
+    entries.flatMap(getResources)
 
   /**
    * Collects all the resources of one table entry.
@@ -122,15 +128,14 @@ class ResourceDirectory private (private val level: Level,
    * @param mmBytes the memory mapped PE
    * @return a list of all resources that can be found with this entry
    */
-  private def getResources(entry: ResourceDirectoryEntry,
-    mmBytes: MemoryMappedPE): List[Resource] = {
+  private def getResources(entry: ResourceDirectoryEntry): List[Resource] = {
     entry match {
       case e: DataEntry =>
-        val resourceBytes = e.data.readResourceBytes(mmBytes)
+        val resourceBytes = e.data.readResourceBytes()
         val levelIDs = Map(level -> e.id)
         List(new Resource(resourceBytes, levelIDs))
       case s: SubDirEntry =>
-        val res = s.table._getResources(mmBytes)
+        val res = s.table._getResources()
         res.foreach(r => r.levelIDs ++= Map(level -> s.id))
         res
     }
@@ -178,7 +183,7 @@ object ResourceDirectory {
     val header = readHeader(headerBytes, rva)
     val entries = readEntries(file, header,
       rva, level, virtualAddress, rsrcOffset, mmBytes)
-    new ResourceDirectory(level, header, entries)
+    new ResourceDirectory(level, header, entries, rsrcOffset + rva)
   }
 
   /**

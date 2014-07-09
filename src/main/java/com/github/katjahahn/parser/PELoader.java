@@ -209,8 +209,11 @@ public final class PELoader {
         // "/home/deque/portextestfiles/badfiles/VirusShare_d7b5da61591482dc4b1c511b14adc99f");
         // File file = new
         // File("/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
-        //TODO this file's resource sections points into no where, but within the file --> does it read from disk?
-        File file = new File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
+        // TODO this file's resource sections points into no where, but within
+        // the file --> does it read from disk?
+        // File file = new
+        // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
+        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
         System.out.println(data);
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
@@ -229,14 +232,14 @@ public final class PELoader {
                     + vEnd);
         }
         System.out.println("file size: " + file.length());
-//        Optional<ImportSection> idata = loader.maybeLoadImportSection();
-//        System.out.println(idata.get().getInfo());
-//        Optional<ExceptionSection> maybePData = loader.maybeLoadExceptionSection();
-//        Optional<ExportSection> edata = loader.maybeLoadExportSection();
+        // Optional<ImportSection> idata = loader.maybeLoadImportSection();
+        // System.out.println(idata.get().getInfo());
+        // Optional<ExceptionSection> maybePData =
+        // loader.maybeLoadExceptionSection();
+        // Optional<ExportSection> edata = loader.maybeLoadExportSection();
         Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
-        if(rsrc.isPresent()) {
+        if (rsrc.isPresent()) {
             System.out.println(rsrc.get().getInfo());
         }
     }
-
 }

@@ -25,6 +25,7 @@ import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.Location
 
 /**
  * Holds the root resource directory table and provides access to the resources.
@@ -43,6 +44,9 @@ class ResourceSection private (
   val resourceTable: ResourceDirectory,
   private val offset: Long,
   private val mmBytes: MemoryMappedPE) extends SpecialSection {
+  
+  def getLocations(): java.util.List[Location] = 
+    Location.mergeContinuous(resourceTable.locations).asJava
 
   /**
    * {@inheritDoc}
@@ -74,7 +78,7 @@ class ResourceSection private (
    * @return a List of {@link Resource} instances
    */
   def getResources(): java.util.List[Resource] =
-    resourceTable.getResources(mmBytes)
+    resourceTable.getResources()
 
 }
 

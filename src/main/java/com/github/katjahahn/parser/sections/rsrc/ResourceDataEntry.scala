@@ -16,32 +16,44 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.parser.sections.rsrc
+import ResourceDataEntry._
 import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.ByteArrayUtil._
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.Location
 
 /**
  * Represents a data entry of a resource.
- * 
+ *
  * @author Katja Hahn
- * 
+ *
  * @param data the header of the data entry
  */
-class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardField]) {
- 
+class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardField],
+  entryOffset: Long, mmBytes: MemoryMappedPE, virtualAddress: Long) {
+
+  lazy val headerLoc = new Location(entryOffset, size)
+  private lazy val resourceBytesLoc = {
+    val rva = data(ResourceDataEntryKey.DATA_RVA).value
+    val offset = mmBytes.getPhysforVir(rva)
+    val size = data(ResourceDataEntryKey.SIZE).value
+    new Location(offset, size)
+  }
+
+  def locations(): List[Location] = headerLoc :: resourceBytesLoc :: Nil //TODO add resource bytes
+
   override def toString(): String =
-    s"""data entry
-       |..........
-       |
-       |${data.values.map(_.toString()).mkString("\n")}
-       |""".stripMargin
+    s"""|${data.values.map(_.toString()).mkString("\n")}
+        |
+        |${new String(readResourceBytes)}
+        |""".stripMargin
 
   /**
    * @return the byte array representing the resource
    */
-  def readResourceBytes(mmBytes: MemoryMappedPE): Array[Byte] = {
+  def readResourceBytes(): Array[Byte] = {
     val address = data(ResourceDataEntryKey.DATA_RVA).value
     val length = data(ResourceDataEntryKey.SIZE).value + address
     mmBytes.slice(address, length)
@@ -50,12 +62,12 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
 }
 
 object ResourceDataEntry {
-  
+
   /**
    * The size of an entry is {@value}
    */
   val size = 16
-  
+
   /**
    * The name of the specification file
    */
@@ -63,12 +75,13 @@ object ResourceDataEntry {
 
   /**
    * Reads and returns a resource data entry instance based on the entryBytes
-   * 
+   *
    * @param entryBytes the byte array containing the entry
    * @param entryOffset the file offset of the entry start
    * @return a resource data entry instance
    */
-  def apply(entryBytes: Array[Byte], entryOffset: Long): ResourceDataEntry = {
+  def apply(entryBytes: Array[Byte], entryOffset: Long, mmBytes: MemoryMappedPE,
+    virtualAddress: Long): ResourceDataEntry = {
     val spec = IOUtil.readMap(specLocation).asScala.toMap
     //TODO use IOUtil.readHeader ...
     val data = for ((sKey, sVal) <- spec) yield {
@@ -83,6 +96,6 @@ object ResourceDataEntry {
       val absFieldOffset = relFieldOffset + entryOffset
       (key, new StandardField(key, description, value, absFieldOffset, length))
     }
-    new ResourceDataEntry(data)
+    new ResourceDataEntry(data, entryOffset, mmBytes, virtualAddress)
   }
 }

@@ -27,6 +27,7 @@ import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.Location
 
 /**
  * The entry of a {@link ResourceDirectory}
@@ -35,10 +36,14 @@ import com.github.katjahahn.parser.MemoryMappedPE
  * resource directory table or to data.
  * <p>
  * The entries have either an {@link ID} or a {@link Name}
- * 
+ *
  * @author Katja Hahn
  */
-abstract class ResourceDirectoryEntry
+abstract class ResourceDirectoryEntry {
+
+  def locations(): List[Location]
+
+}
 
 /**
  * An entry that points to another {@link ResourceDirectory}
@@ -47,7 +52,15 @@ abstract class ResourceDirectoryEntry
  * @param table the table the entry points to
  * @param entryNr the number of the entry within the {@link ResourceDirectory}
  */
-case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int) extends ResourceDirectoryEntry {
+case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsrcOffset: Long) extends ResourceDirectoryEntry {
+
+  private lazy val idLoc = id match {
+    case Name(rva, name) => List(new Location(rva + rsrcOffset, name.length * 2))
+    case _ => Nil
+  }
+
+  override def locations(): List[Location] = idLoc ::: table.locations
+
   override def toString(): String =
     s"""Sub Dir Entry $entryNr
        |+++++++++++++++
@@ -65,7 +78,14 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int) ext
  * @param data the resource data entry
  * @param entryNr the number of the entry within the {@link ResourceDirectory}
  */
-case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extends ResourceDirectoryEntry {
+case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int, rsrcOffset: Long) extends ResourceDirectoryEntry {
+
+  private lazy val idLoc = id match {
+    case Name(rva, name) => List(new Location(rva + rsrcOffset, name.length * 2))
+    case _ => Nil
+  }
+
+  override def locations(): List[Location] = idLoc ::: data.locations
 
   override def toString(): String =
     s"""Data Dir Entry $entryNr
@@ -135,7 +155,7 @@ object ResourceDirectoryEntry {
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
     val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
     if (isDataEntryRVA(rva)) {
-      createDataEntry(rva, id, entryNr, rsrcOffset, mmBytes)
+      createDataEntry(rva, id, entryNr, virtualAddress, rsrcOffset, mmBytes)
     } else {
       createSubDirEntry(file, rva, id, entryNr, level,
         virtualAddress, rsrcOffset, mmBytes)
@@ -211,7 +231,7 @@ object ResourceDirectoryEntry {
    * Creates a data entry instance from the directory at the specified
    * rsrcOffset and with the entryNr.
    *
-   * @param virtualAddress the virtual address to the resource table
+   * @param rva the data entry rva
    * @param id the ID or Name entry
    * @param entryNr the number of the entry
    * @param rsrcOffset the relative offset from the beginning of the
@@ -219,20 +239,21 @@ object ResourceDirectoryEntry {
    * @param mmBytes the memory mapped PE
    * @return a data entry
    */
-  private def createDataEntry(virtualAddress: Long, id: IDOrName, entryNr: Int,
+  private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int, virtualAddress: Long,
     rsrcOffset: Long, mmBytes: MemoryMappedPE): DataEntry = {
-    val entryBytes = mmBytes.slice(virtualAddress, virtualAddress + ResourceDataEntry.size)
-    //TODO is this file offset calculation correct?
-    val entryOffset = virtualAddress + rsrcOffset
-    val data = ResourceDataEntry(entryBytes, entryOffset)
-    DataEntry(id, data, entryNr)
+    val virtStart = rva + virtualAddress
+    val virtEnd = virtStart + ResourceDataEntry.size
+    val entryBytes = mmBytes.slice(virtStart, virtEnd)
+    val entryOffset = rva + rsrcOffset
+    val data = ResourceDataEntry(entryBytes, entryOffset, mmBytes, virtualAddress)
+    DataEntry(id, data, entryNr, rsrcOffset)
   }
 
   private def createSubDirEntry(file: File, rva: Long, id: IDOrName, entryNr: Int, level: Level,
     virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): SubDirEntry = {
     val address = removeHighestIntBit(rva)
     val table = ResourceDirectory(file, level.up, address, virtualAddress, rsrcOffset, mmBytes)
-    SubDirEntry(id, table, entryNr)
+    SubDirEntry(id, table, entryNr, rsrcOffset)
   }
 
   private def isDataEntryRVA(value: Long): Boolean = {

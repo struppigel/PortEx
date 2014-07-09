@@ -300,7 +300,7 @@ public class SectionLoader {
             fileOffset = rva - (virtualAddress - pointerToRawData);
         }
         // file offset is valid
-        if (rva <= file.length()) {
+        if (fileOffset <= file.length()) {
             return Optional.of(fileOffset);
         }
         // file offset is invalid
@@ -589,6 +589,9 @@ public class SectionLoader {
         if (dirEntry.isPresent()) {
             long virtualAddress = dirEntry.get().getVirtualAddress();
             Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
+            if(!maybeOffset.isPresent()) {
+                logger.error("unable to get file offset for " + dataDirKey);
+            }
             long offset = maybeOffset.or(0L);
             return Optional.of(new LoadInfo(offset, virtualAddress,
                     getMemoryMappedPE(), data, this));

@@ -325,10 +325,12 @@ public class Visualizer {
         Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
         if (rsrc.isPresent()) {
             resourcesAvailable = true;
-            long offset = rsrc.get().getOffset();
-            long size = rsrc.get().getSize();
-            System.out.println("rsrc loc: " + offset + "/" + size);
-            drawPixels(rsrcColor, offset, size, additionalGap);
+            for (Location loc : rsrc.get().getLocations()) {
+                long start = loc.from();
+                long size = loc.size();
+                System.out.println("rsrc loc: " + loc);
+                drawPixels(rsrcColor, start, size, additionalGap);
+            }
         }
 
         Optional<DebugSection> debug = loader.maybeLoadDebugSection();
@@ -582,15 +584,11 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe");
+                "/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
         Visualizer vi = new Visualizer(data);
-        vi.setAdditionalGap(3);
-        vi.setFileWidth(160);
-        vi.setPixelSize(20);
-        vi.setBytesPerPixel(1);
         final BufferedImage image = vi.createImage();
          ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
