@@ -33,22 +33,30 @@ import com.github.katjahahn.parser.MemoryMappedPE
  *
  * Creates an instance of the resource section with the resource
  * directory table
+ * 
  * @param resourceTable the root resource directory table that makes up the tree
  *   of the resource section
- *
+ * @param offset the file offset to the beginning of the resource table
+ * @param mmBytes the memory mapped PE
  */
-class ResourceSection(
+class ResourceSection private (
   val resourceTable: ResourceDirectory,
   private val offset: Long,
   private val mmBytes: MemoryMappedPE) extends SpecialSection {
 
+  /**
+   * {@inheritDoc}
+   */
   override def isEmpty(): Boolean = getResources.isEmpty()
 
+  /**
+   * {@inheritDoc}
+   */
   override def getInfo(): String = resourceTable.getInfo
 
-  //TODO size missing
-  def getSize(): Long = 0
-
+  /**
+   * {@inheritDoc}
+   */
   override def getOffset(): Long = offset
 
   /**
@@ -106,6 +114,6 @@ object ResourceSection {
    * @return instance of the resource section
    */
   def newInstance(loadInfo: LoadInfo): ResourceSection =
-    apply(loadInfo.data.getFile, loadInfo.rva, loadInfo.fileOffset, loadInfo.memoryMapped)
+    apply(loadInfo.data.getFile, loadInfo.va, loadInfo.fileOffset, loadInfo.memoryMapped)
 
 }

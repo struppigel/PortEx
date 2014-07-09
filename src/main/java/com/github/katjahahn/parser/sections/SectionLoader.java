@@ -602,15 +602,15 @@ public class SectionLoader {
     public static class LoadInfo {
 
         public final long fileOffset;
-        public final long rva;
+        public final long va;
         public final PEData data;
         public final MemoryMappedPE memoryMapped;
         public final SectionLoader loader;
 
-        public LoadInfo(long fileOffset, long rva, MemoryMappedPE memoryMapped,
+        public LoadInfo(long fileOffset, long va, MemoryMappedPE memoryMapped,
                 PEData data, SectionLoader loader) {
             this.fileOffset = fileOffset;
-            this.rva = rva;
+            this.va = va;
             this.memoryMapped = memoryMapped;
             this.data = data;
             this.loader = loader;

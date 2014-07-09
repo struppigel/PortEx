@@ -116,7 +116,7 @@ object DebugSection {
    * @return debugsection instance
    */
   def newInstance(li: LoadInfo): DebugSection = 
-    apply(li.memoryMapped, li.fileOffset, li.rva)
+    apply(li.memoryMapped, li.fileOffset, li.va)
 
   /**
    * Loads the debug section and returns it.

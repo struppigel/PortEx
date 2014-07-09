@@ -107,7 +107,7 @@ class ResourceDirectory private (private val level: Level,
   /**
    * Collects and returns all resources that this resource table tree has.
    * <p>
-   * Scala only.
+   * Scala only. Use {@link #getResources}.
    *
    * @param mmBytes the memory mapped PE
    * @return a list of all resources

@@ -25,6 +25,11 @@ import com.github.katjahahn.parser.PEModule;
  */
 public interface SpecialSection extends PEModule {
 
+    /**
+     * Returns whether the special section has no entries.
+     * 
+     * @return true if no entries, false otherwise
+     */
     boolean isEmpty();
 
 }

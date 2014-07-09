@@ -91,7 +91,7 @@ object ExceptionSection {
   //TODO refactor parameter list
   def newInstance(li: LoadInfo): ExceptionSection =
     apply(li.memoryMapped, li.data.getCOFFFileHeader().getMachineType(), 
-        li.rva, li.fileOffset)
+        li.va, li.fileOffset)
 
   def main(args: Array[String]): Unit = {
     val folder = new File("/home/deque/portextestfiles/testfiles/")

@@ -106,9 +106,8 @@ object ImportSection {
    */
   private var relOffsetMax = 0L
 
-  //TODO refactor
   def apply(li: LoadInfo): ImportSection =
-    apply(li.memoryMapped, li.rva, li.data.getOptionalHeader(), li.data.getFile().length(), li.fileOffset)
+    apply(li.memoryMapped, li.va, li.data.getOptionalHeader(), li.data.getFile().length(), li.fileOffset)
 
   def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
     optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {

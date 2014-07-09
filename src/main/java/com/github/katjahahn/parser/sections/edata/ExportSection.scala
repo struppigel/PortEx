@@ -190,7 +190,7 @@ object ExportSection {
   }
 
   def apply(li: LoadInfo): ExportSection =
-    apply(li.memoryMapped, li.rva, li.data.getOptionalHeader(), li.loader, li.fileOffset)
+    apply(li.memoryMapped, li.va, li.data.getOptionalHeader(), li.loader, li.fileOffset)
 
   def apply(mmBytes: MemoryMappedPE, virtualAddress: Long,
     opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {

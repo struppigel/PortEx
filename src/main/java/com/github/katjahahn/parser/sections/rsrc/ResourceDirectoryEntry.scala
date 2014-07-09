@@ -35,6 +35,8 @@ import com.github.katjahahn.parser.MemoryMappedPE
  * resource directory table or to data.
  * <p>
  * The entries have either an {@link ID} or a {@link Name}
+ * 
+ * @author Katja Hahn
  */
 abstract class ResourceDirectoryEntry
 
@@ -76,7 +78,7 @@ case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int) extend
 }
 
 /**
- * Represents and ID or a name for a directory table entry
+ * Represents an ID or a name for a directory table entry
  */
 abstract class IDOrName
 
@@ -166,14 +168,9 @@ object ResourceDirectoryEntry {
   private def getIDOrName(rva: Long, isNameEntry: Boolean, level: Level,
     mmBytes: MemoryMappedPE): IDOrName =
     if (isNameEntry) {
-      val name = getStringAtRVA(rva, mmBytes) //TODO ?
-      name match {
-        case None => throw new FileFormatException("unable to read name entry")
-        case Some(str) => Name(rva, str)
-      }
-    } else {
-      ID(rva, level)
-    }
+      val name = getStringAtRVA(rva, mmBytes)
+      Name(rva, name)
+    } else ID(rva, level)
 
   /**
    * Returns the string at the specified rva.
@@ -183,23 +180,20 @@ object ResourceDirectoryEntry {
    * @param mmbytes the memory mapped PE
    * @return string at rva
    */
-  private def getStringAtRVA(rva: Long, mmBytes: MemoryMappedPE): Option[String] = {
-    val nameRVA = removeHighestIntBit(rva)
-    val address = nameRVA
+  private def getStringAtRVA(rva: Long, mmBytes: MemoryMappedPE): String = {
+    val address = removeHighestIntBit(rva)
     val length = 2
     if (address + length > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
-      //          return None
     }
     val strLength = mmBytes.getBytesIntValue(address, length)
     val strBytes = strLength * 2 //wg UTF-16 --> 2 Byte
     val stringAddress = (address + length).toInt
     if (stringAddress + strBytes > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
-      //      return None
     }
     val bytes = mmBytes.slice(stringAddress, stringAddress + strBytes)
-    Some(new String(bytes, "UTF-16LE"))
+    new String(bytes, "UTF-16LE")
   }
 
   /**
@@ -217,7 +211,7 @@ object ResourceDirectoryEntry {
    * Creates a data entry instance from the directory at the specified
    * rsrcOffset and with the entryNr.
    *
-   * @param rva the relative virtual address to the resource table
+   * @param virtualAddress the virtual address to the resource table
    * @param id the ID or Name entry
    * @param entryNr the number of the entry
    * @param rsrcOffset the relative offset from the beginning of the
@@ -225,11 +219,11 @@ object ResourceDirectoryEntry {
    * @param mmBytes the memory mapped PE
    * @return a data entry
    */
-  private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int,
+  private def createDataEntry(virtualAddress: Long, id: IDOrName, entryNr: Int,
     rsrcOffset: Long, mmBytes: MemoryMappedPE): DataEntry = {
-    val entryBytes = mmBytes.slice(rva, rva + ResourceDataEntry.size)
+    val entryBytes = mmBytes.slice(virtualAddress, virtualAddress + ResourceDataEntry.size)
     //TODO is this file offset calculation correct?
-    val entryOffset = rva + rsrcOffset
+    val entryOffset = virtualAddress + rsrcOffset
     val data = ResourceDataEntry(entryBytes, entryOffset)
     DataEntry(id, data, entryNr)
   }
