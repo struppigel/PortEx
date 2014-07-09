@@ -134,9 +134,9 @@ public class ImportSectionTest {
 	private OrdinalImport find(List<OrdinalImport> ordinalImports,
 			OrdinalImport readImport) {
 		long iat = readImport
-				.getDirEntry(DirectoryEntryKey.I_ADDR_TABLE_RVA);
+				.getDirEntryValue(DirectoryEntryKey.I_ADDR_TABLE_RVA);
 		long ilt = readImport
-				.getDirEntry(DirectoryEntryKey.I_LOOKUP_TABLE_RVA);
+				.getDirEntryValue(DirectoryEntryKey.I_LOOKUP_TABLE_RVA);
 		if (ilt == 0)
 			ilt = iat;
 		for (OrdinalImport pefileImport : ordinalImports) {
@@ -155,9 +155,9 @@ public class ImportSectionTest {
 
 	private NameImport find(List<NameImport> pefileList, NameImport readImport) {
 		long iat = readImport
-				.getDirEntry(DirectoryEntryKey.I_ADDR_TABLE_RVA);
+				.getDirEntryValue(DirectoryEntryKey.I_ADDR_TABLE_RVA);
 		long ilt = readImport
-				.getDirEntry(DirectoryEntryKey.I_LOOKUP_TABLE_RVA);
+				.getDirEntryValue(DirectoryEntryKey.I_LOOKUP_TABLE_RVA);
 		if (ilt == 0) {
 			ilt = iat;
 		}

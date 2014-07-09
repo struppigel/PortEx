@@ -59,8 +59,14 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsr
     case _ => Nil
   }
 
+  /**
+   * {@inheritDoc}
+   */
   override def locations(): List[Location] = idLoc ::: table.locations
 
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String =
     s"""Sub Dir Entry $entryNr
        |+++++++++++++++
@@ -242,13 +248,26 @@ object ResourceDirectoryEntry {
   private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int, virtualAddress: Long,
     rsrcOffset: Long, mmBytes: MemoryMappedPE): DataEntry = {
     val virtStart = rva + virtualAddress
-    val virtEnd = virtStart + ResourceDataEntry.size
+    val virtEnd = virtStart + ResourceDataEntry.entrySize
     val entryBytes = mmBytes.slice(virtStart, virtEnd)
     val entryOffset = rva + rsrcOffset
     val data = ResourceDataEntry(entryBytes, entryOffset, mmBytes, virtualAddress)
     DataEntry(id, data, entryNr, rsrcOffset)
   }
 
+  /**
+   * Creates a subdirectory entry.
+   * 
+   * @param rva the subdirectory rva
+   * @param id the ID or Name entry
+   * @param entryNr the number of the entry
+   * @param level the current level of the entry in the resource tree
+   * @param virtualAddress the address to the resource table
+   * @param rsrcOffset the relative offset from the beginning of the
+   *        resource table to the entry
+   * @param mmBytes the memory mapped PE
+   * @return a subdirectory entry
+   */
   private def createSubDirEntry(file: File, rva: Long, id: IDOrName, entryNr: Int, level: Level,
     virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): SubDirEntry = {
     val address = removeHighestIntBit(rva)

@@ -45,6 +45,9 @@ class ResourceSection private (
   private val offset: Long,
   private val mmBytes: MemoryMappedPE) extends SpecialSection {
   
+  /**
+   * Returns all file locations of the special section
+   */
   def getLocations(): java.util.List[Location] = 
     Location.mergeContinuous(resourceTable.locations).asJava
 

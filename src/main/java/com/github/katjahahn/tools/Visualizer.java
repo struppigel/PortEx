@@ -48,7 +48,7 @@ import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
 /**
- * Creates an image that represents the structure of your PE file.
+ * Creates an image that represents the structure of a PE file on disk.
  * 
  * @author Katja Hahn
  * 
@@ -584,7 +584,7 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/testfiles/strings.exe");
+                "/home/deque/portextestfiles/launch4jexe.exe");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);

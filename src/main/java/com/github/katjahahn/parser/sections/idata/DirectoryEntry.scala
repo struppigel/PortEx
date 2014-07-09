@@ -85,6 +85,9 @@ class DirectoryEntry private (
     entries(key).value
   }
 
+  /**
+   * Converts the directory entry to an ImportDLL instance
+   */
   def toImportDLL(): ImportDLL = {
     val nameImports = lookupTableEntries collect { case i: NameEntry => i.toImport.asInstanceOf[NameImport] }
     val ordImports = lookupTableEntries collect { case i: OrdinalEntry => i.toImport.asInstanceOf[OrdinalImport] }
@@ -114,7 +117,7 @@ object DirectoryEntry {
   private final val I_DIR_ENTRY_SPEC = "idataentryspec"
 
   /**
-   * Instantiates the directory table entry based on the given entry bytes
+   * Instantiates the directory table entry based on the given entry bytes.
    *
    * @param entrybytes the bytes that represent the directory table entry and are
    * used to read the information

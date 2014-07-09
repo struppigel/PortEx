@@ -15,21 +15,51 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+/**
+ * Represents an import by ordinal.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public class OrdinalImport implements Import {
 
+    /**
+     * The ordinal number of the import
+     */
 	public int ordinal;
+	
+	/**
+	 * The relative virtual address of the symbol
+	 */
 	public long rva;
+	
+	/**
+	 * The directory entry this import belongs to
+	 */
 	private final DirectoryEntry parent;
 	
+	/**
+	 * 
+	 * @param ordinal the ordinal number of the import
+	 * @param rva the rva of the symbol
+	 * @param parent the directory entry this import belongs to
+	 */
 	public OrdinalImport(int ordinal, long rva, DirectoryEntry parent) {
 		this.ordinal = ordinal;
 		this.rva = rva;
 		this.parent = parent;
 	}
 	
-	public Long getDirEntry(DirectoryEntryKey key) {
+	/**
+	 * Returns the value of the directory entry field
+	 */
+	public Long getDirEntryValue(DirectoryEntryKey key) {
 		return parent.get(key);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return "ordinal: " + ordinal + ", rva: " + rva + " (0x" + Long.toHexString(rva) + ")";

@@ -21,11 +21,14 @@ import Level._
  * Represents the level of a {@link ResourceDirectory}).
  * Windows usually has three levels, that are type, name and language.
  * 
- * @constructor creates an instance of the level with levelNr
+ * Creates an instance of the level with levelNr
  * @param levelNr the number of the level
  */
 class Level(val levelNr: Int) extends Equals {
 
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String = 
     "level: " + levelDescription.getOrElse(levelNr, levelNr.toString)
 
@@ -40,6 +43,9 @@ class Level(val levelNr: Int) extends Equals {
     other.isInstanceOf[Level]
   }
 
+  /**
+   * {@inheritDoc}
+   */
   override def equals(other: Any) = {
     other match {
       case that: Level => that.canEqual(Level.this) && levelNr == that.levelNr
@@ -47,6 +53,9 @@ class Level(val levelNr: Int) extends Equals {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   override def hashCode() = {
     val prime = 41
     prime + levelNr.hashCode

@@ -29,39 +29,67 @@ import com.github.katjahahn.parser.MemoryMappedPE
  * of the lookup table.
  *
  * @author Katja Hahn
+ * 
+ * @param size
+ * @param offset
  */
 abstract class LookupTableEntry(val size: Int, val offset: Long) {
+  
+  /**
+   * Converts the lookup table entry to an import instance.
+   * 
+   * @returns import instance
+   */
   def toImport(): Import
+  
 }
 
 /**
- * Instantiates an ordinal entry
+ * Instantiates an ordinal entry.
  *
  * @param ordNumber the ordinal of the entry
- * @param rva
- * @param dirEntry
- * @param entrySize, val entrySize: Int
+ * @param rva the symbol's address
+ * @param dirEntry the directory entry
+ * @param size
+ * @param offset
  */
 case class OrdinalEntry(val ordNumber: Int, val rva: Long,
   dirEntry: DirectoryEntry, override val size: Int, override val offset: Long) extends LookupTableEntry(size, offset) {
+  
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String = s"ordinal: $ordNumber RVA: $rva (0x${toHexString(rva)})"
+  
+  /**
+   * {@inheritDoc}
+   */
   override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry)
 }
 
 /**
  * Instantiates a name entry.
- * @param nameRVA
- * @param hintNameEntry
- * @param rva
- * @param dirEntry
- * @param entrySize
+ * 
+ * @param nameRVA address to the name
+ * @param hintNameEntry hint name entry instance
+ * @param rva address to the imported symbol
+ * @param dirEntry directory entry instance
+ * @param size
+ * @param offset the file offset
  */
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
   val rva: Long, val dirEntry: DirectoryEntry, override val size: Int, override val offset: Long)
   extends LookupTableEntry(size, offset) {
+ 
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String =
     s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, nameRVA: $nameRVA (0x${toHexString(nameRVA)}), RVA: $rva (0x${toHexString(rva)})"
-
+  
+    /**
+   * {@inheritDoc}
+   */
   override def toImport(): Import =
     new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry)
 }
@@ -69,9 +97,15 @@ case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
 /**
  * Instantiates a null entry, which is an empty entry that
  * indicates the end of the lookup table
+ * 
+ * @param size
+ * @param offset
  */
 case class NullEntry(override val size: Int, override val offset: Long)
   extends LookupTableEntry(size, offset) {
+  /**
+   * {@inheritDoc}
+   */
   override def toImport(): Import = null
 }
 
@@ -84,30 +118,32 @@ object LookupTableEntry {
    * the size of the entry, the offset of the entry and the virtual address of
    * the import section
    *
-   * @param idatabytes the bytes of the import section
-   * @param offset the offset of the entry (relative to the offset of the import section)
-   * @param entrySize the size of one entry (dependend on the magic number)
-   * @param virtualAddress of the import section (used to calculate offsets for
-   * given rva's of hint name entries)
+   * @param mmbytes memory mapped PE
+   * @param entryRVA address to the lookuptable entry relative to iltRVA
+   * @param entrySize the size of one entry
+   * @param virtualAddress the address to the import section
+   * @param iltRVA address to the last ILT or the IAT
+   * @param dirEntry the directory entry
+   * @param fileOffset the file offset to the lookup table entry to create
    * @return lookup table entry
    */
-  def apply(mmbytes: MemoryMappedPE, offset: Int, entrySize: Int,
-    virtualAddress: Long, rva: Long, dirEntry: DirectoryEntry, fileOffset: Long): LookupTableEntry = {
+  def apply(mmbytes: MemoryMappedPE, entryRVA: Int, entrySize: Int,
+    virtualAddress: Long, iltRVA: Long, dirEntry: DirectoryEntry, fileOffset: Long): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     try {
       //TODO remove get array call
-      val value = mmbytes.getBytesLongValue(offset + virtualAddress, entrySize)
+      val value = mmbytes.getBytesLongValue(entryRVA + virtualAddress, entrySize)
       if (value == 0) {
         NullEntry(entrySize, fileOffset)
       } else if ((value & ordFlagMask) != 0) {
-        createOrdEntry(value, rva, dirEntry, entrySize, fileOffset)
+        createOrdEntry(value, iltRVA, dirEntry, entrySize, fileOffset)
       } else {
-        createNameEntry(value, mmbytes, virtualAddress, rva, dirEntry, entrySize, fileOffset)
+        createNameEntry(value, mmbytes, virtualAddress, iltRVA, dirEntry, entrySize, fileOffset)
       }
     } catch {
       case e: Exception =>
-        logger.warn("invalid lookup table entry at rva " + rva)
-        throw new FailureEntryException("invalid lookup table entry at rva " + rva)
+        logger.warn("invalid lookup table entry at ilt rva " + iltRVA)
+        throw new FailureEntryException("invalid lookup table entry at ilt rva " + iltRVA)
     }
   }
 

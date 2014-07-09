@@ -15,29 +15,74 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+/**
+ * Represents an import by name.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public class NameImport implements Import {
 
-	public long rva;
-	public long nameRVA;
-	public String name;
-	public int hint;
-	private final DirectoryEntry parent;
+    /**
+     * The relative virtual address to the symbol
+     */
+    public long rva;
 
-	public NameImport(long rva, String name, int hint, long nameRVA,
-			DirectoryEntry parent) {
-		this.rva = rva;
-		this.hint = hint;
-		this.name = name;
-		this.nameRVA = nameRVA;
-		this.parent = parent;
-	}
+    /**
+     * The relative virtual address to the name
+     */
+    public long nameRVA;
 
-	public Long getDirEntry(DirectoryEntryKey key) {
-		return parent.get(key);
-	}
+    /**
+     * The name of the import
+     */
+    public String name;
 
-	@Override
-	public String toString() {
-		return "rva: " + rva + " (0x" + Long.toHexString(rva) + "), name: " + name + ", hint: " + hint;
-	}
+    /**
+     * The import's hint
+     */
+    public int hint;
+
+    /**
+     * The directory entry this import belongs to
+     */
+    private final DirectoryEntry parent;
+
+    /**
+     * 
+     * @param rva
+     *            relative virtual address to the symbol
+     * @param name
+     *            the name of the import
+     * @param hint
+     *            the import's hint
+     * @param nameRVA
+     *            the relative virtual address to the name
+     * @param parent
+     *            the directory entry this import belongs to
+     */
+    public NameImport(long rva, String name, int hint, long nameRVA,
+            DirectoryEntry parent) {
+        this.rva = rva;
+        this.hint = hint;
+        this.name = name;
+        this.nameRVA = nameRVA;
+        this.parent = parent;
+    }
+
+    /**
+     * Returns the value of the data directory field
+     */
+    public Long getDirEntryValue(DirectoryEntryKey key) {
+        return parent.get(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "rva: " + rva + " (0x" + Long.toHexString(rva) + "), name: "
+                + name + ", hint: " + hint;
+    }
 }

@@ -15,8 +15,19 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+/**
+ * Represents a concrete import of a symbol, either via name or via ordinal.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public interface Import {
 	
-	public Long getDirEntry(DirectoryEntryKey key);
+    /**
+     * 
+     * @param key
+     * @return
+     */
+	public Long getDirEntryValue(DirectoryEntryKey key);
 
 }

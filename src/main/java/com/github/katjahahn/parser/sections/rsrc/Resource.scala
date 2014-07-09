@@ -21,35 +21,50 @@ import java.awt.image.BufferedImage
 import scala.collection.JavaConverters._
 
 /**
- * Holds the most information of a resource, which is the information provided
+ * Holds the information about a resource, which is the information provided
  * by the level IDs and the bytes that make up the resource.
- * This is the return datatype for the API user.
  *
- * @param
- * @param
+ * @author Katja Hahn
+ *
+ * Creates a resource instance
+ *
+ * @param resourceBytes the bytes that make up the data of the resource
+ * @param levelIDs the levelIDs of the resource
  */
 class Resource(
   val resourceBytes: Array[Byte],
   var levelIDs: Map[Level, IDOrName]) {
-  
+
+  /**
+   * Returns a map of all level IDs
+   *
+   * @return level IDs
+   */
   def getLevelIDs: java.util.Map[Level, IDOrName] = levelIDs.asJava
 
+  /**
+   * Returns the type of the resource as string
+   */
   def getType(): String = levelIDs(Level.typeLevel) match {
     case Name(rva, name) => name
     case id: ID => id.idString
   }
 
+  /**
+   * Creates a resource instance
+   *
+   * @param resourceBytes the bytes that make up the data of the resource
+   */
   def this(resourceBytes: Array[Byte]) = this(resourceBytes, Map.empty)
 
+  /**
+   * Creates an UTF8 string of the resource bytes
+   */
   def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
 
-  //TODO implement, probably need to do that manually
-  //  def getResourceAsIcon(): BufferedImage = null 
-
-  //  def isIcon(): Boolean = {
-  //    levelIDs(new Level(1)).toString.contains("icon")
-  //  }
-
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String =
     levelIDs.mkString(" || ")
 

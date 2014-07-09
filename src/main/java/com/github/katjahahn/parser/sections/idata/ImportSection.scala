@@ -45,13 +45,22 @@ import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 //TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
 class ImportSection private (
   private val directoryTable: List[DirectoryEntry],
-  val offset: Long,
-  val size: Long) extends SpecialSection {
+  private val offset: Long,
+  private val size: Long) extends SpecialSection {
 
+  /**
+   * {@inheritDoc}
+   */
   override def getOffset(): Long = offset
 
+  /**
+   * Returns the size of the directory table
+   */
   def getSize(): Long = size
 
+  /**
+   * {@inheritDoc}
+   */
   override def isEmpty(): Boolean = directoryTable.isEmpty || (directoryTable.forall(_.getEntries.isEmpty))
 
   /**
@@ -81,7 +90,8 @@ class ImportSection private (
    */
   //TODO include IAT and ILT, add string locations
   def getLocations(): java.util.List[Location] = {
-    val ranges = Location.mergeContinuous(directoryTable.foldRight(List[Location]())((entry, list) => entry.getLocations ::: list))
+    val ranges = Location.mergeContinuous(directoryTable.foldRight(
+        List[Location]())((entry, list) => entry.getLocations ::: list))
     ranges.toList.asJava
   }
 
@@ -129,6 +139,13 @@ object ImportSection {
   /**
    * Parses all lookup table entries for all entries in the directory table
    * and adds the lookup table entries to the directory table entry they belong to
+   * 
+   * @param directoryTable the directory table to get the lookup table entries from
+   * @param virtualAddress the address to the import section
+   * @param optHeader the optional header
+   * @param mmbytes the memory mapped PE
+   * @param fileSize the length of the file in bytes
+   * @param fileOffset file offset to the directory table
    */
   private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
     virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE,
@@ -144,14 +161,20 @@ object ImportSection {
       }
       var offset = iRVA - virtualAddress
       var relOffset = iRVA
-      logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + mmbytes.length() + " virtualAddress " + virtualAddress)
+      logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + 
+          mmbytes.length() + " virtualAddress " + virtualAddress)
       val EntrySize = optHeader.getMagicNumber match {
         case PE32 => 4
         case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException("ROM file format not covered by PortEx")
       }
       do {
-        entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, virtualAddress, relOffset, dirEntry, fileOffset + offset)
+        //TODO get fileoffset for entry from mmbytes instead of this to avoid
+        //fractionated section issues ?
+        val entryFileOffset = fileOffset + offset 
+//        val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work
+        entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, 
+            virtualAddress, relOffset, dirEntry, entryFileOffset)
         if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
         offset += EntrySize
         relOffset += EntrySize
