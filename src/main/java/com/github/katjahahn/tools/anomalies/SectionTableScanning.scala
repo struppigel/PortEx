@@ -30,6 +30,7 @@ import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.sections.SectionCharacteristic._
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 
 /**
  * Scans the Section Table for anomalies.
@@ -54,12 +55,22 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkTooLargeSizes
     anomalyList ++= checkSectionNames
     anomalyList ++= checkOverlappingOrShuffledSections
-    anomalyList ++= checkNameCharacteristicsMatch
+    anomalyList ++= checkSectionCharacteristics
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
   }
+  
+  private def containsEP(header: SectionHeader): Boolean = {
+    val ep = data.getOptionalHeader().get(
+                StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+    val vStart = header.getAlignedVirtualAddress()
+    var vSize = header.getAlignedVirtualSize()
+    if(vSize == 0) vSize = header.getAlignedSizeOfRaw()
+    val vEnd = vSize + vStart
+    ep >= vStart && ep < vEnd
+  }
 
-  private def checkNameCharacteristicsMatch(): List[Anomaly] = {
+  private def checkSectionCharacteristics(): List[Anomaly] = {
 
     val charSecNameMap = Map(
       ".bss" -> List(IMAGE_SCN_CNT_UNINITIALIZED_DATA, IMAGE_SCN_MEM_READ,
@@ -99,6 +110,10 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionName = filteredString(header.getName)
       val characs = header.getCharacteristics.asScala.toList
       val entry = header.getField(SectionHeaderKey.CHARACTERISTICS)
+      if (characs.contains(IMAGE_SCN_MEM_WRITE) && containsEP(header)) {
+          val description = s"Entry point is in writeable section ${header.getNumber} with name ${sectionName}"
+          anomalyList += FieldAnomaly(entry, description, EP_IN_WRITEABLE_SEC)
+      }
       if (charSecNameMap.contains(header.getName)) {
         val mustHaveCharac = charSecNameMap(header.getName)
         //Note: Almost all files don't have IMAGE_SCN_MEM_READ activated, so 

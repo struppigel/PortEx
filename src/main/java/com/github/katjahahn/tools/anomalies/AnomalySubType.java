@@ -177,6 +177,11 @@ public enum AnomalySubType {
      */
     ZERO_EP(WRONG),
     /**
+     * Entry point is within a writeable section. This is suspicious. The file
+     * might be infected.
+     */
+    EP_IN_WRITEABLE_SEC(NON_DEFAULT),
+    /**
      * The ADDRESS_OF_ENTRY_POINT points into virtual space.
      */
     VIRTUAL_EP(WRONG),

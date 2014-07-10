@@ -98,19 +98,13 @@ object PEAnomalyScanner {
       val loader = new SectionLoader(data)
       val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
       val over = new Overlay(data)
-      val debug = loader.maybeLoadDebugSection()
-      if(debug.isPresent() && !debug.get().getTypeDescription.contains("Visual C++")) {
-        println(file.getName())
-        println(debug.get().getInfo)
-        println
+      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.EP_IN_WRITEABLE_SEC).isEmpty) {
+        println(scanner.scanReport)
+        println("has overlay: " + over.exists())
+        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+        println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+        println()
       }
-//      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.TOO_LARGE_SIZE_OF_RAW).isEmpty) {
-//        println(scanner.scanReport)
-//        println("has overlay: " + over.exists())
-//        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-//        println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-//        println()
-//      }
     }
   }
 

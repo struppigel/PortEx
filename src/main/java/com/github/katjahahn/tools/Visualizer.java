@@ -584,7 +584,7 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/launch4jexe.exe");
+                "/home/deque/portextestfiles/Minecraft.exe");
         PEData data = PELoader.loadPE(file);
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);

@@ -14,11 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,7 +63,8 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-        ableToLoadSections();
+        File[] files = new File(BAD_FILES).listFiles();
+        anomalyCount(files, BAD_FILES);
     }
 
     public static void entropies(File[] files) {
@@ -295,8 +296,6 @@ public class PortexStats {
         writeStats(report, "anomalytype");
     }
 
-    // TODO equality of anomalies is nuts, correct it. value differences
-    // shouldn't count.
     public static void anomalyCount(File[] files, String base) {
         System.out.println("starting anomaly count");
         Map<AnomalySubType, Integer> counter = new HashMap<>();
@@ -308,7 +307,7 @@ public class PortexStats {
                 PEData data = PELoader.loadPE(file);
                 PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
                 List<Anomaly> list = scanner.getAnomalies();
-                Set<AnomalySubType> set = new HashSet<>();
+                Set<AnomalySubType> set = new TreeSet<>();
                 for (Anomaly anomaly : list) {
                     set.add(anomaly.subtype());
                 }
@@ -352,11 +351,12 @@ public class PortexStats {
     private static String createReport(Map<AnomalySubType, Integer> map,
             int total) {
         StringBuilder b = new StringBuilder();
+        b.append("Anomaly\tCount\tPercentage\n");
         for (Entry<AnomalySubType, Integer> entry : map.entrySet()) {
             AnomalySubType type = entry.getKey();
             Integer counter = entry.getValue();
             double percent = counter * 100 / (double) total;
-            b.append(type + ";" + counter + ";" + percent + "\n");
+            b.append(type + "\t" + counter + "\t" + percent + "\n");
             // b.append(counter + " times / " + percent + "% " + type + "\n");
         }
         return b.toString();
@@ -443,9 +443,8 @@ public class PortexStats {
 
     private static void writeStats(String stats, String statname) {
         Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                statname + "-yyyy-MM-dd_HH-mm-ss");
-        String filename = dateFormat.format(date) + ".stat";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String filename = statname + "-" + dateFormat.format(date) + ".stat";
         Path path = Paths.get(STATS_FOLDER, filename);
         writeToFile(path, stats);
         System.out.println("stats written to " + filename);

@@ -599,4 +599,5 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return 0x200 <= fileAlign && fileAlign <= sectionAlign
                 && 0x1000 <= sectionAlign;
     }
+ 
 }

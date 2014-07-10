@@ -114,6 +114,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         if (virtSize == (virtSize & ~0xfff)) {
             return virtSize;
         }
+        // TODO: corkami: "a section can have a null VirtualSize: in this case,
+        // only the SizeOfRawData is taken into consideration" --> maybe create
+        // another method to get the real virtual size
         return (virtSize + 0xfff) & ~0xfff;
     }
 
