@@ -41,7 +41,6 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
-import com.github.katjahahn.parser.sections.idata.ImportDLL;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.Anomaly;
@@ -596,18 +595,20 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File("/home/deque/portextestfiles/testfiles/Lab03-01.exe");
+//        File file = new File("/home/deque/portextestfiles/testfiles/Lab03-01.exe");
 //        File file = new File(
 //                "/home/deque/portextestfiles/badfiles/VirusShare_3e34ab859867eb66b168ee5bf397ed91");
-        // File file = new
-        // File("/home/deque/portextestfiles/badfiles/VirusShare_78ce318e825fe71caa3c22ae0b71969c");
+        File file = new File(
+                "/home/deque/portextestfiles/badfiles/VirusShare_236ade5965c3862e3adff93bb29a4b11");
         PEData data = PELoader.loadPE(file);
         SectionTable table = data.getSectionTable();
         SectionLoader loader = new SectionLoader(data);
-        ImportSection idata = loader.loadImportSection();
-        for (ImportDLL im : idata.getImports()) {
-            System.out.println(im.getName());
-        }
+//        ImportSection idata = loader.loadImportSection();
+//        for (ImportDLL im : idata.getImports()) {
+//            System.out.println(im.getName());
+//        }
+//        ExportSection edata = loader.loadExportSection();
+//        System.out.println(edata.getInfo());
         ShannonEntropy entropy = new ShannonEntropy(data);
         for (SectionHeader header : table.getSectionHeaders()) {
             long start = header.getAlignedPointerToRaw();
@@ -625,7 +626,6 @@ public class Visualizer {
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
         System.out.println("file size: " + file.length());
-        System.out.println("idata offset: " + idata.getOffset());
         Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();
         // ImageIO.write(image, "png", new File(file.getName() + ".png"));

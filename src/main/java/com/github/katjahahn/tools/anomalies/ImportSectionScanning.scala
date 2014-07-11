@@ -43,10 +43,10 @@ trait ImportSectionScanning extends AnomalyScanner {
       val fractions = locs.filter(!isWithinIData(_)).toList
       if (!fractions.isEmpty) {
         val affectedImports = idata.getImports.asScala.filter(i => 
-          i.getLocations.asScala.filter(!isWithinIData(_)).size > 0)
+          i.getLocations.asScala.filter(!isWithinIData(_)).size > 0).toList
         val description = s"Imports are fractionated! Affected import DLLs: ${affectedImports.map(_.getName()).mkString(", ")}"
-        anomalyList += StructureAnomaly(PEStructureKey.IMPORT_SECTION, description,
-          AnomalySubType.FRACTIONATED_DATADIR, fractions)
+        anomalyList += ImportAnomaly(affectedImports, description,
+          AnomalySubType.FRACTIONATED_DATADIR, PEStructureKey.IMPORT_SECTION)
 
       }
     }
