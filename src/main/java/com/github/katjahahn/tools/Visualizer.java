@@ -20,8 +20,10 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -228,6 +230,24 @@ public class Visualizer {
             this.pixelSize = pixelSize;
         }
     }
+    
+    //TODO optimize
+    public BufferedImage createEntropyImage() throws IOException {
+        image = new BufferedImage(legendWidth + fileWidth * 2, height, IMAGE_TYPE);
+        byte[] bytes = Files.readAllBytes(data.getFile().toPath());
+        double[] entropies = ShannonEntropy.localEntropies(bytes);
+        for(int i = 0; i < entropies.length; i += withMinLength(0)) {
+            int col = (int)(entropies[i] * 255);
+            Color color = new Color(col, col, col);
+            long minLength = withMinLength(0);
+            drawPixels(color, i, minLength);
+        }
+        BufferedImage result = image;
+        BufferedImage append = createImage();
+        result.createGraphics().drawImage(append, fileWidth, 0, null); 
+        image = result;
+        return result;
+    }
 
     /**
      * Creates a buffered image that displays the structure of the PE file.
@@ -276,6 +296,7 @@ public class Visualizer {
     }
 
     // TODO create own visualizer for that task, maybe with decorator pattern
+    @SuppressWarnings("unused")
     private void drawAnomalies() {
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
         List<Anomaly> anomalies = scanner.getAnomalies();
@@ -627,8 +648,8 @@ public class Visualizer {
         System.out.println(report);
         System.out.println("file size: " + file.length());
         Visualizer vi = new Visualizer(data);
-        final BufferedImage image = vi.createImage();
-        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
+        final BufferedImage image = vi.createEntropyImage();
+        ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
 

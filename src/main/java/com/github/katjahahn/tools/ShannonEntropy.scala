@@ -46,7 +46,7 @@ class ShannonEntropy(private val data: PEData) {
    *
    * @return map with section number as keys and entropy as values
    */
-  def forSections(): java.util.Map[java.lang.Integer, java.lang.Double] = 
+  def forSections(): java.util.Map[java.lang.Integer, java.lang.Double] =
     _forSections().map(t => (t._1: java.lang.Integer, t._2: java.lang.Double)).asJava
 
   /**
@@ -66,15 +66,15 @@ object ShannonEntropy {
   private val byteSize = 256
 
   def main(args: Array[String]): Unit = {
-//    val folder = new File("src/main/resources/testfiles")
-//    for (file <- folder.listFiles) {
-//      println("file: " + file.getName)
-//      val data = PELoader.loadPE(file)
-//      val ent = new ShannonEntropy(data)
-//      ent._forSections.foreach(println)
-//      println(data.getSectionTable().getInfo)
-//      println()
-//    }
+    //    val folder = new File("src/main/resources/testfiles")
+    //    for (file <- folder.listFiles) {
+    //      println("file: " + file.getName)
+    //      val data = PELoader.loadPE(file)
+    //      val ent = new ShannonEntropy(data)
+    //      ent._forSections.foreach(println)
+    //      println(data.getSectionTable().getInfo)
+    //      println()
+    //    }
     val str = "bla"
     println(List("", "bla").contains(str))
   }
@@ -99,6 +99,17 @@ object ShannonEntropy {
   def fileEntropy(file: File): Double = {
     val (byteCounts, total) = countBytes(file)
     entropy(byteCounts, total)
+  }
+
+  def localEntropies(byteArray: Array[Byte]): Array[Double] = {
+    val window = 50
+    (for (i <- 0 until byteArray.length) yield {
+      val start = if (i - window < 0) 0 else i - window
+      val end = if (i + window > byteArray.length - 1) byteArray.length - 1 else i + window
+      val subArray = byteArray.slice(start, end)
+      val (byteCounts, total) = countBytes(subArray)
+      entropy(byteCounts, total)
+    }).toArray
   }
 
   private def entropy(byteCounts: Array[Long], total: Long): Double =

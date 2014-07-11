@@ -106,17 +106,17 @@ object PEAnomalyScanner {
         val loader = new SectionLoader(data)
         val scanner = PEAnomalyScanner.newInstance(data)
         val over = new Overlay(data)
-        if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.FRACTIONATED_DATADIR).isEmpty) {
+//        if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.FRACTIONATED_DATADIR).isEmpty) {
           println(scanner.scanReport)
           println("has overlay: " + over.exists())
           println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
           //          println(file.getName())
           println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-          //          val vi = new Visualizer(data)
-          //          val image = vi.createImage()
-          //          ImageIO.write(image, "png", new File(file.getName() + ".png"));
+          val vi = new Visualizer(data)
+          val image = vi.createEntropyImage()
+          ImageIO.write(image, "png", new File(file.getName() + ".png"));
           println()
-        }
+//        }
       } catch {
         case e: Exception => System.err.println(e.getMessage)
       }
