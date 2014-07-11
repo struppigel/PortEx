@@ -340,7 +340,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       if (entry.value == 0) {
         val locations = List(new Location(entry.getOffset(), entry.getSize()))
         val description = "Optional Header: No data directory present"
-        anomalyList += StructureAnomaly(PEStructure.DATA_DIRECTORY, description, NO_DATA_DIR, locations)
+        anomalyList += StructureAnomaly(PEStructureKey.DATA_DIRECTORY, description, NO_DATA_DIR, locations)
       }
       if (entry.value != 16) {
         val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value

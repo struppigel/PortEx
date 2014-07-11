@@ -22,7 +22,6 @@ import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.sections.PESection;
 import com.github.katjahahn.parser.sections.SectionHeader;
-import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
@@ -73,8 +72,8 @@ public class SectionLoaderTest {
             SectionTable table = datum.getSectionTable();
             SectionLoader loader = new SectionLoader(datum);
             for (SectionHeader entry : table.getSectionHeaders()) {
-                long start = entry.get(SectionHeaderKey.VIRTUAL_ADDRESS);
-                long size = entry.get(SectionHeaderKey.VIRTUAL_SIZE);
+                long start = entry.getAlignedVirtualAddress();
+                long size = entry.getAlignedVirtualSize();
                 SectionHeader actual = loader.maybeGetSectionHeaderByRVA(start)
                         .get();
                 assertEquals(actual, entry);

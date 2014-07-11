@@ -17,11 +17,13 @@
  */
 package com.github.katjahahn.parser.sections.idata
 
+import scala.collection.JavaConverters._
 import LookupTableEntry._
 import java.lang.Long.toHexString
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.ByteArrayUtil._
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.Location
 
 /**
  * Represents a lookup table entry. Every lookup table entry is either an
@@ -29,19 +31,21 @@ import com.github.katjahahn.parser.MemoryMappedPE
  * of the lookup table.
  *
  * @author Katja Hahn
- * 
+ *
  * @param size
  * @param offset
  */
 abstract class LookupTableEntry(val size: Int, val offset: Long) {
-  
+
+  val location = new Location(offset, size)
+
   /**
    * Converts the lookup table entry to an import instance.
-   * 
+   *
    * @returns import instance
    */
   def toImport(): Import
-  
+
 }
 
 /**
@@ -54,22 +58,23 @@ abstract class LookupTableEntry(val size: Int, val offset: Long) {
  * @param offset
  */
 case class OrdinalEntry(val ordNumber: Int, val rva: Long,
-  dirEntry: DirectoryEntry, override val size: Int, override val offset: Long) extends LookupTableEntry(size, offset) {
-  
+  dirEntry: DirectoryEntry, override val size: Int,
+  override val offset: Long) extends LookupTableEntry(size, offset) {
+
   /**
    * {@inheritDoc}
    */
   override def toString(): String = s"ordinal: $ordNumber RVA: $rva (0x${toHexString(rva)})"
-  
+
   /**
    * {@inheritDoc}
    */
-  override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry)
+  override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry, List(location).asJava)
 }
 
 /**
  * Instantiates a name entry.
- * 
+ *
  * @param nameRVA address to the name
  * @param hintNameEntry hint name entry instance
  * @param rva address to the imported symbol
@@ -80,24 +85,24 @@ case class OrdinalEntry(val ordNumber: Int, val rva: Long,
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
   val rva: Long, val dirEntry: DirectoryEntry, override val size: Int, override val offset: Long)
   extends LookupTableEntry(size, offset) {
- 
+
   /**
    * {@inheritDoc}
    */
   override def toString(): String =
     s"${hintNameEntry.name}, Hint: ${hintNameEntry.hint}, nameRVA: $nameRVA (0x${toHexString(nameRVA)}), RVA: $rva (0x${toHexString(rva)})"
-  
-    /**
+
+  /**
    * {@inheritDoc}
    */
   override def toImport(): Import =
-    new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry)
+    new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry, List(location).asJava)
 }
 
 /**
  * Instantiates a null entry, which is an empty entry that
  * indicates the end of the lookup table
- * 
+ *
  * @param size
  * @param offset
  */

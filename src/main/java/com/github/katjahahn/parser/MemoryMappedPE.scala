@@ -48,7 +48,7 @@ class MemoryMappedPE(
   private val chunkSize = 1024
 
   /**
-   * Returns the physical offset for the given virtual address, if it is within 
+   * Returns the physical offset for the given virtual address, if it is within
    * a mapping. Otherwise -1 is returned.
    */
   def getPhysforVir(va: Long): Long = {
@@ -91,7 +91,7 @@ class MemoryMappedPE(
    *
    * @return size of memory mapped information
    */
-  def length(): Long = mappings.last.va.end
+  def length(): Long = if (mappings.isEmpty) 0L else mappings.last.va.end
 
   /**
    * Returns a byte array of the specified segment.

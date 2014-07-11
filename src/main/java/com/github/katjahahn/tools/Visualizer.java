@@ -22,11 +22,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.PEData;
@@ -39,6 +41,7 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.ImportDLL;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.Anomaly;
@@ -56,6 +59,9 @@ import com.google.java.contract.Requires;
 public class Visualizer {
     // TODO handling duplicated sections
     // TODO anomaly visualizing in separate class
+
+    private static final Logger logger = LogManager.getLogger(Visualizer.class
+            .getName());
 
     /**
      * The default width of the file shown is {@value}
@@ -107,7 +113,7 @@ public class Visualizer {
     private final Color rsrcColor = new Color(100, 250, 100);
     private final Color debugColor = new Color(0, 0, 220);
     private final Color epColor = new Color(255, 80, 80);
-//    private final Color anomalyColor = new Color(168, 0, 224);
+    // private final Color anomalyColor = new Color(168, 0, 224);
     private final Color anomalyColor = new Color(255, 255, 255);
     private final PEData data;
     private BufferedImage image;
@@ -242,7 +248,6 @@ public class Visualizer {
 
         long msdosOffset = 0;
         long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
-        System.out.println("MSDOS size: " + msdosSize);
         drawPixels(msdosColor, msdosOffset, msdosSize);
 
         long optOffset = data.getOptionalHeader().getOffset();
@@ -252,7 +257,7 @@ public class Visualizer {
         long coffOffset = data.getCOFFFileHeader().getOffset();
         long coffSize = withMinLength(COFFFileHeader.HEADER_SIZE);
         drawPixels(coffColor, coffOffset, coffSize);
-        
+
         long tableOffset = data.getSectionTable().getOffset();
         long tableSize = withMinLength(data.getSectionTable().getSize());
         drawPixels(sectionTableColor, tableOffset, tableSize);
@@ -266,7 +271,7 @@ public class Visualizer {
         }
 
         drawSpecials();
-        drawAnomalies();
+        // drawAnomalies();
         drawLegend();
         return image;
     }
@@ -275,12 +280,9 @@ public class Visualizer {
     private void drawAnomalies() {
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
         List<Anomaly> anomalies = scanner.getAnomalies();
-        System.out.println("anomalies: " + anomalies.size());
         for (Anomaly anomaly : anomalies) {
             List<Location> locs = anomaly.locations();
-            System.out.println("anomaly location nr: " + locs.size());
             for (Location loc : locs) {
-                System.out.println("Anomaly loc: " + loc);
                 drawCrosses(anomalyColor, loc.from(), withMinLength(loc.size()));
             }
         }
@@ -306,8 +308,7 @@ public class Visualizer {
             importsAvailable = true;
             for (Location loc : idata.get().getLocations()) {
                 long start = loc.from();
-                long size = loc.size();
-                System.out.println("import loc: " + loc);
+                long size = withMinLength(loc.size());
                 drawPixels(importColor, start, size, additionalGap);
             }
         }
@@ -316,8 +317,7 @@ public class Visualizer {
             exportsAvailable = true;
             for (Location loc : edata.get().getLocations()) {
                 long start = loc.from();
-                long size = loc.size();
-                System.out.println("export loc: " + loc);
+                long size = withMinLength(loc.size());
                 drawPixels(exportColor, start, size, additionalGap);
             }
         }
@@ -327,8 +327,14 @@ public class Visualizer {
             resourcesAvailable = true;
             for (Location loc : rsrc.get().getLocations()) {
                 long start = loc.from();
-                long size = loc.size();
-                System.out.println("rsrc loc: " + loc);
+                if (start == -1) {
+                    // FIXME this happens with
+                    // VirusShare_1eb8065cebc74e752fd4f085f05d62d9, why?
+                    logger.warn("rsrc location starts from -1 (will be ignored): "
+                            + loc);
+                    continue;
+                }
+                long size = withMinLength(loc.size());
                 drawPixels(rsrcColor, start, size, additionalGap);
             }
         }
@@ -337,8 +343,7 @@ public class Visualizer {
         if (debug.isPresent()) {
             debugAvailable = true;
             long offset = debug.get().getOffset();
-            long size = debug.get().getSize();
-            System.out.println("debug loc: " + offset + "/" + size);
+            long size = withMinLength(debug.get().getSize());
             drawPixels(debugColor, offset, size, additionalGap);
         }
         Optional<Long> ep = getEntryPoint();
@@ -405,11 +410,11 @@ public class Visualizer {
     }
 
     private void drawLegend() {
-        drawLegendEntry(1, "MSDOS Header", msdosColor);
-        drawLegendEntry(2, "COFF File Header", coffColor);
-        drawLegendEntry(3, "Optional Header", optColor);
-        drawLegendEntry(4, "Section Table", sectionTableColor);
-        int number = 5;
+        drawLegendEntry(0, "MSDOS Header", msdosColor);
+        drawLegendEntry(1, "COFF File Header", coffColor);
+        drawLegendEntry(2, "Optional Header", optColor);
+        drawLegendEntry(3, "Section Table", sectionTableColor);
+        int number = 4;
         SectionTable table = data.getSectionTable();
         Color sectionColor = new Color(sectionColorStart.getRGB());
         for (SectionHeader header : table.getSectionHeaders()) {
@@ -441,12 +446,13 @@ public class Visualizer {
             drawLegendEntry(number, "Overlay", overlayColor);
             number++;
         }
-        drawLegendCrossEntry(number, "Anomalies", anomalyColor);
+        // drawLegendCrossEntry(number, "Anomalies", anomalyColor);
     }
-    
+
     @Requires({ "description != null", "color != null" })
-    //TODO temporary almost-duplicate of drawLegendEntry
-    private void drawLegendCrossEntry(int number, String description, Color color) {
+    // TODO temporary almost-duplicate of drawLegendEntry
+    private void drawLegendCrossEntry(int number, String description,
+            Color color) {
         int startX = fileWidth + LEGEND_GAP;
         int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
         if (startY >= height) {
@@ -497,14 +503,14 @@ public class Visualizer {
                 try {
                     image.setRGB(x, y, color.getRGB());
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    System.err.println("tried to set x/y = " + x + "/" + y);
+                    logger.error("tried to set x/y = " + x + "/" + y);
                 }
             }
         }
     }
 
     @Requires("color != null")
-    //TODO temporary almost-duplicate of drawRect
+    // TODO temporary almost-duplicate of drawRect
     private void drawCross(Color color, int startX, int startY, int width,
             int height) {
         final int thickness = 2;
@@ -516,14 +522,14 @@ public class Visualizer {
                         image.setRGB(x, y, color.getRGB());
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    System.err.println("tried to set x/y = " + x + "/" + y);
+                    logger.error("tried to set x/y = " + x + "/" + y);
                 }
             }
         }
     }
 
     @Requires("color != null")
-    //TODO temporary almost-duplicate of drawPixels
+    // TODO temporary almost-duplicate of drawPixels
     private void drawCrosses(Color color, long fileOffset, long fileLength) {
         int pixelStart = getPixelNumber(fileOffset);
         // necessary to avoid gaps due to rounding issues (you can't just do
@@ -531,7 +537,7 @@ public class Visualizer {
         int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
         int pixelMax = getXPixels() * getYPixels();
         if (pixelStart >= pixelMax) {
-            System.err.println("too many pixels, max is: " + pixelMax
+            logger.error("too many pixels, max is: " + pixelMax
                     + " and trying to set: " + pixelStart);
         }
         for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
@@ -557,7 +563,7 @@ public class Visualizer {
         int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
         int pixelMax = getXPixels() * getYPixels();
         if (pixelStart >= pixelMax) {
-            System.err.println("too many pixels, max is: " + pixelMax
+            logger.error("too many pixels, max is: " + pixelMax
                     + " and trying to set: " + pixelStart);
         }
         for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
@@ -584,13 +590,34 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/Minecraft.exe");
+                "/home/deque/portextestfiles/badfiles/VirusShare_7dfcbb865a4a5637efd97a2d021eb4b3");
         PEData data = PELoader.loadPE(file);
+        SectionTable table = data.getSectionTable();
+        SectionLoader loader = new SectionLoader(data);
+        ImportSection idata = loader.loadImportSection();
+        for(ImportDLL im : idata.getImports()) {
+            System.out.println(im.getName());
+        }
+        ShannonEntropy entropy = new ShannonEntropy(data);
+        for (SectionHeader header : table.getSectionHeaders()) {
+            long start = header.getAlignedPointerToRaw();
+            long end = loader.getReadSize(header) + start;
+            System.out.println(header.getNumber() + ". " + header.getName()
+                    + " start: " + start + " end: " + end);
+            long vStart = header.getAlignedVirtualAddress();
+            long vEnd = header.getAlignedVirtualSize() + vStart;
+            System.out.println("virtual start: " + vStart + " virtual end: "
+                    + vEnd);
+            System.out.println("entropy: " + entropy.forSection(header.getNumber()) * 8);
+            System.out.println();
+        }
         String report = PEAnomalyScanner.newInstance(data).scanReport();
         System.out.println(report);
+        System.out.println("file size: " + file.length());
+        System.out.println("idata offset: " + idata.getOffset());
         Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();
-         ImageIO.write(image, "png", new File(file.getName() + ".png"));
+//        ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
 

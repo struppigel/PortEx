@@ -27,14 +27,14 @@ import static com.github.katjahahn.tools.anomalies.AnomalyType.*;
  */
 public enum AnomalySubType {
 
-    /** MSDOS Header */
+    /**************************** MSDOS Header ******************************/
 
     /**
      * The MSDOS header is collapsed, i.e. parts are missing.
      */
     COLLAPSED_MSDOS_HEADER(STRUCTURE),
 
-    /** COFF File Header */
+    /*************************** COFF File Header *****************************/
 
     /**
      * The PE File Header was moved to overlay, this is the result of
@@ -42,7 +42,7 @@ public enum AnomalySubType {
      */
     PE_HEADER_IN_OVERLAY(STRUCTURE),
     /**
-     * The optional header size is too small, thus the Optional Header overlaps 
+     * The optional header size is too small, thus the Optional Header overlaps
      * with the Section Table.
      */
     COLLAPSED_OPTIONAL_HEADER(STRUCTURE),
@@ -77,7 +77,7 @@ public enum AnomalySubType {
      */
     DEPRECATED_FILE_CHARACTERISTICS(DEPRECATED),
 
-    /** Optional Header */
+    /**************************** Optional Header ******************************/
 
     /**
      * The image base is too large.
@@ -177,17 +177,21 @@ public enum AnomalySubType {
      */
     ZERO_EP(WRONG),
     /**
+     * The ADDRESS_OF_ENTRY_POINT points into virtual space.
+     */
+    VIRTUAL_EP(WRONG),
+    /**
+     * Entry point is in the last section of the PE file
+     */
+    EP_IN_LAST_SECTION(NON_DEFAULT),
+
+    /**************************** Section Table ******************************/
+
+    /**
      * Entry point is within a writeable section. This is suspicious. The file
      * might be infected.
      */
     EP_IN_WRITEABLE_SEC(NON_DEFAULT),
-    /**
-     * The ADDRESS_OF_ENTRY_POINT points into virtual space.
-     */
-    VIRTUAL_EP(WRONG),
-
-    /** Section Table */
-
     /**
      * The section name is unusual.
      */
@@ -225,7 +229,7 @@ public enum AnomalySubType {
     /**
      * Sections are physically shuffled.
      */
-    PHYSICALLY_SHUFFLED_SEC(STRUCTURE), // TODO add to thesis
+    PHYSICALLY_SHUFFLED_SEC(STRUCTURE),
     /**
      * Sections are physically overlapping.
      */
@@ -284,7 +288,7 @@ public enum AnomalySubType {
     /**
      * POINTER_TO_RAW_DATA is not a multiple of file alignment
      */
-    NOT_FILEALIGNED_PTR_TO_RAW(WRONG), 
+    NOT_FILEALIGNED_PTR_TO_RAW(WRONG),
     /**
      * TODO
      */
@@ -292,14 +296,26 @@ public enum AnomalySubType {
     /**
      * TODO
      */
-    DEPRECATED_PTR_TO_RELOC(DEPRECATED); // TODO add to thesis
-    
+    DEPRECATED_PTR_TO_RELOC(DEPRECATED), // TODO add to thesis
+
+    /**************************** Import Section ******************************/
+
+    /**
+     * Kernel32.dll imports by ordinal are suspicious according to Szor
+     */
+    KERNEL32_BY_ORDINAL_IMPORTS(NON_DEFAULT),
+
+    /**
+     * Imports, Exports, or Resources, etc, are stretched over several sections
+     */
+    FRACTIONATED_DATADIR(STRUCTURE);
+
     private final AnomalyType superType;
-    
+
     private AnomalySubType(AnomalyType superType) {
         this.superType = superType;
     }
-    
+
     public AnomalyType getSuperType() {
         return superType;
     }

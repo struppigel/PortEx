@@ -66,7 +66,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
         coff.getSizeOfOptionalHeader() + data.getSectionTable().getSize()
 
       val locations = List(new Location(peOffset, locSize))
-      List(StructureAnomaly(PEStructure.PE_FILE_HEADER,
+      List(StructureAnomaly(PEStructureKey.PE_FILE_HEADER,
         "PE Header moved to Overlay.", PE_HEADER_IN_OVERLAY, locations))
     } else Nil
   }
@@ -87,7 +87,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
       val locations = List(new Location(opt.getOffset(), size),
         new Location(entry.getOffset(), entry.getSize()))
 
-      List(StructureAnomaly(PEStructure.OPTIONAL_HEADER,
+      List(StructureAnomaly(PEStructureKey.OPTIONAL_HEADER,
         "Collapsed Optional Header, Section Table entries might not be valid.",
         COLLAPSED_OPTIONAL_HEADER, locations))
 
@@ -114,10 +114,10 @@ trait COFFHeaderScanning extends AnomalyScanner {
       val secTable = data.getSectionTable()
       val secTableLoc = new Location(secTable.getOffset(), secTable.getSize())
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
-      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, TOO_MANY_SECTIONS, secTableLoc :: locations))
+      List(StructureAnomaly(PEStructureKey.SECTION_TABLE, description, TOO_MANY_SECTIONS, secTableLoc :: locations))
     } else if (sectionNr == 0) {
       val description = "COFF File Header: Sectionless PE"
-      List(StructureAnomaly(PEStructure.SECTION_TABLE, description, SECTIONLESS, locations))
+      List(StructureAnomaly(PEStructureKey.SECTION_TABLE, description, SECTIONLESS, locations))
     } else Nil
   }
 

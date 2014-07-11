@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+import java.util.List;
+
+import com.github.katjahahn.parser.Location;
+
 /**
  * Represents a concrete import of a symbol, either via name or via ordinal.
  * 
@@ -24,10 +28,16 @@ package com.github.katjahahn.parser.sections.idata;
 public interface Import {
 	
     /**
-     * 
+     * TODO
      * @param key
      * @return
      */
-	public Long getDirEntryValue(DirectoryEntryKey key);
+	Long getDirEntryValue(DirectoryEntryKey key);
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	List<Location> getLocations();
 
 }

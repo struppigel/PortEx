@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.github.katjahahn.parser.Location;
+
 /**
  * Represents an import by name.
  * 
@@ -47,6 +52,8 @@ public class NameImport implements Import {
      * The directory entry this import belongs to
      */
     private final DirectoryEntry parent;
+    
+    private final List<Location> locations;
 
     /**
      * 
@@ -62,12 +69,13 @@ public class NameImport implements Import {
      *            the directory entry this import belongs to
      */
     public NameImport(long rva, String name, int hint, long nameRVA,
-            DirectoryEntry parent) {
+            DirectoryEntry parent, List<Location> locations) {
         this.rva = rva;
         this.hint = hint;
         this.name = name;
         this.nameRVA = nameRVA;
         this.parent = parent;
+        this.locations = locations;
     }
 
     /**
@@ -84,5 +92,13 @@ public class NameImport implements Import {
     public String toString() {
         return "rva: " + rva + " (0x" + Long.toHexString(rva) + "), name: "
                 + name + ", hint: " + hint;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Location> getLocations() {
+        return new ArrayList<Location>(locations);
     }
 }

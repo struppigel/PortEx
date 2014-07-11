@@ -45,18 +45,12 @@ import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 //TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
 class ImportSection private (
   private val directoryTable: List[DirectoryEntry],
-  private val offset: Long,
-  private val size: Long) extends SpecialSection {
+  private val offset: Long) extends SpecialSection {
 
   /**
    * {@inheritDoc}
    */
   override def getOffset(): Long = offset
-
-  /**
-   * Returns the size of the directory table
-   */
-  def getSize(): Long = size
 
   /**
    * {@inheritDoc}
@@ -133,7 +127,7 @@ object ImportSection {
     //filter empty directoryTableEntries, they are of no use and probably because
     //of collapsed imports or other malformations, example: tinype
     directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
-    new ImportSection(directoryTable, fileOffset, mmbytes.length())
+    new ImportSection(directoryTable, fileOffset)
   }
 
   /**

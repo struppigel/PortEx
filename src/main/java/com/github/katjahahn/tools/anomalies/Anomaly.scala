@@ -23,6 +23,7 @@ import com.github.katjahahn.parser.optheader.DataDirEntry
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.sections.SectionHeaderKey
+import com.github.katjahahn.parser.sections.idata.ImportDLL
 
 /**
  * PE file anomaly or malformation.
@@ -63,7 +64,7 @@ abstract class Anomaly() {
  * collapsed, overlapping, moved to overlay
  */
 case class StructureAnomaly(
-  structure: PEStructure,
+  structure: PEStructureKey,
   override val description: String,
   override val subtype: AnomalySubType,
   slocations: List[Location]) extends Anomaly {
@@ -100,10 +101,18 @@ case class DataDirAnomaly(
   override val key = dataDirEntry.getKey
 }
 
-case class SectionNameAnomaly(val header: SectionHeader, 
-    override val description: String, 
-    override val subtype: AnomalySubType) extends Anomaly {
-  
+case class SectionNameAnomaly(val header: SectionHeader,
+  override val description: String,
+  override val subtype: AnomalySubType) extends Anomaly {
+
   override def locations = List(new Location(header.getNameOffset, header.getNameSize)).asJava
   override def key = SectionHeaderKey.NAME
+}
+
+case class ImportAnomaly(val imports: List[ImportDLL],
+  override val description: String,
+  override val subtype: AnomalySubType,
+  override val key: FieldOrStructureKey) extends Anomaly {
+
+  override def locations = imports.flatMap(i => i.getLocations().asScala).asJava
 }

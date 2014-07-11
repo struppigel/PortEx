@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
 import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
@@ -76,15 +77,16 @@ public class TestreportsReader {
                 } else {
                     Long rva = Long.parseLong(entry[0]);
                     String name = entry[1];
+                    List<Location> empty = new ArrayList<>();
                     if (!entry[3].contains("None")) {
                         int ordinal = Integer.parseInt(entry[3]);
                         OrdinalImport ord = new OrdinalImport(ordinal, rva,
-                                null);
+                                null, empty);
                         dll.add(ord);
                     } else {
                         int hint = Integer.parseInt(entry[2]);
                         NameImport nameImp = new NameImport(rva, name, hint,
-                                -1, null);
+                                -1, null, empty);
                         dll.add(nameImp);
                     }
                 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.Location;
 
 /**
  * Represents all imports from a single DLL.
@@ -54,6 +55,17 @@ public class ImportDLL {
 		this.name = name;
 		this.nameImports = new ArrayList<>(nameImports);
 		this.ordinalImports = new ArrayList<>(ordinalImports);
+	}
+	
+	public List<Location> getLocations() {
+	    List<Location> locs = new ArrayList<>();
+	    for(NameImport i : nameImports) {
+	        locs.addAll(i.getLocations());
+	    }
+	    for(OrdinalImport i : ordinalImports) {
+            locs.addAll(i.getLocations());
+        }
+	    return locs;
 	}
 	
 	/**

@@ -51,7 +51,7 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
     if (e_lfanew < 0x40) {
       val locations = List(new Location(0, e_lfanew))
       val description = "Collapsed MSDOS Header, PE Signature offset is at 0x" + java.lang.Long.toHexString(e_lfanew)
-      List(StructureAnomaly(PEStructure.MSDOS_HEADER, description, 
+      List(StructureAnomaly(PEStructureKey.MSDOS_HEADER, description, 
           AnomalySubType.COLLAPSED_MSDOS_HEADER, locations))
     } else Nil
   }

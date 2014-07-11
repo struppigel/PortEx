@@ -25,6 +25,8 @@ import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.tools.Visualizer
+import javax.imageio.ImageIO
 
 /**
  * Scans for anomalies and malformations in a PE file.
@@ -88,21 +90,31 @@ object PEAnomalyScanner {
    * @return a PEAnomalyScanner instance with the traits applied from the boolean values
    */
   def newInstance(data: PEData): PEAnomalyScanner =
-    new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning
+    new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with 
+    SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning
 
   def main(args: Array[String]): Unit = {
     val folder = new File("/home/deque/portextestfiles/badfiles/")
+    var counter = 0
     for (file <- folder.listFiles()) {
+      counter += 1
+      if (counter % 1000 == 0) {
+        println("files read: " + counter)
+      }
       val data = PELoader.loadPE(file)
       //      println(data)
       val loader = new SectionLoader(data)
-      val scanner = new PEAnomalyScanner(data) with MSDOSHeaderScanning with SectionTableScanning with OptionalHeaderScanning with COFFHeaderScanning
+      val scanner = PEAnomalyScanner.newInstance(data)
       val over = new Overlay(data)
-      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.EP_IN_WRITEABLE_SEC).isEmpty) {
-        println(scanner.scanReport)
-        println("has overlay: " + over.exists())
-        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.FRACTIONATED_DATADIR).isEmpty) {
+//        println(scanner.scanReport)
+//        println("has overlay: " + over.exists())
+//        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+        println(file.getName())
         println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+        val vi = new Visualizer(data)
+        val image = vi.createImage()
+        ImageIO.write(image, "png", new File(file.getName() + ".png"));
         println()
       }
     }

@@ -244,7 +244,7 @@ public class SectionLoader {
      *         points into or absent if there is no data dir entry for the key
      *         available
      */
-    private Optional<SectionHeader> maybeGetSectionHeader(
+    public Optional<SectionHeader> maybeGetSectionHeader(
             DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dataDir = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
@@ -320,10 +320,32 @@ public class SectionLoader {
     public Optional<SectionHeader> maybeGetSectionHeaderByRVA(long rva) {
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
-            long vSize = section.get(VIRTUAL_SIZE);
-            long vAddress = section.get(VIRTUAL_ADDRESS);
+            long vSize = section.getAlignedVirtualSize();
+            long vAddress = section.getAlignedVirtualAddress();
             if (rvaIsWithin(vAddress, vSize, rva)) {
                 return Optional.of(section);
+            }
+        }
+        return Optional.absent();
+    }
+    
+    /**
+     * Returns the section entry of the section table the offset is pointing into.
+     * 
+     * @param table
+     *            the section table of the file
+     * @param offset
+     *            the file offset
+     * @return the {@link SectionHeader} of the section the offset is pointing into
+     */
+    @Ensures("result != null")
+    public Optional<SectionHeader> maybeGetSectionHeaderByOffset(long fileOffset) {
+        List<SectionHeader> sections = table.getSectionHeaders();
+        for (SectionHeader header : sections) {
+            long size = getReadSize(header);
+            long address = header.getAlignedPointerToRaw();
+            if (rvaIsWithin(address, size, fileOffset)) { //TODO misleading name of method
+                return Optional.of(header);
             }
         }
         return Optional.absent();
