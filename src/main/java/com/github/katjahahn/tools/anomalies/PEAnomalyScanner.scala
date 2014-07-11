@@ -90,8 +90,7 @@ object PEAnomalyScanner {
    * @return a PEAnomalyScanner instance with the traits applied from the boolean values
    */
   def newInstance(data: PEData): PEAnomalyScanner =
-    new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with 
-    SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning
+    new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning
 
   def main(args: Array[String]): Unit = {
     val folder = new File("/home/deque/portextestfiles/badfiles/")
@@ -101,21 +100,25 @@ object PEAnomalyScanner {
       if (counter % 1000 == 0) {
         println("files read: " + counter)
       }
-      val data = PELoader.loadPE(file)
-      //      println(data)
-      val loader = new SectionLoader(data)
-      val scanner = PEAnomalyScanner.newInstance(data)
-      val over = new Overlay(data)
-      if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.FRACTIONATED_DATADIR).isEmpty) {
-//        println(scanner.scanReport)
-//        println("has overlay: " + over.exists())
-//        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-        println(file.getName())
-        println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-        val vi = new Visualizer(data)
-        val image = vi.createImage()
-        ImageIO.write(image, "png", new File(file.getName() + ".png"));
-        println()
+      try {
+        val data = PELoader.loadPE(file)
+        //      println(data)
+        val loader = new SectionLoader(data)
+        val scanner = PEAnomalyScanner.newInstance(data)
+        val over = new Overlay(data)
+//        if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.FRACTIONATED_DATADIR).isEmpty) {
+          //        println(scanner.scanReport)
+          //        println("has overlay: " + over.exists())
+          //        println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+          println(file.getName())
+          println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+          val vi = new Visualizer(data)
+          val image = vi.createImage()
+          ImageIO.write(image, "png", new File(file.getName() + ".png"));
+          println()
+//        }
+      } catch {
+        case e: Exception => System.err.println(e.getMessage)
       }
     }
   }

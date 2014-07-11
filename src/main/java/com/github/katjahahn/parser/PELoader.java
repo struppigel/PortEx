@@ -205,15 +205,15 @@ public final class PELoader {
 
     public static void main(String[] args) throws IOException {
         logger.entry();
-        // File file = new File(
-        // "/home/deque/portextestfiles/badfiles/VirusShare_d7b5da61591482dc4b1c511b14adc99f");
+         File file = new File(
+         "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
         // File file = new
         // File("/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
         // TODO this file's resource sections points into no where, but within
         // the file --> does it read from disk?
         // File file = new
         // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
+//        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
         System.out.println(data);
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);

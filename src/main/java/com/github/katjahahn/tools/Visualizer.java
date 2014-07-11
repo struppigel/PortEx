@@ -375,13 +375,20 @@ public class Visualizer {
         long sectionTableOffset = table.getOffset();
         long sectionTableSize = table.getSize();
         drawPixels(sectionTableColor, sectionTableOffset, sectionTableSize);
-        Color sectionColor = new Color(sectionColorStart.getRGB());
         for (SectionHeader header : table.getSectionHeaders()) {
             long sectionOffset = header.getAlignedPointerToRaw();
             long sectionSize = new SectionLoader(data).getReadSize(header);
-            drawPixels(sectionColor, sectionOffset, sectionSize);
+            drawPixels(getSectionColor(header), sectionOffset, sectionSize);
+        }
+    }
+    
+    private Color getSectionColor(SectionHeader header) {
+        int nr = header.getNumber();
+        Color sectionColor = sectionColorStart;
+        for(int i = 1; i < nr; i++) {
             sectionColor = variate(sectionColor);
         }
+        return sectionColor;
     }
 
     @Requires("color != null")
@@ -416,8 +423,8 @@ public class Visualizer {
         drawLegendEntry(3, "Section Table", sectionTableColor);
         int number = 4;
         SectionTable table = data.getSectionTable();
-        Color sectionColor = new Color(sectionColorStart.getRGB());
         for (SectionHeader header : table.getSectionHeaders()) {
+            Color sectionColor = getSectionColor(header);
             drawLegendEntry(number, header.getName(), sectionColor);
             sectionColor = variate(sectionColor);
             number++;
@@ -589,13 +596,16 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_7dfcbb865a4a5637efd97a2d021eb4b3");
+        File file = new File("/home/deque/portextestfiles/testfiles/Lab03-01.exe");
+//        File file = new File(
+//                "/home/deque/portextestfiles/badfiles/VirusShare_3e34ab859867eb66b168ee5bf397ed91");
+        // File file = new
+        // File("/home/deque/portextestfiles/badfiles/VirusShare_78ce318e825fe71caa3c22ae0b71969c");
         PEData data = PELoader.loadPE(file);
         SectionTable table = data.getSectionTable();
         SectionLoader loader = new SectionLoader(data);
         ImportSection idata = loader.loadImportSection();
-        for(ImportDLL im : idata.getImports()) {
+        for (ImportDLL im : idata.getImports()) {
             System.out.println(im.getName());
         }
         ShannonEntropy entropy = new ShannonEntropy(data);
@@ -608,7 +618,8 @@ public class Visualizer {
             long vEnd = header.getAlignedVirtualSize() + vStart;
             System.out.println("virtual start: " + vStart + " virtual end: "
                     + vEnd);
-            System.out.println("entropy: " + entropy.forSection(header.getNumber()) * 8);
+            System.out.println("entropy: "
+                    + entropy.forSection(header.getNumber()) * 8);
             System.out.println();
         }
         String report = PEAnomalyScanner.newInstance(data).scanReport();
@@ -617,7 +628,7 @@ public class Visualizer {
         System.out.println("idata offset: " + idata.getOffset());
         Visualizer vi = new Visualizer(data);
         final BufferedImage image = vi.createImage();
-//        ImageIO.write(image, "png", new File(file.getName() + ".png"));
+        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
 

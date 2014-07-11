@@ -31,32 +31,20 @@ trait ImportSectionScanning extends AnomalyScanner {
     val loader = new SectionLoader(data)
     val idataHeader = loader.maybeGetSectionHeaderByOffset(idata.getOffset())
     if (idataHeader.isPresent) {
-      val idata = idataHeader.get
       
       def isWithinIData(loc: Location): Boolean = {
-        val start = idata.getAlignedPointerToRaw()
-        val end = start + loader.getReadSize(idata)
+        val start = idataHeader.get().getAlignedPointerToRaw
+        val end = start + loader.getReadSize(idataHeader.get)
         val locEnd = loc.from + loc.size
         //ignores falty locations (indicated by -1 or larger than file size)
         //FIXME find the cause of -1 entries!
         (loc.from >= data.getFile.length) || (loc.from == -1) || (loc.from >= start && locEnd <= end)
       }
-      def headerDescription(loc: Location): String = {
-        val sec = loader.maybeGetSectionHeaderByOffset(loc.from);
-        val sec2 = loader.maybeGetSectionHeaderByOffset(loc.from + loc.size)
-        var description = ""
-        if(sec.isPresent)
-          description += " in section " + sec.get.getName
-        if(sec2.isPresent && sec2 != sec)
-          description += " in section " + sec2.get.getName
-        if(!sec.isPresent && !sec2.isPresent)
-          description += " not in any section"
-        description
-      }
       val fractions = locs.filter(!isWithinIData(_)).toList
       if (!fractions.isEmpty) {
-        val fracDescriptions = fractions.map(f => s"(${f.from}, ${f.from + f.size})" + headerDescription(f)).mkString(", ")
-        val description = s"Imports are fractionated! Import section: ${idata.getName}, fraction locations: " + fracDescriptions
+        val affectedImports = idata.getImports.asScala.filter(i => 
+          i.getLocations.asScala.filter(!isWithinIData(_)).size > 0)
+        val description = s"Imports are fractionated! Affected import DLLs: ${affectedImports.map(_.getName()).mkString(", ")}"
         anomalyList += StructureAnomaly(PEStructureKey.IMPORT_SECTION, description,
           AnomalySubType.FRACTIONATED_DATADIR, fractions)
 
