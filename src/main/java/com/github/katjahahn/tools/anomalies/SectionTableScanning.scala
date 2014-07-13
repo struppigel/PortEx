@@ -130,11 +130,11 @@ trait SectionTableScanning extends AnomalyScanner {
         val notContainedCharac = mustHaveCharac.filterNot(c => c == IMAGE_SCN_MEM_READ || characs.contains(c))
         val superfluousCharac = characs.filterNot(mustHaveCharac.contains(_))
         if (!notContainedCharac.isEmpty) {
-          val description = s"Section Header ${header.getNumber()} with name ${sectionName} should (but doesn't) contain the characteristics: ${notContainedCharac.mkString(", ")}"
+          val description = s"Section Header ${header.getNumber()} with name ${sectionName} should (but doesn't) contain the characteristics: ${notContainedCharac.map(_.shortName).mkString(", ")}"
           anomalyList += FieldAnomaly(entry, description, UNUSUAL_SEC_CHARACTERISTICS)
         }
         if (!superfluousCharac.isEmpty) {
-          val description = s"Section Header ${header.getNumber()} with name ${sectionName} has unusual characteristics, that shouldn't be there: ${superfluousCharac.mkString(", ")}"
+          val description = s"Section Header ${header.getNumber()} with name ${sectionName} has unusual characteristics, that shouldn't be there: ${superfluousCharac.map(_.shortName).mkString(", ")}"
           anomalyList += FieldAnomaly(entry, description, UNUSUAL_SEC_CHARACTERISTICS)
         }
       }

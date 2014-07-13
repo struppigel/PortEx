@@ -620,8 +620,9 @@ public class Visualizer {
 //        File file = new File(
 //                "/home/deque/portextestfiles/badfiles/VirusShare_3e34ab859867eb66b168ee5bf397ed91");
         File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_236ade5965c3862e3adff93bb29a4b11");
+                "/home/deque/portextestfiles/trojan.spy.zeus.1.gen");
         PEData data = PELoader.loadPE(file);
+        System.out.println(data);
         SectionTable table = data.getSectionTable();
         SectionLoader loader = new SectionLoader(data);
 //        ImportSection idata = loader.loadImportSection();

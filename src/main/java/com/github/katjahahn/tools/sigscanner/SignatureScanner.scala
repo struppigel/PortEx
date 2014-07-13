@@ -35,7 +35,7 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey
  *
  * @author Katja Hahn
  *
- * @constructor Creates a SignatureScanner that uses the signatures applied
+ * Creates a SignatureScanner that uses the signatures applied
  * @param signatures to use for scanning
  */
 class SignatureScanner(signatures: List[Signature]) {

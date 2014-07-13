@@ -70,5 +70,4 @@ public enum SectionHeaderKey implements HeaderKey {
      * Characteristics of the section.
      */
     CHARACTERISTICS;
-
 }

@@ -11,7 +11,7 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceSection
 
 trait ResourceSectionScanning extends AnomalyScanner {
   abstract override def scanReport(): String =
-    "Applied Export Scanning" + NL + super.scanReport
+    "Applied Resource Scanning" + NL + super.scanReport
 
   abstract override def scan(): List[Anomaly] = {
     val maybeRsrc = new SectionLoader(data).maybeLoadResourceSection()

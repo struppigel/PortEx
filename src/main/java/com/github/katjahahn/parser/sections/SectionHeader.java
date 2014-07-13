@@ -206,22 +206,31 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("Name: " + getName() + IOUtil.NL);
+        final int descrLength = "pointer to line numbers:".length();
 
         for (Entry<SectionHeaderKey, StandardField> entry : entries.entrySet()) {
             Long value = entry.getValue().value;
             SectionHeaderKey key = entry.getKey();
+            String description = pad(entry.getValue().description + ": ", descrLength);
+            
             if (key == SectionHeaderKey.CHARACTERISTICS) {
-                b.append(entry.getValue().description
-                        + ": "
+                b.append(description
                         + IOUtil.NL
                         + IOUtil.getCharacteristics(value,
                                 SECTIONCHARACTERISTICS_SPEC) + IOUtil.NL);
             } else {
-                b.append(entry.getValue().description + ": " + value + " (0x"
+                b.append(description + value + " (0x"
                         + Long.toHexString(value) + ")" + IOUtil.NL);
             }
         }
         return b.toString();
+    }
+    
+    private String pad(String string, int length) {
+       for(int i = string.length(); i < length; i++) {
+           string += " ";
+       }
+       return string;
     }
 
     /**
