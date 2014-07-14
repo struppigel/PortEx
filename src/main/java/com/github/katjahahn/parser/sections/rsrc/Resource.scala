@@ -30,6 +30,7 @@ import scala.collection.JavaConverters._
  *
  * @param resourceBytes the bytes that make up the data of the resource
  * @param levelIDs the levelIDs of the resource
+ * FIXME resource bytes must be a stream! some are too big to fit into an array
  */
 class Resource(
   val resourceBytes: Array[Byte],

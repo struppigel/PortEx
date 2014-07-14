@@ -13,13 +13,75 @@ import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
 import com.github.katjahahn.tools.anomalies.SectionTableScanning
 import com.github.katjahahn.tools.sigscanner.SignatureScanner
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
+import com.github.katjahahn.parser.coffheader.COFFHeaderKey
+import com.github.katjahahn.parser.coffheader.COFFFileHeader
 
 class ReportCreator(private val data: PEData) {
 
-  val maxSec = 5
+  val maxSec = 4
 
-  def report(): String = secTableReport + overlayReport + anomalyReport +
-    peidReport + jar2ExeReport + maldetReport
+  def printReport(): Unit = {
+    println(title("Report For " + data.getFile.getName))
+    println("file size " + hexString(data.getFile.length))
+    println("full path " + data.getFile.getAbsolutePath + NL)
+    print(msdosHeaderReport)
+    print(coffHeaderReport)
+    print(optHeaderReport)
+    print(secTableReport)
+    print(importsReport)
+    print(exportsReport)
+    print(resourcesReport)
+    print(overlayReport)
+    print(anomalyReport)
+    print(peidReport)
+    print(jar2ExeReport)
+    print(maldetReport)
+  }
+
+  def importsReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeImports = loader.maybeLoadImportSection()
+    if (maybeImports.isPresent) {
+      val idata = maybeImports.get
+      val buf = new StringBuffer()
+      buf.append(title("Imports") + NL)
+      val imports = idata.getImports.asScala
+      for (importDll <- imports) {
+        buf.append(importDll + NL)
+      }
+      buf.toString
+    } else ""
+  }
+
+  def exportsReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeExports = loader.maybeLoadExportSection()
+    if (maybeExports.isPresent) {
+      val edata = maybeExports.get
+      val buf = new StringBuffer()
+      buf.append(title("Exports") + NL)
+      val exports = edata.getExportEntries.asScala
+      for (export <- exports) {
+        buf.append(export + NL)
+      }
+      buf.toString + NL
+    } else ""
+  }
+
+  def resourcesReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeRSRC = loader.maybeLoadResourceSection()
+    if (maybeRSRC.isPresent) {
+      val rsrc = maybeRSRC.get
+      val buf = new StringBuffer()
+      buf.append(title("Resources") + NL)
+      val resources = rsrc.getResources.asScala
+      for (resource <- resources) {
+        buf.append(resource + NL)
+      }
+      buf.toString + NL
+    } else ""
+  }
 
   def jar2ExeReport(): String = {
     val scanner = new Jar2ExeScanner(data.getFile)
@@ -35,7 +97,8 @@ class ReportCreator(private val data: PEData) {
   def overlayReport(): String = {
     val overlay = new Overlay(data.getFile)
     if (overlay.exists) title("Overlay") + NL + "Overlay at offset " +
-      hexString(overlay.getOffset()) + NL + NL
+      hexString(overlay.getOffset()) + NL + "Overlay size      " +
+      hexString(overlay.getSize) + NL + NL
     else ""
   }
 
@@ -49,7 +112,82 @@ class ReportCreator(private val data: PEData) {
     val anomalies = PEAnomalyScanner.newInstance(data).getAnomalies.asScala
     if (anomalies.isEmpty) ""
     else title("Anomalies") + NL +
-      anomalies.map(a => a.toString).mkString(NL) + NL + NL
+      ("* " + anomalies.map(a => a.toString).mkString(NL + "* ")) + NL + NL
+  }
+
+  def msdosHeaderReport(): String = {
+    val msdos = data.getMSDOSHeader
+    val entries = msdos.getHeaderEntries.asScala.sortBy(e => e.getOffset)
+    val buf = new StringBuffer()
+    val colWidth = 15
+    val padLength = "maximum number of paragraphs allocated ".length
+    buf.append(title("MSDOS Header") + NL)
+    val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+    buf.append(tableHeader + NL)
+    buf.append(pad("", tableHeader.length, "-") + NL)
+    for (entry <- entries) {
+      buf.append(pad(entry.description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+        pad(hexString(entry.getOffset), colWidth, " ") + NL)
+    }
+    buf.toString + NL
+  }
+
+  def coffHeaderReport(): String = {
+    val coff = data.getCOFFFileHeader
+    val buf = new StringBuffer()
+    val colWidth = 15
+    val padLength = "pointer to symbol table (deprecated) ".length
+    buf.append(title("COFF File Header") + NL)
+    val padLength1 = "time date stamp  ".length
+    buf.append(pad("time date stamp", padLength1, " ") +
+      pad(coff.getTimeDate().toLocaleString(), colWidth, " ") + NL)
+    buf.append(pad("machine type", padLength1, " ") +
+      pad(coff.getMachineDescription, colWidth, " ") + NL)
+    buf.append(pad("characteristics", padLength1, " ") + "* " +
+      coff.getCharacteristicsDescriptions().asScala.mkString(NL + pad("", padLength1, " ") + "* "))
+
+    buf.append(NL + NL)
+    val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+    buf.append(tableHeader + NL)
+    buf.append(pad("", tableHeader.length, "-") + NL)
+    val entries = (for (key <- COFFHeaderKey.values) yield coff.getField(key)).sortBy(e => e.getOffset)
+    for (entry <- entries) {
+      val description = entry.description.replace("(deprecated for image)", "(deprecated)")
+      buf.append(pad(description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+        pad(hexString(entry.getOffset), colWidth, " ") + NL)
+    }
+    buf.toString + NL
+  }
+
+  def optHeaderReport(): String = {
+    val opt = data.getOptionalHeader
+    val buf = new StringBuffer()
+    val colWidth = 17
+    val padLength = "pointer to symbol table (deprecated) ".length
+    buf.append(title("Optional Header"))
+    val standardHeader = pad("standard field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+    val windowsHeader = pad("windows field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+    val tableLine = pad("", standardHeader.length, "-") + NL
+    val standardFields = opt.getStandardFields.values.asScala.toList.sortBy(_.getOffset)
+    val windowsFields = opt.getWindowsSpecificFields.values.asScala.toList.sortBy(_.getOffset)
+    for ((fields, header) <- List((standardFields, standardHeader), (windowsFields, windowsHeader))) {
+      buf.append(NL + header + NL + tableLine)
+      for (entry <- fields) {
+        val description = entry.description.replace("(reserved, must be zero)", "(reserved)").replace("(MS DOS stub, PE header, and section headers)", "")
+        buf.append(pad(description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+          pad(hexString(entry.getOffset), colWidth, " ") + NL)
+      }
+    }
+    val padLengthDataDir = "pointer to symbol ".length
+    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("file offset", colWidth, " ")
+    val dataDirs = opt.getDataDirEntries().values.asScala.toList.sortBy(e => e.getTableEntryOffset)
+    buf.append(NL + dataDirHeader + NL + tableLine)
+    for (entry <- dataDirs) {
+      val description = entry.getKey.toString
+      buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(entry.getVirtualAddress()), colWidth, " ") +
+        pad(hexString(entry.getDirectorySize()), colWidth, " ") + pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
+    }
+    buf.toString + NL
   }
 
   def secTableReport(): String = {
@@ -128,13 +266,58 @@ class ReportCreator(private val data: PEData) {
 
 object ReportCreator {
 
+  private val version = """version: 0.1
+    |author: Katja Hahn
+    |last update: 14.Jul 2014""".stripMargin
+
+  private val title = "peana"
+
+  private val usage = """Usage: java -jar peana.jar <PEfile>
+    """.stripMargin
+
+  private type OptionMap = scala.collection.mutable.Map[Symbol, String]
+
   def newInstance(file: File): ReportCreator =
     new ReportCreator(PELoader.loadPE(file))
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/launch4jexe.exe")
-    val reporter = newInstance(file)
-    println(reporter.report())
+    invokeCLI(args)
+  }
+  private def invokeCLI(args: Array[String]): Unit = {
+    val options = nextOption(scala.collection.mutable.Map(), args.toList)
+    if (args.length == 0) {
+      println(usage)
+    } else {
+      if (options.contains('version)) {
+        println(title)
+        println(version)
+        println()
+      }
+      if (options.contains('inputfile)) {
+        try {
+          val file = new File(options('inputfile))
+          if (file.exists) {
+            ReportCreator.newInstance(file).printReport
+          } else {
+            System.err.println("file doesn't exist");
+          }
+        } catch {
+          case e: Exception => System.err.println("Error: " + e.getMessage);
+        }
+      }
+    }
+  }
+
+  private def nextOption(map: OptionMap, list: List[String]): OptionMap = {
+    list match {
+      case Nil => map
+      case "-v" :: tail =>
+        nextOption(map += ('version -> ""), tail)
+      case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
+      case option :: tail =>
+        println("Unknown option " + option + "\n" + usage)
+        sys.exit(1)
+    }
   }
 
 }

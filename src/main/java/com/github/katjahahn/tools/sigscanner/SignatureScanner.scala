@@ -41,7 +41,7 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey
 class SignatureScanner(signatures: List[Signature]) {
 
   /**
-   * @constructor Creates a SignatureScanner that uses the signatures applied
+   * Creates a SignatureScanner that uses the signatures applied
    * @param signatures to use for scanning
    */
   def this(signatures: java.util.List[Signature]) = this(signatures.asScala.toList)

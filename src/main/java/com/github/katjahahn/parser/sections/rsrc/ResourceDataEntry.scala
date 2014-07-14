@@ -65,11 +65,13 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
    * Reads the resource bytes from disk and returns them.
    * 
    * @return the byte array representing the resource
+   * FIXME this is a mistake, use streams
    */
   def readResourceBytes(): Array[Byte] = {
     val address = data(ResourceDataEntryKey.DATA_RVA).value
-    val length = data(ResourceDataEntryKey.SIZE).value + address
-    mmBytes.slice(address, length)
+    val end = data(ResourceDataEntryKey.SIZE).value + address
+//    mmBytes.slice(address, end)
+     Array()
   }
 
 }

@@ -90,10 +90,12 @@ object PEAnomalyScanner {
    * @return a PEAnomalyScanner instance with the traits applied from the boolean values
    */
   def newInstance(data: PEData): PEAnomalyScanner =
-    new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
+    new PEAnomalyScanner(data) with COFFHeaderScanning with 
+    OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning 
+    with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("/home/deque/portextestfiles/badfiles/")
+    val folder = new File("/home/deque/portextestfiles/goodfiles/xp/")
     var counter = 0
     for (file <- folder.listFiles()) {
       val outfile = new File("peimages/" + file.getName() + ".png")

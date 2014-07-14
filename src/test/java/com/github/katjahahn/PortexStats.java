@@ -42,8 +42,6 @@ import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 
 public class PortexStats {
 
-    // TODO add D:\\ partition files from Win 7 machine!
-
     private static final Logger logger = LogManager.getLogger(PortexStats.class
             .getName());
 
@@ -323,20 +321,10 @@ public class PortexStats {
                     System.out.println("Files read: " + total + "/"
                             + files.length);
                 }
-            } catch (FileFormatException e) {
-                if (!file.isDirectory()) {
-                    file.delete();
-                    logger.error("file " + file.getAbsolutePath()
-                            + " deleted, no PE");
-                } else {
-                    logger.error("problem with file " + file.getAbsolutePath()
-                            + " file was not loaded!");
-                }
-                notLoaded++;
             } catch (Exception e) {
-                logger.error("problem with file " + file.getAbsolutePath()
-                        + " file was not loaded!");
-                e.printStackTrace();
+                logger.error(file.getName() + " not loaded! Message: "
+                        + e.getMessage());
+//                 e.printStackTrace();
                 notLoaded++;
             }
         }
@@ -443,7 +431,8 @@ public class PortexStats {
 
     private static void writeStats(String stats, String statname) {
         Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd_HH-mm-ss");
         String filename = statname + "-" + dateFormat.format(date) + ".stat";
         Path path = Paths.get(STATS_FOLDER, filename);
         writeToFile(path, stats);
