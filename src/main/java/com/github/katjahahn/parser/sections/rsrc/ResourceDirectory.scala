@@ -17,18 +17,21 @@
  */
 package com.github.katjahahn.parser.sections.rsrc
 
-import com.github.katjahahn.parser.ByteArrayUtil._
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey._
-import scala.collection.mutable.ListBuffer
-import ResourceDirectory._
 import java.io.File
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
+
 import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.StandardField
+
 import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.StandardField
+import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey._
+
+import ResourceDirectory._
 
 /**
  * Header and the entries which point to either data or other resource directory
@@ -49,10 +52,10 @@ import com.github.katjahahn.parser.Location
 class ResourceDirectory private (private val level: Level,
   private val header: Header,
   private val entries: List[ResourceDirectoryEntry],
-  private val fileOffset: Long) {
-  
+  private val fileOffset: Long) extends Equals {
+
   private val headerLoc = new Location(fileOffset, resourceDirSize)
-  
+
   def locations(): List[Location] = headerLoc :: entries.flatMap(e => e.locations)
 
   /**
@@ -140,6 +143,28 @@ class ResourceDirectory private (private val level: Level,
         res
     }
   }
+
+  def canEqual(other: Any) = {
+    other.isInstanceOf[com.github.katjahahn.parser.sections.rsrc.ResourceDirectory]
+  }
+
+  /**
+   * Equals another resource directory iff it is at the same file offset.
+   */
+  override def equals(other: Any) = {
+    other match {
+      case that: com.github.katjahahn.parser.sections.rsrc.ResourceDirectory => that.canEqual(ResourceDirectory.this) && fileOffset == that.fileOffset
+      case _ => false
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  override def hashCode() = {
+    val prime = 41
+    prime + fileOffset.hashCode
+  }
 }
 
 object ResourceDirectory {
@@ -150,17 +175,17 @@ object ResourceDirectory {
   type Header = Map[ResourceDirectoryKey, StandardField]
 
   private val logger = LogManager.getLogger(ResourceDirectory.getClass().getName());
-  
+
   /**
-   * The size of a resource directory entry 
+   * The size of a resource directory entry
    */
   private val entrySize = 8;
-  
+
   /**
    * The size of the resource directory header
    */
   private val resourceDirSize = 16;
-  
+
   /**
    * The name of resource directory specification file
    */
@@ -178,17 +203,26 @@ object ResourceDirectory {
    * @return resource directory
    */
   def apply(file: File, level: Level, rva: Long,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceDirectory = {
+    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE, 
+    loopChecker: ResourceLoopChecker): ResourceDirectory = {
     val headerBytes = mmBytes.slice(virtualAddress + rva, resourceDirSize + rva + virtualAddress)
     val header = readHeader(headerBytes, rva)
-    val entries = readEntries(file, header,
-      rva, level, virtualAddress, rsrcOffset, mmBytes)
-    new ResourceDirectory(level, header, entries, rsrcOffset + rva)
+    val fileOffset = rsrcOffset + rva
+    if (!loopChecker.isNewResourceDirFileOffset(fileOffset)) {
+      throw new ResourceLoopException("resource loop detected")
+    }
+    //check for max level, don't load entries if reached
+    val entries = {
+      if (level.levelNr < ResourceSection.maxLevel) readEntries(file, header,
+        rva, level, virtualAddress, rsrcOffset, mmBytes, loopChecker)
+      else List[ResourceDirectoryEntry]()
+    }
+    new ResourceDirectory(level, header, entries, fileOffset)
   }
 
   /**
    * Returns the resource directory header.
-   * 
+   *
    * @param tableBytes the bytes representing the table header
    * @param the file offset to the directory header
    * @return resource directory header
@@ -202,7 +236,7 @@ object ResourceDirectory {
 
   /**
    * Reads and returns all resource directory entries.
-   * 
+   *
    * @param file the PE file
    * @param header the resource directory header
    * @param tableOffset the rva to the resource directory
@@ -214,7 +248,7 @@ object ResourceDirectory {
    */
   private def readEntries(file: File, header: Header, tableOffset: Long,
     level: Level, virtualAddress: Long, rsrcOffset: Long,
-    mmBytes: MemoryMappedPE): List[ResourceDirectoryEntry] = {
+    mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): List[ResourceDirectoryEntry] = {
     val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
     val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
     val entriesSum = nameEntries + idEntries
@@ -226,8 +260,12 @@ object ResourceDirectory {
         val entryNr = i + 1
         val entryBytes = mmBytes.slice(offset, endpoint)
         val isNameEntry = i < nameEntries
-        entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
-          level, virtualAddress, rsrcOffset, mmBytes)
+        try {
+          entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
+            level, virtualAddress, rsrcOffset, mmBytes, loopChecker)
+        } catch {
+          case e: ResourceLoopException => logger.warn("resource loop detected at va " + offset)
+        }
       }
     } catch {
       case e: IllegalArgumentException =>

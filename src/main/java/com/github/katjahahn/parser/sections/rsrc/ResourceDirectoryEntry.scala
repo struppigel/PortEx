@@ -156,7 +156,7 @@ object ResourceDirectoryEntry {
    */
   def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
     entryNr: Int, level: Level, virtualAddress: Long, rsrcOffset: Long,
-    mmBytes: MemoryMappedPE): ResourceDirectoryEntry = {
+    mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): ResourceDirectoryEntry = {
     val entries = readEntries(entryBytes)
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
     val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
@@ -164,7 +164,7 @@ object ResourceDirectoryEntry {
       createDataEntry(rva, id, entryNr, virtualAddress, rsrcOffset, mmBytes)
     } else {
       createSubDirEntry(file, rva, id, entryNr, level,
-        virtualAddress, rsrcOffset, mmBytes)
+        virtualAddress, rsrcOffset, mmBytes, loopChecker)
     }
   }
 
@@ -257,7 +257,7 @@ object ResourceDirectoryEntry {
 
   /**
    * Creates a subdirectory entry.
-   * 
+   *
    * @param rva the subdirectory rva
    * @param id the ID or Name entry
    * @param entryNr the number of the entry
@@ -269,9 +269,10 @@ object ResourceDirectoryEntry {
    * @return a subdirectory entry
    */
   private def createSubDirEntry(file: File, rva: Long, id: IDOrName, entryNr: Int, level: Level,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE): SubDirEntry = {
+    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
+    loopChecker: ResourceLoopChecker): SubDirEntry = {
     val address = removeHighestIntBit(rva)
-    val table = ResourceDirectory(file, level.up, address, virtualAddress, rsrcOffset, mmBytes)
+    val table = ResourceDirectory(file, level.up, address, virtualAddress, rsrcOffset, mmBytes, loopChecker)
     SubDirEntry(id, table, entryNr, rsrcOffset)
   }
 

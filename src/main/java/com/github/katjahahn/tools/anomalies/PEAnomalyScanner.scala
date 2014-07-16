@@ -92,7 +92,7 @@ object PEAnomalyScanner {
   def newInstance(data: PEData): PEAnomalyScanner =
     new PEAnomalyScanner(data) with COFFHeaderScanning with 
     OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning 
-    with ImportSectionScanning // with ExportSectionScanning with ResourceSectionScanning
+    with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
 
   def main(args: Array[String]): Unit = {
     val folder = new File("/home/deque/portextestfiles/goodfiles/xp/")

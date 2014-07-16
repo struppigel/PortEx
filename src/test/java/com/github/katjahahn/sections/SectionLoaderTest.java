@@ -123,6 +123,7 @@ public class SectionLoaderTest {
     public void loadResourceSection() throws IOException {
         for (TestData testdatum : testdata) {
             List<DataDirEntry> testDirs = testdatum.dataDir;
+            System.err.println(testdatum.filename);
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             for (DataDirEntry testDir : testDirs) {
                 if (testDir.getKey().equals(DataDirectoryKey.RESOURCE_TABLE)) {

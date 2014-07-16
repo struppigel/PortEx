@@ -26,6 +26,7 @@ import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
+import scala.collection.mutable.ListBuffer
 
 /**
  * Holds the root resource directory table and provides access to the resources.
@@ -34,7 +35,7 @@ import com.github.katjahahn.parser.Location
  *
  * Creates an instance of the resource section with the resource
  * directory table
- * 
+ *
  * @param resourceTable the root resource directory table that makes up the tree
  *   of the resource section
  * @param offset the file offset to the beginning of the resource table
@@ -44,11 +45,11 @@ class ResourceSection private (
   val resourceTable: ResourceDirectory,
   private val offset: Long,
   private val mmBytes: MemoryMappedPE) extends SpecialSection {
-  
+
   /**
    * Returns all file locations of the special section
    */
-  def getLocations(): java.util.List[Location] = 
+  def getLocations(): java.util.List[Location] =
     Location.mergeContinuous(resourceTable.locations).asJava
 
   /**
@@ -87,8 +88,13 @@ class ResourceSection private (
 
 object ResourceSection {
 
+  /**
+   * Maximum depth for the resource tree that is read.
+   */
+  val maxLevel = 20;
+
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/testfiles/WinRar.exe")
+    val file = new File("/home/deque/portextestfiles/unusualfiles/corkami/resource_loop.exe")
     val pedata = PELoader.loadPE(file)
     val rsrc = new SectionLoader(pedata).loadResourceSection()
     val res = rsrc.getResources.asScala
@@ -109,8 +115,9 @@ object ResourceSection {
     rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceSection = {
     val initialLevel = Level()
     val initialOffset = 0
+    val loopChecker = new ResourceLoopChecker()
     val resourceTable = ResourceDirectory(file, initialLevel,
-      initialOffset, virtualAddress, rsrcOffset, mmBytes)
+      initialOffset, virtualAddress, rsrcOffset, mmBytes, loopChecker)
     new ResourceSection(resourceTable, rsrcOffset, mmBytes)
   }
 
@@ -124,3 +131,23 @@ object ResourceSection {
     apply(loadInfo.data.getFile, loadInfo.va, loadInfo.fileOffset, loadInfo.memoryMapped)
 
 }
+
+/**
+ * Checks for resources loops. Exactly one instance per resource tree!
+ */
+class ResourceLoopChecker {
+    /**
+     * Saves references to known file offsets for resource directories to check for loops
+     */
+    private val fileOffsets = ListBuffer[Long]()
+
+    /**
+     * Returns true if the node is a new node, false otherwise. Used to check for
+     * resource tree loops.
+     */
+    def isNewResourceDirFileOffset(fileOffset: Long): Boolean = {
+      val isNew = !fileOffsets.contains(fileOffset)
+      fileOffsets += fileOffset
+      isNew
+    }
+  }
