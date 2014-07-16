@@ -13,12 +13,13 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
 * Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values
-* Visualize PE files
-* Calculate Shannon Entropy for sections
+* Visualize a PE file structure as it is on disk and local entropy
+* Calculate Shannon Entropy for files and sections
+* Calculate MD5 and SHA256 hash values for files and sections
 * Scan for PEiD signatures or your own signature database
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Scan for Unicode and ASCII strings contained in the file
-* Overlay detection
+* Overlay detection and dumping
 * Detection Heuristics based on statistical information
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
