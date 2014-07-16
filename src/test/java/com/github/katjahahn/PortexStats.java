@@ -50,7 +50,6 @@ public class PortexStats {
     private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
     private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
     private static final String STATS_FOLDER = "portexstats/";
-    @SuppressWarnings("unused")
     private static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
     private static final String BAD_FILES = "/home/deque/portextestfiles/badfiles/";
     private static int noPE = 0;
@@ -61,8 +60,28 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-        File[] files = new File(BAD_FILES).listFiles();
-        anomalyCount(files, BAD_FILES);
+        System.out.println("preparing file list...");
+//        File[] folders = new File(GOOD_FILES).listFiles();
+//        List<File[]> arrayList = new ArrayList<>();
+//        for (File folder : folders) {
+//            arrayList.add(folder.listFiles());
+//        }
+//        File[] allFiles = new File[0];
+//        for (File[] files : arrayList) {
+//            allFiles = concat(allFiles, files);
+//        }
+//        System.out.println("files listed: " + allFiles.length);
+        File[] allFiles = new File(BAD_FILES).listFiles();
+        anomalyCount(allFiles, BAD_FILES);
+    }
+
+    private static File[] concat(File[] a, File[] b) {
+        int aLen = a.length;
+        int bLen = b.length;
+        File[] c = new File[aLen + bLen];
+        System.arraycopy(a, 0, c, 0, aLen);
+        System.arraycopy(b, 0, c, aLen, bLen);
+        return c;
     }
 
     public static void entropies(File[] files) {
@@ -322,9 +341,9 @@ public class PortexStats {
                             + files.length);
                 }
             } catch (Exception e) {
-                logger.error(file.getName() + " not loaded! Message: "
+                logger.error(file.getAbsolutePath() + " not loaded! Message: "
                         + e.getMessage());
-//                 e.printStackTrace();
+//                e.printStackTrace();
                 notLoaded++;
             }
         }
@@ -339,12 +358,12 @@ public class PortexStats {
     private static String createReport(Map<AnomalySubType, Integer> map,
             int total) {
         StringBuilder b = new StringBuilder();
-        b.append("Anomaly\tCount\tPercentage\n");
+        b.append("\nAnomaly Type;Count;Percentage\n\n");
         for (Entry<AnomalySubType, Integer> entry : map.entrySet()) {
             AnomalySubType type = entry.getKey();
             Integer counter = entry.getValue();
             double percent = counter * 100 / (double) total;
-            b.append(type + "\t" + counter + "\t" + percent + "\n");
+            b.append(type + ";" + counter + ";" + percent + "\n");
             // b.append(counter + " times / " + percent + "% " + type + "\n");
         }
         return b.toString();

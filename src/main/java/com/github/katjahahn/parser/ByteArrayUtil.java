@@ -144,7 +144,7 @@ public class ByteArrayUtil {
         }
         return bytesToLong(value);
     }
-
+    
     /**
      * Converts a byte array to a hex string.
      * <p>
@@ -157,12 +157,28 @@ public class ByteArrayUtil {
      */
     @Requires("array != null")
     public static String byteToHex(byte[] array) {
+        return byteToHex(array, " ");
+    }
+
+    /**
+     * Converts a byte array to a hex string.
+     * <p>
+     * Every single byte is shown in the string, also prepended zero bytes.
+     * Single bytes are delimited with the separator.
+     * 
+     * @param array
+     *            byte array to convert
+     * @param separator the delimiter of the bytes
+     * @return hexadecimal string representation of the byte array
+     */
+    @Requires("array != null")
+    public static String byteToHex(byte[] array, String separator) {
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
             if ((array[i] & 0xff) < 0x10) {
                 buffer.append("0");
             }
-            buffer.append(Integer.toString(array[i] & 0xff, 16) + " ");
+            buffer.append(Integer.toString(array[i] & 0xff, 16) + separator);
         }
         return buffer.toString().trim();
     }

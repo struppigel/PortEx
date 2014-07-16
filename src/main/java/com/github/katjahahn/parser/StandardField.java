@@ -23,7 +23,7 @@ import com.google.java.contract.Invariant;
  * @author Katja Hahn
  * 
  */
-@Invariant({ "key != null", "size > 0", "offset >= 0" })
+@Invariant({ "key != null" })
 public class StandardField {
 
     /**
