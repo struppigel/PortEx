@@ -27,13 +27,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
-import com.github.katjahahn.parser.sections.SectionHeader;
-import com.github.katjahahn.parser.sections.SectionHeaderKey;
-import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
-import com.google.common.base.Optional;
+import com.github.katjahahn.tools.ReportCreator;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -205,41 +200,14 @@ public final class PELoader {
 
     public static void main(String[] args) throws IOException {
         logger.entry();
-         File file = new File(
-         "/home/deque/portextestfiles/badfiles/VirusShare_05e261d74d06dd8d35583614def3f22e");
+//         File file = new File(
+//         "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
         // File file = new
         // File("/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
-        // TODO this file's resource sections points into no where, but within
-        // the file --> does it read from disk?
-        // File file = new
-        // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
+         File file = new
+         File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
 //        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
-        System.out.println(data);
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-        System.out.println(scanner.scanReport());
-        SectionLoader loader = new SectionLoader(data);
-        SectionTable table = data.getSectionTable();
-        System.out.println("file size: " + file.length());
-        for (SectionHeader header : table.getSectionHeaders()) {
-            long start = header.getAlignedPointerToRaw();
-            long end = loader.getReadSize(header) + start;
-            System.out.println(header.getNumber() + ". " + header.getName()
-                    + " start: " + start + " end: " + end);
-            long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
-            long vEnd = header.getAlignedVirtualSize() + vStart;
-            System.out.println("virtual start: " + vStart + " virtual end: "
-                    + vEnd);
-        }
-        System.out.println("file size: " + file.length());
-        // Optional<ImportSection> idata = loader.maybeLoadImportSection();
-        // System.out.println(idata.get().getInfo());
-        // Optional<ExceptionSection> maybePData =
-        // loader.maybeLoadExceptionSection();
-        // Optional<ExportSection> edata = loader.maybeLoadExportSection();
-        Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
-        if (rsrc.isPresent()) {
-            System.out.println(rsrc.get().getInfo());
-        }
+        new ReportCreator(data).printReport();
     }
 }

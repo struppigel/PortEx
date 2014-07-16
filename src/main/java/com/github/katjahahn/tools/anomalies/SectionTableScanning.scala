@@ -16,21 +16,21 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.tools.anomalies
-import AnomalySubType._
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.IOUtil.{ NL }
+
 import java.util.Arrays
-import com.github.katjahahn.tools.Overlay
-import com.github.katjahahn.parser.sections.SectionCharacteristic
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import com.github.katjahahn.parser.sections.SectionCharacteristic._
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
+import com.github.katjahahn.parser.StandardField
+import com.github.katjahahn.parser.sections.SectionCharacteristic
+import com.github.katjahahn.parser.sections.SectionCharacteristic._
+import com.github.katjahahn.parser.sections.SectionHeader
+import com.github.katjahahn.parser.sections.SectionHeaderKey
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.tools.Overlay
+import com.github.katjahahn.parser.IOUtil.NL
+import AnomalySubType._
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
 
 /**
  * Scans the Section Table for anomalies.
@@ -58,16 +58,6 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkSectionCharacteristics
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
-  }
-
-  private def containsEP(header: SectionHeader): Boolean = {
-    val ep = data.getOptionalHeader().get(
-      StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
-    val vStart = header.getAlignedVirtualAddress()
-    var vSize = header.getAlignedVirtualSize()
-    if (vSize == 0) vSize = header.getAlignedSizeOfRaw()
-    val vEnd = vSize + vStart
-    ep >= vStart && ep < vEnd
   }
 
   private def checkSectionCharacteristics(): List[Anomaly] = {
@@ -109,11 +99,12 @@ trait SectionTableScanning extends AnomalyScanner {
 
     val anomalyList = ListBuffer[Anomaly]()
     val headers = data.getSectionTable.getSectionHeaders.asScala
+    val loader = new SectionLoader(data)
     for (header <- headers) {
       val sectionName = filteredString(header.getName)
       val characs = header.getCharacteristics.asScala.toList
       val entry = header.getField(SectionHeaderKey.CHARACTERISTICS)
-      if (containsEP(header)) {
+      if (loader.containsEntryPoint(header)) {
         if (characs.contains(IMAGE_SCN_MEM_WRITE)) {
           val description = s"Entry point is in writeable section ${header.getNumber} with name ${sectionName}"
           anomalyList += FieldAnomaly(entry, description, EP_IN_WRITEABLE_SEC)

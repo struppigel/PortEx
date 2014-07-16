@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools.sigscanner
 
 import java.io.File
@@ -29,6 +31,7 @@ import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.sections.SectionHeaderKey
+import org.apache.logging.log4j.LogManager
 
 /**
  * Scans PE files for compiler and packer signatures.
@@ -40,6 +43,7 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey
  */
 class SignatureScanner(signatures: List[Signature]) {
 
+  val logger = LogManager.getLogger(SignatureScanner.getClass.getName);
   /**
    * Creates a SignatureScanner that uses the signatures applied
    * @param signatures to use for scanning
@@ -82,7 +86,7 @@ class SignatureScanner(signatures: List[Signature]) {
     (for ((m, addr) <- matches)
       yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
   }
-  
+
   /**
    * Searches for matches in the whole file uscom.github.katjahahn.tools.sigscanner.se signatures.
    *
@@ -90,7 +94,7 @@ class SignatureScanner(signatures: List[Signature]) {
    */
   def findAllEPFalseMatches(file: File): java.util.List[MatchedSignature] =
     _findAllEPFalseMatches(file).map(toMatchedSignature).asJava
-  
+
   def _findAllEPFalseMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
@@ -112,18 +116,24 @@ class SignatureScanner(signatures: List[Signature]) {
    *
    * @param file to search for signatures
    */
-  
-  def findAllEPMatches(file: File): java.util.List[MatchedSignature] = 
+
+  def findAllEPMatches(file: File): java.util.List[MatchedSignature] =
     _findAllEPMatches(file).map(toMatchedSignature).asJava
-    
+
   def _findAllEPMatches(file: File): List[ScanResult] = {
     using(new RandomAccessFile(file, "r")) { raf =>
-      val entryPoint = getEntryPoint(file)
-      raf.seek(entryPoint.toLong)
-      var bytes = Array.fill(longestSigSequence + 1)(0.toByte)
-      val bytesRead = raf.read(bytes)
-      val matches = epOnlySigs.findMatches(bytes.slice(0, bytesRead).toList)
-      matches.map((_, entryPoint.toLong))
+      val maybeEntryPoint = maybeGetEntryPoint(file)
+      maybeEntryPoint match {
+        case Some(entryPoint) =>
+          raf.seek(entryPoint.toLong)
+          var bytes = Array.fill(longestSigSequence + 1)(0.toByte)
+          val bytesRead = raf.read(bytes)
+          val matches = epOnlySigs.findMatches(bytes.slice(0, bytesRead).toList)
+          matches.map((_, entryPoint.toLong))
+        case None =>
+          logger.warn("no entry point found")
+          List()
+      }
     }
   }
 
@@ -135,12 +145,13 @@ class SignatureScanner(signatures: List[Signature]) {
    *
    * @param data the pedata result created by a PELoader
    */
-  def getEntryPoint(file: File): Long = {
+  def maybeGetEntryPoint(file: File): Option[Long] = {
     val data = PELoader.loadPE(file)
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
-    val section = new SectionLoader(data).maybeGetSectionHeaderByRVA(rva).get
-    val phystovirt = section.get(SectionHeaderKey.VIRTUAL_ADDRESS) - section.get(SectionHeaderKey.POINTER_TO_RAW_DATA)
-    rva - phystovirt
+    val loader = new SectionLoader(data)
+    val maybeOffset = loader.maybeGetFileOffset(rva)
+    if (maybeOffset.isPresent) Some(maybeOffset.get)
+    else None
   }
 }
 
@@ -186,7 +197,6 @@ object SignatureScanner {
   def apply(): SignatureScanner =
     new SignatureScanner(loadDefaultSigs())
 
-  
   /**
    * Loads the signatures from the given file.
    *
@@ -247,7 +257,7 @@ object SignatureScanner {
    */
   def loadSignatures(sigFile: File): java.util.List[Signature] =
     _loadSignatures(sigFile).asJava
-    
+
   def toMatchedSignature(result: ScanResult): MatchedSignature = {
     val (sig, addr) = result
     val signature = Signature.bytes2hex(sig.signature, " ")
@@ -258,7 +268,7 @@ object SignatureScanner {
     val file = new File("Holiday_Island.exe")
     val scanner = SignatureScanner()
     scanner.scanAll(file).asScala.foreach(println)
-//    invokeCLI(args)
+    //    invokeCLI(args)
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -295,7 +305,7 @@ object SignatureScanner {
       return
     }
     println("scanning file ...")
-    if(!eponly) println("(this might take a while)")
+    if (!eponly) println("(this might take a while)")
     try {
       val scanner = new SignatureScanner(_loadSignatures(sigFile))
       val list = scanner.scanAll(pefile, eponly).asScala

@@ -30,6 +30,7 @@ import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
@@ -303,6 +304,9 @@ public class SectionLoader {
         if (fileOffset <= file.length()) {
             return Optional.of(fileOffset);
         }
+        logger.warn("invalid file offset: 0x" + Long.toHexString(fileOffset)
+                + " for file: " + file.getName() + " with length 0x"
+                + Long.toHexString(file.length()));
         // file offset is invalid
         return Optional.absent();
     }
@@ -328,15 +332,17 @@ public class SectionLoader {
         }
         return Optional.absent();
     }
-    
+
     /**
-     * Returns the section entry of the section table the offset is pointing into.
+     * Returns the section entry of the section table the offset is pointing
+     * into.
      * 
      * @param table
      *            the section table of the file
      * @param offset
      *            the file offset
-     * @return the {@link SectionHeader} of the section the offset is pointing into
+     * @return the {@link SectionHeader} of the section the offset is pointing
+     *         into
      */
     @Ensures("result != null")
     public Optional<SectionHeader> maybeGetSectionHeaderByOffset(long fileOffset) {
@@ -344,7 +350,8 @@ public class SectionLoader {
         for (SectionHeader header : sections) {
             long size = getReadSize(header);
             long address = header.getAlignedPointerToRaw();
-            if (rvaIsWithin(address, size, fileOffset)) { //TODO misleading name of method
+            if (rvaIsWithin(address, size, fileOffset)) { // TODO misleading
+                                                          // name of method
                 return Optional.of(header);
             }
         }
@@ -490,7 +497,7 @@ public class SectionLoader {
     @Ensures("result != null")
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
-       return (Optional<ResourceSection>) maybeLoadSpecialSection(DataDirectoryKey.RESOURCE_TABLE);
+        return (Optional<ResourceSection>) maybeLoadSpecialSection(DataDirectoryKey.RESOURCE_TABLE);
     }
 
     /**
@@ -611,16 +618,17 @@ public class SectionLoader {
         if (dirEntry.isPresent()) {
             long virtualAddress = dirEntry.get().getVirtualAddress();
             Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
-            if(!maybeOffset.isPresent()) {
-                logger.error("unable to get file offset for " + dataDirKey);
+            if (maybeOffset.isPresent()) {
+                long offset = maybeOffset.or(0L);
+                return Optional.of(new LoadInfo(offset, virtualAddress,
+                        getMemoryMappedPE(), data, this));
+            } else {
+                logger.info("unable to get file offset for " + dataDirKey);
             }
-            long offset = maybeOffset.or(0L);
-            return Optional.of(new LoadInfo(offset, virtualAddress,
-                    getMemoryMappedPE(), data, this));
         }
         return Optional.absent();
     }
-    
+
     /**
      * Contains the load information for a certain data directory.
      */
@@ -644,24 +652,16 @@ public class SectionLoader {
     }
 
     /**
-     * Returns whether the data directory entry points into a valid section.
-     * <p>
-     * Returns false if no data directory entry is present for the key or the
-     * section is invalid.
+     * Returns whether the virtual address of the data directory entry is valid.
      * 
-     * @see #isValidSection()
      * @param dataDirKey
-     *            the key for the data directory entry
-     * @return true if the data directory entry for the key points into a valid
-     *         section. False if no data directory entry present for the key or
-     *         section invalid.
+     * @return true iff virtual address is valid
      */
-    public boolean pointsToValidSection(DataDirectoryKey dataDirKey) {
-        Optional<SectionHeader> header = maybeGetSectionHeader(dataDirKey);
-        if (header.isPresent()) {
-            return isValidSection(header.get());
-        }
-        return false;
+    @Beta
+    public boolean hasValidPointer(DataDirectoryKey dataDirKey) {
+        DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
+        long rva = dataDir.getVirtualAddress();
+        return maybeGetFileOffset(rva).isPresent();
     }
 
     /**
@@ -675,6 +675,7 @@ public class SectionLoader {
      *            the section's header
      * @return true iff section is valid
      */
+    @Beta
     public boolean isValidSection(SectionHeader header) {
         // sidenote: the readsize should never be > 0 if the section starts
         // outside the file
@@ -683,4 +684,17 @@ public class SectionLoader {
                 && header.getAlignedPointerToRaw() < file.length();
     }
 
+    //TODO more general method? Like contains RVA?
+    @Beta 
+    public boolean containsEntryPoint(SectionHeader header) {
+        long ep = data.getOptionalHeader().get(
+                StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
+        long vStart = header.getAlignedVirtualAddress();
+        long vSize = header.getAlignedVirtualSize();
+        if (vSize == 0) {
+            vSize = header.getAlignedSizeOfRaw();
+        }
+        long vEnd = vSize + vStart;
+        return ep >= vStart && ep < vEnd;
+    }
 }

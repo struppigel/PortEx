@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.PELoader
@@ -30,10 +32,11 @@ import com.github.katjahahn.tools.sigscanner.SignatureScanner
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.coffheader.COFFFileHeader
+import com.github.katjahahn.parser.optheader.DataDirectoryKey
 
 /**
  * Utility for easy creation of PE file reports.
- * 
+ *
  * @author Katja Hahn
  */
 class ReportCreator(private val data: PEData) {
@@ -67,7 +70,7 @@ class ReportCreator(private val data: PEData) {
   def importsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeImports = loader.maybeLoadImportSection()
-    if (maybeImports.isPresent) {
+    if (maybeImports.isPresent && !maybeImports.get.isEmpty) {
       val idata = maybeImports.get
       val buf = new StringBuffer()
       buf.append(title("Imports") + NL)
@@ -82,7 +85,7 @@ class ReportCreator(private val data: PEData) {
   def exportsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeExports = loader.maybeLoadExportSection()
-    if (maybeExports.isPresent) {
+    if (maybeExports.isPresent && !maybeExports.get.isEmpty) {
       val edata = maybeExports.get
       val buf = new StringBuffer()
       buf.append(title("Exports") + NL)
@@ -97,7 +100,7 @@ class ReportCreator(private val data: PEData) {
   def resourcesReport(): String = {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
-    if (maybeRSRC.isPresent) {
+    if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
       val buf = new StringBuffer()
       buf.append(title("Resources") + NL)
@@ -216,6 +219,19 @@ class ReportCreator(private val data: PEData) {
     buf.toString + NL
   }
 
+  /**
+   * Filters all control symbols and extended code from the given string. The
+   * filtered string is returned.
+   *
+   * @return filtered string
+   */
+  //TODO duplicate of SectionTableScanning method
+  private def filteredString(string: String): String = {
+    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
+    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
+    string.filterNot(controlCode).filterNot(extendedCode)
+  }
+
   def secTableReport(): String = {
     val table = data.getSectionTable
     val allSections = table.getSectionHeaders.asScala
@@ -224,7 +240,7 @@ class ReportCreator(private val data: PEData) {
     build.append(title("Section Table"))
     for (secs <- allSections.grouped(maxSec).toList) {
       val sections = secs.toList
-      val tableHeader = sectionEntryLine(sections, "", (s: SectionHeader) => s.getName)
+      val tableHeader = sectionEntryLine(sections, "", (s: SectionHeader) => s.getNumber() + ". " + filteredString(s.getName))
       val tableLine = pad("", tableHeader.length, "-") + NL
       build.append(tableHeader + tableLine)
       val entropy = new ShannonEntropy(data)

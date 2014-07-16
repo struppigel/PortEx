@@ -60,19 +60,23 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
+        ableToLoadSections(new File(BAD_FILES));
+    }
+
+    @SuppressWarnings("unused")
+    private static void anomalyCountGood() {
         System.out.println("preparing file list...");
-//        File[] folders = new File(GOOD_FILES).listFiles();
-//        List<File[]> arrayList = new ArrayList<>();
-//        for (File folder : folders) {
-//            arrayList.add(folder.listFiles());
-//        }
-//        File[] allFiles = new File[0];
-//        for (File[] files : arrayList) {
-//            allFiles = concat(allFiles, files);
-//        }
-//        System.out.println("files listed: " + allFiles.length);
-        File[] allFiles = new File(BAD_FILES).listFiles();
-        anomalyCount(allFiles, BAD_FILES);
+        File[] folders = new File(GOOD_FILES).listFiles();
+        List<File[]> arrayList = new ArrayList<>();
+        for (File folder : folders) {
+            arrayList.add(folder.listFiles());
+        }
+        File[] allFiles = new File[0];
+        for (File[] files : arrayList) {
+            allFiles = concat(allFiles, files);
+        }
+        System.out.println("files listed: " + allFiles.length);
+        anomalyCount(allFiles, GOOD_FILES);
     }
 
     private static File[] concat(File[] a, File[] b) {
@@ -343,7 +347,7 @@ public class PortexStats {
             } catch (Exception e) {
                 logger.error(file.getAbsolutePath() + " not loaded! Message: "
                         + e.getMessage());
-//                e.printStackTrace();
+                // e.printStackTrace();
                 notLoaded++;
             }
         }
@@ -467,12 +471,11 @@ public class PortexStats {
         }
     }
 
-    public static int ableToLoadSections() {
+    public static int ableToLoadSections(File folder) {
         int ableToLoad = 0;
         int unableToLoad = 0;
         int filesReadCounter = 0;
         List<String> problemPEs = new ArrayList<>();
-        File folder = new File(BAD_FILES);
         File[] files = folder.listFiles();
         for (File file : files) {
             try {
@@ -482,17 +485,17 @@ public class PortexStats {
                         .getOptionalHeader().getDataDirEntries();
                 if (map.containsKey(DataDirectoryKey.RESOURCE_TABLE)
                         && loader
-                                .pointsToValidSection(DataDirectoryKey.RESOURCE_TABLE)) {
+                                .hasValidPointer(DataDirectoryKey.RESOURCE_TABLE)) {
                     loader.loadResourceSection();
                 }
                 if (map.containsKey(DataDirectoryKey.IMPORT_TABLE)
                         && loader
-                                .pointsToValidSection(DataDirectoryKey.IMPORT_TABLE)) {
+                                .hasValidPointer(DataDirectoryKey.IMPORT_TABLE)) {
                     loader.loadImportSection();
                 }
                 if (map.containsKey(DataDirectoryKey.EXPORT_TABLE)
                         && loader
-                                .pointsToValidSection(DataDirectoryKey.EXPORT_TABLE)) {
+                                .hasValidPointer(DataDirectoryKey.EXPORT_TABLE)) {
                     loader.loadExportSection();
                 }
                 ableToLoad++;

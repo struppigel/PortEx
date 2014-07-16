@@ -111,8 +111,6 @@ class Jar2ExeScanner(file: File) {
    */
   def createReport(): String = {
     if (scanResult.length == 0) return "no indication for java wrapper found"
-
-    val ep = "Entry point: 0x" + scanner.getEntryPoint(file).toHexString + "\n\n"
     var lastName = ""
     val sigs = (for ((sig, addr) <- scanResult) yield {
       var str = new StringBuilder()
@@ -132,7 +130,7 @@ class Jar2ExeScanner(file: File) {
       "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n"
     } else ""
 
-    "Signatures found:\n" + sigs + "\n" + ep + addresses
+    "Signatures found:\n" + sigs + "\n" + addresses
   }
 
   /**
