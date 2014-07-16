@@ -1,4 +1,4 @@
-package com.github.katjahahn;
+package com.github.katjahahn.parser;
 
 import static org.testng.Assert.*;
 

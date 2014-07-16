@@ -1,4 +1,4 @@
-package com.github.katjahahn.coffheader;
+package com.github.katjahahn.parser.coffheader;
 
 import static org.testng.Assert.*;
 

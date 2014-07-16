@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn;
+package com.github.katjahahn.parser;
 
 import static org.testng.Assert.*;
 
@@ -26,6 +26,7 @@ import java.util.Map;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.PEData;

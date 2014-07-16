@@ -1,4 +1,4 @@
-package com.github.katjahahn.sections.idata;
+package com.github.katjahahn.parser.sections.idata;
 
 import static org.testng.Assert.*;
 
@@ -15,18 +15,18 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.SectionLoaderTest;
 import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey;
 import com.github.katjahahn.parser.sections.idata.ImportDLL;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.idata.NameImport;
 import com.github.katjahahn.parser.sections.idata.OrdinalImport;
-import com.github.katjahahn.sections.SectionLoaderTest;
 import com.google.common.base.Optional;
 
 public class ImportSectionTest {

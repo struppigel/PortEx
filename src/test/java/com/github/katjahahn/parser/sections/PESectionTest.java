@@ -1,4 +1,4 @@
-package com.github.katjahahn.sections;
+package com.github.katjahahn.parser.sections;
 
 import static org.testng.Assert.*;
 

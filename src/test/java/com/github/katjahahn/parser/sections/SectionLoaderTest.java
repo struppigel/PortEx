@@ -1,4 +1,4 @@
-package com.github.katjahahn.sections;
+package com.github.katjahahn.parser.sections;
 
 import static org.testng.Assert.*;
 
@@ -13,11 +13,11 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.sections.PESection;

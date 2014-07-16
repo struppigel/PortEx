@@ -1,4 +1,4 @@
-package com.github.katjahahn.optheader;
+package com.github.katjahahn.parser.optheader;
 
 import static org.testng.Assert.*;
 

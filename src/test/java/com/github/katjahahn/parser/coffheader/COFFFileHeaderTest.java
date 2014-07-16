@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn.coffheader;
+package com.github.katjahahn.parser.coffheader;
 
 import static org.testng.Assert.*;
 
@@ -29,11 +29,11 @@ import java.util.Map.Entry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
 import com.github.katjahahn.parser.coffheader.MachineType;

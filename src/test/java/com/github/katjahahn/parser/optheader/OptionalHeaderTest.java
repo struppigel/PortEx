@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn.optheader;
+package com.github.katjahahn.parser.optheader;
 
 import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
 import static org.testng.Assert.*;
@@ -30,9 +30,9 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;

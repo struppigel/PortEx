@@ -1,4 +1,4 @@
-package com.github.katjahahn.sections.rdata;
+package com.github.katjahahn.parser.sections.rdata;
 
 import static org.testng.Assert.*;
 
@@ -11,12 +11,12 @@ import java.util.Map;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.PELoaderTest;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.rsrc.IDOrName;
 import com.github.katjahahn.parser.sections.rsrc.Level;
