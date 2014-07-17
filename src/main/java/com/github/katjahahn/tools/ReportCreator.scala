@@ -207,7 +207,7 @@ class ReportCreator(private val data: PEData) {
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
       }
     }
-    val padLengthDataDir = "pointer to symbol ".length
+    val padLengthDataDir = "delay import descriptor ".length
     val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("file offset", colWidth, " ")
     val dataDirs = opt.getDataDirEntries().values.asScala.toList.sortBy(e => e.getTableEntryOffset)
     buf.append(NL + dataDirHeader + NL + tableLine)

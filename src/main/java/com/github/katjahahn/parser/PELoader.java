@@ -203,7 +203,7 @@ public final class PELoader {
 //         File file = new File(
 //         "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
          File file = new
-         File("/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe");
+         File("/home/deque/portextestfiles/badfiles/VirusShare_7dfe20f5164d80e37b7ba7184d4c73b4");
 //         File file = new
 //         File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
         PEData data = PELoader.loadPE(file);

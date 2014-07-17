@@ -27,6 +27,7 @@ import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.tools.Visualizer
 import javax.imageio.ImageIO
+import com.github.katjahahn.tools.ReportCreator
 
 /**
  * Scans for anomalies and malformations in a PE file.
@@ -90,15 +91,13 @@ object PEAnomalyScanner {
    * @return a PEAnomalyScanner instance with the traits applied from the boolean values
    */
   def newInstance(data: PEData): PEAnomalyScanner =
-    new PEAnomalyScanner(data) with COFFHeaderScanning with 
-    OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning 
-    with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
+    new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("/home/deque/portextestfiles/goodfiles/xp/")
+    val folder = new File("/home/deque/portextestfiles/badfiles/")
     var counter = 0
     for (file <- folder.listFiles()) {
-      val outfile = new File("peimages/" + file.getName() + ".png")
+      val outfile = new File(file.getName() + ".png")
       counter += 1
       if (counter % 1000 == 0) {
         println("files read: " + counter)
@@ -106,22 +105,21 @@ object PEAnomalyScanner {
       if (!outfile.exists()) {
         try {
           val data = PELoader.loadPE(file)
-          //      println(data)
           val loader = new SectionLoader(data)
           val scanner = PEAnomalyScanner.newInstance(data)
           val over = new Overlay(data)
-          //        if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.FRACTIONATED_DATADIR).isEmpty) {
-          println(scanner.scanReport)
-          println("has overlay: " + over.exists())
-          println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-          //          println(file.getName())
-          println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-          val vi = new Visualizer(data)
-          val image = vi.createEntropyImage()
-          ImageIO.write(image, "png", outfile);
-          println()
-
-          //        }
+          if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.RESOURCE_LOOP).isEmpty) {
+//              new ReportCreator(data).printReport()
+            println(scanner.scanReport)
+//            println("has overlay: " + over.exists())
+//            println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
+//            //          println(file.getName())
+//            println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
+            val vi = new Visualizer(data)
+            val image = vi.createEntropyImage()
+            ImageIO.write(image, "png", outfile);
+            println()
+          }
         } catch {
           case e: Exception => System.err.println(e.getMessage)
         }

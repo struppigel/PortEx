@@ -55,6 +55,20 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
           AnomalySubType.COLLAPSED_MSDOS_HEADER, locations))
     } else Nil
   }
+  
+  //TODO maybe not reserved anymore? add to thesis?
+  private def checkReservedFields(): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val msdos = data.getMSDOSHeader()
+    val entries = msdos.getHeaderEntries.asScala
+    for(entry <- entries) {
+      if(entry.description.contains("Reserved")) {
+        val description = s"MSDOS Header: Reserved field set: " + entry.description
+        anomalyList += FieldAnomaly(entry, description, AnomalySubType.RESERVED_MSDOS_FIELD)
+      }
+    }
+    anomalyList.toList
+  }
 
   //TODO non-default stub
 

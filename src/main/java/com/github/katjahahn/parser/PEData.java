@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.Header.*;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -25,6 +23,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.msdos.MSDOSLoadModule;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.tools.ReportCreator;
 import com.google.common.annotations.Beta;
 
 /**
@@ -141,13 +140,14 @@ public class PEData {
 
     /**
      * Returns a description string of all pe headers (that is msdos header,
-     * pesignature, coff file header, optional header and section table).
+     * coff file header, optional header and section table).
      * 
      * @return description string of all pe headers
      */
     public String getInfo() {
-        return msdos.getInfo() + NL + pesig.getInfo() + NL + coff.getInfo()
-                + NL + opt.getInfo() + NL + table.getInfo();
+        ReportCreator reporter = new ReportCreator(this);
+        return reporter.msdosHeaderReport() + reporter.coffHeaderReport() +
+                reporter.optHeaderReport() + reporter.secTableReport();
     }
 
     /**

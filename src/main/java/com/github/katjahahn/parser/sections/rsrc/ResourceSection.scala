@@ -40,11 +40,13 @@ import scala.collection.mutable.ListBuffer
  *   of the resource section
  * @param offset the file offset to the beginning of the resource table
  * @param mmBytes the memory mapped PE
+ * @param hasLoop indicates whether the resource tree has a loop
  */
 class ResourceSection private (
   val resourceTable: ResourceDirectory,
   private val offset: Long,
-  private val mmBytes: MemoryMappedPE) extends SpecialSection {
+  private val mmBytes: MemoryMappedPE,
+  val hasLoop: Boolean) extends SpecialSection {
 
   /**
    * Returns all file locations of the special section
@@ -118,7 +120,8 @@ object ResourceSection {
     val loopChecker = new ResourceLoopChecker()
     val resourceTable = ResourceDirectory(file, initialLevel,
       initialOffset, virtualAddress, rsrcOffset, mmBytes, loopChecker)
-    new ResourceSection(resourceTable, rsrcOffset, mmBytes)
+    val hasLoop = loopChecker.loopDetected
+    new ResourceSection(resourceTable, rsrcOffset, mmBytes, hasLoop)
   }
 
   /**
@@ -140,6 +143,7 @@ class ResourceLoopChecker {
      * Saves references to known file offsets for resource directories to check for loops
      */
     private val fileOffsets = ListBuffer[Long]()
+    private var _loopDetected: Boolean = false
 
     /**
      * Returns true if the node is a new node, false otherwise. Used to check for
@@ -148,6 +152,12 @@ class ResourceLoopChecker {
     def isNewResourceDirFileOffset(fileOffset: Long): Boolean = {
       val isNew = !fileOffsets.contains(fileOffset)
       fileOffsets += fileOffset
+      if(!isNew) _loopDetected = true
       isNew
     }
+
+    /**
+     * Indicates if a loop was detected.
+     */
+    def loopDetected(): Boolean = _loopDetected
   }

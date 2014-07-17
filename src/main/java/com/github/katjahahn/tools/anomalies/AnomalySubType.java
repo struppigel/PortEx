@@ -33,7 +33,12 @@ public enum AnomalySubType {
      * The MSDOS header is collapsed, i.e. parts are missing.
      */
     COLLAPSED_MSDOS_HEADER(STRUCTURE),
-
+    
+    /**
+     * Reserved MSDOS field is not zero
+     */
+    RESERVED_MSDOS_FIELD(RESERVED),
+    
     /*************************** COFF File Header *****************************/
 
     /**
@@ -308,7 +313,14 @@ public enum AnomalySubType {
     /**
      * Imports, Exports, or Resources, etc, are stretched over several sections
      */
-    FRACTIONATED_DATADIR(STRUCTURE);
+    FRACTIONATED_DATADIR(STRUCTURE),
+    
+    /**************************** Resource Section ******************************/
+    
+    /**
+     * Resource tree has a loop.
+     */
+    RESOURCE_LOOP(STRUCTURE);
 
     private final AnomalyType superType;
 

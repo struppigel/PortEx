@@ -8,6 +8,7 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection
+import scala.collection.JavaConverters._
 
 trait ResourceSectionScanning extends AnomalyScanner {
   abstract override def scanReport(): String =
@@ -19,8 +20,21 @@ trait ResourceSectionScanning extends AnomalyScanner {
       val rsrc = maybeRsrc.get
       val anomalyList = ListBuffer[Anomaly]()
       anomalyList ++= checkFractionatedResources(rsrc)
+      anomalyList ++= checkResourceLoop(rsrc)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
+  }
+
+  private def checkResourceLoop(rsrc: ResourceSection): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    if (rsrc.hasLoop) {
+      val description = "Detected loop in resource tree!"
+      //TODO specify exact location of loop?
+      val locs = rsrc.getLocations.asScala.toList 
+      anomalyList += StructureAnomaly(PEStructureKey.RESOURCE_SECTION, 
+          description, AnomalySubType.RESOURCE_LOOP, locs)
+    }
+    anomalyList.toList
   }
 
   private def checkFractionatedResources(rsrc: ResourceSection): List[Anomaly] = {
