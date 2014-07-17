@@ -202,11 +202,10 @@ public final class PELoader {
         logger.entry();
 //         File file = new File(
 //         "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
-        // File file = new
-        // File("/home/deque/portextestfiles/unusualfiles/corkami/sectionless.exe");
          File file = new
-         File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-//        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
+         File("/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe");
+//         File file = new
+//         File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
     }

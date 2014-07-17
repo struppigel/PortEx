@@ -40,7 +40,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * <p>
      * Note: The actual header may be larger, containing optional values.
      */
-    public static final int FORMATTED_HEADER_SIZE = 28;
+    public static final int FORMATTED_HEADER_SIZE = 64;
     private static final int PARAGRAPH_SIZE = 16; // in Byte
 
     private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
@@ -86,6 +86,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * 
      * @return size of header
      */
+    //TODO this is size of header + stub ?
     @Ensures("result >= 0")
     public long getHeaderSize() {
         long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS)
