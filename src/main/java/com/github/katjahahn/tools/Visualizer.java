@@ -230,21 +230,22 @@ public class Visualizer {
             this.pixelSize = pixelSize;
         }
     }
-    
-    //TODO optimize
+
+    // TODO optimize
     public BufferedImage createEntropyImage() throws IOException {
-        image = new BufferedImage(legendWidth + fileWidth * 2, height, IMAGE_TYPE);
+        image = new BufferedImage(legendWidth + fileWidth * 2, height,
+                IMAGE_TYPE);
         byte[] bytes = Files.readAllBytes(data.getFile().toPath());
         double[] entropies = ShannonEntropy.localEntropies(bytes);
-        for(int i = 0; i < entropies.length; i += withMinLength(0)) {
-            int col = (int)(entropies[i] * 255);
+        for (int i = 0; i < entropies.length; i += withMinLength(0)) {
+            int col = (int) (entropies[i] * 255);
             Color color = new Color(col, col, col);
             long minLength = withMinLength(0);
             drawPixels(color, i, minLength);
         }
         BufferedImage result = image;
         BufferedImage append = createImage();
-        result.createGraphics().drawImage(append, fileWidth, 0, null); 
+        result.createGraphics().drawImage(append, fileWidth, 0, null);
         image = result;
         return result;
     }
@@ -278,8 +279,11 @@ public class Visualizer {
         drawPixels(coffColor, coffOffset, coffSize);
 
         long tableOffset = data.getSectionTable().getOffset();
-        long tableSize = withMinLength(data.getSectionTable().getSize());
-        drawPixels(sectionTableColor, tableOffset, tableSize);
+        long tableSize = data.getSectionTable().getSize();
+        if(tableSize != 0){
+            tableSize = withMinLength(tableSize);
+            drawPixels(sectionTableColor, tableOffset, tableSize);
+        }
 
         Overlay overlay = new Overlay(data);
         if (overlay.exists()) {
@@ -401,11 +405,11 @@ public class Visualizer {
             drawPixels(getSectionColor(header), sectionOffset, sectionSize);
         }
     }
-    
+
     private Color getSectionColor(SectionHeader header) {
         int nr = header.getNumber();
         Color sectionColor = sectionColorStart;
-        for(int i = 1; i < nr; i++) {
+        for (int i = 1; i < nr; i++) {
             sectionColor = variate(sectionColor);
         }
         return sectionColor;
@@ -616,39 +620,12 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-//        File file = new File("/home/deque/portextestfiles/testfiles/Lab03-01.exe");
-//        File file = new File(
-//                "/home/deque/portextestfiles/badfiles/VirusShare_3e34ab859867eb66b168ee5bf397ed91");
-        File file = new File(
-                "/home/deque/portextestfiles/trojan.spy.zeus.1.gen");
+        File file = new File("/home/deque/portextestfiles/traceless.exe");
         PEData data = PELoader.loadPE(file);
-        System.out.println(data);
-        SectionTable table = data.getSectionTable();
-        SectionLoader loader = new SectionLoader(data);
-//        ImportSection idata = loader.loadImportSection();
-//        for (ImportDLL im : idata.getImports()) {
-//            System.out.println(im.getName());
-//        }
-//        ExportSection edata = loader.loadExportSection();
-//        System.out.println(edata.getInfo());
-        ShannonEntropy entropy = new ShannonEntropy(data);
-        for (SectionHeader header : table.getSectionHeaders()) {
-            long start = header.getAlignedPointerToRaw();
-            long end = loader.getReadSize(header) + start;
-            System.out.println(header.getNumber() + ". " + header.getName()
-                    + " start: " + start + " end: " + end);
-            long vStart = header.getAlignedVirtualAddress();
-            long vEnd = header.getAlignedVirtualSize() + vStart;
-            System.out.println("virtual start: " + vStart + " virtual end: "
-                    + vEnd);
-            System.out.println("entropy: "
-                    + entropy.forSection(header.getNumber()) * 8);
-            System.out.println();
-        }
-        String report = PEAnomalyScanner.newInstance(data).scanReport();
-        System.out.println(report);
-        System.out.println("file size: " + file.length());
+        new ReportCreator(data).printReport();
         Visualizer vi = new Visualizer(data);
+        vi.setPixelSize(10);
+        vi.setBytesPerPixel(1);
         final BufferedImage image = vi.createEntropyImage();
         ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
