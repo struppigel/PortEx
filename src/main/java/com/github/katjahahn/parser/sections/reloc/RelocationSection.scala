@@ -16,6 +16,40 @@
 
 package com.github.katjahahn.parser.sections.reloc
 
-class RelocationSection {
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
+import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import scala.collection.mutable.ListBuffer
 
+class RelocationSection(blocks : List[BaseRelocBlock]) {
+
+}
+
+object RelocationSection {
+  
+  def apply(loadInfo: LoadInfo): RelocationSection = {
+    val opt = loadInfo.data.getOptionalHeader
+    val tableSize = opt.getDataDirEntries().get(DataDirectoryKey.BASE_RELOCATION_TABLE).getDirectorySize()
+    val blocks = readBlocks(tableSize, loadInfo)
+    new RelocationSection(blocks)
+  }
+  
+  private def readBlocks(tableSize: Long, loadInfo: LoadInfo): List[BaseRelocBlock] = {
+    val mmBytes = loadInfo.memoryMapped
+    val va = loadInfo.va
+    val buf = ListBuffer[BaseRelocBlock]()
+    var offset = 0
+    while(offset < tableSize) {
+      val length = 4
+      val pageRVA = mmBytes.getBytesLongValue(va + offset, length)
+      offset += length
+      val blockSize = mmBytes.getBytesIntValue(offset, length)
+      
+    }
+    buf.toList
+  }
+  
+  def newInstance(loadInfo: LoadInfo): RelocationSection = 
+    apply(loadInfo)
 }
