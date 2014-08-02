@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>edata - com.github.katjahahn.parser.sections.edata</title>
+          <meta name="description" content="edata - com.github.katjahahn.parser.sections.edata" />
+          <meta name="keywords" content="edata com.github.katjahahn.parser.sections.edata" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'com.github.katjahahn.parser.sections.edata.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.github">github</a>.<a href="../../../package.html" class="extype" name="com.github.katjahahn">katjahahn</a>.<a href="../../package.html" class="extype" name="com.github.katjahahn.parser">parser</a>.<a href="../package.html" class="extype" name="com.github.katjahahn.parser.sections">sections</a></p>
+        <h1>edata</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">edata</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.github.katjahahn.parser.sections.edata.ExportAddressTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportAddressTableextendsAnyRef"></a>
+      <a id="ExportAddressTable:ExportAddressTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportAddressTable.html"><span class="name">ExportAddressTable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">The export address table contains all relative virtual addresses in the order
+they are found in the export section.</p>
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportDirectory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportDirectoryextendsAnyRef"></a>
+      <a id="ExportDirectory:ExportDirectory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportDirectory.html"><span class="name">ExportDirectory</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the directory table of the export section and provides access to the
+header values.</p>
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportDirectoryKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportDirectoryKeyextendsEnum[com.github.katjahahn.parser.sections.edata.ExportDirectoryKey]withHeaderKey"></a>
+      <a id="ExportDirectoryKey:ExportDirectoryKey"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportDirectoryKey.html"><span class="name">ExportDirectoryKey</span></a><span class="result"> extends <span class="extype" name="java.lang.Enum">Enum</span>[<a href="ExportDirectoryKey.html" class="extype" name="com.github.katjahahn.parser.sections.edata.ExportDirectoryKey">ExportDirectoryKey</a>] with <a href="../../HeaderKey.html" class="extype" name="com.github.katjahahn.parser.HeaderKey">HeaderKey</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportEntry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportEntryextendsEquals"></a>
+      <a id="ExportEntry:ExportEntry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportEntry.html"><span class="name">ExportEntry</span></a><span class="result"> extends <span class="extype" name="scala.Equals">Equals</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents one entry of the export section.</p>
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportNameEntry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportNameEntryextendsExportEntry"></a>
+      <a id="ExportNameEntry:ExportNameEntry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportNameEntry.html"><span class="name">ExportNameEntry</span></a><span class="result"> extends <a href="ExportEntry.html" class="extype" name="com.github.katjahahn.parser.sections.edata.ExportEntry">ExportEntry</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Creates an instance of an export entry with the name, ordinal
+and relative virtual address
+</p>
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportNamePointerTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportNamePointerTableextendsAnyRef"></a>
+      <a id="ExportNamePointerTable:ExportNamePointerTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportNamePointerTable.html"><span class="name">ExportNamePointerTable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportOrdinalTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportOrdinalTableextendsAnyRef"></a>
+      <a id="ExportOrdinalTable:ExportOrdinalTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportOrdinalTable.html"><span class="name">ExportOrdinalTable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportSection" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportSectionextendsSpecialSection"></a>
+      <a id="ExportSection:ExportSection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportSection.html"><span class="name">ExportSection</span></a><span class="result"> extends <a href="../SpecialSection.html" class="extype" name="com.github.katjahahn.parser.sections.SpecialSection">SpecialSection</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the export section of a PE file and provides access to lists of
+it's inner structures (export address table, ordinal table, name pointer table,
+data directory table) as well as access to a list of export entries fetched
+from these structures.</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="com.github.katjahahn.parser.sections.edata.ExportAddressTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportAddressTable"></a>
+      <a id="ExportAddressTable:ExportAddressTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportAddressTable$.html"><span class="name">ExportAddressTable</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportDirectory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportDirectory"></a>
+      <a id="ExportDirectory:ExportDirectory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportDirectory$.html"><span class="name">ExportDirectory</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportNamePointerTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportNamePointerTable"></a>
+      <a id="ExportNamePointerTable:ExportNamePointerTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportNamePointerTable$.html"><span class="name">ExportNamePointerTable</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportOrdinalTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportOrdinalTable"></a>
+      <a id="ExportOrdinalTable:ExportOrdinalTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportOrdinalTable$.html"><span class="name">ExportOrdinalTable</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.github.katjahahn.parser.sections.edata.ExportSection" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExportSection"></a>
+      <a id="ExportSection:ExportSection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExportSection$.html"><span class="name">ExportSection</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
+    </body>
+      </html>
