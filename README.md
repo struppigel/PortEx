@@ -47,7 +47,7 @@ Now you can include PortEx to your project by adding the following Maven depende
 <dependency>
   		<groupId>portex</groupId>
   		<artifactId>portex_2.10</artifactId>
-  		<version>0.5.0</version>
+  		<version>0.7.0</version>
 </dependency>
 ```
 
