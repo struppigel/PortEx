@@ -35,6 +35,7 @@ import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -283,6 +284,28 @@ public final class IOUtil {
             logger.error(e);
         }
         return keys;
+    }
+    
+    //TODO javadoc, tests
+    public static Optional<String> getType(long value, String filename) {
+        try {
+            Map<String, String[]> map = readMap(filename);
+            for (Entry<String, String[]> entry : map.entrySet()) {
+                try {
+                    long keyValue = Long.parseLong(entry.getKey());
+                    if (value == keyValue) {
+                        return Optional.of(entry.getValue()[0]);
+                    }
+                } catch (NumberFormatException e) {
+                    logger.error("ERROR. number format mismatch in file "
+                            + filename);
+                    logger.error("value: " + entry.getKey());
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e);
+        }
+        return Optional.absent();
     }
 
     /**

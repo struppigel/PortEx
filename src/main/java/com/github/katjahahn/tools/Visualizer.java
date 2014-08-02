@@ -620,12 +620,10 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File("/home/deque/portextestfiles/traceless.exe");
+        File file = new File("/home/deque/portextestfiles/sality.exe");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         Visualizer vi = new Visualizer(data);
-        vi.setPixelSize(10);
-        vi.setBytesPerPixel(1);
         final BufferedImage image = vi.createEntropyImage();
         ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);

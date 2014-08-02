@@ -35,6 +35,7 @@ import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.pdata.ExceptionSection;
+import com.github.katjahahn.parser.sections.reloc.RelocationSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
@@ -407,6 +408,9 @@ public class SectionLoader {
             case RESOURCE_TABLE:
                 section = ResourceSection.newInstance(loadInfo);
                 break;
+            case BASE_RELOCATION_TABLE:
+                section = RelocationSection.newInstance(loadInfo);
+                break;
             default:
                 return Optional.absent();
             }
@@ -432,6 +436,40 @@ public class SectionLoader {
             return optional.get();
         }
         throw new IllegalStateException(message);
+    }
+
+    /**
+     * Loads all bytes and information of the debug section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link DebugSection} of the given file
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if unable to load debug section
+     */
+    @Ensures("result != null")
+    public RelocationSection loadRelocSection() throws IOException {
+        Optional<RelocationSection> debug = maybeLoadRelocSection();
+        return (RelocationSection) getOrThrow(debug,
+                "unable to load reloc section");
+    }
+
+    /**
+     * Loads all bytes and information of the debug section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link DebugSection} of the given file, absent if file doesn't
+     *         have this section
+     * @throws {@link IOException} if unable to read the file
+     */
+    @SuppressWarnings("unchecked")
+    @Ensures("result != null")
+    public Optional<RelocationSection> maybeLoadRelocSection()
+            throws IOException {
+        return (Optional<RelocationSection>) maybeLoadSpecialSection(DataDirectoryKey.BASE_RELOCATION_TABLE);
     }
 
     /**
@@ -684,8 +722,8 @@ public class SectionLoader {
                 && header.getAlignedPointerToRaw() < file.length();
     }
 
-    //TODO more general method? Like contains RVA?
-    @Beta 
+    // TODO more general method? Like contains RVA?
+    @Beta
     public boolean containsEntryPoint(SectionHeader header) {
         long ep = data.getOptionalHeader().get(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
