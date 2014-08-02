@@ -24,6 +24,8 @@ import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.sections.SpecialSection
+import com.github.katjahahn.parser.Location
+import scala.collection.JavaConverters._
 
 class RelocationSection(
   private val blocks: List[BaseRelocBlock],
@@ -34,6 +36,9 @@ class RelocationSection(
   override def isEmpty(): Boolean = blocks.isEmpty
 
   override def getOffset(): Long = 0
+
+  def getLocations(): java.util.List[Location] =
+    blocks.flatMap(b => b.getLocations).asJava
 
 }
 
@@ -52,22 +57,21 @@ object RelocationSection {
     val blocks = ListBuffer[BaseRelocBlock]()
     var offset = 0
     while (offset < tableSize) {
+      val fileOffset = mmBytes.getPhysforVir(va + offset)
       val length = 4
+      val fieldSize = 2
       val pageRVA = mmBytes.getBytesLongValue(va + offset, length)
       offset += length
       val blockSize = mmBytes.getBytesLongValue(va + offset, length)
       offset += length
-      val blockEnd = offset + blockSize
       val fields = ListBuffer[BlockEntry]()
-      while (offset < blockEnd) {
-        val fieldSize = 2
+      val nrOfRelocs = ((blockSize - (length * 2)) / fieldSize).toInt
+      for (i <- 0 until nrOfRelocs) {
         val fieldValue = mmBytes.getBytesIntValue(va + offset, fieldSize)
         fields += BlockEntry(fieldValue)
         offset += fieldSize
-        //        println("current offset to read: " + offset)
       }
-      println("current offset to read: " + offset)
-      blocks += new BaseRelocBlock(pageRVA, blockSize, fields.toList)
+      blocks += new BaseRelocBlock(fileOffset, pageRVA, blockSize, fields.toList)
     }
     blocks.toList
   }

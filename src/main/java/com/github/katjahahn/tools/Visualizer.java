@@ -44,6 +44,7 @@ import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
+import com.github.katjahahn.parser.sections.reloc.RelocationSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
@@ -113,6 +114,7 @@ public class Visualizer {
     private final Color exportColor = new Color(220, 80, 220);
     private final Color rsrcColor = new Color(100, 250, 100);
     private final Color debugColor = new Color(0, 0, 220);
+    private final Color relocColor = new Color(0, 100, 220);
     private final Color epColor = new Color(255, 80, 80);
     // private final Color anomalyColor = new Color(168, 0, 224);
     private final Color anomalyColor = new Color(255, 255, 255);
@@ -125,6 +127,7 @@ public class Visualizer {
     private boolean debugAvailable;
     private boolean overlayAvailable;
     private boolean epAvailable;
+    private boolean relocAvailable;
 
     /**
      * Visualizer instance with default values applied.
@@ -327,6 +330,15 @@ public class Visualizer {
 
     private void drawSpecials() throws IOException {
         SectionLoader loader = new SectionLoader(data);
+        Optional<RelocationSection> reloc = loader.maybeLoadRelocSection();
+        if (reloc.isPresent()) {
+            relocAvailable = true;
+            for (Location loc : reloc.get().getLocations()) {
+                long start = loc.from();
+                long size = withMinLength(loc.size());
+                drawPixels(relocColor, start, size, additionalGap);
+            }
+        }
         Optional<ImportSection> idata = loader.maybeLoadImportSection();
         if (idata.isPresent()) {
             importsAvailable = true;
@@ -471,6 +483,10 @@ public class Visualizer {
         }
         if (epAvailable) {
             drawLegendEntry(number, "Entry Point", epColor, true);
+            number++;
+        }
+        if(relocAvailable) {
+            drawLegendEntry(number, "Relocation Blocks", relocColor, true);
             number++;
         }
         if (overlayAvailable) {
@@ -620,7 +636,7 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File("/home/deque/portextestfiles/sality.exe");
+        File file = new File("/home/deque/portextestfiles/testfiles/Lab07-03.dll");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         Visualizer vi = new Visualizer(data);

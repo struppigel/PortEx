@@ -202,15 +202,15 @@ public final class PELoader {
 
     public static void main(String[] args) throws IOException {
         logger.entry();
-        File file = new File("/home/deque/portextestfiles/testfiles/Lab07-03.dll");
+//        File file = new File("/home/deque/portextestfiles/testfiles/Lab07-03.dll");
         // File file = new File(
         // "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
         // File file = new File(
         // "/home/deque/portextestfiles/badfiles/VirusShare_7dfe20f5164d80e37b7ba7184d4c73b4");
         // File file = new
         // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-//        for (File file : new File("/home/deque/portextestfiles/testfiles")
-//                .listFiles()) {
+        for (File file : new File("/home/deque/portextestfiles/testfiles")
+                .listFiles()) {
             PEData data = PELoader.loadPE(file);
             SectionLoader loader = new SectionLoader(data);
             try {
@@ -224,7 +224,7 @@ public final class PELoader {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-//        }
+        }
         // new ReportCreator(data).printReport();
     }
 }

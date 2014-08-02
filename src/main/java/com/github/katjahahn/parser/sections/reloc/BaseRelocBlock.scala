@@ -2,21 +2,26 @@ package com.github.katjahahn.parser.sections.reloc
 
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
+import com.github.katjahahn.parser.Location
 
 class BaseRelocBlock(
+  val fileOffset: Long,
   val pageRVA: Long,
   val blockSize: Long,
   val entries: List[BlockEntry]) {
+  
+  def getLocations(): List[Location] = List(new Location(fileOffset, blockSize))
 
   override def toString(): String =
     s"""page rva: ${hex(pageRVA)}
        |block size: ${hex(blockSize)}
+       |file offset: ${hex(fileOffset)}
        |
        |${entries.mkString("\n")}
        |""".stripMargin
 
   private def hex(value: Long): String =
-    0x + java.lang.Long.toHexString(value)
+    "0x" + java.lang.Long.toHexString(value)
 
 }
 
