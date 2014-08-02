@@ -10,7 +10,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 ### Features (so far)
 
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
-* Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section
+* Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
 * Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values
 * Visualize a PE file structure as it is on disk and local entropy
