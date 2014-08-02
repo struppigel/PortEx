@@ -636,7 +636,7 @@ public class Visualizer {
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File("/home/deque/portextestfiles/testfiles/Lab07-03.dll");
+        File file = new File("/home/deque/portextestfiles/testfiles/Lab18-04.exe");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         Visualizer vi = new Visualizer(data);

@@ -36,6 +36,8 @@ class RelocationSection(
   override def isEmpty(): Boolean = blocks.isEmpty
 
   override def getOffset(): Long = 0
+  
+  def getRelocBlocks(): java.util.List[BaseRelocBlock] = blocks.asJava
 
   def getLocations(): java.util.List[Location] =
     blocks.flatMap(b => b.getLocations).asJava

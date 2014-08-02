@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.parser.sections.reloc.BaseRelocBlock;
 import com.github.katjahahn.parser.sections.reloc.RelocationSection;
 import com.google.common.base.Optional;
 import com.google.java.contract.Ensures;
@@ -217,9 +219,15 @@ public final class PELoader {
             Optional<RelocationSection> maybeReloc = loader
                     .maybeLoadRelocSection();
             if (maybeReloc.isPresent()) {
-                System.out.println(file.getAbsolutePath());
-                System.out.println(maybeReloc.get().getInfo());
-                System.out.println("----------------------------");
+                System.out.print(file.getAbsolutePath());
+                RelocationSection reloc = maybeReloc.get();
+                List<BaseRelocBlock> list = reloc.getRelocBlocks();
+                System.out.print(";" + list.size());
+                long entrysum = 0;
+                for(BaseRelocBlock block : list) {
+                    entrysum += block.entries().size();
+                }
+                System.out.println(";" + entrysum);
             }
             } catch (Exception e) {
                 e.printStackTrace();
