@@ -41,15 +41,16 @@ PortEx is written in Java and Scala, but targeted at Java applications.</p>
 
 <ul>
 <li>Reading Header information from: MSDOS Header, COFF File Header, Optional Header, Section Table</li>
-<li>Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section</li>
+<li>Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations</li>
 <li>Dumping of sections, overlay, embedded ZIP, JAR or .class files</li>
-<li>Scanning for file anomalies, including collapsed headers and usage of deprecated, reserved or wrong values</li>
-<li>Visualize PE files</li>
-<li>Calculate Shannon Entropy for sections</li>
+<li>Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values</li>
+<li>Visualize a PE file's structure as it is on disk and local entropy</li>
+<li>Calculate Shannon Entropy for files and sections</li>
+<li>Calculate MD5 and SHA256 hash values for files and sections</li>
 <li>Scan for PEiD signatures or your own signature database</li>
 <li>Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)</li>
 <li>Scan for Unicode and ASCII strings contained in the file</li>
-<li>Overlay detection</li>
+<li>Overlay detection and dumping</li>
 <li>Detection Heuristics based on statistical information</li>
 </ul><p>For more information have a look at <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a> and the <a href="http://katjahahn.github.io/PortEx/javadocs">Documentation</a></p>
 
