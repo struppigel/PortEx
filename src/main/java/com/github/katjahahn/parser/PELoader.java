@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,11 +27,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
-import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.reloc.BaseRelocBlock;
-import com.github.katjahahn.parser.sections.reloc.RelocationSection;
-import com.google.common.base.Optional;
+import com.github.katjahahn.tools.ReportCreator;
 import com.google.java.contract.Ensures;
 import com.google.java.contract.Requires;
 
@@ -204,35 +200,31 @@ public final class PELoader {
 
     public static void main(String[] args) throws IOException {
         logger.entry();
-//        File file = new File("/home/deque/portextestfiles/testfiles/Lab07-03.dll");
+        // File file = new
+        // File("/home/deque/portextestfiles/testfiles/strings.exe");
+        File file = new File(
+                "/home/deque/portextestfiles/testfiles/Lab07-03.dll");
         // File file = new File(
         // "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
         // File file = new File(
         // "/home/deque/portextestfiles/badfiles/VirusShare_7dfe20f5164d80e37b7ba7184d4c73b4");
         // File file = new
         // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-        for (File file : new File("/home/deque/portextestfiles/testfiles")
-                .listFiles()) {
-            PEData data = PELoader.loadPE(file);
-            SectionLoader loader = new SectionLoader(data);
-            try {
-            Optional<RelocationSection> maybeReloc = loader
-                    .maybeLoadRelocSection();
-            if (maybeReloc.isPresent()) {
-                System.out.print(file.getAbsolutePath());
-                RelocationSection reloc = maybeReloc.get();
-                List<BaseRelocBlock> list = reloc.getRelocBlocks();
-                System.out.print(";" + list.size());
-                long entrysum = 0;
-                for(BaseRelocBlock block : list) {
-                    entrysum += block.entries().size();
-                }
-                System.out.println(";" + entrysum);
-            }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        PEData data = PELoader.loadPE(file);
+        new ReportCreator(data).printReport();
+        // for (File file : new File("/home/deque/portextestfiles/testfiles")
+        // .listFiles()) {
+        // PEData data = PELoader.loadPE(file);
+        // SectionLoader loader = new SectionLoader(data);
+        // try {
+        // Optional<DebugSection> maybeDebug = loader
+        // .maybeLoadDebugSection();
+        // if (maybeDebug.isPresent()) {
         // new ReportCreator(data).printReport();
+        // }
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
+        // }
     }
 }

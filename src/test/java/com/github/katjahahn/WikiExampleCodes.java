@@ -15,10 +15,7 @@ import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.coffheader.MachineType;
-import com.github.katjahahn.parser.optheader.DataDirEntry;
-import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
@@ -36,6 +33,7 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.parser.sections.rsrc.SubDirEntry;
 import com.github.katjahahn.tools.Overlay;
+import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.Visualizer;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
@@ -59,6 +57,7 @@ public class WikiExampleCodes {
         fileAnomalies();
     }
     
+    @SuppressWarnings("unused")
     public static void visualizer() throws IOException {
         File file = new File("WinRar.exe");
         PEData data = PELoader.loadPE(file);
@@ -74,6 +73,8 @@ public class WikiExampleCodes {
         visualizer.setAdditionalGap(3);
         //set bytes per pixel
         visualizer.setBytesPerPixel(10);
+        //create an entropy image
+        BufferedImage entropyImage = visualizer.createEntropyImage();
     }
     
     public static void fileAnomalies() {
@@ -84,18 +85,28 @@ public class WikiExampleCodes {
         scanner = PEAnomalyScanner.newInstance(file);
         List<Anomaly> anomalies = scanner.getAnomalies();
         for(Anomaly anomaly: anomalies) {
-            System.out.println("Anomaly Type: " + anomaly.getType());
+            System.out.println("Type: " + anomaly.getType());
+            System.out.println("Subtype: " + anomaly.subtype());
             System.out.println("Field or structure with anomaly: " + anomaly.key());
             System.out.println(anomaly.description());
             System.out.println();
         }
     }
 
+    @SuppressWarnings("unused")
     public static void gettingStarted() throws IOException {
         // Header information
         // load the PE file data
         PEData data = PELoader.loadPE(new File("myfile"));
-
+        
+        //Print report
+        ReportCreator reporter = new ReportCreator(data);
+        reporter.printReport();
+        
+        //Get report parts
+        String anomalyReport = reporter.anomalyReport();
+        String importsReport = reporter.importsReport();
+        
         // get various data from coff file header and print it
         COFFFileHeader coff = data.getCOFFFileHeader();
         MachineType machine = coff.getMachineType();
@@ -113,24 +124,6 @@ public class WikiExampleCodes {
         System.out.println("characteristics: ");
         for (String characteristic : characteristics) {
             System.out.println("\t* " + characteristic);
-        }
-        // print all available information of the coff file header
-        System.out.println(coff.getInfo());
-        // standard section information
-        SectionLoader loader = new SectionLoader(data);
-        ImportSection idata = loader.loadImportSection();
-        System.out.println(idata.getInfo());
-        // Miscellaneous
-        SectionTable table = data.getSectionTable();
-        Map<DataDirectoryKey, DataDirEntry> dataDirEntries = data
-                .getOptionalHeader().getDataDirEntries();
-        for (DataDirEntry entry : dataDirEntries.values()) {
-            System.out.println(entry);
-            System.out.println("calculated file offset: "
-                    + entry.getFileOffset(table));
-            System.out.println("section name: "
-                    + entry.getSectionTableEntry(table).getName());
-            System.out.println();
         }
     }
 
@@ -167,9 +160,11 @@ public class WikiExampleCodes {
         File file = new File("WinRar.exe");
         // Print Information
         PEData data = PELoader.loadPE(file);
+        ReportCreator reporter = new ReportCreator(data);
+        System.out.println(reporter.importsReport());
+        // Loading the import section
         SectionLoader loader = new SectionLoader(data);
         ImportSection idata = loader.loadImportSection();
-        System.out.println(idata.getInfo());
         // List of imports
         List<ImportDLL> imports = idata.getImports();
         for (ImportDLL dll : imports) {
@@ -197,12 +192,14 @@ public class WikiExampleCodes {
         }
     }
 
+    @SuppressWarnings("unused")
     public static void exportSection() throws IOException {
         // Show Information
         File file = new File("src/main/resources/testfiles/DLL2.dll");
         PEData data = PELoader.loadPE(file);
+        System.out.println(new ReportCreator(data).exportsReport());
+        // Loading the export section
         ExportSection edata = new SectionLoader(data).loadExportSection();
-        System.out.println(edata.getInfo());
     }
 
     @SuppressWarnings("unused")

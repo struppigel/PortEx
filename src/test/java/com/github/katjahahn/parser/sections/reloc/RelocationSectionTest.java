@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -18,8 +16,6 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 
 public class RelocationSectionTest {
 
-    private static final Logger logger = LogManager
-            .getLogger(RelocationSectionTest.class.getName());
     private Map<String, PEData> pedata = new HashMap<>();
 
     @BeforeClass

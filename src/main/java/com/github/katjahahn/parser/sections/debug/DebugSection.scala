@@ -50,6 +50,9 @@ class DebugSection private (
 
   def getSize(): Long = debugDirSize
   
+  def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] = 
+    directoryTable.asJava
+  
   override def isEmpty: Boolean = directoryTable.isEmpty
 
   override def getInfo(): String =
@@ -81,7 +84,7 @@ class DebugSection private (
   def get(key: DebugDirectoryKey): java.lang.Long =
     if (directoryTable.contains(key))
       directoryTable(key).value else null
-
+      
   /**
    * Returns a string of the type description
    *

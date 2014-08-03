@@ -33,6 +33,8 @@ import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.coffheader.COFFFileHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey
+import com.github.katjahahn.parser.ByteArrayUtil
 
 /**
  * Utility for easy creation of PE file reports.
@@ -60,11 +62,76 @@ class ReportCreator(private val data: PEData) {
     print(importsReport)
     print(exportsReport)
     print(resourcesReport)
+    print(debugReport)
+    print(relocReport)
     print(overlayReport)
     print(anomalyReport)
     print(peidReport)
     print(jar2ExeReport)
     print(maldetReport)
+    print(hashReport)
+  }
+
+  def hashReport(): String = {
+    val hasher = new Hasher(data)
+    val buf = new StringBuffer()
+    buf.append(title("Hashes") + NL)
+    buf.append("MD5:    " + hash(hasher.md5()) + NL)
+    buf.append("SHA256: " + hash(hasher.sha256()) + NL + NL)
+    val colWidth = 10
+    val shaWidth = 64
+    val padLength = "1. .rdata    ".length
+    val tableHeader = pad("Section", padLength, " ") + pad("Type", colWidth, " ") + pad("Hash Value", shaWidth, " ")
+    buf.append(tableHeader + NL)
+    buf.append(pad("", tableHeader.length, "-") + NL)
+    val table = data.getSectionTable
+    for (number <- 1 to table.getNumberOfSections()) {
+      val header = table.getSectionHeader(number)
+      buf.append(pad(number + ". " + header.getName, padLength, " ") + pad("MD5", colWidth, " ") +
+        pad(hash(hasher.md5OfSection(number)), shaWidth, " ") + NL)
+      buf.append(pad("", padLength, " ") + pad("SHA256", colWidth, " ") +
+        pad(hash(hasher.sha256OfSection(number)), shaWidth, " ") + NL)
+    }
+    buf.append(NL)
+    buf.toString
+  }
+
+  private def hash(array: Array[Byte]): String = ByteArrayUtil.byteToHex(array, "")
+
+  def debugReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeDebug = loader.maybeLoadDebugSection()
+    if (maybeDebug.isPresent && !maybeDebug.get.isEmpty) {
+      val debug = maybeDebug.get
+      val buf = new StringBuffer()
+      val colWidth = 17
+      val padLength = "Address of Raw Data ".length
+      buf.append(title("Debug Information") + NL)
+      buf.append("Time Date Stamp: " + debug.getTimeDateStamp + NL)
+      buf.append("Type: " + debug.getTypeDescription + NL + NL)
+      val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+      buf.append(tableHeader + NL)
+      buf.append(pad("", tableHeader.length, "-") + NL)
+      val entries = debug.getDirectoryTable.values().asScala.toList.sortBy(e => e.getOffset)
+      for (entry <- entries) {
+        buf.append(pad(entry.description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+          pad(hexString(entry.getOffset), colWidth, " ") + NL)
+      }
+      buf.append(NL)
+      buf.toString
+    } else ""
+  }
+
+  def relocReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeReloc = loader.maybeLoadRelocSection()
+    if (maybeReloc.isPresent && !maybeReloc.get.isEmpty) {
+      val reloc = maybeReloc.get
+      val buf = new StringBuffer()
+      buf.append(title("Debug Information") + NL)
+      buf.append(reloc.getInfo + NL) //TODO make table
+      buf.toString
+    } else ""
   }
 
   def importsReport(): String = {
