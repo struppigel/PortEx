@@ -68,8 +68,8 @@ class ReportCreator(private val data: PEData) {
     print(anomalyReport)
     print(peidReport)
     print(jar2ExeReport)
-    print(maldetReport)
     print(hashReport)
+    print(maldetReport)
   }
 
   def hashReport(): String = {
@@ -87,7 +87,8 @@ class ReportCreator(private val data: PEData) {
     val table = data.getSectionTable
     for (number <- 1 to table.getNumberOfSections()) {
       val header = table.getSectionHeader(number)
-      buf.append(pad(number + ". " + header.getName, padLength, " ") + pad("MD5", colWidth, " ") +
+      val secName = filteredString(header.getName)
+      buf.append(pad(number + ". " + secName, padLength, " ") + pad("MD5", colWidth, " ") +
         pad(hash(hasher.md5OfSection(number)), shaWidth, " ") + NL)
       buf.append(pad("", padLength, " ") + pad("SHA256", colWidth, " ") +
         pad(hash(hasher.sha256OfSection(number)), shaWidth, " ") + NL)

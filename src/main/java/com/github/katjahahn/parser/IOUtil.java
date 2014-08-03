@@ -176,13 +176,30 @@ public final class IOUtil {
      */
     @Ensures("result != null")
     public static List<String[]> readArray(String filename) throws IOException {
+        return readArray(filename, DELIMITER);
+    }
+
+    /**
+     * Reads the specified file from the specification directory into a list of
+     * arrays. Each array is the entry of one line in the file.
+     * 
+     * @param filename
+     *            the name of the specification file (not the path to it)
+     * @param delimiter the delimiter regex for one column
+     * @return a list of arrays, each array representing a line in the spec
+     * @throws IOException
+     *             if unable to read the specification file
+     */
+    @Ensures("result != null")
+    public static List<String[]> readArray(String filename, String delimiter)
+            throws IOException {
         List<String[]> list = new LinkedList<>();
         try (InputStreamReader isr = new InputStreamReader(
                 IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
                 BufferedReader reader = new BufferedReader(isr)) {
             String line = null;
             while ((line = reader.readLine()) != null) {
-                String[] values = line.split(DELIMITER);
+                String[] values = line.split(delimiter);
                 list.add(values);
             }
             return list;
@@ -285,8 +302,8 @@ public final class IOUtil {
         }
         return keys;
     }
-    
-    //TODO javadoc, tests
+
+    // TODO javadoc, tests
     public static Optional<String> getType(long value, String filename) {
         try {
             Map<String, String[]> map = readMap(filename);

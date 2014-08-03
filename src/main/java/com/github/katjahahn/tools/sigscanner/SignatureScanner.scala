@@ -235,7 +235,7 @@ object SignatureScanner {
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
-    var sigs = ListBuffer[Signature]()
+    val sigs = ListBuffer[Signature]()
     val it = scala.io.Source.fromFile(sigFile)(codec).getLines
     while (it.hasNext) {
       val line = it.next
