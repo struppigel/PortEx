@@ -29,8 +29,6 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.ReportCreator;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -61,7 +59,6 @@ public final class PELoader {
      * @throws IllegalStateException
      *             if no valid PE file
      */
-    @Ensures("result != null")
     public static PEData loadPE(File peFile) throws IOException {
         return new PELoader(peFile).loadData();
     }
@@ -189,9 +186,9 @@ public final class PELoader {
      * @throws IOException
      *             if unable to read the bytes
      */
-    @Requires({ "length >= 0" })
     private static byte[] loadBytes(long offset, int length,
             RandomAccessFile raf) throws IOException {
+        assert length >= 0;
         raf.seek(offset);
         byte[] bytes = new byte[length];
         raf.readFully(bytes);

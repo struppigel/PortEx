@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import com.google.java.contract.Invariant;
 
 /**
  * A data class for a typical entry of PE Headers.
@@ -23,7 +22,6 @@ import com.google.java.contract.Invariant;
  * @author Katja Hahn
  * 
  */
-@Invariant({ "key != null" })
 public class StandardField {
 
     /**

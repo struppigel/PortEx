@@ -24,8 +24,6 @@ import com.github.katjahahn.parser.Header;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
 
 /**
  * Fetches values from the MSDOS header of the PE.
@@ -57,8 +55,8 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * @param headerbytes
      * @param offset
      */
-    @Requires("headerbytes != null")
     private MSDOSHeader(byte[] headerbytes, long peSigOffset) {
+        assert headerbytes != null;
         this.headerbytes = headerbytes.clone();
         this.peSigOffset = peSigOffset;
     }
@@ -87,18 +85,18 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * @return size of header
      */
     //TODO this is size of header + stub ?
-    @Ensures("result >= 0")
     public long getHeaderSize() {
         long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS)
                 * PARAGRAPH_SIZE;
         if (headerSize > peSigOffset) {
             return peSigOffset;
         }
+        assert headerSize >= 0;
         return headerSize;
     }
 
-    @Requires("headerbytes != null")
     private boolean hasSignature(byte[] headerbytes) {
+        assert headerbytes != null;
         // TODO collapsed MSDOS header? And wrong responsibility to check this
         // here!
         if (headerbytes.length < 28) {

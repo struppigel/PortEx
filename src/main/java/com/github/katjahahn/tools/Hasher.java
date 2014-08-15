@@ -28,7 +28,6 @@ import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.google.common.base.Preconditions;
-import com.google.java.contract.Ensures;
 
 /**
  * Creates hash values of PE files and sections.
@@ -56,7 +55,6 @@ public class Hasher {
      * @return md5 hash value of the file
      * @throws IOException
      */
-    @Ensures("result != null")
     public byte[] md5() throws IOException {
         return md5(data.getFile());
     }
@@ -67,7 +65,6 @@ public class Hasher {
      * @return sha256 hash value of the file
      * @throws IOException
      */
-    @Ensures("result != null")
     public byte[] sha256() throws IOException {
         return sha256(data.getFile());
     }

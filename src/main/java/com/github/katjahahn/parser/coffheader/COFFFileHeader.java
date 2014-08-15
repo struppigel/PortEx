@@ -32,7 +32,6 @@ import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
-import com.google.java.contract.Ensures;
 
 /**
  * Represents the COFF File Header.
@@ -174,7 +173,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      *            type
      * @return description
      */
-    @Ensures({ "result != null", "result.trim().length() > 0" })
     public static String getDescription(MachineType machine) {
         int description = 1;
         int keyString = 0;
@@ -182,7 +180,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             Map<String, String[]> map = IOUtil.readMap("machinetype");
             for (String[] entry : map.values()) {
                 if (entry[keyString].equals(machine.getKey())) {
-                    return entry[description];
+                    String result = entry[description];
+                    assert result != null && result.trim().length() > 0;
+                    return result;
                 }
             }
         } catch (IOException e) {
@@ -197,7 +197,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return machine type description
      */
-    @Ensures({ "result != null", "result.trim().length() > 0" })
     public String getMachineDescription() {
         return getDescription(getMachineType());
     }
@@ -207,7 +206,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return list of file characteristics
      */
-    @Ensures("result != null")
     public List<FileCharacteristic> getCharacteristics() {
         List<String> keys = IOUtil.getCharacteristicKeys(get(CHARACTERISTICS),
                 "characteristics");
@@ -215,6 +213,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         for (String key : keys) {
             characteristics.add(FileCharacteristic.valueOf(key));
         }
+        assert characteristics != null;
         return characteristics;
     }
 
@@ -234,7 +233,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return list of characteristic descriptions
      */
-    @Ensures("result != null")
     public List<String> getCharacteristicsDescriptions() {
         return IOUtil.getCharacteristicsDescriptions(get(CHARACTERISTICS),
                 "characteristics");
@@ -245,7 +243,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @return MachineType
      */
-    @Ensures("result != null")
     public MachineType getMachineType() {
         int value = (int) get(MACHINE);
         try {
@@ -254,7 +251,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             String[] ret = map.get(hexKey);
             if (ret != null) {
                 String type = ret[0].substring("IMAGE_FILE_MACHINE_".length());
-                return MachineType.valueOf(type);
+                MachineType result = MachineType.valueOf(type);
+                assert result != null;
+                return result;
             }
         } catch (IOException e) {
             e.printStackTrace();

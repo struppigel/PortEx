@@ -40,8 +40,6 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
 
 /**
  * Responsible for computing section related values that are necessary for
@@ -96,7 +94,6 @@ public class SectionLoader {
      * @throws IOException
      *             if unable to read the file
      */
-    @Ensures("result != null")
     @Beta
     // TODO remove? This seems not necessary
     public Optional<PESection> maybeLoadSection(String name) throws IOException {
@@ -120,8 +117,6 @@ public class SectionLoader {
      * @throws IllegalArgumentException
      *             if invalid sectionNr
      */
-    @Ensures("result != null")
-    @Requires("sectionNr > 0")
     public PESection loadSection(int sectionNr) {
         Preconditions.checkArgument(
                 sectionNr > 0 && sectionNr <= table.getNumberOfSections(),
@@ -140,7 +135,6 @@ public class SectionLoader {
      *            the section's header
      * @return {@link PESection} that belongs to the header
      */
-    @Ensures("result != null")
     public PESection loadSectionFrom(SectionHeader header) {
         long size = getReadSize(header);
         long offset = header.getAlignedPointerToRaw();
@@ -153,8 +147,6 @@ public class SectionLoader {
      * @param value
      * @return file aligned value
      */
-    @Ensures({ "optHeader.isLowAlignmentMode() || result % 512 == 0",
-            "result >= value" })
     private long fileAligned(long value) {
         long fileAlign = optHeader.getAdjustedFileAlignment();
         long rest = value % fileAlign;
@@ -168,6 +160,8 @@ public class SectionLoader {
             logger.error("filealign: " + fileAlign);
             logger.error("result: " + result);
         }
+        assert optHeader.isLowAlignmentMode() || result % 512 == 0;
+        assert result >= value;
         return result;
     }
 
@@ -182,10 +176,8 @@ public class SectionLoader {
      * @throws IllegalArgumentException
      *             if header is null
      */
-    @Ensures("result >= 0")
-    @Requires("header != null")
     public long getReadSize(SectionHeader header) {
-        Preconditions.checkArgument(header != null);
+        Preconditions.checkNotNull(header);
         long pointerToRaw = header.get(POINTER_TO_RAW_DATA);
         long virtSize = header.get(VIRTUAL_SIZE);
         long sizeOfRaw = header.get(SIZE_OF_RAW_DATA);
@@ -209,6 +201,7 @@ public class SectionLoader {
                     + file.getName() + " adjusting readsize to 0");
             readSize = 0;
         }
+        assert readSize >= 0;
         return readSize;
     }
 
@@ -268,7 +261,6 @@ public class SectionLoader {
      * @return file offset of the rva that is in the data directory entry with
      *         the given key, absent if file offset can not be determined
      */
-    @Ensures("result != null")
     public Optional<Long> maybeGetFileOffsetFor(DataDirectoryKey dataDirKey) {
         Optional<DataDirEntry> dataDir = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
@@ -290,7 +282,6 @@ public class SectionLoader {
      * @return file offset optional, absent if file offset can not be
      *         determined.
      */
-    @Ensures("result != null")
     public Optional<Long> maybeGetFileOffset(long rva) {
         Optional<SectionHeader> section = maybeGetSectionHeaderByRVA(rva);
         // standard value if rva doesn't point into a section
@@ -321,7 +312,6 @@ public class SectionLoader {
      *            the relative virtual address
      * @return the {@link SectionHeader} of the section the rva is pointing into
      */
-    @Ensures("result != null")
     public Optional<SectionHeader> maybeGetSectionHeaderByRVA(long rva) {
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader section : sections) {
@@ -345,7 +335,6 @@ public class SectionLoader {
      * @return the {@link SectionHeader} of the section the offset is pointing
      *         into
      */
-    @Ensures("result != null")
     public Optional<SectionHeader> maybeGetSectionHeaderByOffset(long fileOffset) {
         List<SectionHeader> sections = table.getSectionHeaders();
         for (SectionHeader header : sections) {
@@ -449,7 +438,6 @@ public class SectionLoader {
      * @throws IllegalStateException
      *             if unable to load debug section
      */
-    @Ensures("result != null")
     public RelocationSection loadRelocSection() throws IOException {
         Optional<RelocationSection> debug = maybeLoadRelocSection();
         return (RelocationSection) getOrThrow(debug,
@@ -466,7 +454,6 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      */
     @SuppressWarnings("unchecked")
-    @Ensures("result != null")
     public Optional<RelocationSection> maybeLoadRelocSection()
             throws IOException {
         return (Optional<RelocationSection>) maybeLoadSpecialSection(DataDirectoryKey.BASE_RELOCATION_TABLE);
@@ -483,7 +470,6 @@ public class SectionLoader {
      * @throws IllegalStateException
      *             if unable to load debug section
      */
-    @Ensures("result != null")
     public DebugSection loadDebugSection() throws IOException {
         Optional<DebugSection> debug = maybeLoadDebugSection();
         return (DebugSection) getOrThrow(debug, "unable to load debug section");
@@ -499,7 +485,6 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      */
     @SuppressWarnings("unchecked")
-    @Ensures("result != null")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
         return (Optional<DebugSection>) maybeLoadSpecialSection(DataDirectoryKey.DEBUG);
     }
@@ -513,7 +498,6 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      * @throws @{@link IllegalStateException} if section can not be loaded
      */
-    @Ensures("result != null")
     public ResourceSection loadResourceSection() throws IOException,
             FileFormatException {
         Optional<ResourceSection> rsrc = maybeLoadResourceSection();
@@ -532,7 +516,6 @@ public class SectionLoader {
      *             if unable to read the file
      */
     @SuppressWarnings("unchecked")
-    @Ensures("result != null")
     public Optional<ResourceSection> maybeLoadResourceSection()
             throws IOException, FileFormatException {
         return (Optional<ResourceSection>) maybeLoadSpecialSection(DataDirectoryKey.RESOURCE_TABLE);
@@ -547,7 +530,6 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      * @throws @{@link IllegalStateException} if section can not be loaded
      */
-    @Ensures("result != null")
     public ExceptionSection loadExceptionSection() throws IOException {
         Optional<ExceptionSection> pdata = maybeLoadExceptionSection();
         return (ExceptionSection) getOrThrow(pdata,
@@ -565,7 +547,6 @@ public class SectionLoader {
      *             if unable to read the file
      */
     @SuppressWarnings("unchecked")
-    @Ensures("result != null")
     public Optional<ExceptionSection> maybeLoadExceptionSection()
             throws IOException {
         return (Optional<ExceptionSection>) maybeLoadSpecialSection(DataDirectoryKey.EXCEPTION_TABLE);
@@ -579,7 +560,6 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      * @throws {@link IllegalStateException} if unable to load section
      */
-    @Ensures("result != null")
     public ImportSection loadImportSection() throws IOException {
         Optional<ImportSection> idata = maybeLoadImportSection();
         return (ImportSection) getOrThrow(idata,
@@ -594,7 +574,6 @@ public class SectionLoader {
      * @throws {@link IOException} if unable to read the file
      */
     @SuppressWarnings("unchecked")
-    @Ensures("result != null")
     public Optional<ImportSection> maybeLoadImportSection() throws IOException {
         return (Optional<ImportSection>) maybeLoadSpecialSection(DataDirectoryKey.IMPORT_TABLE);
     }
@@ -609,7 +588,6 @@ public class SectionLoader {
      * @throws IllegalStateException
      *             if unable to load section
      */
-    @Ensures("result != null")
     public ExportSection loadExportSection() throws IOException {
         Optional<ExportSection> edata = maybeLoadExportSection();
         return (ExportSection) getOrThrow(edata,
@@ -625,7 +603,6 @@ public class SectionLoader {
      *             if unable to read the file
      */
     @SuppressWarnings("unchecked")
-    @Ensures("result != null")
     public Optional<ExportSection> maybeLoadExportSection() throws IOException {
         return (Optional<ExportSection>) maybeLoadSpecialSection(DataDirectoryKey.EXPORT_TABLE);
     }

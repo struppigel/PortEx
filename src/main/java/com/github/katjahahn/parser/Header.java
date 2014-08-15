@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
 
 /**
  * Represents a header of the pe file or a header of a section.
@@ -32,19 +30,19 @@ public abstract class Header<T extends HeaderKey> implements PEModule {
 
     /**
      * Returns the value for the key.
+     * key must not be null.
      * 
      * @param key the header key
      * @return long value for the key
      */
-    @Requires("key != null")
     public abstract long get(T key);
 
     /**
      * Returns the {@link StandardField} for the given key.
+     * Returned field is never null.
      * 
      * @param key the header key
      * @return {@link StandardField} for the given key.
      */
-    @Ensures("result != null")
     public abstract StandardField getField(T key);
 }

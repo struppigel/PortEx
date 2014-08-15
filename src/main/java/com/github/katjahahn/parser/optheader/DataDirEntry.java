@@ -27,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.google.common.base.Optional;
-import com.google.java.contract.Invariant;
 
 /**
  * Represents an entry of the data directory table. It is used like a struct.
@@ -35,7 +34,6 @@ import com.google.java.contract.Invariant;
  * @author Katja Hahn
  * 
  */
-@Invariant("key != null")
 public class DataDirEntry {
 
     private static final Logger logger = LogManager

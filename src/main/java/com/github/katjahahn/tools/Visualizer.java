@@ -49,8 +49,7 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
+import com.google.common.base.Preconditions;
 
 /**
  * Creates an image that represents the structure of a PE file on disk.
@@ -260,9 +259,6 @@ public class Visualizer {
      * @throws IOException
      *             if sections can not be read
      */
-    @Ensures({ "result != null",
-            "result.getWidth() == legendWidth + fileWidth",
-            "result.getHeight() == height" })
     public BufferedImage createImage() throws IOException {
         image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
 
@@ -299,6 +295,9 @@ public class Visualizer {
         drawSpecials();
         // drawAnomalies();
         drawLegend();
+        assert image != null;
+        assert image.getWidth() == legendWidth + fileWidth;
+        assert image.getHeight() == height;
         return image;
     }
 
@@ -315,7 +314,6 @@ public class Visualizer {
         }
     }
 
-    @Ensures("result > 0")
     private long withMinLength(long length) {
         double minLength = data.getFile().length()
                 / (double) (getXPixels() * getYPixels());
@@ -325,6 +323,7 @@ public class Visualizer {
         if (length < minLength) {
             return Math.round(minLength);
         }
+        assert length > 0;
         return length;
     }
 
@@ -391,7 +390,6 @@ public class Visualizer {
         }
     }
 
-    @Ensures("result != null")
     private Optional<Long> getEntryPoint() {
         long rva = data.getOptionalHeader().get(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
@@ -427,9 +425,8 @@ public class Visualizer {
         return sectionColor;
     }
 
-    @Requires("color != null")
-    @Ensures("result != null")
     private Color variate(Color color) {
+        assert color != null;
         final int diff = 30;
         int newRed = shiftColorPart(color.getRed() - diff);
         int newGreen = shiftColorPart(color.getGreen() - diff);
@@ -496,10 +493,10 @@ public class Visualizer {
         // drawLegendCrossEntry(number, "Anomalies", anomalyColor);
     }
 
-    @Requires({ "description != null", "color != null" })
     // TODO temporary almost-duplicate of drawLegendEntry
     private void drawLegendCrossEntry(int number, String description,
             Color color) {
+        assert description != null && color != null;
         int startX = fileWidth + LEGEND_GAP;
         int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
         if (startY >= height) {
@@ -514,14 +511,14 @@ public class Visualizer {
         g.drawString(description, stringX, stringY);
     }
 
-    @Requires({ "description != null", "color != null" })
     private void drawLegendEntry(int number, String description, Color color) {
+        assert description != null && color != null;
         drawLegendEntry(number, description, color, false);
     }
 
-    @Requires({ "description != null", "color != null" })
     private void drawLegendEntry(int number, String description, Color color,
             boolean withOutLine) {
+        assert description != null && color != null;
         int startX = fileWidth + LEGEND_GAP;
         int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
         if (startY >= height) {
@@ -542,9 +539,9 @@ public class Visualizer {
         g.drawString(description, stringX, stringY);
     }
 
-    @Requires("color != null")
     private void drawRect(Color color, int startX, int startY, int width,
             int height) {
+        assert color != null;
         for (int x = startX; x < startX + width; x++) {
             for (int y = startY; y < startY + height; y++) {
                 try {
@@ -556,10 +553,10 @@ public class Visualizer {
         }
     }
 
-    @Requires("color != null")
     // TODO temporary almost-duplicate of drawRect
     private void drawCross(Color color, int startX, int startY, int width,
             int height) {
+        assert color != null;
         final int thickness = 2;
         for (int x = startX; x < startX + width; x++) {
             for (int y = startY; y < startY + height; y++) {
@@ -575,9 +572,9 @@ public class Visualizer {
         }
     }
 
-    @Requires("color != null")
     // TODO temporary almost-duplicate of drawPixels
     private void drawCrosses(Color color, long fileOffset, long fileLength) {
+        assert color != null;
         int pixelStart = getPixelNumber(fileOffset);
         // necessary to avoid gaps due to rounding issues (you can't just do
         // getPixelNumber(fileLength))
@@ -596,14 +593,14 @@ public class Visualizer {
         }
     }
 
-    @Requires("color != null")
     private void drawPixels(Color color, long fileOffset, long fileLength) {
+        assert color != null;
         drawPixels(color, fileOffset, fileLength, 0);
     }
 
-    @Requires("color != null")
     private void drawPixels(Color color, long fileOffset, long fileLength,
             int additionalGap) {
+        assert color != null;
         int pixelStart = getPixelNumber(fileOffset);
         // necessary to avoid gaps due to rounding issues (you can't just do
         // getPixelNumber(fileLength))
@@ -626,12 +623,13 @@ public class Visualizer {
         // * pixelSize,(pixelStart / xPixels) * pixelSize );
     }
 
-    @Requires("fileOffset >= 0")
-    @Ensures("result >= 0")
     private int getPixelNumber(long fileOffset) {
+        assert fileOffset >= 0;
         long fileSize = data.getFile().length();
-        return (int) Math.round(fileOffset * (getXPixels() * getYPixels())
+        int result = (int) Math.round(fileOffset * (getXPixels() * getYPixels())
                 / (double) fileSize);
+        assert result >= 0;
+        return result;
     }
 
     public static void main(String[] args) throws IOException {
@@ -663,8 +661,8 @@ public class Visualizer {
      * Sets the number of file bytes that are represented by one square pixel.
      * The height of the image is changed accordingly.
      */
-    @Requires("bytes > 0")
     public void setBytesPerPixel(int bytes) {
+        Preconditions.checkArgument(bytes > 0);
         System.out.println("file length: " + data.getFile().length());
         double nrOfPixels = Math.ceil(data.getFile().length() / (double) bytes);
         System.out.println("pixel nr:" + nrOfPixels);
@@ -681,8 +679,8 @@ public class Visualizer {
      * @see #setAdditionalGap(int)
      * @return additional gap
      */
-    @Ensures("result >= 0")
     public int getAdditionalGap() {
+        assert additionalGap >= 0;
         return additionalGap;
     }
 
@@ -692,8 +690,8 @@ public class Visualizer {
      * 
      * @param additionalGap
      */
-    @Requires("additionalGap >= 0")
     public void setAdditionalGap(int additionalGap) {
+        Preconditions.checkArgument(additionalGap >= 0);
         this.additionalGap = additionalGap;
     }
 
@@ -701,8 +699,8 @@ public class Visualizer {
      * @see #setPixelSize(int)
      * @return pixel size
      */
-    @Ensures("result > 0")
     public int getPixelSize() {
+        assert pixelSize > 0;
         return pixelSize;
     }
 
@@ -711,8 +709,8 @@ public class Visualizer {
      * 
      * @param pixelSize
      */
-    @Requires("pixelSize > 0")
     public void setPixelSize(int pixelSize) {
+        Preconditions.checkArgument(pixelSize > 0);
         this.pixelSize = pixelSize;
     }
 
@@ -738,8 +736,8 @@ public class Visualizer {
      * @see #setFileWidth(int)
      * @return file width
      */
-    @Ensures("result > 0")
     public int getFileWidth() {
+        assert fileWidth > 0;
         return fileWidth;
     }
 
@@ -748,8 +746,8 @@ public class Visualizer {
      * 
      * @param fileWidth
      */
-    @Requires("fileWidth > 0")
     public void setFileWidth(int fileWidth) {
+        Preconditions.checkArgument(fileWidth > 0);
         this.fileWidth = fileWidth;
     }
 
@@ -757,8 +755,8 @@ public class Visualizer {
      * @see #setHeight(int)
      * @return height of the image
      */
-    @Ensures("result > 0")
     public int getHeight() {
+        assert height > 0;
         return height;
     }
 
@@ -768,8 +766,8 @@ public class Visualizer {
      * 
      * @param height
      */
-    @Requires("height > 0")
     public void setHeight(int height) {
+        Preconditions.checkArgument(height > 0);
         this.height = height;
     }
 
@@ -777,8 +775,8 @@ public class Visualizer {
      * @see #setLegendWidth(int)
      * @return legend width
      */
-    @Ensures("result >= 0")
     public int getLegendWidth() {
+        assert legendWidth >= 0;
         return legendWidth;
     }
 
@@ -789,19 +787,21 @@ public class Visualizer {
      * 
      * @param legendWidth
      */
-    @Requires("legendWidth >= 0")
     public void setLegendWidth(int legendWidth) {
+        Preconditions.checkArgument(legendWidth >= 0);
         this.legendWidth = legendWidth;
     }
 
-    @Ensures("result >= 0")
     private int getXPixels() {
-        return (int) Math.ceil(this.fileWidth / (double) this.pixelSize);
+        int result = (int) Math.ceil(this.fileWidth / (double) this.pixelSize);
+        assert result >= 0;
+        return result;
     }
 
-    @Ensures("result >= 0")
     private int getYPixels() {
-        return (int) Math.ceil(this.height / (double) this.pixelSize);
+        int result = (int) Math.ceil(this.height / (double) this.pixelSize);
+        assert result >= 0;
+        return result;
     }
 
 }

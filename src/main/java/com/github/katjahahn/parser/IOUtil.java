@@ -36,8 +36,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Optional;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
 
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
@@ -88,13 +86,11 @@ public final class IOUtil {
      * @throws IOException
      *             if specification file can not be read
      */
-    @Ensures("result != null")
-    @Requires({ "clazz != null", "specFormat != null",
-            "specName != null && specName.trim().length() > 0",
-            "headerbytes != null" })
     public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
             Class<T> clazz, SpecificationFormat specFormat, String specName,
             byte[] headerbytes, long headerOffset) throws IOException {
+        assert clazz != null && specFormat != null && headerbytes != null;
+        assert specName != null && specName.trim().length() > 0;
         EnumSolver<T> enumSolver = new EnumSolver<>(clazz);
         Map<T, StandardField> data = initFullEnumMap(enumSolver);
         List<String[]> specification = readArray(specName);
@@ -123,6 +119,7 @@ public final class IOUtil {
                 logger.warn("offset + length larger than headerbytes given");
             }
         }
+        assert data != null;
         return data;
     }
 
@@ -147,7 +144,6 @@ public final class IOUtil {
      * @throws IOException
      *             if unable to read the specification file
      */
-    @Ensures("result != null")
     public static Map<String, String[]> readMap(String filename)
             throws IOException {
         Map<String, String[]> map = new TreeMap<>();
@@ -160,6 +156,7 @@ public final class IOUtil {
                 String[] values = line.split(DELIMITER);
                 map.put(values[0], Arrays.copyOfRange(values, 1, values.length));
             }
+            assert map != null;
             return map;
         }
     }
@@ -174,7 +171,6 @@ public final class IOUtil {
      * @throws IOException
      *             if unable to read the specification file
      */
-    @Ensures("result != null")
     public static List<String[]> readArray(String filename) throws IOException {
         return readArray(filename, DELIMITER);
     }
@@ -190,7 +186,6 @@ public final class IOUtil {
      * @throws IOException
      *             if unable to read the specification file
      */
-    @Ensures("result != null")
     public static List<String[]> readArray(String filename, String delimiter)
             throws IOException {
         List<String[]> list = new LinkedList<>();
@@ -202,6 +197,7 @@ public final class IOUtil {
                 String[] values = line.split(delimiter);
                 list.add(values);
             }
+            assert list != null;
             return list;
         }
     }
@@ -218,7 +214,6 @@ public final class IOUtil {
      * @throws IOException
      *             if unable to read the file
      */
-    @Ensures("result != null")
     public static List<String[]> readArrayFrom(File file) throws IOException {
         List<String[]> list = new LinkedList<>();
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(),
@@ -228,6 +223,7 @@ public final class IOUtil {
                 String[] values = line.split(DELIMITER);
                 list.add(values);
             }
+            assert list != null;
             return list;
         }
     }
@@ -245,7 +241,6 @@ public final class IOUtil {
      * @return description list, each element is one characteristic flag that
      *         was set
      */
-    @Ensures("result != null")
     public static List<String> getCharacteristicsDescriptions(long value,
             String filename) {
         List<String> characteristics = new LinkedList<>();
@@ -267,6 +262,7 @@ public final class IOUtil {
         } catch (IOException e) {
             logger.error(e);
         }
+        assert characteristics != null;
         return characteristics;
     }
 
@@ -280,7 +276,6 @@ public final class IOUtil {
      *            the name of the specification file (not the path to it)
      * @return list of the characteristic's keys that are set
      */
-    @Ensures("result != null")
     public static List<String> getCharacteristicKeys(long value, String filename) {
         List<String> keys = new ArrayList<>();
         try {
@@ -300,6 +295,7 @@ public final class IOUtil {
         } catch (IOException e) {
             logger.error(e);
         }
+        assert keys != null;
         return keys;
     }
 
@@ -338,7 +334,6 @@ public final class IOUtil {
      * @return formatted description for all characteristic flags that have been
      *         set
      */
-    @Ensures({ "result != null", "result.trim().length() > 0" })
     public static String getCharacteristics(long value, String filename) {
         StringBuilder b = new StringBuilder();
         try {
@@ -361,7 +356,9 @@ public final class IOUtil {
         if (b.length() == 0) {
             b.append("\t**no characteristics**" + NL);
         }
-        return b.toString();
+        String result = b.toString();
+        assert result != null && result.trim().length() > 0;
+        return result;
     }
 
     /**

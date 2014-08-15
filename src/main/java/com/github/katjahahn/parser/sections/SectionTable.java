@@ -34,8 +34,6 @@ import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.PEModule;
 import com.github.katjahahn.parser.StandardField;
 import com.google.common.base.Optional;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Requires;
 
 /**
  * Represents the section table of a PE.
@@ -113,7 +111,6 @@ public class SectionTable implements PEModule {
      * 
      * @return ordered section table entries
      */
-    @Ensures("result != null")
     public List<SectionHeader> getSectionHeaders() {
         return new LinkedList<>(headers);
     }
@@ -137,7 +134,6 @@ public class SectionTable implements PEModule {
      * @throw {@link IllegalArgumentException} if no section header for number
      *        found
      */
-    @Ensures("result != null")
     public SectionHeader getSectionHeader(int number) {
         for (SectionHeader header : headers) {
             if (header.getNumber() == number) {
@@ -161,7 +157,6 @@ public class SectionTable implements PEModule {
      * @throw {@link IllegalArgumentException} if no section header for name
      *        found
      */
-    @Ensures("result != null")
     public SectionHeader getSectionHeader(String sectionName) {
         for (SectionHeader entry : headers) {
             if (entry.getName().equals(sectionName)) {
@@ -191,9 +186,8 @@ public class SectionTable implements PEModule {
         return b.toString();
     }
 
-    @Requires("section != null")
-    @Ensures("result != null")
     private String getNextEntryInfo(byte[] section) {
+        assert section != null;
         StringBuilder b = new StringBuilder();
         for (Entry<String, String[]> entry : specification.entrySet()) {
 
@@ -218,7 +212,6 @@ public class SectionTable implements PEModule {
         return b.toString();
     }
 
-    @Ensures("result != null")
     private String getUTF8String(byte[] section) {
         String[] values = specification.get("NAME");
         int from = getRelativeNameOffset(section);
@@ -248,7 +241,6 @@ public class SectionTable implements PEModule {
      * @return first section with the given name, absent if no section with that
      *         name found
      */
-    @Ensures("result != null")
     public Optional<SectionHeader> getSectionHeaderByName(String name) {
         for (SectionHeader header : headers) {
             if (header.getName().equals(name)) {
@@ -263,8 +255,9 @@ public class SectionTable implements PEModule {
      * 
      * @return size of the section table
      */
-    @Ensures({ "result >= 0", "result % ENTRY_SIZE == 0" })
     public int getSize() {
-        return ENTRY_SIZE * numberOfEntries;
+        int result = ENTRY_SIZE * numberOfEntries;
+        assert result >= 0 && result % ENTRY_SIZE == 0;
+        return result;
     }
 }

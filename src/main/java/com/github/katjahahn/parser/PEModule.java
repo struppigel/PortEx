@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import com.google.java.contract.Ensures;
 
 /**
  * Represents a structure in the PE file.
@@ -30,7 +29,6 @@ public interface PEModule {
      * 
      * @return file offset for the beginning of the module
      */
-    @Ensures("result >= 0")
     long getOffset();
 
     /**
@@ -38,6 +36,5 @@ public interface PEModule {
      * 
      * @return description string
      */
-    @Ensures({ "result != null", "result.trim().length() > 0" })
     String getInfo();
 }

@@ -26,8 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Optional;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Invariant;
 
 /**
  * Reads the offset of the PE signature and the signature itself.
@@ -37,7 +35,6 @@ import com.google.java.contract.Invariant;
  * @author Katja Hahn
  * 
  */
-@Invariant("peOffset != null")
 public class PESignature {
 
     private static final Logger logger = LogManager.getLogger(PESignature.class
@@ -134,8 +131,8 @@ public class PESignature {
      * @throws IllegalStateException
      *             if file hasn't been read yet or the read file was no PE file.
      */
-    @Ensures("result > 0")
     public long getOffset() {
+        assert peOffset.get() > 0;
         return peOffset.get();
     }
 

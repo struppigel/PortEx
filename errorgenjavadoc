@@ -1,0 +1,674 @@
+[0m[[0minfo[0m] [0mLoading project definition from /home/deque/git/PortEx/project[0m
+[0m[[0minfo[0m] [0mSet current project to PortEx (in build file:/home/deque/git/PortEx/)[0m
+[0m[[0minfo[0m] [0mGenjavadoc Java API documentation to /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/Characteristic.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/FileFormatException.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/Header.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/HeaderKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/PEData.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/PELoader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/PEModule.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/PESignature.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/StandardField.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/COFFFileHeader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/COFFHeaderKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/FileCharacteristic.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/MachineType.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/package-info.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSHeader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSHeaderKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSLoadModule.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/DataDirEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/DataDirectoryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/DllCharacteristic.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/OptionalHeader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/OptionalHeaderKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/StandardFieldEntryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/Subsystem.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/WindowsEntryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/package-info.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/PESection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionCharacteristic.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionHeader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionHeaderKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionLoader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SpecialSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/debug/DebugDirectoryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/edata/ExportDirectoryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/FailureEntryException.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/Import.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/ImportDLL.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/NameImport.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/OrdinalImport.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/pdata/ExceptionEntryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/reloc/RelocType.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/reloc/package-info.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/rsrc/ResourceDataEntryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectoryKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/rsrc/ResourceLoopException.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/Hasher.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/Overlay.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/Visualizer.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/anomalies/AnomalySubType.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/anomalies/AnomalyType.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/anomalies/FieldOrStructureKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/anomalies/PEStructureKey.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/sigscanner/MatchedSignature.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/PerformanceTester.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/Location.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/Mapping.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/MemoryMappedPE.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/PhysRange.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/Range.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/VirtRange.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/debug/DebugSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportAddressTable.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportDirectory.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportNameEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportNamePointerTable.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportOrdinalTable.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/LookupTableEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/NameEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/NullEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/OrdinalEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/pdata/ExceptionSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/reloc/BaseRelocBlock.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/reloc/BlockEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/reloc/RelocationSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/DataEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ID.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/IDOrName.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/Level.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/Name.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/Resource.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDataEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceLoopChecker.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceSection.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/AnomalyProb.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/DetectionHeuristic.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/ReportCreator.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/ShannonEntropy.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/StringReader.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/Anomaly.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/AnomalyScanner.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/DataDirAnomaly.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/FieldAnomaly.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/ImportAnomaly.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/PEAnomalyScanner.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/SectionNameAnomaly.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/anomalies/StructureAnomaly.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/FileTypeScanner.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Jar2ExeScanner.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Leaf.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Node.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Signature.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/SignatureScanner.java...[0m
+[0m[[0minfo[0m] [0mLoading source file /home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/SignatureTree.java...[0m
+[0m[[0minfo[0m] [0mConstructing Javadoc information...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Leaf.java:2: error: modifier private not allowed here[0m
+[0m[[31merror[0m] [0mprivate  class Leaf extends com.github.katjahahn.tools.sigscanner.SignatureTree implements scala.Product, scala.Serializable {[0m
+[0m[[31merror[0m] [0m         ^[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Node.java:2: error: modifier private not allowed here[0m
+[0m[[31merror[0m] [0mprivate  class Node extends com.github.katjahahn.tools.sigscanner.SignatureTree implements scala.Product, scala.Serializable {[0m
+[0m[[31merror[0m] [0m         ^[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/PESignature.java:18: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport static com.github.katjahahn.parser.ByteArrayUtil.*;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ByteArrayUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/PESignature.java:19: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport static com.github.katjahahn.parser.IOUtil.*;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/COFFFileHeader.java:32: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/coffheader/COFFFileHeader.java:33: error: package com.github.katjahahn.parser.IOUtil does not exist[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil.SpecificationFormat;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/OptionalHeader.java:18: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport static com.github.katjahahn.parser.ByteArrayUtil.*;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ByteArrayUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/OptionalHeader.java:33: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/OptionalHeader.java:34: error: package com.github.katjahahn.parser.IOUtil does not exist[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil.SpecificationFormat;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java:18: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport static com.github.katjahahn.parser.ByteArrayUtil.*;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ByteArrayUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java:19: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport static com.github.katjahahn.parser.IOUtil.*;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java:32: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java:33: error: package com.github.katjahahn.parser.IOUtil does not exist[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil.SpecificationFormat;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSHeader.java:24: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSHeader.java:25: error: package com.github.katjahahn.parser.IOUtil does not exist[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil.SpecificationFormat;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSLoadModule.java:18: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport static com.github.katjahahn.parser.IOUtil.*;[0m
+[0m[[31merror[0m] [0m                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionHeader.java:27: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/PESection.java:22: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:26: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static private  void readLookupTableEntries (scala.collection.immutable.List<com.github.katjahahn.parser.sections.idata.DirectoryEntry> directoryTable, long virtualAddress, com.github.katjahahn.parser.optheader.OptionalHeader optHeader, com.github.katjahahn.parser.MemoryMappedPE mmbytes, long fileSize, long fileOffset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:31: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static private  scala.collection.immutable.List<com.github.katjahahn.parser.sections.idata.DirectoryEntry> readDirEntries (com.github.katjahahn.parser.MemoryMappedPE mmbytes, long virtualAddress, long fileOffset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                            ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:46: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static private  scala.Option<com.github.katjahahn.parser.sections.idata.DirectoryEntry> readDirEntry (int nr, com.github.katjahahn.parser.MemoryMappedPE mmbytes, long virtualAddress, long fileOffset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:69: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  private  scala.collection.immutable.List<com.github.katjahahn.parser.sections.idata.DirectoryEntry> directoryTable () { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                     ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:72: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  private   ImportSection (scala.collection.immutable.List<com.github.katjahahn.parser.sections.idata.DirectoryEntry> directoryTable, long offset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                     ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:87: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  public  java.util.List<com.github.katjahahn.parser.sections.idata.DirectoryEntry> getDirectory () { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                   ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/ImportDLL.java:21: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.IOUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class IOUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:64: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static private  scala.collection.immutable.List<com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry> readEntries (java.io.File file, scala.collection.immutable.Map<com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey, com.github.katjahahn.parser.StandardField> header, long tableOffset, com.github.katjahahn.parser.sections.rsrc.Level level, long virtualAddress, long rsrcOffset, com.github.katjahahn.parser.MemoryMappedPE mmBytes, com.github.katjahahn.parser.sections.rsrc.ResourceLoopChecker loopChecker) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                           ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:67: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  private  scala.collection.immutable.List<com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry> entries () { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                    ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:70: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  private   ResourceDirectory (com.github.katjahahn.parser.sections.rsrc.Level level, scala.collection.immutable.Map<com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey, com.github.katjahahn.parser.StandardField> header, scala.collection.immutable.List<com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry> entries, long fileOffset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                                                                                                                                                                                                                 ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:82: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  public  java.util.List<com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry> getTableEntries () { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/DataEntry.java:9: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mpublic  class DataEntry extends com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry implements scala.Product, scala.Serializable {[0m
+[0m[[31merror[0m] [0m                                                                         ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.java:9: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mpublic  class SubDirEntry extends com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry implements scala.Product, scala.Serializable {[0m
+[0m[[31merror[0m] [0m                                                                           ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:127: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  private  scala.collection.immutable.List<com.github.katjahahn.parser.sections.rsrc.Resource> getResources (com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry entry) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                                                      ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ResourceDirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.rsrc[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/NameImport.java:54: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m    private final DirectoryEntry parent;[0m
+[0m[[31merror[0m] [0m                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: class NameImport[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/NameImport.java:72: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m            DirectoryEntry parent, List<Location> locations) {[0m
+[0m[[31merror[0m] [0m            ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: class NameImport[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/NameImport.java:84: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m    public Long getDirEntryValue(DirectoryEntryKey key) {[0m
+[0m[[31merror[0m] [0m                                 ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntryKey[0m
+[0m[[31merror[0m] [0m  location: class NameImport[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/Import.java:35: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m	Long getDirEntryValue(DirectoryEntryKey key);[0m
+[0m[[31merror[0m] [0m	                      ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntryKey[0m
+[0m[[31merror[0m] [0m  location: interface Import[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/OrdinalImport.java:44: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m    private final DirectoryEntry parent;[0m
+[0m[[31merror[0m] [0m                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: class OrdinalImport[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/OrdinalImport.java:57: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m    public OrdinalImport(int ordinal, long rva, DirectoryEntry parent,[0m
+[0m[[31merror[0m] [0m                                                ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: class OrdinalImport[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/OrdinalImport.java:68: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m    public Long getDirEntryValue(DirectoryEntryKey key) {[0m
+[0m[[31merror[0m] [0m                                 ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntryKey[0m
+[0m[[31merror[0m] [0m  location: class OrdinalImport[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/tools/Hasher.java:24: error: cannot find symbol[0m
+[0m[[31merror[0m] [0mimport com.github.katjahahn.parser.ByteArrayUtil;[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m  symbol:   class ByteArrayUtil[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/LookupTableEntry.java:35: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static public  com.github.katjahahn.parser.sections.idata.LookupTableEntry apply (com.github.katjahahn.parser.MemoryMappedPE mmbytes, int entryRVA, int entrySize, long virtualAddress, long iltRVA, com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry, long fileOffset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                                                                                                                                                 ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/LookupTableEntry.java:36: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static private  com.github.katjahahn.parser.sections.idata.LookupTableEntry createNameEntry (long value, com.github.katjahahn.parser.MemoryMappedPE mmbytes, long virtualAddress, long rva, com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry, int entrySize, long offset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                                                                                                                                        ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/LookupTableEntry.java:37: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  static private  com.github.katjahahn.parser.sections.idata.OrdinalEntry createOrdEntry (long value, long rva, com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry, int entrySize, long offset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                                                          ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/OrdinalEntry.java:14: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  public  com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry () { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                    ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/OrdinalEntry.java:18: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  public   OrdinalEntry (int ordNumber, long rva, com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry, int size, long offset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                            ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/NameEntry.java:16: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  public  com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry () { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                    ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/NameEntry.java:20: error: cannot find symbol[0m
+[0m[[31merror[0m] [0m  public   NameEntry (long nameRVA, com.github.katjahahn.parser.sections.idata.LookupTableEntry.HintNameEntry hintNameEntry, long rva, com.github.katjahahn.parser.sections.idata.DirectoryEntry dirEntry, int size, long offset) { throw new RuntimeException(); }[0m
+[0m[[31merror[0m] [0m                                                                                                                                                                                 ^[0m
+[0m[[31merror[0m] [0m  symbol:   class DirectoryEntry[0m
+[0m[[31merror[0m] [0m  location: package com.github.katjahahn.parser.sections.idata[0m
+[0m[[0minfo[0m] [0mStandard Doclet version 1.7.0_55[0m
+[0m[[0minfo[0m] [0mBuilding tree for all the packages and classes...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/DataDirectoryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/DataDirEntry.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/DataDirEntry.java:80: warning - @param argument "size" is not a parameter name.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/optheader/DataDirEntry.java:101: warning - @param argument "size" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/DllCharacteristic.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/OptionalHeader.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/OptionalHeader.MagicNumber.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/OptionalHeaderKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/StandardFieldEntryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/Subsystem.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/WindowsEntryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/AnomalyProb.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/DetectionHeuristic.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/Hasher.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/Overlay.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/ReportCreator.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/ShannonEntropy.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/ShannonEntropy.java:36: warning - @param argument "the" is not a parameter name.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/ShannonEntropy.java:51: warning - @param argument "sectioNumber" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/StringReader.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/Visualizer.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/FileTypeScanner.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/Jar2ExeScanner.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Jar2ExeScanner.java:11: warning - @constructor is an unknown tag.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/MatchedSignature.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/Signature.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/Signature.java:12: warning - @constructor is an unknown tag.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/SignatureScanner.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/tools/sigscanner/SignatureScanner.java:97: warning - @param argument "data" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/SignatureTree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/PESection.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SectionCharacteristic.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SectionHeader.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionHeader.java:74: warning - @return tag has no arguments.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SectionHeaderKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SectionLoader.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionLoader.java:717: warning - Tag @see: can't find getReadSize() in com.github.katjahahn.parser.sections.SectionLoader[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionLoader.java:433: warning - @return tag has no arguments.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionLoader.java:325: warning - @param argument "table" is not a parameter name.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionLoader.java:349: warning - @param argument "table" is not a parameter name.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionLoader.java:349: warning - @param argument "offset" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SectionLoader.LoadInfo.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SectionTable.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java:141: warning - @throw is an unknown tag.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/SectionTable.java:165: warning - @throw is an unknown tag.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/SpecialSection.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/Anomaly.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/AnomalyScanner.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/AnomalySubType.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/AnomalyType.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/DataDirAnomaly.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/FieldAnomaly.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/FieldOrStructureKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/ImportAnomaly.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/PEAnomalyScanner.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/PEStructureKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/SectionNameAnomaly.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/StructureAnomaly.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/BaseRelocBlock.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/BlockEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/RelocationSection.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/RelocType.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportAddressTable.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportAddressTable.java:24: warning - @param argument "index" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportDirectory.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportDirectory.java:26: warning - Tag @link: reference not found: StandardEntry[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportDirectory.java:26: warning - Tag @link: reference not found: StandardEntry[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportDirectoryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportNameEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportNamePointerTable.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportOrdinalTable.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/ExportSection.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/edata/ExportSection.java:18: warning - Tag @link: reference not found: SectionLoader[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/debug/DebugDirectoryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/debug/DebugSection.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/debug/DebugSection.java:18: warning - @param argument "loadInfo" is not a parameter name.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/debug/DebugSection.java:26: warning - Tag @link: reference not found: SectionLoader[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/msdos/MSDOSHeader.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/msdos/MSDOSHeaderKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/msdos/MSDOSLoadModule.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/msdos/MSDOSLoadModule.java:45: warning - @constructor is an unknown tag.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/DataEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ID.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/IDOrName.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/Level.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/Name.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/Resource.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceDataEntry.html...[0m
+[0m[[31merror[0m] [0mcom.sun.tools.doclets.internal.toolkit.util.DocletAbortException[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.ValueTaglet.getFieldDoc(ValueTaglet.java:126)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.ValueTaglet.getTagletOutput(ValueTaglet.java:162)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.TagletWriter.getInlineTagOuput(TagletWriter.java:220)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.commentTagsToString(HtmlDocletWriter.java:2401)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addCommentTags(HtmlDocletWriter.java:2361)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addSummaryComment(HtmlDocletWriter.java:2295)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.SubWriterHolderWriter.addIndexComment(SubWriterHolderWriter.java:193)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.SubWriterHolderWriter.addSummaryLinkComment(SubWriterHolderWriter.java:242)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.AbstractMemberWriter.addMemberSummary(AbstractMemberWriter.java:568)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.MemberSummaryBuilder.buildSummary(MemberSummaryBuilder.java:337)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.MemberSummaryBuilder.addSummary(MemberSummaryBuilder.java:494)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.MemberSummaryBuilder.buildMethodsSummary(MemberSummaryBuilder.java:288)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor35.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractMemberBuilder.build(AbstractMemberBuilder.java:76)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.buildChildren(AbstractBuilder.java:129)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.buildMemberSummary(ClassBuilder.java:333)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor23.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.buildChildren(AbstractBuilder.java:129)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.buildClassDoc(ClassBuilder.java:145)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor9.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.build(ClassBuilder.java:117)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDoclet.generateClassFiles(HtmlDoclet.java:186)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.generateClassFiles(AbstractDoclet.java:196)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.generateClassFiles(AbstractDoclet.java:180)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.startGeneration(AbstractDoclet.java:125)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.start(AbstractDoclet.java:83)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDoclet.start(HtmlDoclet.java:63)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.standard.Standard.start(Standard.java:39)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.DocletInvoker.invoke(DocletInvoker.java:280)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.DocletInvoker.start(DocletInvoker.java:160)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Start.parseAndExecute(Start.java:397)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Start.begin(Start.java:167)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Main.execute(Main.java:59)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Main.main(Main.java:49)[0m
+[0m[[31merror[0m] [0mcom.sun.tools.doclets.internal.toolkit.util.DocletAbortException[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.ValueTaglet.getFieldDoc(ValueTaglet.java:126)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.ValueTaglet.getTagletOutput(ValueTaglet.java:162)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.TagletWriter.getInlineTagOuput(TagletWriter.java:220)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.commentTagsToString(HtmlDocletWriter.java:2401)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addCommentTags(HtmlDocletWriter.java:2361)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addInlineComment(HtmlDocletWriter.java:2322)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.MethodWriterImpl.addComments(MethodWriterImpl.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.MethodBuilder.buildMethodComments(MethodBuilder.java:213)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor7.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractMemberBuilder.build(AbstractMemberBuilder.java:76)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.buildChildren(AbstractBuilder.java:129)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.MethodBuilder.buildMethodDoc(MethodBuilder.java:162)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor36.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractMemberBuilder.build(AbstractMemberBuilder.java:76)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.buildChildren(AbstractBuilder.java:129)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.buildMethodDetails(ClassBuilder.java:405)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor29.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.buildChildren(AbstractBuilder.java:129)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.buildMemberDetails(ClassBuilder.java:346)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor24.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.buildChildren(AbstractBuilder.java:129)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.buildClassDoc(ClassBuilder.java:145)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.GeneratedMethodAccessor9.invoke(Unknown Source)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.invokeMethod(AbstractBuilder.java:148)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.AbstractBuilder.build(AbstractBuilder.java:103)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.builders.ClassBuilder.build(ClassBuilder.java:117)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDoclet.generateClassFiles(HtmlDoclet.java:186)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.generateClassFiles(AbstractDoclet.java:196)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.generateClassFiles(AbstractDoclet.java:180)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.startGeneration(AbstractDoclet.java:125)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.start(AbstractDoclet.java:83)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDoclet.start(HtmlDoclet.java:63)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.standard.Standard.start(Standard.java:39)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.DocletInvoker.invoke(DocletInvoker.java:280)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.DocletInvoker.start(DocletInvoker.java:160)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Start.parseAndExecute(Start.java:397)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Start.begin(Start.java:167)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Main.execute(Main.java:59)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Main.main(Main.java:49)[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceDataEntryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:110: warning - @param argument "mmBytes" is not a parameter name.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/ResourceDirectory.java:119: warning - @param argument "mmBytes" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceDirectoryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceLoopChecker.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceLoopException.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/ResourceSection.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.java:20: warning - @inheritDoc used but locations() does not override or implement any method.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.java:24: warning - @inheritDoc used but toString() does not override or implement any method.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.java:20: warning - @inheritDoc used but locations() does not override or implement any method.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/rsrc/SubDirEntry.java:24: warning - @inheritDoc used but toString() does not override or implement any method.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/Characteristic.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/FileFormatException.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/Header.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/HeaderKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/Location.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/Mapping.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/Mapping.java:70: warning - @param argument "the" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/MemoryMappedPE.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/MemoryMappedPE.java:86: warning - @param argument "value" is not a parameter name.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/PEData.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/PELoader.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/PEModule.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/PESignature.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/PhysRange.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/Range.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/StandardField.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/VirtRange.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/FailureEntryException.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/Import.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/Import.java:35: warning - @return tag has no arguments.[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/src/main/java/com/github/katjahahn/parser/sections/idata/Import.java:41: warning - @return tag has no arguments.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/ImportDLL.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/ImportSection.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/ImportSection.java:61: warning - Tag @link: reference not found: SectionLoader[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/LookupTableEntry.html...[0m
+[0m[[31merror[0m] [0m/home/deque/git/PortEx/target/java/com/github/katjahahn/parser/sections/idata/LookupTableEntry.java:49: warning - @returns is an unknown tag.[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/LookupTableEntry.HintNameEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/NameEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/NameImport.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/NullEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/OrdinalEntry.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/OrdinalImport.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/pdata/ExceptionEntryKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/pdata/ExceptionSection.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/PerformanceTester.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/COFFFileHeader.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/COFFHeaderKey.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/FileCharacteristic.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/MachineType.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/overview-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/coffheader/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/msdos/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/msdos/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/msdos/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/optheader/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/debug/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/debug/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/debug/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/edata/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/idata/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/pdata/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/pdata/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/pdata/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/reloc/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/parser/sections/rsrc/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/anomalies/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/package-frame.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/package-summary.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/com/github/katjahahn/tools/sigscanner/package-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/constant-values.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/serialized-form.html...[0m
+[0m[[0minfo[0m] [0mBuilding index for all the packages and classes...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/overview-tree.html...[0m
+[0m[[0minfo[0m] [0mGenerating /home/deque/git/PortEx/target/scala-2.10/genjavadoc-api/index-all.html...[0m
+[0m[[31merror[0m] [0mcom.sun.tools.doclets.internal.toolkit.util.DocletAbortException[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.ValueTaglet.getFieldDoc(ValueTaglet.java:126)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.ValueTaglet.getTagletOutput(ValueTaglet.java:162)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.taglets.TagletWriter.getInlineTagOuput(TagletWriter.java:220)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.commentTagsToString(HtmlDocletWriter.java:2401)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addCommentTags(HtmlDocletWriter.java:2361)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addSummaryComment(HtmlDocletWriter.java:2295)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDocletWriter.addSummaryComment(HtmlDocletWriter.java:2280)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.AbstractIndexWriter.addComment(AbstractIndexWriter.java:229)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.AbstractIndexWriter.addDescription(AbstractIndexWriter.java:196)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.AbstractIndexWriter.addContents(AbstractIndexWriter.java:115)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.SingleIndexWriter.generateIndexFile(SingleIndexWriter.java:96)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.SingleIndexWriter.generate(SingleIndexWriter.java:72)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDoclet.generateOtherFiles(HtmlDoclet.java:130)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.startGeneration(AbstractDoclet.java:141)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.internal.toolkit.AbstractDoclet.start(AbstractDoclet.java:83)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.formats.html.HtmlDoclet.start(HtmlDoclet.java:63)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.doclets.standard.Standard.start(Standard.java:39)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)[0m
+[0m[[31merror[0m] [0m	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+[0m[[31merror[0m] [0m	at java.lang.reflect.Method.invoke(Method.java:606)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.DocletInvoker.invoke(DocletInvoker.java:280)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.DocletInvoker.start(DocletInvoker.java:160)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Start.parseAndExecute(Start.java:397)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Start.begin(Start.java:167)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Main.execute(Main.java:59)[0m
+[0m[[31merror[0m] [0m	at com.sun.tools.javadoc.Main.main(Main.java:49)[0m
+[0m[[0minfo[0m] [0m81 warnings[0m
+[0m[[31merror[0m] [0m(genjavadoc:[31mdoc[0m) javadoc returned nonzero exit code[0m
+[0m[[31merror[0m] [0mTotal time: 3 s, completed Aug 12, 2014 3:09:42 PM[0m

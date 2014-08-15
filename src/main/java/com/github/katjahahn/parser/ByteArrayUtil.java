@@ -20,8 +20,6 @@ import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.java.contract.Requires;
-
 /**
  * Utilities to convert from and to byte arrays.
  * <p>
@@ -32,7 +30,8 @@ import com.google.java.contract.Requires;
  * <p>
  * {@link #bytesToInt(byte[])} and {@link #bytesToLong(byte[])} don't care about
  * the proper minimum length of the given byte array: No
- * {@link java.nio.BufferUnderflowException} is thrown. Thus they are more robust.
+ * {@link java.nio.BufferUnderflowException} is thrown. Thus they are more
+ * robust.
  * <p>
  * {@link #byteToHex(byte[])} delimits bytes with spaces and every single byte
  * value is converted including prepended zero bytes in the array.
@@ -74,9 +73,9 @@ public class ByteArrayUtil {
      * @throws IllegalArgumentException
      *             if length is larger than 4 or smaller than 1
      */
-    @Requires({ "length <= 4", "length > 0", "bytes != null",
-            "bytes.length >= length + offset" })
     public static int getBytesIntValue(byte[] bytes, int offset, int length) {
+        assert length <= 4 && length > 0;
+        assert bytes != null && bytes.length >= length + offset;
         byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
         return bytesToInt(value);
     }
@@ -100,9 +99,9 @@ public class ByteArrayUtil {
      * @throws IllegalArgumentException
      *             if length is larger than 8 or smaller than 1
      */
-    @Requires({ "length <= 8", "length > 0", "bytes != null",
-            "bytes.length >= length + offset" })
     public static long getBytesLongValue(byte[] bytes, int offset, int length) {
+        assert length <= 8 && length > 0;
+        assert bytes != null && bytes.length >= length + offset;
         byte[] value = new byte[length];
         value = Arrays.copyOfRange(bytes, offset, offset + length);
         return bytesToLong(value);
@@ -131,9 +130,9 @@ public class ByteArrayUtil {
      * @throws IllegalArgumentException
      *             if length is larger than 8 or smaller than 0
      */
-    @Requires({ "length <= 8", "length >= 0", "bytes != null" })
     public static long getBytesLongValueSafely(byte[] bytes, int offset,
             int length) {
+        assert length <= 8 && length >= 0 && bytes != null;
         byte[] value = new byte[length];
         if (offset + length > bytes.length) {
             logger.warn("byte array not large enough for given offset + length");
@@ -144,7 +143,7 @@ public class ByteArrayUtil {
         }
         return bytesToLong(value);
     }
-    
+
     /**
      * Converts a byte array to a hex string.
      * <p>
@@ -155,8 +154,8 @@ public class ByteArrayUtil {
      *            byte array to convert
      * @return hexadecimal string representation of the byte array
      */
-    @Requires("array != null")
     public static String byteToHex(byte[] array) {
+        assert array != null;
         return byteToHex(array, " ");
     }
 
@@ -168,11 +167,12 @@ public class ByteArrayUtil {
      * 
      * @param array
      *            byte array to convert
-     * @param separator the delimiter of the bytes
+     * @param separator
+     *            the delimiter of the bytes
      * @return hexadecimal string representation of the byte array
      */
-    @Requires("array != null")
     public static String byteToHex(byte[] array, String separator) {
+        assert array != null;
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
             if ((array[i] & 0xff) < 0x10) {
@@ -193,8 +193,8 @@ public class ByteArrayUtil {
      * @throws IllegalArgumentException
      *             if byte array contains more than 4 bytes
      */
-    @Requires({ "bytes != null", "bytes.length <= 4" })
     public static int bytesToInt(byte[] bytes) {
+        assert bytes != null && bytes.length <= 4;
         int value = 0;
         for (int i = 0; i < bytes.length; i++) {
             int shift = 8 * i;
@@ -213,8 +213,8 @@ public class ByteArrayUtil {
      * @throws IllegalArgumentException
      *             if byte array contains more than 8 bytes
      */
-    @Requires({ "bytes != null", "bytes.length <= 8" })
     public static long bytesToLong(byte[] bytes) {
+        assert bytes != null && bytes.length <= 8;
         long value = 0;
         for (int i = 0; i < bytes.length; i++) {
             int shift = 8 * i;

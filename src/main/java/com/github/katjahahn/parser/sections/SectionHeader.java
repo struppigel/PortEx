@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import com.github.katjahahn.parser.Header;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.StandardField;
-import com.google.java.contract.Ensures;
 
 /**
  * Represents an entry of the {@link SectionTable}.
@@ -84,9 +83,10 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned PointerToRawData
      */
-    @Ensures("result % 512 == 0")
     public long getAlignedPointerToRaw() {
-        return get(POINTER_TO_RAW_DATA) & ~0x1ff;
+        long result = get(POINTER_TO_RAW_DATA) & ~0x1ff;
+        assert result % 512 == 0;
+        return result;
     }
 
     /**
@@ -94,13 +94,14 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned SizeOfRawData
      */
-    @Ensures("result % 4096 == 0")
     public long getAlignedSizeOfRaw() {
         long sizeOfRaw = get(SIZE_OF_RAW_DATA);
         if (sizeOfRaw == (sizeOfRaw & ~0xfff)) {
             return sizeOfRaw;
         }
-        return (sizeOfRaw + 0xfff) & ~0xfff;
+        long result = (sizeOfRaw + 0xfff) & ~0xfff;
+        assert result % 4096 == 0;
+        return result;
     }
 
     /**
@@ -108,7 +109,6 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned VirtualSize
      */
-    @Ensures("result % 4096 == 0")
     public long getAlignedVirtualSize() {
         long virtSize = get(VIRTUAL_SIZE);
         if (virtSize == (virtSize & ~0xfff)) {
@@ -117,7 +117,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         // TODO: corkami: "a section can have a null VirtualSize: in this case,
         // only the SizeOfRawData is taken into consideration" --> maybe create
         // another method to get the real virtual size
-        return (virtSize + 0xfff) & ~0xfff;
+        long result = (virtSize + 0xfff) & ~0xfff;
+        assert result % 4096 == 0;
+        return result;
     }
 
     /**
@@ -125,13 +127,14 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned VirtualAddress
      */
-    @Ensures("result % 4096 == 0")
     public long getAlignedVirtualAddress() {
         long virtAddr = get(VIRTUAL_ADDRESS);
         if (virtAddr == (virtAddr & ~0xfff)) {
             return virtAddr;
         }
-        return (virtAddr + 0xfff) & ~0xfff;
+        long result = (virtAddr + 0xfff) & ~0xfff;
+        assert result % 4096 == 0;
+        return result;
     }
 
     /**
@@ -148,8 +151,8 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return number
      */
-    @Ensures("result >= 0")
     public int getNumber() {
+        assert number >= 0;
         return number;
     }
 
@@ -177,7 +180,6 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return a map of all entries
      */
-    @Ensures("result != null")
     public Map<SectionHeaderKey, StandardField> getEntryMap() {
         return new HashMap<>(entries);
     }
@@ -187,7 +189,6 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return list of all characteristics
      */
-    @Ensures("result != null")
     public List<SectionCharacteristic> getCharacteristics() {
         List<SectionCharacteristic> list = new ArrayList<>();
         List<String> keys = IOUtil.getCharacteristicKeys(
@@ -196,6 +197,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         for (String key : keys) {
             list.add(SectionCharacteristic.valueOf(key));
         }
+        assert list != null;
         return list;
     }
 

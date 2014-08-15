@@ -22,8 +22,6 @@ import java.io.RandomAccessFile;
 import com.github.katjahahn.parser.IOUtil;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.java.contract.Ensures;
-import com.google.java.contract.Invariant;
 
 /**
  * Holds header, size, offset and bytes of a PESection.
@@ -33,7 +31,6 @@ import com.google.java.contract.Invariant;
  * @author Katja Hahn
  *
  */
-@Invariant({ "file != null", "header != null", "sectionbytes != null" })
 public class PESection {
 
     private Optional<byte[]> sectionbytes = Optional.absent();
@@ -90,8 +87,8 @@ public class PESection {
      * 
      * @return the number of bytes in the section
      */
-    @Ensures("result >= 0")
     public long getSize() {
+        assert size >= 0;
         return size;
     }
 
@@ -100,8 +97,8 @@ public class PESection {
      * 
      * @return file offset
      */
-    @Ensures("result >= 0")
     public long getOffset() {
+        assert offset >= 0;
         return offset;
     }
 
@@ -110,8 +107,8 @@ public class PESection {
      * 
      * @return section header
      */
-    @Ensures("result != null")
     public SectionHeader getHeader() {
+        assert header != null;
         return header;
     }
 
@@ -126,13 +123,14 @@ public class PESection {
      *             if section is too large to fit into a byte array. This
      *             happens if the size is larger than int can hold.
      */
-    @Ensures("result != null")
     public byte[] getBytes() throws IOException {
         if (sectionbytes.isPresent()) {
             return sectionbytes.get().clone();
         }
         loadSectionBytes();
-        return sectionbytes.get();
+        byte[] result = sectionbytes.get();
+        assert result != null;
+        return result;
     }
 
     /**
