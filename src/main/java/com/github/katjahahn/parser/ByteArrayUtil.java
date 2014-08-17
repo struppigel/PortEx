@@ -60,8 +60,9 @@ public class ByteArrayUtil {
      * considered little endian. The subarray is determined by offset and
      * length.
      * <p>
-     * Presumes the byte array to be not null and the length must be between 1
-     * and 4 inclusive.
+     * Presumes the bytes to be not null and the length must be between 1 and 4
+     * inclusive. The length of bytes must be larger than or equal to length +
+     * offset.
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to int
@@ -70,8 +71,6 @@ public class ByteArrayUtil {
      * @param length
      *            the number of bytes used to convert to int
      * @return int value
-     * @throws IllegalArgumentException
-     *             if length is larger than 4 or smaller than 1
      */
     public static int getBytesIntValue(byte[] bytes, int offset, int length) {
         assert length <= 4 && length > 0;
@@ -87,7 +86,8 @@ public class ByteArrayUtil {
      * offset and length.
      * <p>
      * Presumes the byte array to be not null and its length should be between 1
-     * and 4 inclusive.
+     * and 8 inclusive. The length of bytes must be larger than or equal to
+     * length + offset.
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to long
@@ -96,8 +96,6 @@ public class ByteArrayUtil {
      * @param length
      *            the number of bytes used to convert to long
      * @return long value
-     * @throws IllegalArgumentException
-     *             if length is larger than 8 or smaller than 1
      */
     public static long getBytesLongValue(byte[] bytes, int offset, int length) {
         assert length <= 8 && length > 0;
@@ -118,7 +116,7 @@ public class ByteArrayUtil {
      * been cut. Example: TinyPE
      * <p>
      * Presumes the byte array to be not null and its length should be between 0
-     * and 4 inclusive.
+     * and 8 inclusive.
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to long
@@ -127,8 +125,6 @@ public class ByteArrayUtil {
      * @param length
      *            the number of bytes used to convert to long
      * @return long value
-     * @throws IllegalArgumentException
-     *             if length is larger than 8 or smaller than 0
      */
     public static long getBytesLongValueSafely(byte[] bytes, int offset,
             int length) {
@@ -186,6 +182,9 @@ public class ByteArrayUtil {
     /**
      * Converts a byte array to an int. The bytes are considered unsigned and
      * little endian (first byte is the least significant).
+     * <p>
+     * Presumes the array bytes to be not null and its length smaller or equal
+     * to 4
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to int
@@ -206,6 +205,9 @@ public class ByteArrayUtil {
     /**
      * Converts a byte array to a long. The bytes are considered unsigned and
      * little endian (first byte is the least significant).
+     * <p>
+     * Presumes the array bytes to be not null and its length smaller or equal
+     * to 8
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to int
