@@ -183,14 +183,12 @@ public class ByteArrayUtil {
      * Converts a byte array to an int. The bytes are considered unsigned and
      * little endian (first byte is the least significant).
      * <p>
-     * Presumes the array bytes to be not null and its length smaller or equal
-     * to 4
+     * Presumes the array bytes to be not null and its length smaller than or
+     * equal to 4
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to int
      * @return int value
-     * @throws IllegalArgumentException
-     *             if byte array contains more than 4 bytes
      */
     public static int bytesToInt(byte[] bytes) {
         assert bytes != null && bytes.length <= 4;
@@ -206,14 +204,12 @@ public class ByteArrayUtil {
      * Converts a byte array to a long. The bytes are considered unsigned and
      * little endian (first byte is the least significant).
      * <p>
-     * Presumes the array bytes to be not null and its length smaller or equal
-     * to 8
+     * Presumes the array bytes to be not null and its length smaller than or
+     * equal to 8
      * 
      * @param bytes
      *            the little endian byte array that shall be converted to int
      * @return long value
-     * @throws IllegalArgumentException
-     *             if byte array contains more than 8 bytes
      */
     public static long bytesToLong(byte[] bytes) {
         assert bytes != null && bytes.length <= 8;

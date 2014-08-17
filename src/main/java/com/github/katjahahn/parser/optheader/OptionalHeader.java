@@ -72,13 +72,25 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     private final long offset;
 
     /**
-     * The magic number of the PE file, indicating whether it is a PE32 or PE32+
+     * The magic number of the PE file, indicating whether it is a PE32, PE32+
+     * or ROM file
      * 
      * @author Katja Hahn
      * 
      */
     public static enum MagicNumber {
-        PE32(0x10B), PE32_PLUS(0x20B), ROM(0x107);
+        /**
+         * A PE that supports only 32-bit addresses
+         */
+        PE32(0x10B),
+        /**
+         * A PE that supports up to 64-bit addresses
+         */
+        PE32_PLUS(0x20B),
+        /**
+         * A ROM file. Note: PortEx doesn't support object files by now.
+         */
+        ROM(0x107);
 
         private int value;
 
@@ -86,6 +98,11 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             this.value = value;
         }
 
+        /**
+         * The magic number itself
+         * 
+         * @return the magic number that denotes the type of PE
+         */
         public int getValue() {
             return value;
         }
@@ -102,8 +119,20 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         this.headerbytes = headerbytes.clone();
         this.offset = offset;
     }
-    
-    public static OptionalHeader newInstance(byte[] headerbytes, long offset) throws IOException {
+
+    /**
+     * Creates and returns a new instance of the optional header.
+     * 
+     * @param headerbytes
+     *            the bytes that make up the optional header
+     * @param offset
+     *            the file offset to the beginning of the optional header
+     * @return instance of the optional header
+     * @throws IOException
+     *             if headerbytes can not be read
+     */
+    public static OptionalHeader newInstance(byte[] headerbytes, long offset)
+            throws IOException {
         OptionalHeader header = new OptionalHeader(headerbytes, offset);
         header.read();
         return header;
@@ -243,7 +272,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                         length);
                 long size = getBytesLongValueSafely(headerbytes, offset
                         + length, length);
-                //TODO test if this is correct
+                // TODO test if this is correct
                 long tableEntryOffset = offset + getOffset();
                 if (address != 0) {
                     DataDirEntry entry = new DataDirEntry(specs[description],
@@ -255,7 +284,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec) throws IOException {
+    private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec)
+            throws IOException {
         int offsetLoc;
         int lengthLoc;
         final int description = 1;
@@ -300,8 +330,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         for (DataDirEntry entry : dataDirEntries.values()) {
             b.append(entry.getKey() + ": " + entry.getVirtualAddress() + "(0x"
                     + Long.toHexString(entry.getVirtualAddress()) + ")/"
-                    + entry.getDirectorySize() + "(0x" + Long.toHexString(entry.getDirectorySize()) + ")"
-                    + NL);
+                    + entry.getDirectorySize() + "(0x"
+                    + Long.toHexString(entry.getDirectorySize()) + ")" + NL);
         }
         return b.toString();
     }
@@ -323,7 +353,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                         + Long.toHexString(value) + "), "
                         + getImageBaseDescription(value) + NL);
             } else if (key.equals(SUBSYSTEM)) {
-                //subsystem has only 2 bytes
+                // subsystem has only 2 bytes
                 b.append(description + ": "
                         + getSubsystemDescription((int) value) + NL);
             } else if (key.equals(DLL_CHARACTERISTICS)) {
@@ -497,8 +527,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         try {
             Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
             String[] array = map.get(String.valueOf(value));
-            if(array == null) {
-                logger.warn("No subsystem key for " + value + " 0x" + Integer.toHexString(value) + "! Set to UNKNOWN.");
+            if (array == null) {
+                logger.warn("No subsystem key for " + value + " 0x"
+                        + Integer.toHexString(value) + "! Set to UNKNOWN.");
                 return "IMAGE_SUBSYSTEM_UNKNOWN";
             } else {
                 return array[0];
@@ -547,8 +578,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         if (isLowAlignmentMode()) {
             return 1;
         }
-        if (fileAlign < 512) { //TODO correct?
-        	fileAlign = 512;
+        if (fileAlign < 512) { // TODO correct?
+            fileAlign = 512;
         }
         return fileAlign;
     }
@@ -582,5 +613,5 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return 0x200 <= fileAlign && fileAlign <= sectionAlign
                 && 0x1000 <= sectionAlign;
     }
- 
+
 }

@@ -41,8 +41,8 @@ import com.google.common.base.Optional;
  * Utilities for file IO needed to read maps and arrays from the text files in
  * the data subdirectory of PortEx.
  * <p>
- * The specification text files are CSV, where the values are separated by
- * semicolon and a new entry begins on a new line.
+ * The default specification text files are CSV, where the values are separated
+ * by semicolon and a new entry begins on a new line.
  * 
  * @author Katja Hahn
  * 
@@ -71,15 +71,20 @@ public final class IOUtil {
      * <p>
      * The map is initialized with all possible HeaderKeys of the subtype and
      * empty fields.
+     * <p>
+     * The passed instances must not be null and the specName must not be empty.
      * 
      * @param clazz
      *            the concrete subclass of the HeaderKey
      * @param specFormat
      *            the format of the specification file
      * @param specName
-     *            the name of the specification file (not the path to it)
+     *            the name of the specification file (not the path to it), must
+     *            not be empty.
      * @param headerbytes
      *            the bytes of the header
+     * @param headerOffset
+     *            the file offset to the start of the headerbytes
      * @param <T>
      *            the type for the header key that the returned map shall use
      * @return header entries
@@ -91,7 +96,11 @@ public final class IOUtil {
             byte[] headerbytes, long headerOffset) throws IOException {
         assert clazz != null && specFormat != null && headerbytes != null;
         assert specName != null && specName.trim().length() > 0;
+
+        /* initializers */
         EnumSolver<T> enumSolver = new EnumSolver<>(clazz);
+        // init a full map with default fields. Fields that can be read are
+        // changed subsequently
         Map<T, StandardField> data = initFullEnumMap(enumSolver);
         List<String[]> specification = readArray(specName);
 
@@ -123,6 +132,14 @@ public final class IOUtil {
         return data;
     }
 
+    /**
+     * Initialized a map containing all keys of the Enum T as map-key and
+     * default StandardFields as map-value.
+     * 
+     * @param enumSolver
+     *            EnumSolver instance
+     * @return the fully initialized map
+     */
     private static <T extends Enum<T> & HeaderKey> Map<T, StandardField> initFullEnumMap(
             EnumSolver<T> enumSolver) {
         Map<T, StandardField> map = new HashMap<>();
@@ -136,6 +153,8 @@ public final class IOUtil {
      * Reads the specified file into a map. The first value is used as key. The
      * rest is put into a list and used as map value. Each entry is one line of
      * the file.
+     * <p>
+     * Ensures that no null value is returned.
      * 
      * @param filename
      *            the name of the specification file (not the path to it)
@@ -178,10 +197,13 @@ public final class IOUtil {
     /**
      * Reads the specified file from the specification directory into a list of
      * arrays. Each array is the entry of one line in the file.
+     * <p>
+     * Ensures that no null value is returned.
      * 
      * @param filename
      *            the name of the specification file (not the path to it)
-     * @param delimiter the delimiter regex for one column
+     * @param delimiter
+     *            the delimiter regex for one column
      * @return a list of arrays, each array representing a line in the spec
      * @throws IOException
      *             if unable to read the specification file
@@ -299,7 +321,15 @@ public final class IOUtil {
         return keys;
     }
 
-    // TODO javadoc, tests
+    /**
+     * Returns String in the second column for the value that matches the first
+     * column. Semantically the second column holds the enum type string and the
+     * first a set offset or flag.
+     * 
+     * @param value
+     * @param filename
+     * @return type/key for given value
+     */
     public static Optional<String> getType(long value, String filename) {
         try {
             Map<String, String[]> map = readMap(filename);

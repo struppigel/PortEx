@@ -22,13 +22,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.github.katjahahn.parser.PEModule;
+
 /**
  * Responsible for dumping the MSDOS load module.
  * 
  * @author Katja Hahn
  * 
  */
-public class MSDOSLoadModule {
+public class MSDOSLoadModule implements PEModule {
 
 	private static final int PAGE_SIZE = 512; // in Byte
 
@@ -37,7 +39,7 @@ public class MSDOSLoadModule {
 	private byte[] loadModuleBytes;
 
 	/**
-	 * @constructor creates the MSDOSLoadModule instance based on the
+	 * Creates the MSDOSLoadModule instance based on the
 	 *              {@link MSDOSHeader} of the given file
 	 * @param header
 	 * @param file
@@ -47,6 +49,11 @@ public class MSDOSLoadModule {
 		this.file = file;
 	}
 
+	/**
+	 * Reads the load module.
+	 * TODO public?
+	 * @throws IOException if file can not be read
+	 */
 	public void read() throws IOException {
 		long headerSize = header.getHeaderSize();
 		int loadModuleSize = getLoadModuleSize();
@@ -96,12 +103,18 @@ public class MSDOSLoadModule {
 		return loadModuleBytes.clone();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getInfo() {
 		return "----------------" + NL + "MSDOS Load Module" + NL
 				+ "----------------" + NL + NL + "image size:" + getImageSize()
 				+ NL + "load module size: " + getLoadModuleSize() + NL;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public long getOffset() {
 		return header.getHeaderSize();
 	}

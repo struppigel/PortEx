@@ -84,7 +84,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * 
      * @return size of header
      */
-    //TODO this is size of header + stub ?
+    // TODO this is size of header + stub ?
     public long getHeaderSize() {
         long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS)
                 * PARAGRAPH_SIZE;
@@ -155,6 +155,15 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         }
     }
 
+    /**
+     * Creates and returns an instance of the MSDOSHeader with the given bytes
+     * and the file offset of the PE signature.
+     * 
+     * @param headerbytes the bytes that make up the MSDOSHeader
+     * @param peSigOffset file offset to the PE signature
+     * @return MSDOSHeader instance
+     * @throws IOException if header can not be read.
+     */
     public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset)
             throws IOException {
         MSDOSHeader header = new MSDOSHeader(headerbytes, peSigOffset);
