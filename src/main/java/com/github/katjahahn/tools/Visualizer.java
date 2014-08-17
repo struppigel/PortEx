@@ -494,6 +494,7 @@ public class Visualizer {
     }
 
     // TODO temporary almost-duplicate of drawLegendEntry
+    @SuppressWarnings("unused")
     private void drawLegendCrossEntry(int number, String description,
             Color color) {
         assert description != null && color != null;

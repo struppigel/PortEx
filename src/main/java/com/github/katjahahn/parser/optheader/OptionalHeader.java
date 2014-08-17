@@ -116,7 +116,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
         this.magicNumber = readMagicNumber(standardSpec);
 
-        if (magicNumber.equals(MagicNumber.PE32)) {
+        if (magicNumber == MagicNumber.PE32) {
             minSize = 100;
             maxSize = 224;
         } else {
@@ -216,15 +216,6 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         standardFields = IOUtil.readHeaderEntries(StandardFieldEntryKey.class,
                 format, STANDARD_SPEC, headerbytes, getOffset());
-    }
-
-    private Map<StandardFieldEntryKey, StandardField> initStandardFields() {
-        Map<StandardFieldEntryKey, StandardField> map = new HashMap<>();
-        for (StandardFieldEntryKey key : StandardFieldEntryKey.values()) {
-            map.put(key, new StandardField(key, "absent", 0L, 0L, 0L));
-        }
-        assert map != null && map.size() == StandardFieldEntryKey.values().length;
-        return map;
     }
 
     private void loadDataDirectories(List<String[]> datadirSpec) {
