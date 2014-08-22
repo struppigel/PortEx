@@ -67,6 +67,40 @@ class SignatureScanner(signatures: List[Signature]) {
 
   /**
    * @param file the file to be scanned
+   * @param offset the file offset to be matched
+   *
+   * @return list of scanresults with all matches found at the specified position
+   */
+  def _scanAt(file: File, offset: Long): List[ScanResult] = { //use from scala
+    using(new RandomAccessFile(file, "r")) { raf =>
+      val results = ListBuffer[ScanResult]()
+      val addr = offset
+      val bytes = Array.fill(longestSigSequence + 1)(0.toByte)
+      raf.seek(addr)
+      val bytesRead = raf.read(bytes)
+      val slicedarr = bytes.slice(0, bytesRead)
+      val matches = epOnlyFalseSigs.findMatches(slicedarr.toList)
+      results ++= matches.map((_, addr))
+      results.toList
+    }
+  }
+
+  /**
+   * @param file the file to be scanned
+   * @param offset the file offset to be matched
+   *
+   * @return list of scanresults with all matches found at the specified position
+   */
+  def scanAt(file: File, offset: Long): java.util.List[String] = {
+    def bytesMatched(sig: Signature): Int =
+      sig.signature.filter(cond(_) { case Some(s) => true }).length
+    val matches = _scanAt(file, offset)
+    (for ((m, addr) <- matches)
+      yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
+  }
+
+  /**
+   * @param file the file to be scanned
    * @return list of scanresults with all matches found
    */
   def _scanAll(file: File, epOnly: Boolean = true): List[ScanResult] = { //use from scala

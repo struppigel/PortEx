@@ -8,13 +8,17 @@ import com.github.katjahahn.parser.IOUtil
 
 class FileTypeScanner(sigscanner: SignatureScanner, file: File) {
 
-  def scanReport(): java.util.List[String] = {
+  def scanAllReport(): java.util.List[String] =
     sigscanner.scanAll(file, false)
-  }
 
-  def scan(): List[ScanResult] = {
+  def scanAll(): List[ScanResult] =
     sigscanner._scanAll(file, false)
-  }
+
+  def scanStart(): List[ScanResult] =
+    sigscanner._scanAt(file, 0)
+
+  def scanStartReport(): java.util.List[String] =
+    sigscanner.scanAt(file, 0)
 
 }
 
@@ -23,8 +27,8 @@ object FileTypeScanner {
   private val signatureFile = "customsigs_GCK.txt"
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/WinRar.exe")
-    FileTypeScanner(file).scanReport.asScala.foreach(println)
+    val file = new File("/home/deque/Downloads/deep-blue-space.jpg")
+    FileTypeScanner(file).scanStartReport.asScala.foreach(println)
   }
 
   def apply(file: File): FileTypeScanner = {
@@ -39,9 +43,9 @@ object FileTypeScanner {
     for (array <- sigArrays) {
       val name = array(0)
       val bytes = array(1)
-      if (bytes.length() > 8) {
-        sigs += Signature(name, false, bytes)
-      }
+      //      if (bytes.length() > 8) {
+      sigs += Signature(name, false, bytes)
+      //      }
     }
     sigs.toList
   }
