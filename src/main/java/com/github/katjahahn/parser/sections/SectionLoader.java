@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
@@ -306,8 +305,6 @@ public class SectionLoader {
     /**
      * Returns the section entry of the section table the rva is pointing into.
      * 
-     * @param table
-     *            the section table of the file
      * @param rva
      *            the relative virtual address
      * @return the {@link SectionHeader} of the section the rva is pointing into
@@ -328,9 +325,7 @@ public class SectionLoader {
      * Returns the section entry of the section table the offset is pointing
      * into.
      * 
-     * @param table
-     *            the section table of the file
-     * @param offset
+     * @param fileOffset
      *            the file offset
      * @return the {@link SectionHeader} of the section the offset is pointing
      *         into
@@ -451,7 +446,7 @@ public class SectionLoader {
      * 
      * @return {@link DebugSection} of the given file, absent if file doesn't
      *         have this section
-     * @throws {@link IOException} if unable to read the file
+     * @throws IOException if unable to read the file
      */
     @SuppressWarnings("unchecked")
     public Optional<RelocationSection> maybeLoadRelocSection()
@@ -482,7 +477,7 @@ public class SectionLoader {
      * 
      * @return {@link DebugSection} of the given file, absent if file doesn't
      *         have this section
-     * @throws {@link IOException} if unable to read the file
+     * @throws IOException if unable to read the file
      */
     @SuppressWarnings("unchecked")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
@@ -495,11 +490,10 @@ public class SectionLoader {
      * The file on disk is read to fetch the information.
      * 
      * @return {@link ResourceSection} of the given file
-     * @throws {@link IOException} if unable to read the file
-     * @throws @{@link IllegalStateException} if section can not be loaded
+     * @throws IOException if unable to read the file
+     * @throws IllegalStateException if section can not be loaded
      */
-    public ResourceSection loadResourceSection() throws IOException,
-            FileFormatException {
+    public ResourceSection loadResourceSection() throws IOException {
         Optional<ResourceSection> rsrc = maybeLoadResourceSection();
         return (ResourceSection) getOrThrow(rsrc,
                 "unable to load resource section");
@@ -517,7 +511,7 @@ public class SectionLoader {
      */
     @SuppressWarnings("unchecked")
     public Optional<ResourceSection> maybeLoadResourceSection()
-            throws IOException, FileFormatException {
+            throws IOException {
         return (Optional<ResourceSection>) maybeLoadSpecialSection(DataDirectoryKey.RESOURCE_TABLE);
     }
 
@@ -527,8 +521,8 @@ public class SectionLoader {
      * The file on disk is read to fetch the information.
      * 
      * @return {@link ExceptionSection} of the given file
-     * @throws {@link IOException} if unable to read the file
-     * @throws @{@link IllegalStateException} if section can not be loaded
+     * @throws IOException if unable to read the file
+     * @throws IllegalStateException if section can not be loaded
      */
     public ExceptionSection loadExceptionSection() throws IOException {
         Optional<ExceptionSection> pdata = maybeLoadExceptionSection();
@@ -557,8 +551,8 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the import section
-     * @throws {@link IOException} if unable to read the file
-     * @throws {@link IllegalStateException} if unable to load section
+     * @throws IOException if unable to read the file
+     * @throws IllegalStateException if unable to load section
      */
     public ImportSection loadImportSection() throws IOException {
         Optional<ImportSection> idata = maybeLoadImportSection();
@@ -571,7 +565,7 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the import section, absent if section can not be loaded
-     * @throws {@link IOException} if unable to read the file
+     * @throws IOException if unable to read the file
      */
     @SuppressWarnings("unchecked")
     public Optional<ImportSection> maybeLoadImportSection() throws IOException {

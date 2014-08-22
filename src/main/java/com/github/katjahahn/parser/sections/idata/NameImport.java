@@ -67,6 +67,8 @@ public class NameImport implements Import {
      *            the relative virtual address to the name
      * @param parent
      *            the directory entry this import belongs to
+     * @param locations
+     *            list of file locations the import is in
      */
     public NameImport(long rva, String name, int hint, long nameRVA,
             DirectoryEntry parent, List<Location> locations) {

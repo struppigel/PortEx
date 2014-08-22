@@ -17,6 +17,13 @@ package com.github.katjahahn.parser.optheader;
 
 import com.github.katjahahn.parser.HeaderKey;
 
+/**
+ * Key of the Optional Header. This is either a standard field or a windows
+ * specific field.
+ * 
+ * @author Katja Hahn
+ * 
+ */
 public interface OptionalHeaderKey extends HeaderKey {
 
 }

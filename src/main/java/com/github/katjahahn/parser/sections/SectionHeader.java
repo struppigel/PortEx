@@ -55,6 +55,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * @param offset
      *            the file offset for the start of the section
      * @param name
+     *            the section name
+     * @param nameOffset
+     *            fileoffset to the section name
      */
     public SectionHeader(Map<SectionHeaderKey, StandardField> entries,
             int number, long offset, String name, long nameOffset) {
@@ -66,14 +69,19 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     }
 
     /**
-     * Returns the file offset of the NAME entry
+     * Returns the file offset to the section name
      * 
-     * @return
+     * @return file offset to section name
      */
     public long getNameOffset() {
         return nameOffset;
     }
 
+    /**
+     * Returns the size of the name in bytes
+     * 
+     * @return size of the name in bytes
+     */
     public int getNameSize() {
         return name.length();
     }
@@ -213,26 +221,27 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         for (Entry<SectionHeaderKey, StandardField> entry : entries.entrySet()) {
             Long value = entry.getValue().value;
             SectionHeaderKey key = entry.getKey();
-            String description = pad(entry.getValue().description + ": ", descrLength);
-            
+            String description = pad(entry.getValue().description + ": ",
+                    descrLength);
+
             if (key == SectionHeaderKey.CHARACTERISTICS) {
                 b.append(description
                         + IOUtil.NL
                         + IOUtil.getCharacteristics(value,
                                 SECTIONCHARACTERISTICS_SPEC) + IOUtil.NL);
             } else {
-                b.append(description + value + " (0x"
-                        + Long.toHexString(value) + ")" + IOUtil.NL);
+                b.append(description + value + " (0x" + Long.toHexString(value)
+                        + ")" + IOUtil.NL);
             }
         }
         return b.toString();
     }
-    
+
     private String pad(String string, int length) {
-       for(int i = string.length(); i < length; i++) {
-           string += " ";
-       }
-       return string;
+        for (int i = string.length(); i < length; i++) {
+            string += " ";
+        }
+        return string;
     }
 
     /**

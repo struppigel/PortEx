@@ -26,6 +26,9 @@ package com.github.katjahahn.parser;
  */
 public abstract class Header<T extends HeaderKey> implements PEModule {
 
+    /**
+     * System independend newline
+     */
     public static final String NL = System.getProperty("line.separator");
 
     /**

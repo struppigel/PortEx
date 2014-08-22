@@ -53,6 +53,8 @@ public class OrdinalImport implements Import {
      *            the rva of the symbol
      * @param parent
      *            the directory entry this import belongs to
+     * @param locations
+     *            list of file locations the import is in
      */
     public OrdinalImport(int ordinal, long rva, DirectoryEntry parent,
             List<Location> locations) {

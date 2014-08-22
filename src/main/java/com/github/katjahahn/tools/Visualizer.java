@@ -279,7 +279,7 @@ public class Visualizer {
 
         long tableOffset = data.getSectionTable().getOffset();
         long tableSize = data.getSectionTable().getSize();
-        if(tableSize != 0){
+        if (tableSize != 0) {
             tableSize = withMinLength(tableSize);
             drawPixels(sectionTableColor, tableOffset, tableSize);
         }
@@ -482,7 +482,7 @@ public class Visualizer {
             drawLegendEntry(number, "Entry Point", epColor, true);
             number++;
         }
-        if(relocAvailable) {
+        if (relocAvailable) {
             drawLegendEntry(number, "Relocation Blocks", relocColor, true);
             number++;
         }
@@ -627,15 +627,16 @@ public class Visualizer {
     private int getPixelNumber(long fileOffset) {
         assert fileOffset >= 0;
         long fileSize = data.getFile().length();
-        int result = (int) Math.round(fileOffset * (getXPixels() * getYPixels())
-                / (double) fileSize);
+        int result = (int) Math.round(fileOffset
+                * (getXPixels() * getYPixels()) / (double) fileSize);
         assert result >= 0;
         return result;
     }
 
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File("/home/deque/portextestfiles/testfiles/Lab18-04.exe");
+        File file = new File(
+                "/home/deque/portextestfiles/testfiles/Lab18-04.exe");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         Visualizer vi = new Visualizer(data);
@@ -661,6 +662,9 @@ public class Visualizer {
     /**
      * Sets the number of file bytes that are represented by one square pixel.
      * The height of the image is changed accordingly.
+     * 
+     * @param bytes
+     *            bytes to be set per pixel
      */
     public void setBytesPerPixel(int bytes) {
         Preconditions.checkArgument(bytes > 0);

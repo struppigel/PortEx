@@ -68,7 +68,11 @@ public class SectionTable implements PEModule {
      * entries
      * 
      * @param sectionTableBytes
+     *            the bytes that make up the section table
      * @param numberOfEntries
+     *            the number of section headers in the table
+     * @param offset
+     *            the file offset to the section table
      */
     public SectionTable(byte[] sectionTableBytes, int numberOfEntries,
             long offset) {
@@ -96,11 +100,12 @@ public class SectionTable implements PEModule {
             Map<SectionHeaderKey, StandardField> entries = IOUtil
                     .readHeaderEntries(SectionHeaderKey.class, format,
                             SECTION_TABLE_SPEC, headerbytes, getOffset());
-            
-            //TODO is this calculation correct? make unit tests
+
+            // TODO is this calculation correct? make unit tests
             long nameOffset = getOffset() + getRelativeNameOffset(headerbytes);
             SectionHeader sectionEntry = new SectionHeader(entries,
-                    sectionNumber, sectionOffset, getUTF8String(headerbytes), nameOffset);
+                    sectionNumber, sectionOffset, getUTF8String(headerbytes),
+                    nameOffset);
             headers.add(sectionEntry);
         }
     }
@@ -219,7 +224,7 @@ public class SectionTable implements PEModule {
         byte[] bytes = Arrays.copyOfRange(section, from, to);
         return new String(bytes, StandardCharsets.UTF_8).trim();
     }
-    
+
     private int getRelativeNameOffset(byte[] section) {
         String[] values = specification.get("NAME");
         int from = Integer.parseInt(values[1]);

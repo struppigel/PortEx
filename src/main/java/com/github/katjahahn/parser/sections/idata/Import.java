@@ -27,17 +27,8 @@ import com.github.katjahahn.parser.Location;
  */
 public interface Import {
 	
-    /**
-     * TODO
-     * @param key
-     * @return
-     */
 	Long getDirEntryValue(DirectoryEntryKey key);
 	
-	/**
-	 * TODO
-	 * @return
-	 */
 	List<Location> getLocations();
 
 }

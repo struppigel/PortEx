@@ -39,31 +39,32 @@ public class Overlay {
     private final File file;
     private Long offset;
     private PEData data;
-    
+
     public static void main(String[] args) throws IOException {
-       File file = new File("/home/deque/portextestfiles/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb");
-       PEData data = PELoader.loadPE(file);
-       System.out.println(data);
-       Overlay overlay = new Overlay(file);
-       long offset = overlay.getOffset();
-       System.out.println("offset: " + offset);
-       System.out.println("file length: " + file.length());
-       SectionLoader loader = new SectionLoader(data);
-       SectionTable table = data.getSectionTable();
-       for (SectionHeader header : table.getSectionHeaders()) {
-           long start = header.getAlignedPointerToRaw();
-           long end = loader.getReadSize(header) + start;
-           System.out.println(header.getNumber() + ". "
-                   + header.getName() + " start: " + start + " end: " + end);
-           long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
-           long vEnd = header.getAlignedVirtualSize() + vStart;
-           System.out.println("virtual start: " + vStart + " virtual end: "
-                   + vEnd);
-       }
+        File file = new File(
+                "/home/deque/portextestfiles/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb");
+        PEData data = PELoader.loadPE(file);
+        System.out.println(data);
+        Overlay overlay = new Overlay(file);
+        long offset = overlay.getOffset();
+        System.out.println("offset: " + offset);
+        System.out.println("file length: " + file.length());
+        SectionLoader loader = new SectionLoader(data);
+        SectionTable table = data.getSectionTable();
+        for (SectionHeader header : table.getSectionHeaders()) {
+            long start = header.getAlignedPointerToRaw();
+            long end = loader.getReadSize(header) + start;
+            System.out.println(header.getNumber() + ". " + header.getName()
+                    + " start: " + start + " end: " + end);
+            long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
+            long vEnd = header.getAlignedVirtualSize() + vStart;
+            System.out.println("virtual start: " + vStart + " virtual end: "
+                    + vEnd);
+        }
     }
 
     /**
-     * Creates an Overlay instance with the input file and output file specified
+     * Creates an Overlay instance with the input file specified
      * 
      * @param file
      *            the file to be scanned for overlay
@@ -72,6 +73,12 @@ public class Overlay {
         this.file = file;
     }
 
+    /**
+     * Creates an Overlay instance with the PE data specified
+     * 
+     * @param data
+     *            the PE header data of the file
+     */
     public Overlay(PEData data) {
         this.data = data;
         this.file = data.getFile();
@@ -96,14 +103,14 @@ public class Overlay {
             SectionLoader loader = new SectionLoader(data);
             offset = 0L;
             List<SectionHeader> headers = table.getSectionHeaders();
-            //TODO low alingment check instead?
+            // TODO low alingment check instead?
             if (headers.size() == 0) { // offset for sectionless PE's
                 offset = file.length();
             }
             for (SectionHeader section : headers) {
                 long alignedPointerToRaw = section.getAlignedPointerToRaw();
-                //ignore invalid sections
-                if(alignedPointerToRaw >= file.length()) {
+                // ignore invalid sections
+                if (alignedPointerToRaw >= file.length()) {
                     continue;
                 }
                 long readSize = loader.getReadSize(section);

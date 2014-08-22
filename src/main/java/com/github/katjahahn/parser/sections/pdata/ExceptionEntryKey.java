@@ -18,6 +18,12 @@ package com.github.katjahahn.parser.sections.pdata;
 
 import com.github.katjahahn.parser.HeaderKey;
 
+/**
+ * Represents the key of an entry in the .edata section
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum ExceptionEntryKey implements HeaderKey {
 
     /**
