@@ -5,6 +5,8 @@ import static com.github.katjahahn.tools.anomalies.AnomalyType.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -12,12 +14,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +36,9 @@ import com.github.katjahahn.parser.coffheader.FileCharacteristic;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
+import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.ShannonEntropy;
 import com.github.katjahahn.tools.anomalies.Anomaly;
@@ -60,11 +66,150 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-        ableToLoadSections(new File(BAD_FILES));
+        String goodstats = STATS_FOLDER
+                + "sectionnames-2014-08-22_14-02-11.stat";
+        String badstats = STATS_FOLDER
+                + "sectionnames-2014-08-22_14-26-07.stat";
+        compareSecNames(goodstats, badstats);
     }
 
-    @SuppressWarnings("unused")
-    private static void anomalyCountGood() {
+    private static void compareSecNames(String goodstats, String badstats)
+            throws FileNotFoundException, IOException {
+        final int THRESHOLD = 500;
+        File good = new File(goodstats);
+        File bad = new File(badstats);
+        Map<String, Integer> goodCount = readSecCount(good);
+        Map<String, Integer> badCount = readSecCount(bad);
+        int goodtotal = getTotal(goodCount);
+        int badtotal = getTotal(badCount);
+
+        StringBuilder report = new StringBuilder();
+        report.append("secname count comparison\n\n"
+                + "secname;goodpercent;badpercent;malwareprob\n\n");
+        for (Entry<String, Integer> entry : goodCount.entrySet()) {
+            String name = entry.getKey();
+            int badValue = 0;
+            if (badCount.containsKey(name)) {
+                badValue = badCount.get(name);
+            }
+            int goodValue = entry.getValue();
+            double goodPercent = goodValue / (double) goodtotal;
+            double badPercent = badValue / (double) badtotal;
+            double malProb = badPercent * 0.5
+                    / (badPercent * 0.5 + goodPercent * 0.5);
+            if(goodValue + badValue > THRESHOLD) {
+            report.append(name + ";" + goodPercent + ";" + badPercent
+                    + ";" + malProb + "\n");
+            }
+        }
+        for (Entry<String, Integer> entry : badCount.entrySet()) {
+            String name = entry.getKey();
+            if(!goodCount.containsKey(name)){
+                int badValue = entry.getValue();
+                int goodValue = 0;
+                double badPercent = badValue / (double) badtotal;
+                double goodPercent = 0;
+                double malProb = badPercent * 0.5
+                        / (badPercent * 0.5 + goodPercent * 0.5);
+                if(goodValue + badValue > THRESHOLD) {
+                report.append(name + ";" + goodPercent + ";" + badPercent
+                        + ";" + malProb + "\n");
+                }
+            }
+        }
+        System.out.println(report);
+        writeStats(report.toString(), "secnamecomparison");
+        System.out.println("done");
+    }
+
+    private static int getTotal(Map<String, Integer> goodCount) {
+        int total = 0;
+        for (Integer i : goodCount.values()) {
+            total += i;
+        }
+        return total;
+    }
+
+    private static Map<String, Integer> readSecCount(File file)
+            throws FileNotFoundException, IOException {
+        Map<String, Integer> map = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                String[] split = line.split(";");
+                if (split.length == 2) {
+                    map.put(split[0], Integer.parseInt(split[1]));
+                }
+            }
+        }
+        return map;
+    }
+
+    private static <K, V extends Comparable<? super V>> SortedSet<Map.Entry<K, V>> entriesSortedByValues(
+            Map<K, V> map) {
+        SortedSet<Map.Entry<K, V>> sortedEntries = new TreeSet<Map.Entry<K, V>>(
+                new Comparator<Map.Entry<K, V>>() {
+                    @Override
+                    public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
+                        return e2.getValue().compareTo(e1.getValue());
+                    }
+                });
+        sortedEntries.addAll(map.entrySet());
+        return sortedEntries;
+    }
+
+    private static void sectionNameCount(File[] files, String baseFolder)
+            throws IOException {
+        Map<String, Integer> nameCount = new HashMap<>();
+        int total = 0;
+        for (File file : files) {
+            total++;
+            try {
+                PEData data = PELoader.loadPE(file);
+                SectionTable table = data.getSectionTable();
+                for (SectionHeader header : table.getSectionHeaders()) {
+                    String name = header.getName();
+                    if (nameCount.containsKey(name)) {
+                        int value = nameCount.get(name) + 1;
+                        nameCount.put(name, value);
+                    } else {
+                        nameCount.put(name, 1);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(e);
+            }
+            if (total % 1000 == 0) {
+                System.out.println("Files total: " + total);
+                int entryNr = 0;
+                for (Entry<String, Integer> entry : entriesSortedByValues(nameCount)) {
+                    entryNr++;
+                    System.out
+                            .println(entry.getKey() + ": " + entry.getValue());
+                    if (entryNr == 5) {
+                        break;
+                    }
+                }
+            }
+        }
+        System.out.println("Done counting, preparing stats");
+        StringBuilder stats = new StringBuilder();
+        stats.append(baseFolder + "\nSection name count\n\n");
+        for (Entry<String, Integer> entry : entriesSortedByValues(nameCount)) {
+            stats.append(entry.getKey() + ";" + entry.getValue() + "\n");
+        }
+        writeStats(stats.toString(), "sectionnames");
+    }
+
+    private static File[] badFiles() {
+        System.out.println("preparing file list...");
+        File folder = new File(BAD_FILES);
+        File[] allFiles = folder.listFiles();
+        System.out.println("files listed: " + allFiles.length);
+        return allFiles;
+    }
+
+    private static File[] goodFiles() {
         System.out.println("preparing file list...");
         File[] folders = new File(GOOD_FILES).listFiles();
         List<File[]> arrayList = new ArrayList<>();
@@ -76,7 +221,12 @@ public class PortexStats {
             allFiles = concat(allFiles, files);
         }
         System.out.println("files listed: " + allFiles.length);
-        anomalyCount(allFiles, GOOD_FILES);
+        return allFiles;
+    }
+
+    @SuppressWarnings("unused")
+    private static void anomalyCountGood() {
+        anomalyCount(goodFiles(), GOOD_FILES);
     }
 
     private static File[] concat(File[] a, File[] b) {
