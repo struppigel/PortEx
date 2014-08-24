@@ -74,12 +74,16 @@ class DirectoryEntry private (
   def addLookupTableEntry(e: LookupTableEntry): Unit = {
     lookupTableEntries = lookupTableEntries :+ e
   }
-  
+
   /**
    * Returns a list of all file locations where directory entries are found
    */
-  def getLocations(): List[Location] = new Location(offset, size) :: 
-   (for(entry <- lookupTableEntries) yield new Location(entry.offset, entry.size))
+  def getLocations(): List[Location] = new Location(offset, size) ::
+    //collect lookupTableEntry locations
+    (for (entry <- lookupTableEntries) yield new Location(entry.offset, entry.size)) :::
+    //collect HintNameEntry locations
+    (lookupTableEntries collect { case e: NameEntry => 
+      new Location(e.hintNameEntry.fileOffset, e.hintNameEntry.size) })
 
   def apply(key: DirectoryEntryKey): Long = {
     entries(key).value
@@ -125,8 +129,8 @@ object DirectoryEntry {
    */
   def apply(entrybytes: Array[Byte], offset: Long): DirectoryEntry = {
     val format = new SpecificationFormat(0, 1, 2, 3)
-    val entries = IOUtil.readHeaderEntries(classOf[DirectoryEntryKey], 
-        format, I_DIR_ENTRY_SPEC, entrybytes.clone, offset).asScala.toMap
+    val entries = IOUtil.readHeaderEntries(classOf[DirectoryEntryKey],
+      format, I_DIR_ENTRY_SPEC, entrybytes.clone, offset).asScala.toMap
     new DirectoryEntry(entries, offset)
   }
 }

@@ -21,6 +21,9 @@ import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.parser.ByteArrayUtil;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
@@ -36,6 +39,9 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class Hasher {
+
+    private static final Logger logger = LogManager.getLogger(Hasher.class
+            .getName());
 
     private static final int BUFFER_SIZE = 16384;
     private PEData data;
@@ -70,7 +76,11 @@ public class Hasher {
     }
 
     /**
-     * Returns the md5 hash value of the section with the section number
+     * Returns the md5 hash value of the physical section with the section
+     * number.
+     * <p>
+     * The section's size must be greater than 0, otherwise the returned array
+     * has zero length.
      * 
      * @param sectionNumber
      *            the section's number
@@ -82,12 +92,18 @@ public class Hasher {
         SectionHeader header = table.getSectionHeader(sectionNumber);
         long start = header.getAlignedPointerToRaw();
         long end = new SectionLoader(data).getReadSize(header) + start;
+        if (end <= start) {
+            logger.warn("The physical section size must be greater than zero!");
+            return new byte[0];
+        }
         return computeHash(data.getFile(), "MD5", start, end);
     }
 
     /**
      * Returns the sha256 hash value of the section with the section number
-     * 
+     * <p>
+     * The section's size must be greater than 0, otherwise the returned array
+     * has zero length.
      * @param sectionNumber
      *            the section's number
      * @return sha256 hash value of the section with the section number
@@ -98,6 +114,10 @@ public class Hasher {
         SectionHeader header = table.getSectionHeader(sectionNumber);
         long start = header.getAlignedPointerToRaw();
         long end = new SectionLoader(data).getReadSize(header) + start;
+        if (end <= start) {
+            logger.warn("The physical section size must be greater than zero!");
+            return new byte[0];
+        }
         return computeHash(data.getFile(), "SHA-256", start, end);
     }
 

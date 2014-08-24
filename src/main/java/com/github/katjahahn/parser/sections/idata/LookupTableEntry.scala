@@ -164,7 +164,8 @@ object LookupTableEntry {
     if (address + 2 > mmbytes.length) throw new FailureEntryException()
     val hint = mmbytes.getBytesIntValue(address, 2)
     val name = getASCII(address + 2, mmbytes)
-    NameEntry(nameRVA, new HintNameEntry(hint, name), rva, dirEntry, entrySize, offset: Long)
+    val hintOffset = mmbytes.getPhysforVir(nameRVA)
+    NameEntry(nameRVA, new HintNameEntry(hint, name, hintOffset), rva, dirEntry, entrySize, offset: Long)
   }
 
   private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): OrdinalEntry = {
@@ -178,9 +179,11 @@ object LookupTableEntry {
     new String(mmbytes.slice(offset, nullindex))
   }
 
-  class HintNameEntry(val hint: Int, val name: String) {
+  class HintNameEntry(val hint: Int, val name: String, val fileOffset: Long) {
     override def toString(): String = s"""hint: $hint
       |name: $name""".stripMargin
+      
+    def size(): Long = name.length() + 2
   }
 
 }
