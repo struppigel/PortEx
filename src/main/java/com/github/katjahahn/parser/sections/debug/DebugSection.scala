@@ -40,6 +40,9 @@ import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
  * @author Katja Hahn
  *
  * Represents the debug section of the PE.
+ * @param directoryTable the debug directory
+ * @param typeDescription the description string for the debug information type
+ * @param offset the file offset to the debug directory
  */
 class DebugSection private (
   private val directoryTable: DebugDirectory,
@@ -49,10 +52,10 @@ class DebugSection private (
   override def getOffset(): Long = offset
 
   def getSize(): Long = debugDirSize
-  
-  def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] = 
+
+  def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
     directoryTable.asJava
-  
+
   override def isEmpty: Boolean = directoryTable.isEmpty
 
   override def getInfo(): String =
@@ -84,7 +87,7 @@ class DebugSection private (
   def get(key: DebugDirectoryKey): java.lang.Long =
     if (directoryTable.contains(key))
       directoryTable(key).value else null
-      
+
   /**
    * Returns a string of the type description
    *
@@ -95,7 +98,7 @@ class DebugSection private (
 }
 
 object DebugSection {
-  
+
   val logger = LogManager.getLogger(DebugSection.getClass().getName())
 
   type DebugDirectory = Map[DebugDirectoryKey, StandardField]
@@ -118,7 +121,7 @@ object DebugSection {
    * @param loadInfo the load information
    * @return debugsection instance
    */
-  def newInstance(li: LoadInfo): DebugSection = 
+  def newInstance(li: LoadInfo): DebugSection =
     apply(li.memoryMapped, li.fileOffset, li.va)
 
   /**
@@ -137,11 +140,11 @@ object DebugSection {
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes, offset).asScala.toMap
     val types = getCharacteristicsDescriptions(entries(DebugDirectoryKey.TYPE).value, "debugtypes").asScala.toList
-    if(types.size == 0) {
+    if (types.size == 0) {
       logger.warn("no debug type description found!")
       val description = s"${entries(DebugDirectoryKey.TYPE).value} no description available"
       new DebugSection(entries, description, offset)
-    } else 
-    new DebugSection(entries, types(0), offset)
+    } else
+      new DebugSection(entries, types(0), offset)
   }
 }

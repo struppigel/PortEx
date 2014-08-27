@@ -446,7 +446,8 @@ public class SectionLoader {
      * 
      * @return {@link DebugSection} of the given file, absent if file doesn't
      *         have this section
-     * @throws IOException if unable to read the file
+     * @throws IOException
+     *             if unable to read the file
      */
     @SuppressWarnings("unchecked")
     public Optional<RelocationSection> maybeLoadRelocSection()
@@ -477,7 +478,8 @@ public class SectionLoader {
      * 
      * @return {@link DebugSection} of the given file, absent if file doesn't
      *         have this section
-     * @throws IOException if unable to read the file
+     * @throws IOException
+     *             if unable to read the file
      */
     @SuppressWarnings("unchecked")
     public Optional<DebugSection> maybeLoadDebugSection() throws IOException {
@@ -490,8 +492,10 @@ public class SectionLoader {
      * The file on disk is read to fetch the information.
      * 
      * @return {@link ResourceSection} of the given file
-     * @throws IOException if unable to read the file
-     * @throws IllegalStateException if section can not be loaded
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if section can not be loaded
      */
     public ResourceSection loadResourceSection() throws IOException {
         Optional<ResourceSection> rsrc = maybeLoadResourceSection();
@@ -521,8 +525,10 @@ public class SectionLoader {
      * The file on disk is read to fetch the information.
      * 
      * @return {@link ExceptionSection} of the given file
-     * @throws IOException if unable to read the file
-     * @throws IllegalStateException if section can not be loaded
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if section can not be loaded
      */
     public ExceptionSection loadExceptionSection() throws IOException {
         Optional<ExceptionSection> pdata = maybeLoadExceptionSection();
@@ -551,8 +557,10 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the import section
-     * @throws IOException if unable to read the file
-     * @throws IllegalStateException if unable to load section
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if unable to load section
      */
     public ImportSection loadImportSection() throws IOException {
         Optional<ImportSection> idata = maybeLoadImportSection();
@@ -565,7 +573,8 @@ public class SectionLoader {
      * is read to fetch the information.
      * 
      * @return the import section, absent if section can not be loaded
-     * @throws IOException if unable to read the file
+     * @throws IOException
+     *             if unable to read the file
      */
     @SuppressWarnings("unchecked")
     public Optional<ImportSection> maybeLoadImportSection() throws IOException {
@@ -694,6 +703,13 @@ public class SectionLoader {
     }
 
     // TODO more general method? Like contains RVA?
+    /**
+     * Returns whether the section contains the entry point of the file.
+     * 
+     * @param header
+     *            the header of the section that may contain the entry point.
+     * @return true if entry point is within the section, false otherwise
+     */
     @Beta
     public boolean containsEntryPoint(SectionHeader header) {
         long ep = data.getOptionalHeader().get(

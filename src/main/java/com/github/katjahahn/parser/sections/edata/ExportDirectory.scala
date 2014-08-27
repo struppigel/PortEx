@@ -34,12 +34,14 @@ import com.github.katjahahn.parser.IOUtil
  *
  * @author Katja Hahn
  *
- * instanciates an export directory table.
+ * Instanciates an export directory table.
+ * @param entries the fields of the export directory
+ * @param fileOffset the file offset to the export directory
  */
 class ExportDirectory private (
-  private val entries: Map[ExportDirectoryKey, StandardField], 
+  private val entries: Map[ExportDirectoryKey, StandardField],
   val fileOffset: Long) {
-  
+
   def apply(key: ExportDirectoryKey): Long = entries(key).value
   def size(): Long = 40
 
@@ -70,8 +72,8 @@ object ExportDirectory {
    */
   def apply(entrybytes: Array[Byte], fileOffset: Long): ExportDirectory = {
     val format = new SpecificationFormat(0, 1, 2, 3)
-    val entries = IOUtil.readHeaderEntries(classOf[ExportDirectoryKey], format, 
-        edataTableSpec, entrybytes.clone, fileOffset).asScala.toMap
+    val entries = IOUtil.readHeaderEntries(classOf[ExportDirectoryKey], format,
+      edataTableSpec, entrybytes.clone, fileOffset).asScala.toMap
     new ExportDirectory(entries, fileOffset)
   }
 

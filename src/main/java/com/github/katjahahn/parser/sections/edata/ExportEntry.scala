@@ -22,7 +22,7 @@ import com.google.common.base.Optional
 /**
  * Represents one entry of the export section.
  * <p>
- * Is created by the export section instance ans used for easy access to the
+ * Is created by the export section instance and used for easy access to the
  * export information without knowing the details of the internal structure.
  *
  * @author Katja Hahn
@@ -36,49 +36,66 @@ import com.google.common.base.Optional
  *        a forwarder address
  */
 class ExportEntry(
-  val symbolRVA: Long, 
-  val ordinal: Int, 
-  val forwarder: Option[String])  extends Equals {
+  val symbolRVA: Long,
+  val ordinal: Int,
+  val forwarder: Option[String]) extends Equals {
 
   def this(symbolRVA: Long, ordinal: Int) =
     this(symbolRVA, ordinal, None)
 
+  /**
+   * Returns whether the export entry is a forwarder entry
+   * @return true iff forwarder entry
+   */
   def forwarded: Boolean = forwarder match { case Some(s) => true; case None => false }
 
+  /**
+   * Returns the forwarder string or empty string if this is no forwarder entry.
+   */
   private def forwarderString(): String = forwarder match {
     case None => ""
     case Some(str) => "forwarded from " + str
   }
-  
+
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String =
     s"-ordinal entry-, ${ordinal}, ${symbolRVA} (0x${java.lang.Long.toHexString(symbolRVA)}) ${forwarderString}"
 
-  
   //for java
   //TODO write converter for option to optional!
+  /**
+   * Returns some forwarder String or None if present entry is no forwarder.
+   */
   def maybeGetForwarder(): Optional[String] =
     forwarder match {
       case None => Optional.absent()
       case Some(str) => Optional.of(str)
     }
-  
+
   def canEqual(other: Any) = {
     other.isInstanceOf[com.github.katjahahn.parser.sections.edata.ExportEntry]
   }
-  
+
+  /**
+   * {@inheritDoc}
+   */
   override def equals(other: Any) = {
     other match {
       case that: com.github.katjahahn.parser.sections.edata.ExportEntry => that.canEqual(ExportEntry.this) && symbolRVA == that.symbolRVA && ordinal == that.ordinal
       case _ => false
     }
   }
-  
+
+  /**
+   * {@inheritDoc}
+   */
   override def hashCode() = {
     val prime = 41
     prime * (prime + symbolRVA.hashCode) + ordinal.hashCode
   }
 
-  
 }
 
 /**
@@ -99,12 +116,15 @@ class ExportNameEntry(
 
   def this(symbolRVA: Long, name: String, ordinal: Int) =
     this(symbolRVA, name, ordinal, None)
-    
+
   private def forwarderString(): String = forwarder match {
     case None => ""
     case Some(str) => "forwarded from " + str
   }
 
+  /**
+   * {@inheritDoc}
+   */
   override def toString(): String =
     s"${name}, ${ordinal}, ${symbolRVA} (0x${java.lang.Long.toHexString(symbolRVA)}) ${forwarderString}"
 
@@ -119,6 +139,9 @@ class ExportNameEntry(
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   override def hashCode() = {
     val prime = 41
     prime * (prime * (prime + symbolRVA.hashCode) + name.hashCode) + ordinal.hashCode

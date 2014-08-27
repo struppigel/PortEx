@@ -57,7 +57,7 @@ object ExportAddressTable {
    * Creates an instanceo of the export address table by loading the addresses
    * from the given export section bytes.
    *
-   * @param edataBytes the bytes of the export section
+   * @param mmBytes the bytes of the export section
    * @param rva the relative virtual address for the export address table
    *   (found in the data directory table)
    * @param entries number of entries in the export address table

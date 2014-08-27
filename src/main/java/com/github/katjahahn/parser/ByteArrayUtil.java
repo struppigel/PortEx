@@ -23,8 +23,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Utilities to convert from and to byte arrays.
  * <p>
- * Supports hex string conversion and long/int conversion. So far little endian
- * only.
+ * Supports hex string conversion and long/int conversion. Little endian only.
  * <p>
  * Differences to methods of {@link java.nio.ByteBuffer}:
  * <p>
@@ -40,6 +39,7 @@ import org.apache.logging.log4j.Logger;
  * that are too short for the offset and the length given. It will assume the
  * missing values to be zero.
  * <p>
+ * This class is not meant to be used by library users.
  * 
  * @author Katja Hahn
  * 
