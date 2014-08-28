@@ -24,6 +24,7 @@ import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.sections.idata.ImportDLL
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * PE file anomaly or malformation.
@@ -40,7 +41,7 @@ abstract class Anomaly() {
   /**
    * Returns a list of all locations relevant for the anomaly
    */
-  def locations(): java.util.List[Location]
+  def locations(): java.util.List[PhysicalLocation]
 
   /**
    * Represents a field or structure this anomaly is associated with
@@ -67,7 +68,7 @@ case class StructureAnomaly(
   structure: PEStructureKey,
   override val description: String,
   override val subtype: AnomalySubType,
-  slocations: List[Location]) extends Anomaly {
+  slocations: List[PhysicalLocation]) extends Anomaly {
   require(subtype.getSuperType == AnomalyType.STRUCTURE,
     subtype + " must have anomaly type STRUCTURE!")
 
@@ -85,7 +86,8 @@ case class FieldAnomaly(
   require(subtype.getSuperType != AnomalyType.STRUCTURE,
     subtype + " must not have anomaly type STRUCTURE!")
 
-  override def locations = List(new Location(field.getOffset(), field.getSize())).asJava
+  override def locations = List(new PhysicalLocation(field.getOffset(),
+    field.getSize())).asJava
   override def key = field.key
 }
 
@@ -97,7 +99,8 @@ case class DataDirAnomaly(
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
 
-  override def locations = List(new Location(dataDirEntry.getTableEntryOffset, dataDirEntry.getTableEntrySize)).asJava
+  override def locations = List(new PhysicalLocation(dataDirEntry.getTableEntryOffset,
+    dataDirEntry.getTableEntrySize)).asJava
   override val key = dataDirEntry.getKey
 }
 
@@ -105,7 +108,8 @@ case class SectionNameAnomaly(val header: SectionHeader,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
 
-  override def locations = List(new Location(header.getNameOffset, header.getNameSize)).asJava
+  override def locations = List(new PhysicalLocation(header.getNameOffset,
+    header.getNameSize)).asJava
   override def key = SectionHeaderKey.NAME
 }
 

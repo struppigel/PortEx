@@ -43,6 +43,7 @@ import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.HeaderKey
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Represents a directory table entry. Contains all lookup table entries that
@@ -78,12 +79,12 @@ class DirectoryEntry private (
   /**
    * Returns a list of all file locations where directory entries are found
    */
-  def getLocations(): List[Location] = new Location(offset, size) ::
+  def getLocations(): List[Location] = new PhysicalLocation(offset, size) ::
     //collect lookupTableEntry locations
-    (for (entry <- lookupTableEntries) yield new Location(entry.offset, entry.size)) :::
+    (for (entry <- lookupTableEntries) yield new PhysicalLocation(entry.offset, entry.size)) :::
     //collect HintNameEntry locations
     (lookupTableEntries collect { case e: NameEntry => 
-      new Location(e.hintNameEntry.fileOffset, e.hintNameEntry.size) })
+      new PhysicalLocation(e.hintNameEntry.fileOffset, e.hintNameEntry.size) })
 
   def apply(key: DirectoryEntryKey): Long = {
     entries(key).value

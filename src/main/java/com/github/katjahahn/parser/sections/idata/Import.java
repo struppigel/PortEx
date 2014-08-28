@@ -17,7 +17,7 @@ package com.github.katjahahn.parser.sections.idata;
 
 import java.util.List;
 
-import com.github.katjahahn.parser.Location;
+import com.github.katjahahn.parser.PhysicalLocation;
 
 /**
  * Represents a concrete import of a symbol, either via name or via ordinal.
@@ -29,6 +29,6 @@ public interface Import {
 	
 	Long getDirEntryValue(DirectoryEntryKey key);
 	
-	List<Location> getLocations();
+	List<PhysicalLocation> getLocations();
 
 }

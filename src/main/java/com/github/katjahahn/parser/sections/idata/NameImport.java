@@ -18,7 +18,7 @@ package com.github.katjahahn.parser.sections.idata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.katjahahn.parser.Location;
+import com.github.katjahahn.parser.PhysicalLocation;
 
 /**
  * Represents an import by name.
@@ -53,7 +53,7 @@ public class NameImport implements Import {
      */
     private final DirectoryEntry parent;
     
-    private final List<Location> locations;
+    private final List<PhysicalLocation> locations;
 
     /**
      * 
@@ -71,7 +71,7 @@ public class NameImport implements Import {
      *            list of file locations the import is in
      */
     public NameImport(long rva, String name, int hint, long nameRVA,
-            DirectoryEntry parent, List<Location> locations) {
+            DirectoryEntry parent, List<PhysicalLocation> locations) {
         this.rva = rva;
         this.hint = hint;
         this.name = name;
@@ -100,7 +100,7 @@ public class NameImport implements Import {
      * {@inheritDoc}
      */
     @Override
-    public List<Location> getLocations() {
-        return new ArrayList<Location>(locations);
+    public List<PhysicalLocation> getLocations() {
+        return new ArrayList<PhysicalLocation>(locations);
     }
 }

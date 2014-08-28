@@ -26,6 +26,7 @@ import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PESignature
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Scans the COFF File Header for anomalies.
@@ -65,7 +66,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
       val locSize = PESignature.PE_SIG_LENGTH + COFFFileHeader.HEADER_SIZE +
         coff.getSizeOfOptionalHeader() + data.getSectionTable().getSize()
 
-      val locations = List(new Location(peOffset, locSize))
+      val locations = List(new PhysicalLocation(peOffset, locSize))
       List(StructureAnomaly(PEStructureKey.PE_FILE_HEADER,
         "PE Header moved to Overlay.", PE_HEADER_IN_OVERLAY, locations))
     } else Nil
@@ -84,8 +85,8 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val opt = data.getOptionalHeader()
 
     if (size < opt.getMinSize) {
-      val locations = List(new Location(opt.getOffset(), size),
-        new Location(entry.getOffset(), entry.getSize()))
+      val locations = List(new PhysicalLocation(opt.getOffset(), size),
+        new PhysicalLocation(entry.getOffset(), entry.getSize()))
 
       List(StructureAnomaly(PEStructureKey.OPTIONAL_HEADER,
         "Collapsed Optional Header, Section Table entries might not be valid.",
@@ -109,10 +110,10 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val sectionMax = 96
     val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
     val entry = coff.getField(COFFHeaderKey.SECTION_NR)
-    val locations = List(new Location(entry.getOffset(), entry.getSize()))
+    val locations = List(new PhysicalLocation(entry.getOffset(), entry.getSize()))
     if (sectionNr > sectionMax) {
       val secTable = data.getSectionTable()
-      val secTableLoc = new Location(secTable.getOffset(), secTable.getSize())
+      val secTableLoc = new PhysicalLocation(secTable.getOffset(), secTable.getSize())
       val description = "COFF File Header: Section Number shouldn't be greater than " + sectionMax + ", but is " + sectionNr
       List(StructureAnomaly(PEStructureKey.SECTION_TABLE, description, TOO_MANY_SECTIONS, secTableLoc :: locations))
     } else if (sectionNr == 0) {

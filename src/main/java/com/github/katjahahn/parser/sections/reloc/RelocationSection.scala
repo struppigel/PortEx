@@ -26,6 +26,7 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.Location
 import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.PhysicalLocation
 
 class RelocationSection(
   private val blocks: List[BaseRelocBlock],
@@ -39,7 +40,7 @@ class RelocationSection(
   
   def getRelocBlocks(): java.util.List[BaseRelocBlock] = blocks.asJava
 
-  def getLocations(): java.util.List[Location] =
+  def getLocations(): java.util.List[PhysicalLocation] =
     blocks.flatMap(b => b.getLocations).asJava
 
 }

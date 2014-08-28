@@ -21,6 +21,7 @@ import Level._
  * Represents the level of a {@link ResourceDirectory}).
  * Windows usually has three levels, that are type, name and language.
  * 
+ * @author Katja Hahn
  * Creates an instance of the level with levelNr
  * @param levelNr the number of the level
  */

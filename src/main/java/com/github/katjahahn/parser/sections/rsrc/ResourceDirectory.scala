@@ -18,20 +18,17 @@
 package com.github.katjahahn.parser.sections.rsrc
 
 import java.io.File
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-
 import org.apache.logging.log4j.LogManager
-
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey._
-
 import ResourceDirectory._
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Header and the entries which point to either data or other resource directory
@@ -54,9 +51,9 @@ class ResourceDirectory private (private val level: Level,
   private val entries: List[ResourceDirectoryEntry],
   private val fileOffset: Long) extends Equals {
 
-  private val headerLoc = new Location(fileOffset, resourceDirSize)
+  private val headerLoc = new PhysicalLocation(fileOffset, resourceDirSize)
 
-  def locations(): List[Location] = headerLoc :: entries.flatMap(e => e.locations)
+  def locations(): List[PhysicalLocation] = headerLoc :: entries.flatMap(e => e.locations)
 
   /**
    * @return resource directory information string
@@ -134,7 +131,7 @@ class ResourceDirectory private (private val level: Level,
   private def getResources(entry: ResourceDirectoryEntry): List[Resource] = {
     entry match {
       case e: DataEntry =>
-        val resourceBytes = e.data.readResourceBytes()
+        val resourceBytes = e.data.getResourceLocation()
         val levelIDs = Map(level -> e.id)
         List(new Resource(resourceBytes, levelIDs))
       case s: SubDirEntry =>

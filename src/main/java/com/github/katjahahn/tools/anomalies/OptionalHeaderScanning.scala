@@ -34,6 +34,7 @@ import com.github.katjahahn.parser.optheader.DllCharacteristic
 import com.github.katjahahn.parser.coffheader.FileCharacteristic
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Scans the Optional Header for anomalies.
@@ -338,7 +339,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
       if (entry.value == 0) {
-        val locations = List(new Location(entry.getOffset(), entry.getSize()))
+        val locations = List(new PhysicalLocation(entry.getOffset(), entry.getSize()))
         val description = "Optional Header: No data directory present"
         anomalyList += StructureAnomaly(PEStructureKey.DATA_DIRECTORY, description, NO_DATA_DIR, locations)
       }

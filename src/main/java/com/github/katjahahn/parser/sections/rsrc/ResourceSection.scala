@@ -27,6 +27,7 @@ import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
 import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Holds the root resource directory table and provides access to the resources.
@@ -51,8 +52,8 @@ class ResourceSection private (
   /**
    * Returns all file locations of the special section
    */
-  def getLocations(): java.util.List[Location] =
-    Location.mergeContinuous(resourceTable.locations).asJava
+  def getLocations(): java.util.List[PhysicalLocation] =
+    Location.mergeContinuous[PhysicalLocation](resourceTable.locations).toList.asJava
 
   /**
    * {@inheritDoc}

@@ -31,6 +31,7 @@ import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.parser.IOUtil.NL
 import AnomalySubType._
 import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Scans the Section Table for anomalies.
@@ -139,7 +140,7 @@ trait SectionTableScanning extends AnomalyScanner {
     val overlay = new Overlay(data)
     if (sectionTable.getOffset >= overlay.getOffset) {
       val description = s"Section Table (offset: ${sectionTable.getOffset}) moved to Overlay"
-      val locations = List(new Location(sectionTable.getOffset, sectionTable.getSize))
+      val locations = List(new PhysicalLocation(sectionTable.getOffset, sectionTable.getSize))
       anomalyList += StructureAnomaly(PEStructureKey.SECTION_TABLE, description,
         SEC_TABLE_IN_OVERLAY, locations)
     }
@@ -270,7 +271,7 @@ trait SectionTableScanning extends AnomalyScanner {
         val sec = sectionTable.getSectionHeader(i)
         val range2 = physicalSectionRange(sec)
         val vrange2 = virtualSectionRange(sec)
-        val locations = List(range1, range2).map(r => new Location(r._1, r._2 - r._1))
+        val locations = List(range1, range2).map(r => new PhysicalLocation(r._1, r._2 - r._1))
         //ignore empty sections for shuffle analysis, these get their own anomaly
         if (range1._1 > range2._1 && notEmpty(range1) && notEmpty(range2)) {
           val description = s"Physically shuffled sections: section ${section.getNumber()} has range ${range1._1}--${range1._2}, section ${sec.getNumber()} has range ${range2._1}--${range2._2}"
@@ -311,7 +312,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionVA = entry.value
       if (sectionVA <= prevVA) {
         val range = physicalSectionRange(section)
-        val locations = List(new Location(range._1, range._2 - range._1))
+        val locations = List(new PhysicalLocation(range._1, range._2 - range._1))
         val description = s"Section Header ${section.getNumber()} with name ${sectionName}: VIRTUAL_ADDRESS (${sectionVA}) should be greater than of the previous entry (${prevVA})"
         anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, NOT_ASCENDING_SEC_VA, locations)
       }

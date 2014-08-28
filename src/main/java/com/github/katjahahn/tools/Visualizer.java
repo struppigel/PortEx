@@ -35,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PhysicalLocation;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.sections.SectionHeader;
@@ -307,8 +308,8 @@ public class Visualizer {
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
         List<Anomaly> anomalies = scanner.getAnomalies();
         for (Anomaly anomaly : anomalies) {
-            List<Location> locs = anomaly.locations();
-            for (Location loc : locs) {
+            List<PhysicalLocation> locs = anomaly.locations();
+            for (PhysicalLocation loc : locs) {
                 drawCrosses(anomalyColor, loc.from(), withMinLength(loc.size()));
             }
         }

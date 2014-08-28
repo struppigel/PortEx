@@ -18,7 +18,7 @@ package com.github.katjahahn.parser.sections.idata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.katjahahn.parser.Location;
+import com.github.katjahahn.parser.PhysicalLocation;
 
 /**
  * Represents an import by ordinal.
@@ -43,7 +43,7 @@ public class OrdinalImport implements Import {
      */
     private final DirectoryEntry parent;
 
-    private final List<Location> locations;
+    private final List<PhysicalLocation> locations;
 
     /**
      * 
@@ -57,7 +57,7 @@ public class OrdinalImport implements Import {
      *            list of file locations the import is in
      */
     public OrdinalImport(int ordinal, long rva, DirectoryEntry parent,
-            List<Location> locations) {
+            List<PhysicalLocation> locations) {
         this.ordinal = ordinal;
         this.rva = rva;
         this.parent = parent;
@@ -84,7 +84,7 @@ public class OrdinalImport implements Import {
      * {@inheritDoc}
      */
     @Override
-    public List<Location> getLocations() {
-        return new ArrayList<Location>(locations);
+    public List<PhysicalLocation> getLocations() {
+        return new ArrayList<PhysicalLocation>(locations);
     }
 }

@@ -19,6 +19,7 @@ package com.github.katjahahn.parser.sections.rsrc
 
 import java.awt.image.BufferedImage
 import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Holds the information about a resource, which is the information provided
@@ -33,7 +34,7 @@ import scala.collection.JavaConverters._
  * FIXME resource bytes must be a stream! some are too big to fit into an array
  */
 class Resource(
-  val resourceBytes: Array[Byte],
+  val resourceBytes: PhysicalLocation,
   var levelIDs: Map[Level, IDOrName]) {
 
   /**
@@ -56,12 +57,12 @@ class Resource(
    *
    * @param resourceBytes the bytes that make up the data of the resource
    */
-  def this(resourceBytes: Array[Byte]) = this(resourceBytes, Map.empty)
+  def this(resourceBytes: PhysicalLocation) = this(resourceBytes, Map.empty)
 
-  /**
-   * Creates an UTF8 string of the resource bytes
-   */
-  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
+//  /** TODO
+//   * Creates an UTF8 string of the resource bytes
+//   */
+//  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
 
   /**
    * {@inheritDoc}

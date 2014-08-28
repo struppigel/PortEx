@@ -32,6 +32,7 @@ import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -62,17 +63,17 @@ class ExportSection private (
 
   override def isEmpty(): Boolean = exportEntries.isEmpty
 
-  private def nameLocations(): List[Location] = {
+  private def nameLocations(): List[PhysicalLocation] = {
     namePointerTable.pointerNameList.map(p =>
-      new Location(secLoader.maybeGetFileOffset(p._1).get, ExportNamePointerTable.entryLength))
+      new PhysicalLocation(secLoader.maybeGetFileOffset(p._1).get, ExportNamePointerTable.entryLength))
   }
 
-  def getLocations(): java.util.List[Location] = if (isEmpty) List[Location]().asJava else
+  def getLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
     Location.mergeContinuous(
-      List(new Location(edataTable.fileOffset, edataTable.size),
-        new Location(exportAddressTable.fileOffset, exportAddressTable.size),
-        new Location(namePointerTable.fileOffset, namePointerTable.size),
-        new Location(ordinalTable.fileOffset, ordinalTable.size))
+      List(new PhysicalLocation(edataTable.fileOffset, edataTable.size),
+        new PhysicalLocation(exportAddressTable.fileOffset, exportAddressTable.size),
+        new PhysicalLocation(namePointerTable.fileOffset, namePointerTable.size),
+        new PhysicalLocation(ordinalTable.fileOffset, ordinalTable.size))
         ::: nameLocations).asJava
 
   /**

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.ByteArrayUtil._
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Represents a lookup table entry. Every lookup table entry is either an
@@ -37,7 +38,7 @@ import com.github.katjahahn.parser.Location
  */
 abstract class LookupTableEntry(val size: Int, val offset: Long) {
 
-  val location = new Location(offset, size)
+  val location = new PhysicalLocation(offset, size)
 
   /**
    * Converts the lookup table entry to an import instance.

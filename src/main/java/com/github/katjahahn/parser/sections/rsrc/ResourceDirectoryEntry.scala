@@ -27,7 +27,7 @@ import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * The entry of a {@link ResourceDirectory}
@@ -41,7 +41,7 @@ import com.github.katjahahn.parser.Location
  */
 abstract class ResourceDirectoryEntry {
 
-  def locations(): List[Location]
+  def locations(): List[PhysicalLocation]
 
 }
 
@@ -55,14 +55,14 @@ abstract class ResourceDirectoryEntry {
 case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsrcOffset: Long) extends ResourceDirectoryEntry {
 
   private lazy val idLoc = id match {
-    case Name(rva, name) => List(new Location(rva + rsrcOffset, name.length * 2))
+    case Name(rva, name) => List(new PhysicalLocation(rva + rsrcOffset, name.length * 2))
     case _ => Nil
   }
 
   /**
    * {@inheritDoc}
    */
-  override def locations(): List[Location] = idLoc ::: table.locations
+  override def locations(): List[PhysicalLocation] = idLoc ::: table.locations
 
   /**
    * {@inheritDoc}
@@ -87,11 +87,11 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsr
 case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int, rsrcOffset: Long) extends ResourceDirectoryEntry {
 
   private lazy val idLoc = id match {
-    case Name(rva, name) => List(new Location(rva + rsrcOffset, name.length * 2))
+    case Name(rva, name) => List(new PhysicalLocation(rva + rsrcOffset, name.length * 2))
     case _ => Nil
   }
 
-  override def locations(): List[Location] = idLoc ::: data.locations
+  override def locations(): List[PhysicalLocation] = idLoc ::: data.locations
 
   override def toString(): String =
     s"""Data Dir Entry $entryNr

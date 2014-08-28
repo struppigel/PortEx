@@ -3,6 +3,7 @@ package com.github.katjahahn.parser.sections.reloc
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
 
 class BaseRelocBlock(
   val fileOffset: Long,
@@ -10,7 +11,7 @@ class BaseRelocBlock(
   val blockSize: Long,
   val entries: List[BlockEntry]) {
   
-  def getLocations(): List[Location] = List(new Location(fileOffset, blockSize))
+  def getLocations(): List[PhysicalLocation] = List(new PhysicalLocation(fileOffset, blockSize))
 
   override def toString(): String =
     s"""page rva: ${hex(pageRVA)}
