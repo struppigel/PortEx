@@ -31,7 +31,7 @@ class Level(val levelNr: Int) extends Equals {
    * {@inheritDoc}
    */
   override def toString(): String = 
-    "level: " + levelDescription.getOrElse(levelNr, levelNr.toString)
+    levelDescription.getOrElse(levelNr, levelNr.toString)
 
   /**
    * Returns a level that is one level higher than the current.

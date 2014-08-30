@@ -59,15 +59,17 @@ class Resource(
    */
   def this(resourceBytes: PhysicalLocation) = this(resourceBytes, Map.empty)
 
-//  /** TODO
-//   * Creates an UTF8 string of the resource bytes
-//   */
-//  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
+  //  /** TODO
+  //   * Creates an UTF8 string of the resource bytes
+  //   */
+  //  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
 
   /**
    * {@inheritDoc}
    */
   override def toString(): String =
-    levelIDs.mkString(" || ")
+    "address: 0x" + java.lang.Long.toHexString(resourceBytes.from) + 
+    ", size: 0x" + java.lang.Long.toHexString(resourceBytes.size) + ", " +
+    levelIDs.mkString(", ")
 
 }

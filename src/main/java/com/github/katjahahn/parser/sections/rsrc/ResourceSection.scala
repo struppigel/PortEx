@@ -44,7 +44,7 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param hasLoop indicates whether the resource tree has a loop
  */
 class ResourceSection private (
-  val resourceTable: ResourceDirectory,
+  val resourceTree: ResourceDirectory,
   private val offset: Long,
   private val mmBytes: MemoryMappedPE,
   val hasLoop: Boolean) extends SpecialSection {
@@ -53,7 +53,7 @@ class ResourceSection private (
    * Returns all file locations of the special section
    */
   def getLocations(): java.util.List[PhysicalLocation] =
-    Location.mergeContinuous[PhysicalLocation](resourceTable.locations).toList.asJava
+    Location.mergeContinuous[PhysicalLocation](resourceTree.locations).toList.asJava
 
   /**
    * {@inheritDoc}
@@ -63,7 +63,7 @@ class ResourceSection private (
   /**
    * {@inheritDoc}
    */
-  override def getInfo(): String = resourceTable.getInfo
+  override def getInfo(): String = resourceTree.getInfo
 
   /**
    * {@inheritDoc}
@@ -76,7 +76,7 @@ class ResourceSection private (
    *
    * @return the root node of the resource tree that makes up the resource section
    */
-  def getResourceTable(): ResourceDirectory = resourceTable
+  def getResourceTree(): ResourceDirectory = resourceTree
 
   /**
    * Collects the resources from the root resource directory table and
@@ -85,7 +85,7 @@ class ResourceSection private (
    * @return a List of {@link Resource} instances
    */
   def getResources(): java.util.List[Resource] =
-    resourceTable.getResources()
+    resourceTree.getResources()
 
 }
 

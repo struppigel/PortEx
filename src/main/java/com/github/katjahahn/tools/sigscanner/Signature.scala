@@ -21,7 +21,7 @@ import scala.Array.canBuildFrom
 /**
  * @author Katja Hahn
  *
- * @constructor Creates a signature instance with the values specified
+ * Creates a signature instance with the values specified
  *
  * @param name the name of the packer or compiler
  * @param epOnly true iff only found at the entry point of the PE file

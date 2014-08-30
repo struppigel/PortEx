@@ -197,10 +197,10 @@ public final class PELoader {
 
     public static void main(String[] args) throws IOException {
         logger.entry();
-        // File file = new
-        // File("/home/deque/portextestfiles/testfiles/strings.exe");
-        File file = new File(
-                "/home/deque/portextestfiles/testfiles/Lab07-03.dll");
+         File file = new
+         File("/home/deque/portextestfiles/testfiles/strings.exe");
+//        File file = new File(
+//                "/home/deque/portextestfiles/testfiles/DLL2.dll");
         // File file = new File(
         // "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
         // File file = new File(

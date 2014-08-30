@@ -139,21 +139,21 @@ public class WikiExampleCodes {
             System.out.println(r);
         }
         // Access to structures of the resource tree
-        ResourceDirectory table = rsrc.getResourceTable();
+        ResourceDirectory tree = rsrc.getResourceTree();
         // Resource directory table header
-        Map<ResourceDirectoryKey, StandardField> header = table
+        Map<ResourceDirectoryKey, StandardField> header = tree
                 .getHeader();
         long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION).value;
         // Get values directly
-        long majorVers = table
+        long majorVers = tree
                 .getHeaderValue(ResourceDirectoryKey.MAJOR_VERSION);
         // Resource directory table entries
         // get a list of all entries, regardless which subtype
-        List<ResourceDirectoryEntry> entries = table.getTableEntries();
+        List<ResourceDirectoryEntry> entries = tree.getEntries();
         // get a list of all data entries
-        List<DataEntry> dataEntries = table.getDataEntries();
+        List<DataEntry> dataEntries = tree.getDataEntries();
         // get a list of all subdirectory entries
-        List<SubDirEntry> subdirEntries = table.getSubDirEntries();
+        List<SubDirEntry> subdirEntries = tree.getSubDirEntries();
     }
 
     public static void importSection() throws FileFormatException, IOException {

@@ -142,6 +142,28 @@ public class Visualizer {
      * <li>{@link Visualizer#DEFAULT_LEGEND_WIDTH}</li>
      * </ul>
      * 
+     * @param file
+     *            the PE file to display
+     * @throws IOException
+     *             if file can not be parsed
+     */
+    public Visualizer(File file) throws IOException {
+        this(PELoader.loadPE(file));
+    }
+
+    /**
+     * Visualizer instance with default values applied.
+     * <p>
+     * Default values are:
+     * <ul>
+     * <li>{@link Visualizer#DEFAULT_PIXEL_SIZE}</li>
+     * <li>{@link Visualizer#DEFAULT_PIXELATED}</li>
+     * <li>{@link Visualizer#DEFAULT_ADDITIONAL_GAP}</li>
+     * <li>{@link Visualizer#DEFAULT_HEIGHT}</li>
+     * <li>{@link Visualizer#DEFAULT_FILE_WIDTH}</li>
+     * <li>{@link Visualizer#DEFAULT_LEGEND_WIDTH}</li>
+     * </ul>
+     * 
      * @param data
      *            the data object of the PE file to visualize
      */

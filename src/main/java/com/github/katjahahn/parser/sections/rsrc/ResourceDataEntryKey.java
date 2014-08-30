@@ -17,6 +17,12 @@ package com.github.katjahahn.parser.sections.rsrc;
 
 import com.github.katjahahn.parser.HeaderKey;
 
+/**
+ * Keys for a resource data entry.
+ * 
+ * @author Katja Hahn
+ *
+ */
 public enum ResourceDataEntryKey implements HeaderKey {
 	SIZE, CODEPAGE, DATA_RVA;
 }

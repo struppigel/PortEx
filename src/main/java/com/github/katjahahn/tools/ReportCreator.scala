@@ -129,7 +129,7 @@ class ReportCreator(private val data: PEData) {
     if (maybeReloc.isPresent && !maybeReloc.get.isEmpty) {
       val reloc = maybeReloc.get
       val buf = new StringBuffer()
-      buf.append(title("Debug Information") + NL)
+      buf.append(title("Relocations") + NL)
       buf.append(reloc.getInfo + NL) //TODO make table
       buf.toString
     } else ""
