@@ -376,9 +376,9 @@ class ReportCreator(private val data: PEData) {
 
 object ReportCreator {
 
-  private val version = """version: 0.1
+  private val version = """version: 0.2
     |author: Katja Hahn
-    |last update: 14.Jul 2014""".stripMargin
+    |last update: 1.Sep 2014""".stripMargin
 
   private val title = "peana"
 

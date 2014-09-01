@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.katjahahn.tools;
+package com.github.katjahahn.tools.visualizer;
+import static com.github.katjahahn.tools.visualizer.ColorableItemKey.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -47,10 +49,12 @@ import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.reloc.RelocationSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
+import com.github.katjahahn.tools.Overlay;
+import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.ShannonEntropy;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 /**
  * Creates an image that represents the structure of a PE file on disk.
@@ -65,34 +69,6 @@ public class Visualizer {
     private static final Logger logger = LogManager.getLogger(Visualizer.class
             .getName());
 
-    /**
-     * The default width of the file shown is {@value}
-     */
-    public static final int DEFAULT_FILE_WIDTH = 300;
-    /**
-     * The default image and file height is {@value}
-     */
-    public static final int DEFAULT_HEIGHT = 600;
-    /**
-     * The default size of one pixel-block in the image is {@value}
-     */
-    public static final int DEFAULT_PIXEL_SIZE = 5;
-    /**
-     * The default width of the legend is {@value}
-     */
-    public static final int DEFAULT_LEGEND_WIDTH = 200;
-    /**
-     * The default of the reduced size on each side of pixels that lie on top of
-     * others. Imagine it like a transparent border. Value is {@value}
-     */
-    public static final int DEFAULT_ADDITIONAL_GAP = 1;
-    /**
-     * The default for pixelating the image is {@value} .
-     * <p>
-     * A pixelated image will have borders for every pixel-block.
-     */
-    public static final boolean DEFAULT_PIXELATED = false;
-
     private static final int IMAGE_TYPE = BufferedImage.TYPE_INT_RGB;
     private static final int LEGEND_SAMPLE_SIZE = 10;
     private static final int LEGEND_GAP = 10;
@@ -104,21 +80,9 @@ public class Visualizer {
     private int fileWidth;
     private int height;
     private int legendWidth;
-    private final Color msdosColor = new Color(0, 0, 200);
-    private final Color coffColor = new Color(0, 200, 0);
-    private final Color optColor = new Color(200, 0, 0);
-    private final Color sectionTableColor = new Color(200, 200, 0);
-    private final Color sectionColorStart = new Color(220, 220, 220);
-    private final Color overlayColor = new Color(100, 100, 240);
-    private final Color importColor = new Color(250, 250, 80);
-    private final Color exportColor = new Color(220, 80, 220);
-    private final Color rsrcColor = new Color(100, 250, 100);
-    private final Color debugColor = new Color(0, 0, 220);
-    private final Color relocColor = new Color(0, 100, 220);
-    private final Color epColor = new Color(255, 80, 80);
     // private final Color anomalyColor = new Color(168, 0, 224);
     private final Color anomalyColor = new Color(255, 255, 255);
-    private final PEData data;
+    private PEData data;
     private BufferedImage image;
 
     private boolean importsAvailable;
@@ -129,97 +93,7 @@ public class Visualizer {
     private boolean epAvailable;
     private boolean relocAvailable;
 
-    /**
-     * Visualizer instance with default values applied.
-     * <p>
-     * Default values are:
-     * <ul>
-     * <li>{@link Visualizer#DEFAULT_PIXEL_SIZE}</li>
-     * <li>{@link Visualizer#DEFAULT_PIXELATED}</li>
-     * <li>{@link Visualizer#DEFAULT_ADDITIONAL_GAP}</li>
-     * <li>{@link Visualizer#DEFAULT_HEIGHT}</li>
-     * <li>{@link Visualizer#DEFAULT_FILE_WIDTH}</li>
-     * <li>{@link Visualizer#DEFAULT_LEGEND_WIDTH}</li>
-     * </ul>
-     * 
-     * @param file
-     *            the PE file to display
-     * @throws IOException
-     *             if file can not be parsed
-     */
-    public Visualizer(File file) throws IOException {
-        this(PELoader.loadPE(file));
-    }
-
-    /**
-     * Visualizer instance with default values applied.
-     * <p>
-     * Default values are:
-     * <ul>
-     * <li>{@link Visualizer#DEFAULT_PIXEL_SIZE}</li>
-     * <li>{@link Visualizer#DEFAULT_PIXELATED}</li>
-     * <li>{@link Visualizer#DEFAULT_ADDITIONAL_GAP}</li>
-     * <li>{@link Visualizer#DEFAULT_HEIGHT}</li>
-     * <li>{@link Visualizer#DEFAULT_FILE_WIDTH}</li>
-     * <li>{@link Visualizer#DEFAULT_LEGEND_WIDTH}</li>
-     * </ul>
-     * 
-     * @param data
-     *            the data object of the PE file to visualize
-     */
-    public Visualizer(PEData data) {
-        this(data, DEFAULT_PIXEL_SIZE);
-    }
-
-    /**
-     * Visualizer instance with pixelSize and otherwise default values applied.
-     * <p>
-     * Default values are:
-     * <ul>
-     * <li>{@link Visualizer#DEFAULT_PIXELATED}</li>
-     * <li>{@link Visualizer#DEFAULT_ADDITIONAL_GAP}</li>
-     * <li>{@link Visualizer#DEFAULT_HEIGHT}</li>
-     * <li>{@link Visualizer#DEFAULT_FILE_WIDTH}</li>
-     * <li>{@link Visualizer#DEFAULT_LEGEND_WIDTH}</li>
-     * </ul>
-     * 
-     * @param data
-     *            the data object of the PE file to visualize
-     * @param pixelSize
-     *            size of one rectangle that represents a certain amount of
-     *            bytes
-     */
-    public Visualizer(PEData data, int pixelSize) {
-        this(data, pixelSize, DEFAULT_PIXELATED, DEFAULT_ADDITIONAL_GAP);
-    }
-
-    /**
-     * Creates a visualizer instance based on pixelSize and, pixelated and
-     * additionalGap. Otherwise default values applied.
-     * <p>
-     * Default values are:
-     * <ul>
-     * <li>{@link Visualizer#DEFAULT_HEIGHT}</li>
-     * <li>{@link Visualizer#DEFAULT_FILE_WIDTH}</li>
-     * <li>{@link Visualizer#DEFAULT_LEGEND_WIDTH}</li>
-     * </ul>
-     * 
-     * @param data
-     *            the data object of the PE file to visualize
-     * @param pixelSize
-     *            size of one rectangle that represents a certain amount of
-     *            bytes
-     * @param pixelated
-     *            applies a border to every pixel
-     * @param additionalGap
-     *            the reduced size on each side of pixels that lie on top of
-     *            others, e.g. for the resource section
-     */
-    public Visualizer(PEData data, int pixelSize, boolean pixelated,
-            int additionalGap) {
-        this(data, pixelSize, pixelated, additionalGap, DEFAULT_FILE_WIDTH,
-                DEFAULT_LEGEND_WIDTH, DEFAULT_HEIGHT);
-    }
+    private Map<ColorableItemKey, Color> colorMap;
 
     /**
      * Creates a visualizer instance.
@@ -241,23 +115,26 @@ public class Visualizer {
      * @param imageHeight
      *            the height of the image
      */
-    public Visualizer(PEData data, int pixelSize, boolean pixelated,
-            int additionalGap, int fileWidth, int legendWidth, int imageHeight) {
+    public Visualizer(int pixelSize, boolean pixelated, int additionalGap,
+            int fileWidth, int legendWidth, int imageHeight,
+            Map<ColorableItemKey, Color> colorMap) {
         this.additionalGap = additionalGap;
         this.fileWidth = fileWidth;
         this.legendWidth = legendWidth;
         this.height = imageHeight;
-        this.data = data;
         this.pixelated = pixelated;
+        // TODO maybe check this in builder
         if (pixelated && pixelSize < 2 + additionalGap) {
             this.pixelSize = 2 + additionalGap;
         } else {
             this.pixelSize = pixelSize;
         }
+        this.colorMap = colorMap;
     }
 
     // TODO optimize
-    public BufferedImage createEntropyImage() throws IOException {
+    public BufferedImage createEntropyImage(File file) throws IOException {
+        this.data = PELoader.loadPE(file);
         image = new BufferedImage(legendWidth + fileWidth * 2, height,
                 IMAGE_TYPE);
         byte[] bytes = Files.readAllBytes(data.getFile().toPath());
@@ -269,7 +146,7 @@ public class Visualizer {
             drawPixels(color, i, minLength);
         }
         BufferedImage result = image;
-        BufferedImage append = createImage();
+        BufferedImage append = createImage(file);
         result.createGraphics().drawImage(append, fileWidth, 0, null);
         image = result;
         return result;
@@ -282,7 +159,8 @@ public class Visualizer {
      * @throws IOException
      *             if sections can not be read
      */
-    public BufferedImage createImage() throws IOException {
+    public BufferedImage createImage(File file) throws IOException {
+        this.data = PELoader.loadPE(file);
         image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
 
         // TODO getSize for every module
@@ -290,27 +168,27 @@ public class Visualizer {
 
         long msdosOffset = 0;
         long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
-        drawPixels(msdosColor, msdosOffset, msdosSize);
+        drawPixels(colorMap.get(MSDOS_HEADER), msdosOffset, msdosSize);
 
         long optOffset = data.getOptionalHeader().getOffset();
         long optSize = withMinLength(data.getOptionalHeader().getSize());
-        drawPixels(optColor, optOffset, optSize);
+        drawPixels(colorMap.get(OPTIONAL_HEADER), optOffset, optSize);
 
         long coffOffset = data.getCOFFFileHeader().getOffset();
         long coffSize = withMinLength(COFFFileHeader.HEADER_SIZE);
-        drawPixels(coffColor, coffOffset, coffSize);
+        drawPixels(colorMap.get(COFF_FILE_HEADER), coffOffset, coffSize);
 
         long tableOffset = data.getSectionTable().getOffset();
         long tableSize = data.getSectionTable().getSize();
         if (tableSize != 0) {
             tableSize = withMinLength(tableSize);
-            drawPixels(sectionTableColor, tableOffset, tableSize);
+            drawPixels(colorMap.get(SECTION_TABLE), tableOffset, tableSize);
         }
 
         Overlay overlay = new Overlay(data);
         if (overlay.exists()) {
             long overlayOffset = overlay.getOffset();
-            drawPixels(overlayColor, overlayOffset,
+            drawPixels(colorMap.get(OVERLAY), overlayOffset,
                     withMinLength(overlay.getSize()));
             overlayAvailable = true;
         }
@@ -358,7 +236,7 @@ public class Visualizer {
             for (Location loc : reloc.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(relocColor, start, size, additionalGap);
+                drawPixels(colorMap.get(RELOC_SECTION), start, size, additionalGap);
             }
         }
         Optional<ImportSection> idata = loader.maybeLoadImportSection();
@@ -367,7 +245,7 @@ public class Visualizer {
             for (Location loc : idata.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(importColor, start, size, additionalGap);
+                drawPixels(colorMap.get(IMPORT_SECTION), start, size, additionalGap);
             }
         }
         Optional<ExportSection> edata = loader.maybeLoadExportSection();
@@ -376,7 +254,7 @@ public class Visualizer {
             for (Location loc : edata.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(exportColor, start, size, additionalGap);
+                drawPixels(colorMap.get(EXPORT_SECTION), start, size, additionalGap);
             }
         }
 
@@ -393,7 +271,7 @@ public class Visualizer {
                     continue;
                 }
                 long size = withMinLength(loc.size());
-                drawPixels(rsrcColor, start, size, additionalGap);
+                drawPixels(colorMap.get(RESOURCE_SECTION), start, size, additionalGap);
             }
         }
 
@@ -402,14 +280,14 @@ public class Visualizer {
             debugAvailable = true;
             long offset = debug.get().getOffset();
             long size = withMinLength(debug.get().getSize());
-            drawPixels(debugColor, offset, size, additionalGap);
+            drawPixels(colorMap.get(DEBUG_SECTION), offset, size, additionalGap);
         }
         Optional<Long> ep = getEntryPoint();
         if (ep.isPresent()) {
             epAvailable = true;
             // draw exactly one pixel
             long size = withMinLength(0);
-            drawPixels(epColor, ep.get(), size, additionalGap);
+            drawPixels(colorMap.get(ENTRY_POINT), ep.get(), size, additionalGap);
         }
     }
 
@@ -431,7 +309,7 @@ public class Visualizer {
         SectionTable table = data.getSectionTable();
         long sectionTableOffset = table.getOffset();
         long sectionTableSize = table.getSize();
-        drawPixels(sectionTableColor, sectionTableOffset, sectionTableSize);
+        drawPixels(colorMap.get(SECTION_TABLE), sectionTableOffset, sectionTableSize);
         for (SectionHeader header : table.getSectionHeaders()) {
             long sectionOffset = header.getAlignedPointerToRaw();
             long sectionSize = new SectionLoader(data).getReadSize(header);
@@ -441,7 +319,7 @@ public class Visualizer {
 
     private Color getSectionColor(SectionHeader header) {
         int nr = header.getNumber();
-        Color sectionColor = sectionColorStart;
+        Color sectionColor = colorMap.get(SECTION_START);
         for (int i = 1; i < nr; i++) {
             sectionColor = variate(sectionColor);
         }
@@ -456,7 +334,7 @@ public class Visualizer {
         int newBlue = shiftColorPart(color.getBlue() - diff);
         Color newColor = new Color(newRed, newGreen, newBlue);
         if (newColor.equals(Color.black)) {
-            newColor = sectionColorStart;
+            newColor = colorMap.get(SECTION_START);
         }
         return newColor;
     }
@@ -473,10 +351,10 @@ public class Visualizer {
     }
 
     private void drawLegend() {
-        drawLegendEntry(0, "MSDOS Header", msdosColor);
-        drawLegendEntry(1, "COFF File Header", coffColor);
-        drawLegendEntry(2, "Optional Header", optColor);
-        drawLegendEntry(3, "Section Table", sectionTableColor);
+        drawLegendEntry(0, "MSDOS Header", colorMap.get(MSDOS_HEADER));
+        drawLegendEntry(1, "COFF File Header", colorMap.get(COFF_FILE_HEADER));
+        drawLegendEntry(2, "Optional Header", colorMap.get(OPTIONAL_HEADER));
+        drawLegendEntry(3, "Section Table", colorMap.get(SECTION_TABLE));
         int number = 4;
         SectionTable table = data.getSectionTable();
         for (SectionHeader header : table.getSectionHeaders()) {
@@ -486,31 +364,31 @@ public class Visualizer {
             number++;
         }
         if (importsAvailable) {
-            drawLegendEntry(number, "Imports", importColor, true);
+            drawLegendEntry(number, "Imports", colorMap.get(IMPORT_SECTION), true);
             number++;
         }
         if (exportsAvailable) {
-            drawLegendEntry(number, "Exports", exportColor, true);
+            drawLegendEntry(number, "Exports", colorMap.get(EXPORT_SECTION), true);
             number++;
         }
         if (resourcesAvailable) {
-            drawLegendEntry(number, "Resources", rsrcColor, true);
+            drawLegendEntry(number, "Resources", colorMap.get(RESOURCE_SECTION), true);
             number++;
         }
         if (debugAvailable) {
-            drawLegendEntry(number, "Debug", debugColor, true);
+            drawLegendEntry(number, "Debug", colorMap.get(DEBUG_SECTION), true);
             number++;
         }
         if (epAvailable) {
-            drawLegendEntry(number, "Entry Point", epColor, true);
+            drawLegendEntry(number, "Entry Point", colorMap.get(ENTRY_POINT), true);
             number++;
         }
         if (relocAvailable) {
-            drawLegendEntry(number, "Relocation Blocks", relocColor, true);
+            drawLegendEntry(number, "Relocation Blocks", colorMap.get(RELOC_SECTION), true);
             number++;
         }
         if (overlayAvailable) {
-            drawLegendEntry(number, "Overlay", overlayColor);
+            drawLegendEntry(number, "Overlay", colorMap.get(OVERLAY));
             number++;
         }
         // drawLegendCrossEntry(number, "Anomalies", anomalyColor);
@@ -659,11 +537,11 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/testfiles/Lab18-04.exe");
+                "/home/deque/portextestfiles/unusualfiles/corkami/resource_shuffled.exe");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
-        Visualizer vi = new Visualizer(data);
-        final BufferedImage image = vi.createEntropyImage();
+        Visualizer vi = new VisualizerBuilder().build();
+        final BufferedImage image = vi.createEntropyImage(file);
         ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(image);
     }
@@ -683,28 +561,6 @@ public class Visualizer {
     }
 
     /**
-     * Sets the number of file bytes that are represented by one square pixel.
-     * The height of the image is changed accordingly.
-     * 
-     * @param bytes
-     *            bytes to be set per pixel
-     */
-    public void setBytesPerPixel(int bytes) {
-        Preconditions.checkArgument(bytes > 0);
-        System.out.println("file length: " + data.getFile().length());
-        double nrOfPixels = Math.ceil(data.getFile().length() / (double) bytes);
-        System.out.println("pixel nr:" + nrOfPixels);
-        double pixelsPerRow = Math.ceil(fileWidth / pixelSize);
-        System.out.println("pixels per row: " + pixelsPerRow);
-        double pixelsPerCol = Math.ceil(nrOfPixels / pixelsPerRow);
-        System.out.println("pixels per col: " + pixelsPerCol);
-        height = (int) Math.ceil(pixelsPerCol * pixelSize);
-        System.out.println("height: " + height);
-        System.out.println("pixelsize: " + pixelSize);
-    }
-
-    /**
-     * @see #setAdditionalGap(int)
      * @return additional gap
      */
     public int getAdditionalGap() {
@@ -713,18 +569,6 @@ public class Visualizer {
     }
 
     /**
-     * Sets the reduced size on each side of square pixels that lie on top of
-     * others.
-     * 
-     * @param additionalGap
-     */
-    public void setAdditionalGap(int additionalGap) {
-        Preconditions.checkArgument(additionalGap >= 0);
-        this.additionalGap = additionalGap;
-    }
-
-    /**
-     * @see #setPixelSize(int)
      * @return pixel size
      */
     public int getPixelSize() {
@@ -733,17 +577,6 @@ public class Visualizer {
     }
 
     /**
-     * Sets the length and width of one square pixel.
-     * 
-     * @param pixelSize
-     */
-    public void setPixelSize(int pixelSize) {
-        Preconditions.checkArgument(pixelSize > 0);
-        this.pixelSize = pixelSize;
-    }
-
-    /**
-     * @see #setPixelated(boolean)
      * @return pixelated
      */
     public boolean isPixelated() {
@@ -751,17 +584,6 @@ public class Visualizer {
     }
 
     /**
-     * Sets pixelated mode, meaning every square pixel in the image has borders
-     * if true.
-     * 
-     * @param pixelated
-     */
-    public void setPixelated(boolean pixelated) {
-        this.pixelated = pixelated;
-    }
-
-    /**
-     * @see #setFileWidth(int)
      * @return file width
      */
     public int getFileWidth() {
@@ -770,17 +592,6 @@ public class Visualizer {
     }
 
     /**
-     * Sets the width of the PE file representation in (real) pixels.
-     * 
-     * @param fileWidth
-     */
-    public void setFileWidth(int fileWidth) {
-        Preconditions.checkArgument(fileWidth > 0);
-        this.fileWidth = fileWidth;
-    }
-
-    /**
-     * @see #setHeight(int)
      * @return height of the image
      */
     public int getHeight() {
@@ -789,35 +600,11 @@ public class Visualizer {
     }
 
     /**
-     * Sets the height of the resulting image, thus also the height of the PE
-     * file representation.
-     * 
-     * @param height
-     */
-    public void setHeight(int height) {
-        Preconditions.checkArgument(height > 0);
-        this.height = height;
-    }
-
-    /**
-     * @see #setLegendWidth(int)
      * @return legend width
      */
     public int getLegendWidth() {
         assert legendWidth >= 0;
         return legendWidth;
-    }
-
-    /**
-     * Sets the width of the legend.
-     * <p>
-     * Affects only the available space, not font size or similar.
-     * 
-     * @param legendWidth
-     */
-    public void setLegendWidth(int legendWidth) {
-        Preconditions.checkArgument(legendWidth >= 0);
-        this.legendWidth = legendWidth;
     }
 
     private int getXPixels() {

@@ -25,9 +25,10 @@ import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.tools.Visualizer
+import com.github.katjahahn.tools.visualizer.Visualizer
 import javax.imageio.ImageIO
 import com.github.katjahahn.tools.ReportCreator
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder
 
 /**
  * Scans for anomalies and malformations in a PE file.
@@ -115,8 +116,8 @@ object PEAnomalyScanner {
 //            println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
 //            //          println(file.getName())
 //            println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-            val vi = new Visualizer(data)
-            val image = vi.createEntropyImage()
+            val vi = new VisualizerBuilder().build();
+            val image = vi.createEntropyImage(file)
             ImageIO.write(image, "png", outfile);
             println()
           }

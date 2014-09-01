@@ -34,13 +34,14 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.parser.sections.rsrc.SubDirEntry;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.ReportCreator;
-import com.github.katjahahn.tools.Visualizer;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
 import com.github.katjahahn.tools.sigscanner.MatchedSignature;
 import com.github.katjahahn.tools.sigscanner.Signature;
 import com.github.katjahahn.tools.sigscanner.SignatureScanner;
+import com.github.katjahahn.tools.visualizer.Visualizer;
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
 /**
  * These are the code examples for the PortEx Wiki.
@@ -52,42 +53,43 @@ import com.github.katjahahn.tools.sigscanner.SignatureScanner;
  * 
  */
 public class WikiExampleCodes {
-    
+
     public static void main(String[] args) {
         fileAnomalies();
     }
-    
+
     @SuppressWarnings("unused")
     public static void visualizer() throws IOException {
         File file = new File("WinRar.exe");
-        PEData data = PELoader.loadPE(file);
-        Visualizer visualizer = new Visualizer(data);
-        BufferedImage image = visualizer.createImage();
+        Visualizer visualizer = new VisualizerBuilder().build();
+        BufferedImage image = visualizer.createImage(file);
         ImageIO.write(image, "png", new File("image.png"));
-        //use parameters
-        visualizer.setPixelated(true);
-        visualizer.setHeight(800);
-        visualizer.setFileWidth(600);
-        visualizer.setLegendWidth(300);
-        visualizer.setPixelSize(10);
-        visualizer.setAdditionalGap(3);
-        //set bytes per pixel
-        visualizer.setBytesPerPixel(10);
-        //create an entropy image
-        BufferedImage entropyImage = visualizer.createEntropyImage();
+        // use parameters
+        visualizer = new VisualizerBuilder()
+            .setPixelated(true)
+            .setHeight(800)
+            .setFileWidth(600)
+            .setLegendWidth(300)
+            .setPixelSize(10)
+            .setAdditionalGap(3)
+            .setBytesPerPixel(10, file.length())
+            .build();
+        // create an entropy image
+        BufferedImage entropyImage = visualizer.createEntropyImage(file);
     }
-    
+
     public static void fileAnomalies() {
         File file = new File("/home/deque/portextestfiles/testfiles/WinRar.exe");
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         System.out.println(scanner.scanReport());
-        
+
         scanner = PEAnomalyScanner.newInstance(file);
         List<Anomaly> anomalies = scanner.getAnomalies();
-        for(Anomaly anomaly: anomalies) {
+        for (Anomaly anomaly : anomalies) {
             System.out.println("Type: " + anomaly.getType());
             System.out.println("Subtype: " + anomaly.subtype());
-            System.out.println("Field or structure with anomaly: " + anomaly.key());
+            System.out.println("Field or structure with anomaly: "
+                    + anomaly.key());
             System.out.println(anomaly.description());
             System.out.println();
         }
@@ -98,15 +100,15 @@ public class WikiExampleCodes {
         // Header information
         // load the PE file data
         PEData data = PELoader.loadPE(new File("myfile"));
-        
-        //Print report
+
+        // Print report
         ReportCreator reporter = new ReportCreator(data);
         reporter.printReport();
-        
-        //Get report parts
+
+        // Get report parts
         String anomalyReport = reporter.anomalyReport();
         String importsReport = reporter.importsReport();
-        
+
         // get various data from coff file header and print it
         COFFFileHeader coff = data.getCOFFFileHeader();
         MachineType machine = coff.getMachineType();
@@ -141,8 +143,7 @@ public class WikiExampleCodes {
         // Access to structures of the resource tree
         ResourceDirectory tree = rsrc.getResourceTree();
         // Resource directory table header
-        Map<ResourceDirectoryKey, StandardField> header = tree
-                .getHeader();
+        Map<ResourceDirectoryKey, StandardField> header = tree.getHeader();
         long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION).value;
         // Get values directly
         long majorVers = tree
@@ -183,8 +184,7 @@ public class WikiExampleCodes {
         // Access to ImportSection structures
         List<DirectoryEntry> dirTable = idata.getDirectory();
         for (DirectoryEntry tableEntry : dirTable) {
-            Map<DirectoryEntryKey, StandardField> map = tableEntry
-                    .getEntries();
+            Map<DirectoryEntryKey, StandardField> map = tableEntry.getEntries();
 
             for (StandardField field : map.values()) {
                 System.out.println(field.description + ": " + field.value);
