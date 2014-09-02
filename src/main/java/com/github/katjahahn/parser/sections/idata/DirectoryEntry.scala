@@ -57,7 +57,7 @@ import com.github.katjahahn.parser.PhysicalLocation
  *
  * @param entries that represent the information of the directory table entry
  */
-class DirectoryEntry private (
+class DirectoryEntry (
   private val entries: Map[DirectoryEntryKey, StandardField], val offset: Long) {
 
   /**

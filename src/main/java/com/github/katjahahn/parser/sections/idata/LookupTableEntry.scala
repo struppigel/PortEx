@@ -148,6 +148,7 @@ object LookupTableEntry {
       }
     } catch {
       case e: Exception =>
+        e.printStackTrace()
         logger.warn("invalid lookup table entry at ilt rva " + iltRVA)
         throw new FailureEntryException("invalid lookup table entry at ilt rva " + iltRVA)
     }
@@ -162,11 +163,14 @@ object LookupTableEntry {
     logger.debug("virtual addr: " + virtualAddress)
     logger.debug("address: " + address)
     logger.debug("idata length: " + mmbytes.length)
-    if (address + 2 > mmbytes.length) throw new FailureEntryException()
+    if (address + 2 > mmbytes.length) {
+      throw new FailureEntryException("NameRVA invalid, value: " + address)
+    }
     val hint = mmbytes.getBytesIntValue(address, 2)
     val name = getASCII(address + 2, mmbytes)
     val hintOffset = mmbytes.getPhysforVir(nameRVA)
-    NameEntry(nameRVA, new HintNameEntry(hint, name, hintOffset), rva, dirEntry, entrySize, offset: Long)
+    val hintNameEntry = new HintNameEntry(hint, name, hintOffset)
+    NameEntry(nameRVA, hintNameEntry, rva, dirEntry, entrySize, offset: Long)
   }
 
   private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): OrdinalEntry = {
