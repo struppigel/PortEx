@@ -1,5 +1,6 @@
 package com.github.katjahahn;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
 import com.github.katjahahn.tools.sigscanner.MatchedSignature;
 import com.github.katjahahn.tools.sigscanner.Signature;
 import com.github.katjahahn.tools.sigscanner.SignatureScanner;
+import com.github.katjahahn.tools.visualizer.ColorableItemKey;
 import com.github.katjahahn.tools.visualizer.Visualizer;
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
@@ -73,6 +75,7 @@ public class WikiExampleCodes {
             .setPixelSize(10)
             .setAdditionalGap(3)
             .setBytesPerPixel(10, file.length())
+            .setColor(ColorableItemKey.SECTION_TABLE, Color.BLUE)
             .build();
         // create an entropy image
         BufferedImage entropyImage = visualizer.createEntropyImage(file);
