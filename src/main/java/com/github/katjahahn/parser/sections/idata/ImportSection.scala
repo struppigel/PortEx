@@ -212,8 +212,7 @@ object ImportSection {
   private def getASCIIName(nameRVA: Int, virtualAddress: Long,
     mmbytes: MemoryMappedPE): String = {
     val offset = nameRVA
-    //TODO cast to int is insecure. actual int is unsigned, java int is signed
-    val nullindex = mmbytes.indexWhere(_ == 0, offset.toInt)
+    val nullindex = mmbytes.indexWhere(_ == 0, offset)
     new String(mmbytes.slice(offset, nullindex))
   }
 
@@ -272,9 +271,8 @@ object ImportSection {
     new SectionLoader(data).loadImportSection()
 
   def main(args: Array[String]): Unit = {
-    val file = new File("src/main/resources/unusualfiles/tinype/downloader.exe")
+    val file = new File("/home/deque/portextestfiles/unusualfiles/tinype/downloader.exe")
     val data = PELoader.loadPE(file)
-    println(data)
     val loader = new SectionLoader(data)
     val idata = loader.loadImportSection()
     if (idata != null) {
@@ -282,7 +280,6 @@ object ImportSection {
     } else {
       println("import section null")
     }
-    println(PEAnomalyScanner.newInstance(data).scanReport)
   }
 
   /**
