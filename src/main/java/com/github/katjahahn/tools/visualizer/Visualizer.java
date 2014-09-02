@@ -46,6 +46,7 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.DelayLoadSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.reloc.RelocationSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
@@ -92,6 +93,7 @@ public class Visualizer {
     private boolean overlayAvailable;
     private boolean epAvailable;
     private boolean relocAvailable;
+    private boolean delayLoadAvailable;
 
     private Map<ColorableItemKey, Color> colorMap;
 
@@ -248,6 +250,15 @@ public class Visualizer {
                 drawPixels(colorMap.get(IMPORT_SECTION), start, size, additionalGap);
             }
         }
+        Optional<DelayLoadSection> delayLoad = loader.maybeLoadDelayLoadSection();
+        if (delayLoad.isPresent()) {
+            delayLoadAvailable = true;
+            for (Location loc : delayLoad.get().getLocations()) {
+                long start = loc.from();
+                long size = withMinLength(loc.size());
+                drawPixels(colorMap.get(DELAY_IMPORT_SECTION), start, size, additionalGap);
+            }
+        }
         Optional<ExportSection> edata = loader.maybeLoadExportSection();
         if (edata.isPresent()) {
             exportsAvailable = true;
@@ -365,6 +376,10 @@ public class Visualizer {
         }
         if (importsAvailable) {
             drawLegendEntry(number, "Imports", colorMap.get(IMPORT_SECTION), true);
+            number++;
+        }
+        if (delayLoadAvailable) {
+            drawLegendEntry(number, "Delay-Load", colorMap.get(DELAY_IMPORT_SECTION), true);
             number++;
         }
         if (exportsAvailable) {
@@ -537,7 +552,7 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/resource_shuffled.exe");
+                "/home/deque/portextestfiles/unusualfiles/corkami/delay_imports.exe");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         Visualizer vi = new VisualizerBuilder().build();

@@ -73,6 +73,7 @@ public class VisualizerBuilder {
     private static final Color DEFAULT_RSRC_COLOR = new Color(100, 250, 100);
     private static final Color DEFAULT_DEBUG_COLOR = new Color(0, 0, 220);
     private static final Color DEFAULT_RELOC_COLOR = new Color(0, 100, 220);
+    private static final Color DEFAULT_DELAY_IMPORT_COLOR = new Color(220, 100, 0);
     /* Other colors */
     private static final Color DEFAULT_ENTRY_POINT_COLOR = new Color(255, 80,
             80);
@@ -107,6 +108,7 @@ public class VisualizerBuilder {
         colorMap.put(EXPORT_SECTION, DEFAULT_EXPORT_COLOR);
         colorMap.put(RESOURCE_SECTION, DEFAULT_RSRC_COLOR);
         colorMap.put(RELOC_SECTION, DEFAULT_RELOC_COLOR);
+        colorMap.put(DELAY_IMPORT_SECTION, DEFAULT_DELAY_IMPORT_COLOR);
         /* Other */
         colorMap.put(DEBUG_SECTION, DEFAULT_DEBUG_COLOR);
         colorMap.put(OVERLAY, DEFAULT_OVERLAY_COLOR);
