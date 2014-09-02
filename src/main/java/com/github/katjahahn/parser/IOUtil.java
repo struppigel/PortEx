@@ -110,9 +110,9 @@ public final class IOUtil {
         int keyIndex = specFormat.key;
 
         for (String[] specs : specification) {
-            T key = enumSolver.valueFor(specs[keyIndex]);
-            int offset = Integer.parseInt(specs[offsetIndex]);
-            int length = Integer.parseInt(specs[lengthIndex]);
+            T key = enumSolver.valueFor(specs[keyIndex].trim());
+            int offset = Integer.parseInt(specs[offsetIndex].trim());
+            int length = Integer.parseInt(specs[lengthIndex].trim());
             String description = specs[descriptionIndex];
             // TODO is this correct?
             long fieldOffset = headerOffset + offset;

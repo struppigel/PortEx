@@ -32,6 +32,7 @@ import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.DelayLoadSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.pdata.ExceptionSection;
 import com.github.katjahahn.parser.sections.reloc.RelocationSection;
@@ -395,6 +396,9 @@ public class SectionLoader {
             case BASE_RELOCATION_TABLE:
                 section = RelocationSection.newInstance(loadInfo);
                 break;
+            case DELAY_IMPORT_DESCRIPTOR:
+                section = DelayLoadSection.newInstance(loadInfo);
+                break;
             default:
                 return Optional.absent();
             }
@@ -420,6 +424,39 @@ public class SectionLoader {
             return optional.get();
         }
         throw new IllegalStateException(message);
+    }
+
+    /**
+     * Loads all bytes and information of the debug section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link DebugSection} of the given file
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if unable to load debug section
+     */
+    public DelayLoadSection loadDelayLoadSection() throws IOException {
+        Optional<DelayLoadSection> debug = maybeLoadDelayLoadSection();
+        return (DelayLoadSection) getOrThrow(debug,
+                "unable to load delay-load import section");
+    }
+
+    /**
+     * Loads all bytes and information of the debug section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link DebugSection} of the given file, absent if file doesn't
+     *         have this section
+     * @throws IOException
+     *             if unable to read the file
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<DelayLoadSection> maybeLoadDelayLoadSection()
+            throws IOException {
+        return (Optional<DelayLoadSection>) maybeLoadSpecialSection(DataDirectoryKey.DELAY_IMPORT_DESCRIPTOR);
     }
 
     /**
@@ -648,16 +685,41 @@ public class SectionLoader {
     }
 
     /**
-     * Contains the load information for a certain data directory.
+     * Data object. Contains the load information for a certain data special
+     * section.
      */
     public static class LoadInfo {
 
+        /**
+         * The physical address to the start of the section
+         */
         public final long fileOffset;
+        /**
+         * The virtual address to the start of the section
+         */
         public final long va;
+        /**
+         * The header data
+         */
         public final PEData data;
+        /**
+         * The memory mapped PE instance
+         */
         public final MemoryMappedPE memoryMapped;
+        /**
+         * The section loader
+         */
         public final SectionLoader loader;
 
+        /**
+         * Creates a LoadInfo instance with all the loading information.
+         * 
+         * @param fileOffset
+         * @param va
+         * @param memoryMapped
+         * @param data
+         * @param loader
+         */
         public LoadInfo(long fileOffset, long va, MemoryMappedPE memoryMapped,
                 PEData data, SectionLoader loader) {
             this.fileOffset = fileOffset;
@@ -688,7 +750,7 @@ public class SectionLoader {
      * A section is valid if the readsize is greater than 0 and the section
      * start is within the file.
      * 
-     * @see #getReadSize()
+     * @see #getReadSize(SectionHeader)
      * @param header
      *            the section's header
      * @return true iff section is valid

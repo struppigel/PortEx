@@ -27,8 +27,10 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.parser.sections.idata.DelayLoadSection;
+import com.google.common.base.Optional;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -195,12 +197,18 @@ public final class PELoader {
         return bytes;
     }
 
+    /**
+     * For testing purposes only.
+     * 
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         logger.entry();
-         File file = new
-         File("/home/deque/portextestfiles/testfiles/strings.exe");
-//        File file = new File(
-//                "/home/deque/portextestfiles/testfiles/DLL2.dll");
+        File file = new File(
+                "/home/deque/portextestfiles/unusualfiles/corkami/delay_imports.exe");
+        // File file = new File(
+        // "/home/deque/portextestfiles/testfiles/DLL2.dll");
         // File file = new File(
         // "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
         // File file = new File(
@@ -208,20 +216,19 @@ public final class PELoader {
         // File file = new
         // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
         PEData data = PELoader.loadPE(file);
-        new ReportCreator(data).printReport();
+        // new ReportCreator(data).printReport();
         // for (File file : new File("/home/deque/portextestfiles/testfiles")
         // .listFiles()) {
         // PEData data = PELoader.loadPE(file);
-        // SectionLoader loader = new SectionLoader(data);
-        // try {
-        // Optional<DebugSection> maybeDebug = loader
-        // .maybeLoadDebugSection();
-        // if (maybeDebug.isPresent()) {
-        // new ReportCreator(data).printReport();
-        // }
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
-        // }
+        SectionLoader loader = new SectionLoader(data);
+        try {
+            Optional<DelayLoadSection> maybeDelayLoad = loader.maybeLoadDelayLoadSection();
+            if (maybeDelayLoad.isPresent()) {
+                System.out.println(maybeDelayLoad.get().getInfo());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

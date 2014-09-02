@@ -1,0 +1,8 @@
+ATTRIBUTES;Attributes. Must be zero;0;4
+NAME;RVA of DLL name;4;4 
+MODULE_HANDLE;Module Handle;8;4
+DELAY_IAT;Delay Import Address Table;12;4
+DELAY_IMPORT_NAME_TABLE;Delay Import Name Table;16;4
+BOUND_DELAY_IMPORT_TABLE;Bound Delay Import Table;20;4
+UNLOAD_DELAY_IMPORT_TABLE;Unload Delay Import Table;24;4
+TIME_STAMP;Time Stamp;28;4

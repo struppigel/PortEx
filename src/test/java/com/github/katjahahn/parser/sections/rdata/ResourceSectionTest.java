@@ -48,6 +48,19 @@ public class ResourceSectionTest {
             assertEquals(actResources[i], resources.get(i).toString());
         }
     }
+    
+    @Test
+    public void shuffledResourcesRobustness() throws IOException {
+        String[] actResources = { "address: 0x12f0, size: 0x229, language -> ID: 0, name -> ID: 101, type -> ID: RT_RCDATA" };
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
+                + "/unusualfiles/corkami/resource_shuffled.exe"));
+        List<Resource> resources = new SectionLoader(data)
+                .loadResourceSection().getResources();
+        assertEquals(actResources.length, resources.size());
+        for (int i = 0; i < actResources.length; i++) {
+            assertEquals(actResources[i], resources.get(i).toString());
+        }
+    }
 
     @Test
     public void readWinRarResources() throws IOException {

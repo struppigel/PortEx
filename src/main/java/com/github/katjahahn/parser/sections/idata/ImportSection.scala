@@ -120,9 +120,11 @@ object ImportSection {
     logger.debug(directoryTable.size + " directory entries read")
     logger.debug("reading lookup table entries ...")
     try {
-      readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, fileSize, fileOffset)
+      readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, 
+          fileSize, fileOffset)
     } catch {
-      case e: FailureEntryException => logger.warn("Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
+      case e: FailureEntryException => logger.warn(
+          "Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
     }
     //filter empty directoryTableEntries, they are of no use and probably because
     //of collapsed imports or other malformations, example: tinype
