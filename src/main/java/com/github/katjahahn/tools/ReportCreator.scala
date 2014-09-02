@@ -35,6 +35,8 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey
 import com.github.katjahahn.parser.ByteArrayUtil
+import java.io.FileWriter
+import java.io.IOException
 
 /**
  * Utility for easy creation of PE file reports.
@@ -47,29 +49,30 @@ class ReportCreator(private val data: PEData) {
    * Maximum number of sections displayed in one table
    */
   val maxSec = 4
+  
+  val reportTitle = s"""${title("Report For " + data.getFile.getName)}
+    |file size ${hexString(data.getFile.length)}
+    |full path ${data.getFile.getAbsolutePath}
+    |
+    |""".stripMargin
+  
+  def headerReports(): String = msdosHeaderReport +
+    coffHeaderReport + optHeaderReport + secTableReport
+    
+  def specialSectionReports(): String =  importsReport +
+    delayImportsReport + exportsReport + resourcesReport + debugReport + relocReport
+    
+  def additionalReports(): String = overlayReport +
+    anomalyReport + peidReport + jar2ExeReport + hashReport + maldetReport
 
   /**
    * Prints a report to stdout.
    */
   def printReport(): Unit = {
-    println(title("Report For " + data.getFile.getName))
-    println("file size " + hexString(data.getFile.length))
-    println("full path " + data.getFile.getAbsolutePath + NL)
-    print(msdosHeaderReport)
-    print(coffHeaderReport)
-    print(optHeaderReport)
-    print(secTableReport)
-    print(importsReport)
-    print(exportsReport)
-    print(resourcesReport)
-    print(debugReport)
-    print(relocReport)
-    print(overlayReport)
-    print(anomalyReport)
-    print(peidReport)
-    print(jar2ExeReport)
-    print(hashReport)
-    print(maldetReport)
+    print(reportTitle)
+    print(headerReports)
+    print(specialSectionReports)
+    print(additionalReports)
   }
 
   def hashReport(): String = {
@@ -143,6 +146,21 @@ class ReportCreator(private val data: PEData) {
       val buf = new StringBuffer()
       buf.append(title("Imports") + NL)
       val imports = idata.getImports.asScala
+      for (importDll <- imports) {
+        buf.append(importDll + NL)
+      }
+      buf.toString
+    } else ""
+  }
+
+  def delayImportsReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeImports = loader.maybeLoadDelayLoadSection()
+    if (maybeImports.isPresent && !maybeImports.get.isEmpty) {
+      val delayLoad = maybeImports.get
+      val buf = new StringBuffer()
+      buf.append(title("Delay-Load Imports") + NL)
+      val imports = delayLoad.getImports.asScala
       for (importDll <- imports) {
         buf.append(importDll + NL)
       }
@@ -378,11 +396,14 @@ object ReportCreator {
 
   private val version = """version: 0.2
     |author: Katja Hahn
-    |last update: 1.Sep 2014""".stripMargin
+    |last update: 2.Sep 2014""".stripMargin
 
-  private val title = "peana"
+  private val title = """PE Analyzer""" + NL
 
-  private val usage = """Usage: java -jar peana.jar <PEfile>
+  private val usage = """usage: java -jar peana.jar [<options>] <PEfile>
+    | -h,--help          show help
+    | -v,--version       show version
+    | -o,--output        write report to output file
     """.stripMargin
 
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
@@ -394,20 +415,29 @@ object ReportCreator {
     invokeCLI(args)
   }
   private def invokeCLI(args: Array[String]): Unit = {
+    println(title)
     val options = nextOption(scala.collection.mutable.Map(), args.toList)
     if (args.length == 0) {
       println(usage)
     } else {
       if (options.contains('version)) {
-        println(title)
         println(version)
+        println()
+      }
+      if (options.contains('help)) {
+        println(usage)
         println()
       }
       if (options.contains('inputfile)) {
         try {
           val file = new File(options('inputfile))
           if (file.exists) {
-            ReportCreator.newInstance(file).printReport
+            val reporter = ReportCreator.newInstance(file)
+            if (options.contains('output)) {
+              writeReport(reporter, new File(options('output)))
+            } else {
+              reporter.printReport()
+            }
           } else {
             System.err.println("file doesn't exist");
           }
@@ -418,11 +448,44 @@ object ReportCreator {
     }
   }
 
+  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
+    try { f(param) } finally { param.close() }
+
+  private def writeReport(reporter: ReportCreator, file: File): Unit = {
+    if(file.getName().isEmpty()) {
+      throw new IOException("File name for output file is empty")
+    }
+    if (file.exists()) {
+      throw new IOException("Output file " + file.getAbsoluteFile() + " already exists")
+    }
+    using(new FileWriter(file, true)) { fw =>
+      println("Creating report file...")
+      fw.write(reporter.reportTitle)
+      println("Writing header reports...")
+      fw.write(reporter.headerReports)
+      println("Writing section reports...")
+      fw.write(reporter.specialSectionReports)
+      println("Writing analysis reports...")
+      fw.write(reporter.additionalReports)
+      println("Done!")
+    }
+  }
+
   private def nextOption(map: OptionMap, list: List[String]): OptionMap = {
     list match {
       case Nil => map
+      case "-h" :: tail =>
+        nextOption(map += ('help -> ""), tail)
+      case "--help" :: tail =>
+        nextOption(map += ('help -> ""), tail)
       case "-v" :: tail =>
         nextOption(map += ('version -> ""), tail)
+      case "--version" :: tail =>
+        nextOption(map += ('version -> ""), tail)
+      case "-o" :: value :: tail =>
+        nextOption(map += ('output -> value), tail)
+      case "--output" :: value :: tail =>
+        nextOption(map += ('output -> value), tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
       case option :: tail =>
         println("Unknown option " + option + "\n" + usage)

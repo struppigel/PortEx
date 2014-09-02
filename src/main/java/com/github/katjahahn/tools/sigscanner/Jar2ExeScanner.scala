@@ -39,13 +39,13 @@ import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.nio.channels.Channels
 import java.util.zip.ZipInputStream
-
 import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable.ListBuffer
-
 import SignatureScanner.Address
 import SignatureScanner.ScanResult
-import SignatureScanner._loadSignatures
+import scala.io.Codec
+import java.nio.charset.CodingErrorAction
+import Jar2ExeScanner._
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for
@@ -53,12 +53,12 @@ import SignatureScanner._loadSignatures
  * of the embedded jar file and may assist in dumping it.
  *
  * @author Katja Hahn
- * @constructor Creates a Scanner instance that operates on the given file
+ * Creates a Scanner instance that operates on the given file
  * @param file the file to scan or dump from
  */
 class Jar2ExeScanner(file: File) {
 
-  private lazy val scanner = new SignatureScanner(_loadSignatures(new File("javawrapperdb")))
+  private lazy val scanner = new SignatureScanner(loadDefaultSigs())
 
   /**
    * A list containing the signatures and addresses where they where found.
@@ -204,12 +204,14 @@ class Jar2ExeScanner(file: File) {
 }
 
 object Jar2ExeScanner {
+  
+  private val defaultSigs = "/data/javawrapperdb"
 
-  private val version = """version: 0.1
+  private val version = """version: 0.2
     |author: Katja Hahn
-    |last update: 6.Feb 2014""".stripMargin
+    |last update: 2.Sep 2014""".stripMargin
 
-  private val title = "jwscan v0.1 -- by deque"
+  private val title = "jwscan v0.2 -- by deque"
     
   private val usage = """Usage: java -jar jwscan.jar [-d <hexoffset>] <PEfile>
     """.stripMargin
@@ -218,6 +220,32 @@ object Jar2ExeScanner {
 
   def main(args: Array[String]): Unit = {
     invokeCLI(args)
+  }
+  
+  /**
+   * Loads the signatures from the given file.
+   *
+   * @return a list containing the signatures of the file
+   */
+  private def loadDefaultSigs(): List[Signature] = {
+    implicit val codec = Codec("UTF-8")
+    //replace malformed input
+    codec.onMalformedInput(CodingErrorAction.REPLACE)
+    codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
+
+    var sigs = ListBuffer[Signature]()
+    var is = this.getClass().getResourceAsStream(defaultSigs)
+    val it = scala.io.Source.fromInputStream(is)(codec).getLines
+    while (it.hasNext) {
+      val line = it.next
+      if (line.startsWith("[") && it.hasNext) {
+        val line2 = it.next
+        if (it.hasNext) {
+          sigs += Signature(line, it.next, line2)
+        }
+      }
+    }
+    sigs.toList
   }
 
   private def invokeCLI(args: Array[String]): Unit = {

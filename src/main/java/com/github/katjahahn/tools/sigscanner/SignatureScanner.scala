@@ -201,7 +201,7 @@ object SignatureScanner {
    */
   type ScanResult = (Signature, Address)
 
-  private val defaultSigs = "/userdb.txt"
+  private val defaultSigs = "/data/userdb.txt"
 
   private val version = """version: 0.1
     |author: Katja Hahn
@@ -234,7 +234,6 @@ object SignatureScanner {
   /**
    * Loads the signatures from the given file.
    *
-   * @param sigFile the file containing the signatures
    * @return a list containing the signatures of the file
    */
   private def loadDefaultSigs(): List[Signature] = {
@@ -299,10 +298,10 @@ object SignatureScanner {
   }
 
   def main(args: Array[String]): Unit = {
-    val file = new File("Holiday_Island.exe")
-    val scanner = SignatureScanner()
-    scanner.scanAll(file).asScala.foreach(println)
-    //    invokeCLI(args)
+    //    val file = new File("/home/deque/portextestfiles/Holiday_Island.exe")
+    //    val scanner = SignatureScanner()
+    //    scanner.scanAll(file).asScala.foreach(println)
+    invokeCLI(args)
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -312,14 +311,14 @@ object SignatureScanner {
       println(usage)
     } else {
       var eponly = true
-      var signatures = new File(defaultSigs)
+      var signatures: Option[File] = None
       var file = new File(options('inputfile))
 
       if (options.contains('version)) {
         println(version)
       }
       if (options.contains('signatures)) {
-        signatures = new File(options('signatures))
+        signatures = Some(new File(options('signatures)))
       }
       if (options.contains('eponly)) {
         eponly = options('eponly) == "true"
@@ -328,9 +327,10 @@ object SignatureScanner {
     }
   }
 
-  private def doScan(eponly: Boolean, sigFile: File, pefile: File): Unit = {
-    if (!sigFile.exists()) {
-      println(sigFile)
+  private def doScan(eponly: Boolean, signatures: Option[File], pefile: File): Unit = {
+
+    if (signatures.isDefined && !signatures.get.exists()) {
+      println(signatures.get)
       System.err.println("signature file doesn't exist")
       return
     }
@@ -341,7 +341,11 @@ object SignatureScanner {
     println("scanning file ...")
     if (!eponly) println("(this might take a while)")
     try {
-      val scanner = new SignatureScanner(_loadSignatures(sigFile))
+      val scanner = {
+        if (signatures.isDefined)
+          new SignatureScanner(_loadSignatures(signatures.get))
+        else SignatureScanner()
+      }
       val list = scanner.scanAll(pefile, eponly).asScala
       if (list.length == 0) println("no signature found")
       else list.foreach(println)
