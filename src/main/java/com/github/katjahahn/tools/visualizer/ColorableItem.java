@@ -20,19 +20,28 @@ package com.github.katjahahn.tools.visualizer;
  * Keys for colorable items in the visualizer.
  * 
  * @author Katja Hahn
- *
+ * 
  */
-public enum Visualizeable {
+public enum ColorableItem {
 
     /* Header */
-    MSDOS_HEADER, COFF_FILE_HEADER, OPTIONAL_HEADER, SECTION_TABLE,
+    MSDOS_HEADER("MSDOS Header"), COFF_FILE_HEADER("COFF File Header"), OPTIONAL_HEADER(
+            "Optional Header"), SECTION_TABLE("Section Table"),
     /* Special Sections and Tables */
-    IMPORT_SECTION, EXPORT_SECTION, DEBUG_SECTION, RESOURCE_SECTION, RELOC_SECTION,
-    DELAY_IMPORT_SECTION,
+    IMPORT_SECTION("Import Section"), EXPORT_SECTION("Export Section"), DEBUG_SECTION(
+            "Debug Section"), RESOURCE_SECTION("Resource Section"), RELOC_SECTION(
+            "Relocations"), DELAY_IMPORT_SECTION("Delay Imports"),
     /* Other */
-    ENTRY_POINT, OVERLAY, SECTION_START, ANOMALY;
+    ENTRY_POINT("Entry Point"), OVERLAY("Overlay"), SECTION_START(""), ANOMALY(
+            "Anomaly");
+
+    private final String description;
+
+    private ColorableItem(String description) {
+        this.description = description;
+    }
 
     public String getLegendDescription() {
-        return this.toString();
+        return description;
     }
 }
