@@ -68,7 +68,7 @@ class ExportSection private (
       new PhysicalLocation(secLoader.maybeGetFileOffset(p._1).get, ExportNamePointerTable.entryLength))
   }
 
-  def getLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
     Location.mergeContinuous(
       List(new PhysicalLocation(edataTable.fileOffset, edataTable.size),
         new PhysicalLocation(exportAddressTable.fileOffset, exportAddressTable.size),

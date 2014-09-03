@@ -25,7 +25,7 @@ trait ExportSectionScanning extends AnomalyScanner {
   }
 
   private def checkFractionatedExports(edata: ExportSection): List[Anomaly] = {
-    val locs = edata.getLocations.asScala
+    val locs = edata.getPhysicalLocations.asScala
     val anomalyList = ListBuffer[Anomaly]()
     val loader = new SectionLoader(data)
     val edataHeader = loader.maybeGetSectionHeaderByOffset(edata.getOffset())

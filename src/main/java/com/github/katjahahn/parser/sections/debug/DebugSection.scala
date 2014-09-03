@@ -35,6 +35,9 @@ import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.MemoryMappedPE
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * @author Katja Hahn
@@ -55,6 +58,9 @@ class DebugSection private (
 
   def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
     directoryTable.asJava
+    
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = 
+    (new PhysicalLocation(offset, getSize) :: Nil).asJava
 
   override def isEmpty: Boolean = directoryTable.isEmpty
 

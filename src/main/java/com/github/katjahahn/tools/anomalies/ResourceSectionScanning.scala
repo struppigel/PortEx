@@ -30,7 +30,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
     if (rsrc.hasLoop) {
       val description = "Detected loop in resource tree!"
       //TODO specify exact location of loop?
-      val locs = rsrc.getLocations.asScala.toList 
+      val locs = rsrc.getPhysicalLocations.asScala.toList 
       anomalyList += StructureAnomaly(PEStructureKey.RESOURCE_SECTION, 
           description, AnomalySubType.RESOURCE_LOOP, locs)
     }
@@ -38,7 +38,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
   }
 
   private def checkFractionatedResources(rsrc: ResourceSection): List[Anomaly] = {
-    val locs = rsrc.getLocations.asScala
+    val locs = rsrc.getPhysicalLocations.asScala
     val anomalyList = ListBuffer[Anomaly]()
     val loader = new SectionLoader(data)
     val rsrcHeader = loader.maybeGetSectionHeaderByOffset(rsrc.getOffset())

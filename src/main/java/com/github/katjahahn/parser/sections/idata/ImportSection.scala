@@ -35,6 +35,7 @@ import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -83,9 +84,9 @@ class ImportSection private (
    * @return a list with all locations the import information has been written to.
    */
   //TODO include IAT and ILT, add string locations
-  def getLocations(): java.util.List[Location] = {
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
     val ranges = Location.mergeContinuous(directoryTable.foldRight(
-        List[Location]())((entry, list) => entry.getLocations ::: list))
+        List[PhysicalLocation]())((entry, list) => entry.getPhysicalLocations ::: list))
     ranges.toList.asJava
   }
 

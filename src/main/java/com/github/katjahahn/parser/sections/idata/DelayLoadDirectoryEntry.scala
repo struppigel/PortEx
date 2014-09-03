@@ -45,7 +45,7 @@ class DelayLoadDirectoryEntry private (
   /**
    * Returns a list of all file locations where directory entries are found
    */
-  def getLocations(): List[Location] = new PhysicalLocation(offset, delayDirSize) ::
+  def getPhysicalLocations(): List[PhysicalLocation] = new PhysicalLocation(offset, delayDirSize) ::
     //collect lookupTableEntry locations
     (for (entry <- lookupTableEntries) yield new PhysicalLocation(entry.offset, entry.size)) :::
     //collect HintNameEntry locations

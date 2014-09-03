@@ -29,6 +29,7 @@ import com.github.katjahahn.parser.MemoryMappedPE
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.optheader.OptionalHeader
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.PhysicalLocation
 
 class DelayLoadSection(
     private val delayLoadTable: DelayLoadTable, 
@@ -51,9 +52,9 @@ class DelayLoadSection(
    * @return a list with all locations the import information has been written to.
    */
   //TODO include IAT and ILT, add string locations
-  def getLocations(): java.util.List[Location] = {
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
     val ranges = Location.mergeContinuous(delayLoadTable.foldRight(
-        List[Location]())((entry, list) => entry.getLocations ::: list))
+        List[PhysicalLocation]())((entry, list) => entry.getPhysicalLocations ::: list))
     ranges.toList.asJava
   }
 

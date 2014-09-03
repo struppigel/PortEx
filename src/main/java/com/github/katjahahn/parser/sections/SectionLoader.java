@@ -371,7 +371,7 @@ public class SectionLoader {
      * @param key
      * @return the special section optional that belongs to the key.
      */
-    private Optional<? extends SpecialSection> maybeLoadSpecialSection(
+    public Optional<? extends SpecialSection> maybeLoadSpecialSection(
             DataDirectoryKey key) {
         Optional<LoadInfo> maybeLoadInfo = maybeGetLoadInfo(key);
         if (maybeLoadInfo.isPresent()) {

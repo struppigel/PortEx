@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
+import java.util.List;
+
 import com.github.katjahahn.parser.PEModule;
+import com.github.katjahahn.parser.PhysicalLocation;
 
 /**
  * Represents a special section, whose format is described in the PECOFF
@@ -31,5 +34,12 @@ public interface SpecialSection extends PEModule {
      * @return true if no entries, false otherwise
      */
     boolean isEmpty();
+    
+    /**
+     * Returns a list of physical address ranges this special section is parsed from.
+     * 
+     * @return list of locations
+     */
+    List<PhysicalLocation> getPhysicalLocations();
 
 }

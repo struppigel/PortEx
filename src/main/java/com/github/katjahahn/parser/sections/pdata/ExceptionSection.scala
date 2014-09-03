@@ -18,7 +18,7 @@
 
 package com.github.katjahahn.parser.sections.pdata
 
-import ExceptionSection._
+import com.github.katjahahn.parser.sections.pdata.ExceptionSection._
 import scala.collection.JavaConverters._
 import Function.tupled
 import scala.collection.mutable.ListBuffer
@@ -35,6 +35,7 @@ import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.PhysicalLocation
 
 //TODO getInfo shows empty values, separate different formats, test different formats
 class ExceptionSection private (
@@ -52,6 +53,12 @@ class ExceptionSection private (
   def getInfo(): String = directory.values.mkString(NL)
 
   def getOffset(): Long = offset
+  
+  //FIXME implement
+  def getSize(): Long = 0L
+  
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = 
+    (new PhysicalLocation(getOffset, getSize) :: Nil).asJava
 }
 
 object ExceptionSection {

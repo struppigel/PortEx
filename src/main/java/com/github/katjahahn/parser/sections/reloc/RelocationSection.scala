@@ -40,7 +40,7 @@ class RelocationSection(
   
   def getRelocBlocks(): java.util.List[BaseRelocBlock] = blocks.asJava
 
-  def getLocations(): java.util.List[PhysicalLocation] =
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] =
     blocks.flatMap(b => b.getLocations).asJava
 
 }

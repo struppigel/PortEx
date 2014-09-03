@@ -31,4 +31,8 @@ public enum ColorableItem {
     DELAY_IMPORT_SECTION,
     /* Other */
     ENTRY_POINT, OVERLAY, SECTION_START, ANOMALY;
+
+    public String getLegendDescription() {
+        return this.toString();
+    }
 }

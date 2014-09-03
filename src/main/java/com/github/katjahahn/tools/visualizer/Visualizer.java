@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
 
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
 import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 import java.awt.Color;
@@ -23,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,17 +41,13 @@ import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PhysicalLocation;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.debug.DebugSection;
-import com.github.katjahahn.parser.sections.edata.ExportSection;
-import com.github.katjahahn.parser.sections.idata.DelayLoadSection;
-import com.github.katjahahn.parser.sections.idata.ImportSection;
-import com.github.katjahahn.parser.sections.reloc.RelocationSection;
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
+import com.github.katjahahn.parser.sections.SpecialSection;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.ShannonEntropy;
@@ -86,14 +84,32 @@ public class Visualizer {
     private PEData data;
     private BufferedImage image;
 
-    private boolean importsAvailable;
-    private boolean exportsAvailable;
-    private boolean resourcesAvailable;
-    private boolean debugAvailable;
+    private static final DataDirectoryKey[] specials = { BASE_RELOCATION_TABLE,
+            IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE,
+            RESOURCE_TABLE, DEBUG };
+
+    private Map<DataDirectoryKey, Boolean> specialsAvailability = new EnumMap<>(
+            DataDirectoryKey.class);
+    {
+        for (DataDirectoryKey key : specials) {
+            specialsAvailability.put(key, false);
+        }
+    }
+
+    // TODO colorableitem as interface type
+    private Map<DataDirectoryKey, ColorableItem> specialsColorable = new EnumMap<>(
+            DataDirectoryKey.class);
+    {
+        specialsColorable.put(BASE_RELOCATION_TABLE, RELOC_SECTION);
+        specialsColorable.put(IMPORT_TABLE, IMPORT_SECTION);
+        specialsColorable.put(DELAY_IMPORT_DESCRIPTOR, DELAY_IMPORT_SECTION);
+        specialsColorable.put(EXPORT_TABLE, EXPORT_SECTION);
+        specialsColorable.put(RESOURCE_TABLE, RESOURCE_SECTION);
+        specialsColorable.put(DEBUG, DEBUG_SECTION);
+    }
+
     private boolean overlayAvailable;
     private boolean epAvailable;
-    private boolean relocAvailable;
-    private boolean delayLoadAvailable;
 
     private Map<ColorableItem, Color> colorMap;
 
@@ -123,14 +139,15 @@ public class Visualizer {
     /**
      * Creates an image of the local entropies of this file.
      * 
-     * @param file the PE file
+     * @param file
+     *            the PE file
      * @return image of local entropies
-     * @throws IOException if file can not be read
+     * @throws IOException
+     *             if file can not be read
      */
     public BufferedImage createEntropyImage(File file) throws IOException {
         this.data = PELoader.loadPE(file);
-        image = new BufferedImage(fileWidth, height,
-                IMAGE_TYPE);
+        image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
         byte[] bytes = Files.readAllBytes(data.getFile().toPath());
         double[] entropies = ShannonEntropy.localEntropies(bytes);
         for (int i = 0; i < entropies.length; i += withMinLength(0)) {
@@ -140,18 +157,13 @@ public class Visualizer {
             drawPixels(color, i, minLength);
         }
         return image;
-//        BufferedImage result = image;
-//        BufferedImage append = createImage(file);
-//        result.createGraphics().drawImage(append, fileWidth, 0, null);
-//        image = result;
-//        return result;
     }
-    
-    
 
     /**
      * Creates a buffered image that displays the structure of the PE file.
      * 
+     * @param file
+     *            the PE file to create an image from
      * @return buffered image
      * @throws IOException
      *             if sections can not be read
@@ -160,7 +172,6 @@ public class Visualizer {
         this.data = PELoader.loadPE(file);
         image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
 
-        // TODO getSize for every module
         drawSections();
 
         long msdosOffset = 0;
@@ -225,75 +236,40 @@ public class Visualizer {
         assert length > 0;
         return length;
     }
+    
+    private String getSpecialsDescription(DataDirectoryKey key) {
+        ColorableItem colorableItem = specialsColorable.get(key);
+        return colorableItem.getLegendDescription();
+    }
+
+    private Color getSpecialsColor(DataDirectoryKey key) {
+        ColorableItem colorableItem = specialsColorable.get(key);
+        return colorMap.get(colorableItem);
+    }
 
     private void drawSpecials() throws IOException {
         SectionLoader loader = new SectionLoader(data);
-        Optional<RelocationSection> reloc = loader.maybeLoadRelocSection();
-        if (reloc.isPresent()) {
-            relocAvailable = true;
-            for (Location loc : reloc.get().getLocations()) {
-                long start = loc.from();
-                long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(RELOC_SECTION), start, size,
-                        additionalGap);
-            }
-        }
-        Optional<ImportSection> idata = loader.maybeLoadImportSection();
-        if (idata.isPresent()) {
-            importsAvailable = true;
-            for (Location loc : idata.get().getLocations()) {
-                long start = loc.from();
-                long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(IMPORT_SECTION), start, size,
-                        additionalGap);
-            }
-        }
-        Optional<DelayLoadSection> delayLoad = loader
-                .maybeLoadDelayLoadSection();
-        if (delayLoad.isPresent()) {
-            delayLoadAvailable = true;
-            for (Location loc : delayLoad.get().getLocations()) {
-                long start = loc.from();
-                long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(DELAY_IMPORT_SECTION), start, size,
-                        additionalGap);
-            }
-        }
-        Optional<ExportSection> edata = loader.maybeLoadExportSection();
-        if (edata.isPresent()) {
-            exportsAvailable = true;
-            for (Location loc : edata.get().getLocations()) {
-                long start = loc.from();
-                long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(EXPORT_SECTION), start, size,
-                        additionalGap);
-            }
-        }
 
-        Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
-        if (rsrc.isPresent()) {
-            resourcesAvailable = true;
-            for (Location loc : rsrc.get().getLocations()) {
-                long start = loc.from();
-                if (start == -1) {
-                    // FIXME this happens with
-                    // VirusShare_1eb8065cebc74e752fd4f085f05d62d9, why?
-                    logger.warn("rsrc location starts from -1 (will be ignored): "
-                            + loc);
-                    continue;
+        for (DataDirectoryKey specialKey : specials) {
+            Optional<? extends SpecialSection> section = loader
+                    .maybeLoadSpecialSection(specialKey);
+            if (section.isPresent()) {
+                specialsAvailability.put(specialKey, true);
+                for (Location loc : section.get().getPhysicalLocations()) {
+                    long start = loc.from();
+                    if (start == -1) {
+                        // FIXME this happens with rsrc section and
+                        // VirusShare_1eb8065cebc74e752fd4f085f05d62d9, why?
+                        logger.warn(specialKey
+                                + " location starts from -1 (will be ignored): "
+                                + loc);
+                        continue;
+                    }
+                    long size = withMinLength(loc.size());
+                    drawPixels(getSpecialsColor(specialKey), start, size,
+                            additionalGap);
                 }
-                long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(RESOURCE_SECTION), start, size,
-                        additionalGap);
             }
-        }
-
-        Optional<DebugSection> debug = loader.maybeLoadDebugSection();
-        if (debug.isPresent()) {
-            debugAvailable = true;
-            long offset = debug.get().getOffset();
-            long size = withMinLength(debug.get().getSize());
-            drawPixels(colorMap.get(DEBUG_SECTION), offset, size, additionalGap);
         }
         Optional<Long> ep = getEntryPoint();
         if (ep.isPresent()) {
@@ -377,38 +353,16 @@ public class Visualizer {
             sectionColor = variate(sectionColor);
             number++;
         }
-        if (importsAvailable) {
-            drawLegendEntry(number, "Imports", colorMap.get(IMPORT_SECTION),
-                    true);
-            number++;
-        }
-        if (delayLoadAvailable) {
-            drawLegendEntry(number, "Delay-Load",
-                    colorMap.get(DELAY_IMPORT_SECTION), true);
-            number++;
-        }
-        if (exportsAvailable) {
-            drawLegendEntry(number, "Exports", colorMap.get(EXPORT_SECTION),
-                    true);
-            number++;
-        }
-        if (resourcesAvailable) {
-            drawLegendEntry(number, "Resources",
-                    colorMap.get(RESOURCE_SECTION), true);
-            number++;
-        }
-        if (debugAvailable) {
-            drawLegendEntry(number, "Debug", colorMap.get(DEBUG_SECTION), true);
-            number++;
+        for (DataDirectoryKey special : specials) {
+            if (specialsAvailability.get(special)) {
+                drawLegendEntry(number, getSpecialsDescription(special),
+                        getSpecialsColor(special), true);
+                number++;
+            }
         }
         if (epAvailable) {
             drawLegendEntry(number, "Entry Point", colorMap.get(ENTRY_POINT),
                     true);
-            number++;
-        }
-        if (relocAvailable) {
-            drawLegendEntry(number, "Relocation Blocks",
-                    colorMap.get(RELOC_SECTION), true);
             number++;
         }
         if (overlayAvailable) {
@@ -573,8 +527,9 @@ public class Visualizer {
         Visualizer vi = new VisualizerBuilder().build();
         final BufferedImage entropyImage = vi.createEntropyImage(file);
         final BufferedImage structureImage = vi.createImage(file);
-        final BufferedImage appendedImage = ImageUtil.appendImages(entropyImage, structureImage);
-//        ImageIO.write(image, "png", new File(file.getName() + ".png"));
+        final BufferedImage appendedImage = ImageUtil.appendImages(
+                entropyImage, structureImage);
+        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
         show(appendedImage);
     }
 

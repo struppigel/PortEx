@@ -26,7 +26,7 @@ trait ImportSectionScanning extends AnomalyScanner {
   }
 
   private def checkFractionatedImports(idata: ImportSection): List[Anomaly] = {
-    val locs = idata.getLocations.asScala
+    val locs = idata.getPhysicalLocations.asScala
     val anomalyList = ListBuffer[Anomaly]()
     val loader = new SectionLoader(data)
     val idataHeader = loader.maybeGetSectionHeaderByOffset(idata.getOffset())

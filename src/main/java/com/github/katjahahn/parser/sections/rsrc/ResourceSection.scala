@@ -52,7 +52,7 @@ class ResourceSection private (
   /**
    * Returns all file locations of the special section
    */
-  def getLocations(): java.util.List[PhysicalLocation] =
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] =
     Location.mergeContinuous[PhysicalLocation](resourceTree.locations).toList.asJava
 
   /**
