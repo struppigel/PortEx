@@ -16,7 +16,7 @@
 
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
+import static com.github.katjahahn.tools.visualizer.Visualizeable.*;
 
 import java.awt.Color;
 import java.util.EnumMap;
@@ -99,14 +99,14 @@ public class VisualizerBuilder {
         public int fileWidth = DEFAULT_FILE_WIDTH;
         public int height = DEFAULT_HEIGHT;
         public int legendWidth = DEFAULT_LEGEND_WIDTH; 
-        public Map<ColorableItem, Color> colorMap;
+        public Map<Visualizeable, Color> colorMap;
         
         public VisualizerSettings() {
             initDefaultColorMap();
         }
         
         private void initDefaultColorMap() {
-            colorMap = new EnumMap<>(ColorableItem.class);
+            colorMap = new EnumMap<>(Visualizeable.class);
             /* Header */
             colorMap.put(MSDOS_HEADER, DEFAULT_MSDOS_COLOR);
             colorMap.put(COFF_FILE_HEADER, DEFAULT_COFF_HEADER_COLOR);
@@ -145,7 +145,7 @@ public class VisualizerBuilder {
      *            the color of the item
      * @return this VisualizerBuilder
      */
-    public VisualizerBuilder setColor(ColorableItem key, Color color) {
+    public VisualizerBuilder setColor(Visualizeable key, Color color) {
         settings.colorMap.put(key, color);
         return this;
     }

@@ -22,7 +22,7 @@ package com.github.katjahahn.tools.visualizer;
  * @author Katja Hahn
  *
  */
-public enum ColorableItem {
+public enum Visualizeable {
 
     /* Header */
     MSDOS_HEADER, COFF_FILE_HEADER, OPTIONAL_HEADER, SECTION_TABLE,

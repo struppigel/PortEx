@@ -16,7 +16,7 @@
 package com.github.katjahahn.tools.visualizer;
 
 import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
+import static com.github.katjahahn.tools.visualizer.Visualizeable.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -97,7 +97,7 @@ public class Visualizer {
     }
 
     // TODO colorableitem as interface type
-    private Map<DataDirectoryKey, ColorableItem> specialsColorable = new EnumMap<>(
+    private Map<DataDirectoryKey, Visualizeable> specialsColorable = new EnumMap<>(
             DataDirectoryKey.class);
     {
         specialsColorable.put(BASE_RELOCATION_TABLE, RELOC_SECTION);
@@ -111,7 +111,7 @@ public class Visualizer {
     private boolean overlayAvailable;
     private boolean epAvailable;
 
-    private Map<ColorableItem, Color> colorMap;
+    private Map<Visualizeable, Color> colorMap;
 
     /**
      * Creates a visualizer instance.
@@ -238,12 +238,12 @@ public class Visualizer {
     }
     
     private String getSpecialsDescription(DataDirectoryKey key) {
-        ColorableItem colorableItem = specialsColorable.get(key);
+        Visualizeable colorableItem = specialsColorable.get(key);
         return colorableItem.getLegendDescription();
     }
 
     private Color getSpecialsColor(DataDirectoryKey key) {
-        ColorableItem colorableItem = specialsColorable.get(key);
+        Visualizeable colorableItem = specialsColorable.get(key);
         return colorMap.get(colorableItem);
     }
 
