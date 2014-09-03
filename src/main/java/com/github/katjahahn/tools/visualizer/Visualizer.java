@@ -14,7 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
-import static com.github.katjahahn.tools.visualizer.ColorableItemKey.*;
+
+import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,7 +26,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -55,6 +55,7 @@ import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.ShannonEntropy;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder.VisualizerSettings;
 import com.google.common.base.Optional;
 
 /**
@@ -81,8 +82,7 @@ public class Visualizer {
     private int fileWidth;
     private int height;
     private int legendWidth;
-    // private final Color anomalyColor = new Color(168, 0, 224);
-    private final Color anomalyColor = new Color(255, 255, 255);
+
     private PEData data;
     private BufferedImage image;
 
@@ -95,49 +95,41 @@ public class Visualizer {
     private boolean relocAvailable;
     private boolean delayLoadAvailable;
 
-    private Map<ColorableItemKey, Color> colorMap;
+    private Map<ColorableItem, Color> colorMap;
 
     /**
      * Creates a visualizer instance.
      * 
-     * @param data
-     *            the data object of the PE file to visualize
-     * @param pixelSize
-     *            size of one rectangle that represents a certain amount of
-     *            bytes
-     * @param pixelated
-     *            applies a border to every pixel
-     * @param additionalGap
-     *            the reduced size on each side of pixels that lie on top of
-     *            others, e.g. for the resource section
-     * @param fileWidth
-     *            the width of the shown file
-     * @param legendWidth
-     *            the width of the legend
-     * @param imageHeight
-     *            the height of the image
+     * @param settings
+     *            the settings for the visualizer
      */
-    public Visualizer(int pixelSize, boolean pixelated, int additionalGap,
-            int fileWidth, int legendWidth, int imageHeight,
-            Map<ColorableItemKey, Color> colorMap) {
-        this.additionalGap = additionalGap;
-        this.fileWidth = fileWidth;
-        this.legendWidth = legendWidth;
-        this.height = imageHeight;
-        this.pixelated = pixelated;
+    Visualizer(VisualizerSettings settings) {
+        this.additionalGap = settings.additionalGap;
+        this.fileWidth = settings.fileWidth;
+        this.legendWidth = settings.legendWidth;
+        this.height = settings.height;
+        this.pixelated = settings.pixelated;
         // TODO maybe check this in builder
-        if (pixelated && pixelSize < 2 + additionalGap) {
-            this.pixelSize = 2 + additionalGap;
+        if (settings.pixelated
+                && settings.pixelSize < 2 + settings.additionalGap) {
+            this.pixelSize = 2 + settings.additionalGap;
         } else {
-            this.pixelSize = pixelSize;
+            this.pixelSize = settings.pixelSize;
         }
-        this.colorMap = colorMap;
+        this.colorMap = settings.colorMap;
     }
 
     // TODO optimize
+    /**
+     * Creates an image of the local entropies of this file.
+     * 
+     * @param file the PE file
+     * @return image of local entropies
+     * @throws IOException if file can not be read
+     */
     public BufferedImage createEntropyImage(File file) throws IOException {
         this.data = PELoader.loadPE(file);
-        image = new BufferedImage(legendWidth + fileWidth * 2, height,
+        image = new BufferedImage(fileWidth, height,
                 IMAGE_TYPE);
         byte[] bytes = Files.readAllBytes(data.getFile().toPath());
         double[] entropies = ShannonEntropy.localEntropies(bytes);
@@ -147,12 +139,15 @@ public class Visualizer {
             long minLength = withMinLength(0);
             drawPixels(color, i, minLength);
         }
-        BufferedImage result = image;
-        BufferedImage append = createImage(file);
-        result.createGraphics().drawImage(append, fileWidth, 0, null);
-        image = result;
-        return result;
+        return image;
+//        BufferedImage result = image;
+//        BufferedImage append = createImage(file);
+//        result.createGraphics().drawImage(append, fileWidth, 0, null);
+//        image = result;
+//        return result;
     }
+    
+    
 
     /**
      * Creates a buffered image that displays the structure of the PE file.
@@ -212,7 +207,8 @@ public class Visualizer {
         for (Anomaly anomaly : anomalies) {
             List<PhysicalLocation> locs = anomaly.locations();
             for (PhysicalLocation loc : locs) {
-                drawCrosses(anomalyColor, loc.from(), withMinLength(loc.size()));
+                drawCrosses(colorMap.get(ANOMALY), loc.from(),
+                        withMinLength(loc.size()));
             }
         }
     }
@@ -238,7 +234,8 @@ public class Visualizer {
             for (Location loc : reloc.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(RELOC_SECTION), start, size, additionalGap);
+                drawPixels(colorMap.get(RELOC_SECTION), start, size,
+                        additionalGap);
             }
         }
         Optional<ImportSection> idata = loader.maybeLoadImportSection();
@@ -247,16 +244,19 @@ public class Visualizer {
             for (Location loc : idata.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(IMPORT_SECTION), start, size, additionalGap);
+                drawPixels(colorMap.get(IMPORT_SECTION), start, size,
+                        additionalGap);
             }
         }
-        Optional<DelayLoadSection> delayLoad = loader.maybeLoadDelayLoadSection();
+        Optional<DelayLoadSection> delayLoad = loader
+                .maybeLoadDelayLoadSection();
         if (delayLoad.isPresent()) {
             delayLoadAvailable = true;
             for (Location loc : delayLoad.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(DELAY_IMPORT_SECTION), start, size, additionalGap);
+                drawPixels(colorMap.get(DELAY_IMPORT_SECTION), start, size,
+                        additionalGap);
             }
         }
         Optional<ExportSection> edata = loader.maybeLoadExportSection();
@@ -265,7 +265,8 @@ public class Visualizer {
             for (Location loc : edata.get().getLocations()) {
                 long start = loc.from();
                 long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(EXPORT_SECTION), start, size, additionalGap);
+                drawPixels(colorMap.get(EXPORT_SECTION), start, size,
+                        additionalGap);
             }
         }
 
@@ -282,7 +283,8 @@ public class Visualizer {
                     continue;
                 }
                 long size = withMinLength(loc.size());
-                drawPixels(colorMap.get(RESOURCE_SECTION), start, size, additionalGap);
+                drawPixels(colorMap.get(RESOURCE_SECTION), start, size,
+                        additionalGap);
             }
         }
 
@@ -320,7 +322,8 @@ public class Visualizer {
         SectionTable table = data.getSectionTable();
         long sectionTableOffset = table.getOffset();
         long sectionTableSize = table.getSize();
-        drawPixels(colorMap.get(SECTION_TABLE), sectionTableOffset, sectionTableSize);
+        drawPixels(colorMap.get(SECTION_TABLE), sectionTableOffset,
+                sectionTableSize);
         for (SectionHeader header : table.getSectionHeaders()) {
             long sectionOffset = header.getAlignedPointerToRaw();
             long sectionSize = new SectionLoader(data).getReadSize(header);
@@ -375,19 +378,23 @@ public class Visualizer {
             number++;
         }
         if (importsAvailable) {
-            drawLegendEntry(number, "Imports", colorMap.get(IMPORT_SECTION), true);
+            drawLegendEntry(number, "Imports", colorMap.get(IMPORT_SECTION),
+                    true);
             number++;
         }
         if (delayLoadAvailable) {
-            drawLegendEntry(number, "Delay-Load", colorMap.get(DELAY_IMPORT_SECTION), true);
+            drawLegendEntry(number, "Delay-Load",
+                    colorMap.get(DELAY_IMPORT_SECTION), true);
             number++;
         }
         if (exportsAvailable) {
-            drawLegendEntry(number, "Exports", colorMap.get(EXPORT_SECTION), true);
+            drawLegendEntry(number, "Exports", colorMap.get(EXPORT_SECTION),
+                    true);
             number++;
         }
         if (resourcesAvailable) {
-            drawLegendEntry(number, "Resources", colorMap.get(RESOURCE_SECTION), true);
+            drawLegendEntry(number, "Resources",
+                    colorMap.get(RESOURCE_SECTION), true);
             number++;
         }
         if (debugAvailable) {
@@ -395,11 +402,13 @@ public class Visualizer {
             number++;
         }
         if (epAvailable) {
-            drawLegendEntry(number, "Entry Point", colorMap.get(ENTRY_POINT), true);
+            drawLegendEntry(number, "Entry Point", colorMap.get(ENTRY_POINT),
+                    true);
             number++;
         }
         if (relocAvailable) {
-            drawLegendEntry(number, "Relocation Blocks", colorMap.get(RELOC_SECTION), true);
+            drawLegendEntry(number, "Relocation Blocks",
+                    colorMap.get(RELOC_SECTION), true);
             number++;
         }
         if (overlayAvailable) {
@@ -549,6 +558,12 @@ public class Visualizer {
         return result;
     }
 
+    /**
+     * For testing purposes only.
+     * 
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
@@ -556,9 +571,11 @@ public class Visualizer {
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         Visualizer vi = new VisualizerBuilder().build();
-        final BufferedImage image = vi.createEntropyImage(file);
-        ImageIO.write(image, "png", new File(file.getName() + ".png"));
-        show(image);
+        final BufferedImage entropyImage = vi.createEntropyImage(file);
+        final BufferedImage structureImage = vi.createImage(file);
+        final BufferedImage appendedImage = ImageUtil.appendImages(entropyImage, structureImage);
+//        ImageIO.write(image, "png", new File(file.getName() + ".png"));
+        show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

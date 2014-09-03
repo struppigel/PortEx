@@ -148,9 +148,9 @@ object LookupTableEntry {
       }
     } catch {
       case e: Exception =>
-        e.printStackTrace()
-        logger.warn("invalid lookup table entry at ilt rva " + iltRVA)
-        throw new FailureEntryException("invalid lookup table entry at ilt rva " + iltRVA)
+        val message = "invalid lookup table entry at ilt rva " + iltRVA + ", reason: " + e.getMessage()
+        logger.warn(message)
+        throw new FailureEntryException(message)
     }
   }
 

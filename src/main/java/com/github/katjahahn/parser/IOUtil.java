@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -142,7 +142,7 @@ public final class IOUtil {
      */
     private static <T extends Enum<T> & HeaderKey> Map<T, StandardField> initFullEnumMap(
             EnumSolver<T> enumSolver) {
-        Map<T, StandardField> map = new HashMap<>();
+        Map<T, StandardField> map = new EnumMap<>(enumSolver.clazz);
         for (T key : enumSolver.values()) {
             map.put(key, new StandardField(key, "", 0L, 0L, 0L));
         }

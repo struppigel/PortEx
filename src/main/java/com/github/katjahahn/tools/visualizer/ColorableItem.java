@@ -22,7 +22,7 @@ package com.github.katjahahn.tools.visualizer;
  * @author Katja Hahn
  *
  */
-public enum ColorableItemKey {
+public enum ColorableItem {
 
     /* Header */
     MSDOS_HEADER, COFF_FILE_HEADER, OPTIONAL_HEADER, SECTION_TABLE,
@@ -30,5 +30,5 @@ public enum ColorableItemKey {
     IMPORT_SECTION, EXPORT_SECTION, DEBUG_SECTION, RESOURCE_SECTION, RELOC_SECTION,
     DELAY_IMPORT_SECTION,
     /* Other */
-    ENTRY_POINT, OVERLAY, SECTION_START;
+    ENTRY_POINT, OVERLAY, SECTION_START, ANOMALY;
 }

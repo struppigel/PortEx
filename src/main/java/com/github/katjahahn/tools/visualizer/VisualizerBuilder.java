@@ -16,10 +16,10 @@
 
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.tools.visualizer.ColorableItemKey.*;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 import java.awt.Color;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import com.google.common.base.Preconditions;
@@ -73,47 +73,67 @@ public class VisualizerBuilder {
     private static final Color DEFAULT_RSRC_COLOR = new Color(100, 250, 100);
     private static final Color DEFAULT_DEBUG_COLOR = new Color(0, 0, 220);
     private static final Color DEFAULT_RELOC_COLOR = new Color(0, 100, 220);
-    private static final Color DEFAULT_DELAY_IMPORT_COLOR = new Color(220, 100, 0);
+    private static final Color DEFAULT_DELAY_IMPORT_COLOR = new Color(220, 100,
+            0);
     /* Other colors */
     private static final Color DEFAULT_ENTRY_POINT_COLOR = new Color(255, 80,
             80);
     private static final Color DEFAULT_SECTION_START_COLOR = new Color(220,
             220, 220);
     private static final Color DEFAULT_OVERLAY_COLOR = new Color(100, 100, 240);
+    private static final Color DEFAULT_ANOMALY_COLOR = new Color(255, 255, 255);
 
-    private Map<ColorableItemKey, Color> colorMap;
+    
+    private final VisualizerSettings settings = new VisualizerSettings();
 
-    private int additionalGap = DEFAULT_ADDITIONAL_GAP;
-    private int pixelSize = DEFAULT_PIXEL_SIZE;
-    private boolean pixelated = DEFAULT_PIXELATED;
-    private int fileWidth = DEFAULT_FILE_WIDTH;
-    private int height = DEFAULT_HEIGHT;
-    private int legendWidth = DEFAULT_LEGEND_WIDTH;
-
-    public Visualizer build() {
-        initDefaultColorMap();
-        return new Visualizer(pixelSize, pixelated, additionalGap, fileWidth,
-                legendWidth, height, colorMap);
+    /**
+     * Data object to pass settings for the visualizer in one parameter.
+     * 
+     * @author Katja Hahn
+     *
+     */
+    static class VisualizerSettings {
+        public int additionalGap = DEFAULT_ADDITIONAL_GAP;
+        public int pixelSize = DEFAULT_PIXEL_SIZE;
+        public boolean pixelated = DEFAULT_PIXELATED;
+        public int fileWidth = DEFAULT_FILE_WIDTH;
+        public int height = DEFAULT_HEIGHT;
+        public int legendWidth = DEFAULT_LEGEND_WIDTH; 
+        public Map<ColorableItem, Color> colorMap;
+        
+        public VisualizerSettings() {
+            initDefaultColorMap();
+        }
+        
+        private void initDefaultColorMap() {
+            colorMap = new EnumMap<>(ColorableItem.class);
+            /* Header */
+            colorMap.put(MSDOS_HEADER, DEFAULT_MSDOS_COLOR);
+            colorMap.put(COFF_FILE_HEADER, DEFAULT_COFF_HEADER_COLOR);
+            colorMap.put(OPTIONAL_HEADER, DEFAULT_OPTIONAL_HEADER_COLOR);
+            colorMap.put(SECTION_TABLE, DEFAULT_SECTION_TABLE_COLOR);
+            /* Special Sections */
+            colorMap.put(IMPORT_SECTION, DEFAULT_IMPORT_COLOR);
+            colorMap.put(EXPORT_SECTION, DEFAULT_EXPORT_COLOR);
+            colorMap.put(RESOURCE_SECTION, DEFAULT_RSRC_COLOR);
+            colorMap.put(RELOC_SECTION, DEFAULT_RELOC_COLOR);
+            colorMap.put(DELAY_IMPORT_SECTION, DEFAULT_DELAY_IMPORT_COLOR);
+            /* Other */
+            colorMap.put(DEBUG_SECTION, DEFAULT_DEBUG_COLOR);
+            colorMap.put(OVERLAY, DEFAULT_OVERLAY_COLOR);
+            colorMap.put(ENTRY_POINT, DEFAULT_ENTRY_POINT_COLOR);
+            colorMap.put(SECTION_START, DEFAULT_SECTION_START_COLOR);
+            colorMap.put(ANOMALY, DEFAULT_ANOMALY_COLOR);
+        }
     }
 
-    private void initDefaultColorMap() {
-        colorMap = new HashMap<>();
-        /* Header */
-        colorMap.put(MSDOS_HEADER, DEFAULT_MSDOS_COLOR);
-        colorMap.put(COFF_FILE_HEADER, DEFAULT_COFF_HEADER_COLOR);
-        colorMap.put(OPTIONAL_HEADER, DEFAULT_OPTIONAL_HEADER_COLOR);
-        colorMap.put(SECTION_TABLE, DEFAULT_SECTION_TABLE_COLOR);
-        /* Special Sections */
-        colorMap.put(IMPORT_SECTION, DEFAULT_IMPORT_COLOR);
-        colorMap.put(EXPORT_SECTION, DEFAULT_EXPORT_COLOR);
-        colorMap.put(RESOURCE_SECTION, DEFAULT_RSRC_COLOR);
-        colorMap.put(RELOC_SECTION, DEFAULT_RELOC_COLOR);
-        colorMap.put(DELAY_IMPORT_SECTION, DEFAULT_DELAY_IMPORT_COLOR);
-        /* Other */
-        colorMap.put(DEBUG_SECTION, DEFAULT_DEBUG_COLOR);
-        colorMap.put(OVERLAY, DEFAULT_OVERLAY_COLOR);
-        colorMap.put(ENTRY_POINT, DEFAULT_ENTRY_POINT_COLOR);
-        colorMap.put(SECTION_START, DEFAULT_SECTION_START_COLOR);
+    /**
+     * Build the visualizer with all settings made.
+     * 
+     * @return the visualizer
+     */
+    public Visualizer build() {
+        return new Visualizer(settings);
     }
 
     /**
@@ -125,8 +145,8 @@ public class VisualizerBuilder {
      *            the color of the item
      * @return this VisualizerBuilder
      */
-    public VisualizerBuilder setColor(ColorableItemKey key, Color color) {
-        colorMap.put(key, color);
+    public VisualizerBuilder setColor(ColorableItem key, Color color) {
+        settings.colorMap.put(key, color);
         return this;
     }
 
@@ -140,7 +160,7 @@ public class VisualizerBuilder {
      */
     public VisualizerBuilder setLegendWidth(int legendWidth) {
         Preconditions.checkArgument(legendWidth >= 0);
-        this.legendWidth = legendWidth;
+        settings.legendWidth = legendWidth;
         return this;
     }
 
@@ -153,7 +173,7 @@ public class VisualizerBuilder {
      */
     public VisualizerBuilder setHeight(int height) {
         Preconditions.checkArgument(height > 0);
-        this.height = height;
+        settings.height = height;
         return this;
     }
 
@@ -165,7 +185,7 @@ public class VisualizerBuilder {
      */
     public VisualizerBuilder setFileWidth(int fileWidth) {
         Preconditions.checkArgument(fileWidth > 0);
-        this.fileWidth = fileWidth;
+        settings.fileWidth = fileWidth;
         return this;
     }
 
@@ -177,7 +197,7 @@ public class VisualizerBuilder {
      * @return this VisualizerBuilder
      */
     public VisualizerBuilder setPixelated(boolean pixelated) {
-        this.pixelated = pixelated;
+        settings.pixelated = pixelated;
         return this;
     }
 
@@ -189,7 +209,7 @@ public class VisualizerBuilder {
      */
     public VisualizerBuilder setPixelSize(int pixelSize) {
         Preconditions.checkArgument(pixelSize > 0);
-        this.pixelSize = pixelSize;
+        settings.pixelSize = pixelSize;
         return this;
     }
 
@@ -202,7 +222,7 @@ public class VisualizerBuilder {
      */
     public VisualizerBuilder setAdditionalGap(int additionalGap) {
         Preconditions.checkArgument(additionalGap >= 0);
-        this.additionalGap = additionalGap;
+        settings.additionalGap = additionalGap;
         return this;
     }
 
@@ -212,7 +232,7 @@ public class VisualizerBuilder {
      * 
      * @param bytes
      *            bytes to be set per pixel
-     * @param filelength
+     * @param fileLength
      *            the length of the file
      * @return this VisualizerBuilder
      */
@@ -220,9 +240,9 @@ public class VisualizerBuilder {
     public VisualizerBuilder setBytesPerPixel(int bytes, long fileLength) {
         Preconditions.checkArgument(bytes > 0);
         double nrOfPixels = Math.ceil(fileLength / (double) bytes);
-        double pixelsPerRow = Math.ceil(fileWidth / pixelSize);
+        double pixelsPerRow = Math.ceil(settings.fileWidth / settings.pixelSize);
         double pixelsPerCol = Math.ceil(nrOfPixels / pixelsPerRow);
-        height = (int) Math.ceil(pixelsPerCol * pixelSize);
+        settings.height = (int) Math.ceil(pixelsPerCol * settings.pixelSize);
         return this;
     }
 }
