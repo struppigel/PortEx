@@ -18,17 +18,38 @@
 package com.github.katjahahn.parser
 
 /**
- * Utilities for Scala specific IO.
+ * Utilities for Scala specific IO and small conversions related to IO.
+ * <p>
+ * This class is not meant to be used by library users.
+ *
+ * @author Katja Hahn
  */
 object ScalaIOUtil {
 
+  /**
+   * Equivalent to try-with-resources statement in Java. Closes the resource
+   * automatically in finally.
+   *
+   * @param closeable the closeable resource, must have a close() method
+   * @param f the procedure to be executed within the try statement
+   * @return the result of f
+   */
   def using[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A =
     try { f(closeable) } finally { closeable.close() }
 
+  /**
+   * Converts a long value to a hex string with a prepending '0x'
+   *
+   * @param value the value to convert
+   * @return hex string
+   */
   def hex(value: Long): String = "0x" + java.lang.Long.toHexString(value)
 
   /**
    * Fills an array with 0 bytes of the size
+   *
+   * @param the size of the array
+   * @return byte array, zero filled
    */
   def zeroBytes(size: Int): Array[Byte] =
     if (size >= 0) {

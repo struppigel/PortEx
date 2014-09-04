@@ -23,7 +23,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.RandomAccessFile;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +49,6 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.SpecialSection;
 import com.github.katjahahn.tools.Overlay;
-import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.ShannonEntropy;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
@@ -135,7 +134,6 @@ public class Visualizer {
         this.colorMap = settings.colorMap;
     }
 
-    // TODO optimize
     /**
      * Creates an image of the local entropies of this file.
      * 
@@ -148,13 +146,28 @@ public class Visualizer {
     public BufferedImage createEntropyImage(File file) throws IOException {
         this.data = PELoader.loadPE(file);
         image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
-        byte[] bytes = Files.readAllBytes(data.getFile().toPath());
-        double[] entropies = ShannonEntropy.localEntropies(bytes);
-        for (int i = 0; i < entropies.length; i += withMinLength(0)) {
-            int col = (int) (entropies[i] * 255);
-            Color color = new Color(col, col, col);
-            long minLength = withMinLength(0);
-            drawPixels(color, i, minLength);
+        final int MIN_WINDOW_SIZE = 100;
+        // bytes to be read at once to calculate local entropy
+        final int windowSize = Math.max(MIN_WINDOW_SIZE, pixelSize);
+        final int windowHalfSize = (int) Math.round(windowSize/(double)2);
+        final long minLength = withMinLength(0);
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+            // read until EOF with windowSized steps
+            for(long address = 0; address <= file.length(); address += minLength) {
+                // the start of the window (windowHalf to the left)
+                long start = (address - windowHalfSize < 0) ? 0 : address - windowHalfSize;
+                raf.seek(start);
+                // cut byte number if EOF reached, otherwise read full window
+                int bytesToRead = (int) Math.min(file.length() - start,
+                        windowSize);
+                byte[] bytes = new byte[bytesToRead];
+                raf.readFully(bytes);
+                /* calculate and draw entropy square pixel for this window */
+                double entropy = ShannonEntropy.entropy(bytes);
+                int col = (int) (entropy * 255);
+                Color color = new Color(col, col, col);
+                drawPixels(color, address, minLength);
+            }
         }
         return image;
     }
@@ -236,7 +249,7 @@ public class Visualizer {
         assert length > 0;
         return length;
     }
-    
+
     private String getSpecialsDescription(DataDirectoryKey key) {
         ColorableItem colorableItem = specialsColorable.get(key);
         return colorableItem.getLegendDescription();
@@ -521,9 +534,9 @@ public class Visualizer {
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/delay_imports.exe");
+                "/home/deque/portextestfiles/badfiles/VirusShare_b4e1ae2b910a5553bdd7463b22439d49");
         PEData data = PELoader.loadPE(file);
-        new ReportCreator(data).printReport();
+        // new ReportCreator(data).printReport();
         Visualizer vi = new VisualizerBuilder().build();
         final BufferedImage entropyImage = vi.createEntropyImage(file);
         final BufferedImage structureImage = vi.createImage(file);

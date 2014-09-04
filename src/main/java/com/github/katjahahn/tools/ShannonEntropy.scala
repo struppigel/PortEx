@@ -76,24 +76,13 @@ class ShannonEntropy(private val data: PEData) {
   }
 }
 
+/**
+ * Responsible to calculate non-file-specific entropies, i.e. for byte arrays.
+ */
 object ShannonEntropy {
 
   private val chunkSize = 1024
   private val byteSize = 256
-
-  def main(args: Array[String]): Unit = {
-    //    val folder = new File("src/main/resources/testfiles")
-    //    for (file <- folder.listFiles) {
-    //      println("file: " + file.getName)
-    //      val data = PELoader.loadPE(file)
-    //      val ent = new ShannonEntropy(data)
-    //      ent._forSections.foreach(println)
-    //      println(data.getSectionTable().getInfo)
-    //      println()
-    //    }
-    val str = "bla"
-    println(List("", "bla").contains(str))
-  }
 
   /**
    * Calculates Shannon's Entropy for the byte array
@@ -117,13 +106,25 @@ object ShannonEntropy {
     entropy(byteCounts, total)
   }
 
+  /**
+   * Calculates the local entropies for every byte of the given array.
+   * 
+   * @param byteArray the byte array to calculate local entropies from
+   * @return the array containing one entropy per byte
+   */
   def localEntropies(byteArray: Array[Byte]): Array[Double] = {
-    val window = 50
+    // define the size of one half of the window used to calculate a local entropy
+    val windowHalfSize = 50
+    // yield local entropies for each window
     (for (i <- 0 until byteArray.length) yield {
-      val start = if (i - window < 0) 0 else i - window
-      val end = if (i + window > byteArray.length - 1) byteArray.length - 1 else i + window
-      val subArray = byteArray.slice(start, end)
-      val (byteCounts, total) = countBytes(subArray)
+      // the start of the window (windowHalf to the left)
+      val start = if (i - windowHalfSize < 0) 0 else i - windowHalfSize
+      // the end of the window (windowHalf to the right)
+      val end = if (i + windowHalfSize > byteArray.length - 1) byteArray.length - 1 else i + windowHalfSize
+      // get the window's bytes
+      val window = byteArray.slice(start, end)
+      // calculate entropy and yield
+      val (byteCounts, total) = countBytes(window)
       entropy(byteCounts, total)
     }).toArray
   }
