@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.tools
 
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -100,9 +101,6 @@ object StringReader {
     }
     byte
   }
-
-  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
-    try { f(param) } finally { param.close() }
 
  /**
    * Reads all 2-byte (Unicode) based character-strings

@@ -51,6 +51,7 @@ public class SpecificationTest {
 		characteristicspecs.put(SectionCharacteristic.values(),
 				"sectioncharacteristics");
 		characteristicspecs.put(Subsystem.values(), "subsystem");
+//		characteristicspecs.put(DebugType.values(), "debugtypes"); TODO match key string to enum
 
 		headerspecs.put(COFFHeaderKey.values(), "coffheaderspec");
 		headerspecs.put(DataDirectoryKey.values(), "datadirectoriesspec");

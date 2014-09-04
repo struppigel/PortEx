@@ -20,6 +20,7 @@ import java.io.FileInputStream
 
 import scala.collection.JavaConverters.mapAsJavaMapConverter
 
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader
 
@@ -163,8 +164,5 @@ object ShannonEntropy {
       (byteCounts, total)
     }
   }
-
-  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
-    try { f(param) } finally { param.close() }
 
 }

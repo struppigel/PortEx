@@ -15,25 +15,31 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
+import static org.testng.Assert.*;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.parser.IOUtil;
-
 public class IOUtilTest {
 
-	@Test //TODO
-	public void readArray() throws IOException {
-		@SuppressWarnings("unused")
-		List<String[]> spec = IOUtil.readArray("msdosheaderspec");
-	}
+    @Test
+    public void readArray() throws IOException {
+        List<String[]> spec = IOUtil.readArray("msdosheaderspec");
+        assertEquals(spec.size(), 31);
+        for (String[] array : spec) {
+            assertEquals(array.length, 4);
+        }
+    }
 
-	@Test //TODO
-	public void readMap() throws IOException {
-		@SuppressWarnings("unused")
-		Map<String, String[]> map = IOUtil.readMap("msdosheaderspec");
-	}
+    @Test
+    public void readMap() throws IOException {
+        Map<String, String[]> spec = IOUtil.readMap("msdosheaderspec");
+        assertEquals(spec.size(), 31);
+        for (String[] array : spec.values()) {
+            assertEquals(array.length, 3);
+        }
+    }
 }

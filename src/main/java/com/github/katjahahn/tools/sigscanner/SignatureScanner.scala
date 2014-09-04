@@ -17,6 +17,7 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.charset.CodingErrorAction
@@ -170,9 +171,6 @@ class SignatureScanner(signatures: List[Signature]) {
       }
     }
   }
-
-  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
-    try { f(param) } finally { param.close() }
 
   /**
    * Calculates the entry point with the given PE data

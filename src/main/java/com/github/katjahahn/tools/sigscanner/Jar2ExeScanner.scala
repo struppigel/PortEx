@@ -32,6 +32,7 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import java.io.EOFException
 import java.io.File
 import java.io.FileNotFoundException
@@ -198,9 +199,6 @@ class Jar2ExeScanner(file: File) {
       }
     }
   }
-
-  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
-    try { f(param) } finally { param.close() }
 
 }
 

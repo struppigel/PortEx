@@ -19,6 +19,7 @@ package com.github.katjahahn.parser
 
 import java.io.RandomAccessFile
 import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import Mapping._
 
 /**
@@ -29,26 +30,37 @@ import Mapping._
  *
  * @author Katja Hahn
  *
+ * TODO overlapping ranges! (?)
+ *
  * @param va the virtual address range
  * @param physA the physical address range
  * @param the PEData object the mapping belongs to
  */
-class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData) {
-  require(va.end - va.start == physA.end - physA.start)
+class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val data: PEData) {
+  require(virtRange.end - virtRange.start == physRange.end - physRange.start)
 
   /**
    * The chunks of bytes that make up the Mapping
    */
   private val chunks = {
-    val nrOfChunks = Math.ceil((physA.end - physA.start) / defaultChunkSize.toDouble).toInt
-    var start = physA.start
+    // number of chunks needed for the mapped physical space
+    val nrOfChunks = Math.ceil((physRange.end - physRange.start) / defaultChunkSize.toDouble).toInt
+    // set start as the physical start of the mapped space
+    var start = physRange.start
     for (i <- 1 to nrOfChunks) yield {
       var size = {
-        if ((i * defaultChunkSize + physA.start) > physA.end) {
-          (physA.end - start).toInt
+        // set to default chunk size unless current chunk exceeds the physical 
+        // end of mapped space
+        if ((i * defaultChunkSize + physRange.start) > physRange.end) {
+          // only happens to last chunk
+          assert(i == nrOfChunks)
+          // cut excess
+          (physRange.end - start).toInt
         } else defaultChunkSize
       }
+      // create chunk
       val chunk = new Chunk(start, size, data)
+      // move the starting point for the next chunk for one chunk-size
       start += size
       chunk
     }
@@ -62,25 +74,96 @@ class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData)
    * @return byte at virtOffset
    */
   def apply(virtOffset: Long): Byte = {
-    require(va.contains(virtOffset))
-    val pStart = physA.start
-    val relOffset = virtOffset - va.start
+    require(virtRange.contains(virtOffset))
+    val pStart = physRange.start
+    // relative offset from the start of the virtual range
+    val relOffset = virtOffset - virtRange.start
+    // absolute file offset to start reading from
     val readLocation = pStart + relOffset
-    //read using the chunks
+    /* read using the chunks */
     if (useChunks) {
-      val chunkIndex = (relOffset / defaultChunkSize).toInt
-      val chunk = chunks(chunkIndex)
-      assert(chunk.physStart <= readLocation && chunk.physStart + chunk.size > readLocation)
-      val byteIndex = (readLocation - chunk.physStart).toInt
-      chunk.bytes(byteIndex)
-    //read directly from file
-    } else { //TODO test chunk use and remove the body with worse performance
-      val file = data.getFile
-      using(new RandomAccessFile(file, "r")) { raf =>
-        raf.seek(readLocation)
-        raf.readByte()
-      }
+      readByteFromChunk(readLocation, relOffset)
+    } else {
+      /* read directly from file */
+      readByteFromFile(readLocation)
     }
+  }
+
+  /**
+   * Reads one byte from the fileOffset.
+   *
+   * @param fileOffset the physical address to read the byte from
+   * @return byte
+   */
+  private def readByteFromFile(fileOffset: Long): Byte = {
+    val file = data.getFile
+    using(new RandomAccessFile(file, "r")) { raf =>
+      raf.seek(fileOffset)
+      raf.readByte()
+    }
+  }
+
+  /**
+   * Reads size bytes from the file.
+   *
+   * @param virtOffset the virtual address to read from
+   * @param size number of bytes to read
+   * @return array containing size bytes read from virtOffset
+   */
+  private def readBytesFromFile(virtOffset: Long, size: Int): Array[Byte] = {
+    // relative offset from the virtual start of the current mapping
+    val relOffset = virtOffset - virtRange.start
+    // calculate file offset to start reading from
+    val readLocation = physRange.start + relOffset
+    val file = data.getFile
+    using(new RandomAccessFile(file, "r")) { raf =>
+      raf.seek(readLocation)
+      // cut down read bytes if offset and size exceed the file length
+      val length = (Math.min(readLocation + size, file.length) - readLocation).toInt
+      // fill array with 0
+      val bytes = zeroBytes(length)
+      // read bytes
+      raf.readFully(bytes)
+      // append 0 bytes to array that where cut while calculating length
+      val result = bytes ++ zeroBytes(size - length)
+      assert(result.length == size)
+      result
+    }
+  }
+
+  /**
+   * Reads one byte from a chunk.
+   *
+   * @param fileOffset the physical address to read the byte from
+   * @param relOffset the relative offset from the beginning of the present mapping
+   * @return read byte
+   */
+  private def readByteFromChunk(fileOffset: Long, relOffset: Long): Byte = {
+    // calculate which chunk needs to be read and get it
+    val chunkIndex = (relOffset / defaultChunkSize).toInt
+    val chunk = chunks(chunkIndex)
+    // assert that it was the right chunk
+    assert(chunk.physStart <= fileOffset && chunk.physStart + chunk.size > fileOffset)
+    // calculate the index of the byte within the chunk
+    val byteIndex = (fileOffset - chunk.physStart).toInt
+    // return byte
+    chunk.bytes(byteIndex)
+  }
+
+  /**
+   * Reads size bytes from the file.
+   *
+   * @param virtOffset the virtual address to read from
+   * @param size number of bytes to read
+   * @return array containing size bytes read from virtOffset
+   */
+  private def readBytesFromChunk(virtOffset: Long, size: Int): Array[Byte] = {
+    val bytes = zeroBytes(size)
+    // get every single byte via apply, TODO could be done more efficiently
+    for (i <- 0 until size) {
+      bytes(i) = apply(virtOffset + i)
+    }
+    bytes
   }
 
   /**
@@ -92,27 +175,13 @@ class Mapping(val va: VirtRange, val physA: PhysRange, private val data: PEData)
    * @return array containing the bytes starting from virtOffset
    */
   def apply(virtOffset: Long, size: Int): Array[Byte] = {
-    require(va.contains(virtOffset) && va.contains(virtOffset + size))
-    //read using the chunks
+    require(virtRange.contains(virtOffset) && virtRange.contains(virtOffset + size))
+    /* read using the chunks */
     if (useChunks) {
-      val bytes = zeroBytes(size)
-      for (i <- 0 until size) {
-        bytes(i) = apply(virtOffset + i)
-      }
-      bytes
-    //read directly from file
-    } else { //TODO test chunk use and remove body with worse performance
-      val pStart = physA.start
-      val relOffset = virtOffset - va.start
-      val readLocation = pStart + relOffset
-      val file = data.getFile
-      using(new RandomAccessFile(file, "r")) { raf =>
-        raf.seek(readLocation)
-        val length = (Math.min(readLocation + size, file.length) - readLocation).toInt
-        val bytes = zeroBytes(length)
-        raf.readFully(bytes)
-        bytes ++ zeroBytes(size - length)
-      }
+      readBytesFromChunk(virtOffset, size)
+    } else {
+      /* read directly from file */
+      readBytesFromFile(virtOffset, size)
     }
   }
 
@@ -129,7 +198,7 @@ object Mapping {
   /**
    * The default size of a chunk.
    * This turned out to be a good value after some performance tests.
-   * 
+   *
    * TODO make this a val after performance tests are done
    */
   var defaultChunkSize = 8192
@@ -142,13 +211,10 @@ object Mapping {
       Array.fill(size)(0.toByte)
     } else Array()
 
-  private def using[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A =
-    try { f(closeable) } finally { closeable.close() }
-
   /**
-   * A chunk of bytes with the given size. Loads the bytes lazily.
-   * Improves performance for repeated access to bytes in the same area compared
-   * to reading the file for every tiny slice of bytes.
+   * A chunk of bytes with the given size. Loads the bytes lazily, but all bytes 
+   * at once. Improves performance for repeated access to bytes in the same area 
+   * compared to reading the file for every tiny slice of bytes.
    */
   private class Chunk(val physStart: Long, val size: Int, private val data: PEData) {
     lazy val bytes = {
@@ -163,13 +229,22 @@ object Mapping {
 }
 
 /**
- * Simply a range.
+ * Simply a range with start and end.
+ * 
+ * @param start the start address
+ * @param end the end address
  */
 abstract class Range(val start: Long, val end: Long) {
+  
+  /**
+   * Unpacking method to get a tuple
+   * @return tuple consisting of start and end
+   */
   def unpack(): (Long, Long) = (start, end)
 
   /**
-   * Returns whether the value is within the range.
+   * Returns whether the value is within the range, including the values of 
+   * start and end.
    *
    * @param value the value to check
    * @return true iff value is within range (start and end inclusive)
@@ -179,11 +254,17 @@ abstract class Range(val start: Long, val end: Long) {
 }
 
 /**
- * Represents a range of virtual addresses
+ * Represents a range of in-memory addresses
+ * 
+ * @param start the start address
+ * @param end the end address
  */
 class VirtRange(start: Long, end: Long) extends Range(start, end)
 
 /**
  * Represents a range of physical addresses
+ *
+ * @param start the start address
+ * @param end the end address
  */
 class PhysRange(start: Long, end: Long) extends Range(start, end)

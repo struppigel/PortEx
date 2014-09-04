@@ -16,7 +16,7 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.tools
-
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.PEData
 import java.io.File
@@ -447,9 +447,6 @@ object ReportCreator {
       }
     }
   }
-
-  private def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
-    try { f(param) } finally { param.close() }
 
   private def writeReport(reporter: ReportCreator, file: File): Unit = {
     if(file.getName().isEmpty()) {

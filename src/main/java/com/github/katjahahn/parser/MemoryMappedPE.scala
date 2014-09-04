@@ -52,9 +52,9 @@ class MemoryMappedPE(
    * a mapping. Otherwise -1 is returned.
    */
   def getPhysforVir(va: Long): Long = {
-    val optMapping = mappings.find(m => m.va.contains(va))
+    val optMapping = mappings.find(m => m.virtRange.contains(va))
     optMapping match {
-      case Some(m) => m.physA.start + (va - m.va.start)
+      case Some(m) => m.physRange.start + (va - m.virtRange.start)
       case None => -1
     }
   }
@@ -69,7 +69,7 @@ class MemoryMappedPE(
    * @return byte at position i
    */
   def apply(i: Long): Byte = {
-    val mapping = mappings.find(m => m.va.contains(i))
+    val mapping = mappings.find(m => m.virtRange.contains(i))
     mapping match {
       case Some(m) => m(i)
       case None => 0.toByte
@@ -91,7 +91,7 @@ class MemoryMappedPE(
    *
    * @return size of memory mapped information
    */
-  def length(): Long = if (mappings.isEmpty) 0L else mappings.last.va.end
+  def length(): Long = if (mappings.isEmpty) 0L else mappings.last.virtRange.end
 
   /**
    * Returns a byte array of the specified segment.
@@ -108,8 +108,8 @@ class MemoryMappedPE(
     val sliceMappings = mappingsInRange(new VirtRange(from, until))
     val bytes = Array.fill((until - from).toInt)(0.toByte)
     sliceMappings.foreach { m =>
-      val start = Math.max(m.va.start, from)
-      val end = Math.min(m.va.end, until)
+      val start = Math.max(m.virtRange.start, from)
+      val end = Math.min(m.virtRange.end, until)
       val mappedBytes = m(start, (end - start).toInt)
       for (i <- 0 until mappedBytes.length) {
         val index = (start - from).toInt + i
@@ -124,7 +124,7 @@ class MemoryMappedPE(
    */
   private def mappingsInRange(range: VirtRange): List[Mapping] = {
     val (from, until) = range.unpack
-    mappings.filter(m => m.va.end > from && m.va.start < until)
+    mappings.filter(m => m.virtRange.end > from && m.virtRange.start < until)
   }
 
   /**
