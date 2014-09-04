@@ -98,6 +98,7 @@ class Jar2ExeScanner(file: File) {
       }
     } catch {
       case e: IllegalArgumentException => return Nil
+      case e: Exception => //System.err.println(e.getMessage());
     } finally {
       zis.close();
     }

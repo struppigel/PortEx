@@ -50,6 +50,7 @@ import com.github.katjahahn.parser.PhysicalLocation
 class DebugSection private (
   private val directoryTable: DebugDirectory,
   private val typeDescription: String,
+  private val debugType: DebugType,
   val offset: Long) extends SpecialSection {
 
   override def getOffset(): Long = offset
@@ -100,6 +101,8 @@ class DebugSection private (
    * @return type description string
    */
   def getTypeDescription(): String = typeDescription
+  
+  def getDebugType(): DebugType = debugType
 
 }
 
@@ -145,12 +148,16 @@ object DebugSection {
     val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes, offset).asScala.toMap
-    val types = getCharacteristicsDescriptions(entries(DebugDirectoryKey.TYPE).value, "debugtypes").asScala.toList
-    if (types.size == 0) {
+    val debugTypeValue = entries(DebugDirectoryKey.TYPE).value
+    val typeDescriptions = getCharacteristicsDescriptions(debugTypeValue, "debugtypes").asScala.toList
+    val debugTypes = getCharacteristicKeys(debugTypeValue, "debugtypes").asScala.toList
+    if (typeDescriptions.size == 0) {
       logger.warn("no debug type description found!")
       val description = s"${entries(DebugDirectoryKey.TYPE).value} no description available"
-      new DebugSection(entries, description, offset)
-    } else
-      new DebugSection(entries, types(0), offset)
+      new DebugSection(entries, description, DebugType.UNKNOWN, offset)
+    } else {
+      val debugType = DebugType.valueOf(debugTypes(0).replace("IMAGE_DEBUG_TYPE_", ""))
+      new DebugSection(entries, typeDescriptions(0), debugType, offset)
+    }
   }
 }

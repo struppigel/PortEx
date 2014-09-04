@@ -140,7 +140,6 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     private void read() throws IOException {
         Map<String, String[]> standardSpec = IOUtil.readMap(STANDARD_SPEC);
-        Map<String, String[]> windowsSpec = IOUtil.readMap(WINDOWS_SPEC);
         List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);
 
         this.magicNumber = readMagicNumber(standardSpec);
@@ -154,8 +153,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             maxSize = 240;
         }
 
-        loadStandardFields(standardSpec);
-        loadWindowsSpecificFields(windowsSpec);
+        loadStandardFields();
+        loadWindowsSpecificFields();
         loadDataDirectories(datadirSpec);
     }
 
@@ -240,7 +239,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return windowsFields.get(key);
     }
 
-    private void loadStandardFields(Map<String, String[]> standardSpec)
+    private void loadStandardFields()
             throws IOException {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         standardFields = IOUtil.readHeaderEntries(StandardFieldEntryKey.class,
@@ -284,7 +283,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    private void loadWindowsSpecificFields(Map<String, String[]> windowsSpec)
+    private void loadWindowsSpecificFields()
             throws IOException {
         int offsetLoc;
         int lengthLoc;

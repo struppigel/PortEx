@@ -29,7 +29,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.idata.DelayLoadSection;
+import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.google.common.base.Optional;
 
 /**
@@ -205,8 +205,7 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException {
         logger.entry();
-        File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/delay_imports.exe");
+        // File folder = new File("/home/deque/portextestfiles/");
         // File file = new File(
         // "/home/deque/portextestfiles/testfiles/DLL2.dll");
         // File file = new File(
@@ -215,20 +214,30 @@ public final class PELoader {
         // "/home/deque/portextestfiles/badfiles/VirusShare_7dfe20f5164d80e37b7ba7184d4c73b4");
         // File file = new
         // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-        PEData data = PELoader.loadPE(file);
-        // new ReportCreator(data).printReport();
-        // for (File file : new File("/home/deque/portextestfiles/testfiles")
-        // .listFiles()) {
-        // PEData data = PELoader.loadPE(file);
-        SectionLoader loader = new SectionLoader(data);
-        try {
-            Optional<DelayLoadSection> maybeDelayLoad = loader.maybeLoadDelayLoadSection();
-            if (maybeDelayLoad.isPresent()) {
-                System.out.println(maybeDelayLoad.get().getInfo());
+        // for (File file : folder.listFiles()) {
+        // try {
+        // PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
+        // System.out.println("File: " + file.getName());
+        // System.out.println(scanner.getAnomalies().size());
+        // System.out.println();
+        // } catch (Exception e) {
+        // System.err.println(e.getMessage());
+        // }
+        // }
+        for (File file : new File("/home/deque/portextestfiles/testfiles")
+                .listFiles()) {
+            PEData data = PELoader.loadPE(file);
+            SectionLoader loader = new SectionLoader(data);
+            try {
+                Optional<DebugSection> maybeDebug = loader
+                        .maybeLoadDebugSection();
+                if (maybeDebug.isPresent()) {
+                    System.out.println(file.getName());
+                    System.out.println(maybeDebug.get().getInfo());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 }

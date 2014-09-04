@@ -100,8 +100,7 @@ public class ByteArrayUtil {
     public static long getBytesLongValue(byte[] bytes, int offset, int length) {
         assert length <= 8 && length > 0;
         assert bytes != null && bytes.length >= length + offset;
-        byte[] value = new byte[length];
-        value = Arrays.copyOfRange(bytes, offset, offset + length);
+        byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
         return bytesToLong(value);
     }
 
@@ -135,7 +134,6 @@ public class ByteArrayUtil {
         }
         for (int i = 0; offset + i < bytes.length && i < length; i++) {
             value[i] = bytes[offset + i];
-
         }
         return bytesToLong(value);
     }
