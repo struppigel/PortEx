@@ -21,8 +21,18 @@ package com.github.katjahahn.parser
  * Utilities for Scala specific IO.
  */
 object ScalaIOUtil {
-  
+
   def using[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A =
     try { f(closeable) } finally { closeable.close() }
+
+  def hex(value: Long): String = "0x" + java.lang.Long.toHexString(value)
+
+  /**
+   * Fills an array with 0 bytes of the size
+   */
+  def zeroBytes(size: Int): Array[Byte] =
+    if (size >= 0) {
+      Array.fill(size)(0.toByte)
+    } else Array()
 
 }

@@ -60,7 +60,7 @@ object RelocationSection {
     val blocks = ListBuffer[BaseRelocBlock]()
     var offset = 0
     while (offset < tableSize) {
-      val fileOffset = mmBytes.getPhysforVir(va + offset)
+      val fileOffset = mmBytes.virtToPhysAddress(va + offset)
       val length = 4
       val fieldSize = 2
       val pageRVA = mmBytes.getBytesLongValue(va + offset, length)

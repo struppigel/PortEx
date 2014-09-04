@@ -19,7 +19,7 @@ package com.github.katjahahn.parser
 
 import java.io.RandomAccessFile
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.ScalaIOUtil.using
+import com.github.katjahahn.parser.ScalaIOUtil._
 import Mapping._
 
 /**
@@ -29,8 +29,6 @@ import Mapping._
  * The bytes are read from file only on request, making it possible to map large files.
  *
  * @author Katja Hahn
- *
- * TODO overlapping ranges! (?)
  *
  * @param va the virtual address range
  * @param physA the physical address range
@@ -202,14 +200,6 @@ object Mapping {
    * TODO make this a val after performance tests are done
    */
   var defaultChunkSize = 8192
-
-  /**
-   * Fills an array with 0 bytes of the size
-   */
-  private def zeroBytes(size: Int): Array[Byte] =
-    if (size >= 0) {
-      Array.fill(size)(0.toByte)
-    } else Array()
 
   /**
    * A chunk of bytes with the given size. Loads the bytes lazily, but all bytes 

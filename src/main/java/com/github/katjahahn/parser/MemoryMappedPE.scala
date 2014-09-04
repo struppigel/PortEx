@@ -24,8 +24,10 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.optheader.OptionalHeader
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.SectionTable
-import MemoryMappedPE._
+import com.github.katjahahn.parser.MemoryMappedPE._
+import com.github.katjahahn.parser.ScalaIOUtil._
 import java.io.File
+import org.apache.logging.log4j.LogManager
 
 /**
  * Represents the PE file content as it is mapped to memory.
@@ -35,7 +37,7 @@ import java.io.File
  *
  * @author Katja Hahn
  *
- * @param mappings A list of section mappings
+ * @param mappings A list of section mappings, in ascending order of virtual addresses
  * @param data the PEData instance of the file
  */
 class MemoryMappedPE(
@@ -50,28 +52,63 @@ class MemoryMappedPE(
   /**
    * Returns the physical offset for the given virtual address, if it is within
    * a mapping. Otherwise -1 is returned.
+   * <p>
+   * Spits out a warning if several matching physical addresses are found and 
+   * returns the last one.
+   * @param va the virtual address
+   * @return file offset for the VA, -1 if it does not exist
    */
-  def getPhysforVir(va: Long): Long = {
-    val optMapping = mappings.find(m => m.virtRange.contains(va))
-    optMapping match {
-      case Some(m) => m.physRange.start + (va - m.virtRange.start)
-      case None => -1
+  def virtToPhysAddress(va: Long): Long = {
+    val addresses = _virtToPhysAddresses(va)
+    // VA doesn't exist, return -1
+    if (addresses.size == 0) -1
+    else {
+      if (addresses.size > 1) {
+        logger.warn(s"Caution: Several mappings for the VA (${hex(va)}) found, that means the VA is overwritten.")
+      }
+      addresses.last
     }
+  }
+
+  /**
+   * Returns all physical addresses that are mapped to the VA.
+   *
+   * @param va the virtual address
+   * @return list of file offsets
+   */
+  def virtToPhysAddresses(va: Long): java.util.List[Long] = _virtToPhysAddresses(va).asJava
+
+  /**
+   * Returns all physical addresses that are mapped to the VA.
+   * <p>
+   * Scala method. Use virtToPhysAddress(Long) for Java.
+   * 
+   * @param va the virtual address
+   * @return list of file offsets
+   */
+  def _virtToPhysAddresses(va: Long): List[Long] = {
+    // find mapping that contains VA
+    val matchedMappings = mappings.filter(m => m.virtRange.contains(va))
+    // return physical addresses
+    matchedMappings.map(m => m.physRange.start + (va - m.virtRange.start))
   }
 
   /**Array-like methods**/
 
   /**
-   * Returns byte at position i.
+   * Returns byte at position i. 
    * <p>
    * Scala method. Use get() for Java.
-   * @param i index/position
+   *
+   * @param i virtual index/position
    * @return byte at position i
    */
   def apply(i: Long): Byte = {
+    // find a mapping that contains i
     val mapping = mappings.find(m => m.virtRange.contains(i))
     mapping match {
       case Some(m) => m(i)
+      // no mapping found, return 0 for unmapped virtual location
       case None => 0.toByte
     }
   }
@@ -79,7 +116,7 @@ class MemoryMappedPE(
   /**
    * Returns byte at position i.
    *
-   * @param i index/position
+   * @param i virtual index/position
    * @return byte at position i
    */
   def get(i: Long): Byte = apply(i)
@@ -105,13 +142,20 @@ class MemoryMappedPE(
    */
   def slice(from: Long, until: Long): Array[Byte] = {
     require((from - until) == (from - until).toInt)
+    // fetch all mappings for that range
     val sliceMappings = mappingsInRange(new VirtRange(from, until))
-    val bytes = Array.fill((until - from).toInt)(0.toByte)
-    sliceMappings.foreach { m =>
-      val start = Math.max(m.virtRange.start, from)
-      val end = Math.min(m.virtRange.end, until)
-      val mappedBytes = m(start, (end - start).toInt)
+    // create zero filled array
+    val bytes = zeroBytes((until - from).toInt)
+    // fill byte array with actual values
+    sliceMappings.foreach { mapping =>
+      // determine range of bytes to be read for this mapping
+      val start = Math.max(mapping.virtRange.start, from)
+      val end = Math.min(mapping.virtRange.end, until)
+      // read bytes
+      val mappedBytes = mapping(start, (end - start).toInt)
+      // write bytes into result-array
       for (i <- 0 until mappedBytes.length) {
+        // calculate index to write the byte to
         val index = (start - from).toInt + i
         bytes(index) = mappedBytes(i)
       }
@@ -121,28 +165,41 @@ class MemoryMappedPE(
 
   /**
    * Filters all mappings that are relevant for the range.
+   * <p>
+   * Relevant means the mapping maps VAs of that range to physical addresses
+   * 
+   * @param range the virtual range
    */
   private def mappingsInRange(range: VirtRange): List[Mapping] = {
     val (from, until) = range.unpack
-    mappings.filter(m => m.virtRange.end > from && m.virtRange.start < until)
+    mappings.filter(m => m.virtRange.end >= from && m.virtRange.start <= until)
   }
 
   /**
-   * Returns the index of the first byte that satisfies the condition.
+   * Returns the index of the first byte that satisfies the condition, returns -1
+   * if no such byte was found.
    *
    * @param p the function that specifies the condition
-   * @param from offset to start searching from
-   * @return index of the first byte that satisfies the condition
+   * @param from virtual offset to start searching from
+   * @return index of the first byte that satisfies the condition, 
+   *         -1 if no byte satisfies the condition
    */
   def indexWhere(p: Byte => Boolean, from: Long): Long = {
+    // no byte found, from exceeds MemoryMappedPE length, return -1
     if (from > length) -1
     else {
+      // read chunkSize bytes
       val bytes = slice(from, from + chunkSize)
+      // get index for first byte that satisfies the condition
       val index = bytes.indexWhere(p)
+      // no such byte found, recursive call to search the rest
       if (index == -1) {
         val nextIndex = this.indexWhere(p, from + chunkSize)
+        // if no byte of the rest satisfies the condition, return -1
+        // otherwise update the found index with chunkSize and return it
         if (nextIndex == -1) -1 else chunkSize + nextIndex
       } else {
+        // byte was found in current chunk, update index with the starting VA
         from + index
       }
     }
@@ -168,17 +225,16 @@ class MemoryMappedPE(
 
 }
 
+/**
+ * Responsible for creating the memory mappings
+ */
 object MemoryMappedPE {
 
-  def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/testfiles/DLL1.dll")
-    val data = PELoader.loadPE(file)
-    println(data)
-    val loader = new SectionLoader(data)
-    val mmpe = apply(data, loader)
-    mmpe.slice(31616, 31622).foreach(println)
-  }
+  private val logger = LogManager.getLogger(MemoryMappedPE.getClass().getName())
 
+  /**
+   * Creates a representation of the PE content as it is mapped into memory
+   */
   def newInstance(data: PEData, secLoader: SectionLoader): MemoryMappedPE =
     apply(data, secLoader)
 
@@ -191,32 +247,37 @@ object MemoryMappedPE {
   }
 
   /**
-   * Reads memory mappings for the sections.
+   * Reads and returns the memory mappings for the sections.
    */
   private def readMemoryMappings(data: PEData, secLoader: SectionLoader): List[Mapping] = {
     val optHeader = data.getOptionalHeader
-    //in low alignment mode all virtual addresses equal their physical counterparts
-    //so basically no mapping has to be done
+    /* in low alignment mode all virtual addresses equal their physical counterparts
+       thus, the whole file is mapped as is */
     if (optHeader.isLowAlignmentMode()) {
       val filesize = data.getFile.length
       List(new Mapping(new VirtRange(0, filesize), new PhysRange(0, filesize), data))
-      //not low alignment mode, so mappings are applied per section
     } else {
+      /* not low alignment mode, so mappings are applied per section */
       val table = data.getSectionTable
       val mappings = ListBuffer[Mapping]()
-      for (header <- table.getSectionHeaders().asScala) {
-        if (secLoader.isValidSection(header)) {
-          val pStart = header.getAlignedPointerToRaw()
+      // get all valid section headers
+      for (header <- table.getSectionHeaders().asScala if secLoader.isValidSection(header)) {
           val readSize = secLoader.getReadSize(header)
+          /* calculate physical range */
+          val pStart = header.getAlignedPointerToRaw()
           val pEnd = pStart + readSize
           val physRange = new PhysRange(pStart, pEnd)
+          /* calculate virtual range */
           val vStart = header.getAlignedVirtualAddress()
           val vEnd = vStart + readSize
           val virtRange = new VirtRange(vStart, vEnd)
+          // add mapping to list
           mappings += new Mapping(virtRange, physRange, data)
-        }
       }
-      mappings.toList
+      // sort mappings to be in ascending order for their virtual start
+      val sorted = mappings.sortBy(m => m.virtRange.start)
+      assert(sorted == mappings)
+      sorted.toList
     }
   }
 }

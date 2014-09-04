@@ -43,7 +43,7 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
 
   def getResourceLocation(): PhysicalLocation = {
     val rva = data(ResourceDataEntryKey.DATA_RVA).value
-    val offset = mmBytes.getPhysforVir(rva)
+    val offset = mmBytes.virtToPhysAddress(rva)
     val size = data(ResourceDataEntryKey.SIZE).value
     new PhysicalLocation(offset, size)
   }

@@ -3,6 +3,7 @@ package com.github.katjahahn.parser.sections.reloc
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.PhysicalLocation
 
 class BaseRelocBlock(
@@ -20,9 +21,6 @@ class BaseRelocBlock(
        |
        |${entries.mkString("\n")}
        |""".stripMargin
-
-  private def hex(value: Long): String =
-    "0x" + java.lang.Long.toHexString(value)
 
 }
 
