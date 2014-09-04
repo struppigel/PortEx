@@ -43,7 +43,7 @@ object BlockEntry {
   }
 
   private def getTypeFor(value: Int): RelocType = {
-    val typeString = IOUtil.getType(value, "basereloctypes")
+    val typeString = IOUtil.getEnumTypeString(value, "basereloctypes")
     if (typeString.isPresent) {
       RelocType.valueOf(typeString.get)
     } else throw new FileFormatException("unknown reloc type for value: " + value)

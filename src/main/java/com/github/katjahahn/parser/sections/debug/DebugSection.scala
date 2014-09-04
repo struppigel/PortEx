@@ -59,8 +59,8 @@ class DebugSection private (
 
   def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
     directoryTable.asJava
-    
-  def getPhysicalLocations(): java.util.List[PhysicalLocation] = 
+
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] =
     (new PhysicalLocation(offset, getSize) :: Nil).asJava
 
   override def isEmpty: Boolean = directoryTable.isEmpty
@@ -101,7 +101,7 @@ class DebugSection private (
    * @return type description string
    */
   def getTypeDescription(): String = typeDescription
-  
+
   def getDebugType(): DebugType = debugType
 
 }
@@ -150,13 +150,17 @@ object DebugSection {
       format, debugspec, debugbytes, offset).asScala.toMap
     val debugTypeValue = entries(DebugDirectoryKey.TYPE).value
     val typeDescriptions = getCharacteristicsDescriptions(debugTypeValue, "debugtypes").asScala.toList
-    val debugTypes = getCharacteristicKeys(debugTypeValue, "debugtypes").asScala.toList
+    val debugType = {
+      val debugTypeString = getEnumTypeString(debugTypeValue, "debugtypes")
+      if (debugTypeString.isPresent())
+        DebugType.valueOf(debugTypeString.get().replace("IMAGE_DEBUG_TYPE_", ""))
+      else DebugType.UNKNOWN
+    }
     if (typeDescriptions.size == 0) {
       logger.warn("no debug type description found!")
       val description = s"${entries(DebugDirectoryKey.TYPE).value} no description available"
-      new DebugSection(entries, description, DebugType.UNKNOWN, offset)
+      new DebugSection(entries, description, debugType, offset)
     } else {
-      val debugType = DebugType.valueOf(debugTypes(0).replace("IMAGE_DEBUG_TYPE_", ""))
       new DebugSection(entries, typeDescriptions(0), debugType, offset)
     }
   }

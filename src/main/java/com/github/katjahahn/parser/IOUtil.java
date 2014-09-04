@@ -55,8 +55,13 @@ public final class IOUtil {
      * System independend newline.
      */
     public static final String NL = System.getProperty("line.separator");
-    // TODO system independend path separators
-    private static final String DELIMITER = ";";
+    /**
+     * The default delimiter for a line in a specification file.
+     */
+    public static final String DEFAULT_DELIMITER = ";";
+    /**
+     * The folder that contains the specification files
+     */
     private static final String SPEC_DIR = "/data/";
 
     /**
@@ -98,35 +103,46 @@ public final class IOUtil {
         assert specName != null && specName.trim().length() > 0;
 
         /* initializers */
-        EnumSolver<T> enumSolver = new EnumSolver<>(clazz);
         // init a full map with default fields. Fields that can be read are
         // changed subsequently
-        Map<T, StandardField> data = initFullEnumMap(enumSolver);
+        Map<T, StandardField> data = initFullEnumMap(clazz);
+        // get the specification
         List<String[]> specification = readArray(specName);
 
+        // use the specification format to get the right indices
         int descriptionIndex = specFormat.description;
         int offsetIndex = specFormat.offset;
         int lengthIndex = specFormat.length;
         int keyIndex = specFormat.key;
 
+        // loop through every line in the specification, put read data to the
+        // map
         for (String[] specs : specification) {
-            T key = enumSolver.valueFor(specs[keyIndex].trim());
+            // get the enum type for the key string
+            T key = Enum.valueOf(clazz, specs[keyIndex].trim());
+            // read offset, length, and description, offset is relative to
+            // header
             int offset = Integer.parseInt(specs[offsetIndex].trim());
             int length = Integer.parseInt(specs[lengthIndex].trim());
             String description = specs[descriptionIndex];
-            // TODO is this correct?
+            // get the absolute file offset for the current field
             long fieldOffset = headerOffset + offset;
+            // check if value is entirely contained in the headerbytes
+            long value = 0;
             if (headerbytes.length >= offset + length) {
-                long value = getBytesLongValue(headerbytes, offset, length);
+                value = getBytesLongValue(headerbytes, offset, length);
                 data.put(key, new StandardField(key, description, value,
                         fieldOffset, length));
             } else {
-                long value = getBytesLongValueSafely(headerbytes, offset,
-                        length);
-                data.put(key, new StandardField(key, description, value,
-                        fieldOffset, length));
+                // value not entirely contained in array, so use a safe method
+                // to fetch it
+                value = getBytesLongValueSafely(headerbytes, offset, length);
+                // ... and print a warning message
                 logger.warn("offset + length larger than headerbytes given");
             }
+            // add data to map
+            data.put(key, new StandardField(key, description, value,
+                    fieldOffset, length));
         }
         assert data != null;
         return data;
@@ -135,18 +151,44 @@ public final class IOUtil {
     /**
      * Initialized a map containing all keys of the Enum T as map-key and
      * default StandardFields as map-value.
+     * <p>
+     * Ensures that no null value is returned.
      * 
      * @param enumSolver
      *            EnumSolver instance
      * @return the fully initialized map
      */
     private static <T extends Enum<T> & HeaderKey> Map<T, StandardField> initFullEnumMap(
-            EnumSolver<T> enumSolver) {
-        Map<T, StandardField> map = new EnumMap<>(enumSolver.clazz);
-        for (T key : enumSolver.values()) {
-            map.put(key, new StandardField(key, "", 0L, 0L, 0L));
+            Class<T> clazz) {
+        Map<T, StandardField> map = new EnumMap<>(clazz);
+        // loop through all values of the Enum type and add a dummy field
+        for (T key : clazz.getEnumConstants()) {
+            StandardField dummy = new StandardField(key, "", 0L, 0L, 0L);
+            map.put(key, dummy);
         }
+        assert map != null;
         return map;
+    }
+
+    /**
+     * Reads the specified file into a map. The first value is used as key. The
+     * rest is put into a list and used as map value. Each entry is one line of
+     * the file.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Uses the default {@link #DEFAULT_DELIMITER}
+     * 
+     * @param filename
+     *            the name of the specification file (not the path to it)
+     * @return a map with the first column as keys and the other columns as
+     *         values.
+     * @throws IOException
+     *             if unable to read the specification file
+     */
+    public static Map<String, String[]> readMap(String filename)
+            throws IOException {
+        return readMap(filename, DEFAULT_DELIMITER);
     }
 
     /**
@@ -158,21 +200,25 @@ public final class IOUtil {
      * 
      * @param filename
      *            the name of the specification file (not the path to it)
+     * @param delimiter
+     *            the delimiter regex for one column
      * @return a map with the first column as keys and the other columns as
      *         values.
      * @throws IOException
      *             if unable to read the specification file
      */
-    public static Map<String, String[]> readMap(String filename)
-            throws IOException {
+    public static Map<String, String[]> readMap(String filename,
+            String delimiter) throws IOException {
         Map<String, String[]> map = new TreeMap<>();
-
+        // read spec-file as resource, e.g., from a jar
         try (InputStreamReader isr = new InputStreamReader(
                 IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
                 BufferedReader reader = new BufferedReader(isr)) {
             String line = null;
             while ((line = reader.readLine()) != null) {
-                String[] values = line.split(DELIMITER);
+                // split line into the values
+                String[] values = line.split(delimiter);
+                // put first element as key, rest as array of value-strings
                 map.put(values[0], Arrays.copyOfRange(values, 1, values.length));
             }
             assert map != null;
@@ -183,6 +229,10 @@ public final class IOUtil {
     /**
      * Reads the specified file from the specification directory into a list of
      * arrays. Each array is the entry of one line in the file.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Uses the default {@link #DEFAULT_DELIMITER}
      * 
      * @param filename
      *            the name of the specification file (not the path to it)
@@ -191,7 +241,7 @@ public final class IOUtil {
      *             if unable to read the specification file
      */
     public static List<String[]> readArray(String filename) throws IOException {
-        return readArray(filename, DELIMITER);
+        return readArray(filename, DEFAULT_DELIMITER);
     }
 
     /**
@@ -211,12 +261,15 @@ public final class IOUtil {
     public static List<String[]> readArray(String filename, String delimiter)
             throws IOException {
         List<String[]> list = new LinkedList<>();
+        // read spec-file as resource, e.g., from a jar
         try (InputStreamReader isr = new InputStreamReader(
                 IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
                 BufferedReader reader = new BufferedReader(isr)) {
             String line = null;
             while ((line = reader.readLine()) != null) {
+                // split line into the values
                 String[] values = line.split(delimiter);
+                // add all values as entry to the list
                 list.add(values);
             }
             assert list != null;
@@ -229,20 +282,27 @@ public final class IOUtil {
      * of one line in the file.
      * <p>
      * This method allows to read from files outside of the packaged jar.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Uses the default {@link #DEFAULT_DELIMITER}
      * 
      * @param file
-     *            the file to read from
+     *            the file to read from, UTF-8 encoded
      * @return a list of arrays, each array representing a line in the spec
      * @throws IOException
      *             if unable to read the file
      */
     public static List<String[]> readArrayFrom(File file) throws IOException {
         List<String[]> list = new LinkedList<>();
+        // read spec as UTF-8 encoded file
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(),
                 Charset.forName("UTF-8"))) {
             String line = null;
             while ((line = reader.readLine()) != null) {
-                String[] values = line.split(DELIMITER);
+                // split line into the values
+                String[] values = line.split(DEFAULT_DELIMITER);
+                // add all values as entry to the list
                 list.add(values);
             }
             assert list != null;
@@ -255,6 +315,12 @@ public final class IOUtil {
      * the value flag.
      * <p>
      * This is intented to be used for string output of characteristics.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Assumes a fixed file format, i.e.: mask;keystring;description
+     * <p>
+     * The mask is a hexadecimal value-string (without 0x in front).
      * 
      * @param value
      *            the value of the characteristics field
@@ -267,15 +333,18 @@ public final class IOUtil {
             String filename) {
         List<String> characteristics = new LinkedList<>();
         try {
+            // read specification for characteristics
             Map<String, String[]> map = readMap(filename);
             for (Entry<String, String[]> entry : map.entrySet()) {
                 try {
+                    // read mask
                     long mask = Long.parseLong(entry.getKey(), 16);
+                    // use mask to check if flag is set
                     if ((value & mask) != 0) {
                         characteristics.add(entry.getValue()[1]);
                     }
                 } catch (NumberFormatException e) {
-
+                    // Long.parseLong went wrong
                     logger.error("ERROR. number format mismatch in file "
                             + filename);
                     logger.error("value: " + entry.getKey());
@@ -291,6 +360,12 @@ public final class IOUtil {
     /**
      * Returns a list of all characteristic keys that have been set by the
      * value.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Assumes the fixed file format: mask;keystring;description
+     * <p>
+     * The mask is a hexadecimal value-string (without 0x in front).
      * 
      * @param value
      *            the value of the characteristics field
@@ -301,14 +376,18 @@ public final class IOUtil {
     public static List<String> getCharacteristicKeys(long value, String filename) {
         List<String> keys = new ArrayList<>();
         try {
+            // read specification for characteristics
             Map<String, String[]> map = readMap(filename);
             for (Entry<String, String[]> entry : map.entrySet()) {
                 try {
+                    // read mask
                     long mask = Long.parseLong(entry.getKey(), 16);
+                    // use mask to check if flag is set
                     if ((value & mask) != 0) {
                         keys.add(entry.getValue()[0]);
                     }
                 } catch (NumberFormatException e) {
+                    // Long.parseLong went wrong
                     logger.error("ERROR. number format mismatch in file "
                             + filename);
                     logger.error("value: " + entry.getKey());
@@ -325,21 +404,32 @@ public final class IOUtil {
      * Returns String in the second column for the value that matches the first
      * column. Semantically the second column holds the enum type string and the
      * first a set offset or flag.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Assumes a fixed file format, i.e.: keyvalue;keystring;description The
+     * mask is a hexadecimal value-string (without 0x in front).
      * 
      * @param value
+     *            the value to be masked
      * @param filename
-     * @return type/key for given value
+     *            the name of the specification file (not the path)
+     * @return type/key-string for given value, absent if not found
      */
-    public static Optional<String> getType(long value, String filename) {
+    public static Optional<String> getEnumTypeString(long value, String filename) {
         try {
+            // read the specification
             Map<String, String[]> map = readMap(filename);
             for (Entry<String, String[]> entry : map.entrySet()) {
                 try {
+                    // get the key
                     long keyValue = Long.parseLong(entry.getKey());
+                    // key must match the given value
                     if (value == keyValue) {
                         return Optional.of(entry.getValue()[0]);
                     }
                 } catch (NumberFormatException e) {
+                    // parseLong went wrong
                     logger.error("ERROR. number format mismatch in file "
                             + filename);
                     logger.error("value: " + entry.getKey());
@@ -356,6 +446,12 @@ public final class IOUtil {
      * flag.
      * <p>
      * This is intented to be used for string output of characteristics.
+     * <p>
+     * Ensures that no null value is returned.
+     * <p>
+     * Assumes the fixed file format: mask;keystring;description
+     * <p>
+     * The mask is a hexadecimal value-string (without 0x in front).
      * 
      * @param value
      *            the value of the characteristics field
@@ -367,14 +463,19 @@ public final class IOUtil {
     public static String getCharacteristics(long value, String filename) {
         StringBuilder b = new StringBuilder();
         try {
+            // read specification
             Map<String, String[]> map = readMap(filename);
             for (Entry<String, String[]> entry : map.entrySet()) {
                 try {
+                    // read mask
                     long mask = Long.parseLong(entry.getKey(), 16);
+                    // check if flag is set
                     if ((value & mask) != 0) {
+                        //add description for this characteristic
                         b.append("\t* " + entry.getValue()[1] + NL);
                     }
                 } catch (NumberFormatException e) {
+                    // parseLong went wrong
                     logger.error("ERROR. number format mismatch in file "
                             + filename);
                     logger.error("value: " + entry.getKey());
@@ -383,6 +484,7 @@ public final class IOUtil {
         } catch (IOException e) {
             logger.error(e);
         }
+        // check if there is a description at all
         if (b.length() == 0) {
             b.append("\t**no characteristics**" + NL);
         }
@@ -431,31 +533,6 @@ public final class IOUtil {
             this.offset = offset;
             this.length = length;
             this.key = key;
-        }
-    }
-
-    /**
-     * Used by
-     * {@link IOUtil#readHeaderEntries(Class, SpecificationFormat, String, byte[])}
-     * to be able to use Enum static methods based on a class.
-     * 
-     * @param <T>
-     *            the Enum type
-     */
-    private static class EnumSolver<T extends Enum<T>> {
-
-        private Class<T> clazz;
-
-        public EnumSolver(Class<T> clazz) {
-            this.clazz = clazz;
-        }
-
-        public T valueFor(String key) {
-            return Enum.valueOf(clazz, key);
-        }
-
-        public T[] values() {
-            return clazz.getEnumConstants();
         }
     }
 
