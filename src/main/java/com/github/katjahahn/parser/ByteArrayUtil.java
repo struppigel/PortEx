@@ -169,12 +169,19 @@ public class ByteArrayUtil {
         assert array != null;
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
+            // add separator in between, not before the first byte
+            if (i != 0) {
+                buffer.append(separator);
+            }
+            // (b & 0xff) treats b as unsigned byte
+            // first nibble is 0 if byte is less than 0x10
             if ((array[i] & 0xff) < 0x10) {
                 buffer.append("0");
             }
-            buffer.append(Integer.toString(array[i] & 0xff, 16) + separator);
+            // use java's hex conversion for the rest
+            buffer.append(Integer.toString(array[i] & 0xff, 16));
         }
-        return buffer.toString().trim();
+        return buffer.toString();
     }
 
     /**
@@ -190,10 +197,14 @@ public class ByteArrayUtil {
      */
     public static int bytesToInt(byte[] bytes) {
         assert bytes != null && bytes.length <= 4;
+        final int BYTE_SIZE = 8;
         int value = 0;
         for (int i = 0; i < bytes.length; i++) {
-            int shift = 8 * i;
-            value += (bytes[i] & 0xFF) << shift;
+            // shift byte i times, so it gets the correct significance
+            int shift = BYTE_SIZE * i;
+            // (b & 0xff) treats b as unsigned byte
+            // calculate the value to add by performing the shift
+            value += (bytes[i] & 0xff) << shift;
         }
         return value;
     }
@@ -211,10 +222,14 @@ public class ByteArrayUtil {
      */
     public static long bytesToLong(byte[] bytes) {
         assert bytes != null && bytes.length <= 8;
+        final int BYTE_SIZE = 8;
         long value = 0;
         for (int i = 0; i < bytes.length; i++) {
-            int shift = 8 * i;
-            value += (long) (bytes[i] & 0xFF) << shift;
+            // shift byte i times, so it gets the correct significance
+            int shift = BYTE_SIZE * i;
+            // (b & 0xff) treats b as unsigned byte
+            // calculate the value to add by performing the shift
+            value += (long) (bytes[i] & 0xff) << shift;
         }
         return value;
     }

@@ -16,6 +16,7 @@
 package com.github.katjahahn.parser.optheader;
 
 import static com.github.katjahahn.parser.ByteArrayUtil.*;
+import static com.github.katjahahn.parser.IOUtil.*;
 import static com.github.katjahahn.parser.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.parser.optheader.WindowsEntryKey.*;
 
@@ -34,7 +35,6 @@ import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
 import com.google.common.base.Optional;
-
 /**
  * Represents the optional header of the PE file.
  * 

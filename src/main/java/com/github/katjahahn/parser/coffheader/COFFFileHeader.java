@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.coffheader;
 
+import static com.github.katjahahn.parser.IOUtil.*;
 import static com.github.katjahahn.parser.coffheader.COFFHeaderKey.*;
 import static com.google.common.base.Preconditions.*;
 

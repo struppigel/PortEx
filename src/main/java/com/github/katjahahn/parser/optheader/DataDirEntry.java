@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.optheader;
 
-import static com.github.katjahahn.parser.Header.*;
+import static com.github.katjahahn.parser.IOUtil.*;
 import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 import static com.google.common.base.Preconditions.*;
 

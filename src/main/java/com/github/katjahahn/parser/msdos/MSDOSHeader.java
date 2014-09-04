@@ -14,6 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.parser.msdos;
+import static com.github.katjahahn.parser.IOUtil.*;
 
 import java.io.IOException;
 import java.util.LinkedList;
