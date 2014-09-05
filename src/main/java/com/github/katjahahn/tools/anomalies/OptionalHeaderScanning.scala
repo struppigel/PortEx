@@ -173,14 +173,8 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    *
    * @return the minimum header size
    */
-  private def headerSizeMin(): Long = {
-    val coff = data.getCOFFFileHeader()
-    val pesig = data.getPESignature()
-    val sectionTableSize = SectionTable.ENTRY_SIZE * coff.getNumberOfSections()
-    val pesigOffset = pesig.getOffset
-    val coffOffset = +PESignature.PE_SIG_LENGTH
-    coffOffset + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader() + sectionTableSize
-  }
+  private def headerSizeMin(): Long = 
+    data.getOptionalHeader().getOffset() + data.getSectionTable().getSize()
 
   /**
    * Rounds up the header size minimum to a multiple of FileAlignment.

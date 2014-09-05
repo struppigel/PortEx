@@ -111,6 +111,7 @@ object ShannonEntropy {
    * 
    * @param byteArray the byte array to calculate local entropies from
    * @return the array containing one entropy per byte
+   * @Beta
    */
   def localEntropies(byteArray: Array[Byte]): Array[Double] = {
     // define the size of one half of the window used to calculate a local entropy

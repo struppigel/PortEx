@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
+import static com.github.katjahahn.parser.IOUtil.*;
 import static com.google.common.base.Preconditions.*;
 
 import java.io.File;
@@ -27,10 +28,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
-import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.debug.DebugSection;
-import com.google.common.base.Optional;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -79,12 +77,14 @@ public final class PELoader {
         pesig.read();
         checkState(pesig.hasSignature(),
                 "no valid pe file, signature not found");
+        // read all headers
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             MSDOSHeader msdos = loadMSDOSHeader(raf, pesig.getOffset());
             COFFFileHeader coff = loadCOFFFileHeader(pesig, raf);
             OptionalHeader opt = loadOptionalHeader(pesig, coff, raf);
             SectionTable table = loadSectionTable(pesig, coff, raf);
             table.read();
+            // construct PEData instance
             return new PEData(msdos, pesig, coff, opt, table, file);
         }
     }
@@ -120,17 +120,21 @@ public final class PELoader {
      */
     private SectionTable loadSectionTable(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-        long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
+        // offset is the start of the optional header + SizeOfOptionalHeader
+        long offset = pesig.getOffset() + PESignature.PE_SIG.length
                 + COFFFileHeader.HEADER_SIZE + coff.getSizeOfOptionalHeader();
         logger.info("SectionTable offset: " + offset);
+        // get entries, so you can determine the size
         int numberOfEntries = (int) coff.getNumberOfSections();
-        byte[] tableBytes = loadBytes(offset, SectionTable.ENTRY_SIZE
-                * numberOfEntries, raf);
+        int size = SectionTable.ENTRY_SIZE * numberOfEntries;
+        // read bytes
+        byte[] tableBytes = loadBytes(offset, size, raf);
+        // construct header
         return new SectionTable(tableBytes, numberOfEntries, offset);
     }
 
     /**
-     * Loads the coff file header. Presumes a valid PE file.
+     * Loads the COFF File header. Presumes a valid PE file.
      * 
      * @param pesig
      *            pe signature
@@ -142,9 +146,12 @@ public final class PELoader {
      */
     private COFFFileHeader loadCOFFFileHeader(PESignature pesig,
             RandomAccessFile raf) throws IOException {
-        long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH;
+        // coff header starts right after the PE signature
+        long offset = pesig.getOffset() + PESignature.PE_SIG.length;
         logger.info("COFF Header offset: " + offset);
+        // read bytes, size is fixed anyway
         byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
+        // construct header
         return COFFFileHeader.newInstance(headerbytes, offset);
     }
 
@@ -163,38 +170,20 @@ public final class PELoader {
      */
     private OptionalHeader loadOptionalHeader(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-        long offset = pesig.getOffset() + PESignature.PE_SIG_LENGTH
+        // offset right after the COFF File Header
+        long offset = pesig.getOffset() + PESignature.PE_SIG.length
                 + COFFFileHeader.HEADER_SIZE;
         logger.info("Optional Header offset: " + offset);
+        // set the maximum size for the bytes to read
         int size = OptionalHeader.MAX_SIZE;
+        // ...with the exception of reaching EOF, this is rare, but see tinype.exe
         if (size + offset > file.length()) {
+            // cut size at EOF
             size = (int) (file.length() - offset);
         }
+        // read bytes and construct header
         byte[] headerbytes = loadBytes(offset, size, raf);
         return OptionalHeader.newInstance(headerbytes, offset);
-    }
-
-    /**
-     * Loads the bytes at the offset into a byte array with the given length
-     * using the raf.
-     * 
-     * @param offset
-     *            to seek
-     * @param length
-     *            of the byte array, equals number of bytes read
-     * @param raf
-     *            the random access file
-     * @return byte array
-     * @throws IOException
-     *             if unable to read the bytes
-     */
-    private static byte[] loadBytes(long offset, int length,
-            RandomAccessFile raf) throws IOException {
-        assert length >= 0;
-        raf.seek(offset);
-        byte[] bytes = new byte[length];
-        raf.readFully(bytes);
-        return bytes;
     }
 
     /**
@@ -205,39 +194,20 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException {
         logger.entry();
-        // File folder = new File("/home/deque/portextestfiles/");
-        // File file = new File(
-        // "/home/deque/portextestfiles/testfiles/DLL2.dll");
-        // File file = new File(
-        // "/home/deque/portextestfiles/badfiles/VirusShare_d3ce3ad2bdba15fa687bfe21be52c9ff");
-        // File file = new File(
-        // "/home/deque/portextestfiles/badfiles/VirusShare_7dfe20f5164d80e37b7ba7184d4c73b4");
-        // File file = new
-        // File("/home/deque/portextestfiles//x64viruses/VirusShare_baed21297974b6adf3298585baa78691");
-        // for (File file : folder.listFiles()) {
-        // try {
-        // PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
-        // System.out.println("File: " + file.getName());
-        // System.out.println(scanner.getAnomalies().size());
-        // System.out.println();
-        // } catch (Exception e) {
-        // System.err.println(e.getMessage());
-        // }
-        // }
-        for (File file : new File("/home/deque/portextestfiles/testfiles")
-                .listFiles()) {
-            PEData data = PELoader.loadPE(file);
-            SectionLoader loader = new SectionLoader(data);
-            try {
-                Optional<DebugSection> maybeDebug = loader
-                        .maybeLoadDebugSection();
-                if (maybeDebug.isPresent()) {
-                    System.out.println(file.getName());
-                    System.out.println(maybeDebug.get().getInfo());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
+        PEData data = PELoader.loadPE(file);
+        System.out.println(data.getCOFFFileHeader().getInfo());
+//            ReportCreator.newInstance(file).printReport();
+//            SectionLoader loader = new SectionLoader(data);
+//            try {
+//                Optional<DebugSection> maybeDebug = loader
+//                        .maybeLoadDebugSection();
+//                if (maybeDebug.isPresent()) {
+//                    System.out.println(file.getName());
+//                    System.out.println(maybeDebug.get().getInfo());
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
     }
 }

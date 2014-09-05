@@ -41,9 +41,14 @@ public class PESignature {
             .getName());
 
     /**
-     * The location of the PE signature offset is {@value} .
+     * The file offset that contains the PE Signature offset is {@value} .
      */
     public static final int PE_OFFSET_LOCATION = 0x3c;
+
+    /**
+     * The number of bytes that define the PE Signature offset
+     */
+    public static final int PE_OFFSET_LOCATION_SIZE = 2;
 
     /**
      * The signature bytes of the string PE\0\0.
@@ -51,10 +56,9 @@ public class PESignature {
     public static final byte[] PE_SIG = "PE\0\0".getBytes();
 
     /**
-     * The length of the PE signature is {@value} .
+     * The file offset for the PE signature read at PE_OFFSET_LOCATION Absent,
+     * if not yet read.
      */
-    public static final int PE_SIG_LENGTH = 4;
-
     private Optional<Long> peOffset = Optional.absent();
     private final File file;
 
@@ -78,15 +82,18 @@ public class PESignature {
      */
     public void read() throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            throwIf(file.length() < PE_OFFSET_LOCATION + 2);
-            raf.seek(PE_OFFSET_LOCATION);
-            byte[] offsetBytes = new byte[2];
-            raf.readFully(offsetBytes);
+            // check that offset location bytes are within the file
+            throwIf(file.length() < PE_OFFSET_LOCATION
+                    + PE_OFFSET_LOCATION_SIZE);
+            /* read pe signature offset at offset location */
+            byte[] offsetBytes = loadBytes(PE_OFFSET_LOCATION,
+                    PE_OFFSET_LOCATION_SIZE, raf);
+            // save signature offset
             peOffset = Optional.of((long) bytesToInt(offsetBytes));
-            throwIf(file.length() < peOffset.get() + 4);
-            raf.seek(peOffset.get());
-            byte[] peSigVal = new byte[4];
-            raf.readFully(peSigVal);
+            // check if supposed pe signature is within the file
+            throwIf(file.length() < peOffset.get() + PE_SIG.length);
+            /* read PE signature at offset and verify */
+            byte[] peSigVal = loadBytes(peOffset.get(), PE_SIG.length, raf);
             for (int i = 0; i < PE_SIG.length; i++) {
                 throwIf(peSigVal[i] != PE_SIG[i]);
             }

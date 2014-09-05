@@ -63,7 +63,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
     val peOffset = data.getPESignature().getOffset()
     if (peOffset >= overlayLoc) {
       //the real physical size of all headers
-      val locSize = PESignature.PE_SIG_LENGTH + COFFFileHeader.HEADER_SIZE +
+      val locSize = PESignature.PE_SIG.length + COFFFileHeader.HEADER_SIZE +
         coff.getSizeOfOptionalHeader() + data.getSectionTable().getSize()
 
       val locations = List(new PhysicalLocation(peOffset, locSize))

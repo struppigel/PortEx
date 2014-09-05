@@ -66,7 +66,7 @@ public class SectionTable implements PEModule {
     /**
      * creates the SectionTable with the bytes of the table and the number of
      * entries
-     * 
+     * TODO create newInstance method
      * @param sectionTableBytes
      *            the bytes that make up the section table
      * @param numberOfEntries
@@ -110,7 +110,7 @@ public class SectionTable implements PEModule {
         }
     }
 
-    /**
+    /**or too small for the given file
      * Returns all entries of the section table as a list. They are in the same
      * order as they are within the Section Table.
      * 

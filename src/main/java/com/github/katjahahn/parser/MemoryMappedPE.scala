@@ -141,7 +141,7 @@ class MemoryMappedPE(
    * from extending up to (but not including) index until
    */
   def slice(from: Long, until: Long): Array[Byte] = {
-    require((from - until) == (from - until).toInt)
+    require((until - from) == (until - from).toInt)
     // fetch all mappings for that range
     val sliceMappings = mappingsInRange(new VirtRange(from, until))
     // create zero filled array

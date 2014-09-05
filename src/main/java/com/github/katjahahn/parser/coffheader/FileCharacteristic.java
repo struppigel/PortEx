@@ -64,7 +64,7 @@ public enum FileCharacteristic implements Characteristic {
 	/**
 	 * This flag with value 0x40 is reserved for future use.
 	 */
-	RESERVED_40(true, false), // TODO include to anomaly detection
+	RESERVED_40(true, false),
 	/**
 	 * Little endian: the least significant bit (LSB) precedes the most
 	 * significant bit (MSB) in memory. This flag is deprecated and should be

@@ -28,6 +28,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -62,7 +63,7 @@ import com.google.common.base.Optional;
  * 
  */
 public class Visualizer {
-    // TODO handling duplicated sections
+    // TODO handling duplicated sections ?
     // TODO anomaly visualizing in separate class
 
     private static final Logger logger = LogManager.getLogger(Visualizer.class
@@ -83,9 +84,9 @@ public class Visualizer {
     private PEData data;
     private BufferedImage image;
 
-    private static final DataDirectoryKey[] specials = { BASE_RELOCATION_TABLE,
+    private static final DataDirectoryKey[] specials = { RESOURCE_TABLE,
             IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE,
-            RESOURCE_TABLE, DEBUG };
+            BASE_RELOCATION_TABLE, DEBUG };
 
     private Map<DataDirectoryKey, Boolean> specialsAvailability = new EnumMap<>(
             DataDirectoryKey.class);
@@ -144,18 +145,20 @@ public class Visualizer {
      *             if file can not be read
      */
     public BufferedImage createEntropyImage(File file) throws IOException {
+        resetAvailabilityFlags();
         this.data = PELoader.loadPE(file);
         image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
         final int MIN_WINDOW_SIZE = 100;
         // bytes to be read at once to calculate local entropy
         final int windowSize = Math.max(MIN_WINDOW_SIZE, pixelSize);
-        final int windowHalfSize = (int) Math.round(windowSize/(double)2);
+        final int windowHalfSize = (int) Math.round(windowSize / (double) 2);
         final long minLength = withMinLength(0);
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             // read until EOF with windowSized steps
-            for(long address = 0; address <= file.length(); address += minLength) {
+            for (long address = 0; address <= file.length(); address += minLength) {
                 // the start of the window (windowHalf to the left)
-                long start = (address - windowHalfSize < 0) ? 0 : address - windowHalfSize;
+                long start = (address - windowHalfSize < 0) ? 0 : address
+                        - windowHalfSize;
                 raf.seek(start);
                 // cut byte number if EOF reached, otherwise read full window
                 int bytesToRead = (int) Math.min(file.length() - start,
@@ -172,6 +175,14 @@ public class Visualizer {
         return image;
     }
 
+    private void resetAvailabilityFlags() {
+        epAvailable = false;
+        overlayAvailable = false;
+        for (DataDirectoryKey key : specials) {
+            specialsAvailability.put(key, false);
+        }
+    }
+
     /**
      * Creates a buffered image that displays the structure of the PE file.
      * 
@@ -182,6 +193,7 @@ public class Visualizer {
      *             if sections can not be read
      */
     public BufferedImage createImage(File file) throws IOException {
+        resetAvailabilityFlags();
         this.data = PELoader.loadPE(file);
         image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
 
@@ -473,7 +485,7 @@ public class Visualizer {
         // getPixelNumber(fileLength))
         int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
         int pixelMax = getXPixels() * getYPixels();
-        if (pixelStart >= pixelMax) {
+        if (pixelStart > pixelMax) {
             logger.error("too many pixels, max is: " + pixelMax
                     + " and trying to set: " + pixelStart);
         }
@@ -533,17 +545,18 @@ public class Visualizer {
      */
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_b4e1ae2b910a5553bdd7463b22439d49");
-        PEData data = PELoader.loadPE(file);
-        // new ReportCreator(data).printReport();
+        File folder = new File("/home/deque/portextestfiles/badfiles/");
         Visualizer vi = new VisualizerBuilder().build();
-        final BufferedImage entropyImage = vi.createEntropyImage(file);
-        final BufferedImage structureImage = vi.createImage(file);
-        final BufferedImage appendedImage = ImageUtil.appendImages(
-                entropyImage, structureImage);
-        // ImageIO.write(image, "png", new File(file.getName() + ".png"));
-        show(appendedImage);
+        for (File file : folder.listFiles()) {
+            System.out.println("creating image for " + file.getName());
+            final BufferedImage entropyImage = vi.createEntropyImage(file);
+            final BufferedImage structureImage = vi.createImage(file);
+            final BufferedImage appendedImage = ImageUtil.appendImages(
+                    entropyImage, structureImage);
+            ImageIO.write(appendedImage, "png",
+                    new File("peimages/" + file.getName() + ".png"));
+        }
+        // show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

@@ -72,7 +72,7 @@ public class VisualizerBuilder {
     private static final Color DEFAULT_EXPORT_COLOR = new Color(220, 80, 220);
     private static final Color DEFAULT_RSRC_COLOR = new Color(100, 250, 100);
     private static final Color DEFAULT_DEBUG_COLOR = new Color(0, 0, 220);
-    private static final Color DEFAULT_RELOC_COLOR = new Color(0, 100, 220);
+    private static final Color DEFAULT_RELOC_COLOR = new Color(100, 10, 220);
     private static final Color DEFAULT_DELAY_IMPORT_COLOR = new Color(220, 100,
             0);
     /* Other colors */

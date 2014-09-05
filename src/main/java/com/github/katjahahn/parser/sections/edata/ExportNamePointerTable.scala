@@ -23,11 +23,12 @@ import com.github.katjahahn.parser.IOUtil.{ NL }
 import java.io.File
 import ExportNamePointerTable._
 import com.github.katjahahn.parser.MemoryMappedPE
+import org.apache.logging.log4j.LogManager
 
-class ExportNamePointerTable private (val pointerNameList: List[(Address, String)], 
-    val fileOffset: Long) {
-  
-  def size(): Long = pointerNameList.length * ExportNamePointerTable.entryLength 
+class ExportNamePointerTable private (val pointerNameList: List[(Address, String)],
+  val fileOffset: Long) {
+
+  def size(): Long = pointerNameList.length * ExportNamePointerTable.entryLength
 
   def getMap(): Map[Address, String] = pointerNameList.toMap
 
@@ -47,6 +48,8 @@ class ExportNamePointerTable private (val pointerNameList: List[(Address, String
 }
 
 object ExportNamePointerTable {
+  
+  private val logger = LogManager.getLogger(ExportNamePointerTable.getClass().getName())
 
   type Address = Long
   val entryLength = 4
@@ -67,7 +70,15 @@ object ExportNamePointerTable {
 
   private def getName(mmBytes: MemoryMappedPE, address: Long): String = {
     val end = mmBytes.indexOf('\0'.toByte, address)
-    val nameBytes = mmBytes.slice(address, end)
+    // check size
+    val nameBytes = if ((end - address) != (end - address).toInt) {
+      // TODO this is a full fledged anomaly! add detection for it.
+      // example file: VirusShare_a90da79e98213703fc3342b281a95094
+      logger.warn("No end of export name found, reading 10 chars instead")
+      mmBytes.slice(address, address + 10)
+    } else {
+      mmBytes.slice(address, end)
+    }
     new String(nameBytes)
   }
 

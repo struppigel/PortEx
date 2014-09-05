@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -68,6 +69,29 @@ public final class IOUtil {
      * Forbidden. This is a utility class.
      */
     private IOUtil() {
+    }
+    
+    /**
+     * Loads the bytes at the offset into a byte array with the given length
+     * using the raf.
+     * 
+     * @param offset
+     *            to seek
+     * @param length
+     *            of the byte array, equals number of bytes read
+     * @param raf
+     *            the random access file
+     * @return byte array
+     * @throws IOException
+     *             if unable to read the bytes
+     */
+    public static byte[] loadBytes(long offset, int length,
+            RandomAccessFile raf) throws IOException {
+        assert length >= 0;
+        raf.seek(offset);
+        byte[] bytes = new byte[length];
+        raf.readFully(bytes);
+        return bytes;
     }
 
     /**

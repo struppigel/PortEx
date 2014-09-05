@@ -29,10 +29,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.parser.Header;
-import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
+import com.google.common.base.Preconditions;
 
 /**
  * Represents the COFF File Header.
@@ -51,7 +51,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     private Map<COFFHeaderKey, StandardField> data;
     private final long offset;
 
-    @SuppressWarnings("unused")
     private static final Logger logger = LogManager
             .getLogger(COFFFileHeader.class.getName());
 
@@ -60,7 +59,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * 
      * @param headerbytes
      *            an array that holds the headerbytes. The length of the array
-     *            has to be {@link #HEADER_SIZE}.
+     *            must be {@link #HEADER_SIZE}.
      * @param offset
      *            the file offset of the header
      * @throws IllegalArgumentException
@@ -82,7 +81,14 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     }
 
     private void read() throws IOException {
-        SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
+        // define the specification format
+        final int key = 0;
+        final int description = 1;
+        final int offset = 2;
+        final int length = 3;
+        SpecificationFormat format = new SpecificationFormat(key, description,
+                offset, length);
+        // read the header data
         data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
                 COFF_SPEC_FILE, headerbytes, getOffset());
 
@@ -93,26 +99,32 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Override
     public String getInfo() {
+        // make title
         StringBuilder b = new StringBuilder("----------------" + NL
                 + "COFF File Header" + NL + "----------------" + NL);
-        for (StandardField entry : data.values()) {
-
-            long value = entry.value;
-            HeaderKey key = entry.key;
-            String description = entry.description;
-            if (key.equals(CHARACTERISTICS)) {
+        // loop through standard fields
+        for (StandardField field : data.values()) {
+            long value = field.value;
+            COFFHeaderKey key = (COFFHeaderKey) field.key;
+            String description = field.description;
+            // handle special fields that have additional representations
+            switch (key) {
+            case CHARACTERISTICS:
                 b.append(NL + description + ": " + NL);
-                b.append(IOUtil.getCharacteristics(value, "characteristics")
-                        + NL);
-            } else if (key.equals(TIME_DATE)) {
+                b.append(IOUtil.getCharacteristics(value, "characteristics"));
+                break;
+            case TIME_DATE:
                 b.append(description + ": ");
-                b.append(convertToDate(value) + NL);
-            } else if (key.equals(MACHINE)) {
+                b.append(convertToDate(value));
+                break;
+            case MACHINE:
                 b.append(description + ": ");
-                b.append(getMachineTypeString((int) value) + NL);
-            } else {
-                b.append(description + ": " + value + NL);
+                b.append(getMachineTypeString((int) value));
+                break;
+            default:
+                b.append(field.toString());
             }
+            b.append(NL);
         }
         return b.toString();
     }
@@ -125,12 +137,16 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return the machine type description
      */
     private String getMachineTypeString(int value) {
+        final int typeIndex = 1;
         try {
+            // read the specification
             Map<String, String[]> map = IOUtil.readMap("machinetype");
+            // convert value to hex string
             String key = Integer.toHexString(value);
+            // retrieve type string
             String[] ret = map.get(key);
-            if (ret != null) {
-                return ret[1];
+            if (ret != null && ret.length > typeIndex) {
+                return ret[typeIndex];
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,6 +163,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return date
      */
     private Date convertToDate(long seconds) {
+        // convert seconds to milli seconds
         long millis = seconds * 1000;
         return new Date(millis);
     }
@@ -175,12 +192,16 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return description
      */
     public static String getDescription(MachineType machine) {
+        // set indices
         int description = 1;
         int keyString = 0;
         try {
+            // read the machinetype specification
             Map<String, String[]> map = IOUtil.readMap("machinetype");
             for (String[] entry : map.values()) {
+                // check for key
                 if (entry[keyString].equals(machine.getKey())) {
+                    // correct machine type found, retrieve description
                     String result = entry[description];
                     assert result != null && result.trim().length() > 0;
                     return result;
@@ -189,8 +210,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // this should never happen
         throw new IllegalArgumentException("no description found for machine "
-                + machine); // this should never happen
+                + machine);
     }
 
     /**
@@ -204,16 +226,22 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
 
     /**
      * Returns a list with all characteristics of the file.
+     * <p>
+     * Ensures that the result is never null.
      * 
      * @return list of file characteristics
      */
     public List<FileCharacteristic> getCharacteristics() {
+        // get a list of all key strings whose flags are set
         List<String> keys = IOUtil.getCharacteristicKeys(get(CHARACTERISTICS),
                 "characteristics");
+        // init empty list
         List<FileCharacteristic> characteristics = new ArrayList<>();
+        // fetch enum type for every key string and put to list
         for (String key : keys) {
             characteristics.add(FileCharacteristic.valueOf(key));
         }
+        // ensurance
         assert characteristics != null;
         return characteristics;
     }
@@ -235,6 +263,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return list of characteristic descriptions
      */
     public List<String> getCharacteristicsDescriptions() {
+        // just forward task to IOUtil
         return IOUtil.getCharacteristicsDescriptions(get(CHARACTERISTICS),
                 "characteristics");
     }
@@ -245,18 +274,33 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return MachineType
      */
     public MachineType getMachineType() {
-        int value = (int) get(MACHINE);
+        assert get(MACHINE) == (int) get(MACHINE);
+        // 2 byte value can be casted to int
+        final int value = (int) get(MACHINE);
+        final int enumKeyIndex = 0;
         try {
+            // read the specification
             Map<String, String[]> map = IOUtil.readMap("machinetype");
+            // convert value to hex string representation, which is the key for
+            // the specification map
             String hexKey = Integer.toHexString(value);
+            // get the other values for the hex key
             String[] ret = map.get(hexKey);
+            // check if found, if not found something went really wrong
             if (ret != null) {
-                String type = ret[0].substring("IMAGE_FILE_MACHINE_".length());
+                // cut the beginning of the enum string
+                String type = ret[enumKeyIndex].substring("IMAGE_FILE_MACHINE_"
+                        .length());
+                // retrieve machine type
                 MachineType result = MachineType.valueOf(type);
-                assert result != null;
+                // There must be a matching machine type, otherwise you coded it
+                // wrong
+                Preconditions.checkState(result != null);
                 return result;
             }
         } catch (IOException e) {
+            // could not read the specification
+            logger.fatal(e);
             e.printStackTrace();
         }
         throw new IllegalArgumentException("couldn't match type to value "
@@ -278,7 +322,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return size of optional header
      */
     public int getSizeOfOptionalHeader() {
-        return (int) get(SIZE_OF_OPT_HEADER); // 2-byte value can be casted
+        assert get(SIZE_OF_OPT_HEADER) == (int) get(SIZE_OF_OPT_HEADER);
+        // 2-byte value can be casted to int
+        return (int) get(SIZE_OF_OPT_HEADER);
     }
 
     /**
@@ -287,11 +333,13 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return number of sections
      */
     public int getNumberOfSections() {
-        return (int) get(SECTION_NR); // 2-byte value can be casted
+        assert get(SECTION_NR) == (int) get(SECTION_NR);
+        // 2-byte value can be casted to int
+        return (int) get(SECTION_NR);
     }
 
     /**
-     * Creates an instance of the COFF File Header based on the headerbytes and
+     * Creates an instance of the COFF File Header based on headerbytes and
      * offset.
      * 
      * @param headerbytes
