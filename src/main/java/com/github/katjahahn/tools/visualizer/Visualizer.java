@@ -28,7 +28,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -545,18 +544,18 @@ public class Visualizer {
      */
     public static void main(String[] args) throws IOException {
         // TODO check tinyPE out of bounds pixel setting
-        File folder = new File("/home/deque/portextestfiles/badfiles/");
+        File file = new File("/home/deque/portextestfiles/badfiles/VirusShare_191b28bb42ad40340e48926f53359ff5");
         Visualizer vi = new VisualizerBuilder().build();
-        for (File file : folder.listFiles()) {
+//        for (File file : folder.listFiles()) {
             System.out.println("creating image for " + file.getName());
             final BufferedImage entropyImage = vi.createEntropyImage(file);
             final BufferedImage structureImage = vi.createImage(file);
             final BufferedImage appendedImage = ImageUtil.appendImages(
                     entropyImage, structureImage);
-            ImageIO.write(appendedImage, "png",
-                    new File("peimages/" + file.getName() + ".png"));
-        }
-        // show(appendedImage);
+//            ImageIO.write(appendedImage, "png",
+//                    new File("peimages/" + file.getName() + ".png"));
+//        }
+         show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

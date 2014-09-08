@@ -64,6 +64,8 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
   }
 
   /**
+   * Returns a list of anomalies that were found in the PE file.
+   * 
    * @return list of anomalies found
    */
   def getAnomalies: java.util.List[Anomaly] = scan.asJava
@@ -94,37 +96,14 @@ object PEAnomalyScanner {
   def newInstance(data: PEData): PEAnomalyScanner =
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
 
+  def apply(file: File): PEAnomalyScanner = newInstance(file)
+  
   def main(args: Array[String]): Unit = {
     val folder = new File("/home/deque/portextestfiles/badfiles/")
     var counter = 0
     for (file <- folder.listFiles()) {
-      val outfile = new File(file.getName() + ".png")
-      counter += 1
-      if (counter % 1000 == 0) {
-        println("files read: " + counter)
-      }
-      if (!outfile.exists()) {
-        try {
-          val data = PELoader.loadPE(file)
-          val loader = new SectionLoader(data)
-          val scanner = PEAnomalyScanner.newInstance(data)
-          val over = new Overlay(data)
-          if (!scanner.getAnomalies.asScala.filter(a => a.subtype == AnomalySubType.RESOURCE_LOOP).isEmpty) {
-//              new ReportCreator(data).printReport()
-            println(scanner.scanReport)
-//            println("has overlay: " + over.exists())
-//            println("overlay offset: " + over.getOffset() + " (0x" + java.lang.Long.toHexString(over.getOffset()) + ")")
-//            //          println(file.getName())
-//            println("file size: " + file.length() + " (0x" + java.lang.Long.toHexString(file.length) + ")")
-            val vi = new VisualizerBuilder().build();
-            val image = vi.createEntropyImage(file)
-            ImageIO.write(image, "png", outfile);
-            println()
-          }
-        } catch {
-          case e: Exception => System.err.println(e.getMessage)
-        }
-      }
+        var scanner = PEAnomalyScanner(file)
+        println(scanner.scanReport)
     }
   }
 

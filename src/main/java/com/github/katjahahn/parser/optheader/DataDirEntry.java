@@ -16,7 +16,6 @@
 package com.github.katjahahn.parser.optheader;
 
 import static com.github.katjahahn.parser.IOUtil.*;
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.parser.VirtualLocation;
 import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.google.common.base.Optional;
@@ -47,8 +47,7 @@ public class DataDirEntry {
     /**
      * The virtual address of the entry
      */
-    private final long virtualAddress; // RVA actually, but called like this in
-                                       // spec
+    private final long virtualAddress;
 
     /**
      * The size of the entry
@@ -89,9 +88,7 @@ public class DataDirEntry {
                 this.key = key;
             }
         }
-        if (key == null)
-            throw new IllegalArgumentException(
-                    "no enum constant for given field name: " + fieldName);
+        checkNotNull(key, "no enum constant for given field name: " + fieldName);
         this.virtualAddress = virtualAddress;
         this.directorySize = directorySize;
         this.tableEntryOffset = tableEntryOffset;
@@ -126,10 +123,10 @@ public class DataDirEntry {
      * @return file offset of data directory
      */
     public long getFileOffset(SectionTable table) { // TODO not in use?
-        checkArgument(table != null, "table must not be null");
+        checkArgument(table != null, "section table must not be null");
         Optional<SectionHeader> section = maybeGetSectionTableEntry(table);
         if (section.isPresent()) {
-            long sectionRVA = section.get().get(VIRTUAL_ADDRESS);
+            long sectionRVA = section.get().getAlignedVirtualAddress();
             long sectionOffset = section.get().getAlignedPointerToRaw();
             return (virtualAddress - sectionRVA) + sectionOffset;
         }
@@ -169,19 +166,21 @@ public class DataDirEntry {
     public Optional<SectionHeader> maybeGetSectionTableEntry(SectionTable table) {
         checkArgument(table != null, "table must not be null");
         List<SectionHeader> sections = table.getSectionHeaders();
-        for (SectionHeader section : sections) {
-            long vSize = section.getAlignedVirtualSize();
-            // corkami:
-            // "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
+        // loop through all section headers to check if entry is within section
+        for (SectionHeader header : sections) {
+            long vSize = header.getAlignedVirtualSize();
+            // corkami: "a section can have a null VirtualSize: in this case,
+            // only the SizeOfRawData is taken into consideration. "
             // see: https://code.google.com/p/corkami/wiki/PE#section_table
             if (vSize == 0) {
-                vSize = section.getAlignedSizeOfRaw();
+                vSize = header.getAlignedSizeOfRaw();
             }
-            long vAddress = section.get(VIRTUAL_ADDRESS);
+            long vAddress = header.getAlignedVirtualAddress();
             logger.debug("check if rva is within " + vAddress + " and "
                     + (vAddress + vSize));
-            if (rvaIsWithin(vAddress, vSize)) {
-                return Optional.of(section);
+            // return header if data entry va points into it
+            if (rvaIsWithin(new VirtualLocation(vAddress, vSize))) {
+                return Optional.of(header);
             }
         }
         logger.warn("there is no entry that matches data dir entry RVA "
@@ -189,17 +188,32 @@ public class DataDirEntry {
         return Optional.absent();
     }
 
-    private boolean rvaIsWithin(long address, long size) {
-        long endpoint = address + size;
-        return virtualAddress >= address && virtualAddress < endpoint;
+    /**
+     * Returns whether the data entry va is within the given location. (location
+     * start inclusive, location end exclusive)
+     * 
+     * @param loc
+     *            the virtual location to check
+     * @return true iff data entry va is equal to or larger than location start
+     *         and smaller than location end
+     */
+    private boolean rvaIsWithin(VirtualLocation loc) {
+        long endpoint = loc.from() + loc.size();
+        return virtualAddress >= loc.from() && virtualAddress < endpoint;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "field name: " + key + NL + "virtual address: " + virtualAddress
                 + NL + "size: " + directorySize;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -218,6 +232,9 @@ public class DataDirEntry {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         final int prime = 31;

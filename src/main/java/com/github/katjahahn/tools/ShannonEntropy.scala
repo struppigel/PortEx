@@ -53,6 +53,7 @@ class ShannonEntropy(private val data: PEData) {
    */
   def forSection(sectionNumber: Int): Double = {
     val bytes = (new SectionLoader(data)).loadSection(sectionNumber).getBytes()
+    //TODO large sections?
     entropy(bytes)
   }
 

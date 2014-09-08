@@ -25,8 +25,9 @@ import java.io.RandomAccessFile;
 import com.github.katjahahn.parser.PEModule;
 
 /**
- * Responsible for dumping the MSDOS load module.
- * 
+ * Responsible for dumping the MSDOS load module. 
+ * This class might be removed in future versions.
+ * @Beta
  * @author Katja Hahn
  * 
  */

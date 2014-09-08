@@ -33,8 +33,6 @@ import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.StandardField;
-import com.github.katjahahn.parser.msdos.MSDOSHeader;
-import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
 
 public class MSDOSHeaderTest {
 
@@ -67,7 +65,7 @@ public class MSDOSHeaderTest {
         PELoader.loadPE(new File("build.sbt"));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "not enough headerbytes for MS DOS Header")
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "not enough headerbytes for MS DOS Header")
     public void headerBytesTooShort() throws IOException {
         byte[] headerbytes = { 1, 2, 3 };
         MSDOSHeader.newInstance(headerbytes, 200);

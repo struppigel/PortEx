@@ -35,6 +35,7 @@ import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
 import com.google.common.base.Optional;
+
 /**
  * Represents the optional header of the PE file.
  * 
@@ -47,28 +48,40 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             .getLogger(OptionalHeader.class.getName());
 
     /* spec locations */
+    /** subsystem specification name */
     private static final String SUBSYSTEM_SPEC = "subsystem";
+    /** dll characteristics specification name */
     private static final String DLL_CHARACTERISTICS_SPEC = "dllcharacteristics";
+    /** standard fields specification name */
     private static final String STANDARD_SPEC = "optionalheaderstandardspec";
+    /** windows fields specification name */
     private static final String WINDOWS_SPEC = "optionalheaderwinspec";
+    /** data directories specification name */
     private static final String DATA_DIR_SPEC = "datadirectoriesspec";
+
     /**
      * Maximum size of the optional header to read all values safely is {@value}
      */
     public static final int MAX_SIZE = 240;
-    // minimum size of the optional header with magic number taken into account
-    private int minSize;
-    // maximum size estimated for NrOfRVAAndValue = 16
-    private int maxSize;
 
     /* extracted file data */
+    /** the data directory entries */
     private Map<DataDirectoryKey, DataDirEntry> dataDirEntries;
+    /** the standard fields */
     private Map<StandardFieldEntryKey, StandardField> standardFields;
+    /** the windows specific fields */
     private Map<WindowsEntryKey, StandardField> windowsFields;
 
+    /** the bytes that make up the optional header */
     private final byte[] headerbytes;
+    /** the magic number that defines a PE32 or PE32+ */
     private MagicNumber magicNumber;
-    private long rvaNumber;
+    /**
+     * the value of the NumberOfRVAAndSizes field, the number of directory
+     * entries
+     */
+    private long directoryNr;
+    /** the file offset of the optional header */
     private final long offset;
 
     /**
@@ -82,20 +95,22 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         /**
          * A PE that supports only 32-bit addresses
          */
-        PE32(0x10B),
+        PE32(0x10B, "PE32"),
         /**
          * A PE that supports up to 64-bit addresses
          */
-        PE32_PLUS(0x20B),
+        PE32_PLUS(0x20B, "PE32+"),
         /**
          * A ROM file. Note: PortEx doesn't support object files by now.
          */
-        ROM(0x107);
+        ROM(0x107, "ROM");
 
         private int value;
+        private String name;
 
-        private MagicNumber(int value) {
+        private MagicNumber(int value, String name) {
             this.value = value;
+            this.name = name;
         }
 
         /**
@@ -105,6 +120,15 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Returns the name of the magic number
+         * 
+         * @return name
+         */
+        public String getName() {
+            return name;
         }
     }
 
@@ -138,21 +162,20 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return header;
     }
 
+    /**
+     * Reads the header fields.
+     * 
+     * @throws IOException
+     */
     private void read() throws IOException {
+        // read specifications for standard fields and data directories
         Map<String, String[]> standardSpec = IOUtil.readMap(STANDARD_SPEC);
         List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);
 
+        // read magic number
         this.magicNumber = readMagicNumber(standardSpec);
 
-        if (magicNumber == MagicNumber.PE32) {
-            minSize = 100;
-            maxSize = 224;
-        } else {
-            standardSpec.remove("BASE_OF_DATA");
-            minSize = 112;
-            maxSize = 240;
-        }
-
+        /* load fields */
         loadStandardFields();
         loadWindowsSpecificFields();
         loadDataDirectories(datadirSpec);
@@ -239,11 +262,13 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return windowsFields.get(key);
     }
 
-    private void loadStandardFields()
-            throws IOException {
+    private void loadStandardFields() throws IOException {
         SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
         standardFields = IOUtil.readHeaderEntries(StandardFieldEntryKey.class,
                 format, STANDARD_SPEC, headerbytes, getOffset());
+        if (getMagicNumber() == MagicNumber.PE32_PLUS) {
+            standardFields.remove(BASE_OF_DATA);
+        }
     }
 
     private void loadDataDirectories(List<String[]> datadirSpec) {
@@ -262,7 +287,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
         int counter = 0;
         for (String[] specs : datadirSpec) {
-            if (counter >= rvaNumber) {
+            if (counter >= directoryNr) {
                 break;
             }
             int offset = Integer.parseInt(specs[offsetLoc]);
@@ -283,8 +308,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    private void loadWindowsSpecificFields()
-            throws IOException {
+    private void loadWindowsSpecificFields() throws IOException {
         int offsetLoc;
         int lengthLoc;
         final int description = 1;
@@ -302,9 +326,10 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 offsetLoc, lengthLoc);
         windowsFields = IOUtil.readHeaderEntries(WindowsEntryKey.class, format,
                 WINDOWS_SPEC, headerbytes, getOffset());
-        rvaNumber = windowsFields.get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES).value;
-        if (rvaNumber > 16) {
-            rvaNumber = 16;
+        directoryNr = windowsFields
+                .get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES).value;
+        if (directoryNr > 16) {
+            directoryNr = 16;
         }
     }
 
@@ -365,7 +390,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 b.append(description + ": " + value + " (0x"
                         + Long.toHexString(value) + ")" + NL);
                 if (key.equals(NUMBER_OF_RVA_AND_SIZES)) {
-                    rvaNumber = value;
+                    directoryNr = value;
                 }
             }
         }
@@ -385,11 +410,6 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             if (key.equals(MAGIC_NUMBER)) {
                 b.append(description + ": " + value + " --> "
                         + getMagicNumberString(magicNumber) + NL);
-            } else if (key.equals(BASE_OF_DATA)) {
-                if (magicNumber == MagicNumber.PE32) {
-                    b.append(description + ": " + value + " (0x"
-                            + Long.toHexString(value) + ")" + NL);
-                }
             } else {
                 b.append(description + ": " + value + " (0x"
                         + Long.toHexString(value) + ")" + NL);
@@ -398,12 +418,18 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return b.toString();
     }
 
-    private MagicNumber readMagicNumber(Map<String, String[]> standardSpec) {
+    private MagicNumber readMagicNumber(Map<String, String[]> standardSpec)
+            throws IOException {
         int offset = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[1]);
         int length = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[2]);
         long value = getBytesLongValue(headerbytes, offset, length);
         for (MagicNumber num : MagicNumber.values()) {
             if (num.getValue() == value) {
+                if (num == MagicNumber.ROM) {
+                    throw new IOException("Magic number is "
+                            + magicNumber.getName()
+                            + ", but PortEx does not support object files.");
+                }
                 return num;
             }
         }
@@ -555,14 +581,30 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         return offset;
     }
 
+    /**
+     * Returns minimum size of optional header based on magic number
+     * 
+     * @return minimum size of optional header
+     */
     public int getMinSize() {
-        return minSize;
+        return getMagicNumber() == MagicNumber.PE32 ? 100 : 112;
     }
 
+    /**
+     * Returns maximum size estimated for NrOfRVAAndValue = 16 based on magic
+     * number
+     * 
+     * @return maximum size of optional header in bytes
+     */
     public int getMaxSize() {
-        return maxSize;
+        return getMagicNumber() == MagicNumber.PE32 ? 224 : 240;
     }
 
+    /**
+     * TODO return actual size instead of max size
+     * 
+     * @return number of header bytes
+     */
     public long getSize() {
         return headerbytes.length;
     }

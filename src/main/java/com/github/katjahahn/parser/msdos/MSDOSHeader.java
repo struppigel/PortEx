@@ -14,6 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 package com.github.katjahahn.parser.msdos;
+
 import static com.github.katjahahn.parser.IOUtil.*;
 
 import java.io.IOException;
@@ -21,10 +22,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.katjahahn.parser.Header;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
+import com.google.common.base.Preconditions;
 
 /**
  * Fetches values from the MSDOS header of the PE.
@@ -34,20 +39,30 @@ import com.github.katjahahn.parser.StandardField;
  */
 public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 
+    private static final Logger logger = LogManager.getLogger(MSDOSHeader.class
+            .getName());
+
     /**
-     * The size of the formatted header is {@value}
+     * The size of the formatted header is {@value} bytes
      * <p>
      * Note: The actual header may be larger, containing optional values.
      */
     public static final int FORMATTED_HEADER_SIZE = 64;
+    /** The size one paragraph in bytes */
     private static final int PARAGRAPH_SIZE = 16; // in Byte
 
+    /** the bytes of the MZ signature */
     private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
+    /** the specification name */
     private static final String SPEC_LOCATION = "msdosheaderspec";
+    /** the header fields */
     private Map<MSDOSHeaderKey, StandardField> headerData;
 
+    /** the bytes that make up the header */
     private final byte[] headerbytes;
+    /** the file offset of the header */
     private final long offset = 0;
+    /** the offset of the PE signature */
     private final long peSigOffset;
 
     /**
@@ -70,14 +85,27 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
         return offset;
     }
 
-    // TODO remove read
+    /**
+     * Reads the header fields.
+     */
     private void read() throws IOException {
+        // check headerbytes
+        Preconditions.checkState(headerbytes.length >= 28,
+                "not enough headerbytes for MS DOS Header");
+        // check MZ signature
         if (!hasSignature(headerbytes)) {
             throw new IOException("No MZ Signature found");
         }
+        // define specification format
         SpecificationFormat format = new SpecificationFormat(0, 3, 1, 2);
-        headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format,
-                SPEC_LOCATION, headerbytes, getOffset());
+        // read header fields
+        try {
+            headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format,
+                    SPEC_LOCATION, headerbytes, getOffset());
+        } catch (IOException e) {
+            logger.error("unable to read the msdos specification: "
+                    + e.getMessage());
+        }
     }
 
     /**
@@ -98,19 +126,13 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 
     private boolean hasSignature(byte[] headerbytes) {
         assert headerbytes != null;
-        // TODO collapsed MSDOS header? And wrong responsibility to check this
-        // here!
-        if (headerbytes.length < 28) {
-            throw new IllegalArgumentException(
-                    "not enough headerbytes for MS DOS Header");
-        } else {
-            for (int i = 0; i < MZ_SIGNATURE.length; i++) {
-                if (MZ_SIGNATURE[i] != headerbytes[i]) {
-                    return false;
-                }
+        // check each signature byte
+        for (int i = 0; i < MZ_SIGNATURE.length; i++) {
+            if (MZ_SIGNATURE[i] != headerbytes[i]) {
+                return false;
             }
-            return true;
         }
+        return true;
     }
 
     /**
@@ -160,10 +182,13 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      * Creates and returns an instance of the MSDOSHeader with the given bytes
      * and the file offset of the PE signature.
      * 
-     * @param headerbytes the bytes that make up the MSDOSHeader
-     * @param peSigOffset file offset to the PE signature
+     * @param headerbytes
+     *            the bytes that make up the MSDOSHeader
+     * @param peSigOffset
+     *            file offset to the PE signature
      * @return MSDOSHeader instance
-     * @throws IOException if header can not be read.
+     * @throws IOException
+     *             if header can not be read.
      */
     public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset)
             throws IOException {

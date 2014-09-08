@@ -42,13 +42,15 @@ import com.google.common.base.Preconditions;
  */
 public class COFFFileHeader extends Header<COFFHeaderKey> {
 
-    /**
-     * The size of the header is {@value} .
-     */
+    /** the size of the header is {@value} */
     public static final int HEADER_SIZE = 20;
+    /** the specification name */
     private static final String COFF_SPEC_FILE = "coffheaderspec";
+    /** the bytes that make up the header data */
     private final byte[] headerbytes;
+    /** the header fields */
     private Map<COFFHeaderKey, StandardField> data;
+    /** the file offset of the header */
     private final long offset;
 
     private static final Logger logger = LogManager
@@ -80,7 +82,10 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         return offset;
     }
 
-    private void read() throws IOException {
+    /**
+     * Reads the header's fields.
+     */
+    private void read() {
         // define the specification format
         final int key = 0;
         final int description = 1;
@@ -89,9 +94,12 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         SpecificationFormat format = new SpecificationFormat(key, description,
                 offset, length);
         // read the header data
-        data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
-                COFF_SPEC_FILE, headerbytes, getOffset());
-
+        try {
+            data = IOUtil.readHeaderEntries(COFFHeaderKey.class, format,
+                    COFF_SPEC_FILE, headerbytes, getOffset());
+        } catch (IOException e) {
+            logger.error("unable to read coff specification: " + e.getMessage());
+        }
     }
 
     /**
@@ -347,10 +355,8 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @param offset
      *            the file offset to the beginning of the header
      * @return COFFFileHeader instance
-     * @throws IOException
      */
-    public static COFFFileHeader newInstance(byte[] headerbytes, long offset)
-            throws IOException {
+    public static COFFFileHeader newInstance(byte[] headerbytes, long offset) {
         COFFFileHeader header = new COFFFileHeader(headerbytes, offset);
         header.read();
         return header;

@@ -107,9 +107,8 @@ public final class IOUtil {
      *            the concrete subclass of the HeaderKey
      * @param specFormat
      *            the format of the specification file
-     * @param specName
-     *            the name of the specification file (not the path to it), must
-     *            not be empty.
+     * @param specification
+     *            the specification to be used for reading the fields
      * @param headerbytes
      *            the bytes of the header
      * @param headerOffset
@@ -117,21 +116,16 @@ public final class IOUtil {
      * @param <T>
      *            the type for the header key that the returned map shall use
      * @return header entries
-     * @throws IOException
-     *             if specification file can not be read
      */
     public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
-            Class<T> clazz, SpecificationFormat specFormat, String specName,
-            byte[] headerbytes, long headerOffset) throws IOException {
+            Class<T> clazz, SpecificationFormat specFormat, List<String[]> specification,
+            byte[] headerbytes, long headerOffset) {
         assert clazz != null && specFormat != null && headerbytes != null;
-        assert specName != null && specName.trim().length() > 0;
 
         /* initializers */
         // init a full map with default fields. Fields that can be read are
         // changed subsequently
         Map<T, StandardField> data = initFullEnumMap(clazz);
-        // get the specification
-        List<String[]> specification = readArray(specName);
 
         // use the specification format to get the right indices
         int descriptionIndex = specFormat.description;
@@ -170,6 +164,42 @@ public final class IOUtil {
         }
         assert data != null;
         return data;
+    }
+    
+    /**
+     * Reads the entries of a Header and returns a map containing the
+     * {@link HeaderKey} as key and {@link StandardField} as value.
+     * <p>
+     * The map is initialized with all possible HeaderKeys of the subtype and
+     * empty fields.
+     * <p>
+     * The passed instances must not be null and the specName must not be empty.
+     * 
+     * @param clazz
+     *            the concrete subclass of the HeaderKey
+     * @param specFormat
+     *            the format of the specification file
+     * @param specName
+     *            the name of the specification file (not the path to it), must
+     *            not be empty.
+     * @param headerbytes
+     *            the bytes of the header
+     * @param headerOffset
+     *            the file offset to the start of the headerbytes
+     * @param <T>
+     *            the type for the header key that the returned map shall use
+     * @return header entries
+     * @throws IOException
+     *             if specification file can not be read
+     */
+    public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
+            Class<T> clazz, SpecificationFormat specFormat, String specName,
+            byte[] headerbytes, long headerOffset) throws IOException {
+        assert specName != null && specName.trim().length() > 0;
+        // get the specification
+        List<String[]> specification = readArray(specName);
+        // call readHeaderEntries for specification
+        return readHeaderEntries(clazz, specFormat, specification, headerbytes, headerOffset);
     }
 
     /**

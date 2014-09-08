@@ -34,16 +34,11 @@ import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.StandardField;
-import com.github.katjahahn.parser.optheader.DataDirEntry;
-import com.github.katjahahn.parser.optheader.DataDirectoryKey;
-import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
-import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.google.common.base.Optional;
 
 public class OptionalHeaderTest {
-    
+
     private static final Logger logger = LogManager
             .getLogger(OptionalHeaderTest.class.getName());
 
@@ -74,7 +69,7 @@ public class OptionalHeaderTest {
             OptionalHeader opt = pedatum.getOptionalHeader();
             Collection<DataDirEntry> peDataEntries = opt.getDataDirEntries()
                     .values();
-            
+
             assertEquals(peDataEntries.size(), testDirs.size());
             for (DataDirEntry expected : testDirs) {
                 assertTrue(peDataEntries.contains(expected));
@@ -83,15 +78,16 @@ public class OptionalHeaderTest {
     }
 
     @Test
-	public void getDataDirEntry() {
-		OptionalHeader header = pedata.get("strings.exe").getOptionalHeader();
-		DataDirectoryKey[] existant = { IMPORT_TABLE, RESOURCE_TABLE,
-				CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT };
-		for (DataDirectoryKey key : DataDirectoryKey.values()) {
-			Optional<DataDirEntry> entry = header.maybeGetDataDirEntry(key);
-			assertTrue((entry.isPresent() && isIn(existant, key)) || !entry.isPresent());
-		}
-	}
+    public void getDataDirEntry() {
+        OptionalHeader header = pedata.get("strings.exe").getOptionalHeader();
+        DataDirectoryKey[] existant = { IMPORT_TABLE, RESOURCE_TABLE,
+                CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT };
+        for (DataDirectoryKey key : DataDirectoryKey.values()) {
+            Optional<DataDirEntry> entry = header.maybeGetDataDirEntry(key);
+            assertTrue((entry.isPresent() && isIn(existant, key))
+                    || !entry.isPresent());
+        }
+    }
 
     private <T> boolean isIn(T[] array, T item) {
         for (T t : array) {
@@ -154,6 +150,23 @@ public class OptionalHeaderTest {
         }
     }
 
+    @Test
+    public void baseOfData() {
+        for (TestData testdatum : testdata) {
+            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
+            OptionalHeader opt = pedatum.getOptionalHeader();
+            Map<StandardFieldEntryKey, StandardField> standardFields = opt
+                    .getStandardFields();
+            if (opt.getMagicNumber() == MagicNumber.PE32_PLUS) {
+                assertFalse(standardFields
+                        .containsKey(StandardFieldEntryKey.BASE_OF_DATA));
+            } else {
+                assertTrue(standardFields
+                        .containsKey(StandardFieldEntryKey.BASE_OF_DATA));
+            }
+        }
+    }
+
     // TODO in Oberklasse auslagern, ebenso prepare
     private long convertToLong(String value) {
         if (value.startsWith("0x")) {
@@ -169,12 +182,16 @@ public class OptionalHeaderTest {
         for (PEData pedatum : pedata.values()) {
             Collection<StandardField> list = pedatum.getOptionalHeader()
                     .getStandardFields().values();
+            MagicNumber magic = pedatum.getOptionalHeader().getMagicNumber();
             assertNotNull(list);
             int expected = StandardFieldEntryKey.values().length;
+            if (magic == MagicNumber.PE32_PLUS) {
+                expected--;
+            }
             int actual = list.size();
             if (actual != expected) {
                 for (StandardField entry : list) {
-                    logger.error(entry.description + " | " + entry.key); // debug purposes
+                    logger.error(entry.description + " | " + entry.key);
                 }
             }
             assertEquals(actual, expected);
