@@ -29,7 +29,7 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 
 /**
- * Recognizes and dumps overlay in a PE file.
+ * Detects and dumps overlay in of PE file.
  * 
  * @author Katja Hahn
  * 
@@ -39,29 +39,6 @@ public class Overlay {
     private final File file;
     private Long offset;
     private PEData data;
-
-    public static void main(String[] args) throws IOException {
-        File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb");
-        PEData data = PELoader.loadPE(file);
-        System.out.println(data);
-        Overlay overlay = new Overlay(file);
-        long offset = overlay.getOffset();
-        System.out.println("offset: " + offset);
-        System.out.println("file length: " + file.length());
-        SectionLoader loader = new SectionLoader(data);
-        SectionTable table = data.getSectionTable();
-        for (SectionHeader header : table.getSectionHeaders()) {
-            long start = header.getAlignedPointerToRaw();
-            long end = loader.getReadSize(header) + start;
-            System.out.println(header.getNumber() + ". " + header.getName()
-                    + " start: " + start + " end: " + end);
-            long vStart = header.get(SectionHeaderKey.VIRTUAL_ADDRESS);
-            long vEnd = header.getAlignedVirtualSize() + vStart;
-            System.out.println("virtual start: " + vStart + " virtual end: "
-                    + vEnd);
-        }
-    }
 
     /**
      * Creates an Overlay instance with the input file specified
@@ -104,13 +81,14 @@ public class Overlay {
             offset = 0L;
             List<SectionHeader> headers = table.getSectionHeaders();
             // TODO low alingment check instead?
-            if (headers.size() == 0) { // offset for sectionless PE's
-                offset = file.length();
-            }
+//            if (headers.size() == 0) { // offset for sectionless PE's
+//                offset = file.length();
+//            }
             for (SectionHeader section : headers) {
                 long alignedPointerToRaw = section.getAlignedPointerToRaw();
                 // ignore invalid sections
-                if (alignedPointerToRaw >= file.length()) {
+                // corkami: "if a section starts at [unaligned] offset 0, it's invalid."
+                if (alignedPointerToRaw >= file.length() || section.get(SectionHeaderKey.POINTER_TO_RAW_DATA) == 0) {
                     continue;
                 }
                 long readSize = loader.getReadSize(section);

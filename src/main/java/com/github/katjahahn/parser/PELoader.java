@@ -29,6 +29,7 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.tools.anomalies.AnomalySubType;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -194,6 +195,7 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException {
         logger.entry();
+        System.out.println(AnomalySubType.values().length);
         File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
         PEData data = PELoader.loadPE(file);
         System.out.println(data.getCOFFFileHeader().getInfo());
