@@ -70,7 +70,51 @@ public final class IOUtil {
      */
     private IOUtil() {
     }
-    
+
+    /**
+     * Loads the bytes at the offset into a byte array with the given length
+     * using the raf. If EOF, the byte array is zero padded.
+     * 
+     * @param offset
+     *            to seek
+     * @param length
+     *            of the byte array, equals number of bytes read
+     * @param raf
+     *            the random access file
+     * @return byte array
+     * @throws IOException
+     *             if unable to read the bytes
+     */
+    public static byte[] loadBytesSafely(long offset, int length,
+            RandomAccessFile raf) throws IOException {
+        assert length >= 0;
+        raf.seek(offset);
+        int readsize = length;
+        if (readsize + offset > raf.length()) {
+            readsize = (int) (raf.length() - offset);
+        }
+        byte[] bytes = new byte[readsize];
+        raf.readFully(bytes);
+        padBytes(bytes, length);
+        return bytes;
+    }
+
+    /**
+     * Return array with length size, if length is greater than the previous
+     * size, the array is zero-padded at the end.
+     * 
+     * @param bytes
+     * @param length
+     * @return zero-padded array with length size
+     */
+    private static byte[] padBytes(byte[] bytes, int length) {
+        byte[] padded = new byte[length];
+        for (int i = 0; i < bytes.length; i++) {
+            padded[i] = bytes[i];
+        }
+        return padded;
+    }
+
     /**
      * Loads the bytes at the offset into a byte array with the given length
      * using the raf.
@@ -85,8 +129,8 @@ public final class IOUtil {
      * @throws IOException
      *             if unable to read the bytes
      */
-    public static byte[] loadBytes(long offset, int length,
-            RandomAccessFile raf) throws IOException {
+    public static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
+            throws IOException {
         assert length >= 0;
         raf.seek(offset);
         byte[] bytes = new byte[length];
@@ -118,8 +162,8 @@ public final class IOUtil {
      * @return header entries
      */
     public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
-            Class<T> clazz, SpecificationFormat specFormat, List<String[]> specification,
-            byte[] headerbytes, long headerOffset) {
+            Class<T> clazz, SpecificationFormat specFormat,
+            List<String[]> specification, byte[] headerbytes, long headerOffset) {
         assert clazz != null && specFormat != null && headerbytes != null;
 
         /* initializers */
@@ -165,7 +209,7 @@ public final class IOUtil {
         assert data != null;
         return data;
     }
-    
+
     /**
      * Reads the entries of a Header and returns a map containing the
      * {@link HeaderKey} as key and {@link StandardField} as value.
@@ -199,7 +243,8 @@ public final class IOUtil {
         // get the specification
         List<String[]> specification = readArray(specName);
         // call readHeaderEntries for specification
-        return readHeaderEntries(clazz, specFormat, specification, headerbytes, headerOffset);
+        return readHeaderEntries(clazz, specFormat, specification, headerbytes,
+                headerOffset);
     }
 
     /**
@@ -525,7 +570,7 @@ public final class IOUtil {
                     long mask = Long.parseLong(entry.getKey(), 16);
                     // check if flag is set
                     if ((value & mask) != 0) {
-                        //add description for this characteristic
+                        // add description for this characteristic
                         b.append("\t* " + entry.getValue()[1] + NL);
                     }
                 } catch (NumberFormatException e) {

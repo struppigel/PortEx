@@ -33,6 +33,8 @@ import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.PhysicalLocation
+import org.apache.logging.log4j.LogManager
+import com.github.katjahahn.tools.visualizer.Visualizer
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -180,6 +182,8 @@ class ExportSection private (
 }
 
 object ExportSection {
+  
+  val logger = LogManager.getLogger(ExportSection.getClass().getName());
 
   def main(args: Array[String]): Unit = {
     val data = PELoader.loadPE(new File("/home/deque/portextestfiles/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
@@ -282,8 +286,12 @@ object ExportSection {
     }
 
     assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
-    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
-      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+//    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
+//      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+    if(!(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
+      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))){
+      logger.warn("corrup ordinal entries");
+    }
 
     ordEntries.toList ::: nameEntries.toList
   }

@@ -311,8 +311,8 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             logger.fatal(e);
             e.printStackTrace();
         }
-        throw new IllegalArgumentException("couldn't match type to value "
-                + value);
+        logger.warn("couldn't match type to value " + value);
+        return MachineType.UNKNOWN;
     }
 
     /**

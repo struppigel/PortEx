@@ -14,7 +14,8 @@ public enum RelocType implements Characteristic {
     RESERVED_1("Reserved, must be zero", true),
     IMAGE_REL_BASED_ARM_MOV32T("ARM mov 32 T"),
     IMAGE_REL_BASED_MIPS_JMPADDR16("MIPS16 jump instruction"),
-    IMAGE_REL_BASED_DIR64("64-bit field");
+    IMAGE_REL_BASED_DIR64("64-bit field"),
+    UNKNOWN("unknown type, corrupt entry");
     
     private String description;
     private boolean reserved = false;

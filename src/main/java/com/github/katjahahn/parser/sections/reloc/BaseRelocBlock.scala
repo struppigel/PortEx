@@ -5,6 +5,8 @@ import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.PhysicalLocation
+import org.apache.logging.log4j.LogManager
+import com.github.katjahahn.parser.PELoader
 
 class BaseRelocBlock(
   val fileOffset: Long,
@@ -31,6 +33,9 @@ class BlockEntry(val relocType: RelocType, val offset: Long) {
 }
 
 object BlockEntry {
+  
+  private val logger = LogManager.getLogger(BlockEntry.getClass().getName());
+
   def apply(value: Int): BlockEntry = {
     val typeMask = 0xf000
     val offsetMask = 0x0fff
@@ -44,6 +49,9 @@ object BlockEntry {
     val typeString = IOUtil.getEnumTypeString(value, "basereloctypes")
     if (typeString.isPresent) {
       RelocType.valueOf(typeString.get)
-    } else throw new FileFormatException("unknown reloc type for value: " + value)
+    } else {
+      logger.warn("unknown reloc type for value: " + value)
+      RelocType.UNKNOWN
+    }
   }
 }

@@ -28,8 +28,9 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.anomalies.AnomalySubType;
+import com.github.katjahahn.tools.ReportCreator;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -101,7 +102,7 @@ public final class PELoader {
      */
     private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf, long peSigOffset)
             throws IOException {
-        byte[] headerbytes = loadBytes(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
+        byte[] headerbytes = loadBytesSafely(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
                 raf);
         return MSDOSHeader.newInstance(headerbytes, peSigOffset);
     }
@@ -128,6 +129,13 @@ public final class PELoader {
         // get entries, so you can determine the size
         int numberOfEntries = (int) coff.getNumberOfSections();
         int size = SectionTable.ENTRY_SIZE * numberOfEntries;
+        if (size + offset > file.length()) {
+            size = (int) (file.length() - offset);
+        }
+        if (size <= 0) {
+            logger.warn("Unable to parse Section table, offset outside the file");
+            return new SectionTable(new byte[0], 0, offset);
+        }
         // read bytes
         byte[] tableBytes = loadBytes(offset, size, raf);
         // construct header
@@ -177,7 +185,8 @@ public final class PELoader {
         logger.info("Optional Header offset: " + offset);
         // set the maximum size for the bytes to read
         int size = OptionalHeader.MAX_SIZE;
-        // ...with the exception of reaching EOF, this is rare, but see tinype.exe
+        // ...with the exception of reaching EOF, this is rare, but see
+        // tinype.exe
         if (size + offset > file.length()) {
             // cut size at EOF
             size = (int) (file.length() - offset);
@@ -195,21 +204,33 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException {
         logger.entry();
-        System.out.println(AnomalySubType.values().length);
-        File file = new File("/home/deque/portextestfiles/testfiles/strings.exe");
-        PEData data = PELoader.loadPE(file);
-        System.out.println(data.getCOFFFileHeader().getInfo());
-//            ReportCreator.newInstance(file).printReport();
-//            SectionLoader loader = new SectionLoader(data);
-//            try {
-//                Optional<DebugSection> maybeDebug = loader
-//                        .maybeLoadDebugSection();
-//                if (maybeDebug.isPresent()) {
-//                    System.out.println(file.getName());
-//                    System.out.println(maybeDebug.get().getInfo());
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+        File file = new File(
+                "/home/deque/portextestfiles/testfiles/Lab13-01.exe");
+        // PEData data = PELoader.loadPE(file);
+        // System.out.println(data.getCOFFFileHeader().getInfo());
+        ReportCreator reporter = ReportCreator.newInstance(file);
+        PEData data = loadPE(file);
+        long value = data.getSectionTable().getSectionHeaderByName(".rsrc").get().get(SectionHeaderKey.CHARACTERISTICS);
+        System.out.println(value);
+        //        System.out.println(reporter.headerReports());
+//        System.out.println(reporter.importsReport());
+//        System.out.println(reporter.exportsReport());
+//        System.out.println(reporter.resourcesReport());
+//        System.out.println(reporter.debugReport());
+//        System.out.println(reporter.delayImportsReport());
+////        System.out.println(reporter.relocReport());
+//        System.out.println(reporter.additionalReports());
+//        System.out.println("done");
+        // SectionLoader loader = new SectionLoader(data);
+        // try {
+        // Optional<DebugSection> maybeDebug = loader
+        // .maybeLoadDebugSection();
+        // if (maybeDebug.isPresent()) {
+        // System.out.println(file.getName());
+        // System.out.println(maybeDebug.get().getInfo());
+        // }
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
     }
 }

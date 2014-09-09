@@ -58,15 +58,15 @@ public class SectionTable implements PEModule {
 
     private List<SectionHeader> headers;
     private final byte[] sectionTableBytes;
-    private final int numberOfEntries;
+    private int numberOfEntries;
     private Map<String, String[]> specification;
 
     private final long offset;
 
     /**
      * creates the SectionTable with the bytes of the table and the number of
-     * entries
-     * TODO create newInstance method
+     * entries TODO create newInstance method
+     * 
      * @param sectionTableBytes
      *            the bytes that make up the section table
      * @param numberOfEntries
@@ -92,9 +92,19 @@ public class SectionTable implements PEModule {
         for (int i = 0; i < numberOfEntries; i++) {
             int sectionNumber = i + 1;
             int sectionOffset = i * ENTRY_SIZE;
-
+            int headerbytesEnd = sectionOffset + ENTRY_SIZE;
+            // next two steps done because of d_resource.dll
+            // TODO read table from memory mapped pe, this would help here as well
+            if (sectionOffset >= sectionTableBytes.length) {
+                //TODO correct sectionNumer
+                this.numberOfEntries = i;
+                break;
+            }
+            if (headerbytesEnd > sectionTableBytes.length) {
+                headerbytesEnd = sectionTableBytes.length;
+            }
             byte[] headerbytes = Arrays.copyOfRange(sectionTableBytes,
-                    sectionOffset, sectionOffset + ENTRY_SIZE);
+                    sectionOffset, headerbytesEnd);
 
             SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
             Map<SectionHeaderKey, StandardField> entries = IOUtil
@@ -110,9 +120,10 @@ public class SectionTable implements PEModule {
         }
     }
 
-    /**or too small for the given file
-     * Returns all entries of the section table as a list. They are in the same
-     * order as they are within the Section Table.
+    /**
+     * or too small for the given file Returns all entries of the section table
+     * as a list. They are in the same order as they are within the Section
+     * Table.
      * 
      * @return ordered section table entries
      */
@@ -206,7 +217,8 @@ public class SectionTable implements PEModule {
                         + NL
                         + IOUtil.getCharacteristics(value,
                                 "sectioncharacteristics") + NL);
-            } else if (key.equals("NAME")) {
+            } else 
+                if (key.equals("NAME")) {
                 b.append(specs[0] + ": " + getUTF8String(section) + NL);
 
             } else {

@@ -37,12 +37,14 @@ public class SectionTableTest {
         assertNotNull(info);
         assertTrue(info.length() > 0);
     }
-    
-//    @Test slows down performance too much
-//    public void maxSect() throws IOException {
-//        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/unusualfiles/corkami/65535sects.exe"));
-//        System.out.println("Number of sections read: " + data.getSectionTable().getNumberOfSections());
-//    }
+
+    // @Test slows down performance too much
+    // public void maxSect() throws IOException {
+    // PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR +
+    // "/unusualfiles/corkami/65535sects.exe"));
+    // System.out.println("Number of sections read: " +
+    // data.getSectionTable().getNumberOfSections());
+    // }
 
     @Test
     public void getPointerToRawData() {

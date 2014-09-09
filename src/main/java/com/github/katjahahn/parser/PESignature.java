@@ -82,11 +82,12 @@ public class PESignature {
      */
     public void read() throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            // check that offset location bytes are within the file
-            throwIf(file.length() < PE_OFFSET_LOCATION
-                    + PE_OFFSET_LOCATION_SIZE);
+            // check that offset location is within the file
+            // a truncated signature has to be taken into account and allowed
+            // see d_nonnull.dll
+            throwIf(file.length() < PE_OFFSET_LOCATION);
             /* read pe signature offset at offset location */
-            byte[] offsetBytes = loadBytes(PE_OFFSET_LOCATION,
+            byte[] offsetBytes = loadBytesSafely(PE_OFFSET_LOCATION,
                     PE_OFFSET_LOCATION_SIZE, raf);
             // save signature offset
             peOffset = Optional.of((long) bytesToInt(offsetBytes));

@@ -37,7 +37,7 @@ class RelocationSection(
   override def isEmpty(): Boolean = blocks.isEmpty
 
   override def getOffset(): Long = 0
-  
+
   def getRelocBlocks(): java.util.List[BaseRelocBlock] = blocks.asJava
 
   def getPhysicalLocations(): java.util.List[PhysicalLocation] =
@@ -56,10 +56,15 @@ object RelocationSection {
 
   private def readBlocks(tableSize: Long, loadInfo: LoadInfo): List[BaseRelocBlock] = {
     val mmBytes = loadInfo.memoryMapped
+    // set maximum to avoid endless parsing, e.g., in foldedhdr.exe
+    val maxblocks = 10000
+    // set maximum to avoid almost endless parsing, e.g., in reloccrypt.exe
+    // TODO set as public value ?
+    val maxrelocsPerBlock = 10000
     val va = loadInfo.va
     val blocks = ListBuffer[BaseRelocBlock]()
     var offset = 0
-    while (offset < tableSize) {
+    while (offset < tableSize && blocks.size < maxblocks) {
       val fileOffset = mmBytes.virtToPhysAddress(va + offset)
       val length = 4
       val fieldSize = 2
@@ -70,8 +75,10 @@ object RelocationSection {
       val fields = ListBuffer[BlockEntry]()
       val nrOfRelocs = ((blockSize - (length * 2)) / fieldSize).toInt
       for (i <- 0 until nrOfRelocs) {
-        val fieldValue = mmBytes.getBytesIntValue(va + offset, fieldSize)
-        fields += BlockEntry(fieldValue)
+        if (fields.size < maxrelocsPerBlock) { 
+          val fieldValue = mmBytes.getBytesIntValue(va + offset, fieldSize)
+          fields += BlockEntry(fieldValue)
+        }
         offset += fieldSize
       }
       blocks += new BaseRelocBlock(fileOffset, pageRVA, blockSize, fields.toList)

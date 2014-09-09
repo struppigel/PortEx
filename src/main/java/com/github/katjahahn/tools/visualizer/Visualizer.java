@@ -24,10 +24,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,6 +37,8 @@ import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import scala.actors.threadpool.Arrays;
 
 import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.PEData;
@@ -198,6 +202,25 @@ public class Visualizer {
 
         drawSections();
 
+
+        Overlay overlay = new Overlay(data);
+        if (overlay.exists()) {
+            long overlayOffset = overlay.getOffset();
+            drawPixels(colorMap.get(OVERLAY), overlayOffset,
+                    withMinLength(overlay.getSize()));
+            overlayAvailable = true;
+        }
+
+        drawPEHeaders();
+        drawSpecials();
+        drawLegend();
+        assert image != null;
+        assert image.getWidth() == legendWidth + fileWidth;
+        assert image.getHeight() == height;
+        return image;
+    }
+
+    private void drawPEHeaders() {
         long msdosOffset = 0;
         long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
         drawPixels(colorMap.get(MSDOS_HEADER), msdosOffset, msdosSize);
@@ -216,22 +239,6 @@ public class Visualizer {
             tableSize = withMinLength(tableSize);
             drawPixels(colorMap.get(SECTION_TABLE), tableOffset, tableSize);
         }
-
-        Overlay overlay = new Overlay(data);
-        if (overlay.exists()) {
-            long overlayOffset = overlay.getOffset();
-            drawPixels(colorMap.get(OVERLAY), overlayOffset,
-                    withMinLength(overlay.getSize()));
-            overlayAvailable = true;
-        }
-
-        drawSpecials();
-        // drawAnomalies();
-        drawLegend();
-        assert image != null;
-        assert image.getWidth() == legendWidth + fileWidth;
-        assert image.getHeight() == height;
-        return image;
     }
 
     // TODO create own visualizer for that task, maybe with decorator pattern
@@ -451,7 +458,7 @@ public class Visualizer {
                 try {
                     image.setRGB(x, y, color.getRGB());
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    logger.error("tried to set x/y = " + x + "/" + y);
+                    logger.warn("tried to set x/y = " + x + "/" + y);
                 }
             }
         }
@@ -479,18 +486,18 @@ public class Visualizer {
     // TODO temporary almost-duplicate of drawPixels
     private void drawCrosses(Color color, long fileOffset, long fileLength) {
         assert color != null;
-        int pixelStart = getPixelNumber(fileOffset);
+        long pixelStart = getPixelNumber(fileOffset);
         // necessary to avoid gaps due to rounding issues (you can't just do
         // getPixelNumber(fileLength))
-        int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
-        int pixelMax = getXPixels() * getYPixels();
+        long pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
+        long pixelMax = getXPixels() * getYPixels();
         if (pixelStart > pixelMax) {
             logger.error("too many pixels, max is: " + pixelMax
                     + " and trying to set: " + pixelStart);
         }
-        for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
-            int x = (i % getXPixels()) * pixelSize;
-            int y = (i / getXPixels()) * pixelSize;
+        for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
+            int x = (int) ((i % getXPixels()) * pixelSize);
+            int y = (int) ((i / getXPixels()) * pixelSize);
             int sizemodifier = pixelated ? 2 : 1;
             drawCross(color, x, y, pixelSize * sizemodifier, pixelSize
                     * sizemodifier);
@@ -505,18 +512,18 @@ public class Visualizer {
     private void drawPixels(Color color, long fileOffset, long fileLength,
             int additionalGap) {
         assert color != null;
-        int pixelStart = getPixelNumber(fileOffset);
+        long pixelStart = getPixelNumber(fileOffset);
         // necessary to avoid gaps due to rounding issues (you can't just do
         // getPixelNumber(fileLength))
-        int pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
-        int pixelMax = getXPixels() * getYPixels();
-        if (pixelStart >= pixelMax) {
+        long pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
+        long pixelMax = getXPixels() * getYPixels();
+        if (pixelStart > pixelMax) {
             logger.error("too many pixels, max is: " + pixelMax
                     + " and trying to set: " + pixelStart);
         }
-        for (int i = pixelStart; i < pixelStart + pixelLength; i++) {
-            int x = (i % getXPixels()) * pixelSize;
-            int y = (i / getXPixels()) * pixelSize;
+        for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
+            int x = (int) ((i % getXPixels()) * pixelSize);
+            int y = (int) ((i / getXPixels()) * pixelSize);
             int gap = pixelated ? additionalGap + 1 : additionalGap;
             int sizemodifier = pixelated ? 2 : 1;
             drawRect(color, x + gap, y + gap, pixelSize - gap * sizemodifier,
@@ -527,10 +534,10 @@ public class Visualizer {
         // * pixelSize,(pixelStart / xPixels) * pixelSize );
     }
 
-    private int getPixelNumber(long fileOffset) {
+    private long getPixelNumber(long fileOffset) {
         assert fileOffset >= 0;
         long fileSize = data.getFile().length();
-        int result = (int) Math.round(fileOffset
+        long result = Math.round(fileOffset
                 * (getXPixels() * getYPixels()) / (double) fileSize);
         assert result >= 0;
         return result;
@@ -543,19 +550,39 @@ public class Visualizer {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        // TODO check tinyPE out of bounds pixel setting
-        File file = new File("/home/deque/portextestfiles/badfiles/VirusShare_191b28bb42ad40340e48926f53359ff5");
-        Visualizer vi = new VisualizerBuilder().build();
-//        for (File file : folder.listFiles()) {
-            System.out.println("creating image for " + file.getName());
-            final BufferedImage entropyImage = vi.createEntropyImage(file);
-            final BufferedImage structureImage = vi.createImage(file);
-            final BufferedImage appendedImage = ImageUtil.appendImages(
-                    entropyImage, structureImage);
-//            ImageIO.write(appendedImage, "png",
-//                    new File("peimages/" + file.getName() + ".png"));
-//        }
-         show(appendedImage);
+        File folder = new File(
+                "/home/deque/portextestfiles/unusualfiles/corkami/");
+        List<String> problemfiles = new ArrayList<>();
+        // TODO these are problemfiles, handle them!
+        String[] problem = {"foldedhdr.exe", "impbyord.exe", "maxvals.exe", "65535sects.exe"};
+        List<String> moreproblemfiles = Arrays.asList(problem);
+        for (File file : folder.listFiles()) {
+            try {
+                if (moreproblemfiles.contains(file.getName()))
+                    continue;
+                VisualizerBuilder builder = new VisualizerBuilder();
+                if(file.length() < 300) {
+                    builder.setFileWidth(150).setBytesPerPixel(1, file.length());
+                }
+                Visualizer vi = builder.build();
+                System.out.println("creating image for " + file.getName());
+
+                final BufferedImage entropyImage = vi.createEntropyImage(file);
+                final BufferedImage structureImage = vi.createImage(file);
+                final BufferedImage appendedImage = ImageUtil.appendImages(
+                        entropyImage, structureImage);
+                ImageIO.write(appendedImage, "png",
+                        new File("peimages/" + file.getName() + ".png"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                problemfiles.add(file.getName());
+            }
+        }
+        System.out.println("Problemfiles");
+        for (String filename : problemfiles) {
+            System.out.println(filename);
+        }
+        // show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {
