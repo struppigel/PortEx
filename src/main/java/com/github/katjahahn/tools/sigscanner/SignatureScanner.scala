@@ -181,8 +181,8 @@ class SignatureScanner(signatures: List[Signature]) {
     val data = PELoader.loadPE(file)
     val rva = data.getOptionalHeader().getStandardFieldEntry(ADDR_OF_ENTRY_POINT).value
     val loader = new SectionLoader(data)
-    val maybeOffset = loader.maybeGetFileOffset(rva)
-    if (maybeOffset.isPresent) Some(maybeOffset.get)
+    val offset = loader.getFileOffset(rva)
+    if (offset <= file.length()) Some(offset)
     else None
   }
 }

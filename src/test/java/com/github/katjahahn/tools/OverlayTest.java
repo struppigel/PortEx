@@ -31,7 +31,7 @@ public class OverlayTest {
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(OverlayTest.class
             .getName());
-
+    
     @Test(timeOut = 9000)
     public void hasOverlayTest() throws IOException {
         String[] files = {

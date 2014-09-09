@@ -18,15 +18,11 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionLoaderTest;
-import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey;
-import com.github.katjahahn.parser.sections.idata.ImportDLL;
-import com.github.katjahahn.parser.sections.idata.ImportSection;
-import com.github.katjahahn.parser.sections.idata.NameImport;
-import com.github.katjahahn.parser.sections.idata.OrdinalImport;
 import com.google.common.base.Optional;
 
 public class ImportSectionTest {
@@ -40,6 +36,16 @@ public class ImportSectionTest {
     public void prepare() throws IOException {
         imports = TestreportsReader.readImportEntries();
         pedata = PELoaderTest.getPEData();
+    }
+
+    @Test
+    public void virtualImportDescriptor() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
+                + "/unusualfiles/corkami/imports_virtdesc.exe"));
+        System.out.println(data.getInfo());
+        ImportSection idata = new SectionLoader(data).loadImportSection();
+        List<ImportDLL> imports = idata.getImports();
+        assertEquals(imports.size(), 2);
     }
 
     @Test

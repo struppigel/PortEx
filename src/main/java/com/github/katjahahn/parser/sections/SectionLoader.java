@@ -266,7 +266,7 @@ public class SectionLoader {
                 .maybeGetDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
             long rva = dataDir.get().getVirtualAddress();
-            return maybeGetFileOffset(rva);
+            return Optional.of(getFileOffset(rva));
         }
         return Optional.absent();
     }
@@ -274,33 +274,32 @@ public class SectionLoader {
     /**
      * Returns the file offset for the given RVA.
      * <p>
-     * Returns absent if determined offset would point outside the file.
+     * A warning is issued if the file offset is outside the file, but the file
+     * offset will be returned nevertheless.
      * 
      * @param rva
      *            the relative virtual address that shall be converted to a
      *            plain file offset
-     * @return file offset optional, absent if file offset can not be
-     *         determined.
+     * @return file offset
      */
-    public Optional<Long> maybeGetFileOffset(long rva) {
+    public long getFileOffset(long rva) {
         Optional<SectionHeader> section = maybeGetSectionHeaderByRVA(rva);
         // standard value if rva doesn't point into a section
         long fileOffset = rva;
-        // rva is located within a section
+        // rva is located within a section, so calculate offset
         if (section.isPresent()) {
             long virtualAddress = section.get().get(VIRTUAL_ADDRESS);
             long pointerToRawData = section.get().get(POINTER_TO_RAW_DATA);
             fileOffset = rva - (virtualAddress - pointerToRawData);
         }
-        // file offset is valid
-        if (fileOffset <= file.length()) {
-            return Optional.of(fileOffset);
+        // file offset is not within file --> warning
+        if (fileOffset > file.length() || fileOffset < 0) {
+            logger.warn("invalid file offset: 0x"
+                    + Long.toHexString(fileOffset) + " for file: "
+                    + file.getName() + " with length 0x"
+                    + Long.toHexString(file.length()));
         }
-        logger.warn("invalid file offset: 0x" + Long.toHexString(fileOffset)
-                + " for file: " + file.getName() + " with length 0x"
-                + Long.toHexString(file.length()));
-        // file offset is invalid
-        return Optional.absent();
+        return fileOffset;
     }
 
     /**
@@ -673,13 +672,13 @@ public class SectionLoader {
         if (dirEntry.isPresent()) {
             long virtualAddress = dirEntry.get().getVirtualAddress();
             Optional<Long> maybeOffset = maybeGetFileOffsetFor(dataDirKey);
-            if (maybeOffset.isPresent()) {
-                long offset = maybeOffset.or(0L);
-                return Optional.of(new LoadInfo(offset, virtualAddress,
-                        getMemoryMappedPE(), data, this));
-            } else {
+            if (!maybeOffset.isPresent()) {
                 logger.info("unable to get file offset for " + dataDirKey);
             }
+            long offset = maybeOffset.or(-1L);
+            return Optional.of(new LoadInfo(offset, virtualAddress,
+                    getMemoryMappedPE(), data, this));
+
         }
         return Optional.absent();
     }
@@ -733,7 +732,7 @@ public class SectionLoader {
 
     /**
      * Returns whether the virtual address of the data directory entry is valid.
-     * 
+     * TODO remove
      * @param dataDirKey
      * @return true iff virtual address is valid
      */
@@ -741,7 +740,8 @@ public class SectionLoader {
     public boolean hasValidPointer(DataDirectoryKey dataDirKey) {
         DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
         long rva = dataDir.getVirtualAddress();
-        return maybeGetFileOffset(rva).isPresent();
+        long offset = getFileOffset(rva);
+        return offset <= file.length() && offset >= 0;
     }
 
     /**

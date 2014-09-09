@@ -16,9 +16,6 @@ import org.testng.annotations.Test;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoaderTest;
-import com.github.katjahahn.parser.sections.SectionHeader;
-import com.github.katjahahn.parser.sections.SectionHeaderKey;
-import com.github.katjahahn.parser.sections.SectionTable;
 
 public class SectionTableTest {
 
@@ -40,6 +37,12 @@ public class SectionTableTest {
         assertNotNull(info);
         assertTrue(info.length() > 0);
     }
+    
+//    @Test slows down performance too much
+//    public void maxSect() throws IOException {
+//        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/unusualfiles/corkami/65535sects.exe"));
+//        System.out.println("Number of sections read: " + data.getSectionTable().getNumberOfSections());
+//    }
 
     @Test
     public void getPointerToRawData() {

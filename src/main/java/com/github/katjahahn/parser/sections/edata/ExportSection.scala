@@ -65,7 +65,7 @@ class ExportSection private (
 
   private def nameLocations(): List[PhysicalLocation] = {
     namePointerTable.pointerNameList.map(p =>
-      new PhysicalLocation(secLoader.maybeGetFileOffset(p._1).get, ExportNamePointerTable.entryLength))
+      new PhysicalLocation(secLoader.getFileOffset(p._1), ExportNamePointerTable.entryLength))
   }
 
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
