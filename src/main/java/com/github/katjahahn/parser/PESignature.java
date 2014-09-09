@@ -96,6 +96,7 @@ public class PESignature {
             /* read PE signature at offset and verify */
             byte[] peSigVal = loadBytes(peOffset.get(), PE_SIG.length, raf);
             for (int i = 0; i < PE_SIG.length; i++) {
+                System.out.println(peSigVal[i]);
                 throwIf(peSigVal[i] != PE_SIG[i]);
             }
         }

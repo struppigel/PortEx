@@ -103,7 +103,12 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         /**
          * A ROM file. Note: PortEx doesn't support object files by now.
          */
-        ROM(0x107, "ROM");
+        ROM(0x107, "ROM"), 
+        /**
+         * Magic number could not be read for any reason.
+         * This is possible for a minimal DLL, e.g., d_tiny.dll
+         */
+        UNKNOWN(0x0, "Unknown");
 
         private int value;
         private String name;
@@ -320,6 +325,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             offsetLoc = 3;
             lengthLoc = 5;
         } else {
+            windowsFields = IOUtil.initFullEnumMap(WindowsEntryKey.class);
             return; // no fields
         }
         SpecificationFormat format = new SpecificationFormat(0, description,
@@ -433,7 +439,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 return num;
             }
         }
-        throw new IllegalArgumentException("unable to read magic number");
+//        throw new IllegalArgumentException(
+//                "unable to read magic number, value is: " + value);
+        return MagicNumber.UNKNOWN; // TODO remove
     }
 
     /**

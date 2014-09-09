@@ -183,7 +183,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    */
   private def roundedUpHeaderSize(): Long = {
     val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
-    if ((headerSizeMin % fileAlignment) != 0) {
+    if (fileAlignment != 0 && (headerSizeMin % fileAlignment) != 0) {
       (fileAlignment - (headerSizeMin % fileAlignment)) + headerSizeMin
     } else headerSizeMin
   }

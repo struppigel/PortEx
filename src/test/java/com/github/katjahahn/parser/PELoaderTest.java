@@ -22,37 +22,44 @@ import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
 
 public class PELoaderTest {
 
-	private static List<TestData> testData;
-	private static final Map<String, PEData> peData = new HashMap<>();
+    private static List<TestData> testData;
+    private static final Map<String, PEData> peData = new HashMap<>();
 
-	@BeforeSuite(alwaysRun = true)
-	public static void loadPE() throws IOException {
-		File[] testfiles = TestreportsReader.getTestiles();
-		for (File file : testfiles) {
-			peData.put(file.getName(), PELoader.loadPE(file));
-		}
-		testData = TestreportsReader.readTestDataList();
-	}
+    @BeforeSuite(alwaysRun = true)
+    public static void loadPE() throws IOException {
+        File[] testfiles = TestreportsReader.getTestiles();
+        for (File file : testfiles) {
+            peData.put(file.getName(), PELoader.loadPE(file));
+        }
+        testData = TestreportsReader.readTestDataList();
+    }
 
-	public static List<TestData> getTestData() throws IOException {
-		if (testData == null) {
-			loadPE();
-		}
-		return testData;
-	}
+    public static List<TestData> getTestData() throws IOException {
+        if (testData == null) {
+            loadPE();
+        }
+        return testData;
+    }
 
-	public static Map<String, PEData> getPEData() throws IOException {
-		if (peData == null || peData.size() == 0) {
-			loadPE();
-		}
-		return peData;
-	}
+    public static Map<String, PEData> getPEData() throws IOException {
+        if (peData == null || peData.size() == 0) {
+            loadPE();
+        }
+        return peData;
+    }
+
+    @Test
+    public void ableToParse() throws IOException {
+        String[] filenames = {"d_tiny.dll", "d_resource.dll", "d_nonnull.dll"};
+        for (String filename : filenames) {
+            PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/unusualfiles/corkami/" + filename));
+        }
+    }
 }

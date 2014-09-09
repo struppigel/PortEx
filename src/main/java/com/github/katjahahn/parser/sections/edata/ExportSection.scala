@@ -285,12 +285,16 @@ object ExportSection {
       new ExportEntry(rva, ordinal, forwarder)
     }
 
-    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+//    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
 //    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
 //      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+    //TODO better description, add to anomalies
+    if(!(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))) {
+      logger.warn("corrupt export entries")
+    }
     if(!(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
       edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))){
-      logger.warn("corrup ordinal entries");
+      logger.warn("corrupt export entries")
     }
 
     ordEntries.toList ::: nameEntries.toList

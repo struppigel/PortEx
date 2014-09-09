@@ -257,12 +257,13 @@ public final class IOUtil {
      *            EnumSolver instance
      * @return the fully initialized map
      */
-    private static <T extends Enum<T> & HeaderKey> Map<T, StandardField> initFullEnumMap(
+    public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> initFullEnumMap(
             Class<T> clazz) {
         Map<T, StandardField> map = new EnumMap<>(clazz);
         // loop through all values of the Enum type and add a dummy field
         for (T key : clazz.getEnumConstants()) {
-            StandardField dummy = new StandardField(key, "", 0L, 0L, 0L);
+            // TODO init correct description string
+            StandardField dummy = new StandardField(key, "not set", 0L, 0L, 0L);
             map.put(key, dummy);
         }
         assert map != null;

@@ -28,7 +28,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
-import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.ReportCreator;
 
@@ -205,22 +204,19 @@ public final class PELoader {
     public static void main(String[] args) throws IOException {
         logger.entry();
         File file = new File(
-                "/home/deque/portextestfiles/testfiles/Lab13-01.exe");
+                "/home/deque/portextestfiles/unusualfiles/corkami/d_nonnull.dll");
         // PEData data = PELoader.loadPE(file);
         // System.out.println(data.getCOFFFileHeader().getInfo());
         ReportCreator reporter = ReportCreator.newInstance(file);
-        PEData data = loadPE(file);
-        long value = data.getSectionTable().getSectionHeaderByName(".rsrc").get().get(SectionHeaderKey.CHARACTERISTICS);
-        System.out.println(value);
-        //        System.out.println(reporter.headerReports());
-//        System.out.println(reporter.importsReport());
-//        System.out.println(reporter.exportsReport());
-//        System.out.println(reporter.resourcesReport());
-//        System.out.println(reporter.debugReport());
-//        System.out.println(reporter.delayImportsReport());
-////        System.out.println(reporter.relocReport());
-//        System.out.println(reporter.additionalReports());
-//        System.out.println("done");
+        System.out.println(reporter.headerReports());
+        System.out.println(reporter.importsReport());
+        System.out.println(reporter.exportsReport());
+        System.out.println(reporter.resourcesReport());
+        System.out.println(reporter.debugReport());
+        System.out.println(reporter.delayImportsReport());
+//        System.out.println(reporter.relocReport());
+        System.out.println(reporter.additionalReports());
+        System.out.println("done");
         // SectionLoader loader = new SectionLoader(data);
         // try {
         // Optional<DebugSection> maybeDebug = loader
