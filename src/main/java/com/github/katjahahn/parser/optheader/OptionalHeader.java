@@ -95,27 +95,29 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         /**
          * A PE that supports only 32-bit addresses
          */
-        PE32(0x10B, "PE32"),
+        PE32(0x10B, "PE32", "PE32, normal executable file"),
         /**
          * A PE that supports up to 64-bit addresses
          */
-        PE32_PLUS(0x20B, "PE32+"),
+        PE32_PLUS(0x20B, "PE32+", "PE32+ executable"),
         /**
          * A ROM file. Note: PortEx doesn't support object files by now.
          */
-        ROM(0x107, "ROM"), 
+        ROM(0x107, "ROM", "ROM image"),
         /**
-         * Magic number could not be read for any reason.
-         * This is possible for a minimal DLL, e.g., d_tiny.dll
+         * Magic number could not be read for any reason. This is possible for a
+         * minimal DLL, e.g., d_tiny.dll
          */
-        UNKNOWN(0x0, "Unknown");
+        UNKNOWN(0x0, "Unknown", "Unknown, this PE file is really weird");
 
         private int value;
         private String name;
+        private String description;
 
-        private MagicNumber(int value, String name) {
+        private MagicNumber(int value, String name, String description) {
             this.value = value;
             this.name = name;
+            this.description = description;
         }
 
         /**
@@ -134,6 +136,15 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
          */
         public String getName() {
             return name;
+        }
+
+        /**
+         * Returns a description of the magic number
+         * 
+         * @return description string
+         */
+        public String getDescription() {
+            return description;
         }
     }
 
@@ -415,7 +426,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             String description = entry.description;
             if (key.equals(MAGIC_NUMBER)) {
                 b.append(description + ": " + value + " --> "
-                        + getMagicNumberString(magicNumber) + NL);
+                        + magicNumber.description + NL);
             } else {
                 b.append(description + ": " + value + " (0x"
                         + Long.toHexString(value) + ")" + NL);
@@ -428,7 +439,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             throws IOException {
         int offset = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[1]);
         int length = Integer.parseInt(standardSpec.get("MAGIC_NUMBER")[2]);
-        long value = getBytesLongValue(headerbytes, offset, length);
+        long value = getBytesLongValueSafely(headerbytes, offset, length);
         for (MagicNumber num : MagicNumber.values()) {
             if (num.getValue() == value) {
                 if (num == MagicNumber.ROM) {
@@ -439,9 +450,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 return num;
             }
         }
-//        throw new IllegalArgumentException(
-//                "unable to read magic number, value is: " + value);
-        return MagicNumber.UNKNOWN; // TODO remove
+        return MagicNumber.UNKNOWN;
     }
 
     /**
@@ -451,26 +460,6 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      */
     public MagicNumber getMagicNumber() {
         return magicNumber;
-    }
-
-    /**
-     * Returns the magic number description.
-     * 
-     * @param magicNumber
-     * @return the magic number description
-     */
-    public static String getMagicNumberString(MagicNumber magicNumber) {
-        switch (magicNumber) {
-        case PE32:
-            return "PE32, normal executable file";
-        case PE32_PLUS:
-            return "PE32+ executable";
-        case ROM:
-            return "ROM image";
-        default:
-            throw new IllegalArgumentException(
-                    "unable to recognize magic number");
-        }
     }
 
     /**

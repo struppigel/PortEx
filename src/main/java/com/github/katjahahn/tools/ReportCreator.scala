@@ -200,7 +200,8 @@ class ReportCreator(private val data: PEData) {
 
   def jar2ExeReport(): String = {
     val scanner = new Jar2ExeScanner(data.getFile)
-    if (scanner.scan.isEmpty()) ""
+    println("scanner created")
+    if (scanner.scan.isEmpty()) "" 
     else title("Jar to EXE Wrapper Scan") + NL + scanner.createReport + NL
   }
 

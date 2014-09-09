@@ -131,9 +131,11 @@ class SignatureScanner(signatures: List[Signature]) {
     _findAllEPFalseMatches(file).map(toMatchedSignature).asJava
 
   def _findAllEPFalseMatches(file: File): List[ScanResult] = {
+    println("searching ep false matches")
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
       for (addr <- 0L to file.length()) {
+        if(addr % 100000 == 0) println("addr: " + addr)
         val bytes = Array.fill(longestSigSequence + 1)(0.toByte)
         raf.seek(addr)
         val bytesRead = raf.read(bytes)

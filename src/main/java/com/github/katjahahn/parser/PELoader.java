@@ -158,7 +158,7 @@ public final class PELoader {
         long offset = pesig.getOffset() + PESignature.PE_SIG.length;
         logger.info("COFF Header offset: " + offset);
         // read bytes, size is fixed anyway
-        byte[] headerbytes = loadBytes(offset, COFFFileHeader.HEADER_SIZE, raf);
+        byte[] headerbytes = loadBytesSafely(offset, COFFFileHeader.HEADER_SIZE, raf);
         // construct header
         return COFFFileHeader.newInstance(headerbytes, offset);
     }
@@ -190,8 +190,11 @@ public final class PELoader {
             // cut size at EOF
             size = (int) (file.length() - offset);
         }
+        if(size < 0) {
+            size = 0;
+        }
         // read bytes and construct header
-        byte[] headerbytes = loadBytes(offset, size, raf);
+        byte[] headerbytes = loadBytesSafely(offset, size, raf);
         return OptionalHeader.newInstance(headerbytes, offset);
     }
 
@@ -204,17 +207,23 @@ public final class PELoader {
     public static void main(String[] args) throws IOException {
         logger.entry();
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/d_nonnull.dll");
+                "/home/deque/portextestfiles/unusualfiles/corkami/dosZMXP.exe");
         // PEData data = PELoader.loadPE(file);
         // System.out.println(data.getCOFFFileHeader().getInfo());
         ReportCreator reporter = ReportCreator.newInstance(file);
         System.out.println(reporter.headerReports());
-        System.out.println(reporter.importsReport());
-        System.out.println(reporter.exportsReport());
-        System.out.println(reporter.resourcesReport());
-        System.out.println(reporter.debugReport());
-        System.out.println(reporter.delayImportsReport());
+//        System.out.println(reporter.importsReport());
+//        System.out.println(reporter.exportsReport());
+//        System.out.println(reporter.resourcesReport());
+//        System.out.println(reporter.debugReport());
+//        System.out.println(reporter.delayImportsReport());
 //        System.out.println(reporter.relocReport());
+//        System.out.println(reporter.anomalyReport());
+//        System.out.println(reporter.hashReport());
+//        System.out.println(reporter.overlayReport());
+//        System.out.println(reporter.peidReport());
+//        System.out.println(reporter.maldetReport());
+//        System.out.println(reporter.jar2ExeReport());
         System.out.println(reporter.additionalReports());
         System.out.println("done");
         // SectionLoader loader = new SectionLoader(data);

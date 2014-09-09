@@ -127,7 +127,7 @@ public class OptionalHeaderTest {
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             OptionalHeader opt = pedatum.getOptionalHeader();
             MagicNumber magic = opt.getMagicNumber();
-            String string = OptionalHeader.getMagicNumberString(magic);
+            String string = magic.getDescription();
             assertNotNull(magic);
             assertNotNull(string);
             assertTrue(string.length() > 0);

@@ -37,6 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 /**
  * Utilities for file IO needed to read maps and arrays from the text files in
@@ -87,15 +88,19 @@ public final class IOUtil {
      */
     public static byte[] loadBytesSafely(long offset, int length,
             RandomAccessFile raf) throws IOException {
-        assert length >= 0;
+        Preconditions.checkArgument(length >= 0);
         raf.seek(offset);
         int readsize = length;
         if (readsize + offset > raf.length()) {
             readsize = (int) (raf.length() - offset);
         }
+        if (readsize < 0) {
+            readsize = 0;
+        }
         byte[] bytes = new byte[readsize];
         raf.readFully(bytes);
-        padBytes(bytes, length);
+        bytes = padBytes(bytes, length);
+        assert bytes.length == length;
         return bytes;
     }
 
