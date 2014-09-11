@@ -147,7 +147,10 @@ object ImportSection {
   private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
     virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE,
     fileSize: Long, fileOffset: Long): Unit = {
-    for (dirEntry <- directoryTable) {
+    //set a maximum of entries to avoid problems with, e.g., manyimportsW7.exe
+    var entryCounter = 0
+    val importMax = 10000 
+    for (dirEntry <- directoryTable if entryCounter < importMax) {
       var entry: LookupTableEntry = null
       var iRVA = dirEntry(I_LOOKUP_TABLE_RVA)
       if (iRVA == 0 || (iRVA - virtualAddress) > fileSize) {
@@ -172,11 +175,14 @@ object ImportSection {
 //        val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work
         entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, 
             virtualAddress, relOffset, dirEntry, entryFileOffset)
-        if (!entry.isInstanceOf[NullEntry]) dirEntry.addLookupTableEntry(entry)
+        if (!entry.isInstanceOf[NullEntry]) {
+          dirEntry.addLookupTableEntry(entry)
+          entryCounter += 1
+        }
         offset += EntrySize
         relOffset += EntrySize
         if (relOffsetMax < relOffset) relOffsetMax = relOffset;
-      } while (!entry.isInstanceOf[NullEntry])
+      } while (!entry.isInstanceOf[NullEntry] && entryCounter < importMax)
     }
   }
 
@@ -189,6 +195,7 @@ object ImportSection {
     val directoryTable = ListBuffer[DirectoryEntry]()
     var isLastEntry = false
     var i = 0
+    val dirEntryMax = 10000 //TODO ?
     do {
       logger.debug(s"reading ${i + 1}. entry")
       readDirEntry(i, mmbytes, virtualAddress, fileOffset) match {
@@ -200,7 +207,7 @@ object ImportSection {
         case None => isLastEntry = true
       }
       i += 1
-    } while (!isLastEntry)
+    } while (!isLastEntry && i < dirEntryMax)
     directoryTable.toList
   }
 

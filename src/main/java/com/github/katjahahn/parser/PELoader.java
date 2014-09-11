@@ -207,11 +207,15 @@ public final class PELoader {
     public static void main(String[] args) throws IOException {
         logger.entry();
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/dosZMXP.exe");
-        // PEData data = PELoader.loadPE(file);
+                "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe");
+//         PEData data = PELoader.loadPE(file);
         // System.out.println(data.getCOFFFileHeader().getInfo());
         ReportCreator reporter = ReportCreator.newInstance(file);
-        System.out.println(reporter.headerReports());
+        reporter.printReport();
+//        System.out.println(reporter.headerReports());
+//        SectionLoader loader = new SectionLoader(data);
+//        loader.loadImportSection();
+        
 //        System.out.println(reporter.importsReport());
 //        System.out.println(reporter.exportsReport());
 //        System.out.println(reporter.resourcesReport());
@@ -224,18 +228,7 @@ public final class PELoader {
 //        System.out.println(reporter.peidReport());
 //        System.out.println(reporter.maldetReport());
 //        System.out.println(reporter.jar2ExeReport());
-        System.out.println(reporter.additionalReports());
+//        System.out.println(reporter.additionalReports());
         System.out.println("done");
-        // SectionLoader loader = new SectionLoader(data);
-        // try {
-        // Optional<DebugSection> maybeDebug = loader
-        // .maybeLoadDebugSection();
-        // if (maybeDebug.isPresent()) {
-        // System.out.println(file.getName());
-        // System.out.println(maybeDebug.get().getInfo());
-        // }
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
     }
 }

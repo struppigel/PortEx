@@ -17,22 +17,26 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
-import com.github.katjahahn.parser.ScalaIOUtil.using
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.charset.CodingErrorAction
+
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
-import scala.collection.mutable.{ Map, ListBuffer }
+import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.Map
 import scala.io.Codec
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey._
-import Signature._
-import SignatureScanner._
-import com.github.katjahahn.parser.sections.SectionLoader
+
+import org.apache.logging.log4j.LogManager
+
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import org.apache.logging.log4j.LogManager
+import com.github.katjahahn.parser.ScalaIOUtil.{bytes2hex, using}
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey._
+import com.github.katjahahn.parser.sections.SectionLoader
+
+import Signature._
+import SignatureScanner._
 
 /**
  * Scans PE files for compiler and packer signatures.
@@ -131,11 +135,9 @@ class SignatureScanner(signatures: List[Signature]) {
     _findAllEPFalseMatches(file).map(toMatchedSignature).asJava
 
   def _findAllEPFalseMatches(file: File): List[ScanResult] = {
-    println("searching ep false matches")
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
       for (addr <- 0L to file.length()) {
-        if(addr % 100000 == 0) println("addr: " + addr)
         val bytes = Array.fill(longestSigSequence + 1)(0.toByte)
         raf.seek(addr)
         val bytesRead = raf.read(bytes)
@@ -293,7 +295,7 @@ object SignatureScanner {
 
   def toMatchedSignature(result: ScanResult): MatchedSignature = {
     val (sig, addr) = result
-    val signature = Signature.bytes2hex(sig.signature, " ")
+    val signature = bytes2hex(sig.signature, " ")
     new MatchedSignature(addr, signature, sig.name, sig.epOnly)
   }
 

@@ -27,7 +27,7 @@ object FileTypeScanner {
   private val signatureFile = "customsigs_GCK.txt"
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/Downloads/deep-blue-space.jpg")
+    val file = new File("/home/deque/portextestfiles/unusualfiles/corkami/gui.exe")
     FileTypeScanner(file).scanStartReport.asScala.foreach(println)
   }
 

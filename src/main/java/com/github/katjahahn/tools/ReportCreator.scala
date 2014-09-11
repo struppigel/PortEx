@@ -16,27 +16,32 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.tools
-import com.github.katjahahn.parser.ScalaIOUtil.using
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.PEData
+
 import java.io.File
-import com.github.katjahahn.parser.IOUtil.NL
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionHeaderKey._
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.sections.SectionCharacteristic
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
-import com.github.katjahahn.tools.anomalies.SectionTableScanning
-import com.github.katjahahn.tools.sigscanner.SignatureScanner
-import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
-import com.github.katjahahn.parser.coffheader.COFFHeaderKey
-import com.github.katjahahn.parser.coffheader.COFFFileHeader
-import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey
-import com.github.katjahahn.parser.ByteArrayUtil
 import java.io.FileWriter
 import java.io.IOException
+import scala.PartialFunction._
+import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.ByteArrayUtil
+import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.PESignature
+import com.github.katjahahn.parser.ScalaIOUtil.bytes2hex
+import com.github.katjahahn.parser.ScalaIOUtil.using
+import com.github.katjahahn.parser.IOUtil.NL
+import com.github.katjahahn.parser.coffheader.COFFFileHeader
+import com.github.katjahahn.parser.coffheader.COFFHeaderKey
+import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import com.github.katjahahn.parser.sections.SectionCharacteristic
+import com.github.katjahahn.parser.sections.SectionHeader
+import com.github.katjahahn.parser.sections.SectionHeaderKey._
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
+import com.github.katjahahn.tools.anomalies.SectionTableScanning
+import com.github.katjahahn.tools.sigscanner.FileTypeScanner
+import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
+import com.github.katjahahn.tools.sigscanner.SignatureScanner
+import com.github.katjahahn.tools.sigscanner.Signature
 
 /**
  * Utility for easy creation of PE file reports.
@@ -49,19 +54,19 @@ class ReportCreator(private val data: PEData) {
    * Maximum number of sections displayed in one table
    */
   val maxSec = 4
-  
+
   val reportTitle = s"""${title("Report For " + data.getFile.getName)}
     |file size ${hexString(data.getFile.length)}
     |full path ${data.getFile.getAbsolutePath}
     |
     |""".stripMargin
-  
+
   def headerReports(): String = msdosHeaderReport +
     coffHeaderReport + optHeaderReport + secTableReport
-    
-  def specialSectionReports(): String =  importsReport +
+
+  def specialSectionReports(): String = importsReport +
     delayImportsReport + exportsReport + resourcesReport + debugReport + relocReport
-    
+
   def additionalReports(): String = overlayReport +
     anomalyReport + peidReport + jar2ExeReport + hashReport + maldetReport
 
@@ -200,8 +205,7 @@ class ReportCreator(private val data: PEData) {
 
   def jar2ExeReport(): String = {
     val scanner = new Jar2ExeScanner(data.getFile)
-    println("scanner created")
-    if (scanner.scan.isEmpty()) "" 
+    if (scanner.scan.isEmpty()) ""
     else title("Jar to EXE Wrapper Scan") + NL + scanner.createReport + NL
   }
 
@@ -395,9 +399,9 @@ class ReportCreator(private val data: PEData) {
 
 object ReportCreator {
 
-  private val version = """version: 0.2
+  private val version = """version: 0.3
     |author: Katja Hahn
-    |last update: 2.Sep 2014""".stripMargin
+    |last update: 11.Sep 2014""".stripMargin
 
   private val title = """PE Analyzer""" + NL
 
@@ -433,24 +437,46 @@ object ReportCreator {
         try {
           val file = new File(options('inputfile))
           if (file.exists) {
-            val reporter = ReportCreator.newInstance(file)
-            if (options.contains('output)) {
-              writeReport(reporter, new File(options('output)))
+            if (isPEFile(file)) {
+              val reporter = ReportCreator.newInstance(file)
+              if (options.contains('output)) {
+                writeReport(reporter, new File(options('output)))
+              } else {
+                reporter.printReport()
+              }
             } else {
-              reporter.printReport()
+              println("The given file is no PE file!")
+              printFileTypeReport(file)
             }
           } else {
-            System.err.println("file doesn't exist");
+            System.err.println("file doesn't exist")
           }
         } catch {
-          case e: Exception => System.err.println("Error: " + e.getMessage);
+          case e: Exception => System.err.println("Error: " + e.getMessage)
         }
       }
     }
   }
 
+  private def printFileTypeReport(file: File): Unit = {
+    def bytesMatched(sig: Signature): Int =
+      sig.signature.filter(cond(_) { case Some(s) => true }).length
+    var results = FileTypeScanner(file).scanStart()
+    if (results.isEmpty) println("No matching file-type signatures found")
+    if (results.size == 1)
+      println("The file could be of the following type: ")
+    else
+      println("The file could be of one of the following types: ")
+    println()
+    results.foreach(result => 
+      println(s"* ${result._1.name}, ${bytesMatched(result._1)} bytes matched"))
+  }
+
+  private def isPEFile(file: File): Boolean =
+    new PESignature(file).hasSignature()
+
   private def writeReport(reporter: ReportCreator, file: File): Unit = {
-    if(file.getName().isEmpty()) {
+    if (file.getName().isEmpty()) {
       throw new IOException("File name for output file is empty")
     }
     if (file.exists()) {

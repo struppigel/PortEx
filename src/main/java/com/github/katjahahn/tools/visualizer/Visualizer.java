@@ -24,12 +24,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,8 +35,6 @@ import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import scala.actors.threadpool.Arrays;
 
 import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.PEData;
@@ -550,39 +546,41 @@ public class Visualizer {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        File folder = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/");
-        List<String> problemfiles = new ArrayList<>();
-        // TODO these are problemfiles, handle them!
-        String[] problem = {"foldedhdr.exe", "impbyord.exe", "maxvals.exe", "65535sects.exe"};
-        List<String> moreproblemfiles = Arrays.asList(problem);
-        for (File file : folder.listFiles()) {
-            try {
-                if (moreproblemfiles.contains(file.getName()))
-                    continue;
+//        File file = new File(
+//                "/home/deque/portextestfiles/badfiles/VirusShare_f844ea7ac31f3a93357392072da69d49");
+        File file = new File(
+                "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe");
+//        List<String> problemfiles = new ArrayList<>();
+//        // TODO these are problemfiles, handle them!
+//        String[] problem = {"foldedhdr.exe", "impbyord.exe", "maxvals.exe", "65535sects.exe"};
+//        List<String> moreproblemfiles = Arrays.asList(problem);
+//        for (File file : folder.listFiles()) {
+//            try {
+//                if (moreproblemfiles.contains(file.getName()))
+//                    continue;
                 VisualizerBuilder builder = new VisualizerBuilder();
-                if(file.length() < 300) {
-                    builder.setFileWidth(150).setBytesPerPixel(1, file.length());
-                }
+//                if(file.length() < 300) {
+//                    builder.setFileWidth(150).setBytesPerPixel(1, file.length());
+//                }
                 Visualizer vi = builder.build();
-                System.out.println("creating image for " + file.getName());
-
+//                System.out.println("creating image for " + file.getName());
+//
                 final BufferedImage entropyImage = vi.createEntropyImage(file);
                 final BufferedImage structureImage = vi.createImage(file);
                 final BufferedImage appendedImage = ImageUtil.appendImages(
                         entropyImage, structureImage);
-                ImageIO.write(appendedImage, "png",
-                        new File("peimages/" + file.getName() + ".png"));
-            } catch (Exception e) {
-                e.printStackTrace();
-                problemfiles.add(file.getName());
-            }
-        }
-        System.out.println("Problemfiles");
-        for (String filename : problemfiles) {
-            System.out.println(filename);
-        }
-        // show(appendedImage);
+//                ImageIO.write(appendedImage, "png",
+//                        new File("peimages/" + file.getName() + ".png"));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                problemfiles.add(file.getName());
+//            }
+//        }
+//        System.out.println("Problemfiles");
+//        for (String filename : problemfiles) {
+//            System.out.println(filename);
+//        }
+         show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

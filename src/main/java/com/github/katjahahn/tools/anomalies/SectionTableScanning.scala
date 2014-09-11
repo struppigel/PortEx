@@ -462,7 +462,8 @@ trait SectionTableScanning extends AnomalyScanner {
       val sizeEntry = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getField(SectionHeaderKey.POINTER_TO_RAW_DATA)
       val sectionName = filteredString(section.getName)
-      for (entry <- List(sizeEntry, pointerEntry) if entry != null && entry.value % fileAlignment != 0) {
+      for (entry <- List(sizeEntry, pointerEntry) if entry != null && 
+          fileAlignment != 0 && entry.value % fileAlignment != 0) {
         val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.key} (${entry.value}) must be a multiple of File Alignment (${fileAlignment})"
         val subtype = if (entry.key == SectionHeaderKey.SIZE_OF_RAW_DATA)
           NOT_FILEALIGNED_SIZE_OF_RAW

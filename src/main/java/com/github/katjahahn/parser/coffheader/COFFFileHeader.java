@@ -116,20 +116,17 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             COFFHeaderKey key = (COFFHeaderKey) field.key;
             String description = field.description;
             // handle special fields that have additional representations
-            switch (key) {
-            case CHARACTERISTICS:
+            
+            if(key == COFFHeaderKey.CHARACTERISTICS) {
                 b.append(NL + description + ": " + NL);
                 b.append(IOUtil.getCharacteristics(value, "characteristics"));
-                break;
-            case TIME_DATE:
+            } else if (key == COFFHeaderKey.TIME_DATE) {
                 b.append(description + ": ");
                 b.append(convertToDate(value));
-                break;
-            case MACHINE:
+            } else if (key == COFFHeaderKey.MACHINE) {
                 b.append(description + ": ");
                 b.append(getMachineTypeString((int) value));
-                break;
-            default:
+            } else {
                 b.append(field.toString());
             }
             b.append(NL);

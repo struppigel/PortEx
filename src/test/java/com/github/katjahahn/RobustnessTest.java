@@ -18,6 +18,34 @@ public class RobustnessTest {
 
     public static final String PROBLEMFILES_DIR = TestreportsReader.RESOURCE_DIR
             + "/problemfiles/";
+    
+    public static void main(String... args) {
+        testAll();
+    }
+
+    public static void testAll() { //not a unit test, too costly
+        File folder = new File(TestreportsReader.RESOURCE_DIR
+                + "/unusualfiles/corkami/");
+        int failed = 0;
+        for (File file : folder.listFiles()) {
+            try {
+                System.out.println("checking file " + file.getName());
+                if(file.getName().equals("dllmaxvals.dll") | file.isDirectory()) continue;
+                PEData data = PELoader.loadPE(file);
+                SectionLoader loader = new SectionLoader(data);
+                loader.maybeLoadDebugSection();
+                loader.maybeLoadDelayLoadSection();
+                loader.maybeLoadExportSection();
+                loader.maybeLoadImportSection();
+                loader.maybeLoadResourceSection();
+//                loader.maybeLoadRelocSection();
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                failed++;
+            }
+        }
+        System.out.println("Files that failed: " + failed);
+    }
 
     @Test
     public void loadTinyPE() throws IOException {

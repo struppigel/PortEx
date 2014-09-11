@@ -17,6 +17,7 @@ package com.github.katjahahn.tools.sigscanner
 
 import Signature._
 import scala.Array.canBuildFrom
+import com.github.katjahahn.parser.ScalaIOUtil._
 
 /**
  * @author Katja Hahn
@@ -61,21 +62,6 @@ object Signature {
   def apply(name: String, ep: Boolean, sig: String): Signature = {
     val sigbytes = hex2bytes(sig)
     new Signature(name, ep, sigbytes)
-  }
-
-  /**
-   * Converts an array of Option bytes to its hex string representation. None is
-   * converted to "??"
-   *
-   * @param bytes byte array to be converted
-   * @param sep the character(s) that separates to bytes in the string
-   * @return string that represents the byte values as hex numbers
-   */
-  def bytes2hex(bytes: Array[Option[Byte]], sep: String): String = {
-    bytes.foldLeft("")((s, b) => b match {
-      case None => s + sep + "??"
-      case _ => s + sep + "%02x".format(b.get)
-    })
   }
 
   /**
