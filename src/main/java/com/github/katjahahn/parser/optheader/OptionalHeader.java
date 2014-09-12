@@ -186,7 +186,6 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     private void read() throws IOException {
         // read specifications for standard fields and data directories
         Map<String, String[]> standardSpec = IOUtil.readMap(STANDARD_SPEC);
-        List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);
 
         // read magic number
         this.magicNumber = readMagicNumber(standardSpec);
@@ -194,7 +193,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         /* load fields */
         loadStandardFields();
         loadWindowsSpecificFields();
-        loadDataDirectories(datadirSpec);
+        loadDataDirectories();
     }
 
     /**
@@ -287,7 +286,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    private void loadDataDirectories(List<String[]> datadirSpec) {
+    private void loadDataDirectories() throws IOException {
+        List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);
         dataDirEntries = new HashMap<>();
         final int description = 0;
         int offsetLoc;
@@ -618,6 +618,12 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
         if (fileAlign < 512) { // TODO correct?
             fileAlign = 512;
+        }
+        // TODO what happens for too big alignment?
+        // TODO this is just a test, verify
+        if (fileAlign % 512 != 0) {
+            long rest = fileAlign % 512;
+            fileAlign += (512 - rest);
         }
         return fileAlign;
     }

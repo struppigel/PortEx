@@ -83,6 +83,11 @@ public enum AnomalySubType {
     DEPRECATED_FILE_CHARACTERISTICS(DEPRECATED),
 
     /**************************** Optional Header ******************************/
+    
+    /**
+     * PE file header might be a different one in memory than on disk
+     */
+    DUPLICATED_PE_FILE_HEADER(STRUCTURE),
 
     /**
      * The image base is too large.

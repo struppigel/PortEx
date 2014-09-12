@@ -123,7 +123,7 @@ class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val da
       // read bytes
       raf.readFully(bytes)
       // append 0 bytes to array that where cut while calculating length
-      val result = bytes ++ zeroBytes(size - length)
+      val result = bytes ++ zeroBytes(size - bytes.length)
       assert(result.length == size)
       result
     }
@@ -202,17 +202,24 @@ object Mapping {
   var defaultChunkSize = 8192
 
   /**
-   * A chunk of bytes with the given size. Loads the bytes lazily, but all bytes 
-   * at once. Improves performance for repeated access to bytes in the same area 
+   * A chunk of bytes with the given size. Loads the bytes lazily, but all bytes
+   * at once. Improves performance for repeated access to bytes in the same area
    * compared to reading the file for every tiny slice of bytes.
    */
   private class Chunk(val physStart: Long, val size: Int, private val data: PEData) {
     lazy val bytes = {
       using(new RandomAccessFile(data.getFile, "r")) { raf =>
-        val array = Array.fill(size)(0.toByte)
+        val fileSize = data.getFile().length()
+        val length = {
+          if (physStart + size < fileSize) size
+          else (fileSize - physStart).toInt
+        }
+        val array = Array.fill(length)(0.toByte)
         raf.seek(physStart)
         raf.readFully(array)
-        array
+        val extended = array ++ zeroBytes(size - array.length)
+        assert(extended.length == size)
+        extended
       }
     }
   }
@@ -220,12 +227,12 @@ object Mapping {
 
 /**
  * Simply a range with start and end.
- * 
+ *
  * @param start the start address
  * @param end the end address
  */
 abstract class Range(val start: Long, val end: Long) {
-  
+
   /**
    * Unpacking method to get a tuple
    * @return tuple consisting of start and end
@@ -233,7 +240,7 @@ abstract class Range(val start: Long, val end: Long) {
   def unpack(): (Long, Long) = (start, end)
 
   /**
-   * Returns whether the value is within the range, including the values of 
+   * Returns whether the value is within the range, including the values of
    * start and end.
    *
    * @param value the value to check
@@ -245,7 +252,7 @@ abstract class Range(val start: Long, val end: Long) {
 
 /**
  * Represents a range of in-memory addresses
- * 
+ *
  * @param start the start address
  * @param end the end address
  */

@@ -20,10 +20,6 @@ import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
-import com.github.katjahahn.parser.sections.PESection;
-import com.github.katjahahn.parser.sections.SectionHeader;
-import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
@@ -60,9 +56,6 @@ public class SectionLoaderTest {
         PEData data = PELoader.loadPE(file);
         SectionLoader loader = new SectionLoader(data);
         Optional<ResourceSection> rsrc = loader.maybeLoadResourceSection();
-        if (rsrc.isPresent()) {
-            System.out.println(rsrc.get().getInfo());
-        }
         assertTrue(rsrc.get().isEmpty());
     }
 
@@ -123,7 +116,6 @@ public class SectionLoaderTest {
     public void loadResourceSection() throws IOException {
         for (TestData testdatum : testdata) {
             List<DataDirEntry> testDirs = testdatum.dataDir;
-            System.err.println(testdatum.filename);
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             for (DataDirEntry testDir : testDirs) {
                 if (testDir.getKey().equals(DataDirectoryKey.RESOURCE_TABLE)) {

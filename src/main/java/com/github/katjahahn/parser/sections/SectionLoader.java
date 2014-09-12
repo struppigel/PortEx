@@ -153,11 +153,14 @@ public class SectionLoader {
         long result = value;
         if (rest != 0) {
             result = value - rest + fileAlign;
-        }
+        } 
         if (!(optHeader.isLowAlignmentMode() || result % 512 == 0)) {
             logger.error("file aligning went wrong");
+            logger.error("rest: " + rest);
             logger.error("value: " + value);
             logger.error("filealign: " + fileAlign);
+            logger.error("filealign % 512: " + (fileAlign % 512));
+            logger.error("result % 512: " + (result % 512));
             logger.error("result: " + result);
         }
         assert optHeader.isLowAlignmentMode() || result % 512 == 0;

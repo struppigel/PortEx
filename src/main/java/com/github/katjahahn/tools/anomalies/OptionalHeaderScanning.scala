@@ -53,7 +53,18 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList ++= dataDirScan(opt)
     anomalyList ++= windowsFieldScan(opt)
     anomalyList ++= standardFieldScan(opt)
+    anomalyList ++= dupHeadScan(opt)
     super.scan ::: anomalyList.toList
+  }
+  
+  private def dupHeadScan(opt: OptionalHeader): List[Anomaly] = {
+    val sizeOfHeaders = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
+    if(sizeOfHeaders < headerSizeMin) {
+      val description = "Possible Duplicated Header: SizeOfHeaders smaller than actual header size"
+      val subtype = AnomalySubType.DUPLICATED_PE_FILE_HEADER
+      val locations = List(new PhysicalLocation(sizeOfHeaders, headerSizeMin))
+      List(new StructureAnomaly(PEStructureKey.PE_FILE_HEADER, description, subtype, locations))
+    } else Nil
   }
 
   /**
@@ -174,7 +185,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    * @return the minimum header size
    */
   private def headerSizeMin(): Long = 
-    data.getOptionalHeader().getOffset() + data.getSectionTable().getSize()
+    data.getSectionTable().getOffset() + data.getSectionTable().getSize()
 
   /**
    * Rounds up the header size minimum to a multiple of FileAlignment.

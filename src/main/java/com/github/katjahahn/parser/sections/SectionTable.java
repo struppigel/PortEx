@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
+import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEModule;
 import com.github.katjahahn.parser.StandardField;
 import com.google.common.base.Optional;
@@ -94,9 +95,10 @@ public class SectionTable implements PEModule {
             int sectionOffset = i * ENTRY_SIZE;
             int headerbytesEnd = sectionOffset + ENTRY_SIZE;
             // next two steps done because of d_resource.dll
-            // TODO read table from memory mapped pe, this would help here as well
+            // TODO read table from memory mapped pe, this would help here as
+            // well
             if (sectionOffset >= sectionTableBytes.length) {
-                //TODO correct sectionNumer
+                // TODO correct sectionNumer
                 this.numberOfEntries = i;
                 break;
             }
@@ -217,8 +219,7 @@ public class SectionTable implements PEModule {
                         + NL
                         + IOUtil.getCharacteristics(value,
                                 "sectioncharacteristics") + NL);
-            } else 
-                if (key.equals("NAME")) {
+            } else if (key.equals("NAME")) {
                 b.append(specs[0] + ": " + getUTF8String(section) + NL);
 
             } else {
@@ -276,5 +277,28 @@ public class SectionTable implements PEModule {
         int result = ENTRY_SIZE * numberOfEntries;
         assert result >= 0 && result % ENTRY_SIZE == 0;
         return result;
+    }
+
+    public void reload(MemoryMappedPE mmBytes) throws IOException {
+        headers = new LinkedList<>();
+
+        for (int i = 0; i < numberOfEntries; i++) {
+            int sectionNumber = i + 1;
+            int sectionOffset = i * ENTRY_SIZE;
+            long start = mmBytes.physToVirtAddress(sectionOffset + getOffset());
+            long end = mmBytes.physToVirtAddress(sectionOffset + getOffset() + ENTRY_SIZE);
+            byte[] headerbytes = mmBytes.slice(start, end);
+
+            SpecificationFormat format = new SpecificationFormat(0, 1, 2, 3);
+            Map<SectionHeaderKey, StandardField> entries = IOUtil
+                    .readHeaderEntries(SectionHeaderKey.class, format,
+                            SECTION_TABLE_SPEC, headerbytes, getOffset());
+
+            long nameOffset = getOffset() + getRelativeNameOffset(headerbytes);
+            SectionHeader sectionEntry = new SectionHeader(entries,
+                    sectionNumber, sectionOffset, getUTF8String(headerbytes),
+                    nameOffset);
+            headers.add(sectionEntry);
+        }
     }
 }

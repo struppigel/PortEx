@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.ReportCreator;
 
@@ -86,8 +87,19 @@ public final class PELoader {
             SectionTable table = loadSectionTable(pesig, coff, raf);
             table.read();
             // construct PEData instance
-            return new PEData(msdos, pesig, coff, opt, table, file);
+            PEData data = new PEData(msdos, pesig, coff, opt, table, file);
+            /* reload headers in case of dual pe header */
+            MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data, new SectionLoader(data));
+//            reloadOptionalHeader(data);
+            table.reload(mmBytes);
+            return data;
         }
+    }
+
+    private long getFirstSectionVA(SectionTable table) {
+        assert table.getNumberOfSections() > 0;
+        // the VAs must be in correct order
+        return table.getSectionHeader(1).getAlignedVirtualAddress();
     }
 
     /**
@@ -101,8 +113,8 @@ public final class PELoader {
      */
     private MSDOSHeader loadMSDOSHeader(RandomAccessFile raf, long peSigOffset)
             throws IOException {
-        byte[] headerbytes = loadBytesSafely(0, MSDOSHeader.FORMATTED_HEADER_SIZE,
-                raf);
+        byte[] headerbytes = loadBytesSafely(0,
+                MSDOSHeader.FORMATTED_HEADER_SIZE, raf);
         return MSDOSHeader.newInstance(headerbytes, peSigOffset);
     }
 
@@ -158,7 +170,8 @@ public final class PELoader {
         long offset = pesig.getOffset() + PESignature.PE_SIG.length;
         logger.info("COFF Header offset: " + offset);
         // read bytes, size is fixed anyway
-        byte[] headerbytes = loadBytesSafely(offset, COFFFileHeader.HEADER_SIZE, raf);
+        byte[] headerbytes = loadBytesSafely(offset,
+                COFFFileHeader.HEADER_SIZE, raf);
         // construct header
         return COFFFileHeader.newInstance(headerbytes, offset);
     }
@@ -190,7 +203,7 @@ public final class PELoader {
             // cut size at EOF
             size = (int) (file.length() - offset);
         }
-        if(size < 0) {
+        if (size < 0) {
             size = 0;
         }
         // read bytes and construct header
@@ -208,27 +221,27 @@ public final class PELoader {
         logger.entry();
         File file = new File(
                 "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe");
-//         PEData data = PELoader.loadPE(file);
+        // PEData data = PELoader.loadPE(file);
         // System.out.println(data.getCOFFFileHeader().getInfo());
         ReportCreator reporter = ReportCreator.newInstance(file);
         reporter.printReport();
-//        System.out.println(reporter.headerReports());
-//        SectionLoader loader = new SectionLoader(data);
-//        loader.loadImportSection();
-        
-//        System.out.println(reporter.importsReport());
-//        System.out.println(reporter.exportsReport());
-//        System.out.println(reporter.resourcesReport());
-//        System.out.println(reporter.debugReport());
-//        System.out.println(reporter.delayImportsReport());
-//        System.out.println(reporter.relocReport());
-//        System.out.println(reporter.anomalyReport());
-//        System.out.println(reporter.hashReport());
-//        System.out.println(reporter.overlayReport());
-//        System.out.println(reporter.peidReport());
-//        System.out.println(reporter.maldetReport());
-//        System.out.println(reporter.jar2ExeReport());
-//        System.out.println(reporter.additionalReports());
+        // System.out.println(reporter.headerReports());
+        // SectionLoader loader = new SectionLoader(data);
+        // loader.loadImportSection();
+
+        // System.out.println(reporter.importsReport());
+        // System.out.println(reporter.exportsReport());
+        // System.out.println(reporter.resourcesReport());
+        // System.out.println(reporter.debugReport());
+        // System.out.println(reporter.delayImportsReport());
+        // System.out.println(reporter.relocReport());
+        // System.out.println(reporter.anomalyReport());
+        // System.out.println(reporter.hashReport());
+        // System.out.println(reporter.overlayReport());
+        // System.out.println(reporter.peidReport());
+        // System.out.println(reporter.maldetReport());
+        // System.out.println(reporter.jar2ExeReport());
+        // System.out.println(reporter.additionalReports());
         System.out.println("done");
     }
 }
