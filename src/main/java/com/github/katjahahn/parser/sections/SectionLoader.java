@@ -24,8 +24,11 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PhysicalLocation;
+import com.github.katjahahn.parser.VirtualLocation;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
@@ -153,7 +156,7 @@ public class SectionLoader {
         long result = value;
         if (rest != 0) {
             result = value - rest + fileAlign;
-        } 
+        }
         if (!(optHeader.isLowAlignmentMode() || result % 512 == 0)) {
             logger.error("file aligning went wrong");
             logger.error("rest: " + rest);
@@ -313,12 +316,11 @@ public class SectionLoader {
      * @return the {@link SectionHeader} of the section the rva is pointing into
      */
     public Optional<SectionHeader> maybeGetSectionHeaderByRVA(long rva) {
-        List<SectionHeader> sections = table.getSectionHeaders();
-        for (SectionHeader section : sections) {
-            long vSize = section.getAlignedVirtualSize();
-            long vAddress = section.getAlignedVirtualAddress();
-            if (rvaIsWithin(vAddress, vSize, rva)) {
-                return Optional.of(section);
+        List<SectionHeader> headers = table.getSectionHeaders();
+        for (SectionHeader header : headers) {
+            VirtualLocation vLoc = getVirtualSectionLocation(header);
+            if (addressIsWithin(vLoc, rva)) {
+                return Optional.of(header);
             }
         }
         return Optional.absent();
@@ -334,32 +336,39 @@ public class SectionLoader {
      *         into
      */
     public Optional<SectionHeader> maybeGetSectionHeaderByOffset(long fileOffset) {
-        List<SectionHeader> sections = table.getSectionHeaders();
-        for (SectionHeader header : sections) {
-            long size = getReadSize(header);
-            long address = header.getAlignedPointerToRaw();
-            if (rvaIsWithin(address, size, fileOffset)) { // TODO misleading
-                                                          // name of method
+        List<SectionHeader> headers = table.getSectionHeaders();
+        for (SectionHeader header : headers) {
+            PhysicalLocation loc = getPhysicalSectionLocation(header);
+            if (addressIsWithin(loc, fileOffset)) {
                 return Optional.of(header);
             }
         }
         return Optional.absent();
     }
+    
+    private PhysicalLocation getPhysicalSectionLocation(SectionHeader header) {
+        long size = getReadSize(header);
+        long address = header.getAlignedPointerToRaw();
+        return new PhysicalLocation(address, size);
+    }
+    
+    private VirtualLocation getVirtualSectionLocation(SectionHeader header) {
+        long vSize = header.getAlignedVirtualSize();
+        long vAddress = header.getAlignedVirtualAddress();
+        return new VirtualLocation(vAddress, vSize);
+    }
 
     /**
-     * Returns true if rva is within address and size of a section
+     * Returns true if the address is within the given location
      * 
+     * @param location
      * @param address
-     *            start of a section
-     * @param size
-     *            size of a section
-     * @param rva
-     *            a relative virtual address that may point into the section
-     * @return true iff rva is within section range
+     *            a  address that may point into the section
+     * @return true iff address is within location
      */
-    private static boolean rvaIsWithin(long address, long size, long rva) {
-        long endpoint = address + size;
-        return rva >= address && rva < endpoint;
+    private static boolean addressIsWithin(Location location, long address) {
+        long endpoint = location.from() + location.size();
+        return address >= location.from() && address < endpoint;
     }
 
     /**
@@ -371,7 +380,8 @@ public class SectionLoader {
      * but correct types are well tested with unit tests.
      * 
      * @param key
-     * @return the special section optional that belongs to the key.
+     * @return the special section optional that belongs to the key. Absent if
+     *         no special section for that key available or an error occurs.
      */
     public Optional<? extends SpecialSection> maybeLoadSpecialSection(
             DataDirectoryKey key) {
@@ -409,6 +419,7 @@ public class SectionLoader {
             }
             return Optional.of(section);
         }
+
         return Optional.absent();
     }
 
@@ -736,6 +747,7 @@ public class SectionLoader {
     /**
      * Returns whether the virtual address of the data directory entry is valid.
      * TODO remove
+     * 
      * @param dataDirKey
      * @return true iff virtual address is valid
      */

@@ -65,7 +65,7 @@ class PEAnomalyScanner(data: PEData) extends AnomalyScanner(data) {
 
   /**
    * Returns a list of anomalies that were found in the PE file.
-   * 
+   *
    * @return list of anomalies found
    */
   def getAnomalies: java.util.List[Anomaly] = scan.asJava
@@ -97,13 +97,25 @@ object PEAnomalyScanner {
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with MSDOSHeaderScanning with ImportSectionScanning with ExportSectionScanning with ResourceSectionScanning
 
   def apply(file: File): PEAnomalyScanner = newInstance(file)
-  
+
   def main(args: Array[String]): Unit = {
     val folder = new File("/home/deque/portextestfiles/badfiles/")
     var counter = 0
-    for (file <- folder.listFiles()) {
-        var scanner = PEAnomalyScanner(file)
-        println(scanner.scanReport)
+    val list = List("VirusShare_a90da79e98213703fc3342b281a95094",
+      "VirusShare_c125736034171e9ae84eb69fdee6e334", "VirusShare_5dbd4d92a20be612d2293ca10d3cecff")
+    for (file <- folder.listFiles() if !list.contains(file.getName())) {
+      try {
+        val scanner = PEAnomalyScanner(file)
+        counter += 1
+//        println(file.getName())
+        if(counter % 10 == 0) println("files read: " + counter)
+        val anomalies = scanner.getAnomalies.asScala
+        if (!anomalies.filter(a => a.subtype == AnomalySubType.DUPLICATED_PE_FILE_HEADER).isEmpty) {
+          println(scanner.scanReport)
+        }
+      } catch {
+        case e: Exception => System.err.println(e.getMessage())
+      }
     }
   }
 

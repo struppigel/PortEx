@@ -18,6 +18,7 @@
 
 package com.github.katjahahn.parser.sections.reloc
 
+import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.optheader.WindowsEntryKey
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
@@ -27,6 +28,7 @@ import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.Location
 import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.PhysicalLocation
+import org.apache.logging.log4j.LogManager
 
 class RelocationSection(
   private val blocks: List[BaseRelocBlock],
@@ -46,6 +48,13 @@ class RelocationSection(
 }
 
 object RelocationSection {
+  
+  private val logger = LogManager.getLogger(RelocationSection.getClass().getName())
+
+  // set maximum to avoid endless parsing, e.g., in corkami's foldedhdr.exe
+  val maxblocks = 10000
+  // set maximum to avoid almost endless parsing, e.g., in corkami's reloccrypt.exe
+  val maxRelocsPerBlock = 10000
 
   def apply(loadInfo: LoadInfo): RelocationSection = {
     val opt = loadInfo.data.getOptionalHeader
@@ -56,11 +65,6 @@ object RelocationSection {
 
   private def readBlocks(tableSize: Long, loadInfo: LoadInfo): List[BaseRelocBlock] = {
     val mmBytes = loadInfo.memoryMapped
-    // set maximum to avoid endless parsing, e.g., in foldedhdr.exe
-    val maxblocks = 10000
-    // set maximum to avoid almost endless parsing, e.g., in reloccrypt.exe
-    // TODO set as public value ?
-    val maxrelocsPerBlock = 10000
     val va = loadInfo.va
     val blocks = ListBuffer[BaseRelocBlock]()
     var offset = 0
@@ -74,11 +78,13 @@ object RelocationSection {
       offset += length
       val fields = ListBuffer[BlockEntry]()
       val nrOfRelocs = ((blockSize - (length * 2)) / fieldSize).toInt
-      for (i <- 0 until nrOfRelocs) {
-        if (fields.size < maxrelocsPerBlock) { 
-          val fieldValue = mmBytes.getBytesIntValue(va + offset, fieldSize)
-          fields += BlockEntry(fieldValue)
-        }
+      val limitedRelocs = if (nrOfRelocs <= maxRelocsPerBlock) nrOfRelocs else {
+        logger.warn(s"Too many relocations ($nrOfRelocs) for block at offset ${hex(fileOffset)}. Limit set.")
+        maxRelocsPerBlock
+      }
+      for (i <- 0 until limitedRelocs) {
+        val fieldValue = mmBytes.getBytesIntValue(va + offset, fieldSize)
+        fields += BlockEntry(fieldValue)
         offset += fieldSize
       }
       blocks += new BaseRelocBlock(fileOffset, pageRVA, blockSize, fields.toList)

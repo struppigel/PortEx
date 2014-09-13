@@ -185,6 +185,9 @@ object ExportSection {
   
   val logger = LogManager.getLogger(ExportSection.getClass().getName());
 
+  val maxNameEntries = 10000
+  val maxOrdEntries = 10000
+  
   def main(args: Array[String]): Unit = {
     val data = PELoader.loadPE(new File("/home/deque/portextestfiles/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
     val loader = new SectionLoader(data)
@@ -253,7 +256,6 @@ object ExportSection {
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
     // "if the function's RVA is inside the exports section (as given by the
     // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
-    //TODO is that approach accurate?
     def isForwarderRVA(rva: Long): Boolean = {
       val maybeEdata = optHeader.maybeGetDataDirEntry(DataDirectoryKey.EXPORT_TABLE)
       if (maybeEdata.isPresent) {
@@ -267,7 +269,9 @@ object ExportSection {
     } else None
 
     val names = namePointerTable.pointerNameList.map(_._2)
-    val nameEntries: List[ExportEntry] = names map { name =>
+    //limit name entries to read to maximum
+    val namesLimited = if(names.length > maxNameEntries) names.take(maxNameEntries) else names
+    val nameEntries: List[ExportEntry] = namesLimited map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
       val forwarder = getForwarder(rva)
       val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
@@ -275,8 +279,10 @@ object ExportSection {
     }
     val addresses = exportAddressTable.addresses
     val ordinalBase = edataTable.get(ExportDirectoryKey.ORDINAL_BASE)
+    //TODO this is rather an address maximum
+    val ordMax = Math.min(addresses.length, maxOrdEntries)
     val ordEntries = for (
-      i <- 0 until addresses.length;
+      i <- 0 until ordMax;
       if !ordinalTable.ordinals.contains(i + ordinalBase)
     ) yield {
       val rva = addresses(i)
@@ -284,7 +290,6 @@ object ExportSection {
       val ordinal = (i + ordinalBase).toInt
       new ExportEntry(rva, ordinal, forwarder)
     }
-
 //    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
 //    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
 //      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))

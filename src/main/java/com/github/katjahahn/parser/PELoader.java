@@ -89,9 +89,11 @@ public final class PELoader {
             // construct PEData instance
             PEData data = new PEData(msdos, pesig, coff, opt, table, file);
             /* reload headers in case of dual pe header */
-            MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data, new SectionLoader(data));
-//            reloadOptionalHeader(data);
-            table.reload(mmBytes);
+            MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
+                    new SectionLoader(data));
+            // reloadOptionalHeader(data);
+            // table.reload(mmBytes);
+            // System.out.println(new ReportCreator(data).secTableReport());
             return data;
         }
     }
@@ -191,7 +193,7 @@ public final class PELoader {
      */
     private OptionalHeader loadOptionalHeader(PESignature pesig,
             COFFFileHeader coff, RandomAccessFile raf) throws IOException {
-        // offset right after the COFF File Header
+        // offset right after the eCOFF File Header
         long offset = pesig.getOffset() + PESignature.PE_SIG.length
                 + COFFFileHeader.HEADER_SIZE;
         logger.info("Optional Header offset: " + offset);
@@ -219,29 +221,30 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException {
         logger.entry();
-        File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe");
-        // PEData data = PELoader.loadPE(file);
-        // System.out.println(data.getCOFFFileHeader().getInfo());
+//        File file = new File(
+//                "/home/deque/portextestfiles/problemfiles/requirementfailed.exe");
+         File file = new File(
+         "/home/deque/portextestfiles/badfiles/VirusShare_0561ba386fb5180e9a316aa4c3759498");
         ReportCreator reporter = ReportCreator.newInstance(file);
-        reporter.printReport();
-        // System.out.println(reporter.headerReports());
+        // reporter.printReport();
+        // System.out.println(data.getSectionTable().getOffset());
+        System.out.println(reporter.headerReports());
         // SectionLoader loader = new SectionLoader(data);
         // loader.loadImportSection();
 
-        // System.out.println(reporter.importsReport());
-        // System.out.println(reporter.exportsReport());
-        // System.out.println(reporter.resourcesReport());
-        // System.out.println(reporter.debugReport());
-        // System.out.println(reporter.delayImportsReport());
-        // System.out.println(reporter.relocReport());
-        // System.out.println(reporter.anomalyReport());
-        // System.out.println(reporter.hashReport());
-        // System.out.println(reporter.overlayReport());
-        // System.out.println(reporter.peidReport());
-        // System.out.println(reporter.maldetReport());
-        // System.out.println(reporter.jar2ExeReport());
-        // System.out.println(reporter.additionalReports());
+        System.out.println(reporter.importsReport());
+        System.out.println(reporter.exportsReport());
+        System.out.println(reporter.resourcesReport());
+        System.out.println(reporter.debugReport());
+        System.out.println(reporter.delayImportsReport());
+        System.out.println(reporter.relocReport());
+        System.out.println(reporter.anomalyReport());
+        System.out.println(reporter.hashReport());
+        System.out.println(reporter.overlayReport());
+        System.out.println(reporter.peidReport());
+        System.out.println(reporter.maldetReport());
+        System.out.println(reporter.jar2ExeReport());
+        System.out.println(reporter.additionalReports());
         System.out.println("done");
     }
 }

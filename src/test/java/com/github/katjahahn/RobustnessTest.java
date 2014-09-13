@@ -4,6 +4,7 @@ import static org.testng.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.testng.annotations.Test;
@@ -25,26 +26,43 @@ public class RobustnessTest {
 
     public static void testAll() { //not a unit test, too costly
         File folder = new File(TestreportsReader.RESOURCE_DIR
-                + "/unusualfiles/corkami/");
+                + "/badfiles/");
+        List<String> fails = new ArrayList<>();
         int failed = 0;
+        int counter = 0;
         for (File file : folder.listFiles()) {
             try {
-                System.out.println("checking file " + file.getName());
-                if(file.getName().equals("dllmaxvals.dll") | file.isDirectory()) continue;
+                if(file.isDirectory()) {
+                    System.err.println(file.getName());
+                    continue;
+                }
+                counter++;
+                if(counter % 100 == 0) {
+                    System.out.println("Files read: " + counter);
+                    System.out.println("Fails: " + failed);
+                }
                 PEData data = PELoader.loadPE(file);
+//                new ReportCreator(data).headerReports();
                 SectionLoader loader = new SectionLoader(data);
+                
                 loader.maybeLoadDebugSection();
                 loader.maybeLoadDelayLoadSection();
+//                loader.maybeLoadExceptionSection();
                 loader.maybeLoadExportSection();
                 loader.maybeLoadImportSection();
                 loader.maybeLoadResourceSection();
-//                loader.maybeLoadRelocSection();
+                loader.maybeLoadRelocSection();
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                String message = file.getName() + " " + e.getMessage();
+                System.err.println(message);
+                fails.add(message);
                 failed++;
             }
         }
         System.out.println("Files that failed: " + failed);
+        for(String message : fails) {
+            System.out.println(message);
+        }
     }
 
     @Test
