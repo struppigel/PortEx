@@ -8,6 +8,7 @@ import com.github.katjahahn.parser.sections.idata.ImportSection
 import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.sections.idata.ImportDLL
 
 trait ImportSectionScanning extends AnomalyScanner {
 
@@ -21,8 +22,27 @@ trait ImportSectionScanning extends AnomalyScanner {
       val anomalyList = ListBuffer[Anomaly]()
       anomalyList ++= checkFractionatedImports(idata)
       anomalyList ++= checkKernel32Imports(idata)
+      anomalyList ++= checkVirtualImports(idata)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
+  }
+
+  private def checkVirtualImports(idata: ImportSection): List[Anomaly] = {
+    val fileSize = data.getFile.length
+    def isVirtual(imp: ImportDLL): Boolean = {
+      val locs = imp.getLocations().asScala
+      locs.exists(loc => loc.from + loc.size > fileSize)
+    }
+    val imports = idata.getImports.asScala
+    val anomalyList = ListBuffer[Anomaly]()
+    for(imp <- imports) {
+      if(isVirtual(imp)) {
+        val description = s"Import DLL has virtual imports: ${imp.getName()}"
+        anomalyList += ImportAnomaly(List(imp), description,
+          AnomalySubType.VIRTUAL_IMPORTS, PEStructureKey.IMPORT_SECTION)
+      }
+    }
+    anomalyList.toList
   }
 
   private def checkFractionatedImports(idata: ImportSection): List[Anomaly] = {
@@ -31,7 +51,7 @@ trait ImportSectionScanning extends AnomalyScanner {
     val loader = new SectionLoader(data)
     val idataHeader = loader.maybeGetSectionHeaderByOffset(idata.getOffset())
     if (idataHeader.isPresent) {
-      
+
       def isWithinIData(loc: Location): Boolean = {
         val start = idataHeader.get().getAlignedPointerToRaw
         val end = start + loader.getReadSize(idataHeader.get)
@@ -42,7 +62,7 @@ trait ImportSectionScanning extends AnomalyScanner {
       }
       val fractions = locs.filter(!isWithinIData(_)).toList
       if (!fractions.isEmpty) {
-        val affectedImports = idata.getImports.asScala.filter(i => 
+        val affectedImports = idata.getImports.asScala.filter(i =>
           i.getLocations.asScala.filter(!isWithinIData(_)).size > 0).toList
         val description = s"Imports are fractionated! Affected import DLLs: ${affectedImports.map(_.getName()).mkString(", ")}"
         anomalyList += ImportAnomaly(affectedImports, description,

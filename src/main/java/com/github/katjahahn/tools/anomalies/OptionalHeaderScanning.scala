@@ -56,10 +56,10 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     anomalyList ++= dupHeadScan(opt)
     super.scan ::: anomalyList.toList
   }
-  
+
   private def dupHeadScan(opt: OptionalHeader): List[Anomaly] = {
     val sizeOfHeaders = opt.get(WindowsEntryKey.SIZE_OF_HEADERS)
-    if(sizeOfHeaders < headerSizeMin) {
+    if (sizeOfHeaders < headerSizeMin) {
       val description = "Possible Duplicated Header: SizeOfHeaders smaller than actual header size"
       val subtype = AnomalySubType.DUPLICATED_PE_FILE_HEADER
       val locations = List(new PhysicalLocation(sizeOfHeaders, headerSizeMin))
@@ -184,7 +184,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    *
    * @return the minimum header size
    */
-  private def headerSizeMin(): Long = 
+  private def headerSizeMin(): Long =
     data.getSectionTable().getOffset() + data.getSectionTable().getSize()
 
   /**
@@ -357,6 +357,17 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val entry = datadirs.get(DataDirectoryKey.RESERVED)
       val description = "Reserved Data Directory Entry is not 0. Entry --> " + NL + entry.toString
       anomalyList += DataDirAnomaly(entry, description, RESERVED_DATA_DIR)
+    }
+    if (datadirs.containsKey(DataDirectoryKey.ARCHITECTURE)) {
+      val entry = datadirs.get(DataDirectoryKey.ARCHITECTURE)
+      val description = "Reserved Data Directory Entry is not 0. Entry --> " + NL + entry.toString
+      anomalyList += DataDirAnomaly(entry, description, RESERVED_DATA_DIR)
+    }
+    if (datadirs.containsKey(DataDirectoryKey.GLOBAL_PTR) &&
+      datadirs.get(DataDirectoryKey.GLOBAL_PTR).getDirectorySize() != 0) {
+        val entry = datadirs.get(DataDirectoryKey.GLOBAL_PTR)
+      val description = "Global Ptr Data Directory size is not 0, but should be"
+      anomalyList += DataDirAnomaly(entry, description, GLOBAL_PTR_SIZE_SET)
     }
     for (datadir <- datadirs.values().asScala) {
       def isValid: Boolean = {

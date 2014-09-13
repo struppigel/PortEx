@@ -47,6 +47,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   abstract override def scan(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
+    anomalyList ++= checkVirtualSecTable
     anomalyList ++= checkFileAlignmentConstrains
     anomalyList ++= checkZeroValues
     anomalyList ++= checkDeprecated
@@ -59,6 +60,16 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkSectionCharacteristics
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
+  }
+
+  private def checkVirtualSecTable(): List[Anomaly] = {
+    val table = data.getSectionTable()
+    if (table.getOffset() > data.getFile().length()) {
+      val description = s"Section Table (offset: ${table.getOffset}) is in virtual space"
+      val locations = List(new PhysicalLocation(table.getOffset, table.getSize))
+      List(StructureAnomaly(PEStructureKey.SECTION_TABLE, description,
+        SEC_TABLE_IN_OVERLAY, locations))
+    } else Nil
   }
 
   private def checkSectionCharacteristics(): List[Anomaly] = {
@@ -138,7 +149,8 @@ trait SectionTableScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
     val overlay = new Overlay(data)
-    if (sectionTable.getOffset >= overlay.getOffset) {
+    if (sectionTable.getOffset >= overlay.getOffset && 
+        sectionTable.getOffset < data.getFile.length) {
       val description = s"Section Table (offset: ${sectionTable.getOffset}) moved to Overlay"
       val locations = List(new PhysicalLocation(sectionTable.getOffset, sectionTable.getSize))
       anomalyList += StructureAnomaly(PEStructureKey.SECTION_TABLE, description,
@@ -462,8 +474,10 @@ trait SectionTableScanning extends AnomalyScanner {
       val sizeEntry = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getField(SectionHeaderKey.POINTER_TO_RAW_DATA)
       val sectionName = filteredString(section.getName)
-      for (entry <- List(sizeEntry, pointerEntry) if entry != null && 
-          fileAlignment != 0 && entry.value % fileAlignment != 0) {
+      for (
+        entry <- List(sizeEntry, pointerEntry) if entry != null &&
+          fileAlignment != 0 && entry.value % fileAlignment != 0
+      ) {
         val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.key} (${entry.value}) must be a multiple of File Alignment (${fileAlignment})"
         val subtype = if (entry.key == SectionHeaderKey.SIZE_OF_RAW_DATA)
           NOT_FILEALIGNED_SIZE_OF_RAW

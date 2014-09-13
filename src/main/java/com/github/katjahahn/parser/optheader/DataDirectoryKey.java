@@ -53,13 +53,13 @@ public enum DataDirectoryKey implements HeaderKey {
 	 */
 	DEBUG("debug"), 
 	/**
-	 * Reserved, must be 0. //TODO anomaly
+	 * Reserved, must be 0.
 	 */
 	ARCHITECTURE("architecture"), 
 	/**
 	 * The RVA of the value to be stored in the global pointer register.
 	 * <p>
-	 * The size member of this structure must be set to zero. //TODO anomaly
+	 * The size member of this structure must be set to zero.
 	 */
 	GLOBAL_PTR("global ptr"), 
 	/**

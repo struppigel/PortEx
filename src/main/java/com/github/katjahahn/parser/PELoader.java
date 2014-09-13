@@ -221,10 +221,10 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException {
         logger.entry();
-//        File file = new File(
-//                "/home/deque/portextestfiles/problemfiles/requirementfailed.exe");
-         File file = new File(
-         "/home/deque/portextestfiles/badfiles/VirusShare_0561ba386fb5180e9a316aa4c3759498");
+        File file = new File(
+                "/home/deque/portextestfiles/unusualfiles/corkami/imports_virtdesc.exe");
+//         File file = new File(
+//         "/home/deque/portextestfiles/badfiles/VirusShare_0561ba386fb5180e9a316aa4c3759498");
         ReportCreator reporter = ReportCreator.newInstance(file);
         // reporter.printReport();
         // System.out.println(data.getSectionTable().getOffset());

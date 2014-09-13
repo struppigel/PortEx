@@ -33,12 +33,12 @@ public enum AnomalySubType {
      * The MSDOS header is collapsed, i.e. parts are missing.
      */
     COLLAPSED_MSDOS_HEADER(STRUCTURE),
-    
+
     /**
      * Reserved MSDOS field is not zero
      */
     RESERVED_MSDOS_FIELD(RESERVED),
-    
+
     /*************************** COFF File Header *****************************/
 
     /**
@@ -83,12 +83,11 @@ public enum AnomalySubType {
     DEPRECATED_FILE_CHARACTERISTICS(DEPRECATED),
 
     /**************************** Optional Header ******************************/
-    
+
     /**
-     * PE file header might be a different one in memory than on disk
+     * PE file header might be a different one in memory than on disk //TODO add to thesis
      */
     DUPLICATED_PE_FILE_HEADER(STRUCTURE),
-
     /**
      * The image base is too large.
      */
@@ -121,6 +120,10 @@ public enum AnomalySubType {
      * Reserved data directories are present.
      */
     RESERVED_DATA_DIR(RESERVED),
+    /**
+     * GLOBAL_PTR data directory size is set, but must be zero
+     */
+    GLOBAL_PTR_SIZE_SET(WRONG), //TODO add to thesis
     /**
      * Data directory entry doesn't point to a valid location, i.e. outside the
      * file
@@ -197,6 +200,10 @@ public enum AnomalySubType {
 
     /**************************** Section Table ******************************/
 
+    /**
+     * Section table is in virtual space //TODO add to thesis
+     */
+    VIRTUAL_SECTION_TABLE(STRUCTURE),
     /**
      * Entry point is within a writeable section. This is suspicious. The file
      * might be infected.
@@ -320,8 +327,13 @@ public enum AnomalySubType {
      */
     FRACTIONATED_DATADIR(STRUCTURE),
     
+    /**
+     * Any structures of the import directory are in virtual space. //TODO add to thesis
+     */
+    VIRTUAL_IMPORTS(STRUCTURE), //TODO implement virtual exports, relocs, etc
+
     /**************************** Resource Section ******************************/
-    
+
     /**
      * Resource tree has a loop.
      */

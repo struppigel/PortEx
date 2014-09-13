@@ -110,11 +110,11 @@ object PEAnomalyScanner {
 //        println(file.getName())
         if(counter % 10 == 0) println("files read: " + counter)
         val anomalies = scanner.getAnomalies.asScala
-        if (!anomalies.filter(a => a.subtype == AnomalySubType.DUPLICATED_PE_FILE_HEADER).isEmpty) {
+        if (!anomalies.filter(a => a.subtype == AnomalySubType.VIRTUAL_IMPORTS).isEmpty) {
           println(scanner.scanReport)
         }
       } catch {
-        case e: Exception => System.err.println(e.getMessage())
+        case e: Exception => e.printStackTrace()
       }
     }
   }
