@@ -36,8 +36,8 @@ import java.io.RandomAccessFile
 object StringReader {
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/testfiles/WinRar.exe")
-    println(readStrings(file, 4).asScala.mkString(", "))
+    val file = new File("/home/deque/portextestfiles/simile.exe")
+    println(readStrings(file, 4).asScala.mkString("\n"))
   }
   
   /**

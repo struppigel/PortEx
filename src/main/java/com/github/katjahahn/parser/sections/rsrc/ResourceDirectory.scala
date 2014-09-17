@@ -187,6 +187,11 @@ object ResourceDirectory {
    * The name of resource directory specification file
    */
   private val specLocation = "rsrcdirspec"
+    
+  /**
+   * Maximum of resource entries for each directory
+   */
+  val entryMaximum = 1000
 
   /**
    * Creates a resource directory.
@@ -200,7 +205,7 @@ object ResourceDirectory {
    * @return resource directory
    */
   def apply(file: File, level: Level, rva: Long,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE, 
+    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
     loopChecker: ResourceLoopChecker): ResourceDirectory = {
     val headerBytes = mmBytes.slice(virtualAddress + rva, resourceDirSize + rva + virtualAddress)
     val header = readHeader(headerBytes, rva)
@@ -208,10 +213,11 @@ object ResourceDirectory {
     if (!loopChecker.isNewResourceDirFileOffset(fileOffset)) {
       throw new ResourceLoopException("resource loop detected")
     }
-    //check for max level, don't load entries if reached
+    //check for max level and max resourceDirs, don't load entries if reached
     val entries = {
-      if (level.levelNr < ResourceSection.maxLevel) readEntries(file, header,
-        rva, level, virtualAddress, rsrcOffset, mmBytes, loopChecker)
+      if (level.levelNr < ResourceSection.maxLevel && loopChecker.size < ResourceSection.maxResourceDirs)
+        readEntries(file, header, rva, level, virtualAddress, rsrcOffset,
+          mmBytes, loopChecker)
       else List[ResourceDirectoryEntry]()
     }
     new ResourceDirectory(level, header, entries, fileOffset)
@@ -249,9 +255,10 @@ object ResourceDirectory {
     val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
     val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
     val entriesSum = nameEntries + idEntries
+    val limitedEntriesSum = if(entriesSum < entryMaximum) entriesSum else entryMaximum
     var entries = ListBuffer.empty[ResourceDirectoryEntry]
     try {
-      for (i <- 0 until entriesSum) {
+      for (i <- 0 until limitedEntriesSum) {
         val offset = resourceDirSize + i * entrySize + virtualAddress + tableOffset
         val endpoint = offset + entrySize
         val entryNr = i + 1

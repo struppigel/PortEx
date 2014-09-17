@@ -51,13 +51,13 @@ public class PortexStats {
     private static final Logger logger = LogManager.getLogger(PortexStats.class
             .getName());
 
-    private static final String BASE_MALW_FOLDER = "/home/deque/virusshare128";
-    private static final String ANOMALY_FOLDER = "/home/deque/portextestfiles/unusualfiles/corkami";
-    private static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
-    private static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
-    private static final String STATS_FOLDER = "portexstats/";
-    private static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
-    private static final String BAD_FILES = "/home/deque/portextestfiles/badfiles/";
+    public static final String BASE_MALW_FOLDER = "/home/deque/virusshare128";
+    public static final String ANOMALY_FOLDER = "/home/deque/portextestfiles/unusualfiles/corkami";
+    public static final String PE_FOLDER = BASE_MALW_FOLDER + "/pe/";
+    public static final String NO_PE_FOLDER = BASE_MALW_FOLDER + "/nope/";
+    public static final String STATS_FOLDER = "portexstats/";
+    public static final String GOOD_FILES = "/home/deque/portextestfiles/goodfiles/";
+    public static final String BAD_FILES = "/home/deque/portextestfiles/badfiles/";
     private static int noPE = 0;
     private static int notLoaded = 0;
     private static int dirsRead = 0;
@@ -66,11 +66,7 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-        String goodstats = STATS_FOLDER
-                + "sectionnames-2014-08-22_14-02-11.stat";
-        String badstats = STATS_FOLDER
-                + "sectionnames-2014-08-22_14-26-07.stat";
-        compareSecNames(goodstats, badstats);
+        anomalyCount(new File(BAD_FILES).listFiles(), BAD_FILES);
     }
 
     private static void compareSecNames(String goodstats, String badstats)
@@ -97,23 +93,23 @@ public class PortexStats {
             double badPercent = badValue / (double) badtotal;
             double malProb = badPercent * 0.5
                     / (badPercent * 0.5 + goodPercent * 0.5);
-            if(goodValue + badValue > THRESHOLD) {
-            report.append(name + ";" + goodPercent + ";" + badPercent
-                    + ";" + malProb + "\n");
+            if (goodValue + badValue > THRESHOLD) {
+                report.append(name + ";" + goodPercent + ";" + badPercent + ";"
+                        + malProb + "\n");
             }
         }
         for (Entry<String, Integer> entry : badCount.entrySet()) {
             String name = entry.getKey();
-            if(!goodCount.containsKey(name)){
+            if (!goodCount.containsKey(name)) {
                 int badValue = entry.getValue();
                 int goodValue = 0;
                 double badPercent = badValue / (double) badtotal;
                 double goodPercent = 0;
                 double malProb = badPercent * 0.5
                         / (badPercent * 0.5 + goodPercent * 0.5);
-                if(goodValue + badValue > THRESHOLD) {
-                report.append(name + ";" + goodPercent + ";" + badPercent
-                        + ";" + malProb + "\n");
+                if (goodValue + badValue > THRESHOLD) {
+                    report.append(name + ";" + goodPercent + ";" + badPercent
+                            + ";" + malProb + "\n");
                 }
             }
         }
@@ -474,6 +470,7 @@ public class PortexStats {
         int notLoaded = 0;
         for (File file : files) {
             try {
+                System.out.println(file.getName());
                 total++;
                 PEData data = PELoader.loadPE(file);
                 PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);

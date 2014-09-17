@@ -35,6 +35,7 @@ import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.PhysicalLocation
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.tools.visualizer.Visualizer
+import scala.collection.mutable.ListBuffer
 
 /**
  * Represents the export section of a PE file and provides access to lists of
@@ -59,7 +60,8 @@ class ExportSection private (
   private val ordinalTable: ExportOrdinalTable,
   val exportEntries: List[ExportEntry],
   val offset: Long,
-  val secLoader: SectionLoader) extends SpecialSection {
+  val secLoader: SectionLoader,
+  val invalidExportCount: Integer) extends SpecialSection {
 
   override def getOffset(): Long = offset
 
@@ -182,12 +184,13 @@ class ExportSection private (
 }
 
 object ExportSection {
-  
+
   val logger = LogManager.getLogger(ExportSection.getClass().getName());
 
-  val maxNameEntries = 10000
-  val maxOrdEntries = 10000
-  
+  val maxNameEntries = 5000
+  val maxOrdEntries = 5000
+  var invalidExportCount = 0
+
   def main(args: Array[String]): Unit = {
     val data = PELoader.loadPE(new File("/home/deque/portextestfiles/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
     val loader = new SectionLoader(data)
@@ -197,21 +200,20 @@ object ExportSection {
     println(edata.getInfo)
   }
 
-  def apply(li: LoadInfo): ExportSection =
-    apply(li.memoryMapped, li.va, li.data.getOptionalHeader(), li.loader, li.fileOffset)
-
-  def apply(mmBytes: MemoryMappedPE, virtualAddress: Long,
-    opt: OptionalHeader, sectionLoader: SectionLoader, offset: Long): ExportSection = {
+  def apply(li: LoadInfo): ExportSection = {
     //TODO slice only headerbytes for ExportDir
-    val exportBytes = mmBytes.slice(virtualAddress, mmBytes.length + virtualAddress);
+    invalidExportCount = 0
+    val mmBytes = li.memoryMapped
+    val offset = li.fileOffset
+    val exportBytes = mmBytes.slice(li.va, mmBytes.length + li.va);
     val edataTable = ExportDirectory(exportBytes, offset)
-    val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, virtualAddress, offset)
-    val namePointerTable = loadNamePointerTable(edataTable, mmBytes, virtualAddress, offset)
-    val ordinalTable = loadOrdinalTable(edataTable, mmBytes, virtualAddress, offset)
-    val exportEntries = loadExportEntries(sectionLoader, namePointerTable, opt,
-      ordinalTable, exportAddressTable, mmBytes, virtualAddress, edataTable)
+    val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, li.va, offset)
+    val namePointerTable = loadNamePointerTable(edataTable, mmBytes, li.va, offset)
+    val ordinalTable = loadOrdinalTable(edataTable, mmBytes, li.va, offset)
+    val exportEntries = loadExportEntries(li, namePointerTable, ordinalTable,
+      exportAddressTable, edataTable)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
-      ordinalTable, exportEntries, offset, sectionLoader)
+      ordinalTable, exportEntries, offset, li.loader, invalidExportCount)
   }
 
   private def loadOrdinalTable(edataTable: ExportDirectory,
@@ -247,12 +249,16 @@ object ExportSection {
     ExportAddressTable(mmBytes, addrTableRVA, entries, virtualAddress, fileOffset)
   }
 
-  //TODO this parameter list is horrible!
-  private def loadExportEntries(sectionLoader: SectionLoader,
-    namePointerTable: ExportNamePointerTable, optHeader: OptionalHeader,
+  private def loadExportEntries(li: LoadInfo,
+    namePointerTable: ExportNamePointerTable,
     ordinalTable: ExportOrdinalTable,
-    exportAddressTable: ExportAddressTable, mmBytes: MemoryMappedPE,
-    virtualAddress: Long, edataTable: ExportDirectory): List[ExportEntry] = {
+    exportAddressTable: ExportAddressTable,
+    edataTable: ExportDirectory): List[ExportEntry] = {
+    val optHeader = li.data.getOptionalHeader
+    val virtualAddress = li.va
+    val sectionLoader = li.loader
+    val mmBytes = li.memoryMapped
+    val file = li.data.getFile
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
     // "if the function's RVA is inside the exports section (as given by the
     // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
@@ -268,41 +274,63 @@ object ExportSection {
       Some(getASCIIName(rva, virtualAddress, mmBytes))
     } else None
 
+    val rvas = ListBuffer[Long]()
     val names = namePointerTable.pointerNameList.map(_._2)
     //limit name entries to read to maximum
-    val namesLimited = if(names.length > maxNameEntries) names.take(maxNameEntries) else names
-    val nameEntries: List[ExportEntry] = namesLimited map { name =>
+    val namesLimited = if (names.length > maxNameEntries) names.take(maxNameEntries) else names
+    val nameEntries: List[ExportEntry] = (namesLimited map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
-      val forwarder = getForwarder(rva)
-      val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
-      new ExportNameEntry(rva, name, ordinal, forwarder)
-    }
+      if (isValidRVA(rva, sectionLoader, file, rvas)) {
+        val forwarder = getForwarder(rva)
+        val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
+        Some(new ExportNameEntry(rva, name, ordinal, forwarder))
+      } else None
+    }).flatten
     val addresses = exportAddressTable.addresses
     val ordinalBase = edataTable.get(ExportDirectoryKey.ORDINAL_BASE)
     //TODO this is rather an address maximum
     val ordMax = Math.min(addresses.length, maxOrdEntries)
-    val ordEntries = for (
+    val ordEntries = (for (
       i <- 0 until ordMax;
       if !ordinalTable.ordinals.contains(i + ordinalBase)
     ) yield {
       val rva = addresses(i)
-      val forwarder = getForwarder(rva)
-      val ordinal = (i + ordinalBase).toInt
-      new ExportEntry(rva, ordinal, forwarder)
-    }
-//    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
-//    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
-//      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+      if (isValidRVA(rva, sectionLoader, file, rvas)) {
+        val forwarder = getForwarder(rva)
+        val ordinal = (i + ordinalBase).toInt
+        Some(new ExportEntry(rva, ordinal, forwarder))
+      } else None
+    }).flatten
+    //    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
+    //    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
+    //      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
     //TODO better description, add to anomalies
-    if(!(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))) {
+    if (!(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))) {
       logger.warn("corrupt export entries")
     }
-    if(!(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
-      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))){
+    if (!(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
+      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))) {
       logger.warn("corrupt export entries")
     }
 
     ordEntries.toList ::: nameEntries.toList
+  }
+
+  private def isValidRVA(rva: Long, loader: SectionLoader, file: File, rvas: ListBuffer[Long]): Boolean = {
+    // no rva duplicates allowed
+    if (rvas.contains(rva)) {
+      invalidExportCount += 1
+      false
+    } else {
+      rvas += rva
+      val offset = loader.getFileOffset(rva)
+      if (!(offset < file.length() && offset > 0))
+        true
+      else {
+        invalidExportCount += 1
+        false
+      }
+    }
   }
 
   /**

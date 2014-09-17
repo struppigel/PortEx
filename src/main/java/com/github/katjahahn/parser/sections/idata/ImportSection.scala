@@ -167,6 +167,7 @@ object ImportSection {
         case PE32 => 4
         case PE32_PLUS => 8
         case ROM => throw new IllegalArgumentException("ROM file format not covered by PortEx")
+        case UNKNOWN => throw new IllegalArgumentException("Unknown magic number, can not parse delay-load imports")
       }
       do {
         //TODO get fileoffset for entry from mmbytes instead of this to avoid

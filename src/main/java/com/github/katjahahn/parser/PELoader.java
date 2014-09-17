@@ -18,6 +18,7 @@ package com.github.katjahahn.parser;
 import static com.github.katjahahn.parser.IOUtil.*;
 import static com.google.common.base.Preconditions.*;
 
+import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -219,32 +220,36 @@ public final class PELoader {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-        File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/imports_virtdesc.exe");
-//         File file = new File(
-//         "/home/deque/portextestfiles/badfiles/VirusShare_0561ba386fb5180e9a316aa4c3759498");
+//        File file = new File(
+//                "/home/deque/portextestfiles/unusualfiles/corkami/sc.exe");
+        // TODO the following files take very long to parse, why?
+         File file = new File(
+         "/home/deque/portextestfiles/badfiles/VirusShare_10c6fdb01b6b19f84055754b764c6e38");
+        // VirusShare_10c6fdb01b6b19f84055754b764c6e38 --> invalid delay-load imports, exhaustive resource section
+         //VirusShare_a90da79e98213703fc3342b281a95094 --> invalid export entries, lots of
         ReportCreator reporter = ReportCreator.newInstance(file);
-        // reporter.printReport();
+//        reporter.printReport();
+        
         // System.out.println(data.getSectionTable().getOffset());
-        System.out.println(reporter.headerReports());
+         System.out.println(reporter.headerReports());
         // SectionLoader loader = new SectionLoader(data);
         // loader.loadImportSection();
 
-        System.out.println(reporter.importsReport());
-        System.out.println(reporter.exportsReport());
-        System.out.println(reporter.resourcesReport());
-        System.out.println(reporter.debugReport());
-        System.out.println(reporter.delayImportsReport());
-        System.out.println(reporter.relocReport());
-        System.out.println(reporter.anomalyReport());
-        System.out.println(reporter.hashReport());
-        System.out.println(reporter.overlayReport());
-        System.out.println(reporter.peidReport());
-        System.out.println(reporter.maldetReport());
-        System.out.println(reporter.jar2ExeReport());
-        System.out.println(reporter.additionalReports());
+//         System.out.println(reporter.importsReport());
+//         System.out.println(reporter.exportsReport());
+         System.out.println(reporter.resourcesReport());
+//         System.out.println(reporter.debugReport());
+//         System.out.println(reporter.delayImportsReport());
+//         System.out.println(reporter.relocReport());
+        // System.out.println(reporter.anomalyReport());
+//         System.out.println(reporter.hashReport());
+//         System.out.println(reporter.overlayReport());
+//         System.out.println(reporter.peidReport());
+        // System.out.println(reporter.maldetReport());
+        // System.out.println(reporter.jar2ExeReport());
+        // System.out.println(reporter.additionalReports());
         System.out.println("done");
     }
 }

@@ -8,10 +8,11 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.edata.ExportSection
+import com.github.katjahahn.parser.PhysicalLocation
 
 trait ExportSectionScanning extends AnomalyScanner {
-  
-    abstract override def scanReport(): String =
+
+  abstract override def scanReport(): String =
     "Applied Export Scanning" + NL + super.scanReport
 
   abstract override def scan(): List[Anomaly] = {
@@ -20,8 +21,18 @@ trait ExportSectionScanning extends AnomalyScanner {
       val edata = maybeEdata.get
       val anomalyList = ListBuffer[Anomaly]()
       anomalyList ++= checkFractionatedExports(edata)
+      anomalyList ++= checkInvalidExports(edata)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
+  }
+
+  private def checkInvalidExports(edata: ExportSection): List[Anomaly] = {
+    if(edata.invalidExportCount > 0) {
+      val description = "Invalid exports found: " + edata.invalidExportCount
+      val locs = List[PhysicalLocation]() //TODO get locations
+      List(new StructureAnomaly(PEStructureKey.EXPORT_SECTION, description,
+          AnomalySubType.INVALID_EXPORTS, locs))
+    } else Nil
   }
 
   private def checkFractionatedExports(edata: ExportSection): List[Anomaly] = {
@@ -30,7 +41,7 @@ trait ExportSectionScanning extends AnomalyScanner {
     val loader = new SectionLoader(data)
     val edataHeader = loader.maybeGetSectionHeaderByOffset(edata.getOffset())
     if (edataHeader.isPresent) {
-      
+
       def isWithinEData(loc: Location): Boolean = {
         val start = edataHeader.get().getAlignedPointerToRaw
         val end = start + loader.getReadSize(edataHeader.get)

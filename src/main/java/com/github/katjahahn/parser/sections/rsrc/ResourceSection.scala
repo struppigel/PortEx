@@ -94,10 +94,15 @@ object ResourceSection {
   /**
    * Maximum depth for the resource tree that is read.
    */
-  val maxLevel = 20;
+  val maxLevel = 10
+  
+  /**
+   * Maximum number of nodes to read.
+   */
+  val maxResourceDirs = 1000
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/unusualfiles/corkami/resource_loop.exe")
+    val file = new File("/home/deque/portextestfiles/badfiles/VirusShare_10c6fdb01b6b19f84055754b764c6e38")
     val pedata = PELoader.loadPE(file)
     val rsrc = new SectionLoader(pedata).loadResourceSection()
     val res = rsrc.getResources.asScala
@@ -119,9 +124,11 @@ object ResourceSection {
     val initialLevel = Level()
     val initialOffset = 0
     val loopChecker = new ResourceLoopChecker()
+    println("creating resource table")
     val resourceTable = ResourceDirectory(file, initialLevel,
       initialOffset, virtualAddress, rsrcOffset, mmBytes, loopChecker)
     val hasLoop = loopChecker.loopDetected
+    println("creating resource section")
     new ResourceSection(resourceTable, rsrcOffset, mmBytes, hasLoop)
   }
 
@@ -156,6 +163,11 @@ class ResourceLoopChecker {
       if(!isNew) _loopDetected = true
       isNew
     }
+    
+    /**
+     * Get the number of saved resource directory file offsets
+     */
+    def size(): Integer = fileOffsets.size
 
     /**
      * Indicates if a loop was detected.

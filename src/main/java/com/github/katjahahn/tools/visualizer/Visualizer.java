@@ -549,7 +549,8 @@ public class Visualizer {
 //        File file = new File(
 //                "/home/deque/portextestfiles/badfiles/VirusShare_f844ea7ac31f3a93357392072da69d49");
         File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe");
+                "/home/deque/portextestfiles/unusualfiles/corkami/resource_shuffled.exe");
+//        ReportCreator.newInstance(file).printReport();
 //        List<String> problemfiles = new ArrayList<>();
 //        // TODO these are problemfiles, handle them!
 //        String[] problem = {"foldedhdr.exe", "impbyord.exe", "maxvals.exe", "65535sects.exe"};

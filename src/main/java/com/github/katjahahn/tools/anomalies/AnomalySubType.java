@@ -316,7 +316,14 @@ public enum AnomalySubType {
     DEPRECATED_PTR_TO_RELOC(DEPRECATED), // TODO add to thesis
 
     /**************************** Import Section ******************************/
-
+    
+    /**
+     * So many imports, exports, resources or any other data that the maximum 
+     * limits for parsing them were reached.
+     * TODO detect for imports, resources, exports, delay-load imports
+     */
+    EXHAUSTIVE_DATA(STRUCTURE),
+    
     /**
      * Kernel32.dll imports by ordinal are suspicious according to Szor
      */
@@ -331,6 +338,13 @@ public enum AnomalySubType {
      * Any structures of the import directory are in virtual space. //TODO add to thesis
      */
     VIRTUAL_IMPORTS(STRUCTURE), //TODO implement virtual exports, relocs, etc
+    
+    /**************************** Export Section ******************************/
+    
+    /**
+     * File contains export entries with invalid RVAs.
+     */
+    INVALID_EXPORTS(STRUCTURE),
 
     /**************************** Resource Section ******************************/
 
