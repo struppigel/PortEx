@@ -317,20 +317,20 @@ object ExportSection {
   }
 
   private def isValidRVA(rva: Long, loader: SectionLoader, file: File, rvas: ListBuffer[Long]): Boolean = {
-    // no rva duplicates allowed
-    if (rvas.contains(rva)) {
-      invalidExportCount += 1
-      false
-    } else {
+    // no rva duplicates allowed TODO consider, creates false unit tests
+//    if (rvas.contains(rva)) {
+//      invalidExportCount += 1
+//      false
+//    } else {
       rvas += rva
       val offset = loader.getFileOffset(rva)
-      if (!(offset < file.length() && offset > 0))
+      if (offset < file.length() && offset >= 0)
         true
       else {
         invalidExportCount += 1
         false
       }
-    }
+//    }
   }
 
   /**

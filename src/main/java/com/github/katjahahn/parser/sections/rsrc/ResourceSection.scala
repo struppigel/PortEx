@@ -124,11 +124,9 @@ object ResourceSection {
     val initialLevel = Level()
     val initialOffset = 0
     val loopChecker = new ResourceLoopChecker()
-    println("creating resource table")
     val resourceTable = ResourceDirectory(file, initialLevel,
       initialOffset, virtualAddress, rsrcOffset, mmBytes, loopChecker)
     val hasLoop = loopChecker.loopDetected
-    println("creating resource section")
     new ResourceSection(resourceTable, rsrcOffset, mmBytes, hasLoop)
   }
 

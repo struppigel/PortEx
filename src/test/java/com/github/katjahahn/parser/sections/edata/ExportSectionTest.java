@@ -21,9 +21,6 @@ import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.edata.ExportEntry;
-import com.github.katjahahn.parser.sections.edata.ExportNameEntry;
-import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.google.common.base.Optional;
 
 public class ExportSectionTest {
@@ -64,7 +61,7 @@ public class ExportSectionTest {
 
     @Test
     public void getExportEntries() throws IOException {
-//        assertEquals(pedata.size(), exportEntries.size()); TODO
+        // assertEquals(pedata.size(), exportEntries.size()); TODO
         for (Entry<File, List<ExportEntry>> set : exportEntries.entrySet()) {
             File file = set.getKey();
             List<ExportEntry> expected = set.getValue();

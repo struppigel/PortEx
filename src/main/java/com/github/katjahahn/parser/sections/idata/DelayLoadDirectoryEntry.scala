@@ -94,13 +94,13 @@ object DelayLoadDirectoryEntry {
     val name = getASCIIName(nameRVA, va, mmbytes)
     try {
       val lookupTableEntries = readLookupTableEntries(entries, loadInfo)
-      new DelayLoadDirectoryEntry(entries, entryFileOffset, name, lookupTableEntries)
+      return new DelayLoadDirectoryEntry(entries, entryFileOffset, name, lookupTableEntries)
     } catch {
-      case e: FailureEntryException => logger.warn(
+      case e: FailureEntryException => logger.error(
         "Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
     }
     // No lookup table entries read
-    new DelayLoadDirectoryEntry(entries, entryFileOffset, name, Nil)
+    return new DelayLoadDirectoryEntry(entries, entryFileOffset, name, Nil)
   }
 
   private def readLookupTableEntries(entries: Map[DelayLoadDirectoryKey, StandardField],
