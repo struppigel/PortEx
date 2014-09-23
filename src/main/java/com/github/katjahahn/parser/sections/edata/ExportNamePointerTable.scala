@@ -48,18 +48,20 @@ class ExportNamePointerTable private (val pointerNameList: List[(Address, String
 }
 
 object ExportNamePointerTable {
-  
+
   private val logger = LogManager.getLogger(ExportNamePointerTable.getClass().getName())
 
   type Address = Long
   val entryLength = 4
+  val maxNameEntries = 10000 //add max val TODO anomaly
 
   def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int,
     virtualAddress: Long, fileOffset: Long): ExportNamePointerTable = {
     val initialOffset = (rva - virtualAddress).toInt
     val addresses = new ListBuffer[(Address, String)]
     val end = initialOffset + entries * entryLength
-    for (offset <- initialOffset until end by entryLength) {
+    val limitedEnd = Math.min(maxNameEntries * 4 + initialOffset, end)
+    for (offset <- initialOffset until limitedEnd by entryLength) {
       val address = mmBytes.getBytesLongValue(offset + virtualAddress, entryLength)
       val name = getName(mmBytes, address)
       addresses += ((address, name))

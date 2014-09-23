@@ -31,7 +31,15 @@ import com.github.katjahahn.parser.MemoryMappedPE
  */
 class ExportAddressTable private (val addresses: List[Long], val fileOffset: Long) {
 
+  /**
+   * Returns the size of the EAT in bytes
+   */
   def size(): Long = addresses.length * ExportAddressTable.addressLength
+  
+  /**
+   * Returns the number of addresses in the EAT
+   */
+  def nrOfAddresses(): Long = addresses.length
   
   /**
    * Returns the address at the given index

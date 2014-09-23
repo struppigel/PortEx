@@ -200,6 +200,7 @@ object ExportSection {
     println(edata.getInfo)
   }
 
+  @throws(classOf[FileFormatException])
   def apply(li: LoadInfo): ExportSection = {
     //TODO slice only headerbytes for ExportDir
     invalidExportCount = 0
@@ -238,6 +239,7 @@ object ExportSection {
    *
    * @param offset file offset of the export directory table
    */
+  @throws(classOf[FileFormatException])
   private def loadExportAddressTable(edataTable: ExportDirectory,
     mmBytes: MemoryMappedPE, virtualAddress: Long, offset: Long): ExportAddressTable = {
     val addrTableRVA = edataTable(EXPORT_ADDR_TABLE_RVA)
@@ -318,19 +320,19 @@ object ExportSection {
 
   private def isValidRVA(rva: Long, loader: SectionLoader, file: File, rvas: ListBuffer[Long]): Boolean = {
     // no rva duplicates allowed TODO consider, creates false unit tests
-//    if (rvas.contains(rva)) {
-//      invalidExportCount += 1
-//      false
-//    } else {
-      rvas += rva
-      val offset = loader.getFileOffset(rva)
-      if (offset < file.length() && offset >= 0)
-        true
-      else {
-        invalidExportCount += 1
-        false
-      }
-//    }
+    //    if (rvas.contains(rva)) {
+    //      invalidExportCount += 1
+    //      false
+    //    } else {
+    rvas += rva
+    val offset = loader.getFileOffset(rva)
+    if (offset < file.length() && offset >= 0)
+      true
+    else {
+      invalidExportCount += 1
+      false
+    }
+    //    }
   }
 
   /**
@@ -358,7 +360,8 @@ object ExportSection {
   private def getSymbolRVAForName(name: String, exportAddressTable: ExportAddressTable,
     ordinalTable: ExportOrdinalTable, namePointerTable: ExportNamePointerTable): Long = {
     val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
-    if (ordinal == -1) -1 else exportAddressTable(ordinal - ordinalTable.base)
+    if (ordinal == -1 || (ordinal - ordinalTable.base) >= exportAddressTable.nrOfAddresses) -1
+    else exportAddressTable(ordinal - ordinalTable.base)
   }
 
   private def getASCIIName(nameRVA: Long, virtualAddress: Long,
@@ -376,6 +379,7 @@ object ExportSection {
    * @param loadInfo the load information
    * @return instance of the export section
    */
+  @throws(classOf[FileFormatException])
   def newInstance(loadInfo: LoadInfo): ExportSection = apply(loadInfo)
 
 }

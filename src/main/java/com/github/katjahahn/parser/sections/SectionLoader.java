@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
@@ -345,13 +346,13 @@ public class SectionLoader {
         }
         return Optional.absent();
     }
-    
+
     private PhysicalLocation getPhysicalSectionLocation(SectionHeader header) {
         long size = getReadSize(header);
         long address = header.getAlignedPointerToRaw();
         return new PhysicalLocation(address, size);
     }
-    
+
     private VirtualLocation getVirtualSectionLocation(SectionHeader header) {
         long vSize = header.getAlignedVirtualSize();
         long vAddress = header.getAlignedVirtualAddress();
@@ -363,7 +364,7 @@ public class SectionLoader {
      * 
      * @param location
      * @param address
-     *            a  address that may point into the section
+     *            a address that may point into the section
      * @return true iff address is within location
      */
     private static boolean addressIsWithin(Location location, long address) {
@@ -386,40 +387,43 @@ public class SectionLoader {
     public Optional<? extends SpecialSection> maybeLoadSpecialSection(
             DataDirectoryKey key) {
         Optional<LoadInfo> maybeLoadInfo = maybeGetLoadInfo(key);
-        if (maybeLoadInfo.isPresent()) {
-            LoadInfo loadInfo = maybeLoadInfo.get();
-            SpecialSection section = null;
-            switch (key) {
-            case IMPORT_TABLE:
-                section = ImportSection.newInstance(loadInfo);
-                break;
-            case EXCEPTION_TABLE:
-                section = ExceptionSection.newInstance(loadInfo);
-                break;
-            case EXPORT_TABLE:
-                section = ExportSection.newInstance(loadInfo);
-                break;
-            case DEBUG:
-                section = DebugSection.newInstance(loadInfo);
-                break;
-            case RESOURCE_TABLE:
-                section = ResourceSection.newInstance(loadInfo);
-                break;
-            case BASE_RELOCATION_TABLE:
-                section = RelocationSection.newInstance(loadInfo);
-                break;
-            case DELAY_IMPORT_DESCRIPTOR:
-                section = DelayLoadSection.newInstance(loadInfo);
-                break;
-            default:
-                return Optional.absent();
+        try {
+            if (maybeLoadInfo.isPresent()) {
+                LoadInfo loadInfo = maybeLoadInfo.get();
+                SpecialSection section = null;
+                switch (key) {
+                case IMPORT_TABLE:
+                    section = ImportSection.newInstance(loadInfo);
+                    break;
+                case EXCEPTION_TABLE:
+                    section = ExceptionSection.newInstance(loadInfo);
+                    break;
+                case EXPORT_TABLE:
+                    section = ExportSection.newInstance(loadInfo);
+                    break;
+                case DEBUG:
+                    section = DebugSection.newInstance(loadInfo);
+                    break;
+                case RESOURCE_TABLE:
+                    section = ResourceSection.newInstance(loadInfo);
+                    break;
+                case BASE_RELOCATION_TABLE:
+                    section = RelocationSection.newInstance(loadInfo);
+                    break;
+                case DELAY_IMPORT_DESCRIPTOR:
+                    section = DelayLoadSection.newInstance(loadInfo);
+                    break;
+                default:
+                    return Optional.absent();
+                }
+                if (section.isEmpty()) {
+                    logger.warn("empty data directory: " + key);
+                }
+                return Optional.of(section);
             }
-            if (section.isEmpty()) {
-                logger.warn("empty data directory: " + key);
-            }
-            return Optional.of(section);
+        } catch (FileFormatException e) {
+            logger.warn(e);
         }
-
         return Optional.absent();
     }
 

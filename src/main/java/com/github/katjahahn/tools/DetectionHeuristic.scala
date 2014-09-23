@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.PELoader
@@ -36,7 +38,7 @@ import com.github.katjahahn.parser.FileFormatException
 /**
  * Provides detection heuristics based on statistical information about PE files.
  * Only anomaly statistics are used at present.
- * 
+ *
  * @author Katja Hahn
  */
 class DetectionHeuristic(
@@ -44,9 +46,9 @@ class DetectionHeuristic(
   private val probabilities: Map[AnomalySubType, AnomalyProb]) {
 
   /**
-   * Calculates the probability for a file to be malicious based on the 
+   * Calculates the probability for a file to be malicious based on the
    * anomalies found in the file.
-   * 
+   *
    * @return probability P(BAD|Anomalies)
    */
   def malwareProbability(): Double = {
@@ -93,7 +95,16 @@ object DetectionHeuristic {
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
 
   def main(args: Array[String]): Unit = {
-    testHeuristics();
+    testHeuristics()
+  }
+
+  //subtype; bad; good; badprob; ratio
+  private def printCleanedProbs(): Unit = {
+    probabilities.foreach { prob =>
+      val ratio = prob._2.good / prob._2.bad
+      val badProb = prob._2.bad * 0.5 / (prob._2.good * 0.5 + prob._2.bad * 0.5)
+      println(prob._1 + ";" + prob._2.bad + ";" + prob._2.good + ";" + badProb + ";" + ratio)
+    }
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -166,7 +177,7 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/goodcontrolgroup")
+    val folder = new File("/home/deque/portextestfiles/badfiles")
     val thresholdA = 0.99
     val thresholdB = 0.80
     val thresholdC = 0.50
@@ -195,7 +206,7 @@ object DetectionHeuristic {
           println("malicious by threshold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
         }
       } catch {
-        case e: FileFormatException => notLoaded +=1; System.err.println("file is no PE file: " + file.getName());
+        case e: FileFormatException => notLoaded += 1; System.err.println("file is no PE file: " + file.getName());
         case e: Exception => notLoaded += 1; e.printStackTrace();
       }
     }

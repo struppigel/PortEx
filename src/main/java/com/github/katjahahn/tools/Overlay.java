@@ -86,12 +86,12 @@ public class Overlay {
 //            }
             for (SectionHeader section : headers) {
                 long alignedPointerToRaw = section.getAlignedPointerToRaw();
+                long readSize = loader.getReadSize(section);
                 // ignore invalid sections
                 // corkami: "if a section starts at [unaligned] offset 0, it's invalid."
-                if (alignedPointerToRaw >= file.length() || section.get(SectionHeaderKey.POINTER_TO_RAW_DATA) == 0) {
+                if (readSize == 0 || section.get(SectionHeaderKey.POINTER_TO_RAW_DATA) == 0) {
                     continue;
                 }
-                long readSize = loader.getReadSize(section);
                 long endPoint = readSize + alignedPointerToRaw;
                 if (offset < endPoint) { // determine largest endPoint
                     offset = endPoint;

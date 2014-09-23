@@ -66,7 +66,7 @@ public class PortexStats {
     private static int written = 0;
 
     public static void main(String[] args) throws IOException {
-        anomalyCount(new File(BAD_FILES).listFiles(), BAD_FILES);
+        anomalyCount(goodFiles(), GOOD_FILES);
     }
 
     private static void compareSecNames(String goodstats, String badstats)
@@ -470,7 +470,7 @@ public class PortexStats {
         int notLoaded = 0;
         for (File file : files) {
             try {
-                System.out.println(file.getName());
+//                System.out.println(file.getName());
                 total++;
                 PEData data = PELoader.loadPE(file);
                 PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);

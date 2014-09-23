@@ -29,9 +29,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
-import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.anomalies.AnomalySubType;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -90,8 +89,8 @@ public final class PELoader {
             // construct PEData instance
             PEData data = new PEData(msdos, pesig, coff, opt, table, file);
             /* reload headers in case of dual pe header */
-            MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
-                    new SectionLoader(data));
+            // MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
+            // new SectionLoader(data));
             // reloadOptionalHeader(data);
             // table.reload(mmBytes);
             // System.out.println(new ReportCreator(data).secTableReport());
@@ -222,34 +221,42 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-//        File file = new File(
-//                "/home/deque/portextestfiles/unusualfiles/corkami/sc.exe");
+        // File file = new File(
+        // "/home/deque/portextestfiles/unusualfiles/corkami/sc.exe");
         // TODO the following files take very long to parse, why?
-         File file = new File(
-         "/home/deque/portextestfiles/badfiles/VirusShare_10c6fdb01b6b19f84055754b764c6e38");
-        // VirusShare_10c6fdb01b6b19f84055754b764c6e38 --> invalid delay-load imports, exhaustive resource section
-         //VirusShare_a90da79e98213703fc3342b281a95094 --> invalid export entries, lots of
-        ReportCreator reporter = ReportCreator.newInstance(file);
+        File file = new File(
+                "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");
+        // VirusShare_e5ce7ba71528a1f221d6be883e5967f0 --> exhaustive name
+        // pointer entries, export section not in section, pev doesn't show
+        // imports
+        // VirusShare_10c6fdb01b6b19f84055754b764c6e38 --> invalid delay-load
+        // imports, exhaustive resource section
+        // VirusShare_a90da79e98213703fc3342b281a95094 --> invalid export
+        // entries, lots of
+        // VirusShare_130f13919f9d6ed5b77046644fdbab42 --> virtual export
+        // address table
+//        ReportCreator reporter = ReportCreator.newInstance(file);
 //        reporter.printReport();
-        
+        System.out.println(AnomalySubType.values().length);
         // System.out.println(data.getSectionTable().getOffset());
-         System.out.println(reporter.headerReports());
+        // System.out.println(reporter.headerReports());
+        // PEData data = loadPE(file);
         // SectionLoader loader = new SectionLoader(data);
-        // loader.loadImportSection();
+        // loader.maybeLoadResourceSection();
 
-//         System.out.println(reporter.importsReport());
-//         System.out.println(reporter.exportsReport());
-         System.out.println(reporter.resourcesReport());
-//         System.out.println(reporter.debugReport());
-//         System.out.println(reporter.delayImportsReport());
-//         System.out.println(reporter.relocReport());
+        // System.out.println(reporter.importsReport());
+        // System.out.println(reporter.exportsReport());
+        // System.out.println(reporter.resourcesReport());
+        // System.out.println(reporter.debugReport());
+        // System.out.println(reporter.delayImportsReport());
+        // System.out.println(reporter.relocReport());
         // System.out.println(reporter.anomalyReport());
-//         System.out.println(reporter.hashReport());
-//         System.out.println(reporter.overlayReport());
-//         System.out.println(reporter.peidReport());
+        // System.out.println(reporter.hashReport());
+        // System.out.println(reporter.overlayReport());
+        // System.out.println(reporter.peidReport());
         // System.out.println(reporter.maldetReport());
         // System.out.println(reporter.jar2ExeReport());
         // System.out.println(reporter.additionalReports());
-        System.out.println("done");
+        // System.out.println("done");
     }
 }
