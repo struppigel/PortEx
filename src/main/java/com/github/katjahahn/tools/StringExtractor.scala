@@ -33,7 +33,7 @@ import java.io.RandomAccessFile
  * }
  * </pre>
  */
-object StringReader {
+object StringExtractor {
 
   def main(args: Array[String]): Unit = {
     val file = new File("/home/deque/portextestfiles/simile.exe")

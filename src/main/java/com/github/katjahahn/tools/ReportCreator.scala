@@ -42,6 +42,7 @@ import com.github.katjahahn.tools.sigscanner.FileTypeScanner
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
 import com.github.katjahahn.tools.sigscanner.SignatureScanner
 import com.github.katjahahn.tools.sigscanner.Signature
+import java.security.MessageDigest
 
 /**
  * Utility for easy creation of PE file reports.
@@ -83,9 +84,11 @@ class ReportCreator(private val data: PEData) {
   def hashReport(): String = {
     val hasher = new Hasher(data)
     val buf = new StringBuffer()
+    val sha256 = MessageDigest.getInstance("SHA-256")
+    val md5 = MessageDigest.getInstance("MD5")
     buf.append(title("Hashes") + NL)
-    buf.append("MD5:    " + hash(hasher.md5()) + NL)
-    buf.append("SHA256: " + hash(hasher.sha256()) + NL + NL)
+    buf.append("MD5:    " + hash(hasher.fileHash(md5)) + NL)
+    buf.append("SHA256: " + hash(hasher.fileHash(sha256)) + NL + NL)
     val colWidth = 10
     val shaWidth = 64
     val padLength = "1. .rdata    ".length
@@ -97,9 +100,9 @@ class ReportCreator(private val data: PEData) {
       val header = table.getSectionHeader(number)
       val secName = filteredString(header.getName)
       buf.append(pad(number + ". " + secName, padLength, " ") + pad("MD5", colWidth, " ") +
-        pad(hash(hasher.md5OfSection(number)), shaWidth, " ") + NL)
+        pad(hash(hasher.sectionHash(number, md5)), shaWidth, " ") + NL)
       buf.append(pad("", padLength, " ") + pad("SHA256", colWidth, " ") +
-        pad(hash(hasher.sha256OfSection(number)), shaWidth, " ") + NL)
+        pad(hash(hasher.sectionHash(number, sha256)), shaWidth, " ") + NL)
     }
     buf.append(NL)
     buf.toString

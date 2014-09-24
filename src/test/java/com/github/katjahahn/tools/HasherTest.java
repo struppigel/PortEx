@@ -4,6 +4,8 @@ import static org.testng.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,25 +18,29 @@ import com.github.katjahahn.parser.PELoader;
 public class HasherTest {
 
     private PEData winrar;
+    private MessageDigest md5;
+    private MessageDigest sha256;
 
     @BeforeClass
-    public void prepare() throws IOException {
+    public void prepare() throws IOException, NoSuchAlgorithmException {
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
                 + TestreportsReader.TEST_FILE_DIR + "/WinRar.exe"));
         this.winrar = data;
+        md5 = MessageDigest.getInstance("MD5");
+        sha256 = MessageDigest.getInstance("SHA-256");
     }
 
     @Test
-    public void fileHashes() throws IOException {
+    public void fileHashes() throws IOException, NoSuchAlgorithmException {
         Hasher hasher = new Hasher(winrar);
-        byte[] hash = hasher.md5();
+        byte[] hash = hasher.fileHash(md5);
         assertEquals(ByteArrayUtil.byteToHex(hash, ""),
                 "54e97d9059e3ba4e4dee6f0433fec960");
-        assertEquals(Hasher.md5(winrar.getFile()), hash);
-        hash = hasher.sha256();
+        assertEquals(Hasher.fileHash(winrar.getFile(), md5), hash);
+        hash = hasher.fileHash(sha256);
         assertEquals(ByteArrayUtil.byteToHex(hash, ""),
                 "df7509783db57a7ed2b2c794cea04a08f1ca7c289999730c4b914237eeb3b072");
-        assertEquals(Hasher.sha256(winrar.getFile()), hash);
+        assertEquals(Hasher.fileHash(winrar.getFile(), sha256), hash);
     }
 
     public void sectionMD5Hashes() throws IOException {
@@ -46,7 +52,7 @@ public class HasherTest {
         byte[] hash;
         int sections = winrar.getSectionTable().getNumberOfSections();
         for (int i = 1; i <= sections; i++) {
-            hash = hasher.md5OfSection(i);
+            hash = hasher.sectionHash(i, md5);
             assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i]);
         }
     }
@@ -60,7 +66,7 @@ public class HasherTest {
         byte[] hash;
         int sections = winrar.getSectionTable().getNumberOfSections();
         for (int i = 1; i <= sections; i++) {
-            hash = hasher.sha256OfSection(i);
+            hash = hasher.sectionHash(i, sha256);
             assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i]);
         }
     }

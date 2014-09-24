@@ -56,38 +56,31 @@ public class Hasher {
     }
 
     /**
-     * Returns the md5 hash value of the file.
+     * Returns the hash value of the file with the messageDigest.
      * 
-     * @return md5 hash value of the file
+     * @return hash value of the file
      * @throws IOException
      */
-    public byte[] md5() throws IOException {
-        return md5(data.getFile());
+    public byte[] fileHash(MessageDigest messageDigest) throws IOException {
+        return fileHash(data.getFile(), messageDigest);
     }
 
     /**
-     * Returns the sha256 hash value of the file.
-     * 
-     * @return sha256 hash value of the file
-     * @throws IOException
-     */
-    public byte[] sha256() throws IOException {
-        return sha256(data.getFile());
-    }
-
-    /**
-     * Returns the md5 hash value of the physical section with the section
-     * number.
+     * Returns the hash value of the section with the section number and the
+     * messageDigest.
      * <p>
      * The section's size must be greater than 0, otherwise the returned array
      * has zero length.
      * 
      * @param sectionNumber
      *            the section's number
-     * @return md5 hash value of the section with the section number
+     * @param messageDigest
+     *            the message digest algorithm
+     * @return hash value of the section with the section number
      * @throws IOException
      */
-    public byte[] md5OfSection(int sectionNumber) throws IOException {
+    public byte[] sectionHash(int sectionNumber, MessageDigest messageDigest)
+            throws IOException {
         SectionTable table = data.getSectionTable();
         SectionHeader header = table.getSectionHeader(sectionNumber);
         long start = header.getAlignedPointerToRaw();
@@ -96,70 +89,43 @@ public class Hasher {
             logger.warn("The physical section size must be greater than zero!");
             return new byte[0];
         }
-        return computeHash(data.getFile(), "MD5", start, end);
+        return computeHash(data.getFile(), messageDigest, start, end);
     }
 
-    /**
-     * Returns the sha256 hash value of the section with the section number
-     * <p>
-     * The section's size must be greater than 0, otherwise the returned array
-     * has zero length.
-     * @param sectionNumber
-     *            the section's number
-     * @return sha256 hash value of the section with the section number
-     * @throws IOException
-     */
-    public byte[] sha256OfSection(int sectionNumber) throws IOException {
-        SectionTable table = data.getSectionTable();
-        SectionHeader header = table.getSectionHeader(sectionNumber);
-        long start = header.getAlignedPointerToRaw();
-        long end = new SectionLoader(data).getReadSize(header) + start;
-        if (end <= start) {
-            logger.warn("The physical section size must be greater than zero!");
-            return new byte[0];
-        }
-        return computeHash(data.getFile(), "SHA-256", start, end);
+    public static Hasher newInstance(File file) throws IOException {
+        PEData data = PELoader.loadPE(file);
+        return new Hasher(data);
     }
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, NoSuchAlgorithmException {
         File file = new File("/home/deque/portextestfiles/WinRar.exe");
         PEData data = PELoader.loadPE(file);
         Hasher hasher = new Hasher(data);
-        byte[] hash = hasher.md5();
-        System.out.println("MD5: " + ByteArrayUtil.byteToHex(hash, ""));
-        hash = hasher.sha256();
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        byte[] hash = hasher.fileHash(sha256);
         System.out.println("SHA-256: " + ByteArrayUtil.byteToHex(hash, ""));
         System.out.println();
         int sections = data.getSectionTable().getNumberOfSections();
         for (int i = 1; i <= sections; i++) {
-            hash = hasher.sha256OfSection(i);
+            hash = hasher.sectionHash(i, sha256);
             System.out.println("SHA256 section " + i + ": "
                     + ByteArrayUtil.byteToHex(hash, ""));
         }
     }
 
     /**
-     * Returns MD5 hash value of the file.
+     * Returns the hash value of the file for the specified messageDigest.
      * 
      * @param file
      *            to compute the hash value for
-     * @return MD5 hash value of the file
+     * @param messageDigest
+     *            the message digest algorithm
+     * @return hash value of the file
      * @throws IOException
      */
-    public static byte[] md5(File file) throws IOException {
-        return computeHash(file, "MD5", 0L, file.length());
-    }
-
-    /**
-     * Returns SHA256 hash value of the file.
-     * 
-     * @param file
-     *            to compute the hash value for
-     * @return SHA256 hash value of the file
-     * @throws IOException
-     */
-    public static byte[] sha256(File file) throws IOException {
-        return computeHash(file, "SHA-256", 0L, file.length());
+    public static byte[] fileHash(File file, MessageDigest messageDigest)
+            throws IOException {
+        return computeHash(file, messageDigest, 0L, file.length());
     }
 
     /**
@@ -178,12 +144,11 @@ public class Hasher {
      * @return hash value as byte array
      * @throws IOException
      */
-    private static byte[] computeHash(File file, String hashType, long from,
-            long until) throws IOException {
+    private static byte[] computeHash(File file, MessageDigest digest,
+            long from, long until) throws IOException {
         Preconditions.checkArgument(until > from);
         Preconditions.checkArgument(until <= file.length());
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            MessageDigest digest = MessageDigest.getInstance(hashType);
             byte[] buffer = new byte[BUFFER_SIZE];
             int readbytes;
             long byteSum = from;
@@ -196,11 +161,6 @@ public class Hasher {
                 digest.update(buffer, 0, readbytes);
             }
             return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
         }
-        // must never happen (can happen with the wrong hash type and this is
-        // catched by unit tests)
-        return null;
     }
 }
