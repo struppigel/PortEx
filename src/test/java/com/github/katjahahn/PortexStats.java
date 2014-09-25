@@ -12,16 +12,20 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -64,9 +68,169 @@ public class PortexStats {
     private static int total = 0;
     private static int prevTotal = 0;
     private static int written = 0;
+    private static final int POWERMAX = 4;
 
     public static void main(String[] args) throws IOException {
-        anomalyCount(goodFiles(), GOOD_FILES);
+       anomalyStats(badFiles());
+    }
+
+    private static String percent(double value) {
+        NumberFormat formatter = new DecimalFormat("##0.00");
+        return formatter.format(value);
+    }
+
+    private static String createXLetAnomalyStats()
+            throws FileNotFoundException, IOException {
+        int badTotal = 103274;
+        int goodTotal = 49814;
+        Map<Set<AnomalySubType>, Integer> goodStats = readAnomalyXLetStats(new File(
+                "goodfiles"));
+        Map<Set<AnomalySubType>, Integer> badStats = readAnomalyXLetStats(new File(
+                "badfiles"));
+        StringBuffer buf = new StringBuffer("anomalies;good;bad;boost;badprob\n");
+        Map<String, Double> lines = new TreeMap<>();
+        for (Entry<Set<AnomalySubType>, Integer> badEntry : entriesSortedByValues(badStats)) {
+            int badCount = badEntry.getValue();
+            Set<AnomalySubType> types = badEntry.getKey();
+            int goodCount = 0;
+            if (goodStats.containsKey(types)) {
+                goodCount = goodStats.get(types);
+            }
+            if(goodCount + badCount < 500) continue; //Threshold
+            double goodPercent = goodCount / (double) goodTotal;
+            double badPercent = badCount / (double) badTotal;
+            double badProb = badPercent * 0.5
+                    / (double) (badPercent * 0.5 + goodPercent * 0.5);
+            double boost = (badPercent
+                    / (double) (badPercent + goodPercent)) * 20 - 10;
+            // write stat report
+            boolean first = true;
+            String line = "";
+            for (AnomalySubType type : types) {
+                if (!first) {
+                    line += " & ";
+                }
+                first = false;
+                line += type.toString();
+            }
+            line += "  " + percent(goodPercent * 100) + "  " + percent(badPercent * 100)
+                    + "  " + percent(boost) + "  " + percent(badProb * 100) + "\n";
+            lines.put(line, boost);
+        }
+        for(Entry<String, Double> entry : entriesSortedByValues(lines)) {
+            buf.append(entry.getKey());
+        }
+//        writeStats(buf.toString(), "anomalyXletsanalysis");
+        return buf.toString();
+    }
+
+    private static Map<Set<AnomalySubType>, Integer> readAnomalyXLetStats(
+            File file) throws FileNotFoundException, IOException {
+        Map<Set<AnomalySubType>, Integer> stats = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            for (String line; (line = br.readLine()) != null;) {
+                // evaluate line
+                String[] elems = line.split(";");
+                String[] keys = elems[0].split("&");
+                // parse number of affected files
+                Integer count = Integer.parseInt(elems[1]);
+                // collect anomaly types
+                Set<AnomalySubType> anomalyTypes = new HashSet<>();
+                for (String key : keys) {
+                    AnomalySubType type = AnomalySubType.valueOf(key);
+                    anomalyTypes.add(type);
+                }
+                // put into stats
+                stats.put(anomalyTypes, count);
+            }
+        }
+        return stats;
+    }
+
+    private static void buildPowerSet(List<AnomalySubType> list, int count,
+            Set<List<AnomalySubType>> powerSet) {
+        if (list.size() > POWERMAX)
+            return;
+        powerSet.add(list);
+
+        for (int i = 0; i < list.size(); i++) {
+            List<AnomalySubType> temp = new ArrayList<AnomalySubType>(list);
+            temp.remove(i);
+            buildPowerSet(temp, temp.size(), powerSet);
+        }
+    }
+
+    private static void countAnomalyXLets(Set<AnomalySubType> set,
+            Map<Set<AnomalySubType>, Integer> counter) {
+        List<AnomalySubType> mainList = new ArrayList<>(set);
+        Set<List<AnomalySubType>> result = new HashSet<>();
+        buildPowerSet(mainList, mainList.size(), result);
+        for (List<AnomalySubType> subset : result) {
+            Set<AnomalySubType> key = new HashSet<>(subset);
+            if (counter.containsKey(key)) {
+                int value = counter.get(key);
+                counter.put(key, value + 1);
+            } else {
+                counter.put(key, 1);
+            }
+        }
+    }
+
+    private static String createXLetReport(
+            Map<Set<AnomalySubType>, Integer> counter, int total) {
+        StringBuilder b = new StringBuilder();
+        b.append("\nAnomaly Types;Count;Percentage\n\n");
+        for (Entry<Set<AnomalySubType>, Integer> entry : counter.entrySet()) {
+            Set<AnomalySubType> types = entry.getKey();
+            Integer count = entry.getValue();
+            double percent = count * 100 / (double) total;
+            boolean first = true;
+            for (AnomalySubType type : types) {
+                if (!first) {
+                    b.append("&");
+                }
+                first = false;
+                b.append(type);
+            }
+            b.append(";" + count + ";" + percent + "\n");
+        }
+        return b.toString();
+    }
+
+    private static void anomalyXlets(File[] files, String base) {
+        System.out.println("starting anomaly xlets count");
+        Map<Set<AnomalySubType>, Integer> counter = new HashMap<>();
+        int total = 0;
+        int notLoaded = 0;
+        for (File file : files) {
+            try {
+                total++;
+                PEData data = PELoader.loadPE(file);
+                PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
+                List<Anomaly> list = scanner.getAnomalies();
+                Set<AnomalySubType> set = new TreeSet<>();
+                for (Anomaly anomaly : list) {
+                    set.add(anomaly.subtype());
+                }
+                countAnomalyXLets(set, counter);
+                if (total % 1000 == 0) {
+                    System.out.println("Files read: " + total + "/"
+                            + files.length);
+                }
+            } catch (Exception e) {
+                logger.error(file.getAbsolutePath() + " not loaded! Message: "
+                        + e.getMessage());
+                // e.printStackTrace();
+                notLoaded++;
+            }
+        }
+        String report = "Anomalies Counted: \n\nBase folder: " + base + "\n"
+                + createXLetReport(counter, total - notLoaded)
+                + "\ntotal files: " + total + "\nnot loaded: " + notLoaded
+                + "\nDone\n\n";
+        System.out.println(report);
+        writeStats(report, "anomalycount");
+        System.out.println("anomaly count done");
     }
 
     private static void compareSecNames(String goodstats, String badstats)
@@ -218,11 +382,6 @@ public class PortexStats {
         }
         System.out.println("files listed: " + allFiles.length);
         return allFiles;
-    }
-
-    @SuppressWarnings("unused")
-    private static void anomalyCountGood() {
-        anomalyCount(goodFiles(), GOOD_FILES);
     }
 
     private static File[] concat(File[] a, File[] b) {
@@ -470,7 +629,7 @@ public class PortexStats {
         int notLoaded = 0;
         for (File file : files) {
             try {
-//                System.out.println(file.getName());
+                // System.out.println(file.getName());
                 total++;
                 PEData data = PELoader.loadPE(file);
                 PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
@@ -524,6 +683,7 @@ public class PortexStats {
         int hasOverlay = 0;
         int hasNoOverlay = 0;
         int notLoaded = 0;
+        long overlaySizeSum = 0;
         int total = 0;
         for (File file : files) {
             try {
@@ -532,6 +692,7 @@ public class PortexStats {
                 Overlay overlay = new Overlay(data);
                 if (overlay.exists()) {
                     hasOverlay++;
+                    overlaySizeSum += overlay.getSize();
                 } else {
                     hasNoOverlay++;
                 }
@@ -544,10 +705,12 @@ public class PortexStats {
                 notLoaded++;
             }
         }
-        double percentage = total / (double) hasOverlay;
+        double percentage = hasOverlay / (double) total;
+        long avgSize = overlaySizeSum / total;
         String stats = "total: " + total + "\nhas overlay: " + hasOverlay
                 + "\nno overlay: " + hasNoOverlay
                 + "\npercentage files with overlay: " + percentage
+                + "\n average overlay size: " + avgSize
                 + "\nNot loaded: " + notLoaded + "\nDone\n";
         System.out.println(stats);
         writeStats(stats, "overlay");

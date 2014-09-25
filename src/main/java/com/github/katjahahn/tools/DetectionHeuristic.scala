@@ -71,7 +71,7 @@ case class AnomalyProb(bad: Double, good: Double)
 
 object DetectionHeuristic {
 
-  val threshold = 500
+  val threshold = 200
   lazy val probabilities = readProbabilities()
 
   private val version = """version: 0.2
@@ -95,15 +95,29 @@ object DetectionHeuristic {
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
 
   def main(args: Array[String]): Unit = {
-    testHeuristics()
+    printCleanedProbs()
+  }
+  
+  private def pad(string: String, length: Int, padStr: String): String = {
+    val padding = (for (i <- string.length until length by padStr.length)
+      yield padStr).mkString
+    string + padding
+  }
+  
+  private def percentage(value: Double): String = {
+    ("%.2f" format (value * 100))
   }
 
   //subtype; bad; good; badprob; ratio
   private def printCleanedProbs(): Unit = {
+    val keyPad = "UNINIT_DATA_CONTRAINTS_VIOLATION ".length
+    println(pad("anomaly", keyPad - 2, " ") + "| bad freq | good freq | P(bad|anomaly) | ratio: good/bad ")
+    println()
     probabilities.foreach { prob =>
       val ratio = prob._2.good / prob._2.bad
       val badProb = prob._2.bad * 0.5 / (prob._2.good * 0.5 + prob._2.bad * 0.5)
-      println(prob._1 + ";" + prob._2.bad + ";" + prob._2.good + ";" + badProb + ";" + ratio)
+      println(pad(prob._1.toString, keyPad, " ") + percentage(prob._2.bad) + 
+          "\t" + percentage(prob._2.good) + "\t" + percentage(badProb) + "\t" + ratio)
     }
   }
 
