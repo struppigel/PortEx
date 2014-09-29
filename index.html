@@ -31,33 +31,33 @@
       </header>
       <section>
         <h3>
-<a name="welcome-to-portex" class="anchor" href="#welcome-to-portex"><span class="octicon octicon-link"></span></a>Welcome to PortEx Alpha</h3>
+<a name="welcome-to-portex" class="anchor" href="#welcome-to-portex"><span class="octicon octicon-link"></span></a>Welcome to PortEx Beta</h3>
 
 <p>PortEx is a Java library for static malware analysis of portable executable files. Its focus is on PE malformation robustness and anomaly detection.
-PortEx is written in Java and Scala, but targeted at Java applications.</p>
+PortEx is written in Java and Scala, and targeted at Java applications.</p>
 
 <h3>
 <a name="features-so-far" class="anchor" href="#features-so-far"><span class="octicon octicon-link"></span></a>Features (so far)</h3>
 
 <ul>
 <li>Reading Header information from: MSDOS Header, COFF File Header, Optional Header, Section Table</li>
-<li>Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations</li>
+<li>Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations, Delay-Load Imports</li>
 <li>Dumping of sections, overlay, embedded ZIP, JAR or .class files</li>
-<li>Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values. See here for a full <a href="https://github.com/katjahahn/PortEx/blob/master/src/main/java/com/github/katjahahn/tools/anomalies/AnomalySubType.java">list of anomalies</a></li>
-<li>Visualize a PE file's structure as it is on disk and local entropy</li>
+<li>Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values. The Beta1 release is able to detect 79 different anomalies. See here for a full <a href="https://github.com/katjahahn/PortEx/blob/master/src/main/java/com/github/katjahahn/tools/anomalies/AnomalySubType.java">list of anomalies</a></li>
+<li>Visualize a PE file's structure as it is on disk and visualize the local entropies of a file</li>
 <li>Calculate Shannon Entropy for files and sections</li>
-<li>Calculate MD5 and SHA256 hash values for files and sections</li>
+<li>Calculate hash values for files and sections</li>
 <li>Scan for PEiD signatures or your own signature database</li>
 <li>Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)</li>
-<li>Scan for Unicode and ASCII strings contained in the file</li>
+<li>Extract Unicode and ASCII strings contained in the file</li>
 <li>Overlay detection and dumping</li>
-<li>Detection Heuristics based on statistical information</li>
+<li>Experimental: Detection Heuristics based on statistical information</li>
 </ul><p>For more information have a look at <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a> and the <a href="http://katjahahn.github.io/PortEx/javadocs">Documentation</a></p>
 
 <h3>
 <a name="version" class="anchor" href="#version"><span class="octicon octicon-link"></span></a>Version</h3>
 
-<p>The current version is in Alpha, so beware of bugs and changes of the API until the first release is out. The first release will be in December 2014.</p>
+<p>The current version is in Beta, so beware of bugs and changes of the API until the first release is out. The first release will be in December 2014.</p>
 
 <h3>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Using Portex</h3>
@@ -77,7 +77,7 @@ PortEx is written in Java and Scala, but targeted at Java applications.</p>
 <pre><code>&lt;dependency&gt;
         &lt;groupId&gt;portex&lt;/groupId&gt;
         &lt;artifactId&gt;portex_2.10&lt;/artifactId&gt;
-        &lt;version&gt;0.5.0&lt;/version&gt;
+        &lt;version&gt;1.0&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 
