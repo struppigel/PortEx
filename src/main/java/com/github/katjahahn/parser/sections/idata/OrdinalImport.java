@@ -31,12 +31,12 @@ public class OrdinalImport implements Import {
     /**
      * The ordinal number of the import
      */
-    public int ordinal;
+    private int ordinal;
 
     /**
      * The relative virtual address of the symbol
      */
-    public long rva;
+    private long rva;
 
     /**
      * The directory entry this import belongs to
@@ -62,6 +62,24 @@ public class OrdinalImport implements Import {
         this.rva = rva;
         this.parent = parent;
         this.locations = locations;
+    }
+
+    /**
+     * Returns the ordinal number of the import
+     * 
+     * @return the ordinal number of the import
+     */
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    /**
+     * Returns the rva of the symbol
+     * 
+     * @return the rva of the symbol
+     */
+    public long getRVA() {
+        return rva;
     }
 
     /**

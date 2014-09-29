@@ -86,15 +86,15 @@ public class ImportSectionTest {
         for (ImportDLL dll : expected) {
             ImportDLL newDLL = new ImportDLL(dll.getName());
             for (NameImport nameImport : dll.getNameImports()) {
-                long rva = nameImport.rva - imageBase;
-                NameImport newImport = new NameImport(rva, nameImport.name,
-                        nameImport.hint, nameImport.nameRVA, null,
+                long rva = nameImport.getRVA() - imageBase;
+                NameImport newImport = new NameImport(rva, nameImport.getName(),
+                        nameImport.getHint(), nameImport.getNameRVA(), null,
                         nameImport.getLocations());
                 newDLL.add(newImport);
             }
             for (OrdinalImport ordImport : dll.getOrdinalImports()) {
-                long rva = ordImport.rva - imageBase;
-                OrdinalImport newImport = new OrdinalImport(ordImport.ordinal,
+                long rva = ordImport.getRVA() - imageBase;
+                OrdinalImport newImport = new OrdinalImport(ordImport.getOrdinal(),
                         rva, null, ordImport.getLocations());
                 newDLL.add(newImport);
             }
@@ -150,13 +150,13 @@ public class ImportSectionTest {
         if (ilt == 0)
             ilt = iat;
         for (OrdinalImport pefileImport : ordinalImports) {
-            long rva1 = pefileImport.rva - iat;
-            long rva2 = readImport.rva - ilt;
+            long rva1 = pefileImport.getRVA() - iat;
+            long rva2 = readImport.getRVA() - ilt;
             logger.info("rva1: " + rva1 + " rva2: " + rva2);
-            logger.info("pefileImport ord: " + pefileImport.ordinal);
-            logger.info("readImport ord: " + readImport.ordinal);
+            logger.info("pefileImport ord: " + pefileImport.getOrdinal());
+            logger.info("readImport ord: " + readImport.getOrdinal());
             // second condition to work with lowalignment mode
-            if (pefileImport.ordinal == readImport.ordinal && rva1 == rva2
+            if (pefileImport.getOrdinal() == readImport.getOrdinal() && rva1 == rva2
                     || pefileImport.toString().equals(readImport.toString())) {
                 return pefileImport;
             }
@@ -173,9 +173,9 @@ public class ImportSectionTest {
             ilt = iat;
         }
         for (NameImport pefileImport : pefileList) {
-            long rva1 = pefileImport.rva - iat;
-            long rva2 = readImport.rva - ilt;
-            if (pefileImport.name.equals(readImport.name) && rva1 == rva2) {
+            long rva1 = pefileImport.getRVA() - iat;
+            long rva2 = readImport.getRVA() - ilt;
+            if (pefileImport.getName().equals(readImport.getName()) && rva1 == rva2) {
                 return pefileImport;
             }
         }

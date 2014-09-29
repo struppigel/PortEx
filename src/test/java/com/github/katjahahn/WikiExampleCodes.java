@@ -149,7 +149,7 @@ public class WikiExampleCodes {
         ResourceDirectory tree = rsrc.getResourceTree();
         // Resource directory table header
         Map<ResourceDirectoryKey, StandardField> header = tree.getHeader();
-        long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION).value;
+        long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION).getValue();
         // Get values directly
         long majorVers = tree
                 .getHeaderValue(ResourceDirectoryKey.MAJOR_VERSION);
@@ -176,13 +176,13 @@ public class WikiExampleCodes {
         for (ImportDLL dll : imports) {
             System.out.println("Imports from " + dll.getName());
             for (NameImport nameImport : dll.getNameImports()) {
-                System.out.print("Name: " + nameImport.name);
-                System.out.print(" Hint: " + nameImport.hint);
-                System.out.println(" RVA: " + nameImport.rva);
+                System.out.print("Name: " + nameImport.getName());
+                System.out.print(" Hint: " + nameImport.getHint());
+                System.out.println(" RVA: " + nameImport.getRVA());
             }
 
             for (OrdinalImport ordImport : dll.getOrdinalImports()) {
-                System.out.println("Ordinal: " + ordImport.ordinal);
+                System.out.println("Ordinal: " + ordImport.getOrdinal());
             }
             System.out.println();
         }
@@ -192,7 +192,7 @@ public class WikiExampleCodes {
             Map<DirectoryEntryKey, StandardField> map = tableEntry.getEntries();
 
             for (StandardField field : map.values()) {
-                System.out.println(field.description + ": " + field.value);
+                System.out.println(field.getDescription() + ": " + field.getValue());
             }
         }
     }
@@ -201,9 +201,10 @@ public class WikiExampleCodes {
     public static void exportSection() throws IOException {
         // Show Information
         File file = new File("src/main/resources/testfiles/DLL2.dll");
-        PEData data = PELoader.loadPE(file);
-        System.out.println(new ReportCreator(data).exportsReport());
+        String report = ReportCreator.newInstance(file).exportsReport();
+        System.out.println(report);
         // Loading the export section
+        PEData data = PELoader.loadPE(file);
         ExportSection edata = new SectionLoader(data).loadExportSection();
     }
 
@@ -211,11 +212,12 @@ public class WikiExampleCodes {
     public static void debugSection() throws IOException {
         File file = new File("src/main/resources/testfiles/ntdll.dll");
         // Print Information
+        String report = ReportCreator.newInstance(file).debugReport();
+        System.out.println(report);
+        // Get specific values
         PEData data = PELoader.loadPE(file);
         SectionLoader loader = new SectionLoader(data);
         DebugSection debug = loader.loadDebugSection();
-        System.out.println(debug.getInfo());
-        // Get specific values
         Long address = debug.get(DebugDirectoryKey.ADDR_OF_RAW_DATA);
         Long size = debug.get(DebugDirectoryKey.SIZE_OF_DATA);
         String type = debug.getTypeDescription();
@@ -268,10 +270,10 @@ public class WikiExampleCodes {
         j2eScanner = new Jar2ExeScanner(new File("launch4jexe.exe"));
         List<MatchedSignature> result = j2eScanner.scan();
         for (MatchedSignature sig : result) {
-            System.out.println("name: " + sig.name);
-            System.out.println("address: " + sig.address);
-            System.out.println("epOnly: " + sig.epOnly);
-            System.out.println("signature: " + sig.signature);
+            System.out.println("name: " + sig.getName());
+            System.out.println("address: " + sig.getAddress());
+            System.out.println("epOnly: " + sig.isEpOnly());
+            System.out.println("signature: " + sig.getSignature());
             System.out.println();
         }
     }

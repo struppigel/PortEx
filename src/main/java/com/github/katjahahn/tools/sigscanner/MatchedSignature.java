@@ -17,10 +17,10 @@ package com.github.katjahahn.tools.sigscanner;
 
 public class MatchedSignature {
 	
-	public long address;
-	public String signature;
-	public String name;
-	public boolean epOnly;
+	private long address;
+	private String signature;
+	private String name;
+	private boolean epOnly;
 
 	public MatchedSignature(long address, String signature, String name, boolean epOnly) {
 		this.address = address;
@@ -28,4 +28,20 @@ public class MatchedSignature {
 		this.signature = signature;
 		this.epOnly = epOnly;
 	}
+
+    public long getAddress() {
+        return address;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isEpOnly() {
+        return epOnly;
+    }
 }

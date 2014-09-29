@@ -51,8 +51,8 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
   private def checkLargeELfanew(): List[Anomaly] = {
     val msdos = data.getMSDOSHeader()
     val e_lfanew = msdos.getField(MSDOSHeaderKey.E_LFANEW)
-    if (e_lfanew.value > (data.getFile.length() / 2)) {
-      val description = "e_lfanew points to second half of the file, the value is 0x" + java.lang.Long.toHexString(e_lfanew.value)
+    if (e_lfanew.getValue > (data.getFile.length() / 2)) {
+      val description = "e_lfanew points to second half of the file, the value is 0x" + java.lang.Long.toHexString(e_lfanew.getValue)
       List(FieldAnomaly(e_lfanew, description, AnomalySubType.LARGE_E_LFANEW))
     } else Nil
   }
@@ -79,8 +79,8 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
     val msdos = data.getMSDOSHeader()
     val entries = msdos.getHeaderEntries.asScala
     for(entry <- entries) {
-      if(entry.description.contains("Reserved")) {
-        val description = s"MSDOS Header: Reserved field set: " + entry.description
+      if(entry.getDescription.contains("Reserved")) {
+        val description = s"MSDOS Header: Reserved field set: " + entry.getDescription
         anomalyList += FieldAnomaly(entry, description, AnomalySubType.RESERVED_MSDOS_FIELD)
       }
     }

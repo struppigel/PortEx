@@ -46,7 +46,7 @@ class ExceptionSection private (
 
   def getField(key: ExceptionEntryKey): StandardField = directory(key)
 
-  def get(key: ExceptionEntryKey): Long = directory(key).value
+  def get(key: ExceptionEntryKey): Long = directory(key).getValue
 
   def getExceptionFields(): java.util.Map[ExceptionEntryKey, StandardField] = directory.asJava
 

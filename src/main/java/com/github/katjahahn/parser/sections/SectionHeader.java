@@ -169,7 +169,7 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      */
     @Override
     public long get(SectionHeaderKey key) {
-        return getField(key).value;
+        return getField(key).getValue();
     }
 
     /**
@@ -219,9 +219,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
         final int descrLength = "pointer to line numbers:".length();
 
         for (Entry<SectionHeaderKey, StandardField> entry : entries.entrySet()) {
-            Long value = entry.getValue().value;
+            Long value = entry.getValue().getValue();
             SectionHeaderKey key = entry.getKey();
-            String description = pad(entry.getValue().description + ": ",
+            String description = pad(entry.getValue().getDescription() + ": ",
                     descrLength);
 
             if (key == SectionHeaderKey.CHARACTERISTICS) {

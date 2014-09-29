@@ -126,7 +126,7 @@ class ReportCreator(private val data: PEData) {
       buf.append(pad("", tableHeader.length, "-") + NL)
       val entries = debug.getDirectoryTable.values().asScala.toList.sortBy(e => e.getOffset)
       for (entry <- entries) {
-        buf.append(pad(entry.description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+        buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
       }
       buf.append(NL)
@@ -249,7 +249,7 @@ class ReportCreator(private val data: PEData) {
     buf.append(tableHeader + NL)
     buf.append(pad("", tableHeader.length, "-") + NL)
     for (entry <- entries) {
-      buf.append(pad(entry.description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+      buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
         pad(hexString(entry.getOffset), colWidth, " ") + NL)
     }
     buf.toString + NL
@@ -275,8 +275,8 @@ class ReportCreator(private val data: PEData) {
     buf.append(pad("", tableHeader.length, "-") + NL)
     val entries = (for (key <- COFFHeaderKey.values) yield coff.getField(key)).sortBy(e => e.getOffset)
     for (entry <- entries) {
-      val description = entry.description.replace("(deprecated for image)", "(deprecated)")
-      buf.append(pad(description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+      val description = entry.getDescription.replace("(deprecated for image)", "(deprecated)")
+      buf.append(pad(description, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
         pad(hexString(entry.getOffset), colWidth, " ") + NL)
     }
     buf.toString + NL
@@ -296,8 +296,8 @@ class ReportCreator(private val data: PEData) {
     for ((fields, header) <- List((standardFields, standardHeader), (windowsFields, windowsHeader))) {
       buf.append(NL + header + NL + tableLine)
       for (entry <- fields) {
-        val description = entry.description.replace("(reserved, must be zero)", "(reserved)").replace("(MS DOS stub, PE header, and section headers)", "")
-        buf.append(pad(description, padLength, " ") + pad(hexString(entry.value), colWidth, " ") +
+        val description = entry.getDescription.replace("(reserved, must be zero)", "(reserved)").replace("(MS DOS stub, PE header, and section headers)", "")
+        buf.append(pad(description, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
       }
     }

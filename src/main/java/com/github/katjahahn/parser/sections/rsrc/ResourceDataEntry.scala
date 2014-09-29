@@ -42,9 +42,9 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
   private lazy val headerLoc = new PhysicalLocation(entryOffset, entrySize)
 
   def getResourceLocation(): PhysicalLocation = {
-    val rva = data(ResourceDataEntryKey.DATA_RVA).value
+    val rva = data(ResourceDataEntryKey.DATA_RVA).getValue
     val offset = mmBytes.virtToPhysAddress(rva)
-    val size = data(ResourceDataEntryKey.SIZE).value
+    val size = data(ResourceDataEntryKey.SIZE).getValue
     new PhysicalLocation(offset, size)
   }
 
@@ -68,8 +68,8 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
    * FIXME this is a mistake, use streams
    */
   def getVirtResourceLoc(): Array[Byte] = {
-    val address = data(ResourceDataEntryKey.DATA_RVA).value
-    val end = data(ResourceDataEntryKey.SIZE).value + address
+    val address = data(ResourceDataEntryKey.DATA_RVA).getValue
+    val end = data(ResourceDataEntryKey.SIZE).getValue + address
     //    mmBytes.slice(address, end)
     Array()
   }

@@ -149,7 +149,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
      */
     @Override
     public long get(MSDOSHeaderKey key) {
-        return getField(key).value;
+        return getField(key).getValue();
     }
 
     /**
@@ -171,8 +171,8 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
             StringBuilder b = new StringBuilder("-------------" + NL
                     + "MS DOS Header" + NL + "-------------" + NL);
             for (StandardField entry : headerData.values()) {
-                b.append(entry.description + ": " + entry.value + " (0x"
-                        + Long.toHexString(entry.value) + ")" + NL);
+                b.append(entry.getDescription() + ": " + entry.getValue() + " (0x"
+                        + Long.toHexString(entry.getValue()) + ")" + NL);
             }
             return b.toString();
         }

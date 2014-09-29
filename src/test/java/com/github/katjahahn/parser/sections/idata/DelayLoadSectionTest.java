@@ -26,10 +26,10 @@ public class DelayLoadSectionTest {
       List<NameImport> imports = dll.getNameImports();
       assertEquals(imports.size(), 1);
       NameImport nameImport = imports.get(0);
-      assertEquals(nameImport.hint, 0);
-      assertEquals(nameImport.name, "MessageBoxA");
-      assertEquals(nameImport.nameRVA, 8356);
-      assertEquals(nameImport.rva, 8348);
+      assertEquals(nameImport.getHint(), 0);
+      assertEquals(nameImport.getName(), "MessageBoxA");
+      assertEquals(nameImport.getNameRVA(), 8356);
+      assertEquals(nameImport.getRVA(), 8348);
   }
   
 }

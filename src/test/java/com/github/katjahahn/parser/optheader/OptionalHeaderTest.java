@@ -142,7 +142,7 @@ public class OptionalHeaderTest {
                     .entrySet()) {
                 StandardFieldEntryKey key = entry.getKey();
                 OptionalHeader opt = pedatum.getOptionalHeader();
-                Long actual = opt.getStandardFieldEntry(key).value;
+                Long actual = opt.getStandardFieldEntry(key).getValue();
                 String value = entry.getValue().trim();
                 Long expected = convertToLong(value);
                 assertEquals(expected, actual);
@@ -191,7 +191,7 @@ public class OptionalHeaderTest {
             int actual = list.size();
             if (actual != expected) {
                 for (StandardField entry : list) {
-                    logger.error(entry.description + " | " + entry.key);
+                    logger.error(entry.getDescription() + " | " + entry.getKey());
                 }
             }
             assertEquals(actual, expected);
@@ -222,7 +222,7 @@ public class OptionalHeaderTest {
                     .entrySet()) {
                 WindowsEntryKey key = entry.getKey();
                 OptionalHeader opt = pedatum.getOptionalHeader();
-                long actual = opt.getWindowsFieldEntry(key).value;
+                long actual = opt.getWindowsFieldEntry(key).getValue();
                 String value = entry.getValue().trim();
                 long expected = convertToLong(value);
                 assertEquals(actual, expected);

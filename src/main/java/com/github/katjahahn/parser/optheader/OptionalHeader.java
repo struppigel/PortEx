@@ -242,7 +242,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      */
     @Override
     public long get(OptionalHeaderKey key) {
-        return getField(key).value;
+        return getField(key).getValue();
     }
 
     /**
@@ -344,7 +344,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         windowsFields = IOUtil.readHeaderEntries(WindowsEntryKey.class, format,
                 WINDOWS_SPEC, headerbytes, getOffset());
         directoryNr = windowsFields
-                .get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES).value;
+                .get(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES).getValue();
         if (directoryNr > 16) {
             directoryNr = 16;
         }
@@ -386,9 +386,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     public String getWindowsSpecificInfo() {
         StringBuilder b = new StringBuilder();
         for (StandardField entry : windowsFields.values()) {
-            long value = entry.value;
-            HeaderKey key = entry.key;
-            String description = entry.description;
+            long value = entry.getValue();
+            HeaderKey key = entry.getKey();
+            String description = entry.getDescription();
             if (key.equals(IMAGE_BASE)) {
                 b.append(description + ": " + value + " (0x"
                         + Long.toHexString(value) + "), "
@@ -421,9 +421,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     public String getStandardFieldsInfo() {
         StringBuilder b = new StringBuilder();
         for (StandardField entry : standardFields.values()) {
-            long value = entry.value;
-            HeaderKey key = entry.key;
-            String description = entry.description;
+            long value = entry.getValue();
+            HeaderKey key = entry.getKey();
+            String description = entry.getDescription();
             if (key.equals(MAGIC_NUMBER)) {
                 b.append(description + ": " + value + " --> "
                         + magicNumber.description + NL);

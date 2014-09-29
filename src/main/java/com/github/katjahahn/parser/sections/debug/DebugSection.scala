@@ -71,7 +71,7 @@ class DebugSection private (
         |-------------
         |
         |${
-      directoryTable.values.map(s => s.key match {
+      directoryTable.values.map(s => s.getKey() match {
         case TYPE => "Type: " + typeDescription
         case TIME_DATE_STAMP => "Time date stamp: " + getTimeDateStamp().toString
         case _ => s.toString
@@ -93,7 +93,7 @@ class DebugSection private (
    */
   def get(key: DebugDirectoryKey): java.lang.Long =
     if (directoryTable.contains(key))
-      directoryTable(key).value else null
+      directoryTable(key).getValue else null
 
   /**
    * Returns a string of the type description
@@ -148,7 +148,7 @@ object DebugSection {
     val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes, offset).asScala.toMap
-    val debugTypeValue = entries(DebugDirectoryKey.TYPE).value
+    val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue
     val typeDescriptions = getCharacteristicsDescriptions(debugTypeValue, "debugtypes").asScala.toList
     val debugType = {
       val debugTypeString = getEnumTypeString(debugTypeValue, "debugtypes")
@@ -158,7 +158,7 @@ object DebugSection {
     }
     if (typeDescriptions.size == 0) {
       logger.warn("no debug type description found!")
-      val description = s"${entries(DebugDirectoryKey.TYPE).value} no description available"
+      val description = s"${entries(DebugDirectoryKey.TYPE).getValue} no description available"
       new DebugSection(entries, description, debugType, offset)
     } else {
       new DebugSection(entries, typeDescriptions(0), debugType, offset)

@@ -88,7 +88,7 @@ case class FieldAnomaly(
 
   override def locations = List(new PhysicalLocation(field.getOffset(),
     field.getSize())).asJava
-  override def key = field.key
+  override def key = field.getKey
 }
 
 /**

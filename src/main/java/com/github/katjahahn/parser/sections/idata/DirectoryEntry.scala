@@ -87,7 +87,7 @@ class DirectoryEntry (
       new PhysicalLocation(e.hintNameEntry.fileOffset, e.hintNameEntry.size) })
 
   def apply(key: DirectoryEntryKey): Long = {
-    entries(key).value
+    entries(key).getValue
   }
 
   /**

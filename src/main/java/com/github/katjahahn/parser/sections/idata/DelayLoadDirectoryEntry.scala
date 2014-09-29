@@ -40,7 +40,7 @@ class DelayLoadDirectoryEntry private (
   val name: String,
   private val lookupTableEntries: List[LookupTableEntry]) {
 
-  def apply(key: DelayLoadDirectoryKey): Long = entries(key).value
+  def apply(key: DelayLoadDirectoryKey): Long = entries(key).getValue
 
   /**
    * Returns a list of all file locations where directory entries are found
@@ -90,7 +90,7 @@ object DelayLoadDirectoryEntry {
     val delayLoadBytes = mmbytes.slice(readAddress, readAddress + delayDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DelayLoadDirectoryKey],
       format, delayLoadSpec, delayLoadBytes, entryFileOffset).asScala.toMap
-    val nameRVA = entries(NAME).value.toInt
+    val nameRVA = entries(NAME).getValue.toInt
     val name = getASCIIName(nameRVA, va, mmbytes)
     try {
       val lookupTableEntries = readLookupTableEntries(entries, loadInfo)
@@ -110,7 +110,7 @@ object DelayLoadDirectoryEntry {
     val magicNumber = loadInfo.data.getOptionalHeader.getMagicNumber()
     val fileOffset = loadInfo.fileOffset
     var entry: LookupTableEntry = null
-    var iRVA = entries(DELAY_IMPORT_NAME_TABLE).value
+    var iRVA = entries(DELAY_IMPORT_NAME_TABLE).getValue
     var offset = iRVA - virtualAddress
     var relOffset = iRVA
     val lookupTableEntries = ListBuffer[LookupTableEntry]()

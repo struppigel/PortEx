@@ -112,9 +112,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
                 + "COFF File Header" + NL + "----------------" + NL);
         // loop through standard fields
         for (StandardField field : data.values()) {
-            long value = field.value;
-            COFFHeaderKey key = (COFFHeaderKey) field.key;
-            String description = field.description;
+            long value = field.getValue();
+            COFFHeaderKey key = (COFFHeaderKey) field.getKey();
+            String description = field.getDescription();
             // handle special fields that have additional representations
             
             if(key == COFFHeaderKey.CHARACTERISTICS) {
@@ -178,7 +178,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      */
     @Override
     public long get(COFFHeaderKey key) {
-        return getField(key).value;
+        return getField(key).getValue();
     }
 
     /**

@@ -246,7 +246,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
-    val fileAlignment = entry.value
+    val fileAlignment = entry.getValue
     if (!isPowerOfTwo(fileAlignment)) {
       val description = "Optional Header: File Alignment must be a power of 2, but is " + fileAlignment
       anomalyList += FieldAnomaly(entry, description, NOT_POW_OF_TWO_FILEALIGN)
@@ -290,7 +290,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def checkImageBase(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val entry = opt.getWindowsFieldEntry(WindowsEntryKey.IMAGE_BASE)
-    val imageBase = entry.value
+    val imageBase = entry.getValue
     val sizeOfImage = opt.get(WindowsEntryKey.SIZE_OF_IMAGE)
     if (imageBase % 65536 != 0) {
       val description = "Optional Header: Image Base must be a multiple of 64 K, but is " + imageBase
@@ -343,13 +343,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val datadirs = opt.getDataDirEntries()
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
-      if (entry.value == 0) {
+      if (entry.getValue == 0) {
         val locations = List(new PhysicalLocation(entry.getOffset(), entry.getSize()))
         val description = "Optional Header: No data directory present"
         anomalyList += StructureAnomaly(PEStructureKey.DATA_DIRECTORY, description, NO_DATA_DIR, locations)
       }
-      if (entry.value != 16) {
-        val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.value
+      if (entry.getValue != 16) {
+        val description = "Optional Header: NumberOfRVAAndSizes has unusual value: " + entry.getValue
         anomalyList += FieldAnomaly(entry, description, UNUSUAL_DATA_DIR_NR)
       }
     }

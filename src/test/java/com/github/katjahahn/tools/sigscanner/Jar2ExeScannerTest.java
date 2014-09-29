@@ -43,7 +43,7 @@ public class Jar2ExeScannerTest {
 
     private boolean contains(List<MatchedSignature> siglist, String name) {
         for (MatchedSignature sig : siglist) {
-            if (sig.name.equals(name))
+            if (sig.getName().equals(name))
                 return true;
         }
         return false;

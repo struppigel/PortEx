@@ -99,7 +99,7 @@ class ResourceDirectory private (private val level: Level,
    * @param key the resource directory key
    * @return The value for the given resource directory table key
    */
-  def getHeaderValue(key: ResourceDirectoryKey): Long = header(key).value
+  def getHeaderValue(key: ResourceDirectoryKey): Long = header(key).getValue
 
   /**
    * Collects and returns all resources that this resource table tree has.
@@ -252,8 +252,8 @@ object ResourceDirectory {
   private def readEntries(file: File, header: Header, tableOffset: Long,
     level: Level, virtualAddress: Long, rsrcOffset: Long,
     mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): List[ResourceDirectoryEntry] = {
-    val nameEntries = header(NR_OF_NAME_ENTRIES).value.toInt
-    val idEntries = header(NR_OF_ID_ENTRIES).value.toInt
+    val nameEntries = header(NR_OF_NAME_ENTRIES).getValue.toInt
+    val idEntries = header(NR_OF_ID_ENTRIES).getValue.toInt
     val entriesSum = nameEntries + idEntries
     val limitedEntriesSum = if(entriesSum < entryMaximum) entriesSum else entryMaximum
     var entries = ListBuffer.empty[ResourceDirectoryEntry]

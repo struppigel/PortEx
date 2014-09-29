@@ -42,7 +42,7 @@ class ExportDirectory private (
   private val entries: Map[ExportDirectoryKey, StandardField],
   val fileOffset: Long) {
 
-  def apply(key: ExportDirectoryKey): Long = entries(key).value
+  def apply(key: ExportDirectoryKey): Long = entries(key).getValue
   def size(): Long = 40
 
   /**

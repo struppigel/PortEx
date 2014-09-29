@@ -31,28 +31,28 @@ public class NameImport implements Import {
     /**
      * The relative virtual address to the symbol
      */
-    public long rva;
+    private long rva;
 
     /**
      * The relative virtual address to the name
      */
-    public long nameRVA;
+    private long nameRVA;
 
     /**
      * The name of the import
      */
-    public String name;
+    private String name;
 
     /**
      * The import's hint
      */
-    public int hint;
+    private int hint;
 
     /**
      * The directory entry this import belongs to
      */
     private final DirectoryEntry parent;
-    
+
     private final List<PhysicalLocation> locations;
 
     /**
@@ -102,5 +102,41 @@ public class NameImport implements Import {
     @Override
     public List<PhysicalLocation> getLocations() {
         return new ArrayList<PhysicalLocation>(locations);
+    }
+
+    /**
+     * Returns the relative virtual address to the symbol
+     * 
+     * @return relative virtual address to the symbol
+     */
+    public long getRVA() {
+        return rva;
+    }
+
+    /**
+     * Returns the name rva of the import
+     * 
+     * @return the name rva of the import
+     */
+    public long getNameRVA() {
+        return nameRVA;
+    }
+
+    /**
+     * Returns the name of the import
+     * 
+     * @return the name of the import
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the import's hint
+     * 
+     * @return the import's hint
+     */
+    public int getHint() {
+        return hint;
     }
 }

@@ -86,7 +86,7 @@ public class ExportSectionTest {
             PEData datum) {
         List<ExportEntry> list = new ArrayList<ExportEntry>();
         long imageBase = datum.getOptionalHeader().getWindowsFieldEntry(
-                WindowsEntryKey.IMAGE_BASE).value;
+                WindowsEntryKey.IMAGE_BASE).getValue();
         for (ExportEntry entry : expected) {
             if (entry instanceof ExportNameEntry) {
                 list.add(new ExportNameEntry(entry.symbolRVA() - imageBase,
