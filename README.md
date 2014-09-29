@@ -1,10 +1,10 @@
 PortEx
 ======
 
-### Welcome to PortEx Alpha
+### Welcome to PortEx Beta
 
-PortEx is a Java library for static malware analysis of Portable Executable files. Its focus is on PE malformation robustness, and anomaly detection.  
-PortEx is written in Java and Scala, but targeted at Java applications.  
+PortEx is a Java library for static malware analysis of Portable Executable files. Its focus is on PE malformation robustness, and anomaly detection. 
+PortEx is written in Java and Scala, and targeted at Java applications.  
 Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 
 ### Features (so far)
@@ -12,22 +12,22 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
-* Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values. Click here for a full [list of anomalies](https://github.com/katjahahn/PortEx/blob/master/src/main/java/com/github/katjahahn/tools/anomalies/AnomalySubType.java)
-* Visualize a PE file structure as it is on disk and local entropy
+* Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values. The Beta1 release is able to detect 79 different anomalies. Click here for a full [list of anomalies](https://github.com/katjahahn/PortEx/blob/master/src/main/java/com/github/katjahahn/tools/anomalies/AnomalySubType.java)
+* Visualize a PE file structure as it is on disk and visualize the local entropies of the file
 * Calculate Shannon Entropy for files and sections
-* Calculate MD5 and SHA256 hash values for files and sections
+* Calculate hash values for files and sections
 * Scan for PEiD signatures or your own signature database
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
-* Scan for Unicode and ASCII strings contained in the file
+* Extract Unicode and ASCII strings contained in the file
 * Overlay detection and dumping
-* Detection Heuristics based on statistical information
+* Experimental: Detection Heuristics based on statistical information
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
 ### Version Information
 
-The current version is in Alpha, so beware of bugs and changes of the API until the first release.
-The first release will be in December 2014.
+The current version is in Beta, so beware of bugs and changes of the API until the first release.
+The first release will be in December/January 2014.
 
 ### Using PortEx
 
@@ -47,7 +47,7 @@ Now you can include PortEx to your project by adding the following Maven depende
 <dependency>
   		<groupId>portex</groupId>
   		<artifactId>portex_2.10</artifactId>
-  		<version>0.7.0</version>
+  		<version>1.0</version>
 </dependency>
 ```
 
