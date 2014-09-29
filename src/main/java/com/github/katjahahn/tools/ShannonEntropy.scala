@@ -130,39 +130,25 @@ object ShannonEntropy {
     (byteCounts, total)
   }
 
-  //TODO test this
-  private def countBytes(file: File, offset: Long, size: Long): (Array[Long], Long) = {
-    using(new RandomAccessFile(file, "r")) { raf =>
-      val bytes = Array.fill[Byte](chunkSize)(0)
-      val byteCounts = Array.fill[Long](byteSize)(0L)
-      var total: Long = 0L
-      raf.seek(offset)
-      var readbytes = 0
-      while (readbytes != -1) {
-        readbytes = raf.read(bytes)
-        bytes.take(readbytes).foreach { _ =>
-          List.fromArray(bytes).foreach { byte =>
-            byteCounts((byte & 0xff)) += 1
-            total += 1
-          }
-        }
-      }
-      (byteCounts, total)
-    }
-  }
+  private def countBytes(file: File): (Array[Long], Long) =
+    countBytes(file, 0L, file.length)
 
-  private def countBytes(file: File): (Array[Long], Long) = {
+  private def countBytes(file: File, offset: Long, size: Long): (Array[Long], Long) = {
     using(new FileInputStream(file)) { fis =>
       val bytes = Array.fill[Byte](chunkSize)(0)
       val byteCounts = Array.fill[Long](byteSize)(0L)
       var total: Long = 0L
+      var readbytes = 0L
       Iterator
         .continually(fis.read(bytes))
         .takeWhile(-1 !=)
         .foreach { _ =>
           List.fromArray(bytes).foreach { byte =>
-            byteCounts((byte & 0xff)) += 1
-            total += 1
+            if (readbytes >= offset && readbytes < offset + size) {
+              byteCounts((byte & 0xff)) += 1
+              total += 1
+            }
+            readbytes += 1
           }
         }
       (byteCounts, total)

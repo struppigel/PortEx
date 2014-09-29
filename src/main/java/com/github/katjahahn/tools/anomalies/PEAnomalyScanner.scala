@@ -107,7 +107,7 @@ object PEAnomalyScanner {
       try {
         val scanner = PEAnomalyScanner(file)
         counter += 1
-//        println(file.getName())
+        println(file.getName())
         if(counter % 10 == 0) println("files read: " + counter)
         val anomalies = scanner.getAnomalies.asScala
         if (!anomalies.filter(a => a.subtype == AnomalySubType.VIRTUAL_IMPORTS).isEmpty) {

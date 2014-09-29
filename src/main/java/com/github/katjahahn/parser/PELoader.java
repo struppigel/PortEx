@@ -30,7 +30,7 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.anomalies.AnomalySubType;
+import com.github.katjahahn.tools.ReportCreator;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -235,9 +235,8 @@ public final class PELoader {
         // entries, lots of
         // VirusShare_130f13919f9d6ed5b77046644fdbab42 --> virtual export
         // address table
-//        ReportCreator reporter = ReportCreator.newInstance(file);
-//        reporter.printReport();
-        System.out.println(AnomalySubType.values().length);
+        ReportCreator reporter = ReportCreator.newInstance(file);
+        reporter.printReport();
         // System.out.println(data.getSectionTable().getOffset());
         // System.out.println(reporter.headerReports());
         // PEData data = loadPE(file);

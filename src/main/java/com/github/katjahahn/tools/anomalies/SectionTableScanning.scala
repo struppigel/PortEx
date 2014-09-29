@@ -48,7 +48,6 @@ trait SectionTableScanning extends AnomalyScanner {
 
   abstract override def scan(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    anomalyList ++= checkSectionEntropies
     anomalyList ++= checkVirtualSecTable
     anomalyList ++= checkFileAlignmentConstrains
     anomalyList ++= checkZeroValues
@@ -62,28 +61,6 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkSectionCharacteristics
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
-  }
-
-  private def checkSectionEntropies(): List[Anomaly] = {
-    val table = data.getSectionTable()
-    val anomalyList = ListBuffer[Anomaly]()
-    val highThreshold = 0.8
-    val lowThreshold = 0.2
-    val entropy = new ShannonEntropy(data)
-    val loader = new SectionLoader(data)
-    for (header <- table.getSectionHeaders().asScala) {
-      val readSize = loader.getReadSize(header)
-      val secEntropy = entropy.forSection(header.getNumber())
-      if (secEntropy >= highThreshold) {
-        val description = "Section ${header.getNumber} with name ${sectionName} has high entropy, namely ${secEntropy}"
-        anomalyList += SectionAnomaly(header, description, AnomalySubType.HIGH_ENTROPY_SECTION, readSize)
-      }
-      if(secEntropy <= lowThreshold) {
-        val description = "Section ${header.getNumber} with name ${sectionName} has low entropy, namely ${secEntropy}"
-        anomalyList += SectionAnomaly(header, description, AnomalySubType.LOW_ENTROPY_SECTION, readSize)
-      }
-    }
-    anomalyList.toList
   }
 
   private def checkVirtualSecTable(): List[Anomaly] = {

@@ -191,7 +191,7 @@ object Mapping {
    * Turn chunk usage on or off.
    * TODO remove non-chunk usage entirely after testing this throughoughly
    */
-  var useChunks = true
+  var useChunks = false
 
   /**
    * The default size of a chunk.

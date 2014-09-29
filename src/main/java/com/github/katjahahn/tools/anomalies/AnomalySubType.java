@@ -332,16 +332,6 @@ public enum AnomalySubType {
      * No characteristics specified for a section
      */
     CHARACTERLESS_SECTION(NON_DEFAULT),
-    
-    /**
-     * Section has an entropy that is greater than or equal to 0.8
-     */
-    HIGH_ENTROPY_SECTION(NON_DEFAULT),
-    
-    /**
-     * Section has an entropy that is lower than or equal to 0.2
-     */
-    LOW_ENTROPY_SECTION(NON_DEFAULT),
 
     /**************************** Import Section ******************************/
     
