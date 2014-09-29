@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-
 import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
@@ -42,6 +40,7 @@ import com.github.katjahahn.tools.sigscanner.MatchedSignature;
 import com.github.katjahahn.tools.sigscanner.Signature;
 import com.github.katjahahn.tools.sigscanner.SignatureScanner;
 import com.github.katjahahn.tools.visualizer.ColorableItem;
+import com.github.katjahahn.tools.visualizer.ImageUtil;
 import com.github.katjahahn.tools.visualizer.Visualizer;
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
@@ -62,10 +61,9 @@ public class WikiExampleCodes {
 
     @SuppressWarnings("unused")
     public static void visualizer() throws IOException {
-        File file = new File("WinRar.exe");
+        File peFile = new File("WinRar.exe");
         Visualizer visualizer = new VisualizerBuilder().build();
-        BufferedImage image = visualizer.createImage(file);
-        ImageIO.write(image, "png", new File("image.png"));
+        visualizer.writeImage(peFile, new File("image.png"));
         // use parameters
         visualizer = new VisualizerBuilder()
             .setPixelated(true)
@@ -74,11 +72,15 @@ public class WikiExampleCodes {
             .setLegendWidth(300)
             .setPixelSize(10)
             .setAdditionalGap(3)
-            .setBytesPerPixel(10, file.length())
+            .setBytesPerPixel(10, peFile.length())
             .setColor(ColorableItem.SECTION_TABLE, Color.BLUE)
             .build();
         // create an entropy image
-        BufferedImage entropyImage = visualizer.createEntropyImage(file);
+        BufferedImage entropyImage = visualizer.createEntropyImage(peFile);
+        // create appended entropy & structure image
+        BufferedImage leftImage = visualizer.createEntropyImage(peFile);
+        BufferedImage rightImage = visualizer.createImage(peFile);
+        BufferedImage appendedImage = ImageUtil.appendImages(leftImage, rightImage);
     }
 
     public static void fileAnomalies() {
