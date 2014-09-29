@@ -22,6 +22,7 @@ import com.github.katjahahn.parser.IOUtil._
 import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.msdos.MSDOSHeaderKey
 
 /**
  * Scans the MSDOS Header for anomalies
@@ -38,7 +39,22 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
   abstract override def scan(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     anomalyList ++= checkCollapsedHeader()
+    anomalyList ++= checkLargeELfanew()
     super.scan ::: anomalyList.toList
+  }
+  
+  /**
+   * Checks if e_lfanew points to second half of file
+   *
+   * @return anomaly list
+   */
+  private def checkLargeELfanew(): List[Anomaly] = {
+    val msdos = data.getMSDOSHeader()
+    val e_lfanew = msdos.getField(MSDOSHeaderKey.E_LFANEW)
+    if (e_lfanew.value > (data.getFile.length() / 2)) {
+      val description = "e_lfanew points to second half of the file, the value is 0x" + java.lang.Long.toHexString(e_lfanew.value)
+      List(FieldAnomaly(e_lfanew, description, AnomalySubType.LARGE_E_LFANEW))
+    } else Nil
   }
 
   /**

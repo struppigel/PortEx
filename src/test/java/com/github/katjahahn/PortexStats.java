@@ -71,7 +71,7 @@ public class PortexStats {
     private static final int POWERMAX = 4;
 
     public static void main(String[] args) throws IOException {
-       anomalyStats(badFiles());
+      anomalyCount(goodFiles(), GOOD_FILES);
     }
 
     private static String percent(double value) {
@@ -83,13 +83,16 @@ public class PortexStats {
             throws FileNotFoundException, IOException {
         int badTotal = 103274;
         int goodTotal = 49814;
+        double total = badTotal + goodTotal;
+        System.out.println("b / t " + badTotal / total);
+        System.out.println("g / t " + goodTotal / total);
         Map<Set<AnomalySubType>, Integer> goodStats = readAnomalyXLetStats(new File(
                 "goodfiles"));
         Map<Set<AnomalySubType>, Integer> badStats = readAnomalyXLetStats(new File(
                 "badfiles"));
         StringBuffer buf = new StringBuffer("anomalies;good;bad;boost;badprob\n");
         Map<String, Double> lines = new TreeMap<>();
-        for (Entry<Set<AnomalySubType>, Integer> badEntry : entriesSortedByValues(badStats)) {
+        for (Entry<Set<AnomalySubType>, Integer> badEntry : badStats.entrySet()) {
             int badCount = badEntry.getValue();
             Set<AnomalySubType> types = badEntry.getKey();
             int goodCount = 0;
@@ -99,8 +102,8 @@ public class PortexStats {
             if(goodCount + badCount < 500) continue; //Threshold
             double goodPercent = goodCount / (double) goodTotal;
             double badPercent = badCount / (double) badTotal;
-            double badProb = badPercent * 0.5
-                    / (double) (badPercent * 0.5 + goodPercent * 0.5);
+            double badProb = badPercent * (badTotal / total)
+                    / (double) (badPercent * (badTotal / total) + goodPercent * (goodTotal / total));
             double boost = (badPercent
                     / (double) (badPercent + goodPercent)) * 20 - 10;
             // write stat report

@@ -2,7 +2,7 @@ import AssemblyKeys._ // put this at the top of the file
 
 assemblySettings
 
-jarName in assembly := "portex_alpha_0.7.fat.jar"
+jarName in assembly := "portex_1.0_beta1.jar"
 
 test in assembly := {}
 

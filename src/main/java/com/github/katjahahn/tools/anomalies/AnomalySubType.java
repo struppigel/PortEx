@@ -38,6 +38,11 @@ public enum AnomalySubType {
      * Reserved MSDOS field is not zero
      */
     RESERVED_MSDOS_FIELD(RESERVED),
+    
+    /**
+     * e_lfanew oints to second half of file
+     */
+    LARGE_E_LFANEW(NON_DEFAULT),
 
     /*************************** COFF File Header *****************************/
 
@@ -314,6 +319,29 @@ public enum AnomalySubType {
      * TODO
      */
     DEPRECATED_PTR_TO_RELOC(DEPRECATED), // TODO add to thesis
+    //The following are suspicious section characteristics
+   /**
+    * A section is writeable and executable
+    */
+    WRITE_AND_EXECUTE_SECTION(NON_DEFAULT),
+    /**
+     * A section is writeable only.
+     */
+    WRITEABLE_ONLY_SECTION(NON_DEFAULT),
+    /**
+     * No characteristics specified for a section
+     */
+    CHARACTERLESS_SECTION(NON_DEFAULT),
+    
+    /**
+     * Section has an entropy that is greater than or equal to 0.8
+     */
+    HIGH_ENTROPY_SECTION(NON_DEFAULT),
+    
+    /**
+     * Section has an entropy that is lower than or equal to 0.2
+     */
+    LOW_ENTROPY_SECTION(NON_DEFAULT),
 
     /**************************** Import Section ******************************/
     

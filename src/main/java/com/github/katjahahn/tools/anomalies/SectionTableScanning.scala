@@ -32,6 +32,7 @@ import com.github.katjahahn.parser.IOUtil.NL
 import AnomalySubType._
 import com.github.katjahahn.parser.optheader.WindowsEntryKey
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.tools.ShannonEntropy
 
 /**
  * Scans the Section Table for anomalies.
@@ -47,6 +48,7 @@ trait SectionTableScanning extends AnomalyScanner {
 
   abstract override def scan(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
+    anomalyList ++= checkSectionEntropies
     anomalyList ++= checkVirtualSecTable
     anomalyList ++= checkFileAlignmentConstrains
     anomalyList ++= checkZeroValues
@@ -60,6 +62,28 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkSectionCharacteristics
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
+  }
+
+  private def checkSectionEntropies(): List[Anomaly] = {
+    val table = data.getSectionTable()
+    val anomalyList = ListBuffer[Anomaly]()
+    val highThreshold = 0.8
+    val lowThreshold = 0.2
+    val entropy = new ShannonEntropy(data)
+    val loader = new SectionLoader(data)
+    for (header <- table.getSectionHeaders().asScala) {
+      val readSize = loader.getReadSize(header)
+      val secEntropy = entropy.forSection(header.getNumber())
+      if (secEntropy >= highThreshold) {
+        val description = "Section ${header.getNumber} with name ${sectionName} has high entropy, namely ${secEntropy}"
+        anomalyList += SectionAnomaly(header, description, AnomalySubType.HIGH_ENTROPY_SECTION, readSize)
+      }
+      if(secEntropy <= lowThreshold) {
+        val description = "Section ${header.getNumber} with name ${sectionName} has low entropy, namely ${secEntropy}"
+        anomalyList += SectionAnomaly(header, description, AnomalySubType.LOW_ENTROPY_SECTION, readSize)
+      }
+    }
+    anomalyList.toList
   }
 
   private def checkVirtualSecTable(): List[Anomaly] = {
@@ -116,6 +140,18 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionName = filteredString(header.getName)
       val characs = header.getCharacteristics.asScala.toList
       val entry = header.getField(SectionHeaderKey.CHARACTERISTICS)
+      if (characs.contains(SectionCharacteristic.IMAGE_SCN_MEM_WRITE) && characs.contains(SectionCharacteristic.IMAGE_SCN_MEM_EXECUTE)) {
+        val description = s"Section ${header.getNumber} with name ${sectionName} has write and execute characteristics."
+        anomalyList += FieldAnomaly(entry, description, WRITE_AND_EXECUTE_SECTION)
+      }
+      if (characs.size == 1 && characs.contains(SectionCharacteristic.IMAGE_SCN_MEM_WRITE)) {
+        val description = s"Section ${header.getNumber} with name ${sectionName} has write as only characteristic"
+        anomalyList += FieldAnomaly(entry, description, WRITEABLE_ONLY_SECTION)
+      }
+      if (characs.size == 0) {
+        val description = s"Section ${header.getNumber} with name ${sectionName} has no characteristics"
+        anomalyList += FieldAnomaly(entry, description, CHARACTERLESS_SECTION)
+      }
       if (loader.containsEntryPoint(header)) {
         if (characs.contains(IMAGE_SCN_MEM_WRITE)) {
           val description = s"Entry point is in writeable section ${header.getNumber} with name ${sectionName}"
@@ -149,8 +185,8 @@ trait SectionTableScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
     val overlay = new Overlay(data)
-    if (sectionTable.getOffset >= overlay.getOffset && 
-        sectionTable.getOffset < data.getFile.length) {
+    if (sectionTable.getOffset >= overlay.getOffset &&
+      sectionTable.getOffset < data.getFile.length) {
       val description = s"Section Table (offset: ${sectionTable.getOffset}) moved to Overlay"
       val locations = List(new PhysicalLocation(sectionTable.getOffset, sectionTable.getSize))
       anomalyList += StructureAnomaly(PEStructureKey.SECTION_TABLE, description,

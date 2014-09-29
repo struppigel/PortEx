@@ -1,30 +1,30 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools
 
 import java.io.File
 import java.io.FileInputStream
-
 import scala.collection.JavaConverters.mapAsJavaMapConverter
-
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader
-
 import ShannonEntropy._
+import java.io.RandomAccessFile
 
 /**
  * Tool to calculate Shannon's Entropy for entire files, byte arrays or sections
@@ -52,9 +52,8 @@ class ShannonEntropy(private val data: PEData) {
    * @return entropy of the section
    */
   def forSection(sectionNumber: Int): Double = {
-    val bytes = (new SectionLoader(data)).loadSection(sectionNumber).getBytes()
-    //TODO large sections?
-    entropy(bytes)
+    val section = (new SectionLoader(data)).loadSection(sectionNumber)
+    entropy(data.getFile, section.getOffset(), section.getSize())
   }
 
   /**
@@ -107,28 +106,9 @@ object ShannonEntropy {
     entropy(byteCounts, total)
   }
 
-  /**
-   * Calculates the local entropies for every byte of the given array.
-   * 
-   * @param byteArray the byte array to calculate local entropies from
-   * @return the array containing one entropy per byte
-   * @Beta
-   */
-  def localEntropies(byteArray: Array[Byte]): Array[Double] = {
-    // define the size of one half of the window used to calculate a local entropy
-    val windowHalfSize = 50
-    // yield local entropies for each window
-    (for (i <- 0 until byteArray.length) yield {
-      // the start of the window (windowHalf to the left)
-      val start = if (i - windowHalfSize < 0) 0 else i - windowHalfSize
-      // the end of the window (windowHalf to the right)
-      val end = if (i + windowHalfSize > byteArray.length - 1) byteArray.length - 1 else i + windowHalfSize
-      // get the window's bytes
-      val window = byteArray.slice(start, end)
-      // calculate entropy and yield
-      val (byteCounts, total) = countBytes(window)
-      entropy(byteCounts, total)
-    }).toArray
+  def entropy(file: File, offset: Long, size: Long): Double = {
+    val (byteCounts, total) = countBytes(file, offset, size)
+    entropy(byteCounts, total)
   }
 
   private def entropy(byteCounts: Array[Long], total: Long): Double =
@@ -148,6 +128,27 @@ object ShannonEntropy {
       total += 1L
     }
     (byteCounts, total)
+  }
+
+  //TODO test this
+  private def countBytes(file: File, offset: Long, size: Long): (Array[Long], Long) = {
+    using(new RandomAccessFile(file, "r")) { raf =>
+      val bytes = Array.fill[Byte](chunkSize)(0)
+      val byteCounts = Array.fill[Long](byteSize)(0L)
+      var total: Long = 0L
+      raf.seek(offset)
+      var readbytes = 0
+      while (readbytes != -1) {
+        readbytes = raf.read(bytes)
+        bytes.take(readbytes).foreach { _ =>
+          List.fromArray(bytes).foreach { byte =>
+            byteCounts((byte & 0xff)) += 1
+            total += 1
+          }
+        }
+      }
+      (byteCounts, total)
+    }
   }
 
   private def countBytes(file: File): (Array[Long], Long) = {

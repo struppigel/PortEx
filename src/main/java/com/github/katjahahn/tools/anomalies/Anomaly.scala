@@ -104,6 +104,14 @@ case class DataDirAnomaly(
   override val key = dataDirEntry.getKey
 }
 
+case class SectionAnomaly(val header: SectionHeader,
+  override val description: String,
+  override val subtype: AnomalySubType,
+  readSize: Long) extends Anomaly {
+  override def locations = List(new PhysicalLocation(header.getAlignedPointerToRaw(), readSize)).asJava
+  override def key = PEStructureKey.SECTION 
+}
+
 case class SectionNameAnomaly(val header: SectionHeader,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
