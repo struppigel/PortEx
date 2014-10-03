@@ -71,7 +71,7 @@ public class PortexStats {
     private static final int POWERMAX = 4;
 
     public static void main(String[] args) throws IOException {
-      anomalyCount(goodFiles(), GOOD_FILES);
+        entropies(goodFiles());
     }
 
     private static String percent(double value) {
@@ -84,13 +84,12 @@ public class PortexStats {
         int badTotal = 103274;
         int goodTotal = 49814;
         double total = badTotal + goodTotal;
-        System.out.println("b / t " + badTotal / total);
-        System.out.println("g / t " + goodTotal / total);
         Map<Set<AnomalySubType>, Integer> goodStats = readAnomalyXLetStats(new File(
                 "goodfiles"));
         Map<Set<AnomalySubType>, Integer> badStats = readAnomalyXLetStats(new File(
                 "badfiles"));
-        StringBuffer buf = new StringBuffer("anomalies;good;bad;boost;badprob\n");
+        StringBuffer buf = new StringBuffer(
+                "anomalies;good;bad;boost;badprob\n");
         Map<String, Double> lines = new TreeMap<>();
         for (Entry<Set<AnomalySubType>, Integer> badEntry : badStats.entrySet()) {
             int badCount = badEntry.getValue();
@@ -99,13 +98,15 @@ public class PortexStats {
             if (goodStats.containsKey(types)) {
                 goodCount = goodStats.get(types);
             }
-            if(goodCount + badCount < 500) continue; //Threshold
+            if (goodCount + badCount < 500)
+                continue; // Threshold
             double goodPercent = goodCount / (double) goodTotal;
             double badPercent = badCount / (double) badTotal;
-            double badProb = badPercent * (badTotal / total)
-                    / (double) (badPercent * (badTotal / total) + goodPercent * (goodTotal / total));
-            double boost = (badPercent
-                    / (double) (badPercent + goodPercent)) * 20 - 10;
+            double badProb = badPercent
+                    * (badTotal / total)
+                    / (double) (badPercent * (badTotal / total) + goodPercent
+                            * (goodTotal / total));
+            double boost = (badPercent / (double) (badPercent + goodPercent)) * 20 - 10;
             // write stat report
             boolean first = true;
             String line = "";
@@ -116,14 +117,15 @@ public class PortexStats {
                 first = false;
                 line += type.toString();
             }
-            line += "  " + percent(goodPercent * 100) + "  " + percent(badPercent * 100)
-                    + "  " + percent(boost) + "  " + percent(badProb * 100) + "\n";
+            line += "  " + percent(goodPercent * 100) + "  "
+                    + percent(badPercent * 100) + "  " + percent(boost) + "  "
+                    + percent(badProb * 100) + "\n";
             lines.put(line, boost);
         }
-        for(Entry<String, Double> entry : entriesSortedByValues(lines)) {
+        for (Entry<String, Double> entry : entriesSortedByValues(lines)) {
             buf.append(entry.getKey());
         }
-//        writeStats(buf.toString(), "anomalyXletsanalysis");
+        // writeStats(buf.toString(), "anomalyXletsanalysis");
         return buf.toString();
     }
 
@@ -399,7 +401,15 @@ public class PortexStats {
     public static void entropies(File[] files) {
         int total = 0;
         int hasHighE = 0;
+        int highETotal = 0;
+        int lowETotal = 0;
+        int averageTotal = 0;
+        int veryHighETotal = 0;
+        int veryLowETotal = 0;
         int hasLowE = 0;
+        int hasAverageE = 0;
+        int hasVeryHighE = 0;
+        int hasVeryLowE = 0;
         double entAverage = 0;
         for (File file : files) {
             try {
@@ -409,44 +419,115 @@ public class PortexStats {
                 double entSum = 0;
                 boolean hasHighEFlag = false;
                 boolean hasLowEFlag = false;
+                boolean hasVeryHighEFlag = false;
+                boolean hasVeryLowEFlag = false;
+                boolean hasAverageFlag = false;
                 for (Entry<Integer, Double> entry : entropies.entrySet()) {
                     double entropy = entry.getValue();
                     entSum += entropy;
-                    if (entropy > 0.9) {
+                    if (entropy > 0.75) {
+                        highETotal++;
                         hasHighEFlag = true;
-                    }
-                    if (entropy < 0.1) {
+                        if (entropy > 0.90) {
+                            hasVeryHighEFlag = true;
+                            veryHighETotal++;
+                        }
+                    } else if (entropy < 0.25) {
+                        lowETotal++;
                         hasLowEFlag = true;
+                        if (entropy < 0.10) {
+                            hasVeryLowEFlag = true;
+                            veryLowETotal++;
+                        }
+                    } else {
+                        averageTotal++;
+                        hasAverageFlag = true;
                     }
                 }
                 if (entropies.size() != 0) {
                     entAverage += (entSum / entropies.size());
                 }
+                if (hasAverageFlag)
+                    hasAverageE++;
                 if (hasHighEFlag)
                     hasHighE++;
+                if (hasVeryHighEFlag)
+                    hasVeryHighE++;
                 if (hasLowEFlag)
                     hasLowE++;
+                if (hasVeryLowEFlag)
+                    hasVeryLowE++;
                 total++;
                 if (total % 1000 == 0) {
+                    double veryHighPercent = hasVeryHighE / (double) total;
                     double highPercent = hasHighE / (double) total;
                     double lowPercent = hasLowE / (double) total;
+                    double averagePercent = hasAverageE / (double) total;
+                    double veryLowPercent = hasVeryLowE / (double) total;
+                    double highEPerFile = highETotal / (double) total;
+                    double veryHighEPerFile = veryHighETotal / (double) total;
+                    double veryLowEPerFile = veryLowETotal / (double) total;
+                    double lowEPerFile = lowETotal / (double) total;
+                    double averageEPerFile = averageTotal / (double) total;
                     System.out.println("files read: " + total);
+                    System.out.println("has very high entropy: " + hasVeryHighE
+                            + " " + veryHighPercent);
                     System.out.println("has high entropy: " + hasHighE + " "
                             + highPercent);
+                    System.out.println("has average entropy: " + hasAverageE + " " + averagePercent);
                     System.out.println("has low entropy: " + hasLowE + " "
                             + lowPercent);
+                    System.out.println("has very low entropy: " + hasVeryLowE
+                            + " " + veryLowPercent);
+                    System.out.println();
+                    System.out.println("average very high entropy sections: "
+                            + veryHighEPerFile);
+                    System.out.println("average high entropy sections: "
+                            + highEPerFile);
+                    System.out.println("average average entropy sections: " + averageEPerFile);
+                    System.out.println("average low entropy sections: "
+                            + lowEPerFile);
+                    System.out.println("average very low entropy sections: "
+                            + veryLowEPerFile);
                     System.out.println();
                 }
+                if (total >= 10000)
+                    break;
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
         }
+        double veryHighPercent = hasVeryHighE / (double) total;
         double highPercent = hasHighE / (double) total;
         double lowPercent = hasLowE / (double) total;
+        double averagePercent = hasAverageE / (double) total;
+        double veryLowPercent = hasVeryLowE / (double) total;
+        double highEPerFile = highETotal / (double) total;
+        double veryHighEPerFile = veryHighETotal / (double) total;
+        double veryLowEPerFile = veryLowETotal / (double) total;
+        double lowEPerFile = lowETotal / (double) total;
+        double averageEPerFile = averageTotal / (double) total;
         System.out.println("files read: " + total);
-        System.out.println("has high entropy: " + hasHighE + " " + highPercent);
-        System.out.println("has low entropy: " + hasLowE + " " + lowPercent);
-        System.out.println("entropy average: " + (entAverage / (double) total));
+        System.out.println("has very high entropy: " + hasVeryHighE
+                + " " + veryHighPercent);
+        System.out.println("has high entropy: " + hasHighE + " "
+                + highPercent);
+        System.out.println("has average entropy: " + hasAverageE + " " + averagePercent);
+        System.out.println("has low entropy: " + hasLowE + " "
+                + lowPercent);
+        System.out.println("has very low entropy: " + hasVeryLowE
+                + " " + veryLowPercent);
+        System.out.println();
+        System.out.println("average very high entropy sections: "
+                + veryHighEPerFile);
+        System.out.println("average high entropy sections: "
+                + highEPerFile);
+        System.out.println("average average entropy sections: " + averageEPerFile);
+        System.out.println("average low entropy sections: "
+                + lowEPerFile);
+        System.out.println("average very low entropy sections: "
+                + veryLowEPerFile);
+        System.out.println();
     }
 
     public static void fileTypeCountForFileList() throws IOException {
@@ -713,8 +794,8 @@ public class PortexStats {
         String stats = "total: " + total + "\nhas overlay: " + hasOverlay
                 + "\nno overlay: " + hasNoOverlay
                 + "\npercentage files with overlay: " + percentage
-                + "\n average overlay size: " + avgSize
-                + "\nNot loaded: " + notLoaded + "\nDone\n";
+                + "\n average overlay size: " + avgSize + "\nNot loaded: "
+                + notLoaded + "\nDone\n";
         System.out.println(stats);
         writeStats(stats, "overlay");
     }
