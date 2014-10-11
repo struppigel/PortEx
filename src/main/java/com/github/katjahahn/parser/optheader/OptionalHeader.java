@@ -66,7 +66,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 
     /* extracted file data */
     /** the data directory entries */
-    private Map<DataDirectoryKey, DataDirEntry> dataDirEntries;
+    private Map<DataDirectoryKey, DataDirEntry> dataDirectory;
     /** the standard fields */
     private Map<StandardFieldEntryKey, StandardField> standardFields;
     /** the windows specific fields */
@@ -193,7 +193,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         /* load fields */
         loadStandardFields();
         loadWindowsSpecificFields();
-        loadDataDirectories();
+        loadDataDirectory();
     }
 
     /**
@@ -202,8 +202,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * 
      * @return the data directory entries
      */
-    public Map<DataDirectoryKey, DataDirEntry> getDataDirEntries() {
-        return new HashMap<>(dataDirEntries);
+    public Map<DataDirectoryKey, DataDirEntry> getDataDirectory() {
+        return new HashMap<>(dataDirectory);
     }
 
     /**
@@ -234,7 +234,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      *         doesn't exist.
      */
     public Optional<DataDirEntry> maybeGetDataDirEntry(DataDirectoryKey key) {
-        return Optional.fromNullable(dataDirEntries.get(key));
+        return Optional.fromNullable(dataDirectory.get(key));
     }
 
     /**
@@ -286,9 +286,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
     }
 
-    private void loadDataDirectories() throws IOException {
+    private void loadDataDirectory() throws IOException {
         List<String[]> datadirSpec = IOUtil.readArray(DATA_DIR_SPEC);
-        dataDirEntries = new HashMap<>();
+        dataDirectory = new HashMap<>();
         final int description = 0;
         int offsetLoc;
         int length = 4; // the actual length
@@ -317,7 +317,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                 if (address != 0) {
                     DataDirEntry entry = new DataDirEntry(specs[description],
                             address, size, tableEntryOffset);
-                    dataDirEntries.put(entry.getKey(), entry);
+                    dataDirectory.put(entry.getKey(), entry);
                 }
             }
             counter++;
@@ -368,7 +368,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      */
     public String getDataDirInfo() {
         StringBuilder b = new StringBuilder();
-        for (DataDirEntry entry : dataDirEntries.values()) {
+        for (DataDirEntry entry : dataDirectory.values()) {
             b.append(entry.getKey() + ": " + entry.getVirtualAddress() + "(0x"
                     + Long.toHexString(entry.getVirtualAddress()) + ")/"
                     + entry.getDirectorySize() + "(0x"

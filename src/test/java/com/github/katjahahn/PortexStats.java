@@ -71,7 +71,7 @@ public class PortexStats {
     private static final int POWERMAX = 4;
 
     public static void main(String[] args) throws IOException {
-        entropies(goodFiles());
+        anomalyStats(badFiles());
     }
 
     private static String percent(double value) {
@@ -474,7 +474,8 @@ public class PortexStats {
                             + " " + veryHighPercent);
                     System.out.println("has high entropy: " + hasHighE + " "
                             + highPercent);
-                    System.out.println("has average entropy: " + hasAverageE + " " + averagePercent);
+                    System.out.println("has average entropy: " + hasAverageE
+                            + " " + averagePercent);
                     System.out.println("has low entropy: " + hasLowE + " "
                             + lowPercent);
                     System.out.println("has very low entropy: " + hasVeryLowE
@@ -484,7 +485,8 @@ public class PortexStats {
                             + veryHighEPerFile);
                     System.out.println("average high entropy sections: "
                             + highEPerFile);
-                    System.out.println("average average entropy sections: " + averageEPerFile);
+                    System.out.println("average average entropy sections: "
+                            + averageEPerFile);
                     System.out.println("average low entropy sections: "
                             + lowEPerFile);
                     System.out.println("average very low entropy sections: "
@@ -508,23 +510,21 @@ public class PortexStats {
         double lowEPerFile = lowETotal / (double) total;
         double averageEPerFile = averageTotal / (double) total;
         System.out.println("files read: " + total);
-        System.out.println("has very high entropy: " + hasVeryHighE
-                + " " + veryHighPercent);
-        System.out.println("has high entropy: " + hasHighE + " "
-                + highPercent);
-        System.out.println("has average entropy: " + hasAverageE + " " + averagePercent);
-        System.out.println("has low entropy: " + hasLowE + " "
-                + lowPercent);
-        System.out.println("has very low entropy: " + hasVeryLowE
-                + " " + veryLowPercent);
+        System.out.println("has very high entropy: " + hasVeryHighE + " "
+                + veryHighPercent);
+        System.out.println("has high entropy: " + hasHighE + " " + highPercent);
+        System.out.println("has average entropy: " + hasAverageE + " "
+                + averagePercent);
+        System.out.println("has low entropy: " + hasLowE + " " + lowPercent);
+        System.out.println("has very low entropy: " + hasVeryLowE + " "
+                + veryLowPercent);
         System.out.println();
         System.out.println("average very high entropy sections: "
                 + veryHighEPerFile);
-        System.out.println("average high entropy sections: "
-                + highEPerFile);
-        System.out.println("average average entropy sections: " + averageEPerFile);
-        System.out.println("average low entropy sections: "
-                + lowEPerFile);
+        System.out.println("average high entropy sections: " + highEPerFile);
+        System.out.println("average average entropy sections: "
+                + averageEPerFile);
+        System.out.println("average low entropy sections: " + lowEPerFile);
         System.out.println("average very low entropy sections: "
                 + veryLowEPerFile);
         System.out.println();
@@ -621,17 +621,33 @@ public class PortexStats {
         boolean[] occured = new boolean[ANOMALY_TYPE_NR];
         int notLoaded = 0;
         int total = 0;
+        int malformedFiles = 0;
+        int malformationsTotal = 0;
+        int[] moreThanNMalformationsTotal = new int[1000];
         for (File file : files) {
             try {
                 total++;
                 PEData data = PELoader.loadPE(file);
                 PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(data);
                 List<Anomaly> list = scanner.getAnomalies();
+                boolean malformationFlag = false;
+                int malformationsThisFile = 0;
                 for (Anomaly a : list) {
                     int ordinal = a.getType().ordinal();
                     anomalies[ordinal] += 1;
                     occured[ordinal] = true;
+                    if (a.getType() != AnomalyType.NON_DEFAULT) {
+                        malformationFlag = true;
+                        malformationsTotal++;
+                        malformationsThisFile++;
+                    }
 
+                }
+                for (int i = 0; i <= malformationsThisFile; i++) {
+                    moreThanNMalformationsTotal[i]++;
+                }
+                if (malformationFlag) {
+                    malformedFiles++;
                 }
                 for (int i = 0; i < ANOMALY_TYPE_NR; i++) {
                     if (occured[i]) {
@@ -652,6 +668,8 @@ public class PortexStats {
         }
         double[] averages = new double[ANOMALY_TYPE_NR];
         double[] occPerFile = new double[ANOMALY_TYPE_NR];
+        double malformationsPerMalformedFile = malformationsTotal
+                / (double) malformedFiles;
         try {
             for (int i = 0; i < ANOMALY_TYPE_NR; i++) {
                 averages[i] = anomalies[i] / (double) total;
@@ -700,8 +718,20 @@ public class PortexStats {
                 + "\nnon default: "
                 + occPerFile[NON_DEFAULT.ordinal()]
                 + "\nNot loaded: " + notLoaded + "\nDone\n";
+        String stats5 = "";
+        for (int i = 0; i < moreThanNMalformationsTotal.length; i++) {
+            int value = moreThanNMalformationsTotal[i];
+            double percentage = value / (double) total * 100;
+            if (value != 0) {
+                stats5 += "more than " + i + " malformations: " + value + "("
+                        + percentage + "% )\n";
+
+            }
+        }
         String report = stats1 + "\n\n" + stats2 + "\n\n" + stats3 + "\n\n"
-                + stats4;
+                + stats4 + "\n\n" + stats5 + "\n\n overall malformed files: "
+                + malformedFiles + "\n\n malformations per malformed file: "
+                + malformationsPerMalformedFile;
         System.out.println(report);
         writeStats(report, "anomalytype");
     }
@@ -876,7 +906,7 @@ public class PortexStats {
                 PEData data = PELoader.loadPE(file);
                 SectionLoader loader = new SectionLoader(data);
                 Map<DataDirectoryKey, DataDirEntry> map = data
-                        .getOptionalHeader().getDataDirEntries();
+                        .getOptionalHeader().getDataDirectory();
                 if (map.containsKey(DataDirectoryKey.RESOURCE_TABLE)
                         && loader
                                 .hasValidPointer(DataDirectoryKey.RESOURCE_TABLE)) {

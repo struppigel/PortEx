@@ -221,12 +221,12 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-        // File file = new File(
-        // "/home/deque/portextestfiles/unusualfiles/corkami/sc.exe");
+         File file = new File(
+         "/home/deque/portextestfiles/unusualfiles/corkami/sc.exe");
         // TODO the following files take very long to parse, why?
-        File file = new File(
-                "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");
-        // VirusShare_e5ce7ba71528a1f221d6be883e5967f0 --> exhaustive name
+//        File file = new File(
+//                "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");
+//         "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");// --> exhaustive name
         // pointer entries, export section not in section, pev doesn't show
         // imports
         // VirusShare_10c6fdb01b6b19f84055754b764c6e38 --> invalid delay-load

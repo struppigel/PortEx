@@ -94,7 +94,7 @@ public enum AnomalySubType {
      */
     DUPLICATED_PE_FILE_HEADER(STRUCTURE),
     /**
-     * The image base is too large.
+     * ImageBase + SizeOfImage too large.
      */
     TOO_LARGE_IMAGE_BASE(WRONG),
     /**

@@ -340,7 +340,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    */
   private def dataDirScan(opt: OptionalHeader): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val datadirs = opt.getDataDirEntries()
+    val datadirs = opt.getDataDirectory()
     if (datadirs.size() != 16) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES)
       if (entry.getValue == 0) {

@@ -55,7 +55,7 @@ public class OptionalHeaderTest {
     public void dataDirEntriesListValid() {
         for (PEData pedatum : pedata.values()) {
             Collection<DataDirEntry> coll = pedatum.getOptionalHeader()
-                    .getDataDirEntries().values();
+                    .getDataDirectory().values();
             assertNotNull(coll);
             assertTrue(coll.size() >= 0);
         }
@@ -67,7 +67,7 @@ public class OptionalHeaderTest {
             List<DataDirEntry> testDirs = testdatum.dataDir;
             PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
             OptionalHeader opt = pedatum.getOptionalHeader();
-            Collection<DataDirEntry> peDataEntries = opt.getDataDirEntries()
+            Collection<DataDirEntry> peDataEntries = opt.getDataDirectory()
                     .values();
 
             assertEquals(peDataEntries.size(), testDirs.size());

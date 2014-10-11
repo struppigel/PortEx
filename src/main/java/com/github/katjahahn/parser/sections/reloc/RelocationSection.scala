@@ -58,7 +58,7 @@ object RelocationSection {
 
   def apply(loadInfo: LoadInfo): RelocationSection = {
     val opt = loadInfo.data.getOptionalHeader
-    val tableSize = opt.getDataDirEntries().get(DataDirectoryKey.BASE_RELOCATION_TABLE).getDirectorySize()
+    val tableSize = opt.getDataDirectory().get(DataDirectoryKey.BASE_RELOCATION_TABLE).getDirectorySize()
     val blocks = readBlocks(tableSize, loadInfo)
     new RelocationSection(blocks, loadInfo.fileOffset)
   }

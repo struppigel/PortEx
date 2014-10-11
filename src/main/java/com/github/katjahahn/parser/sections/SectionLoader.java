@@ -757,7 +757,7 @@ public class SectionLoader {
      */
     @Beta
     public boolean hasValidPointer(DataDirectoryKey dataDirKey) {
-        DataDirEntry dataDir = optHeader.getDataDirEntries().get(dataDirKey);
+        DataDirEntry dataDir = optHeader.getDataDirectory().get(dataDirKey);
         long rva = dataDir.getVirtualAddress();
         long offset = getFileOffset(rva);
         return offset <= file.length() && offset >= 0;

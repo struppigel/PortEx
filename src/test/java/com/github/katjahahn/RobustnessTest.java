@@ -71,7 +71,7 @@ public class RobustnessTest {
                 + "/tinype/tinyest.exe");
         PEData data = PELoader.loadPE(tinyest);
         assertEquals(data.getSectionTable().getNumberOfSections(), 1);
-        assertTrue(data.getOptionalHeader().getDataDirEntries().isEmpty());
+        assertTrue(data.getOptionalHeader().getDataDirectory().isEmpty());
 
         File downloader = new File(PEAnomalyScannerTest.UNUSUAL_FOLDER
                 + "/tinype/downloader.exe");

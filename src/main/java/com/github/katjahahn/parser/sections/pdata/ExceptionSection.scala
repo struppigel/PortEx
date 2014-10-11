@@ -104,7 +104,7 @@ object ExceptionSection {
     val folder = new File("/home/deque/portextestfiles/testfiles/")
     for (file <- folder.listFiles) {
       val data = PELoader.loadPE(file)
-      val entries = data.getOptionalHeader().getDataDirEntries()
+      val entries = data.getOptionalHeader().getDataDirectory()
       if (entries.containsKey(DataDirectoryKey.EXCEPTION_TABLE)) {
         try {
           val pdata = new SectionLoader(data).loadExceptionSection()
