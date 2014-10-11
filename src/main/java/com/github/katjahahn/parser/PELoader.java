@@ -30,7 +30,7 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.StringExtractor;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -222,7 +222,7 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
          File file = new File(
-         "/home/deque/portextestfiles/unusualfiles/corkami/sc.exe");
+         "/home/deque/portextestfiles/MinecraftForceOp.exe");
         // TODO the following files take very long to parse, why?
 //        File file = new File(
 //                "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");
@@ -235,8 +235,11 @@ public final class PELoader {
         // entries, lots of
         // VirusShare_130f13919f9d6ed5b77046644fdbab42 --> virtual export
         // address table
-        ReportCreator reporter = ReportCreator.newInstance(file);
-        reporter.printReport();
+//        ReportCreator reporter = ReportCreator.newInstance(file);
+//        reporter.printReport();
+        for( String str : StringExtractor.readASCIIStrings(file, 3)) {
+            System.out.println(str);
+        }
         // System.out.println(data.getSectionTable().getOffset());
         // System.out.println(reporter.headerReports());
         // PEData data = loadPE(file);

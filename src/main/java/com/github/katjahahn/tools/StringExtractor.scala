@@ -65,14 +65,24 @@ object StringExtractor {
   }
 
   def _readASCIIStrings(file: File, minLength: Int): List[String] = {
+    // TODO make more efficient
+    // initialize listbuffer to save all strings found
     val strings = new ListBuffer[String]
     using(new FileInputStream(file)) { is =>
+      // read one byte
       var byte: Int = is.read()
+      // until EOF
       while (byte != -1) {
+        // drop all bytes that are not ascii
         byte = dropWhile(is, !isASCIIPrintable(_))
+        // check for EOF
         if (byte != -1) {
+          // take all bytes that are ascii
           val (taken, b) = takeWhile(is, isASCIIPrintable(_))
+          // check if string has minimum length
           if (taken.length() > minLength) {
+            // save string with very first char/byte prepended, which had to be 
+            // read by dropWhile
             strings.append(byte.toChar + taken)
           }
           byte = b
@@ -85,20 +95,26 @@ object StringExtractor {
   private def isASCIIPrintable(i: Int) = i >= 32 && i < 127
 
   private def takeWhile(is: InputStream, f: Int => Boolean): (String, Int) = {
+    // read first byte
     var byte: Int = is.read()
     val str = new StringBuffer()
+    // read and save bytes as long as they fulfill f
     while (byte != -1 && f(byte)) {
       str.append(byte.toChar)
       byte = is.read();
     }
+    // return string and last read byte
     (str.toString(), byte)
   }
 
   private def dropWhile(is: InputStream, f: Int => Boolean): Int = {
+    // read first byte
     var byte: Int = is.read()
+    // read bytes as long as they fulfill f
     while (byte != -1 && f(byte)) {
       byte = is.read()
     }
+    // return last read value, which does not fulfill f
     byte
   }
 
