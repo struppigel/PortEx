@@ -29,6 +29,7 @@ import scala.None
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.FileFormatException
 import DetectionHeuristic._
+import com.github.katjahahn.PortexStats
 
 /**
  * Provides detection heuristics based on statistical information about PE files.
@@ -42,11 +43,23 @@ class DetectionHeuristic(
   private val boosterScores: Map[AnomalySubType, BScore]) {
 
   /**
+   * @Beta
+   */
+  def isClassifyable(): Boolean = {
+    // obtain number of all cleaned anomalies that have been found in the present file
+    val anomalyNrThreshold = 5
+    val scoringThreshold = 3.0
+    val cleaned = anomalies.filter(a => probabilities.keys.toList.contains(a.subtype))
+    cleaned.size >= anomalyNrThreshold && Math.abs(fileScore) >= scoringThreshold
+  }
+
+  /**
    * Calculates a file score based on anomalies and their BScores.
    * The higher the score, the more likely we have a malicious file.
    * A negative score indicates a non-malicious file.
    * A positive score indicates a malicious file.
    * A score of zero means there is no information whatsoever.
+   * @return the file's score based on its anomalies
    */
   def fileScore(): Double = {
     // obtain a set of all anomaly subtypes that have been found in the present file
@@ -230,14 +243,17 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/goodfiles/Win8Psycho")
-    val probThresholds = List(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.98)
+    val folder = new File("/home/deque/portextestfiles/badfiles")
+    val probThresholds = List(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.98, 0.99)
     val probCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
-    val bscoreThresholds = List(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 20.0)
+    val probClassifiedCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
+    val bscoreThresholds = for(i <- 0 to 35) yield i.toDouble
     val bscoreCounter = collection.mutable.Map((bscoreThresholds.view map ((_, 0))): _*)
+    val bscoreClassifiedCounter = collection.mutable.Map((bscoreThresholds.view map ((_, 0))): _*)
     var total = 0
+    var classifyable = 0
     var notLoaded = 0
-    for (file <- folder.listFiles()) {
+    for (file <- PortexStats.goodFiles()) {
       try {
         val scoring = DetectionHeuristic(file)
         val prob = scoring.malwareProbability
@@ -245,12 +261,18 @@ object DetectionHeuristic {
         total += 1
         probThresholds.filter(prob >=).foreach { probCounter(_) += 1 }
         bscoreThresholds.filter(bscore >=).foreach { bscoreCounter(_) += 1 }
+        if (scoring.isClassifyable) {
+          probThresholds.filter(prob >=).foreach { probClassifiedCounter(_) += 1 }
+          bscoreThresholds.filter(bscore >=).foreach { bscoreClassifiedCounter(_) += 1 }
+          classifyable += 1
+        }
         if (total % 1000 == 0) {
           println("files read: " + total)
+          println("classifyable files: " + classifyable)
           println("probabilities: ")
-          printCounts(probCounter, total)
+          printCounts(probCounter, probClassifiedCounter, total, classifyable)
           println("bscores: ")
-          printCounts(bscoreCounter, total)
+          printCounts(bscoreCounter, bscoreClassifiedCounter, total, classifyable)
         }
       } catch {
         case e: FileFormatException => notLoaded += 1; System.err.println("file is no PE file: " + file.getName());
@@ -259,18 +281,28 @@ object DetectionHeuristic {
     }
     total -= notLoaded
     println("files read: " + total)
+    println("classifyable files: " + classifyable)
     println("probabilities: ")
-    printCounts(probCounter, total)
+    printCounts(probCounter, probClassifiedCounter, total, classifyable)
     println("bscores: ")
-    printCounts(bscoreCounter, total)
+    printCounts(bscoreCounter, bscoreClassifiedCounter, total, classifyable)
   }
 
-  private def printCounts(counter: collection.mutable.Map[Double, Int], total: Int) {
+  private def printCounts(counter: collection.mutable.Map[Double, Int],
+    classifiedCounter: collection.mutable.Map[Double, Int],
+    total: Int, classifyable: Int): Unit = {
     // Scala has no mutable treemap, so we create one here, we need sorted keys
     val sorted = collection.immutable.TreeMap(counter.toArray: _*)
     sorted.foreach { tuple =>
       val (threshold, count) = tuple
       val message = s"malicious by threshold ${threshold}: ${count} ratio ${(count.toDouble / total.toDouble)}"
+      println(message)
+    }
+    println("!!! classified only:")
+    val classifiedSorted = collection.immutable.TreeMap(classifiedCounter.toArray: _*)
+    classifiedSorted.foreach { tuple =>
+      val (threshold, count) = tuple
+      val message = s"malicious by threshold ${threshold}: ${count} ratio ${(count.toDouble / classifyable.toDouble)}"
       println(message)
     }
     println()

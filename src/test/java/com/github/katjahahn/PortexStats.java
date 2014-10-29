@@ -374,7 +374,7 @@ public class PortexStats {
         return allFiles;
     }
 
-    private static File[] goodFiles() {
+    public static File[] goodFiles() {
         System.out.println("preparing file list...");
         File[] folders = new File(GOOD_FILES).listFiles();
         List<File[]> arrayList = new ArrayList<>();
