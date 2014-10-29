@@ -13,23 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-/**
- * *****************************************************************************
- * Copyright 2014 Katja Hahn
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ****************************************************************************
- */
 package com.github.katjahahn.tools.sigscanner
 
 import com.github.katjahahn.parser.ScalaIOUtil.using
@@ -205,21 +188,6 @@ class Jar2ExeScanner(file: File) {
 object Jar2ExeScanner {
   
   private val defaultSigs = "/data/javawrapperdb"
-
-  private val version = """version: 0.2
-    |author: Katja Hahn
-    |last update: 2.Sep 2014""".stripMargin
-
-  private val title = "jwscan v0.2 -- by deque"
-    
-  private val usage = """Usage: java -jar jwscan.jar [-d <hexoffset>] <PEfile>
-    """.stripMargin
-
-  private type OptionMap = scala.collection.mutable.Map[Symbol, String]
-
-  def main(args: Array[String]): Unit = {
-    invokeCLI(args)
-  }
   
   /**
    * Loads the signatures from the given file.
@@ -247,60 +215,4 @@ object Jar2ExeScanner {
     sigs.toList
   }
 
-  private def invokeCLI(args: Array[String]): Unit = {
-    val options = nextOption(scala.collection.mutable.Map(), args.toList)
-    println(title + "\n")
-    if (args.length == 0 || !options.contains('inputfile)) {
-      println(usage)
-    } else {
-      try {
-        println("scanning file ...\n")
-        var file = new File(options('inputfile))
-        println("file name: " + file + "\n")
-
-        if (options.contains('version)) {
-          println(version)
-        }
-
-        val scanner = new Jar2ExeScanner(file)
-        println(scanner.createReport())
-
-        if (options.contains('dump)) {
-          dumpFile(options, scanner)
-        }
-      } catch {
-        case e: FileNotFoundException => System.err.println(e.getMessage())
-        case e: EOFException => System.err.println("given file is no PE file")
-      }
-    }
-  }
-
-  private def nextOption(map: OptionMap, list: List[String]): OptionMap = {
-    list match {
-      case Nil => map
-      case "-d" :: value :: tail =>
-        nextOption(map += ('dump -> value), tail)
-      case "-v" :: tail =>
-        nextOption(map += ('version -> ""), tail)
-      case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
-      case option :: tail =>
-        println("Unknown option " + option + "\n" + usage)
-        sys.exit(1)
-    }
-  }
-
-  private def dumpFile(options: OptionMap, scanner: Jar2ExeScanner): Unit = {
-    try {
-      var dumped = new File("dumped.out")
-      var hexoffset = options('dump)
-      if (hexoffset.startsWith("0x")) {
-        hexoffset = hexoffset.drop(2)
-      }
-      val addr = Integer.valueOf(hexoffset, 16)
-      scanner.dumpAt(addr.toInt, dumped)
-      println("successfully dumped from offset 0x" + hexoffset + " to " + dumped)
-    } catch {
-      case e: NumberFormatException => System.err.println("no valid offset")
-    }
-  }
 }

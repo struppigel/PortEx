@@ -36,7 +36,7 @@ import java.io.RandomAccessFile
 object StringExtractor {
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/simile.exe")
+    val file = new File("/home/deque/portextestfiles/MinecraftForceOp.exe")
     println(readStrings(file, 4).asScala.mkString("\n"))
   }
   

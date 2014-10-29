@@ -25,6 +25,7 @@ import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader
 import ShannonEntropy._
 import java.io.RandomAccessFile
+import com.github.katjahahn.parser.PELoader
 
 /**
  * Tool to calculate Shannon's Entropy for entire files, byte arrays or sections
@@ -96,6 +97,11 @@ object ShannonEntropy {
   private val chunkSize = 1024
   /** size of one byte is surprisingly 256 */
   private val byteSize = 256
+  
+  def newInstance(file: File): ShannonEntropy = {
+    val data = PELoader.loadPE(file)
+    new ShannonEntropy(data)
+  }
 
   /**
    * Calculates Shannon's Entropy for the byte array

@@ -26,14 +26,9 @@ import com.github.katjahahn.tools.anomalies.AnomalySubType
 import Function.tupled
 import com.github.katjahahn.parser.IOUtil
 import scala.None
-import scala.None
-import scala.None
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.FileFormatException
-
-//TODO implement new good file stats
-//TODO remove dependend anomalies from /data/stats file
-//TODO test this more, also ask Schönherr
+import DetectionHeuristic._
 
 /**
  * Provides detection heuristics based on statistical information about PE files.
@@ -43,7 +38,24 @@ import com.github.katjahahn.parser.FileFormatException
  */
 class DetectionHeuristic(
   private val anomalies: List[Anomaly],
-  private val probabilities: Map[AnomalySubType, AnomalyProb]) {
+  private val probabilities: Map[AnomalySubType, AnomalyProb],
+  private val boosterScores: Map[AnomalySubType, BScore]) {
+
+  /**
+   * Calculates a file score based on anomalies and their BScores.
+   * The higher the score, the more likely we have a malicious file.
+   * A negative score indicates a non-malicious file.
+   * A positive score indicates a malicious file.
+   * A score of zero means there is no information whatsoever.
+   */
+  def fileScore(): Double = {
+    // obtain a set of all anomaly subtypes that have been found in the present file
+    val subtypes = anomalies.map(a => a.subtype).distinct
+    // obtain a list of all bscores for the subtypes found in the file
+    val bscores = subtypes.map(subtype => boosterScores.get(subtype)).flatten
+    // calculate and return the overall score of the file
+    bscores.sum
+  }
 
   /**
    * Calculates the probability for a file to be malicious based on the
@@ -52,12 +64,37 @@ class DetectionHeuristic(
    * @return probability P(BAD|Anomalies)
    */
   def malwareProbability(): Double = {
+    // first round, priors chosen by principle of indifference
+    val (firstGoodProb, firstBadProb) = conditionalProbs(0.5, 0.5)
+    // second round uses result of the first round as input
+    val (goodProb, badProb) = conditionalProbs(firstGoodProb, firstBadProb)
+    badProb
+  }
+
+  /**
+   * Calculates the conditional probabilities for a file to be BAD or GOOD with
+   * the condition being the anomalies found in the file. This is done using
+   * Bayes' Theorem with the prior probabilities goodPrior and badPrior.
+   *
+   * @param goodPrior the prior for P(GOOD)
+   * @param badPrior the prior for P(BAD)
+   * @return probability tuple (P(GOOD | Anomalies), P(BAD | Anomalies))
+   */
+  private def conditionalProbs(goodPrior: Double, badPrior: Double): (Double, Double) = {
+    // obtain a set of all anomaly subtypes that have been found in the present file
     val subtypes = anomalies.map(a => a.subtype).distinct
+    // obtain the probabilities P(Anomaly|BAD) and P(Anomaly|GOOD) for each subtype
     val probs = subtypes.map(subtype => probabilities.get(subtype)).flatten
+    // calculate the overall probability P(Anomalies | BAD) for this file
     val allBad = probs.foldRight(1.0) { (p, bad) => p.bad * bad }
+    // calculate the overall probability P(Anomalies | GOOD) for this file
     val allGood = probs.foldRight(1.0) { (p, good) => p.good * good }
-    val bayes = allBad * 0.5 / (allGood * 0.5 + allBad * 0.5)
-    bayes
+    // calculate P(BAD | Anomalies) using Bayes' Theorem
+    val bayesBad = allBad * badPrior / (allGood * goodPrior + allBad * badPrior)
+    // calculate P(GOOD | Anomalies) using Bayes' Theorem
+    val bayesGood = allGood * goodPrior / (allGood * goodPrior + allBad * badPrior)
+    // return the tuple
+    (bayesGood, bayesBad)
   }
 
 }
@@ -71,14 +108,15 @@ case class AnomalyProb(bad: Double, good: Double)
 
 object DetectionHeuristic {
 
-  val threshold = 200
+  val threshold = 100
   lazy val probabilities = readProbabilities()
+  lazy val boosterScores = readBoosterScores()
 
-  private val version = """version: 0.2
+  private val version = """version: 0.3
     |author: Katja Hahn
     |last update: 21.Jun 2014""".stripMargin
 
-  private val title = """MalDet v0.2
+  private val title = """MalDet v0.3
                         |-----------    
                     |Please note: 
                     |MalDet uses statistical information about file anomalies to assign a probability to a file for being malicious.
@@ -93,17 +131,18 @@ object DetectionHeuristic {
     """.stripMargin
 
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
+  type BScore = Double
 
   def main(args: Array[String]): Unit = {
-    printCleanedProbs()
+    testHeuristics()
   }
-  
+
   private def pad(string: String, length: Int, padStr: String): String = {
     val padding = (for (i <- string.length until length by padStr.length)
       yield padStr).mkString
     string + padding
   }
-  
+
   private def percentage(value: Double): String = {
     ("%.2f" format (value * 100))
   }
@@ -111,13 +150,13 @@ object DetectionHeuristic {
   //subtype; bad; good; badprob; ratio
   private def printCleanedProbs(): Unit = {
     val keyPad = "UNINIT_DATA_CONTRAINTS_VIOLATION ".length
-    println(pad("anomaly", keyPad - 2, " ") + "| bad freq | good freq | P(bad|anomaly) | ratio: good/bad ")
+    println(pad("anomaly", keyPad - 2, " ") + "| bad freq | good freq | P(bad|anomaly) | bscore ")
     println()
     probabilities.foreach { prob =>
-      val ratio = prob._2.good / prob._2.bad
       val badProb = prob._2.bad * 0.5 / (prob._2.good * 0.5 + prob._2.bad * 0.5)
-      println(pad(prob._1.toString, keyPad, " ") + percentage(prob._2.bad) + 
-          "\t" + percentage(prob._2.good) + "\t" + percentage(badProb) + "\t" + ratio)
+      val bscore = boosterScores(prob._1)
+      println(pad(prob._1.toString, keyPad, " ") + percentage(prob._2.bad) +
+        "\t\t" + percentage(prob._2.good) + "\t\t" + percentage(badProb) + "\t\t" + bscore)
     }
   }
 
@@ -191,33 +230,27 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/badfiles")
-    val thresholdA = 0.99
-    val thresholdB = 0.80
-    val thresholdC = 0.50
-    var malcounterA = 0
-    var malcounterB = 0
-    var malcounterC = 0
+    val folder = new File("/home/deque/portextestfiles/goodfiles/Win8Psycho")
+    val probThresholds = List(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.98)
+    val probCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
+    val bscoreThresholds = List(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 20.0)
+    val bscoreCounter = collection.mutable.Map((bscoreThresholds.view map ((_, 0))): _*)
     var total = 0
     var notLoaded = 0
     for (file <- folder.listFiles()) {
       try {
-        val p = DetectionHeuristic(file).malwareProbability
+        val scoring = DetectionHeuristic(file)
+        val prob = scoring.malwareProbability
+        val bscore = scoring.fileScore
         total += 1
-        if (p > thresholdA) {
-          malcounterA += 1
-        }
-        if (p > thresholdB) {
-          malcounterB += 1
-        }
-        if (p > thresholdC) {
-          malcounterC += 1
-        }
+        probThresholds.filter(prob >=).foreach { probCounter(_) += 1 }
+        bscoreThresholds.filter(bscore >=).foreach { bscoreCounter(_) += 1 }
         if (total % 1000 == 0) {
           println("files read: " + total)
-          println("malicious by threshold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
-          println("malicious by threshold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
-          println("malicious by threshold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
+          println("probabilities: ")
+          printCounts(probCounter, total)
+          println("bscores: ")
+          printCounts(bscoreCounter, total)
         }
       } catch {
         case e: FileFormatException => notLoaded += 1; System.err.println("file is no PE file: " + file.getName());
@@ -226,9 +259,21 @@ object DetectionHeuristic {
     }
     total -= notLoaded
     println("files read: " + total)
-    println("malicious by threshold 0.99: " + malcounterA + " ratio " + (malcounterA.toDouble / total.toDouble))
-    println("malicious by threshold 0.80: " + malcounterB + " ratio " + (malcounterB.toDouble / total.toDouble))
-    println("malicious by threshold 0.50: " + malcounterC + " ratio " + (malcounterC.toDouble / total.toDouble))
+    println("probabilities: ")
+    printCounts(probCounter, total)
+    println("bscores: ")
+    printCounts(bscoreCounter, total)
+  }
+
+  private def printCounts(counter: collection.mutable.Map[Double, Int], total: Int) {
+    // Scala has no mutable treemap, so we create one here, we need sorted keys
+    val sorted = collection.immutable.TreeMap(counter.toArray: _*)
+    sorted.foreach { tuple =>
+      val (threshold, count) = tuple
+      val message = s"malicious by threshold ${threshold}: ${count} ratio ${(count.toDouble / total.toDouble)}"
+      println(message)
+    }
+    println()
   }
 
   def newInstance(file: File): DetectionHeuristic = apply(file)
@@ -237,13 +282,14 @@ object DetectionHeuristic {
     val data = PELoader.loadPE(file)
     val scanner = PEAnomalyScanner.newInstance(data)
     val list = scanner.getAnomalies.asScala.toList
-    new DetectionHeuristic(list, probabilities)
+    new DetectionHeuristic(list, probabilities, boosterScores)
   }
 
   private def clean(bad: Map[String, Array[String]],
     good: Map[String, Array[String]]): (Map[String, Double], Map[String, Double]) = {
     val newBad = scala.collection.mutable.Map[String, Double]()
     val newGood = scala.collection.mutable.Map[String, Double]()
+    // TODO add good only values ?
     for ((key, arr) <- bad) {
       val goodArr = good.getOrElse(key, Array("0", "0.0"))
       val goodNr = goodArr(0).toInt
@@ -277,6 +323,24 @@ object DetectionHeuristic {
         val malicious = malprobs.getOrElse(key, 0.5)
         val prob = AnomalyProb(malicious / 100.0, good / 100.0)
         (subtype, prob)
+      }).toMap
+  }
+
+  private def readBoosterScores(): Map[AnomalySubType, BScore] = {
+    val rawMalprobs = IOUtil.readMap("malwareanomalystats").asScala.toMap
+    val rawGoodprobs = IOUtil.readMap("goodwareanomalystats").asScala.toMap
+    val (malprobs, goodprobs) = clean(rawMalprobs, rawGoodprobs)
+    (malprobs map tupled { (key: String, malicious: Double) =>
+      val subtype = AnomalySubType.valueOf(key)
+      val good = goodprobs.getOrElse(key, 0.5)
+      val bscore = malicious / (malicious + good) * 20 - 10
+      (subtype, bscore)
+    }).toMap ++
+      (goodprobs.filterNot(t => malprobs.contains(t._1)) map tupled { (key, good) =>
+        val subtype = AnomalySubType.valueOf(key)
+        val malicious = malprobs.getOrElse(key, 0.5)
+        val bscore = malicious / (malicious + good) * 20 - 10
+        (subtype, bscore)
       }).toMap
   }
 
