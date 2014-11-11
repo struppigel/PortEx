@@ -212,10 +212,15 @@ class ReportCreator(private val data: PEData) {
     else title("Jar to EXE Wrapper Scan") + NL + scanner.createReport + NL
   }
 
-  def maldetReport(): String =
-    title("Malware Detection Heuristic") + NL + "Malware probability: " +
-      ("%3.2f" format (DetectionHeuristic.newInstance(data.getFile).malwareProbability * 100)) +
-      " %" + NL + NL
+  def maldetReport(): String = {
+    val scoring = FileScoring.newInstance(data.getFile)
+    val report1 = title("File Scoring") + NL + "Malware probability: " +
+      ("%3.2f" format (scoring.malwareProbability * 100)) +
+      " %" 
+    val report2 = "File Score: " + scoring.fileScore() + NL + "Score based on: " + NL +
+      scoring._scoreParts.map(m => m._1 + ": " + m._2).mkString(NL)
+    report1 + NL + report2 + NL + NL
+  }
 
   def overlayReport(): String = {
     val overlay = new Overlay(data.getFile)

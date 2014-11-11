@@ -28,16 +28,16 @@ import com.github.katjahahn.parser.IOUtil
 import scala.None
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.FileFormatException
-import DetectionHeuristic._
+import FileScoring._
 import com.github.katjahahn.PortexStats
 
 /**
- * Provides detection heuristics based on statistical information about PE files.
+ * Provides file scoring based on statistical information about PE files.
  * Only anomaly statistics are used at present.
  *
  * @author Katja Hahn
  */
-class DetectionHeuristic(
+class FileScoring(
   private val anomalies: List[Anomaly],
   private val probabilities: Map[AnomalySubType, AnomalyProb],
   private val boosterScores: Map[AnomalySubType, BScore]) {
@@ -48,9 +48,9 @@ class DetectionHeuristic(
   def isClassifyable(): Boolean = {
     // obtain number of all cleaned anomalies that have been found in the present file
     val anomalyNrThreshold = 5
-    val scoringThreshold = 3.0
+    val scoringThreshold = 5.0
     val cleaned = anomalies.filter(a => probabilities.keys.toList.contains(a.subtype))
-    cleaned.size >= anomalyNrThreshold && Math.abs(fileScore) >= scoringThreshold
+    /*cleaned.size >= anomalyNrThreshold &&*/ Math.abs(fileScore) >= scoringThreshold
   }
 
   /**
@@ -68,6 +68,19 @@ class DetectionHeuristic(
     val bscores = subtypes.map(subtype => boosterScores.get(subtype)).flatten
     // calculate and return the overall score of the file
     bscores.sum
+  }
+  
+  def scoreParts(): java.util.Map[AnomalySubType, BScore] = _scoreParts().asJava
+  
+  def _scoreParts(): Map[AnomalySubType, BScore] = {
+    // obtain a set of all anomaly subtypes that have been found in the present file
+    val subtypes = anomalies.map(a => a.subtype).distinct
+    // obtain a list of all bscores for the subtypes found in the file
+    subtypes.map{ subtype => 
+      if ( boosterScores.contains(subtype) ) {
+        Some((subtype, boosterScores(subtype) ))
+        } else None
+    }.flatten.toMap
   }
 
   /**
@@ -119,9 +132,9 @@ class DetectionHeuristic(
  */
 case class AnomalyProb(bad: Double, good: Double)
 
-object DetectionHeuristic {
+object FileScoring {
 
-  val threshold = 100
+  val threshold = 500
   lazy val probabilities = readProbabilities()
   lazy val boosterScores = readBoosterScores()
 
@@ -189,7 +202,7 @@ object DetectionHeuristic {
           System.err.println("file doesn't exist!");
         } else {
           println("scanning file ...")
-          val prob = DetectionHeuristic(file).malwareProbability
+          val prob = FileScoring(file).malwareProbability
           println("malware probability: " + (prob * 100) + "%")
           println("-done-")
         }
@@ -207,7 +220,7 @@ object DetectionHeuristic {
           println("scanning files ...")
           for (file <- folder.listFiles()) {
             if (isPEFile(file)) {
-              val prob = DetectionHeuristic(file).malwareProbability
+              val prob = FileScoring(file).malwareProbability
               println(file.getName() + " malware probability: " + (prob * 100) + "%")
             } else {
               println(file.getName() + " is no PE file")
@@ -243,7 +256,7 @@ object DetectionHeuristic {
     }
   }
   private def testHeuristics(): Unit = {
-    val folder = new File("/home/deque/portextestfiles/badfiles")
+    val folder = new File("/home/deque/portextestfiles/evilset")
     val probThresholds = List(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.98, 0.99)
     val probCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
     val probClassifiedCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
@@ -253,9 +266,9 @@ object DetectionHeuristic {
     var total = 0
     var classifyable = 0
     var notLoaded = 0
-    for (file <- PortexStats.goodFiles()) {
+    for (file <- folder.listFiles()) {
       try {
-        val scoring = DetectionHeuristic(file)
+        val scoring = FileScoring(file)
         val prob = scoring.malwareProbability
         val bscore = scoring.fileScore
         total += 1
@@ -308,13 +321,13 @@ object DetectionHeuristic {
     println()
   }
 
-  def newInstance(file: File): DetectionHeuristic = apply(file)
+  def newInstance(file: File): FileScoring = apply(file)
 
-  def apply(file: File): DetectionHeuristic = {
+  def apply(file: File): FileScoring = {
     val data = PELoader.loadPE(file)
     val scanner = PEAnomalyScanner.newInstance(data)
     val list = scanner.getAnomalies.asScala.toList
-    new DetectionHeuristic(list, probabilities, boosterScores)
+    new FileScoring(list, probabilities, boosterScores)
   }
 
   private def clean(bad: Map[String, Array[String]],

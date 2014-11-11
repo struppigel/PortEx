@@ -92,7 +92,7 @@ public class PESignature {
             // check if supposed pe signature is within the file
             // a truncated signature has to be taken into account and allowed
             // see d_nonnull.dll
-            throwIf(file.length() < peOffset.get());
+            throwIf(file.length() < peOffset.get() || peOffset.get() < 0);
             /* read PE signature at offset and verify */
             byte[] peSigVal = loadBytesSafely(peOffset.get(), PE_SIG.length, raf);
             for (int i = 0; i < PE_SIG.length; i++) {

@@ -583,10 +583,10 @@ public class Visualizer {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        // File file = new File(
-        // "/home/deque/portextestfiles/badfiles/VirusShare_f844ea7ac31f3a93357392072da69d49");
-        File file = new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/resource_shuffled.exe");
+         File file = new File(
+         "/home/deque/portextestfiles/badfiles/VirusShare_7dfcbb865a4a5637efd97a2d021eb4b3");
+//        File file = new File(
+//                "/home/deque/portextestfiles/unusualfiles/corkami/resource_shuffled.exe");
         // ReportCreator.newInstance(file).printReport();
         // List<String> problemfiles = new ArrayList<>();
         // // TODO these are problemfiles, handle them!
@@ -601,6 +601,7 @@ public class Visualizer {
         // if(file.length() < 300) {
         // builder.setFileWidth(150).setBytesPerPixel(1, file.length());
         // }
+        builder.setHeight(400);
         Visualizer vi = builder.build();
         // System.out.println("creating image for " + file.getName());
         //

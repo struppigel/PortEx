@@ -71,7 +71,28 @@ public class PortexStats {
     private static final int POWERMAX = 4;
 
     public static void main(String[] args) throws IOException {
-        anomalyStats(badFiles());
+        anomalyStats(new File("/home/deque/portextestfiles/evilset/").listFiles());
+    }
+
+    @SuppressWarnings("unused")
+    private static void convertToLatexTable() throws FileNotFoundException, IOException {
+        File file = new File("/home/deque/git/Thesis/arbeit/plots/merged");
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = null;
+            int nr = 0;
+            while ((line = reader.readLine()) != null) {
+                String[] split = line.split("\\s+");
+                System.out.print(nr);
+                for (String element : split) {
+                    Double d = Double.valueOf(element);
+                    String percent = String.format("%.2f", (d * 100))
+                            + "\\thinspace{}\\%";
+                    System.out.print(" & " + percent);
+                }
+                System.out.println("\\\\");
+                nr++;
+            }
+        }
     }
 
     private static String percent(double value) {
@@ -624,6 +645,7 @@ public class PortexStats {
         int malformedFiles = 0;
         int malformationsTotal = 0;
         int[] moreThanNMalformationsTotal = new int[1000];
+        int[] moreThanNAnomaliesTotal = new int[1000];
         for (File file : files) {
             try {
                 total++;
@@ -632,10 +654,12 @@ public class PortexStats {
                 List<Anomaly> list = scanner.getAnomalies();
                 boolean malformationFlag = false;
                 int malformationsThisFile = 0;
+                int anomaliesThisFile = 0;
                 for (Anomaly a : list) {
                     int ordinal = a.getType().ordinal();
                     anomalies[ordinal] += 1;
                     occured[ordinal] = true;
+                    anomaliesThisFile++;
                     if (a.getType() != AnomalyType.NON_DEFAULT) {
                         malformationFlag = true;
                         malformationsTotal++;
@@ -645,6 +669,9 @@ public class PortexStats {
                 }
                 for (int i = 0; i <= malformationsThisFile; i++) {
                     moreThanNMalformationsTotal[i]++;
+                }
+                for (int i = 0; i <= anomaliesThisFile; i++) {
+                    moreThanNAnomaliesTotal[i]++;
                 }
                 if (malformationFlag) {
                     malformedFiles++;
@@ -724,6 +751,15 @@ public class PortexStats {
             double percentage = value / (double) total * 100;
             if (value != 0) {
                 stats5 += "more than " + i + " malformations: " + value + "("
+                        + percentage + "% )\n";
+
+            }
+        }
+        for (int i = 0; i < moreThanNAnomaliesTotal.length; i++) {
+            int value = moreThanNAnomaliesTotal[i];
+            double percentage = value / (double) total * 100;
+            if (value != 0) {
+                stats5 += "more than " + i + " anomalies: " + value + "("
                         + percentage + "% )\n";
 
             }
@@ -863,8 +899,12 @@ public class PortexStats {
                     System.out.println("Files read: " + total + "/"
                             + files.length);
                 }
+            } catch (FileFormatException e) {
+                notLoaded++;
+                System.out.println("removing file: " + file.getName());
+                file.delete();
             } catch (Exception e) {
-                logger.error(e);
+                e.printStackTrace();
                 notLoaded++;
             }
         }
