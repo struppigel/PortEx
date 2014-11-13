@@ -12,7 +12,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations
 * Dumping of sections, overlay, embedded ZIP, JAR or .class files
-* Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values. The Beta1 release is able to detect 77 different anomalies. Click here for a full [list of anomalies](https://github.com/katjahahn/PortEx/blob/master/src/main/java/com/github/katjahahn/tools/anomalies/AnomalySubType.java)
+* Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values. The Beta1 release is able to detect 77 different anomalies.
 * Visualize a PE file structure as it is on disk and visualize the local entropies of the file
 * Calculate Shannon Entropy for files and sections
 * Calculate hash values for files and sections
@@ -20,7 +20,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Extract Unicode and ASCII strings contained in the file
 * Overlay detection and dumping
-* Experimental: Detection Heuristics based on statistical information
+* File scoring based on statistical information
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
