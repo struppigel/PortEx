@@ -29,7 +29,6 @@ import scala.None
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.FileFormatException
 import FileScoring._
-import com.github.katjahahn.PortexStats
 
 /**
  * Provides file scoring based on statistical information about PE files.
