@@ -94,4 +94,13 @@ public enum DebugType implements Characteristic {
     public long getValue() {
         return value;
     }
+    
+    public static DebugType getForValue(long value) {
+        for(DebugType type : values()) {
+            if(type.getValue() == value) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No debug type for value " + value);
+    }
 }

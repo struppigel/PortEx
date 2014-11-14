@@ -13,7 +13,7 @@ class BaseRelocBlock(
   val pageRVA: Long,
   val blockSize: Long,
   val entries: List[BlockEntry]) {
-  
+
   def getLocations(): List[PhysicalLocation] = List(new PhysicalLocation(fileOffset, blockSize))
 
   override def toString(): String =
@@ -33,7 +33,7 @@ class BlockEntry(val relocType: RelocType, val offset: Long) {
 }
 
 object BlockEntry {
-  
+
   private val logger = LogManager.getLogger(BlockEntry.getClass().getName());
 
   def apply(value: Int): BlockEntry = {
@@ -46,12 +46,13 @@ object BlockEntry {
   }
 
   private def getTypeFor(value: Int): RelocType = {
-    val typeString = IOUtil.getEnumTypeString(value, "basereloctypes")
-    if (typeString.isPresent) {
-      RelocType.valueOf(typeString.get)
-    } else {
-      logger.warn("unknown reloc type for value: " + value)
-      RelocType.UNKNOWN
+    try {
+      val relocType = RelocType.getForValue(value)
+      relocType
+    } catch {
+      case e: IllegalArgumentException =>
+        logger.warn("unknown reloc type for value: " + value)
+        RelocType.UNKNOWN
     }
   }
 }

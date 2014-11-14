@@ -100,5 +100,14 @@ public enum RelocType implements Characteristic {
     public long getValue() {
         return value;
     }
+    
+    public static RelocType getForValue(long value) {
+        for(RelocType type : values()) {
+            if(type.getValue() == value) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No reloc type for value " + value);
+    }
 
 }

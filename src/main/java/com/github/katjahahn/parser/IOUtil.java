@@ -24,19 +24,16 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 /**
@@ -411,189 +408,6 @@ public final class IOUtil {
             assert list != null;
             return list;
         }
-    }
-
-    /**
-     * Returns a list of the descriptions of all characteristics that are set by
-     * the value flag.
-     * <p>
-     * This is intented to be used for string output of characteristics.
-     * <p>
-     * Ensures that no null value is returned.
-     * <p>
-     * Assumes a fixed file format, i.e.: mask;keystring;description
-     * <p>
-     * The mask is a hexadecimal value-string (without 0x in front).
-     * 
-     * @param value
-     *            the value of the characteristics field
-     * @param filename
-     *            the name of the specification file (not the path to it)
-     * @return description list, each element is one characteristic flag that
-     *         was set
-     */
-    public static List<String> getCharacteristicsDescriptions(long value,
-            String filename) {
-        List<String> characteristics = new LinkedList<>();
-        try {
-            // read specification for characteristics
-            Map<String, String[]> map = readMap(filename);
-            for (Entry<String, String[]> entry : map.entrySet()) {
-                try {
-                    // read mask
-                    long mask = Long.parseLong(entry.getKey(), 16);
-                    // use mask to check if flag is set
-                    if ((value & mask) != 0) {
-                        characteristics.add(entry.getValue()[1]);
-                    }
-                } catch (NumberFormatException e) {
-                    // Long.parseLong went wrong
-                    logger.error("ERROR. number format mismatch in file "
-                            + filename);
-                    logger.error("value: " + entry.getKey());
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-        assert characteristics != null;
-        return characteristics;
-    }
-
-    /**
-     * Returns a list of all characteristic keys that have been set by the
-     * value.
-     * <p>
-     * Ensures that no null value is returned.
-     * <p>
-     * Assumes the fixed file format: mask;keystring;description
-     * <p>
-     * The mask is a hexadecimal value-string (without 0x in front).
-     * 
-     * @param value
-     *            the value of the characteristics field
-     * @param filename
-     *            the name of the specification file (not the path to it)
-     * @return list of the characteristic's keys that are set
-     */
-    public static List<String> getCharacteristicKeys(long value, String filename) {
-        List<String> keys = new ArrayList<>();
-        try {
-            // read specification for characteristics
-            Map<String, String[]> map = readMap(filename);
-            for (Entry<String, String[]> entry : map.entrySet()) {
-                try {
-                    // read mask
-                    long mask = Long.parseLong(entry.getKey(), 16);
-                    // use mask to check if flag is set
-                    if ((value & mask) != 0) {
-                        keys.add(entry.getValue()[0]);
-                    }
-                } catch (NumberFormatException e) {
-                    // Long.parseLong went wrong
-                    logger.error("ERROR. number format mismatch in file "
-                            + filename);
-                    logger.error("value: " + entry.getKey());
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-        assert keys != null;
-        return keys;
-    }
-
-    /**
-     * Returns String in the second column for the value that matches the first
-     * column. Semantically the second column holds the enum type string and the
-     * first a set offset or flag.
-     * <p>
-     * Ensures that no null value is returned.
-     * <p>
-     * Assumes a fixed file format, i.e.: keyvalue;keystring;description The
-     * mask is a hexadecimal value-string (without 0x in front).
-     * 
-     * @param value
-     *            the value to be masked
-     * @param filename
-     *            the name of the specification file (not the path)
-     * @return type/key-string for given value, absent if not found
-     */
-    public static Optional<String> getEnumTypeString(long value, String filename) {
-        try {
-            // read the specification
-            Map<String, String[]> map = readMap(filename);
-            for (Entry<String, String[]> entry : map.entrySet()) {
-                try {
-                    // get the key
-                    long keyValue = Long.parseLong(entry.getKey());
-                    // key must match the given value
-                    if (value == keyValue) {
-                        return Optional.of(entry.getValue()[0]);
-                    }
-                } catch (NumberFormatException e) {
-                    // parseLong went wrong
-                    logger.error("ERROR. number format mismatch in file "
-                            + filename);
-                    logger.error("value: " + entry.getKey());
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Returns a description of all characteristics that are set by the value
-     * flag.
-     * <p>
-     * This is intented to be used for string output of characteristics.
-     * <p>
-     * Ensures that no null value is returned.
-     * <p>
-     * Assumes the fixed file format: mask;keystring;description
-     * <p>
-     * The mask is a hexadecimal value-string (without 0x in front).
-     * 
-     * @param value
-     *            the value of the characteristics field
-     * @param filename
-     *            the name of the specification file (not the path to it)
-     * @return formatted description for all characteristic flags that have been
-     *         set
-     */
-    public static String getCharacteristics(long value, String filename) {
-        StringBuilder b = new StringBuilder();
-        try {
-            // read specification
-            Map<String, String[]> map = readMap(filename);
-            for (Entry<String, String[]> entry : map.entrySet()) {
-                try {
-                    // read mask
-                    long mask = Long.parseLong(entry.getKey(), 16);
-                    // check if flag is set
-                    if ((value & mask) != 0) {
-                        // add description for this characteristic
-                        b.append("\t* " + entry.getValue()[1] + NL);
-                    }
-                } catch (NumberFormatException e) {
-                    // parseLong went wrong
-                    logger.error("ERROR. number format mismatch in file "
-                            + filename);
-                    logger.error("value: " + entry.getKey());
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-        // check if there is a description at all
-        if (b.length() == 0) {
-            b.append("\t**no characteristics**" + NL);
-        }
-        String result = b.toString();
-        assert result != null && result.trim().length() > 0;
-        return result;
     }
 
     /**

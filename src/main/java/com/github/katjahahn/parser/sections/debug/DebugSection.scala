@@ -149,19 +149,14 @@ object DebugSection {
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes, offset).asScala.toMap
     val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue
-    val typeDescriptions = getCharacteristicsDescriptions(debugTypeValue, "debugtypes").asScala.toList
-    val debugType = {
-      val debugTypeString = getEnumTypeString(debugTypeValue, "debugtypes")
-      if (debugTypeString.isPresent())
-        DebugType.valueOf(debugTypeString.get().replace("IMAGE_DEBUG_TYPE_", ""))
-      else DebugType.UNKNOWN
-    }
-    if (typeDescriptions.size == 0) {
-      logger.warn("no debug type description found!")
-      val description = s"${entries(DebugDirectoryKey.TYPE).getValue} no description available"
-      new DebugSection(entries, description, debugType, offset)
-    } else {
-      new DebugSection(entries, typeDescriptions(0), debugType, offset)
+    try {
+      val debugType = DebugType.getForValue(debugTypeValue)
+      new DebugSection(entries, debugType.getDescription, debugType, offset)
+    } catch {
+      case e: IllegalArgumentException =>
+        logger.warn("no debug type description found!")
+        val description = s"${entries(DebugDirectoryKey.TYPE).getValue} no description available"
+        new DebugSection(entries, description, DebugType.UNKNOWN, offset)
     }
   }
 }
