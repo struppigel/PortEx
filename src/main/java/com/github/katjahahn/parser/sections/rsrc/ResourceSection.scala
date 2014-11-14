@@ -121,12 +121,19 @@ object ResourceSection {
    */
   def apply(file: File, virtualAddress: Long,
     rsrcOffset: Long, mmBytes: MemoryMappedPE): ResourceSection = {
+    // empty constructor creates type level (depth 1)
     val initialLevel = Level()
+    // initial offset for the resource directory (relative to rsrc table) is zero
     val initialOffset = 0
+    // initialize loop checker
     val loopChecker = new ResourceLoopChecker()
+    // create the root of the resource directory, this will recursively
+    // create all the children too
     val resourceTable = ResourceDirectory(file, initialLevel,
       initialOffset, virtualAddress, rsrcOffset, mmBytes, loopChecker)
+    // check if loop was detected during creation
     val hasLoop = loopChecker.loopDetected
+    // create resource section instance
     new ResourceSection(resourceTable, rsrcOffset, mmBytes, hasLoop)
   }
 
@@ -156,9 +163,13 @@ class ResourceLoopChecker {
      * resource tree loops.
      */
     def isNewResourceDirFileOffset(fileOffset: Long): Boolean = {
+      // a new offset is one that wasn't already added
       val isNew = !fileOffsets.contains(fileOffset)
+      // now add the offset to the list
       fileOffsets += fileOffset
+      // change status of loopDetected if necessary
       if(!isNew) _loopDetected = true
+      // return whether offset was a new one
       isNew
     }
     

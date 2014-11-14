@@ -117,10 +117,12 @@ object ImportSection {
   def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
     optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {
     logger.debug("reading directory entries for root table ...")
+    // read directory table (as a list of entries)
     var directoryTable = readDirEntries(mmbytes, virtualAddress, fileOffset)
     logger.debug(directoryTable.size + " directory entries read")
     logger.debug("reading lookup table entries ...")
     try {
+      // read all lookup table entries
       readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, 
           fileSize, fileOffset)
     } catch {
