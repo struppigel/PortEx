@@ -97,12 +97,6 @@ public final class PELoader {
         }
     }
 
-    private long getFirstSectionVA(SectionTable table) {
-        assert table.getNumberOfSections() > 0;
-        // the VAs must be in correct order
-        return table.getSectionHeader(1).getAlignedVirtualAddress();
-    }
-
     /**
      * Loads the MSDOS header.
      * 
