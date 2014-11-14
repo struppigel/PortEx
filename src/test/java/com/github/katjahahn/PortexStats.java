@@ -71,12 +71,12 @@ public class PortexStats {
     private static final int POWERMAX = 4;
 
     public static void main(String[] args) throws IOException {
-        anomalyStats(new File("/home/deque/portextestfiles/evilset/").listFiles());
+        convertToLatexTable();
     }
 
     @SuppressWarnings("unused")
     private static void convertToLatexTable() throws FileNotFoundException, IOException {
-        File file = new File("/home/deque/git/Thesis/arbeit/plots/merged");
+        File file = new File("/home/deque/git/Thesis/arbeit/plots/results.txt");
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line = null;
             int nr = 0;

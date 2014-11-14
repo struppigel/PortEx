@@ -37,5 +37,5 @@ E00000;IMAGE_SCN_ALIGN_8192BYTES;Align data on a 8192-byte boundary. Valid only 
 8000000;IMAGE_SCN_MEM_NOT_PAGED;The section is not pageable.
 10000000;IMAGE_SCN_MEM_SHARED;The section can be shared in memory.
 20000000;IMAGE_SCN_MEM_EXECUTE;The section can be executed as code.
-80000000;IMAGE_SCN_MEM_READ;The section can be read.
+40000000;IMAGE_SCN_MEM_READ;The section can be read.
 80000000;IMAGE_SCN_MEM_WRITE;The section can be written to.

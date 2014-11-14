@@ -601,7 +601,7 @@ public class Visualizer {
         // if(file.length() < 300) {
         // builder.setFileWidth(150).setBytesPerPixel(1, file.length());
         // }
-        builder.setHeight(400);
+//        builder.setHeight(400);
         Visualizer vi = builder.build();
         // System.out.println("creating image for " + file.getName());
         //
@@ -609,8 +609,8 @@ public class Visualizer {
         final BufferedImage structureImage = vi.createImage(file);
         final BufferedImage appendedImage = ImageUtil.appendImages(
                 entropyImage, structureImage);
-        // ImageIO.write(appendedImage, "png",
-        // new File("peimages/" + file.getName() + ".png"));
+         ImageIO.write(structureImage, "png",
+         new File("peimages/" + file.getName() + ".png"));
         // } catch (Exception e) {
         // e.printStackTrace();
         // problemfiles.add(file.getName());

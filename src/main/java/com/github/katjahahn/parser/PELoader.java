@@ -30,7 +30,6 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.StringExtractor;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -222,43 +221,7 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
          File file = new File(
-         "/home/deque/portextestfiles/MinecraftForceOp.exe");
-        // TODO the following files take very long to parse, why?
-//        File file = new File(
-//                "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");
-//         "/home/deque/portextestfiles/badfiles/VirusShare_e5ce7ba71528a1f221d6be883e5967f0");// --> exhaustive name
-        // pointer entries, export section not in section, pev doesn't show
-        // imports
-        // VirusShare_10c6fdb01b6b19f84055754b764c6e38 --> invalid delay-load
-        // imports, exhaustive resource section
-        // VirusShare_a90da79e98213703fc3342b281a95094 --> invalid export
-        // entries, lots of
-        // VirusShare_130f13919f9d6ed5b77046644fdbab42 --> virtual export
-        // address table
-//        ReportCreator reporter = ReportCreator.newInstance(file);
-//        reporter.printReport();
-        for( String str : StringExtractor.readASCIIStrings(file, 3)) {
-            System.out.println(str);
-        }
-        // System.out.println(data.getSectionTable().getOffset());
-        // System.out.println(reporter.headerReports());
-        // PEData data = loadPE(file);
-        // SectionLoader loader = new SectionLoader(data);
-        // loader.maybeLoadResourceSection();
-
-        // System.out.println(reporter.importsReport());
-        // System.out.println(reporter.exportsReport());
-        // System.out.println(reporter.resourcesReport());
-        // System.out.println(reporter.debugReport());
-        // System.out.println(reporter.delayImportsReport());
-        // System.out.println(reporter.relocReport());
-        // System.out.println(reporter.anomalyReport());
-        // System.out.println(reporter.hashReport());
-        // System.out.println(reporter.overlayReport());
-        // System.out.println(reporter.peidReport());
-        // System.out.println(reporter.maldetReport());
-        // System.out.println(reporter.jar2ExeReport());
-        // System.out.println(reporter.additionalReports());
-        // System.out.println("done");
+         "/home/deque/portextestfiles/test.dmg");
+         loadPE(file);
     }
 }

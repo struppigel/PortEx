@@ -30,16 +30,24 @@ import com.github.katjahahn.parser.MemoryMappedPE
  * @param addresses of the export section
  */
 class ExportAddressTable private (val addresses: List[Long], val fileOffset: Long) {
-
+ 
   /**
    * Returns the size of the EAT in bytes
    */
-  def size(): Long = addresses.length * ExportAddressTable.addressLength
+  def getSize(): Long = addresses.length * ExportAddressTable.addressLength
   
   /**
    * Returns the number of addresses in the EAT
    */
-  def nrOfAddresses(): Long = addresses.length
+  def getNrOfAddresses(): Long = addresses.length
+  
+  /**
+   * Scala only. Returns the address at the given index
+   *
+   * @param index
+   * @return the address in the given index
+   */
+  def apply(i: Int): Long = addresses(i)
   
   /**
    * Returns the address at the given index
@@ -47,7 +55,7 @@ class ExportAddressTable private (val addresses: List[Long], val fileOffset: Lon
    * @param index
    * @return the address in the given index
    */
-  def apply(i: Int): Long = addresses(i)
+  def get(i: Int): Long = apply(i)
 
   override def toString(): String =
     s"""|Export Address Table

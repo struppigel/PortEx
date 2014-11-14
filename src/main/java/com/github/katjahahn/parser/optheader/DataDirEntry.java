@@ -118,11 +118,12 @@ public class DataDirEntry {
     /**
      * Calculates the file offset of the data directory based on the virtual
      * address and the entries in the section table.
-     * 
+     * This method is subject to change.
+     * @Beta
      * @param table
      * @return file offset of data directory
      */
-    public long getFileOffset(SectionTable table) { // TODO not in use?
+    public long getFileOffset(SectionTable table) { 
         checkArgument(table != null, "section table must not be null");
         Optional<SectionHeader> section = maybeGetSectionTableEntry(table);
         if (section.isPresent()) {
@@ -162,7 +163,7 @@ public class DataDirEntry {
      *         to a section
      */
     // this is a duplicate to Sectionloader getSectionByRVA, but intentional for
-    // better use of the API
+    // more convenient use of the API
     public Optional<SectionHeader> maybeGetSectionTableEntry(SectionTable table) {
         checkArgument(table != null, "table must not be null");
         List<SectionHeader> sections = table.getSectionHeaders();

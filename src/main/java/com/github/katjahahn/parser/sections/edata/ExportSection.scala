@@ -75,7 +75,7 @@ class ExportSection private (
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
     Location.mergeContinuous(
       List(new PhysicalLocation(edataTable.fileOffset, edataTable.size),
-        new PhysicalLocation(exportAddressTable.fileOffset, exportAddressTable.size),
+        new PhysicalLocation(exportAddressTable.fileOffset, exportAddressTable.getSize),
         new PhysicalLocation(namePointerTable.fileOffset, namePointerTable.size),
         new PhysicalLocation(ordinalTable.fileOffset, ordinalTable.size))
         ::: nameLocations).asJava
@@ -185,20 +185,11 @@ class ExportSection private (
 
 object ExportSection {
 
-  val logger = LogManager.getLogger(ExportSection.getClass().getName());
+  private val logger = LogManager.getLogger(ExportSection.getClass().getName());
 
   val maxNameEntries = 5000
   val maxOrdEntries = 5000
-  var invalidExportCount = 0
-
-  def main(args: Array[String]): Unit = {
-    val data = PELoader.loadPE(new File("/home/deque/portextestfiles/testfiles/DLL2.dll")) //TODO correct ordinal and rva of this? see tests
-    val loader = new SectionLoader(data)
-    val edata = loader.loadExportSection()
-    println(edata.getDetailedInfo)
-    println()
-    println(edata.getInfo)
-  }
+  private var invalidExportCount = 0
 
   @throws(classOf[FileFormatException])
   def apply(li: LoadInfo): ExportSection = {
@@ -360,7 +351,7 @@ object ExportSection {
   private def getSymbolRVAForName(name: String, exportAddressTable: ExportAddressTable,
     ordinalTable: ExportOrdinalTable, namePointerTable: ExportNamePointerTable): Long = {
     val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
-    if (ordinal == -1 || (ordinal - ordinalTable.base) >= exportAddressTable.nrOfAddresses) -1
+    if (ordinal == -1 || (ordinal - ordinalTable.base) >= exportAddressTable.getNrOfAddresses) -1
     else exportAddressTable(ordinal - ordinalTable.base)
   }
 

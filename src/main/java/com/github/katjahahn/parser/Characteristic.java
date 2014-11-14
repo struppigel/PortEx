@@ -38,5 +38,19 @@ public interface Characteristic {
      * @return true iff deprecated
      */
     boolean isDeprecated();
+    
+    /**
+     * Returns the description of the characteristic.
+     * 
+     * @return description string
+     */
+    String getDescription();
+
+    /**
+     * Returns the value or bitmask of this characteristic.
+     * 
+     * @return value
+     */
+    long getValue();
 
 }
