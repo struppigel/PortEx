@@ -139,7 +139,7 @@ public enum MachineType implements Characteristic {
                 return machine;
             }
         }
-        throw new IllegalArgumentException("couldn't match type to value "
+        throw new IllegalArgumentException("couldn't match machine type to value "
                 + value);
     }
 

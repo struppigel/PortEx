@@ -101,4 +101,13 @@ public enum Subsystem implements Characteristic {
     public long getValue() {
         return value;
     }
+
+    public static Subsystem getForValue(long value) {
+        for(Subsystem subsystem : values()) {
+            if(subsystem.getValue() == value) {
+                return subsystem;
+            }
+        }
+        throw new IllegalArgumentException("No subsystem for value " + value);
+    }
 }

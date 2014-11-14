@@ -209,7 +209,7 @@ public class OptionalHeaderTest {
     @Test
     // TODO maybe better
     public void getSubsystemDescription() {
-        String info = OptionalHeader.getSubsystemDescription(13);
+        String info = Subsystem.getForValue(13).getDescription();
         assertNotNull(info);
         assertTrue(info.length() > 0);
     }

@@ -43,12 +43,11 @@ import com.google.common.base.Optional;
  */
 public class OptionalHeader extends Header<OptionalHeaderKey> {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LogManager
             .getLogger(OptionalHeader.class.getName());
 
     /* spec locations */
-    /** subsystem specification name */
-    private static final String SUBSYSTEM_SPEC = "subsystem";
     /** standard fields specification name */
     private static final String STANDARD_SPEC = "optionalheaderstandardspec";
     /** windows fields specification name */
@@ -393,7 +392,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
             } else if (key.equals(SUBSYSTEM)) {
                 // subsystem has only 2 bytes
                 b.append(description + ": "
-                        + getSubsystemDescription((int) value) + NL);
+                        + getSubsystem().getDescription() + NL);
             } else if (key.equals(DLL_CHARACTERISTICS)) {
                 b.append(NL + description + ": " + NL);
                 b.append(getCharacteristicsInfo(value) + NL);
@@ -409,7 +408,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         }
         return b.toString();
     }
-    
+
     private static String getCharacteristicsInfo(long value) {
         StringBuilder b = new StringBuilder();
         List<DllCharacteristic> characs = DllCharacteristic.getAllFor(value);
@@ -516,54 +515,13 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     }
 
     /**
-     * Returns the description string of the subsystem value.
-     * 
-     * @param value
-     * @return subsystem description string
-     */
-    public static String getSubsystemDescription(int value) {
-        try {
-            Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
-            return map.get(String.valueOf(value))[1];
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        throw new IllegalArgumentException(
-                "unable to find subsystem description");
-    }
-
-    /**
-     * Returns the subsystem key string for the given value.
-     * 
-     * @param value
-     * @return key string
-     */
-    public static String getSubsystemKey(int value) {
-        try {
-            Map<String, String[]> map = IOUtil.readMap(SUBSYSTEM_SPEC);
-            String[] array = map.get(String.valueOf(value));
-            if (array == null) {
-                logger.warn("No subsystem key for " + value + " 0x"
-                        + Integer.toHexString(value) + "! Set to UNKNOWN.");
-                return "IMAGE_SUBSYSTEM_UNKNOWN";
-            } else {
-                return array[0];
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-        throw new IllegalArgumentException("unable to find subsystem key");
-    }
-
-    /**
      * Returns the subsystem instance of the file.
      * 
      * @return subsystem instance
      */
     public Subsystem getSubsystem() {
-        long subsystem = get(SUBSYSTEM);
-        String key = getSubsystemKey((int) subsystem);
-        return Subsystem.valueOf(key);
+        long value = get(SUBSYSTEM);
+        return Subsystem.getForValue(value);
     }
 
     @Override

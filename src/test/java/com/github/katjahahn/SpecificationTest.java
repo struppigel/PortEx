@@ -13,14 +13,12 @@ import org.testng.annotations.Test;
 
 import scala.actors.threadpool.Arrays;
 
-import com.github.katjahahn.parser.Characteristic;
 import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
 import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
-import com.github.katjahahn.parser.optheader.Subsystem;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
@@ -37,14 +35,10 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey;
  */
 public class SpecificationTest {
 
-	private final Map<Characteristic[], String> characteristicspecs = new HashMap<>();
 	private final Map<HeaderKey[], String> headerspecs = new HashMap<>();
 
 	@BeforeClass
 	public void prepare() {
-		characteristicspecs.put(Subsystem.values(), "subsystem");
-//		characteristicspecs.put(DebugType.values(), "debugtypes"); TODO match key string to enum
-
 		headerspecs.put(COFFHeaderKey.values(), "coffheaderspec");
 		headerspecs.put(DataDirectoryKey.values(), "datadirectoriesspec");
 		headerspecs.put(DebugDirectoryKey.values(), "debugdirentryspec");
@@ -58,23 +52,6 @@ public class SpecificationTest {
 		headerspecs.put(ResourceDirectoryKey.values(), "rsrcdirspec");
 		headerspecs.put(SectionHeaderKey.values(), "sectiontablespec");
 		// TODO resourcetype, machinetype (covered by MachineTypeTest so far), debugtypes
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void characteristicCoherence() throws IOException {
-		final int keyIndex = 1;
-		for (Entry<Characteristic[], String> entry : characteristicspecs
-				.entrySet()) {
-			String specname = entry.getValue();
-			Characteristic[] fields = entry.getKey();
-			List<String[]> list = IOUtil.readArray(specname);
-			assertEquals(list.size(), fields.length);
-			for (String[] values : list) {
-				String key = values[keyIndex];
-				assertTrue(containsKey(Arrays.asList(fields), key));
-			}
-		}
 	}
 
 	@SuppressWarnings("unchecked")
