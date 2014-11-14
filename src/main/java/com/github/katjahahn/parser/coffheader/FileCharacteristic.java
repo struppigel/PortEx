@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.coffheader;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.github.katjahahn.parser.Characteristic;
 
 /**
@@ -141,6 +144,26 @@ public enum FileCharacteristic implements Characteristic {
         this.deprecated = deprecated;
         this.description = description;
         this.value = value;
+    }
+
+    /**
+     * Returns a list of all characteristics, whose flags are set in value
+     * 
+     * @param value
+     * @return list of all characteristics that are set
+     */
+    public static List<FileCharacteristic> getAllFor(long value) {
+        List<FileCharacteristic> list = new ArrayList<>();
+        // check every characteristic if it fits
+        for (FileCharacteristic ch : values()) {
+            // read mask
+            long mask = ch.getValue();
+            // use mask to check if flag is set
+            if ((value & mask) != 0) {
+                list.add(ch);
+            }
+        }
+        return list;
     }
 
     /**

@@ -17,7 +17,6 @@ import com.github.katjahahn.parser.Characteristic;
 import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
-import com.github.katjahahn.parser.coffheader.FileCharacteristic;
 import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.DllCharacteristic;
@@ -45,7 +44,6 @@ public class SpecificationTest {
 
 	@BeforeClass
 	public void prepare() {
-		characteristicspecs.put(FileCharacteristic.values(), "characteristics");
 		characteristicspecs.put(DllCharacteristic.values(),
 				"dllcharacteristics");
 		characteristicspecs.put(SectionCharacteristic.values(),

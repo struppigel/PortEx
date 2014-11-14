@@ -272,7 +272,7 @@ class ReportCreator(private val data: PEData) {
     buf.append(pad("machine type", padLength1, " ") +
       pad(coff.getMachineType.getDescription(), colWidth, " ") + NL)
     buf.append(pad("characteristics", padLength1, " ") + "* " +
-      coff.getCharacteristicsDescriptions().asScala.mkString(NL + pad("", padLength1, " ") + "* "))
+      coff.getCharacteristics().asScala.map(_.getDescription).mkString(NL + pad("", padLength1, " ") + "* "))
 
     buf.append(NL + NL)
     val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")

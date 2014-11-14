@@ -13,6 +13,7 @@ import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
+import com.github.katjahahn.parser.coffheader.FileCharacteristic;
 import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
@@ -127,10 +128,10 @@ public class WikiExampleCodes {
         System.out.println("size of optional header: " + optionalHeaderSize);
         System.out.println("time date stamp: " + date);
 
-        List<String> characteristics = coff.getCharacteristicsDescriptions();
+        List<FileCharacteristic> characteristics = coff.getCharacteristics();
         System.out.println("characteristics: ");
-        for (String characteristic : characteristics) {
-            System.out.println("\t* " + characteristic);
+        for (FileCharacteristic characteristic : characteristics) {
+            System.out.println("\t* " + characteristic.getDescription());
         }
     }
 

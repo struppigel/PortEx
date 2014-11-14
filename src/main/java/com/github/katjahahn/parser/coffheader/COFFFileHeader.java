@@ -20,7 +20,6 @@ import static com.github.katjahahn.parser.coffheader.COFFHeaderKey.*;
 import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ import com.github.katjahahn.parser.Header;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
-import com.google.common.base.Preconditions;
 
 /**
  * Represents the COFF File Header.
@@ -52,7 +50,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     private Map<COFFHeaderKey, StandardField> data;
     /** the file offset of the header */
     private final long offset;
-    /** the logger for the COFF File Header*/
+    /** the logger for the COFF File Header */
     private static final Logger logger = LogManager
             .getLogger(COFFFileHeader.class.getName());
 
@@ -116,10 +114,10 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
             COFFHeaderKey key = (COFFHeaderKey) field.getKey();
             String description = field.getDescription();
             // handle special fields that have additional representations
-            
-            if(key == COFFHeaderKey.CHARACTERISTICS) {
+
+            if (key == COFFHeaderKey.CHARACTERISTICS) {
                 b.append(NL + description + ": " + NL);
-                b.append(IOUtil.getCharacteristics(value, "characteristics"));
+                b.append(getCharacteristicsInfo(value));
             } else if (key == COFFHeaderKey.TIME_DATE) {
                 b.append(description + ": ");
                 b.append(convertToDate(value));
@@ -130,6 +128,18 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
                 b.append(field.toString());
             }
             b.append(NL);
+        }
+        return b.toString();
+    }
+
+    private static String getCharacteristicsInfo(long value) {
+        StringBuilder b = new StringBuilder();
+        List<FileCharacteristic> characs = FileCharacteristic.getAllFor(value);
+        for (FileCharacteristic ch : characs) {
+            b.append("\t* " + ch.getDescription() + NL);
+        }
+        if (characs.isEmpty()) {
+            b.append("\t**no characteristics**" + NL);
         }
         return b.toString();
     }
@@ -182,15 +192,9 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return list of file characteristics
      */
     public List<FileCharacteristic> getCharacteristics() {
-        // get a list of all key strings whose flags are set
-        List<String> keys = IOUtil.getCharacteristicKeys(get(CHARACTERISTICS),
-                "characteristics");
-        // init empty list
-        List<FileCharacteristic> characteristics = new ArrayList<>();
-        // fetch enum type for every key string and put to list
-        for (String key : keys) {
-            characteristics.add(FileCharacteristic.valueOf(key));
-        }
+        long value = get(CHARACTERISTICS);
+        List<FileCharacteristic> characteristics = FileCharacteristic
+                .getAllFor(value);
         // ensurance
         assert characteristics != null;
         return characteristics;
@@ -204,18 +208,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return true if characteristic is set, false otherwise
      */
     public boolean hasCharacteristic(FileCharacteristic characteristic) {
-        return getCharacteristics().contains(characteristic);
-    }
-
-    /**
-     * Returns a list of the characteristics.
-     * 
-     * @return list of characteristic descriptions
-     */
-    public List<String> getCharacteristicsDescriptions() {
-        // just forward task to IOUtil
-        return IOUtil.getCharacteristicsDescriptions(get(CHARACTERISTICS),
-                "characteristics");
+        return (get(CHARACTERISTICS) & characteristic.getValue()) != 0;
     }
 
     /**
@@ -224,37 +217,13 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return MachineType
      */
     public MachineType getMachineType() {
-        assert get(MACHINE) == (int) get(MACHINE);
-        // 2 byte value can be casted to int
-        final int value = (int) get(MACHINE);
-        final int enumKeyIndex = 0;
+        long value = get(MACHINE);
         try {
-            // read the specification
-            Map<String, String[]> map = IOUtil.readMap("machinetype");
-            // convert value to hex string representation, which is the key for
-            // the specification map
-            String hexKey = Integer.toHexString(value);
-            // get the other values for the hex key
-            String[] ret = map.get(hexKey);
-            // check if found, if not found something went really wrong
-            if (ret != null) {
-                // cut the beginning of the enum string
-                String type = ret[enumKeyIndex].substring("IMAGE_FILE_MACHINE_"
-                        .length());
-                // retrieve machine type
-                MachineType result = MachineType.valueOf(type);
-                // There must be a matching machine type, otherwise you coded it
-                // wrong
-                Preconditions.checkState(result != null);
-                return result;
-            }
-        } catch (IOException e) {
-            // could not read the specification
-            logger.fatal(e);
-            e.printStackTrace();
+            return MachineType.getForValue(value);
+        } catch (IllegalArgumentException e) {
+            logger.error("Unable to resolve machine type for value: " + value);
+            return MachineType.UNKNOWN;
         }
-        logger.warn("couldn't match type to value " + value);
-        return MachineType.UNKNOWN;
     }
 
     /**

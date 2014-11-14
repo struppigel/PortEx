@@ -7,16 +7,11 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.coffheader.FileCharacteristic;
-
 public class FileCharacteristicTest {
-  @Test
-  public void coherence() throws IOException {
-	 List<String[]> list = IOUtil.readArray("characteristics");
-	 assertEquals(list.size(), FileCharacteristic.values().length);
-	 for(String[] array : list) {
-		 assertNotNull(FileCharacteristic.valueOf(array[1]));
-	 }
-  }
+    @Test
+    public void getAllSet() throws IOException {
+        long value = 0xffffffff;
+        List<FileCharacteristic> list = FileCharacteristic.getAllFor(value);
+        assertEquals(list.size(), FileCharacteristic.values().length);
+    }
 }

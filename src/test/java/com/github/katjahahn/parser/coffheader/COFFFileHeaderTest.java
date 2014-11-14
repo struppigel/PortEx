@@ -106,8 +106,8 @@ public class COFFFileHeaderTest {
     }
 
     @Test
-    public void getCharacteristicsDescription() {
-        List<String> description = winRarCoff.getCharacteristicsDescriptions();
+    public void characteristicsSize() {
+        List<FileCharacteristic> description = winRarCoff.getCharacteristics();
         assertEquals(description.size(), 5);
     }
 
