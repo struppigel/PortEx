@@ -34,9 +34,6 @@ import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PELoaderTest;
-import com.github.katjahahn.parser.coffheader.COFFFileHeader;
-import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
-import com.github.katjahahn.parser.coffheader.MachineType;
 
 public class COFFFileHeaderTest {
 
@@ -79,7 +76,7 @@ public class COFFFileHeaderTest {
 
     @Test
     public void getMachineDescription() {
-        assertEquals(winRarCoff.getMachineDescription(),
+        assertEquals(winRarCoff.getMachineType().getDescription(),
                 "Intel 386 or later processors and compatible processors");
     }
 

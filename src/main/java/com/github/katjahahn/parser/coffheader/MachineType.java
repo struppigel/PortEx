@@ -127,6 +127,23 @@ public enum MachineType implements Characteristic {
     }
 
     /**
+     * Returns the machine type for the specified value.
+     * 
+     * @param value
+     *            the value of the machine type
+     * @return machine type with value
+     */
+    public static MachineType getForValue(long value) {
+        for (MachineType machine : values()) {
+            if (machine.getValue() == value) {
+                return machine;
+            }
+        }
+        throw new IllegalArgumentException("couldn't match type to value "
+                + value);
+    }
+
+    /**
      * Returns the key as it is used in the specification.
      * 
      * @return key string as it is in the specification file.

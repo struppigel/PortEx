@@ -166,9 +166,6 @@ public class SectionTable implements PEModule {
      * Returns the section entry that has the given name. If there are several
      * sections with the same name, the first one will be returned.
      * 
-     * TODO there might be several sections with the same name. Provide a better
-     * way to fetch them.
-     * 
      * @param sectionName
      *            name of the section
      * @return the section table entry that has the given sectionName

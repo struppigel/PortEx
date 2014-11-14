@@ -16,9 +16,9 @@
 package com.github.katjahahn.parser;
 
 /**
- * Represents characteristic flags used by the PE format. These include among
- * others file characteristics, dll characteristics, subsystem, machinetype,
- * resourcetype or similar.
+ * Represents characteristic flags used by the PE format. These include, among
+ * others, file characteristics, dll characteristics, subsystem, machinetype,
+ * reloctypes.
  * 
  * @author Katja Hahn
  * 

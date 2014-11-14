@@ -122,7 +122,7 @@ public class WikiExampleCodes {
         int optionalHeaderSize = coff.getSizeOfOptionalHeader();
 
         System.out.println("machine type: "
-                + COFFFileHeader.getDescription(machine));
+                + machine.getDescription());
         System.out.println("number of sections: " + numberOfSections);
         System.out.println("size of optional header: " + optionalHeaderSize);
         System.out.println("time date stamp: " + date);

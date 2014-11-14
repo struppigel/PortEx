@@ -270,7 +270,7 @@ class ReportCreator(private val data: PEData) {
     buf.append(pad("time date stamp", padLength1, " ") +
       pad(coff.getTimeDate().toLocaleString(), colWidth, " ") + NL)
     buf.append(pad("machine type", padLength1, " ") +
-      pad(coff.getMachineDescription, colWidth, " ") + NL)
+      pad(coff.getMachineType.getDescription(), colWidth, " ") + NL)
     buf.append(pad("characteristics", padLength1, " ") + "* " +
       coff.getCharacteristicsDescriptions().asScala.mkString(NL + pad("", padLength1, " ") + "* "))
 

@@ -52,7 +52,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     private Map<COFFHeaderKey, StandardField> data;
     /** the file offset of the header */
     private final long offset;
-
+    /** the logger for the COFF File Header*/
     private static final Logger logger = LogManager
             .getLogger(COFFFileHeader.class.getName());
 
@@ -142,22 +142,7 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
      * @return the machine type description
      */
     private String getMachineTypeString(int value) {
-        final int typeIndex = 1;
-        try {
-            // read the specification
-            Map<String, String[]> map = IOUtil.readMap("machinetype");
-            // convert value to hex string
-            String key = Integer.toHexString(value);
-            // retrieve type string
-            String[] ret = map.get(key);
-            if (ret != null && ret.length > typeIndex) {
-                return ret[typeIndex];
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        throw new IllegalArgumentException("couldn't match type to value "
-                + value);
+        return MachineType.getForValue(value).getDescription();
     }
 
     /**
@@ -187,46 +172,6 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
     @Override
     public StandardField getField(COFFHeaderKey key) {
         return data.get(key);
-    }
-
-    /**
-     * Returns a description of the machine type.
-     * 
-     * @param machine
-     *            type
-     * @return description
-     */
-    public static String getDescription(MachineType machine) {
-        // set indices
-        int description = 1;
-        int keyString = 0;
-        try {
-            // read the machinetype specification
-            Map<String, String[]> map = IOUtil.readMap("machinetype");
-            for (String[] entry : map.values()) {
-                // check for key
-                if (entry[keyString].equals(machine.getKey())) {
-                    // correct machine type found, retrieve description
-                    String result = entry[description];
-                    assert result != null && result.trim().length() > 0;
-                    return result;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // this should never happen
-        throw new IllegalArgumentException("no description found for machine "
-                + machine);
-    }
-
-    /**
-     * Returns a description of the machine type read.
-     * 
-     * @return machine type description
-     */
-    public String getMachineDescription() {
-        return getDescription(getMachineType());
     }
 
     /**
