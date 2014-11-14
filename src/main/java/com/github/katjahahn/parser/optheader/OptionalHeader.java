@@ -21,7 +21,6 @@ import static com.github.katjahahn.parser.optheader.StandardFieldEntryKey.*;
 import static com.github.katjahahn.parser.optheader.WindowsEntryKey.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +49,6 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     /* spec locations */
     /** subsystem specification name */
     private static final String SUBSYSTEM_SPEC = "subsystem";
-    /** dll characteristics specification name */
-    private static final String DLL_CHARACTERISTICS_SPEC = "dllcharacteristics";
     /** standard fields specification name */
     private static final String STANDARD_SPEC = "optionalheaderstandardspec";
     /** windows fields specification name */
@@ -399,8 +396,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                         + getSubsystemDescription((int) value) + NL);
             } else if (key.equals(DLL_CHARACTERISTICS)) {
                 b.append(NL + description + ": " + NL);
-                b.append(IOUtil.getCharacteristics(value,
-                        DLL_CHARACTERISTICS_SPEC) + NL);
+                b.append(getCharacteristicsInfo(value) + NL);
             }
 
             else {
@@ -410,6 +406,18 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                     directoryNr = value;
                 }
             }
+        }
+        return b.toString();
+    }
+    
+    private static String getCharacteristicsInfo(long value) {
+        StringBuilder b = new StringBuilder();
+        List<DllCharacteristic> characs = DllCharacteristic.getAllFor(value);
+        for (DllCharacteristic ch : characs) {
+            b.append("\t* " + ch.getDescription() + NL);
+        }
+        if (characs.isEmpty()) {
+            b.append("\t**no characteristics**" + NL);
         }
         return b.toString();
     }
@@ -502,24 +510,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @return list of DllCharacteristics
      */
     public List<DllCharacteristic> getDllCharacteristics() {
-        List<DllCharacteristic> dllChs = new ArrayList<>();
-        long characteristics = get(DLL_CHARACTERISTICS);
-        List<String> keys = IOUtil.getCharacteristicKeys(characteristics,
-                DLL_CHARACTERISTICS_SPEC);
-        for (String key : keys) {
-            dllChs.add(DllCharacteristic.valueOf(key));
-        }
+        long value = get(DLL_CHARACTERISTICS);
+        List<DllCharacteristic> dllChs = DllCharacteristic.getAllFor(value);
         return dllChs;
-    }
-
-    /**
-     * Returns a list of all DllCharacteristic descriptions.
-     * 
-     * @return list of DllCharacteristic descriptions
-     */
-    public List<String> getDllCharacteristicsDescriptions() {
-        return IOUtil.getCharacteristicsDescriptions(get(DLL_CHARACTERISTICS),
-                DLL_CHARACTERISTICS_SPEC);
     }
 
     /**

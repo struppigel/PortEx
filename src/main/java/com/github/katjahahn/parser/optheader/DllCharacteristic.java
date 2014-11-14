@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.optheader;
 
+import java.util.List;
+
 import com.github.katjahahn.parser.Characteristic;
+import com.github.katjahahn.parser.FlagUtil;
 
 /**
  * Represents the flags for the DLL Characteristic field of the optional header.
@@ -100,6 +103,18 @@ public enum DllCharacteristic implements Characteristic {
         this.reserved = reserved;
         this.deprecated = deprecated;
     }
+    
+    /**
+     * Returns a list of all characteristics, whose flags are set in value
+     * 
+     * @param value
+     * @return list of all characteristics that are set
+     */
+    public static List<DllCharacteristic> getAllFor(long value) {
+        List<DllCharacteristic> list = FlagUtil
+                .getAllMatching(value, values());
+        return list;
+    }
 
     /**
      * {@inheritDoc}
@@ -126,4 +141,5 @@ public enum DllCharacteristic implements Characteristic {
     public long getValue() {
         return value;
     }
+
 }

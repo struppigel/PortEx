@@ -19,7 +19,6 @@ import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
 import com.github.katjahahn.parser.msdos.MSDOSHeaderKey;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
-import com.github.katjahahn.parser.optheader.DllCharacteristic;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.optheader.Subsystem;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
@@ -44,8 +43,6 @@ public class SpecificationTest {
 
 	@BeforeClass
 	public void prepare() {
-		characteristicspecs.put(DllCharacteristic.values(),
-				"dllcharacteristics");
 		characteristicspecs.put(SectionCharacteristic.values(),
 				"sectioncharacteristics");
 		characteristicspecs.put(Subsystem.values(), "subsystem");

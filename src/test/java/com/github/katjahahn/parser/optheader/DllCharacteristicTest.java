@@ -7,16 +7,28 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.optheader.DllCharacteristic;
-
 public class DllCharacteristicTest {
-	@Test
-	public void coherence() throws IOException {
-		List<String[]> list = IOUtil.readArray("dllcharacteristics");
-		assertEquals(list.size(), DllCharacteristic.values().length);
-		for (String[] array : list) {
-			assertNotNull(DllCharacteristic.valueOf(array[1]));
-		}
-	}
+    @Test
+    public void getAllSet() throws IOException {
+        long value = 0xffffffff;
+        List<DllCharacteristic> list = DllCharacteristic.getAllFor(value);
+        assertEquals(list.size(), DllCharacteristic.values().length);
+    }
+
+    @Test
+    public void getNothing() throws IOException {
+        long value = 0x00000000;
+        List<DllCharacteristic> list = DllCharacteristic.getAllFor(value);
+        assertEquals(list.size(), 0);
+    }
+
+    @Test
+    public void getOne() throws IOException {
+        long value = 0x100;
+        List<DllCharacteristic> list = DllCharacteristic.getAllFor(value);
+        assertEquals(list.size(), 1);
+        assertEquals(list.get(0).getDescription(),
+                "Image is NX compatible.");
+        assertEquals(list.get(0), DllCharacteristic.IMAGE_DLL_CHARACTERISTICS_NX_COMPAT);
+    }
 }
