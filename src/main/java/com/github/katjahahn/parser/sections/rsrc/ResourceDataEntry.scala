@@ -39,17 +39,29 @@ import com.github.katjahahn.parser.PhysicalLocation
 class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardField],
   entryOffset: Long, mmBytes: MemoryMappedPE, virtualAddress: Long) {
 
+  /** physical location of the header */
   private lazy val headerLoc = new PhysicalLocation(entryOffset, entrySize)
 
+  /**
+   * Returns the physical location of the resource data.
+   * 
+   * @return location of the resource
+   */
   def getResourceLocation(): PhysicalLocation = {
+    // fetch RVA of resource
     val rva = data(ResourceDataEntryKey.DATA_RVA).getValue
+    // calculate file offset using memory-mapped PE
     val offset = mmBytes.virtToPhysAddress(rva)
+    // fetch size of resource
     val size = data(ResourceDataEntryKey.SIZE).getValue
+    // create and return location
     new PhysicalLocation(offset, size)
   }
 
   /**
    * Returns all file locations of the resource data entry
+   * 
+   * @return all physical locations of the resource data entry
    */
   def locations(): List[PhysicalLocation] = headerLoc ::
     getResourceLocation() :: Nil
@@ -66,6 +78,7 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
    *
    * @return the byte array representing the resource
    * FIXME this is a mistake, use streams
+   * @Beta
    */
   def getVirtResourceLoc(): Array[Byte] = {
     val address = data(ResourceDataEntryKey.DATA_RVA).getValue

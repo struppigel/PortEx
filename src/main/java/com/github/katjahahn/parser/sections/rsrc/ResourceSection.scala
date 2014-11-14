@@ -44,7 +44,7 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param hasLoop indicates whether the resource tree has a loop
  */
 class ResourceSection private (
-  val resourceTree: ResourceDirectory,
+  private val resourceTree: ResourceDirectory,
   private val offset: Long,
   private val mmBytes: MemoryMappedPE,
   val hasLoop: Boolean) extends SpecialSection {

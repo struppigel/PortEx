@@ -407,11 +407,11 @@ class ReportCreator(private val data: PEData) {
 
 object ReportCreator {
 
-  private val version = """version: 0.3
+  private val version = """version: 0.3.1
     |author: Katja Hahn
     |last update: 11.Sep 2014""".stripMargin
 
-  private val title = """PE Analyzer""" + NL
+  private val title = """PortEx Analyzer""" + NL
 
   private val usage = """usage: java -jar peana.jar [<options>] <PEfile>
     | -h,--help          show help
@@ -451,6 +451,7 @@ object ReportCreator {
                 writeReport(reporter, new File(options('output)))
               } else {
                 reporter.printReport()
+                println("--- end of report ---")
               }
             } else {
               println("The given file is no PE file!")
@@ -471,7 +472,7 @@ object ReportCreator {
       sig.signature.filter(cond(_) { case Some(s) => true }).length
     var results = FileTypeScanner(file).scanStart()
     if (results.isEmpty) println("No matching file-type signatures found")
-    if (results.size == 1)
+    else if (results.size == 1)
       println("The file could be of the following type: ")
     else
       println("The file could be of one of the following types: ")
@@ -499,6 +500,7 @@ object ReportCreator {
       fw.write(reporter.specialSectionReports)
       println("Writing analysis reports...")
       fw.write(reporter.additionalReports)
+      fw.write("--- end of report ---")
       println("Done!")
     }
   }

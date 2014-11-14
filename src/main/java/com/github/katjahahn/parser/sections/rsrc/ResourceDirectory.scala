@@ -45,6 +45,7 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param level the level of the table in the tree (where the table is a node)
  * @param header the table header
  * @param entries the table entries
+ * @param fileOffset the offset of the resource directory
  */
 class ResourceDirectory private (private val level: Level,
   private val header: Header,
@@ -125,7 +126,6 @@ class ResourceDirectory private (private val level: Level,
    * Collects all the resources of one table entry.
    *
    * @param entry the table directory entry
-   * @param mmBytes the memory mapped PE
    * @return a list of all resources that can be found with this entry
    */
   private def getResources(entry: ResourceDirectoryEntry): List[Resource] = {
@@ -187,7 +187,7 @@ object ResourceDirectory {
    * The name of resource directory specification file
    */
   private val specLocation = "rsrcdirspec"
-    
+
   /**
    * Maximum of resource entries for each directory
    */
@@ -197,29 +197,37 @@ object ResourceDirectory {
    * Creates a resource directory.
    *
    * @param file the PE file
-   * @param rva the relative virtual address to the resource directory
    * @param level the level in the resource tree of the resource directory to create
-   * @param virtualAddress the rva to the resource table
+   * @param rsrcDirRVA the relative virtual address to the resource directory, 
+   *        relative to the resource table va
+   * @param rsrcVA the rva to the resource table
    * @param rsrcOffset the file offset to the resource table
    * @param mmBytes the memory mapped PE
+   * @param loopChecker the resource loop checker
    * @return resource directory
    */
-  def apply(file: File, level: Level, rva: Long,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
+  def apply(file: File, level: Level, rsrcDirRVA: Long,
+    rsrcVA: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
     loopChecker: ResourceLoopChecker): ResourceDirectory = {
-    val headerBytes = mmBytes.slice(virtualAddress + rva, resourceDirSize + rva + virtualAddress)
-    val header = readHeader(headerBytes, rva)
-    val fileOffset = rsrcOffset + rva
+    // fetch the bytes of the resource directory header
+    val headerBytes = mmBytes.slice(rsrcVA + rsrcDirRVA, resourceDirSize + rsrcDirRVA + rsrcVA)
+    // read the header data from the bytes
+    val header = readHeader(headerBytes, rsrcDirRVA)
+    // calculate the file offset to the resource directory header
+    val fileOffset = rsrcOffset + rsrcDirRVA
+    // check for resource loop
     if (!loopChecker.isNewResourceDirFileOffset(fileOffset)) {
       throw new ResourceLoopException("resource loop detected")
     }
     //check for max level and max resourceDirs, don't load entries if reached
     val entries = {
       if (level.levelNr < ResourceSection.maxLevel && loopChecker.size < ResourceSection.maxResourceDirs)
-        readEntries(file, header, rva, level, virtualAddress, rsrcOffset,
+        readEntries(file, header, rsrcDirRVA, level, rsrcVA, rsrcOffset,
           mmBytes, loopChecker)
+      // no loading
       else List[ResourceDirectoryEntry]()
     }
+    // create resource directory with header, entries and file offset
     new ResourceDirectory(level, header, entries, fileOffset)
   }
 
@@ -232,7 +240,6 @@ object ResourceDirectory {
    */
   private def readHeader(tableBytes: Array[Byte], tableOffset: Long): Header = {
     val specformat = new SpecificationFormat(0, 1, 2, 3)
-    //TODO read header from memory mapped PE?
     IOUtil.readHeaderEntries(classOf[ResourceDirectoryKey], specformat,
       specLocation, tableBytes, tableOffset).asScala.toMap
   }
@@ -242,32 +249,45 @@ object ResourceDirectory {
    *
    * @param file the PE file
    * @param header the resource directory header
-   * @param tableOffset the rva to the resource directory
+   * @param rsrcDirRVA the relative virtual address to the resource directory, 
+   *        relative to the resource table va
    * @param level the level of the current directory within the resource tree
    * @param virtualAddress the rva to the resource table
    * @param rsrcOffset the file offset to the resource table
    * @param mmBytes the memory mapped PE
+   * @param loopChecker the resource loop checker
    * @return a list of resource directory entries
    */
-  private def readEntries(file: File, header: Header, tableOffset: Long,
+  private def readEntries(file: File, header: Header, rsrcDirRVA: Long,
     level: Level, virtualAddress: Long, rsrcOffset: Long,
     mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): List[ResourceDirectoryEntry] = {
+    // fetch number of name entries
     val nameEntries = header(NR_OF_NAME_ENTRIES).getValue.toInt
+    // fetch number of id entries
     val idEntries = header(NR_OF_ID_ENTRIES).getValue.toInt
+    // number of all entries
     val entriesSum = nameEntries + idEntries
-    val limitedEntriesSum = if(entriesSum < entryMaximum) entriesSum else entryMaximum
+    // we limit the number to maximum if reached
+    val limitedEntriesSum = if (entriesSum < entryMaximum) entriesSum else entryMaximum
     var entries = ListBuffer.empty[ResourceDirectoryEntry]
     try {
       for (i <- 0 until limitedEntriesSum) {
-        val offset = resourceDirSize + i * entrySize + virtualAddress + tableOffset
+        // calculate the offset for the entry
+        val offset = resourceDirSize + i * entrySize + virtualAddress + rsrcDirRVA
+        // the offset to the end of the entry
         val endpoint = offset + entrySize
+        // actual number of the entry is index + 1
         val entryNr = i + 1
+        // now read entry bytes
         val entryBytes = mmBytes.slice(offset, endpoint)
+        // number of name entries defines if this is one
         val isNameEntry = i < nameEntries
         try {
+          // create and add entry to the list
           entries += ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
             level, virtualAddress, rsrcOffset, mmBytes, loopChecker)
         } catch {
+          // resource loop detected during entry creation
           case e: ResourceLoopException => logger.warn("resource loop detected at va " + offset)
         }
       }

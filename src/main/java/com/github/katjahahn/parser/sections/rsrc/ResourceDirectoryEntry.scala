@@ -145,6 +145,7 @@ object ResourceDirectoryEntry {
   /**
    * Creates a {@link ResourceDirectoryEntry}
    *
+   * @param file the PE file
    * @param isNameEntry indicates whether the ID is a number id or points to a name
    * @param entryBytes the array of bytes this entry is made of
    * @param entryNr the number of the entry within the {@link ResourceDirectory}
@@ -152,17 +153,24 @@ object ResourceDirectoryEntry {
    * @param virtualAddress the rva to the resource table
    * @param rsrcOffset the relative offset from the resource table to the resource directory entry
    * @param mmBytes the memory mapped PE
+   * @param loopChecker the resource loop checker
    * @return {@link ResourceDirectoryEntry}
    */
   def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
     entryNr: Int, level: Level, virtualAddress: Long, rsrcOffset: Long,
     mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): ResourceDirectoryEntry = {
+    // read all fields of this resource directory entry
     val entries = readEntries(entryBytes)
+    // fetch rva to subdirectory or data entry
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
+    // fetch id or name field
     val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
+    // rva determines if this is a subdirectory or a data entry
     if (isDataEntryRVA(rva)) {
+      // create and return data entry
       createDataEntry(rva, id, entryNr, virtualAddress, rsrcOffset, mmBytes)
     } else {
+      // create and return subdirectory
       createSubDirEntry(file, rva, id, entryNr, level,
         virtualAddress, rsrcOffset, mmBytes, loopChecker)
     }
@@ -194,8 +202,10 @@ object ResourceDirectoryEntry {
   private def getIDOrName(rva: Long, isNameEntry: Boolean, level: Level,
     mmBytes: MemoryMappedPE): IDOrName =
     if (isNameEntry) {
+      // if name entry fetch the name string at given rva
       val name = getStringAtRVA(rva, mmBytes)
       Name(rva, name)
+      // create id instance otherwise
     } else ID(rva, level)
 
   /**
@@ -207,18 +217,27 @@ object ResourceDirectoryEntry {
    * @return string at rva
    */
   private def getStringAtRVA(rva: Long, mmBytes: MemoryMappedPE): String = {
+    // highest bit does not belong to rva
     val address = removeHighestIntBit(rva)
+    // 2 bytes reserved for length
     val length = 2
+    // check if able to read
     if (address + length > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
     }
+    // read the length of the string (number of characters)
     val strLength = mmBytes.getBytesIntValue(address, length)
-    val strBytes = strLength * 2 //wg UTF-16 --> 2 Byte
-    val stringAddress = (address + length).toInt
+    // UTF-16 needs two bytes per character
+    val strBytes = strLength * 2
+    // the actual address of the string
+    val stringAddress = address + length
+    // check if within boundaries
     if (stringAddress + strBytes > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
     }
+    // read bytes
     val bytes = mmBytes.slice(stringAddress, stringAddress + strBytes)
+    // create UTF-16 little endian string
     new String(bytes, "UTF-16LE")
   }
 
@@ -245,12 +264,18 @@ object ResourceDirectoryEntry {
    * @param mmBytes the memory mapped PE
    * @return a data entry
    */
-  private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int, virtualAddress: Long,
-    rsrcOffset: Long, mmBytes: MemoryMappedPE): DataEntry = {
+  private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int,
+    virtualAddress: Long, rsrcOffset: Long,
+    mmBytes: MemoryMappedPE): DataEntry = {
+    // calculate virtual start of the data entry
     val virtStart = rva + virtualAddress
+    // calculate virtual end of the data entry
     val virtEnd = virtStart + ResourceDataEntry.entrySize
+    // read bytes of the data entry
     val entryBytes = mmBytes.slice(virtStart, virtEnd)
+    // calculate the file offset of the data entry
     val entryOffset = rva + rsrcOffset
+    // create and return resource data entry
     val data = ResourceDataEntry(entryBytes, entryOffset, mmBytes, virtualAddress)
     DataEntry(id, data, entryNr, rsrcOffset)
   }
@@ -271,12 +296,16 @@ object ResourceDirectoryEntry {
   private def createSubDirEntry(file: File, rva: Long, id: IDOrName, entryNr: Int, level: Level,
     virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
     loopChecker: ResourceLoopChecker): SubDirEntry = {
+    // highest bit does not belong to actual rva
     val address = removeHighestIntBit(rva)
+    // parse and create underlying resource directory of the subdirectory entry
     val table = ResourceDirectory(file, level.up, address, virtualAddress, rsrcOffset, mmBytes, loopChecker)
+    // create sub directory entry
     SubDirEntry(id, table, entryNr, rsrcOffset)
   }
 
   private def isDataEntryRVA(value: Long): Boolean = {
+    // highest integer bit determines if entry is a data entry or subdir entry
     val mask = 1 << 31
     (value & mask) == 0
   }
