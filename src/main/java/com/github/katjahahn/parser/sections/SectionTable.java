@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import static com.github.katjahahn.parser.ByteArrayUtil.*;
 import static com.github.katjahahn.parser.IOUtil.*;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -190,40 +188,14 @@ public class SectionTable implements PEModule {
         StringBuilder b = new StringBuilder();
         b.append("-----------------" + NL + "Section Table" + NL
                 + "-----------------" + NL + NL);
-        for (int i = 0; i < numberOfEntries; i++) {
-            b.append("entry number " + (i + 1) + ": " + NL + "..............."
+        int i = 0;
+        for(SectionHeader header : headers) {
+            i++;
+            b.append("entry number " + i + ": " + NL + "..............."
                     + NL + NL);
-            byte[] section = Arrays.copyOfRange(sectionTableBytes, i
-                    * ENTRY_SIZE, i * ENTRY_SIZE + ENTRY_SIZE);
-            b.append(getNextEntryInfo(section) + NL);
+            b.append(header.getInfo());
         }
 
-        return b.toString();
-    }
-
-    private String getNextEntryInfo(byte[] section) {
-        assert section != null;
-        StringBuilder b = new StringBuilder();
-        for (Entry<String, String[]> entry : specification.entrySet()) {
-
-            String[] specs = entry.getValue();
-            long value = getBytesLongValue(section, Integer.parseInt(specs[1]),
-                    Integer.parseInt(specs[2]));
-            String key = entry.getKey();
-            if (key.equals("CHARACTERISTICS")) {
-                b.append(specs[0]
-                        + ": "
-                        + NL
-                        + IOUtil.getCharacteristics(value,
-                                "sectioncharacteristics") + NL);
-            } else if (key.equals("NAME")) {
-                b.append(specs[0] + ": " + getUTF8String(section) + NL);
-
-            } else {
-                b.append(specs[0] + ": " + value + " (0x"
-                        + Long.toHexString(value) + ")" + NL);
-            }
-        }
         return b.toString();
     }
 

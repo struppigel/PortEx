@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
+import static com.github.katjahahn.parser.IOUtil.*;
 import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,6 @@ import com.github.katjahahn.parser.StandardField;
  */
 public class SectionHeader extends Header<SectionHeaderKey> {
 
-    private static final String SECTIONCHARACTERISTICS_SPEC = "sectioncharacteristics";
     private final Map<SectionHeaderKey, StandardField> entries;
     private String name;
     private final int number;
@@ -198,13 +197,8 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * @return list of all characteristics
      */
     public List<SectionCharacteristic> getCharacteristics() {
-        List<SectionCharacteristic> list = new ArrayList<>();
-        List<String> keys = IOUtil.getCharacteristicKeys(
-                get(SectionHeaderKey.CHARACTERISTICS),
-                SECTIONCHARACTERISTICS_SPEC);
-        for (String key : keys) {
-            list.add(SectionCharacteristic.valueOf(key));
-        }
+        long value = get(SectionHeaderKey.CHARACTERISTICS);
+        List<SectionCharacteristic> list = SectionCharacteristic.getAllFor(value);
         assert list != null;
         return list;
     }
@@ -227,12 +221,23 @@ public class SectionHeader extends Header<SectionHeaderKey> {
             if (key == SectionHeaderKey.CHARACTERISTICS) {
                 b.append(description
                         + IOUtil.NL
-                        + IOUtil.getCharacteristics(value,
-                                SECTIONCHARACTERISTICS_SPEC) + IOUtil.NL);
+                        + getCharacteristicsInfo(value) + IOUtil.NL);
             } else {
                 b.append(description + value + " (0x" + Long.toHexString(value)
                         + ")" + IOUtil.NL);
             }
+        }
+        return b.toString();
+    }
+    
+    private static String getCharacteristicsInfo(long value) {
+        StringBuilder b = new StringBuilder();
+        List<SectionCharacteristic> characs = SectionCharacteristic.getAllFor(value);
+        for (SectionCharacteristic ch : characs) {
+            b.append("\t* " + ch.getDescription() + NL);
+        }
+        if (characs.isEmpty()) {
+            b.append("\t**no characteristics**" + NL);
         }
         return b.toString();
     }

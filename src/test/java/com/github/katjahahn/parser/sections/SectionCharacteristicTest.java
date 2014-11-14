@@ -7,16 +7,28 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.sections.SectionCharacteristic;
-
 public class SectionCharacteristicTest {
-	@Test
-	public void coherence() throws IOException {
-		List<String[]> list = IOUtil.readArray("sectioncharacteristics");
-		assertEquals(list.size(), SectionCharacteristic.values().length);
-		for (String[] array : list) {
-			assertNotNull(SectionCharacteristic.valueOf(array[1]));
-		}
-	}
+    @Test
+    public void getAllSet() throws IOException {
+        long value = 0xffffffff;
+        List<SectionCharacteristic> list = SectionCharacteristic.getAllFor(value);
+        assertEquals(list.size(), SectionCharacteristic.values().length);
+    }
+
+    @Test
+    public void getNothing() throws IOException {
+        long value = 0x00000000;
+        List<SectionCharacteristic> list = SectionCharacteristic.getAllFor(value);
+        assertEquals(list.size(), 0);
+    }
+
+    @Test
+    public void getOne() throws IOException {
+        long value = 0x00000020;
+        List<SectionCharacteristic> list = SectionCharacteristic.getAllFor(value);
+        assertEquals(list.size(), 1);
+        assertEquals(list.get(0).getDescription(),
+                "The section contains executable code.");
+        assertEquals(list.get(0), SectionCharacteristic.IMAGE_SCN_CNT_CODE);
+    }
 }

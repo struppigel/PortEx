@@ -22,7 +22,6 @@ import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.optheader.Subsystem;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
-import com.github.katjahahn.parser.sections.SectionCharacteristic;
 import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
 import com.github.katjahahn.parser.sections.edata.ExportDirectoryKey;
@@ -43,8 +42,6 @@ public class SpecificationTest {
 
 	@BeforeClass
 	public void prepare() {
-		characteristicspecs.put(SectionCharacteristic.values(),
-				"sectioncharacteristics");
 		characteristicspecs.put(Subsystem.values(), "subsystem");
 //		characteristicspecs.put(DebugType.values(), "debugtypes"); TODO match key string to enum
 

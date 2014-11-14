@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
+import java.util.List;
+
 import com.github.katjahahn.parser.Characteristic;
+import com.github.katjahahn.parser.FlagUtil;
 
 /**
  * Represents the attributes of a section.
@@ -24,11 +27,7 @@ import com.github.katjahahn.parser.Characteristic;
  * 
  */
 public enum SectionCharacteristic implements Characteristic {
-    /**
-     * Reserved for future use.
-     */
-    RESERVED_0(0x00000000, "Reserved 0", "Reserved for future use.", true,
-            false),
+
     /**
      * Reserved for future use.
      */
@@ -273,5 +272,9 @@ public enum SectionCharacteristic implements Characteristic {
     @Override
     public long getValue() {
         return value;
+    }
+
+    public static List<SectionCharacteristic> getAllFor(long value) {
+        return FlagUtil.getAllMatching(value, values());
     }
 }
