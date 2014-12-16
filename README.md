@@ -1,13 +1,13 @@
 PortEx
 ======
 
-### Welcome to PortEx Beta
+### Welcome to PortEx
 
 PortEx is a Java library for static malware analysis of Portable Executable files. Its focus is on PE malformation robustness, and anomaly detection. 
 PortEx is written in Java and Scala, and targeted at Java applications.  
 Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 
-### Features (so far)
+### Features
 
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations
@@ -23,11 +23,6 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * File scoring based on statistical information
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
-
-### Version Information
-
-The current version is in Beta, so beware of bugs and changes of the API until the first release.
-The first release will be in December/January 2014.
 
 ### Using PortEx
 
