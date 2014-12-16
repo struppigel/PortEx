@@ -30,9 +30,9 @@ import Mapping._
  *
  * @author Katja Hahn
  *
- * @param va the virtual address range
- * @param physA the physical address range
- * @param the PEData object the mapping belongs to
+ * @param virtRange the virtual address range
+ * @param physRange the physical address range
+ * @param data the PEData object the mapping belongs to
  */
 class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val data: PEData) {
   require(virtRange.end - virtRange.start == physRange.end - physRange.start)
@@ -169,7 +169,7 @@ class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val da
    * Requires the offset + size to be within the virtual range of the mapping.
    *
    * @param virtOffset the virtual offset to start reading the bytes from
-   * @param the size of the returned array
+   * @param size of the returned array
    * @return array containing the bytes starting from virtOffset
    */
   def apply(virtOffset: Long, size: Int): Array[Byte] = {
@@ -190,14 +190,16 @@ object Mapping {
   /**
    * Turn chunk usage on or off.
    * TODO remove non-chunk usage entirely after testing this throughoughly
+   * @Beta
    */
-  var useChunks = false
+  var useChunks = true
 
   /**
    * The default size of a chunk.
    * This turned out to be a good value after some performance tests.
    *
    * TODO make this a val after performance tests are done
+   * @Beta
    */
   var defaultChunkSize = 8192
 
@@ -205,6 +207,10 @@ object Mapping {
    * A chunk of bytes with the given size. Loads the bytes lazily, but all bytes
    * at once. Improves performance for repeated access to bytes in the same area
    * compared to reading the file for every tiny slice of bytes.
+   * 
+   * @param physStart physical start of the chunk
+   * @param size of the chunk in bytes
+   * @param data the PEData object
    */
   private class Chunk(val physStart: Long, val size: Int, private val data: PEData) {
     lazy val bytes = {
@@ -248,6 +254,8 @@ abstract class Range(val start: Long, val end: Long) {
    */
   def contains(value: Long): Boolean =
     start <= value && end >= value
+    
+  override def toString(): String = "Range(" + start + ", " + end + ")"
 }
 
 /**

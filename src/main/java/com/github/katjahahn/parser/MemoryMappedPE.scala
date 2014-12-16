@@ -56,6 +56,10 @@ class MemoryMappedPE(
    * <p>
    * Spits out a warning if several matching virtual addresses are found and
    * returns the last one.
+   * <p>
+   * @Beta This method is subject to change
+   * @TODO remove -1 as return value
+   *
    * @param physAddr physical address
    * @return virtual address for physAddr, -1 if it does not exist
    */
@@ -72,12 +76,14 @@ class MemoryMappedPE(
   }
 
   /**
-   * Returns all virtual addresses that are mapped to the physical Address.
+   * Returns all virtual addresses that are mapped to this physical address.
    * <p>
-   * Scala method. Use virtToPhysAddress(Long) for Java.
+   * Scala method. Use physToVirtAddress(Long) for Java.
+   * <p>
+   * @Beta This method is subject to change
    *
-   * @param physAddr the virtual address
-   * @return list of virtual addresses
+   * @param physAddr the physical address
+   * @return list of virtual addresses that are mapped to physAddr
    */
   def _physToVirtAddresses(physAddr: Long): List[Long] = {
     // find mapping that contains physAddr
@@ -92,6 +98,8 @@ class MemoryMappedPE(
    * <p>
    * Spits out a warning if several matching physical addresses are found and
    * returns the last one.
+   * <p>
+   * @Beta This method is subject to change
    * @param va the virtual address
    * @return file offset for the VA, -1 if it does not exist
    */
@@ -109,7 +117,8 @@ class MemoryMappedPE(
 
   /**
    * Returns all physical addresses that are mapped to the VA.
-   *
+   * <p>
+   * @Beta This method is subject to change
    * @param va the virtual address
    * @return list of file offsets
    */
@@ -119,7 +128,8 @@ class MemoryMappedPE(
    * Returns all physical addresses that are mapped to the VA.
    * <p>
    * Scala method. Use virtToPhysAddress(Long) for Java.
-   *
+   * <p>
+   * @Beta This method is subject to change
    * @param va the virtual address
    * @return list of file offsets
    */
@@ -254,11 +264,43 @@ class MemoryMappedPE(
 
   /**ByteArrayUtil methods**/
 
-  def getBytesIntValue(offset: Long, length: Int): Int =
+  /**
+   * Retrieves the integer value of the bytes in the memory mapped PE given by
+   * offset and length.
+   * <p>
+   * The values are considered little endian.
+   * <p>
+   * Length must be between 1 and 4 inclusive.
+   *
+   * @param offset
+   *            the index to start reading the integer value from
+   * @param length
+   *            the number of bytes used to convert to int
+   * @return int value
+   */
+  def getBytesIntValue(offset: Long, length: Int): Int = {
+    assert(length <= 4 && length > 0)
     ByteArrayUtil.bytesToInt(this.slice(offset, offset + length))
+  }
 
-  def getBytesLongValue(offset: Long, length: Int): Long =
+  /**
+   * Retrieves the integer value of the bytes in the memory mapped PE given by
+   * offset and length.
+   * <p>
+   * The values are considered little endian.
+   * <p>
+   * Length must be between 1 and 8 inclusive.
+   *
+   * @param offset
+   *            the index to start reading the long value from
+   * @param length
+   *            the number of bytes used to convert to long
+   * @return long value
+   */
+  def getBytesLongValue(offset: Long, length: Int): Long = {
+    assert(length <= 8 && length > 0)
     ByteArrayUtil.bytesToLong(this.slice(offset, offset + length))
+  }
 
 }
 
@@ -271,12 +313,20 @@ object MemoryMappedPE {
 
   /**
    * Creates a representation of the PE content as it is mapped into memory
+   *
+   * @param data the PEData object
+   * @param secLoader the section loader instance
+   * @returns a memory mapped PE
    */
   def newInstance(data: PEData, secLoader: SectionLoader): MemoryMappedPE =
     apply(data, secLoader)
 
   /**
    * Creates a representation of the PE content as it is mapped into memory
+   *
+   * @param data the PEData object
+   * @param secLoader the section loader instance
+   * @returns a memory mapped PE
    */
   def apply(data: PEData, secLoader: SectionLoader): MemoryMappedPE = {
     val mappings = readMemoryMappings(data, secLoader)
@@ -285,6 +335,10 @@ object MemoryMappedPE {
 
   /**
    * Reads and returns the memory mappings for the sections.
+   *
+   * @param data the PEData object
+   * @param secLoader the section loader instance
+   * @returns a list of mappings
    */
   private def readMemoryMappings(data: PEData, secLoader: SectionLoader): List[Mapping] = {
     val optHeader = data.getOptionalHeader
@@ -303,19 +357,41 @@ object MemoryMappedPE {
     }
   }
 
+  /**
+   * Returns the header mappings of the file.
+   *
+   * @param secLoader the section loader instance
+   * @param data the PEData object
+   * @return list of header mapping(s)
+   */
   private def getHeaderMappings(secLoader: SectionLoader,
     data: PEData): List[Mapping] = {
     val table = data.getSectionTable
     if (table.getNumberOfSections() > 0) {
+      // size of headers is also size of header mapping
       val sizeOfHeaders = data.getOptionalHeader.get(WindowsEntryKey.SIZE_OF_HEADERS)
-      val vEnd = table.getSectionHeader(1).getAlignedVirtualAddress()
+      // virtual end of header mapping marked by VA of first section
+      val vEnd = table.getSectionHeader(1).getAlignedVirtualAddress() - 1
+      // virtual start of headers
       val vStart = vEnd - sizeOfHeaders
+      /* create mapping with ranges */
       val virtRange = new VirtRange(vStart, vEnd)
-      val physRange = new PhysRange(0, sizeOfHeaders)
+      val pStart = data.getPESignature().getOffset()
+      logger.debug("pesig offset: " + pStart)
+      val pEnd = pStart + sizeOfHeaders
+      val physRange = new PhysRange(pStart, pEnd)
+      logger.debug("header mapping (v --> p): " + virtRange + " --> " + physRange) //TODO remove
       List(new Mapping(virtRange, physRange, data))
-    } else Nil
+    } else Nil //TODO add mapping
   }
 
+  /**
+   * Returns the section mappings of the file.
+   * 
+   * @param secLoader the section loader instance
+   * @param data the PEData object
+   * @return list of section mapping(s)
+   */
   private def getSectionMappings(secLoader: SectionLoader,
     data: PEData): ListBuffer[Mapping] = {
     val table = data.getSectionTable
@@ -331,6 +407,7 @@ object MemoryMappedPE {
       val vStart = header.getAlignedVirtualAddress()
       val vEnd = vStart + readSize
       val virtRange = new VirtRange(vStart, vEnd)
+      logger.debug("section mapping (v --> p): " + virtRange + " --> " + physRange) //TODO remove
       // add mapping to list
       mappings += new Mapping(virtRange, physRange, data)
     }

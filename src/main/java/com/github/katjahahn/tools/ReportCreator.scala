@@ -215,9 +215,10 @@ class ReportCreator(private val data: PEData) {
   def maldetReport(): String = {
     val scoring = FileScoring.newInstance(data.getFile)
     val report1 = title("File Scoring") + NL + "Malware probability: " +
-      ("%3.2f" format (scoring.malwareProbability * 100)) +
-      " %" 
-    val report2 = "File Score: " + scoring.fileScore() + NL + "Score based on: " + NL +
+          ("%3.2f" format (scoring.malwareProbability * 100.0)) +
+          " %" 
+    val report2 = "File Score: " + scoring.fileScore() + NL + NL +
+      "Score based on: " + NL +
       scoring._scoreParts.map(m => m._1 + ": " + m._2).mkString(NL)
     report1 + NL + report2 + NL + NL
   }
@@ -477,7 +478,7 @@ object ReportCreator {
     else
       println("The file could be of one of the following types: ")
     println()
-    results.foreach(result => 
+    results.foreach(result =>
       println(s"* ${result._1.name}, ${bytesMatched(result._1)} bytes matched"))
   }
 

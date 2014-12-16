@@ -49,6 +49,9 @@ class PhysicalLocation(from: Long, size: Long) extends Location(from, size) {
 
 /**
  * Abstract location.
+ * 
+ * @param from start address (either virtual or physical)
+ * @param size in bytes
  */
 abstract class Location(val from: Long, val size: Long) extends Equals {
 

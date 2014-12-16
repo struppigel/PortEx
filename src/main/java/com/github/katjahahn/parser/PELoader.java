@@ -29,7 +29,9 @@ import org.apache.logging.log4j.Logger;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.tools.ReportCreator;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -88,13 +90,81 @@ public final class PELoader {
             // construct PEData instance
             PEData data = new PEData(msdos, pesig, coff, opt, table, file);
             /* reload headers in case of dual pe header */
-            // MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
-            // new SectionLoader(data));
-            // reloadOptionalHeader(data);
-            // table.reload(mmBytes);
+//            MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
+//                    new SectionLoader(data));
+            // TODO reload coff, msdos, ..
+//            coff = reloadCOFFFileHeader(pesig, mmBytes, data);
+//            data = new PEData(msdos, pesig, coff, opt, table, file);
+//            opt = reloadOptionalHeader(pesig, mmBytes, data);
+//            data = new PEData(msdos, pesig, coff, opt, table, file);
+//            table.reload(mmBytes);
             // System.out.println(new ReportCreator(data).secTableReport());
+            // re-construct PEData instance
             return data;
         }
+    }
+
+    private int getOptHeaderSize(long offset) {
+        // set the maximum size for the bytes to read
+        int size = OptionalHeader.MAX_SIZE;
+        // ...with the exception of reaching EOF, this is rare, but see
+        // tinype.exe
+        if (size + offset > file.length()) {
+            // cut size at EOF
+            size = (int) (file.length() - offset);
+        }
+        if (size < 0) {
+            size = 0;
+        }
+        return size;
+    }
+
+    //TODO is this necessary? look it up
+    private COFFFileHeader reloadCOFFFileHeader(PESignature pesig,
+            MemoryMappedPE mmBytes, PEData data) throws IOException {
+        // coff header starts right after the PE signature
+        long offset = pesig.getOffset() + PESignature.PE_SIG.length;
+        /* read bytes, size is fixed anyway */
+        long sizeOfHeaders = data.getOptionalHeader().get(
+                WindowsEntryKey.SIZE_OF_HEADERS);
+        logger.debug("SizeOfHeaders: " + sizeOfHeaders);
+        // virtual end of header mapping marked by VA of first section
+        long vEnd = data.getSectionTable().getSectionHeader(1)
+                .getAlignedVirtualAddress() - 1;
+        // virtual start of headers TODO test
+        long vStart = vEnd - sizeOfHeaders;
+        long sliceStart = vStart + PESignature.PE_SIG.length;
+        logger.debug("reading coff at start: " + sliceStart);
+        byte[] headerbytes = mmBytes.slice(sliceStart, sliceStart
+                + COFFFileHeader.HEADER_SIZE);
+        // construct header
+        return COFFFileHeader.newInstance(headerbytes, offset);
+    }
+
+    // FIXME
+    private OptionalHeader reloadOptionalHeader(PESignature pesig,
+            MemoryMappedPE mmBytes, PEData data) throws IOException {
+        logger.info("reloading optional header");
+        // offset right after the eCOFF File Header
+        long offset = pesig.getOffset() + PESignature.PE_SIG.length
+                + COFFFileHeader.HEADER_SIZE;
+        logger.info("Optional Header offset: " + offset);
+        int size = getOptHeaderSize(offset);
+        // read bytes and construct header
+        long sizeOfHeaders = data.getOptionalHeader().get(
+                WindowsEntryKey.SIZE_OF_HEADERS);
+        // virtual end of header mapping marked by VA of first section
+        long vEnd = data.getSectionTable().getSectionHeader(1)
+                .getAlignedVirtualAddress() - 1;
+        // virtual start of headers TODO test
+        long vStart = vEnd - sizeOfHeaders;
+        long sliceStart = vStart + COFFFileHeader.HEADER_SIZE
+                + PESignature.PE_SIG.length;
+        logger.debug("reading opt at start: " + sliceStart);
+        byte[] headerbytes = mmBytes.slice(sliceStart, sliceStart + size);
+        logger.debug("array size: " + headerbytes.length);
+        logger.debug(ByteArrayUtil.byteToHex(headerbytes));
+        return OptionalHeader.newInstance(headerbytes, offset);
     }
 
     /**
@@ -191,16 +261,7 @@ public final class PELoader {
                 + COFFFileHeader.HEADER_SIZE;
         logger.info("Optional Header offset: " + offset);
         // set the maximum size for the bytes to read
-        int size = OptionalHeader.MAX_SIZE;
-        // ...with the exception of reaching EOF, this is rare, but see
-        // tinype.exe
-        if (size + offset > file.length()) {
-            // cut size at EOF
-            size = (int) (file.length() - offset);
-        }
-        if (size < 0) {
-            size = 0;
-        }
+        int size = getOptHeaderSize(offset);
         // read bytes and construct header
         byte[] headerbytes = loadBytesSafely(offset, size, raf);
         return OptionalHeader.newInstance(headerbytes, offset);
@@ -214,8 +275,9 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-         File file = new File(
-         "/home/deque/portextestfiles/test.dmg");
-         loadPE(file);
+        PEData data = loadPE(new File(
+                "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe"));
+        ReportCreator reporter = ReportCreator.newInstance(data.getFile());
+        reporter.printReport();
     }
 }

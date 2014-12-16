@@ -44,7 +44,7 @@ class FileScoring(
   /**
    * @Beta
    */
-  def isClassifyable(): Boolean = {
+  private def isClassifyable(): Boolean = {
     // obtain number of all cleaned anomalies that have been found in the present file
     val anomalyNrThreshold = 5
     val scoringThreshold = 5.0
@@ -58,6 +58,7 @@ class FileScoring(
    * A negative score indicates a non-malicious file.
    * A positive score indicates a malicious file.
    * A score of zero means there is no information whatsoever.
+   * @Beta
    * @return the file's score based on its anomalies
    */
   def fileScore(): Double = {
@@ -68,17 +69,17 @@ class FileScoring(
     // calculate and return the overall score of the file
     bscores.sum
   }
-  
+
   def scoreParts(): java.util.Map[AnomalySubType, BScore] = _scoreParts().asJava
-  
+
   def _scoreParts(): Map[AnomalySubType, BScore] = {
     // obtain a set of all anomaly subtypes that have been found in the present file
     val subtypes = anomalies.map(a => a.subtype).distinct
     // obtain a list of all bscores for the subtypes found in the file
-    subtypes.map{ subtype => 
-      if ( boosterScores.contains(subtype) ) {
-        Some((subtype, boosterScores(subtype) ))
-        } else None
+    subtypes.map { subtype =>
+      if (boosterScores.contains(subtype)) {
+        Some((subtype, boosterScores(subtype)))
+      } else None
     }.flatten.toMap
   }
 
@@ -89,11 +90,18 @@ class FileScoring(
    * @return probability P(BAD|Anomalies)
    */
   def malwareProbability(): Double = {
-    // first round, priors chosen by principle of indifference
-    val (firstGoodProb, firstBadProb) = conditionalProbs(0.5, 0.5)
-    // second round uses result of the first round as input
-    val (goodProb, badProb) = conditionalProbs(firstGoodProb, firstBadProb)
-    badProb
+    val subtypes = anomalies.map(a => a.subtype).distinct
+    val probs = subtypes.map(subtype => probabilities.get(subtype)).flatten
+    val allBad = probs.foldRight(1.0) { (p, bad) => p.bad * bad }
+    val allGood = probs.foldRight(1.0) { (p, good) => p.good * good }
+    val bayes = allBad * 0.5 / (allGood * 0.5 + allBad * 0.5)
+    bayes
+    //FIXME duphead with negative filescore but 100 % ?
+    //    // first round, priors chosen by principle of indifference
+    //    val (firstGoodProb, firstBadProb) = conditionalProbs(0.5, 0.5)
+    //    // second round uses result of the first round as input
+    //    val (goodProb, badProb) = conditionalProbs(firstGoodProb, firstBadProb)
+    //    badProb
   }
 
   /**
@@ -133,7 +141,7 @@ case class AnomalyProb(bad: Double, good: Double)
 
 object FileScoring {
 
-  val threshold = 500
+  val threshold = 200
   lazy val probabilities = readProbabilities()
   lazy val boosterScores = readBoosterScores()
 
@@ -259,7 +267,7 @@ object FileScoring {
     val probThresholds = List(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.98, 0.99)
     val probCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
     val probClassifiedCounter = collection.mutable.Map((probThresholds.view map ((_, 0))): _*)
-    val bscoreThresholds = for(i <- 0 to 35) yield i.toDouble
+    val bscoreThresholds = for (i <- 0 to 35) yield i.toDouble
     val bscoreCounter = collection.mutable.Map((bscoreThresholds.view map ((_, 0))): _*)
     val bscoreClassifiedCounter = collection.mutable.Map((bscoreThresholds.view map ((_, 0))): _*)
     var total = 0

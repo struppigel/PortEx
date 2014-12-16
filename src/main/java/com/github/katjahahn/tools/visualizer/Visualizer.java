@@ -601,16 +601,16 @@ public class Visualizer {
         // if(file.length() < 300) {
         // builder.setFileWidth(150).setBytesPerPixel(1, file.length());
         // }
-//        builder.setHeight(400);
+        builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
         Visualizer vi = builder.build();
         // System.out.println("creating image for " + file.getName());
         //
         final BufferedImage entropyImage = vi.createEntropyImage(file);
         final BufferedImage structureImage = vi.createImage(file);
-        final BufferedImage appendedImage = ImageUtil.appendImages(
-                entropyImage, structureImage);
+//        final BufferedImage appendedImage = ImageUtil.appendImages(
+//                entropyImage, structureImage);
          ImageIO.write(structureImage, "png",
-         new File("peimages/" + file.getName() + ".png"));
+         new File("/home/deque/git/Thesis/Verteidigung/img/visualizer.png"));
         // } catch (Exception e) {
         // e.printStackTrace();
         // problemfiles.add(file.getName());
@@ -620,7 +620,7 @@ public class Visualizer {
         // for (String filename : problemfiles) {
         // System.out.println(filename);
         // }
-        show(appendedImage);
+        show(structureImage);
     }
 
     private static void show(final BufferedImage image) {
