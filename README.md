@@ -33,7 +33,7 @@ The first release will be in December/January 2014.
 
 #### Including PortEx to a Maven Project
 
-PortEx will be added to the Central Maven Repository with its first release. Until then you can include PortEx as follows:
+PortEx will be added to the Central Maven Repository soon. Until then you can include PortEx as follows:
 
 Download portex.pom and portex.jar and install portex to your local Maven repository as follows:
 
@@ -47,7 +47,7 @@ Now you can include PortEx to your project by adding the following Maven depende
 <dependency>
     	<groupId>com.github.katjahahn</groupId>
     	<artifactId>portex</artifactId>
-    	<version>1.0.beta1.1</version>
+    	<version>1.0</version>
 </dependency>
 ```
 
