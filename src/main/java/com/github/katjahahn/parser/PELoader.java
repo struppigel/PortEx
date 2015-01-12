@@ -19,9 +19,16 @@ import static com.github.katjahahn.parser.IOUtil.*;
 import static com.google.common.base.Preconditions.*;
 
 import java.awt.AWTException;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +39,9 @@ import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.visualizer.ImageUtil;
+import com.github.katjahahn.tools.visualizer.Visualizer;
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -275,9 +285,31 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-        PEData data = loadPE(new File(
-                "/home/deque/portextestfiles/unusualfiles/corkami/duphead.exe"));
+        File file = new File(
+                "/home/katja/samples/7011d1af961170f91c1c54afd5cb38e9ba954a68c84b62ab9a822ad88f81e06e");
+        PEData data = loadPE(file);
         ReportCreator reporter = ReportCreator.newInstance(data.getFile());
         reporter.printReport();
+        VisualizerBuilder builder = new VisualizerBuilder();
+        Visualizer vi = builder.build();
+        final BufferedImage entropyImage = vi.createEntropyImage(file);
+        final BufferedImage structureImage = vi.createImage(file);
+        final BufferedImage appendedImage = ImageUtil.appendImages(
+                entropyImage, structureImage);
+        show(appendedImage);
+    }
+
+    private static void show(final BufferedImage image) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame();
+                frame.setSize(600, 600);
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+                frame.pack();
+                frame.setVisible(true);
+            }
+        });
     }
 }

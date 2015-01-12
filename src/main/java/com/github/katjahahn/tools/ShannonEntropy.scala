@@ -136,7 +136,7 @@ object ShannonEntropy {
    */
   private def entropy(byteCounts: Array[Long], total: Long): Double =
     // iterate through byte counts, start fold with initial entropy 0.0
-    List.fromArray(byteCounts).foldRight(0.0) { (counter, entropy) =>
+    byteCounts.toList.foldRight(0.0) { (counter, entropy) =>
       // if byte count is zero, just return current entropy
       if (counter != 0) {
         // calculate the relative frequency of the byte value
@@ -159,7 +159,7 @@ object ShannonEntropy {
     // initialize total
     var total: Long = 0L
     // count each byte in the given array
-    List.fromArray(bytes).foreach { byte =>
+    bytes.toList.foreach { byte =>
       // byte to int conversion
       val index = (byte & 0xff)
       // count byte, index denotes the read byte value
@@ -198,8 +198,9 @@ object ShannonEntropy {
       val byteCounts = Array.fill[Long](byteSize)(0L)
       // initialize the total of bytes counted
       var totalCounted: Long = 0L
-      // initialize total of bytes read
-      var bytesReadTotal = 0L
+      // initialize total of bytes read, starting with offset bytes
+      // read bytes are not necessarily counted
+      var bytesReadTotal = offset
       // point raf to offset
       raf.seek(offset)
       Iterator
@@ -212,7 +213,7 @@ object ShannonEntropy {
         // count bytes for each chunk
         .foreach { bytesRead =>
           // take only the bytes that were actually read
-          val bytes = List.fromArray(chunk).take(bytesRead)
+          val bytes = chunk.toList.take(bytesRead)
           // count each byte that is within the specified range
           bytes.foreach { byte =>
             if (bytesReadTotal >= offset && bytesReadTotal < offset + size) {
