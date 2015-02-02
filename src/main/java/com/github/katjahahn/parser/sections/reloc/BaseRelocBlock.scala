@@ -34,7 +34,7 @@ class BlockEntry(val relocType: RelocType, val offset: Long) {
 
 object BlockEntry {
 
-  private val logger = LogManager.getLogger(BlockEntry.getClass().getName());
+  private val logger = LogManager.getLogger(BlockEntry.getClass().getName())
 
   def apply(value: Int): BlockEntry = {
     val typeMask = 0xf000

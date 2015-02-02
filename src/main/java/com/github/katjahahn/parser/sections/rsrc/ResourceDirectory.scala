@@ -171,17 +171,17 @@ object ResourceDirectory {
    */
   type Header = Map[ResourceDirectoryKey, StandardField]
 
-  private val logger = LogManager.getLogger(ResourceDirectory.getClass().getName());
+  private val logger = LogManager.getLogger(ResourceDirectory.getClass().getName())
 
   /**
    * The size of a resource directory entry
    */
-  private val entrySize = 8;
+  private val entrySize = 8
 
   /**
    * The size of the resource directory header
    */
-  private val resourceDirSize = 16;
+  private val resourceDirSize = 16
 
   /**
    * The name of resource directory specification file
@@ -269,7 +269,7 @@ object ResourceDirectory {
     val entriesSum = nameEntries + idEntries
     // we limit the number to maximum if reached
     val limitedEntriesSum = if (entriesSum < entryMaximum) entriesSum else entryMaximum
-    var entries = ListBuffer.empty[ResourceDirectoryEntry]
+    val entries = ListBuffer.empty[ResourceDirectoryEntry]
     try {
       for (i <- 0 until limitedEntriesSum) {
         // calculate the offset for the entry
@@ -293,7 +293,7 @@ object ResourceDirectory {
       }
     } catch {
       case e: IllegalArgumentException =>
-        logger.warn(e.getMessage());
+        logger.warn(e.getMessage())
     }
     entries.toList
   }

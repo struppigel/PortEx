@@ -54,7 +54,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
       }
       val fractions = locs.filter(!isWithinEData(_)).toList
       if (!fractions.isEmpty) {
-        val description = s"Resources are fractionated!"
+        val description = "Resources are fractionated!"
         anomalyList += StructureAnomaly(PEStructureKey.RESOURCE_SECTION, description,
           AnomalySubType.FRACTIONATED_DATADIR, fractions)
 

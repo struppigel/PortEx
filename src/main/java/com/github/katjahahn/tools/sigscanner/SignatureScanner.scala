@@ -48,7 +48,7 @@ import SignatureScanner._
  */
 class SignatureScanner(signatures: List[Signature]) {
 
-  val logger = LogManager.getLogger(SignatureScanner.getClass.getName);
+  val logger = LogManager.getLogger(SignatureScanner.getClass.getName)
   /**
    * Creates a SignatureScanner that uses the signatures applied
    * @param signatures to use for scanning
@@ -244,8 +244,8 @@ object SignatureScanner {
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
-    var sigs = ListBuffer[Signature]()
-    var is = this.getClass().getResourceAsStream(defaultSigs)
+    val sigs = ListBuffer[Signature]()
+    val is = this.getClass().getResourceAsStream(defaultSigs)
     val it = scala.io.Source.fromInputStream(is)(codec).getLines
     while (it.hasNext) {
       val line = it.next

@@ -173,7 +173,7 @@ public class SectionLoader {
     }
 
     /**
-     * Determines the the number of bytes that is read for the section.
+     * Determines the number of bytes that is read for the section.
      * <p>
      * This is the actual section size.
      * 

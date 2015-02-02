@@ -184,7 +184,7 @@ object ImportSection {
         }
         offset += EntrySize
         relOffset += EntrySize
-        if (relOffsetMax < relOffset) relOffsetMax = relOffset;
+        if (relOffsetMax < relOffset) relOffsetMax = relOffset
       } while (!entry.isInstanceOf[NullEntry] && entryCounter < importMax)
     }
   }

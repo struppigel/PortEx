@@ -50,7 +50,7 @@ import scala.collection.mutable.ListBuffer
  * Creates an export section instance
  * @param edataTable the data directory table
  * @param exportAddressTable contains addresses to exported functions
- * @param namePointerTable containes addresses to names of exported functions
+ * @param namePointerTable contains addresses to names of exported functions
  * @param ordinalTable contains ordinal number of exported functions
  */
 class ExportSection private (
@@ -185,7 +185,7 @@ class ExportSection private (
 
 object ExportSection {
 
-  private val logger = LogManager.getLogger(ExportSection.getClass().getName());
+  private val logger = LogManager.getLogger(ExportSection.getClass().getName())
 
   val maxNameEntries = 5000
   val maxOrdEntries = 5000
@@ -197,7 +197,7 @@ object ExportSection {
     invalidExportCount = 0
     val mmBytes = li.memoryMapped
     val offset = li.fileOffset
-    val exportBytes = mmBytes.slice(li.va, mmBytes.length + li.va);
+    val exportBytes = mmBytes.slice(li.va, mmBytes.length + li.va)
     val edataTable = ExportDirectory(exportBytes, offset)
     val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, li.va, offset)
     val namePointerTable = loadNamePointerTable(edataTable, mmBytes, li.va, offset)

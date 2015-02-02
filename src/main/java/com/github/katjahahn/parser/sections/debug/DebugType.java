@@ -10,7 +10,7 @@ import com.github.katjahahn.parser.Characteristic;
  */
 public enum DebugType implements Characteristic {
     /**
-     * Unkown value
+     * Unknown value
      */
     UNKNOWN(0, "Unknown value"),
     /**

@@ -80,7 +80,7 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
     val entries = msdos.getHeaderEntries.asScala
     for(entry <- entries) {
       if(entry.getDescription.contains("Reserved")) {
-        val description = s"MSDOS Header: Reserved field set: " + entry.getDescription
+        val description = "MSDOS Header: Reserved field set: " + entry.getDescription
         anomalyList += FieldAnomaly(entry, description, AnomalySubType.RESERVED_MSDOS_FIELD)
       }
     }
