@@ -101,7 +101,7 @@ object StringExtractor {
     // read and save bytes as long as they fulfill f
     while (byte != -1 && f(byte)) {
       str.append(byte.toChar)
-      byte = is.read();
+      byte = is.read()
     }
     // return string and last read byte
     (str.toString(), byte)

@@ -52,7 +52,7 @@ trait ExportSectionScanning extends AnomalyScanner {
       }
       val fractions = locs.filter(!isWithinEData(_)).toList
       if (!fractions.isEmpty) {
-        val description = s"Exports are fractionated!"
+        val description = "Exports are fractionated!"
         anomalyList += StructureAnomaly(PEStructureKey.EXPORT_SECTION, description,
           AnomalySubType.FRACTIONATED_DATADIR, fractions)
 

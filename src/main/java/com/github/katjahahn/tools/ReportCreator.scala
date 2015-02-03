@@ -336,7 +336,7 @@ class ReportCreator(private val data: PEData) {
     val table = data.getSectionTable
     val allSections = table.getSectionHeaders.asScala
     val loader = new SectionLoader(data)
-    val build = new StringBuilder();
+    val build = new StringBuilder()
     build.append(title("Section Table"))
     for (secs <- allSections.grouped(maxSec).toList) {
       val sections = secs.toList

@@ -206,7 +206,7 @@ object FileScoring {
         val file = new File(filename)
         println("input file: " + filename)
         if (!file.exists()) {
-          System.err.println("file doesn't exist!");
+          System.err.println("file doesn't exist!")
         } else {
           println("scanning file ...")
           val prob = FileScoring(file).malwareProbability
@@ -214,7 +214,7 @@ object FileScoring {
           println("-done-")
         }
       } catch {
-        case e: Exception => System.err.println(e.getMessage());
+        case e: Exception => System.err.println(e.getMessage())
       }
     } else if (options.contains('directory)) {
       try {
@@ -222,7 +222,7 @@ object FileScoring {
         val folder = new File(foldername)
         println("input folder: " + foldername)
         if (!folder.exists()) {
-          System.err.println("folder doesn't exist!");
+          System.err.println("folder doesn't exist!")
         } else {
           println("scanning files ...")
           for (file <- folder.listFiles()) {
@@ -236,7 +236,7 @@ object FileScoring {
           println("-done-")
         }
       } catch {
-        case e: Exception => System.err.println(e.getMessage());
+        case e: Exception => System.err.println(e.getMessage())
       }
 
     } else {
@@ -295,8 +295,8 @@ object FileScoring {
           printCounts(bscoreCounter, bscoreClassifiedCounter, total, classifyable)
         }
       } catch {
-        case e: FileFormatException => notLoaded += 1; System.err.println("file is no PE file: " + file.getName());
-        case e: Exception => notLoaded += 1; e.printStackTrace();
+        case e: FileFormatException => notLoaded += 1; System.err.println("file is no PE file: " + file.getName())
+        case e: Exception => notLoaded += 1; e.printStackTrace()
       }
     }
     total -= notLoaded

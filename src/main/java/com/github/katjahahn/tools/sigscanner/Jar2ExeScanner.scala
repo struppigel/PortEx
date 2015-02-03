@@ -73,7 +73,7 @@ class Jar2ExeScanner(file: File) {
     val raf = new RandomAccessFile(file, "r")
     val is = Channels.newInputStream(raf.getChannel().position(pos))
     val zis = new ZipInputStream(is)
-    var entries = new ListBuffer[String]()
+    val entries = new ListBuffer[String]()
     try {
       var e = zis.getNextEntry()
       while (e != null) {
@@ -82,9 +82,9 @@ class Jar2ExeScanner(file: File) {
       }
     } catch {
       case e: IllegalArgumentException => return Nil
-      case e: Exception => //System.err.println(e.getMessage());
+      case e: Exception => //System.err.println(e.getMessage())
     } finally {
-      zis.close();
+      zis.close()
     }
     entries.toList
   }
@@ -95,7 +95,7 @@ class Jar2ExeScanner(file: File) {
    * @return scan report
    */
   def createReport(): String = {
-    if (scanResult.length == 0) return "no indication for java wrapper found"
+    if (scanResult.isEmpty) return "no indication for java wrapper found"
     var lastName = ""
     val sigs = (for ((sig, addr) <- scanResult) yield {
       var str = new StringBuilder()
@@ -111,7 +111,7 @@ class Jar2ExeScanner(file: File) {
 
     val addresses = if (scanResult.contains("[CAFEBABE]")) {
       ".class offsets: " + classAddr.mkString(", ") + "\n"
-    } else if (zipAddr.length > 0) {
+    } else if (zipAddr.nonEmpty) {
       "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n"
     } else ""
 
@@ -200,8 +200,8 @@ object Jar2ExeScanner {
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
-    var sigs = ListBuffer[Signature]()
-    var is = this.getClass().getResourceAsStream(defaultSigs)
+    val sigs = ListBuffer[Signature]()
+    val is = this.getClass().getResourceAsStream(defaultSigs)
     val it = scala.io.Source.fromInputStream(is)(codec).getLines
     while (it.hasNext) {
       val line = it.next

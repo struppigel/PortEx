@@ -66,7 +66,7 @@ class MemoryMappedPE(
   def physToVirtAddress(physAddr: Long): Long = {
     val addresses = _physToVirtAddresses(physAddr)
     // VA doesn't exist, return -1
-    if (addresses.size == 0) -1
+    if (addresses.isEmpty) -1
     else {
       if (addresses.size > 1) {
         logger.warn(s"Caution: Several mappings for the file offset (${hex(physAddr)}) found.")
@@ -106,7 +106,7 @@ class MemoryMappedPE(
   def virtToPhysAddress(va: Long): Long = {
     val addresses = _virtToPhysAddresses(va)
     // VA doesn't exist, return -1
-    if (addresses.size == 0) -1
+    if (addresses.isEmpty) -1
     else {
       if (addresses.size > 1) {
         logger.warn(s"Caution: Several mappings for the VA (${hex(va)}) found, that means the VA is overwritten.")

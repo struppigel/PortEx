@@ -123,13 +123,12 @@ case class Name(rva: Long, name: String) extends IDOrName {
 
 object ResourceDirectoryEntry {
 
-  private val logger = LogManager
-    .getLogger(ResourceDirectoryEntry.getClass().getName());
+  private val logger = LogManager.getLogger(ResourceDirectoryEntry.getClass().getName())
 
   /**
    * The specification file name of the resource directory entry
    */
-  private val specLocation = "resourcedirentryspec";
+  private val specLocation = "resourcedirentryspec"
 
   /**
    * The specification file name of the resource type

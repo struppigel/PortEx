@@ -301,7 +301,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       anomalyList += FieldAnomaly(entry, description, TOO_LARGE_IMAGE_BASE)
     }
     if (imageBase == 0) {
-      val description = s"Optional Header: The image base is 0, thus relocated to 0x10000"
+      val description = "Optional Header: The image base is 0, thus relocated to 0x10000"
       anomalyList += FieldAnomaly(entry, description, ZERO_IMAGE_BASE)
     }
     if (isDLL() && imageBase != 0x10000000L) {

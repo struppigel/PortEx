@@ -232,7 +232,7 @@ public enum AnomalySubType {
      */
     TOO_LARGE_SIZE_OF_RAW(WRONG),
     /**
-     * Contraints for extendec reloc have been violated.
+     * Constraints for extended reloc have been violated.
      */
     EXTENDED_RELOC_VIOLATIONS(WRONG),
     /**

@@ -720,7 +720,7 @@ public class PortexStats {
                 + "\ndeprecated: " + anomalies[DEPRECATED.ordinal()]
                 + "\nnon default: " + anomalies[NON_DEFAULT.ordinal()];
 
-        String stats3 = "Anomaly occurance per file (absolute) \n\ntotal files: "
+        String stats3 = "Anomaly occurrence per file (absolute) \n\ntotal files: "
                 + total
                 + "\nstructural: "
                 + anPerFile[STRUCTURE.ordinal()]
@@ -732,7 +732,7 @@ public class PortexStats {
                 + anPerFile[DEPRECATED.ordinal()]
                 + "\nnon default: " + anPerFile[NON_DEFAULT.ordinal()];
 
-        String stats4 = "Anomaly occurance per file in percent \n\ntotal files: "
+        String stats4 = "Anomaly occurrence per file in percent \n\ntotal files: "
                 + total
                 + "\nstructural: "
                 + occPerFile[STRUCTURE.ordinal()]
