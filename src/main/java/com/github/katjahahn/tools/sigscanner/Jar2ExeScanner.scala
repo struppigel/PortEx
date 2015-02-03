@@ -110,11 +110,12 @@ class Jar2ExeScanner(file: File) {
 
     val zipAddr = _getZipAddresses().map("0x" + _.toHexString)
     val classAddr = _getPossibleClassAddresses.map("0x" + _.toHexString)
-    val addresses = if (classAddr.nonEmpty) {
+    val addresses = { if (classAddr.nonEmpty) {
       ".class offsets: " + classAddr.mkString(", ") + "\n"
-    } else if (zipAddr.nonEmpty) {
+    } else "" } ++ 
+    { if (zipAddr.nonEmpty) {
       "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n"
-    } else ""
+    } else "" }
 
     "Signatures found:\n" + sigs + "\n" + addresses
   }
