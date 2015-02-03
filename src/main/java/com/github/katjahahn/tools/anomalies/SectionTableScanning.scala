@@ -510,7 +510,7 @@ trait SectionTableScanning extends AnomalyScanner {
    * @param sectionName the name to use for the anomaly description
    */
   private def checkObjectOnlyCharacteristics(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
-    val alignmentCharacteristics = Arrays.asList(SectionCharacteristic.values).asScala.filter(k => k.toString.contains("IMAGE_SCN_ALIGN")).toList
+    val alignmentCharacteristics = SectionCharacteristic.values.filter(k => k.toString.startsWith("IMAGE_SCN_ALIGN")).toList
     val objectOnly = List(IMAGE_SCN_TYPE_NO_PAD, IMAGE_SCN_LNK_INFO, IMAGE_SCN_LNK_REMOVE, IMAGE_SCN_LNK_COMDAT) ::: alignmentCharacteristics
     for (characteristic <- section.getCharacteristics().asScala if objectOnly.contains(characteristic)) {
       val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${characteristic} characteristic is only valid for object files"

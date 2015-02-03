@@ -286,7 +286,7 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
         File file = new File(
-                "/home/katja/samples/7011d1af961170f91c1c54afd5cb38e9ba954a68c84b62ab9a822ad88f81e06e");
+                "/home/katja/samples/Tickets/599143_MyPhoneExplorer/63ea67424bb3089e376f36c47a8fa32b0a828ddbe34447a9f9d97f8947e9ad60");
         PEData data = loadPE(file);
         ReportCreator reporter = ReportCreator.newInstance(data.getFile());
         reporter.printReport();

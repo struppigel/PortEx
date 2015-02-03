@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools.sigscanner
 
 import com.github.katjahahn.parser.ScalaIOUtil.using
@@ -47,14 +49,14 @@ class Jar2ExeScanner(file: File) {
   /**
    * A list containing the signatures and addresses where they where found.
    */
-  private lazy val scanResult: List[ScanResult] = scanner._findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
+  private lazy val scanResults: List[ScanResult] = scanner._findAllEPFalseMatches(file).sortWith(_._1.name < _._1.name)
 
   /**
    * Returns a list with all signature scan result data found in the file.
    *
    * @return list with jar related signatures found in the file
    */
-  def scan(): java.util.List[MatchedSignature] = scanResult.map(SignatureScanner.toMatchedSignature).asJava
+  def scan(): java.util.List[MatchedSignature] = scanResults.map(SignatureScanner.toMatchedSignature).asJava
 
   private val description = Map("[Jar Manifest]" -> "Jar manifest (strong indication for embedded jar)",
     "[PKZIP Archive File]" -> "PZIP Magic Number (weak indication for embedded zip)",
@@ -82,7 +84,7 @@ class Jar2ExeScanner(file: File) {
       }
     } catch {
       case e: IllegalArgumentException => return Nil
-      case e: Exception => //System.err.println(e.getMessage())
+      case e: Exception                => //System.err.println(e.getMessage())
     } finally {
       zis.close()
     }
@@ -95,9 +97,9 @@ class Jar2ExeScanner(file: File) {
    * @return scan report
    */
   def createReport(): String = {
-    if (scanResult.isEmpty) return "no indication for java wrapper found"
+    if (scanResults.isEmpty) return "no indication for java wrapper found"
     var lastName = ""
-    val sigs = (for ((sig, addr) <- scanResult) yield {
+    val sigs = (for ((sig, addr) <- scanResults) yield {
       var str = new StringBuilder()
       if (lastName != sig.name) {
         str ++= "\t* " + description.getOrElse(sig.name, sig.name) + "\n"
@@ -108,8 +110,7 @@ class Jar2ExeScanner(file: File) {
 
     val zipAddr = _getZipAddresses().map("0x" + _.toHexString)
     val classAddr = _getPossibleClassAddresses.map("0x" + _.toHexString)
-
-    val addresses = if (scanResult.contains("[CAFEBABE]")) {
+    val addresses = if (classAddr.nonEmpty) {
       ".class offsets: " + classAddr.mkString(", ") + "\n"
     } else if (zipAddr.nonEmpty) {
       "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n"
@@ -148,7 +149,7 @@ class Jar2ExeScanner(file: File) {
    * @return a list of addresses that might be the beginning of an embedded zip or jar
    */
   private def getPossibleZipAddresses(): List[Address] =
-    for ((sig, addr) <- scanResult; if sig.name == "[PKZIP Archive File]") yield addr
+    for ((sig, addr) <- scanResults; if sig.name == "[PKZIP Archive File]") yield addr
 
   /**
    * Returns offsets of the file where the 0xCAFEBABE magic number for Java .class
@@ -160,7 +161,7 @@ class Jar2ExeScanner(file: File) {
     _getPossibleClassAddresses.map(java.lang.Long.valueOf(_)).asJava
 
   private def _getPossibleClassAddresses(): List[Address] =
-    for ((sig, addr) <- scanResult; if sig.name == "[CAFEBABE]") yield addr
+    for ((sig, addr) <- scanResults; if sig.name == "[CAFEBABE]") yield addr
 
   /**
    * Dumps the part of PE file starting at the given address to the given
@@ -186,9 +187,9 @@ class Jar2ExeScanner(file: File) {
 }
 
 object Jar2ExeScanner {
-  
+
   private val defaultSigs = "/data/javawrapperdb"
-  
+
   /**
    * Loads the signatures from the given file.
    *
