@@ -467,7 +467,7 @@ trait SectionTableScanning extends AnomalyScanner {
       for (entry <- List(sizeEntry, pointerEntry) if entry.getValue != 0) {
         val value = entry.getValue
         val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey.toString} must be 0 for sections with only uninitialized data, but is: ${value}"
-        anomalyList += FieldAnomaly(entry, description, UNINIT_DATA_CONTRAINTS_VIOLATION)
+        anomalyList += FieldAnomaly(entry, description, UNINIT_DATA_CONSTRAINTS_VIOLATION)
       }
     }
   }

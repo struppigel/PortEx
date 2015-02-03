@@ -182,7 +182,7 @@ object FileScoring {
 
   //subtype; bad; good; badprob; ratio
   private def printCleanedProbs(): Unit = {
-    val keyPad = "UNINIT_DATA_CONTRAINTS_VIOLATION ".length
+    val keyPad = "UNINIT_DATA_CONSTRAINTS_VIOLATION ".length
     println(pad("anomaly", keyPad - 2, " ") + "| bad freq | good freq | P(bad|anomaly) | bscore ")
     println()
     probabilities.foreach { prob =>

@@ -302,7 +302,7 @@ public enum AnomalySubType {
     /**
      * TODO
      */
-    UNINIT_DATA_CONTRAINTS_VIOLATION(WRONG),
+    UNINIT_DATA_CONSTRAINTS_VIOLATION(WRONG),
     /**
      * SIZE_OF_RAW_DATA is not a multiple of file alignment
      */
