@@ -22,4 +22,4 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   }
 }
 
-//mainClass in assembly := Some("com.github.katjahahn.tools.sigscanner.Jar2ExeScanner")
+//mainClass in assembly := Some("com.github.katjahahn.tools.ReportCreator")

@@ -43,6 +43,9 @@ import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
 import com.github.katjahahn.tools.sigscanner.SignatureScanner
 import com.github.katjahahn.tools.sigscanner.Signature
 import java.security.MessageDigest
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder
+import com.github.katjahahn.tools.visualizer.ImageUtil
+import javax.imageio.ImageIO
 
 /**
  * Utility for easy creation of PE file reports.
@@ -408,16 +411,17 @@ class ReportCreator(private val data: PEData) {
 
 object ReportCreator {
 
-  private val version = """version: 0.3.1
+  private val version = """version: 0.3.2
     |author: Katja Hahn
-    |last update: 11.Sep 2014""".stripMargin
+    |last update: 04.Feb 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
-  private val usage = """usage: java -jar peana.jar [<options>] <PEfile>
+  private val usage = """usage: java -jar PortexAnalyzer.jar [<options>] <PEfile>
     | -h,--help          show help
     | -v,--version       show version
     | -o,--output        write report to output file
+    | -p,--picture       write image representation of the PE to output file
     """.stripMargin
 
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
@@ -444,6 +448,7 @@ object ReportCreator {
       }
       if (options.contains('inputfile)) {
         try {
+          println("file arg read: " + options('inputfile))
           val file = new File(options('inputfile))
           if (file.exists) {
             if (isPEFile(file)) {
@@ -453,6 +458,13 @@ object ReportCreator {
               } else {
                 reporter.printReport()
                 println("--- end of report ---")
+                println()
+              }
+              if (options.contains('picture)) {
+                val imageFile = new File(options('picture))
+                writePicture(file, imageFile)
+                println("picture successfully created and saved to " + imageFile.getAbsolutePath)
+                println()
               }
             } else {
               println("The given file is no PE file!")
@@ -462,10 +474,18 @@ object ReportCreator {
             System.err.println("file doesn't exist")
           }
         } catch {
-          case e: Exception => System.err.println("Error: " + e.getMessage)
+          case e: Exception => System.err.println("Error: " + e.getMessage); e.printStackTrace();
         }
       }
     }
+  }
+  
+  private def writePicture(peFile: File, imageFile: File): Unit = {
+    val vi = new VisualizerBuilder().build()
+    val entropyImage = vi.createEntropyImage(peFile)
+    val structureImage = vi.createImage(peFile)
+    val appendedImage = ImageUtil.appendImages(entropyImage, structureImage)
+    ImageIO.write(structureImage, "png", imageFile);
   }
 
   private def printFileTypeReport(file: File): Unit = {
@@ -521,6 +541,10 @@ object ReportCreator {
         nextOption(map += ('output -> value), tail)
       case "--output" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
+      case "-p" :: value :: tail =>
+        nextOption(map += ('picture -> value), tail)
+      case "--picture" :: value :: tail =>
+        nextOption(map += ('picture -> value), tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
       case option :: tail =>
         println("Unknown option " + option + "\n" + usage)
