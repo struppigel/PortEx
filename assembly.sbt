@@ -2,7 +2,8 @@ import AssemblyKeys._ // put this at the top of the file
 
 assemblySettings
 
-jarName in assembly := "portex_1.0_beta1.1.jar"
+//jarName in assembly := "portex_1.0_beta1.1.jar"
+jarName in assembly := "PortexAnalyzer.jar"
 
 test in assembly := {}
 
@@ -22,4 +23,4 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   }
 }
 
-//mainClass in assembly := Some("com.github.katjahahn.tools.ReportCreator")
+mainClass in assembly := Some("com.github.katjahahn.tools.ReportCreator")

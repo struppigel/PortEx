@@ -69,7 +69,7 @@ class ReportCreator(private val data: PEData) {
     coffHeaderReport + optHeaderReport + secTableReport
 
   def specialSectionReports(): String = importsReport +
-    delayImportsReport + exportsReport + resourcesReport + debugReport + relocReport
+    delayImportsReport + exportsReport + resourcesReport + debugReport //+ relocReport
 
   def additionalReports(): String = overlayReport +
     anomalyReport + peidReport + jar2ExeReport + hashReport + maldetReport
@@ -218,8 +218,8 @@ class ReportCreator(private val data: PEData) {
   def maldetReport(): String = {
     val scoring = FileScoring.newInstance(data.getFile)
     val report1 = title("File Scoring") + NL + "Malware probability: " +
-          ("%3.2f" format (scoring.malwareProbability * 100.0)) +
-          " %" 
+      ("%3.2f" format (scoring.malwareProbability * 100.0)) +
+      " %"
     val report2 = "File Score: " + scoring.fileScore() + NL + NL +
       "Score based on: " + NL +
       scoring._scoreParts.map(m => m._1 + ": " + m._2).mkString(NL)
@@ -296,12 +296,22 @@ class ReportCreator(private val data: PEData) {
     val buf = new StringBuffer()
     val colWidth = 17
     val padLength = "pointer to symbol table (deprecated) ".length
+    val subsystem = "Subsystem:           " + opt.getSubsystem.getDescription
+    val dllCharacteristics = { 
+      if(opt.getDllCharacteristics.isEmpty()) "No DLL Characteristics" 
+      else "DLL Characteristics  * " +
+        opt.getDllCharacteristics.asScala.map(_.getDescription).mkString(NL + "                     * ") 
+    }
+
     buf.append(title("Optional Header"))
+    buf.append(NL + subsystem)
+    buf.append(NL + dllCharacteristics + NL)
     val standardHeader = pad("standard field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     val windowsHeader = pad("windows field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     val tableLine = pad("", standardHeader.length, "-") + NL
     val standardFields = opt.getStandardFields.values.asScala.toList.sortBy(_.getOffset)
     val windowsFields = opt.getWindowsSpecificFields.values.asScala.toList.sortBy(_.getOffset)
+
     for ((fields, header) <- List((standardFields, standardHeader), (windowsFields, windowsHeader))) {
       buf.append(NL + header + NL + tableLine)
       for (entry <- fields) {
@@ -348,7 +358,7 @@ class ReportCreator(private val data: PEData) {
       build.append(tableHeader + tableLine)
       val entropy = new ShannonEntropy(data)
       build.append(sectionEntryLine(sections, "Entropy", (s: SectionHeader) =>
-        "%1.2f" format entropy.forSection(s.getNumber())))
+        "%1.2f" format (entropy.forSection(s.getNumber()) * 8 )))
       build.append(sectionEntryLine(sections, "Pointer To Raw Data",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RAW_DATA))))
       build.append(sectionEntryLine(sections, "-> aligned (act. start)",
@@ -411,9 +421,9 @@ class ReportCreator(private val data: PEData) {
 
 object ReportCreator {
 
-  private val version = """version: 0.3.2
+  private val version = """version: 0.3.3
     |author: Katja Hahn
-    |last update: 04.Feb 2015""".stripMargin
+    |last update: 12.Feb 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -448,7 +458,6 @@ object ReportCreator {
       }
       if (options.contains('inputfile)) {
         try {
-          println("file arg read: " + options('inputfile))
           val file = new File(options('inputfile))
           if (file.exists) {
             if (isPEFile(file)) {
@@ -479,7 +488,7 @@ object ReportCreator {
       }
     }
   }
-  
+
   private def writePicture(peFile: File, imageFile: File): Unit = {
     val vi = new VisualizerBuilder().build()
     val entropyImage = vi.createEntropyImage(peFile)
