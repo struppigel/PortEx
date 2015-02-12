@@ -28,6 +28,7 @@ import com.github.katjahahn.parser.FileFormatException;
 import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.MemoryMappedPE;
 import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PhysicalLocation;
 import com.github.katjahahn.parser.VirtualLocation;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
@@ -66,6 +67,20 @@ public class SectionLoader {
     private final OptionalHeader optHeader;
     private final PEData data;
     private Optional<MemoryMappedPE> memoryMapped = Optional.absent();
+    
+    /**
+     * Creates a SectionLoader instance taking all information from the given
+     * file.
+     * 
+     * @param file the PE file
+     * @throws IOException 
+     */
+    public SectionLoader(File file) throws IOException {
+    	data = PELoader.loadPE(file);
+        this.table = data.getSectionTable();
+        this.optHeader = data.getOptionalHeader();
+        this.file = file;
+    }
 
     /**
      * Creates a SectionLoader instance taking all information from the given
