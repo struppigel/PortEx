@@ -4,11 +4,15 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.github.katjahahn.parser.ByteArrayUtil;
 import com.github.katjahahn.parser.FileFormatException;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.Location;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.StandardField;
@@ -56,8 +60,8 @@ import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
  */
 public class WikiExampleCodes {
 
-    public static void main(String[] args) {
-        fileAnomalies();
+    public static void main(String[] args) throws IOException {
+        resourceSection();
     }
 
     @SuppressWarnings("unused")
@@ -66,22 +70,17 @@ public class WikiExampleCodes {
         Visualizer visualizer = new VisualizerBuilder().build();
         visualizer.writeImage(peFile, new File("image.png"));
         // use parameters
-        visualizer = new VisualizerBuilder()
-            .setPixelated(true)
-            .setHeight(800)
-            .setFileWidth(600)
-            .setLegendWidth(300)
-            .setPixelSize(10)
-            .setAdditionalGap(3)
-            .setBytesPerPixel(10, peFile.length())
-            .setColor(ColorableItem.SECTION_TABLE, Color.BLUE)
-            .build();
+        visualizer = new VisualizerBuilder().setPixelated(true).setHeight(800)
+                .setFileWidth(600).setLegendWidth(300).setPixelSize(10)
+                .setAdditionalGap(3).setBytesPerPixel(10, peFile.length())
+                .setColor(ColorableItem.SECTION_TABLE, Color.BLUE).build();
         // create an entropy image
         BufferedImage entropyImage = visualizer.createEntropyImage(peFile);
         // create appended entropy & structure image
         BufferedImage leftImage = visualizer.createEntropyImage(peFile);
         BufferedImage rightImage = visualizer.createImage(peFile);
-        BufferedImage appendedImage = ImageUtil.appendImages(leftImage, rightImage);
+        BufferedImage appendedImage = ImageUtil.appendImages(leftImage,
+                rightImage);
     }
 
     public static void fileAnomalies() {
@@ -122,8 +121,7 @@ public class WikiExampleCodes {
         int numberOfSections = coff.getNumberOfSections();
         int optionalHeaderSize = coff.getSizeOfOptionalHeader();
 
-        System.out.println("machine type: "
-                + machine.getDescription());
+        System.out.println("machine type: " + machine.getDescription());
         System.out.println("number of sections: " + numberOfSections);
         System.out.println("size of optional header: " + optionalHeaderSize);
         System.out.println("time date stamp: " + date);
@@ -138,7 +136,7 @@ public class WikiExampleCodes {
     @SuppressWarnings("unused")
     public static void resourceSection() throws IOException {
         // Loading
-        File file = new File("WinRar.exe");
+        File file = new File("/home/deque/portextestfiles/Minecraft.exe");
         PEData data = PELoader.loadPE(file);
         ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
         // Fetching resources
@@ -146,11 +144,25 @@ public class WikiExampleCodes {
         for (Resource r : resources) {
             System.out.println(r);
         }
+        // Getting raw data
+        Resource resource = resources.get(0);
+        Location loc = resource.resourceBytes();
+        long offset = loc.from();
+        assert loc.size() == (int) loc.size();
+        int size = (int) loc.size();
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+            byte[] bytes = IOUtil.loadBytes(offset, size, raf);
+            // print as hex string
+            System.out.println(ByteArrayUtil.byteToHex(bytes));
+            // print as string (e.g. for ASCII resources)
+            System.out.println(new String(bytes));
+        }
         // Access to structures of the resource tree
         ResourceDirectory tree = rsrc.getResourceTree();
         // Resource directory table header
         Map<ResourceDirectoryKey, StandardField> header = tree.getHeader();
-        long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION).getValue();
+        long majorVersion = header.get(ResourceDirectoryKey.MAJOR_VERSION)
+                .getValue();
         // Get values directly
         long majorVers = tree
                 .getHeaderValue(ResourceDirectoryKey.MAJOR_VERSION);
@@ -193,7 +205,8 @@ public class WikiExampleCodes {
             Map<DirectoryEntryKey, StandardField> map = tableEntry.getEntries();
 
             for (StandardField field : map.values()) {
-                System.out.println(field.getDescription() + ": " + field.getValue());
+                System.out.println(field.getDescription() + ": "
+                        + field.getValue());
             }
         }
     }
