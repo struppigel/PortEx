@@ -51,11 +51,16 @@ class DebugSection private (
   private val directoryTable: DebugDirectory,
   private val typeDescription: String,
   private val debugType: DebugType,
-  val offset: Long) extends SpecialSection {
+  val offset: Long,
+  private val maybeCodeView: Option[CodeviewInfo]) extends SpecialSection {
 
   override def getOffset(): Long = offset
 
   def getSize(): Long = debugDirSize
+
+  def getCodeView(): CodeviewInfo =
+    if (maybeCodeView.isDefined) maybeCodeView.get
+    else throw new IllegalStateException()
 
   def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
     directoryTable.asJava
@@ -72,11 +77,12 @@ class DebugSection private (
         |
         |${
       directoryTable.values.map(s => s.getKey() match {
-        case TYPE => "Type: " + typeDescription
+        case TYPE            => "Type: " + typeDescription
         case TIME_DATE_STAMP => "Time date stamp: " + getTimeDateStamp().toString
-        case _ => s.toString
-      }).mkString(NL)
-    }""".stripMargin
+        case _               => s.toString
+      }).mkString(NL)}
+        |${if (maybeCodeView.isDefined) maybeCodeView.get.getInfo else ""}
+        |""".stripMargin
 
   /**
    * Returns a date object of the time date stamp in the debug section.
@@ -117,7 +123,7 @@ object DebugSection {
   private val debugspec = "debugdirentryspec"
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/testfiles/ntdll.dll")
+    val file = new File("/home/katja/samples/WarpBrothers Crypter")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
     val debug = loader.loadDebugSection()
@@ -131,7 +137,7 @@ object DebugSection {
    * @return debugsection instance
    */
   def newInstance(li: LoadInfo): DebugSection =
-    apply(li.memoryMapped, li.fileOffset, li.va)
+    apply(li.memoryMapped, li.fileOffset, li.va, li.data)
 
   /**
    * Loads the debug section and returns it.
@@ -143,7 +149,7 @@ object DebugSection {
   def load(data: PEData): DebugSection =
     new SectionLoader(data).loadDebugSection()
 
-  def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long): DebugSection = {
+  def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): DebugSection = {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
@@ -151,12 +157,14 @@ object DebugSection {
     val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue
     try {
       val debugType = DebugType.getForValue(debugTypeValue)
-      new DebugSection(entries, debugType.getDescription, debugType, offset)
+      val ptrToRawData = entries(POINTER_TO_RAW_DATA).getValue
+      val codeview = CodeviewInfo(ptrToRawData, data.getFile)
+      new DebugSection(entries, debugType.getDescription, debugType, offset, Some(codeview))
     } catch {
       case e: IllegalArgumentException =>
         logger.warn("no debug type description found!")
         val description = s"${entries(DebugDirectoryKey.TYPE).getValue} no description available"
-        new DebugSection(entries, description, DebugType.UNKNOWN, offset)
+        new DebugSection(entries, description, DebugType.UNKNOWN, offset, None)
     }
   }
 }

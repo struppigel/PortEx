@@ -286,17 +286,17 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
         File file = new File(
-                "/home/katja/samples/Tickets/640139 Dridex/ESET/2e93ecff8ef00f1547e95840544c2ae438541254c0f4dad4c44956f8b7faf7a9");
+                "/home/katja/samples/WarpBrothers Crypter");
         PEData data = loadPE(file);
         ReportCreator reporter = ReportCreator.newInstance(data.getFile());
         reporter.printReport(); //TODO print DLL Characteristics
-//        VisualizerBuilder builder = new VisualizerBuilder();
-//        Visualizer vi = builder.build();
-//        final BufferedImage entropyImage = vi.createEntropyImage(file);
-//        final BufferedImage structureImage = vi.createImage(file);
-//        final BufferedImage appendedImage = ImageUtil.appendImages(
-//                entropyImage, structureImage);
-//        show(appendedImage);
+        VisualizerBuilder builder = new VisualizerBuilder();
+        Visualizer vi = builder.build();
+        final BufferedImage entropyImage = vi.createEntropyImage(file);
+        final BufferedImage structureImage = vi.createImage(file);
+        final BufferedImage appendedImage = ImageUtil.appendImages(
+                entropyImage, structureImage);
+        show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {
