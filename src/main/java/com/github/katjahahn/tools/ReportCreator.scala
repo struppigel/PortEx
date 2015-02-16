@@ -46,6 +46,7 @@ import java.security.MessageDigest
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder
 import com.github.katjahahn.tools.visualizer.ImageUtil
 import javax.imageio.ImageIO
+import com.github.katjahahn.parser.sections.debug.DebugType
 
 /**
  * Utility for easy creation of PE file reports.
@@ -131,6 +132,9 @@ class ReportCreator(private val data: PEData) {
       for (entry <- entries) {
         buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
+      }
+      if(debug.getDebugType() == DebugType.CODEVIEW) {
+        buf.append(debug.getCodeView().getInfo())
       }
       buf.append(NL)
       buf.toString
@@ -494,7 +498,7 @@ object ReportCreator {
     val entropyImage = vi.createEntropyImage(peFile)
     val structureImage = vi.createImage(peFile)
     val appendedImage = ImageUtil.appendImages(entropyImage, structureImage)
-    ImageIO.write(structureImage, "png", imageFile);
+    ImageIO.write(appendedImage, "png", imageFile);
   }
 
   private def printFileTypeReport(file: File): Unit = {
