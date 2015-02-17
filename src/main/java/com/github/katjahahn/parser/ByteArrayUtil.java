@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
@@ -208,6 +209,14 @@ public class ByteArrayUtil {
         }
         return value;
     }
+    
+  //TODO create decent (flexible) version
+    public static byte[] intToWord(int a) {
+    	byte[] ret = new byte[2];
+        ret[0] = (byte) (a & 0xFF);   
+        ret[1] = (byte) ((a >> 8) & 0xFF);   
+        return ret;
+    }
 
     /**
      * Converts a byte array to a long. The bytes are considered unsigned and
@@ -232,5 +241,15 @@ public class ByteArrayUtil {
             value += (long) (bytes[i] & 0xff) << shift;
         }
         return value;
+    }
+    
+    //TODO create decent version
+    public static byte[] longToDWord(long a) {
+    	byte[] ret = new byte[4];
+        ret[0] = (byte) (a & 0xFF);   
+        ret[1] = (byte) ((a >> 8) & 0xFF);   
+        ret[2] = (byte) ((a >> 16) & 0xFF);   
+        ret[3] = (byte) ((a >> 24) & 0xFF);
+        return ret;
     }
 }

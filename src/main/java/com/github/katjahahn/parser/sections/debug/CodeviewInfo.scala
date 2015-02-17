@@ -25,6 +25,15 @@ class CodeviewInfo(private val age: Long,
 
 object CodeviewInfo {
 
+  /* offsets and sizes in bytes */
+  private val guidOffset = 4
+  private val ageOffset = 0x14
+  private val filePathOffset = 0x18
+
+  private val signatureSize = 4
+  private val guidSize = 16
+  private val ageSize = 4
+
   def guidToString(guid: Array[Byte]): String = {
     val part1 = guid.slice(0, 4).reverse
     val part2 = guid.slice(4, 6).reverse
@@ -40,11 +49,11 @@ object CodeviewInfo {
       val age = 0
       val filePath = ""
       //check signature
-      val signature = new String(loadBytes(ptrToRaw, 4, raf))
+      val signature = new String(loadBytes(ptrToRaw, signatureSize, raf))
       if (signature.equals("RSDS")) {
-        val guid = loadBytes(ptrToRaw + 4, 16, raf)
-        val age = bytesToInt(loadBytes(ptrToRaw + 0x14, 4, raf))
-        val filePath = readNullTerminatedUTF8String(ptrToRaw + 0x18, raf)
+        val guid = loadBytes(ptrToRaw + guidOffset, guidSize, raf)
+        val age = bytesToInt(loadBytes(ptrToRaw + ageOffset, ageSize, raf))
+        val filePath = readNullTerminatedUTF8String(ptrToRaw + filePathOffset, raf)
         new CodeviewInfo(age, guid, filePath)
       } else throw new IllegalStateException("RSDS signature not found")
     }
