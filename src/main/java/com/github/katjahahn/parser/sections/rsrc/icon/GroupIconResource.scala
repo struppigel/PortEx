@@ -30,7 +30,8 @@ import com.github.katjahahn.parser.sections.rsrc.ID
 
 class GroupIconResource(
   private val grpIconDir: GrpIconDir,
-  private val nIDToLocations: Map[NID, PhysicalLocation]) {
+  private val nIDToLocations: Map[NID, PhysicalLocation],
+  private val peFile: File) {
 
   override def toString(): String =
     s"""|GroupIconDirectory
@@ -60,7 +61,7 @@ class GroupIconResource(
 
     val iconDir = IconDir(grpIconDir.idReserved, grpIconDir.idType,
       grpIconDir.idCount, iconDirEntries)
-    new IcoFile(iconDir)
+    new IcoFile(iconDir, peFile)
   }
 
 }
@@ -80,7 +81,7 @@ object GroupIconResource {
       val idEntries = readGrpIconDirEntries(idEntriesOffset, raf, idCount)
       val grpIconDir = GrpIconDir(idReserved, idType, idCount, idEntries)
       val nIDToLocs = getEntryLocs(idEntries, resources)
-      new GroupIconResource(grpIconDir, nIDToLocs)
+      new GroupIconResource(grpIconDir, nIDToLocs, file)
     }
   }
 

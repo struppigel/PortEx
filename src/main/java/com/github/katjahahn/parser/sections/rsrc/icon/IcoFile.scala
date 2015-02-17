@@ -24,9 +24,9 @@ import java.io.RandomAccessFile
 import java.io.FileOutputStream
 
 class IcoFile(
-  private val iconDir: IconDir) {
+  private val iconDir: IconDir, private val peFile: File) {
 
-  def saveTo(dest: File, peFile: File): Unit = {
+  def saveTo(dest: File): Unit = {
     using(new RandomAccessFile(peFile, "r")) { raf =>
 
       using(new FileOutputStream(dest)) { out =>

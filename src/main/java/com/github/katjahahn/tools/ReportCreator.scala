@@ -47,6 +47,8 @@ import com.github.katjahahn.tools.visualizer.VisualizerBuilder
 import com.github.katjahahn.tools.visualizer.ImageUtil
 import javax.imageio.ImageIO
 import com.github.katjahahn.parser.sections.debug.DebugType
+import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
+import java.nio.file.Paths
 
 /**
  * Utility for easy creation of PE file reports.
@@ -133,7 +135,7 @@ class ReportCreator(private val data: PEData) {
         buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
       }
-      if(debug.getDebugType() == DebugType.CODEVIEW) {
+      if (debug.getDebugType() == DebugType.CODEVIEW) {
         buf.append(debug.getCodeView().getInfo())
       }
       buf.append(NL)
@@ -301,10 +303,10 @@ class ReportCreator(private val data: PEData) {
     val colWidth = 17
     val padLength = "pointer to symbol table (deprecated) ".length
     val subsystem = "Subsystem:           " + opt.getSubsystem.getDescription
-    val dllCharacteristics = { 
-      if(opt.getDllCharacteristics.isEmpty()) "No DLL Characteristics" 
+    val dllCharacteristics = {
+      if (opt.getDllCharacteristics.isEmpty()) "No DLL Characteristics"
       else "DLL Characteristics  * " +
-        opt.getDllCharacteristics.asScala.map(_.getDescription).mkString(NL + "                     * ") 
+        opt.getDllCharacteristics.asScala.map(_.getDescription).mkString(NL + "                     * ")
     }
 
     buf.append(title("Optional Header"))
@@ -362,7 +364,7 @@ class ReportCreator(private val data: PEData) {
       build.append(tableHeader + tableLine)
       val entropy = new ShannonEntropy(data)
       build.append(sectionEntryLine(sections, "Entropy", (s: SectionHeader) =>
-        "%1.2f" format (entropy.forSection(s.getNumber()) * 8 )))
+        "%1.2f" format (entropy.forSection(s.getNumber()) * 8)))
       build.append(sectionEntryLine(sections, "Pointer To Raw Data",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RAW_DATA))))
       build.append(sectionEntryLine(sections, "-> aligned (act. start)",
@@ -479,6 +481,14 @@ object ReportCreator {
                 println("picture successfully created and saved to " + imageFile.getAbsolutePath)
                 println()
               }
+              if (options.contains('icons)) {
+                val folder = new File(options('icons))
+                if (folder.isDirectory && folder.exists) {
+                  extractIcons(file, folder)
+                } else {
+                  println("No valid directory: " + folder.getAbsolutePath)
+                }
+              }
             } else {
               println("The given file is no PE file!")
               printFileTypeReport(file)
@@ -490,6 +500,20 @@ object ReportCreator {
           case e: Exception => System.err.println("Error: " + e.getMessage); e.printStackTrace();
         }
       }
+    }
+  }
+
+  private def extractIcons(peFile: File, folder: File): Unit = {
+    val grpIcoResources = IconParser.extractGroupIcons(peFile).asScala
+    var nr = 0
+    for (grpIconResource <- grpIcoResources) {
+      val icoFile = grpIconResource.toIcoFile()
+      while (Paths.get(folder.getAbsolutePath, nr + ".ico").toFile.exists()) {
+        nr += 1
+      }
+      val dest = Paths.get(folder.getAbsolutePath, nr + ".ico").toFile
+      icoFile.saveTo(dest)
+      println("file " + dest.getName() + " written")
     }
   }
 
@@ -558,6 +582,10 @@ object ReportCreator {
         nextOption(map += ('picture -> value), tail)
       case "--picture" :: value :: tail =>
         nextOption(map += ('picture -> value), tail)
+      case "-i" :: value :: tail =>
+        nextOption(map += ('icons -> value), tail)
+      case "--ico" :: value :: tail =>
+        nextOption(map += ('icons -> value), tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
       case option :: tail =>
         println("Unknown option " + option + "\n" + usage)

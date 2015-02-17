@@ -36,6 +36,9 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry;
 import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey;
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.parser.sections.rsrc.SubDirEntry;
+import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource;
+import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
+import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.anomalies.Anomaly;
@@ -136,7 +139,7 @@ public class WikiExampleCodes {
     @SuppressWarnings("unused")
     public static void resourceSection() throws IOException {
         // Loading
-        File file = new File("/home/deque/portextestfiles/Minecraft.exe");
+        File file = new File("/home/katja/samples/VirMC.exe");
         PEData data = PELoader.loadPE(file);
         ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
         // Fetching resources
@@ -157,6 +160,17 @@ public class WikiExampleCodes {
             // print as string (e.g. for ASCII resources)
             System.out.println(new String(bytes));
         }
+        // Extraction of ICO files
+        List<GroupIconResource> grpIcoResources = IconParser.extractGroupIcons(file);
+        int nr = 0;
+        for(GroupIconResource grpIconResource : grpIcoResources) { 
+        	nr++;
+        	IcoFile icoFile = grpIconResource.toIcoFile();
+        	File dest = new File("/home/katja/ico/icon" + nr + ".ico");
+        	icoFile.saveTo(dest);
+        	System.out.println("ico file " + dest.getName() + " written");
+        }
+        
         // Access to structures of the resource tree
         ResourceDirectory tree = rsrc.getResourceTree();
         // Resource directory table header

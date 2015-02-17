@@ -287,7 +287,7 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
         File file = new File(
-                "/home/katja/samples/VirMC.exe");
+                "/home/katja/samples/VirMC.exe"); //TODO VirMC resource type f*ed up
         PEData data = loadPE(file);
         ReportCreator reporter = ReportCreator.newInstance(data.getFile());
         System.out.println(reporter.resourcesReport());
@@ -298,7 +298,7 @@ public final class PELoader {
         	nr++;
         	IcoFile icoFile = grpIconResource.toIcoFile();
         	File dest = new File("/home/katja/ico/icon" + nr + ".ico");
-        	icoFile.saveTo(dest, file);
+        	icoFile.saveTo(dest);
         	System.out.println("ico file " + dest.getName() + " written");
         }
         
