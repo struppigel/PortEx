@@ -33,7 +33,7 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param levelIDs the levelIDs of the resource
  */
 class Resource(
-  val resourceBytes: PhysicalLocation,
+  val rawBytesLocation: PhysicalLocation,
   var levelIDs: Map[Level, IDOrName]) {
 
   /**
@@ -56,7 +56,7 @@ class Resource(
    *
    * @param resourceBytes the bytes that make up the data of the resource
    */
-  def this(resourceBytes: PhysicalLocation) = this(resourceBytes, Map.empty)
+  def this(rawBytesLocation: PhysicalLocation) = this(rawBytesLocation, Map.empty)
 
   //  /** TODO
   //   * Creates an UTF8 string of the resource bytes
@@ -67,8 +67,8 @@ class Resource(
    * {@inheritDoc}
    */
   override def toString(): String =
-    "address: 0x" + java.lang.Long.toHexString(resourceBytes.from) + 
-    ", size: 0x" + java.lang.Long.toHexString(resourceBytes.size) + ", " +
+    "address: 0x" + java.lang.Long.toHexString(rawBytesLocation.from) + 
+    ", size: 0x" + java.lang.Long.toHexString(rawBytesLocation.size) + ", " +
     levelIDs.mkString(", ")
 
 }

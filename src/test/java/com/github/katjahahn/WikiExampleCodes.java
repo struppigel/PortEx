@@ -149,7 +149,7 @@ public class WikiExampleCodes {
         }
         // Getting raw data
         Resource resource = resources.get(0);
-        Location loc = resource.resourceBytes();
+        Location loc = resource.rawBytesLocation();
         long offset = loc.from();
         assert loc.size() == (int) loc.size();
         int size = (int) loc.size();

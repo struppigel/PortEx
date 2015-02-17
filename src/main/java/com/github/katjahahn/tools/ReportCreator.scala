@@ -17,7 +17,6 @@
  */
 package com.github.katjahahn.tools
 
-
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.ScalaIOUtil.bytes2hex
