@@ -28,22 +28,22 @@ For more information have a look at [PortEx Wiki](https://github.com/katjahahn/P
 
 #### Including PortEx to a Maven Project
 
-PortEx will be added to the Central Maven Repository soon. Until then you can include PortEx as follows:
-
-Download portex.pom and portex.jar and install portex to your local Maven repository as follows:
-
-```
-$ mvn install:install-file -Dfile=portex.jar -DpomFile=portex.pom
-```
-
-Now you can include PortEx to your project by adding the following Maven dependency:
+You can include PortEx to your project by adding the following Maven dependency:
 
 ```
 <dependency>
     	<groupId>com.github.katjahahn</groupId>
-    	<artifactId>portex</artifactId>
-    	<version>1.0</version>
+    	<artifactId>portex_2.10</artifactId>
+    	<version>1.0.1</version>
 </dependency>
+```
+
+#### Including PortEx to an SBT project
+
+Add the dependency as follows in your build.sbt
+
+```
+libraryDependencies += "com.github.katjahahn" % "portex_2.10" % "1.0.1"
 ```
 
 #### Using the Fat Jar
