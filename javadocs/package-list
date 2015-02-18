@@ -10,6 +10,7 @@ com.github.katjahahn.parser.sections.idata
 com.github.katjahahn.parser.sections.pdata
 com.github.katjahahn.parser.sections.reloc
 com.github.katjahahn.parser.sections.rsrc
+com.github.katjahahn.parser.sections.rsrc.icon
 com.github.katjahahn.tools
 com.github.katjahahn.tools.anomalies
 com.github.katjahahn.tools.sigscanner

@@ -51,6 +51,7 @@ PortEx is written in Java and Scala, and targeted at Java applications.</p>
 <li>Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)</li>
 <li>Extract Unicode and ASCII strings contained in the file</li>
 <li>Overlay detection and dumping</li>
+<li>Extract ICO files from resource section
 <li>Experimental: Detection Heuristics based on statistical information</li>
 </ul><p>For more information have a look at <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a> and the <a href="http://katjahahn.github.io/PortEx/javadocs">Documentation</a></p>
 
@@ -60,28 +61,14 @@ PortEx is written in Java and Scala, and targeted at Java applications.</p>
 <h4>
 <a name="user-content-including-portex-to-a-maven-project" class="anchor" href="#including-portex-to-a-maven-project"><span class="octicon octicon-link"></span></a>Including PortEx to a Maven Project</h4>
 
-<p>PortEx will be added to the Central Maven Repository with its first release. Until then you can include PortEx as follows.</p>
-
-<p>Download portex.pom and portex.jar and install portex to your local Maven repository as follows:</p>
-
-<pre><code>$ mvn install:install-file -Dfile=portex.jar -DpomFile=portex.pom
-</code></pre>
-
-<p>Now you can include PortEx to your project by adding the following Maven dependency:</p>
+<p>You can include PortEx to your project by adding the following Maven dependency:</p>
 
 <pre><code>&lt;dependency&gt;
         &lt;groupId&gt;com.github.katjahahn&lt;/groupId&gt;
-        &lt;artifactId&gt;portex0&lt;/artifactId&gt;
-        &lt;version&gt;1.0&lt;/version&gt;
+        &lt;artifactId&gt;portex_2.10&lt;/artifactId&gt;
+        &lt;version&gt;1.0.1&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
-
-<h4>
-<a name="user-content-using-the-fat-jar" class="anchor" href="#using-the-fat-jar"><span class="octicon octicon-link"></span></a>Using the Fat Jar</h4>
-
-<p>Alternatively download portex.fat.jar and just include it to your build path.</p>
-
-<p>For more information, read the <a href="https://github.com/katjahahn/PortEx/wiki">PortEx Wiki</a></p>
 
 <h3>
 <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Building Portex</h3>
