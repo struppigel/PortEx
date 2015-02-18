@@ -46,12 +46,6 @@ Add the dependency as follows in your build.sbt
 libraryDependencies += "com.github.katjahahn" % "portex_2.10" % "1.0.1"
 ```
 
-#### Using the Fat Jar
-
-Alternatively download portex.fat.jar and just include it to your build path.
-
-For more information, read the [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki)
-
 ### Building PortEx
 
 #### Requirements
