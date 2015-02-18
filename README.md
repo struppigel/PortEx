@@ -20,6 +20,7 @@ Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Extract Unicode and ASCII strings contained in the file
 * Overlay detection and dumping
+* Extraction of ICO files from resource section
 * File scoring based on statistical information
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
