@@ -1,6 +1,8 @@
+import SonatypeKeys._
+
 name := "PortEx"
 
-version := "1.0"
+version := "1.0.1"
 
 javadocSettings
 
@@ -15,3 +17,32 @@ libraryDependencies += "com.google.code.findbugs" % "jsr305" % "2.0.2"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.0-rc1"
 
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.0-rc1"
+
+// Import default settings. This changes `publishTo` settings to use the Sonatype repository and add several commands for publishing.
+sonatypeSettings
+
+// Your project orgnization (package name)
+organization := "com.github.katjahahn"
+
+// To sync with Maven central, you need to supply the following information:
+pomExtra := {
+  <url>https://github.com/katjahahn/PortEx</url>
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:katjahahn/PortEx.git</connection>
+    <developerConnection>scm:git:git@github.com:katjahahn/PortEx.git</developerConnection>
+    <url>github.com/katjahahn/PortEx</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>katjahahn</id>
+      <name>Katja Hahn</name>
+      <url>https://github.com/katjahahn/PortEx</url>
+    </developer>
+  </developers>
+}
