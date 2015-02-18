@@ -43,6 +43,9 @@ import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource;
 import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
 import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.visualizer.ImageUtil;
+import com.github.katjahahn.tools.visualizer.Visualizer;
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -287,30 +290,20 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
         File file = new File(
-                "/home/katja/samples/VirMC.exe"); //TODO VirMC resource type f*ed up
+                "/home/katja/samples/VirMC.exe"); //TODO create Unit test for resource type with name!
         PEData data = loadPE(file);
         ReportCreator reporter = ReportCreator.newInstance(data.getFile());
         System.out.println(reporter.resourcesReport());
-        List<GroupIconResource> grpIcoResources = IconParser.extractGroupIcons(file);
-        int nr = 2;
-        for(GroupIconResource grpIconResource : grpIcoResources) { 
-        	
-        	nr++;
-        	IcoFile icoFile = grpIconResource.toIcoFile();
-        	File dest = new File("/home/katja/ico/icon" + nr + ".ico");
-        	icoFile.saveTo(dest);
-        	System.out.println("ico file " + dest.getName() + " written");
-        }
         
 //        ReportCreator reporter = ReportCreator.newInstance(data.getFile());
 //        reporter.printReport(); 
-//        VisualizerBuilder builder = new VisualizerBuilder();
-//        Visualizer vi = builder.build();
-//        final BufferedImage entropyImage = vi.createEntropyImage(file);
-//        final BufferedImage structureImage = vi.createImage(file);
-//        final BufferedImage appendedImage = ImageUtil.appendImages(
-//                entropyImage, structureImage);
-//        show(appendedImage);
+        VisualizerBuilder builder = new VisualizerBuilder();
+        Visualizer vi = builder.build();
+        final BufferedImage entropyImage = vi.createEntropyImage(file);
+        final BufferedImage structureImage = vi.createImage(file);
+        final BufferedImage appendedImage = ImageUtil.appendImages(
+                entropyImage, structureImage);
+        show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

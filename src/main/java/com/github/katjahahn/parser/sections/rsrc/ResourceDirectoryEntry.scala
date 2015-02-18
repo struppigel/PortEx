@@ -28,6 +28,7 @@ import com.github.katjahahn.parser.FileFormatException
 import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.ScalaIOUtil
 
 /**
  * The entry of a {@link ResourceDirectory}
@@ -113,7 +114,7 @@ case class ID(id: Long, level: Level) extends IDOrName {
   def idString: String = typeIDMap.getOrElse(id.toInt, id.toString)
 
   override def toString(): String =
-    "ID: " + { if (level.levelNr == 1) idString else id.toString }
+    "ID: " + { if (level == Level.typeLevel()) idString else id.toString }
 
 }
 
@@ -163,7 +164,7 @@ object ResourceDirectoryEntry {
     // fetch rva to subdirectory or data entry
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
     // fetch id or name field
-    val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes)
+    val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes, virtualAddress)
     // rva determines if this is a subdirectory or a data entry
     if (isDataEntryRVA(rva)) {
       // create and return data entry
@@ -199,10 +200,10 @@ object ResourceDirectoryEntry {
    * @return ID entry or name entry
    */
   private def getIDOrName(rva: Long, isNameEntry: Boolean, level: Level,
-    mmBytes: MemoryMappedPE): IDOrName =
+    mmBytes: MemoryMappedPE, va: Long): IDOrName =
     if (isNameEntry) {
       // if name entry fetch the name string at given rva
-      val name = getStringAtRVA(rva, mmBytes)
+      val name = getStringAtRVA(rva, va, mmBytes)
       Name(rva, name)
       // create id instance otherwise
     } else ID(rva, level)
@@ -215,9 +216,9 @@ object ResourceDirectoryEntry {
    * @param mmbytes the memory mapped PE
    * @return string at rva
    */
-  private def getStringAtRVA(rva: Long, mmBytes: MemoryMappedPE): String = {
-    // highest bit does not belong to rva
-    val address = removeHighestIntBit(rva)
+  private def getStringAtRVA(rva: Long, va: Long, mmBytes: MemoryMappedPE): String = {
+    // highest bit does not belong to rva, add virtualAddress of resource section
+    val address = removeHighestIntBit(rva) + va
     // 2 bytes reserved for length
     val length = 2
     // check if able to read
