@@ -33,6 +33,11 @@ object IconParser {
   
   private final val RT_GROUP_ICON = 14 //TODO remove data file, use enums
   
+  /**
+   * Extract all group icons from the resource section of the file.
+   * @param file the PE file
+   * @return list of group icon resources
+   */
   def extractGroupIcons(file: File): java.util.List[GroupIconResource] = {
     val loader = new SectionLoader(file)
     val rsrc = loader.loadResourceSection()
@@ -40,6 +45,11 @@ object IconParser {
     _extractGroupIcons(resources, file).asJava
   }
   
+  /**
+   * @param resources the list of all resources that belong the the file
+   * @param file the PE file to extract the icons from
+   * @return list of group icon resources
+   */
   private def _extractGroupIcons(resources: List[Resource], file: File): List[GroupIconResource] =
     resources.filter(isGroupIcon).map(res => GroupIconResource(res, resources, file))
   

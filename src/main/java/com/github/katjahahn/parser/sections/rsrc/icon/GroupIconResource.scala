@@ -40,7 +40,7 @@ import com.github.katjahahn.parser.sections.rsrc.ID
  * @param peFile the file this resource belongs to
  */
 class GroupIconResource(
-  private val grpIconDir: GrpIconDir,
+  private val grpIconDir: GroupIconDir,
   private val nIDToLocations: Map[NID, PhysicalLocation],
   private val peFile: File) {
 
@@ -94,10 +94,11 @@ object GroupIconResource {
 
   type NID = Int
 
-  val byteSize = 1
-  val wordSize = 2
-  val dwordSize = 4
-  val qwordSize = 8
+  private val byteSize = 1
+  private val wordSize = 2
+  private val dwordSize = 4
+  private val qwordSize = 8
+  private val entrySize = 14
 
   /**
    * Parses the resource bytes of the given RT_GROUP_ICON and the related RT_ICON
@@ -117,9 +118,9 @@ object GroupIconResource {
       // current offset after reading the first three values
       val idEntriesOffset = loc.from + 3 * wordSize
       // read idEntries array starting from idEntriesOffset
-      val idEntries = readGrpIconDirEntries(idEntriesOffset, raf, idCount)
+      val idEntries = readGroupIconDirEntries(idEntriesOffset, raf, idCount)
       // create grpIconDir
-      val grpIconDir = GrpIconDir(idReserved, idType, idCount, idEntries)
+      val grpIconDir = GroupIconDir(idReserved, idType, idCount, idEntries)
       // save location of RT_ICON resources in a map
       val nIDToLocs = getEntryLocs(idEntries, resources)
       // create and return GroupIconResource
@@ -128,14 +129,16 @@ object GroupIconResource {
   }
 
   /**
+   * 
    * @param idEntriesOffset
    * @param raf
    * @param idCount
+   * @return list of GrpIconDirEntries
    */
-  private def readGrpIconDirEntries(idEntriesOffset: Long, raf: RandomAccessFile,
-    idCount: Int): List[GrpIconDirEntry] = {
+  private def readGroupIconDirEntries(idEntriesOffset: Long, raf: RandomAccessFile,
+    idCount: Int): List[GroupIconDirEntry] = {
     (for (i <- Range(0, idCount)) yield {
-      val offset = i * 14 + idEntriesOffset
+      val offset = i * entrySize + idEntriesOffset
       val bWidth = loadBytes(offset, 1, raf)(0)
       val bHeight = loadBytes(offset + 1, 1, raf)(0)
       val bColorCount = loadBytes(offset + 2, 1, raf)(0)
@@ -144,10 +147,15 @@ object GroupIconResource {
       val wBitCount = ByteArrayUtil.bytesToInt(loadBytes(offset + 6, 2, raf))
       val dwBytesInRes = ByteArrayUtil.bytesToLong(loadBytes(offset + 8, 4, raf))
       val nID = ByteArrayUtil.bytesToInt(loadBytes(offset + 12, 2, raf))
-      GrpIconDirEntry(bWidth, bHeight, bColorCount, bReserved, wPlanes, wBitCount, dwBytesInRes, nID)
+      GroupIconDirEntry(bWidth, bHeight, bColorCount, bReserved, wPlanes, wBitCount, dwBytesInRes, nID)
     }).toList
   }
 
+  /**
+   * @param nID the nID of the entry
+   * @param resources list of all resources in the PE file
+   * @return physical location of the raw data for resource with nID
+   */
   private def getLocation(nID: NID, resources: List[Resource]): PhysicalLocation = {
     // search for resource, whose ID matches the nID
     val maybeRes = resources.find { res =>
@@ -171,7 +179,7 @@ object GroupIconResource {
    * @param idEntries the idEntries of the current GroupIconResource
    * @param resources all resources of the pefile
    */
-  private def getEntryLocs(idEntries: List[GrpIconDirEntry],
+  private def getEntryLocs(idEntries: List[GroupIconDirEntry],
     resources: List[Resource]): Map[NID, PhysicalLocation] = {
     (for (entry <- idEntries) yield {
       val loc = getLocation(entry.nID, resources)
@@ -187,7 +195,7 @@ object GroupIconResource {
  * @param idCount number of images
  * @param idEntries the entries for each image
  */
-case class GrpIconDir(idReserved: Int, idType: Int, idCount: Int, idEntries: List[GrpIconDirEntry]) {
+case class GroupIconDir(idReserved: Int, idType: Int, idCount: Int, idEntries: List[GroupIconDirEntry]) {
   override def toString(): String =
     s"""|idReserved: $idReserved
         |idType: $idType
@@ -207,7 +215,7 @@ case class GrpIconDir(idReserved: Int, idType: Int, idCount: Int, idEntries: Lis
  * @param wPlanes color planes
  * @param wBitCount
  */
-case class GrpIconDirEntry(bWidth: Byte, bHeight: Byte, bColorCount: Byte,
+case class GroupIconDirEntry(bWidth: Byte, bHeight: Byte, bColorCount: Byte,
   bReserved: Byte, wPlanes: Int, wBitCount: Int,
   dwBytesInRes: Long, nID: Int) {
   override def toString(): String =
