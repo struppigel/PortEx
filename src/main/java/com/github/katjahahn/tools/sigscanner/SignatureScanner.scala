@@ -98,7 +98,7 @@ class SignatureScanner(signatures: List[Signature]) {
    */
   def scanAt(file: File, offset: Long): java.util.List[String] = {
     def bytesMatched(sig: Signature): Int =
-      sig.signature.filter(cond(_) { case Some(s) => true }).length
+      sig.signature.count(cond(_) { case Some(s) => true })
     val matches = _scanAt(file, offset)
     (for ((m, addr) <- matches)
       yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
@@ -120,7 +120,7 @@ class SignatureScanner(signatures: List[Signature]) {
    */
   def scanAll(file: File, epOnly: Boolean = true): java.util.List[String] = { //use from Java
     def bytesMatched(sig: Signature): Int =
-      sig.signature.filter(cond(_) { case Some(s) => true }).length
+      sig.signature.count(cond(_) { case Some(s) => true })
     val matches = _scanAll(file, epOnly)
     (for ((m, addr) <- matches)
       yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
