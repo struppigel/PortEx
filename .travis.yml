@@ -7,3 +7,4 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 sudo: false
+script: "sbt ++$TRAVIS_SCALA_VERSION compile test"
