@@ -136,7 +136,7 @@ object PortExAnalyzer {
 
   private def printFileTypeReport(file: File): Unit = {
     def bytesMatched(sig: Signature): Int =
-      sig.signature.filter(cond(_) { case Some(s) => true }).length
+      sig.signature.count(cond(_) { case Some(s) => true })
     var results = FileTypeScanner(file).scanStart()
     if (results.isEmpty) println("No matching file-type signatures found")
     else if (results.size == 1)
