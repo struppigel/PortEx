@@ -46,7 +46,7 @@ object IconParser {
   }
   
   /**
-   * @param resources the list of all resources that belong the the file
+   * @param resources the list of all resources that belong the file
    * @param file the PE file to extract the icons from
    * @return list of group icon resources
    */
