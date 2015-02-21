@@ -68,7 +68,6 @@ public class SpecificationTest {
 		// TODO resourcetype, machinetype (covered by MachineTypeTest so far), debugtypes
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void headerCoherence() throws IOException {
 		int keyIndex = 0;

@@ -40,8 +40,8 @@ import com.github.katjahahn.parser.sections.rsrc.ID
  * @param peFile the file this resource belongs to
  */
 class GroupIconResource(
-  private val grpIconDir: GroupIconDir,
-  private val nIDToLocations: Map[NID, PhysicalLocation],
+  val groupIconDir: GroupIconDir,
+  val nIDToLocations: Map[NID, PhysicalLocation],
   private val peFile: File) {
 
   val entryHeaderSize = 16
@@ -50,7 +50,7 @@ class GroupIconResource(
     s"""|GroupIconDirectory
         |------------------
         |
-        |${grpIconDir.toString}
+        |${groupIconDir.toString}
         |Icon locations
         |...............
         |${
@@ -67,8 +67,8 @@ class GroupIconResource(
    */
   def toIcoFile(): IcoFile = {
     // calculate the offset right after the ICO headers to put raw data into
-    var dwImageOffset = 6L + grpIconDir.idEntries.size * entryHeaderSize
-    val iconDirEntries = (for (idEntry <- grpIconDir.idEntries) yield {
+    var dwImageOffset = 6L + groupIconDir.idEntries.size * entryHeaderSize
+    val iconDirEntries = (for (idEntry <- groupIconDir.idEntries) yield {
       // fetch location of raw data
       val peLocation = nIDToLocations(idEntry.nID) //TODO does it exist?
       // create the IconDirEntry
@@ -82,8 +82,8 @@ class GroupIconResource(
     }).toList
 
     // instantiate IconDir with the collected iconDirEntries
-    val iconDir = IconDir(grpIconDir.idReserved, grpIconDir.idType,
-      grpIconDir.idCount, iconDirEntries)
+    val iconDir = IconDir(groupIconDir.idReserved, groupIconDir.idType,
+      groupIconDir.idCount, iconDirEntries)
     // create and return the IcoFile
     new IcoFile(iconDir, peFile)
   }
@@ -110,26 +110,35 @@ object GroupIconResource {
     file: File): GroupIconResource = {
     // fetch location of raw data
     val loc = grpResource.rawBytesLocation
-    using(new RandomAccessFile(file, "r")) { raf =>
-      // read the header values
-      val idReserved = ByteArrayUtil.bytesToInt(loadBytes(loc.from, wordSize, raf))
-      val idType = ByteArrayUtil.bytesToInt(loadBytes(loc.from + wordSize, wordSize, raf))
-      val idCount = ByteArrayUtil.bytesToInt(loadBytes(loc.from + 2 * wordSize, wordSize, raf))
-      // current offset after reading the first three values
-      val idEntriesOffset = loc.from + 3 * wordSize
-      // read idEntries array starting from idEntriesOffset
-      val idEntries = readGroupIconDirEntries(idEntriesOffset, raf, idCount)
-      // create grpIconDir
-      val grpIconDir = GroupIconDir(idReserved, idType, idCount, idEntries)
-      // save location of RT_ICON resources in a map
-      val nIDToLocs = getEntryLocs(idEntries, resources)
-      // create and return GroupIconResource
-      new GroupIconResource(grpIconDir, nIDToLocs, file)
-    }
+    if (isValidLocation(loc, file)) {
+      using(new RandomAccessFile(file, "r")) { raf =>
+        // read the header values
+        val idReserved = ByteArrayUtil.bytesToInt(loadBytes(loc.from, wordSize, raf))
+        val idType = ByteArrayUtil.bytesToInt(loadBytes(loc.from + wordSize, wordSize, raf))
+        val idCount = ByteArrayUtil.bytesToInt(loadBytes(loc.from + 2 * wordSize, wordSize, raf))
+        // current offset after reading the first three values
+        val idEntriesOffset = loc.from + 3 * wordSize
+        // read idEntries array starting from idEntriesOffset
+        val idEntries = readGroupIconDirEntries(idEntriesOffset, raf, idCount)
+        // save location of RT_ICON resources in a map
+        val nIDToLocs = getEntryLocs(idEntries, resources, file)
+        val filteredEntries = idEntries.filter(entry => nIDToLocs.contains(entry.nID))
+        // create grpIconDir
+        val grpIconDir = GroupIconDir(idReserved, idType, idCount, filteredEntries)
+        // create and return GroupIconResource
+        new GroupIconResource(grpIconDir, nIDToLocs, file)
+      }
+    } else throw new IllegalArgumentException("invalid group icon location")
   }
 
+  private def isValidLocation(loc: PhysicalLocation, file: File): Boolean = {
+    loc.from >= 0 &&
+    loc.size > 0 &&
+    loc.from + loc.size <= file.length()
+  }
+  
   /**
-   * 
+   *
    * @param idEntriesOffset
    * @param raf
    * @param idCount
@@ -175,16 +184,16 @@ object GroupIconResource {
   /**
    * Creates a map that lists the NID of the RT_ICON resources and the location
    * of their raw data within the pefile.
-   * 
+   *
    * @param idEntries the idEntries of the current GroupIconResource
    * @param resources all resources of the pefile
    */
   private def getEntryLocs(idEntries: List[GroupIconDirEntry],
-    resources: List[Resource]): Map[NID, PhysicalLocation] = {
+    resources: List[Resource], file: File): Map[NID, PhysicalLocation] = {
     (for (entry <- idEntries) yield {
       val loc = getLocation(entry.nID, resources)
-      (entry.nID, loc)
-    }).toMap
+      if(isValidLocation(loc, file)) Some((entry.nID, loc)) else None
+    }).toList.flatten.toMap
   }
 
 }

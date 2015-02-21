@@ -135,7 +135,7 @@ public class Hasher {
      * 
      * @param file
      *            the file to compute the hash from
-     * @param hashType
+     * @param digest
      *            the message digest instance
      * @param from
      *            file offset to start from
@@ -144,10 +144,11 @@ public class Hasher {
      * @return hash value as byte array
      * @throws IOException
      */
-    private static byte[] computeHash(File file, MessageDigest digest,
+    public static byte[] computeHash(File file, MessageDigest digest,
             long from, long until) throws IOException {
-        Preconditions.checkArgument(until > from);
-        Preconditions.checkArgument(until <= file.length());
+        Preconditions.checkArgument(from >= 0, "negative offset");
+        Preconditions.checkArgument(until > from, "end offset is smaller or equal to start offset");
+        Preconditions.checkArgument(until <= file.length(), "end offset is greater than file length");
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int readbytes;
