@@ -32,11 +32,14 @@ import java.io.File
 import java.nio.file.Paths
 import java.io.FileWriter
 
+/**
+ * Command line frontend of PortEx
+ */
 object PortExAnalyzer {
 
-  private val version = """version: 0.3.4
+  private val version = """version: 0.3.5
     |author: Katja Hahn
-    |last update: 17. Feb 2015""".stripMargin
+    |last update: 19. Feb 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
