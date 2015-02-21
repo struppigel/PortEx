@@ -29,10 +29,14 @@ import GroupIconResource.NID
 import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.sections.rsrc.Level
 import com.github.katjahahn.parser.sections.rsrc.ID
+import org.apache.logging.log4j.LogManager
 
 /**
  * Parsing and converting group icon resources to an IcoFile.
  */
+
+//FIXME: PsychoXP uTorrent.exe makes problems, check if anomaly
+
 /**
  * @param grpIconDir the group icon directory
  * @param nIDToLocations a map that saves the nID of each idEntry and the
@@ -92,6 +96,9 @@ class GroupIconResource(
 
 object GroupIconResource {
 
+  private val logger = LogManager.getLogger(GroupIconResource.getClass()
+    .getName());
+
   type NID = Int
 
   private val byteSize = 1
@@ -133,10 +140,10 @@ object GroupIconResource {
 
   private def isValidLocation(loc: PhysicalLocation, file: File): Boolean = {
     loc.from >= 0 &&
-    loc.size > 0 &&
-    loc.from + loc.size <= file.length()
+      loc.size > 0 &&
+      loc.from + loc.size <= file.length()
   }
-  
+
   /**
    *
    * @param idEntriesOffset
@@ -148,16 +155,20 @@ object GroupIconResource {
     idCount: Int): List[GroupIconDirEntry] = {
     (for (i <- Range(0, idCount)) yield {
       val offset = i * entrySize + idEntriesOffset
-      val bWidth = loadBytes(offset, 1, raf)(0)
-      val bHeight = loadBytes(offset + 1, 1, raf)(0)
-      val bColorCount = loadBytes(offset + 2, 1, raf)(0)
-      val bReserved = loadBytes(offset + 3, 1, raf)(0)
-      val wPlanes = ByteArrayUtil.bytesToInt(loadBytes(offset + 4, 2, raf))
-      val wBitCount = ByteArrayUtil.bytesToInt(loadBytes(offset + 6, 2, raf))
-      val dwBytesInRes = ByteArrayUtil.bytesToLong(loadBytes(offset + 8, 4, raf))
-      val nID = ByteArrayUtil.bytesToInt(loadBytes(offset + 12, 2, raf))
-      GroupIconDirEntry(bWidth, bHeight, bColorCount, bReserved, wPlanes, wBitCount, dwBytesInRes, nID)
-    }).toList
+      //Check for EOF
+      if (offset + 14 <= raf.length()) {
+        val bWidth = loadBytes(offset, 1, raf)(0)
+        val bHeight = loadBytes(offset + 1, 1, raf)(0)
+        val bColorCount = loadBytes(offset + 2, 1, raf)(0)
+        val bReserved = loadBytes(offset + 3, 1, raf)(0)
+        val wPlanes = ByteArrayUtil.bytesToInt(loadBytes(offset + 4, 2, raf))
+        val wBitCount = ByteArrayUtil.bytesToInt(loadBytes(offset + 6, 2, raf))
+        val dwBytesInRes = ByteArrayUtil.bytesToLong(loadBytes(offset + 8, 4, raf))
+        val nID = ByteArrayUtil.bytesToInt(loadBytes(offset + 12, 2, raf))
+        Some(GroupIconDirEntry(bWidth, bHeight, bColorCount, bReserved, wPlanes,
+          wBitCount, dwBytesInRes, nID))
+      } else None
+    }).toList.flatten
   }
 
   /**
@@ -191,8 +202,15 @@ object GroupIconResource {
   private def getEntryLocs(idEntries: List[GroupIconDirEntry],
     resources: List[Resource], file: File): Map[NID, PhysicalLocation] = {
     (for (entry <- idEntries) yield {
-      val loc = getLocation(entry.nID, resources)
-      if(isValidLocation(loc, file)) Some((entry.nID, loc)) else None
+      try {
+        val loc = getLocation(entry.nID, resources)
+        if (isValidLocation(loc, file)) Some((entry.nID, loc)) else None
+      } catch {
+        case e: IllegalStateException =>
+          logger.warn(e)
+          logger.warn("file: " + file.getAbsolutePath())
+          None
+      }
     }).toList.flatten.toMap
   }
 
