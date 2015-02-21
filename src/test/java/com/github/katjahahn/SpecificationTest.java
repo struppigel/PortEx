@@ -18,6 +18,7 @@ package com.github.katjahahn;
 import static org.testng.Assert.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,6 @@ import java.util.Map.Entry;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import scala.actors.threadpool.Arrays;
 
 import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
