@@ -1,7 +1,6 @@
 /ignore
 /portexstats
 /lib
-/project/plugins.sbt
 .factorypath
 *.class
 *.sh
