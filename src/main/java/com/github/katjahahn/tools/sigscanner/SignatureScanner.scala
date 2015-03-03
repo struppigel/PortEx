@@ -21,7 +21,6 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.nio.charset.CodingErrorAction
 
-import scala.PartialFunction._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Map
@@ -77,16 +76,23 @@ class SignatureScanner(signatures: List[Signature]) {
    * @return list of scanresults with all matches found at the specified position
    */
   def _scanAt(file: File, offset: Long): List[ScanResult] = { //use from scala
+    if(offset < 0){
+      logger.warn("offset must not be negative")
+      return Nil
+    } 
+    if(offset >= file.length()){
+      logger.warn("offset is larger than file")
+      return Nil
+    }
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
-      val addr = offset
       val bytes = Array.fill(longestSigSequence + 1)(0.toByte)
-      raf.seek(addr)
+      raf.seek(offset)
       val bytesRead = raf.read(bytes)
       val slicedarr = bytes.slice(0, bytesRead)
       val matches = epOnlyFalseSigs.findMatches(slicedarr.toList)
-      results ++= matches.map((_, addr))
-      results.toList
+      results ++= matches.map((_, offset))
+      return results.toList
     }
   }
 
@@ -97,11 +103,9 @@ class SignatureScanner(signatures: List[Signature]) {
    * @return list of scanresults with all matches found at the specified position
    */
   def scanAt(file: File, offset: Long): java.util.List[String] = {
-    def bytesMatched(sig: Signature): Int =
-      sig.signature.count(cond(_) { case Some(s) => true })
     val matches = _scanAt(file, offset)
     (for ((m, addr) <- matches)
-      yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
+      yield m.name + " bytes matched: " + m.bytesMatched + " at address: " + addr).asJava
   }
 
   /**
@@ -119,11 +123,9 @@ class SignatureScanner(signatures: List[Signature]) {
    * @return list of strings with all matches found
    */
   def scanAll(file: File, epOnly: Boolean = true): java.util.List[String] = { //use from Java
-    def bytesMatched(sig: Signature): Int =
-      sig.signature.count(cond(_) { case Some(s) => true })
     val matches = _scanAll(file, epOnly)
     (for ((m, addr) <- matches)
-      yield m.name + " bytes matched: " + bytesMatched(m) + " at address: " + addr).asJava
+      yield m.name + " bytes matched: " + m.bytesMatched + " at address: " + addr).asJava
   }
 
   /**

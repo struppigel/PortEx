@@ -140,7 +140,7 @@ object PortExAnalyzer {
   private def printFileTypeReport(file: File): Unit = {
     def bytesMatched(sig: Signature): Int =
       sig.signature.count(cond(_) { case Some(s) => true })
-    var results = FileTypeScanner(file).scanStart()
+    var results = FileTypeScanner(file).scanAt(0)
     if (results.isEmpty) println("No matching file-type signatures found")
     else if (results.size == 1)
       println("The file could be of the following type: ")
@@ -152,7 +152,7 @@ object PortExAnalyzer {
   }
 
   private def isPEFile(file: File): Boolean =
-    new PESignature(file).hasSignature()
+    new PESignature(file).exists()
 
   private def writeReport(reporter: ReportCreator, file: File): Unit = {
     if (file.getName().isEmpty()) {

@@ -159,7 +159,7 @@ object DebugSection {
       val debugType = DebugType.getForValue(debugTypeValue)
       val ptrToRawData = entries(POINTER_TO_RAW_DATA).getValue
       val codeview = CodeviewInfo(ptrToRawData, data.getFile)
-      new DebugSection(entries, debugType.getDescription, debugType, offset, Some(codeview))
+      new DebugSection(entries, debugType.getDescription, debugType, offset, codeview)
     } catch {
       case e: IllegalArgumentException =>
         logger.warn("no debug type description found!")

@@ -245,7 +245,7 @@ object FileScoring {
   }
 
   private def isPEFile(file: File): Boolean = {
-    !file.isDirectory() && new PESignature(file).hasSignature()
+    !file.isDirectory() && new PESignature(file).exists()
   }
 
   private def nextOption(map: OptionMap, list: List[String]): OptionMap = {

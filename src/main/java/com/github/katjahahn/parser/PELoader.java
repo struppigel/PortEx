@@ -15,16 +15,14 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.IOUtil.loadBytes;
-import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
-import static com.google.common.base.Preconditions.checkState;
+import static com.github.katjahahn.parser.IOUtil.*;
+import static com.google.common.base.Preconditions.*;
 
 import java.awt.AWTException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -39,13 +37,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource;
-import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
-import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
 import com.github.katjahahn.tools.ReportCreator;
-import com.github.katjahahn.tools.visualizer.ImageUtil;
-import com.github.katjahahn.tools.visualizer.Visualizer;
-import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -92,7 +84,7 @@ public final class PELoader {
     private PEData loadData() throws IOException {
         PESignature pesig = new PESignature(file);
         pesig.read();
-        checkState(pesig.hasSignature(),
+        checkState(pesig.exists(),
                 "no valid pe file, signature not found");
         // read all headers
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -104,14 +96,14 @@ public final class PELoader {
             // construct PEData instance
             PEData data = new PEData(msdos, pesig, coff, opt, table, file);
             /* reload headers in case of dual pe header */
-//            MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
-//                    new SectionLoader(data));
+            // MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
+            // new SectionLoader(data));
             // TODO reload coff, msdos, ..
-//            coff = reloadCOFFFileHeader(pesig, mmBytes, data);
-//            data = new PEData(msdos, pesig, coff, opt, table, file);
-//            opt = reloadOptionalHeader(pesig, mmBytes, data);
-//            data = new PEData(msdos, pesig, coff, opt, table, file);
-//            table.reload(mmBytes);
+            // coff = reloadCOFFFileHeader(pesig, mmBytes, data);
+            // data = new PEData(msdos, pesig, coff, opt, table, file);
+            // opt = reloadOptionalHeader(pesig, mmBytes, data);
+            // data = new PEData(msdos, pesig, coff, opt, table, file);
+            // table.reload(mmBytes);
             // System.out.println(new ReportCreator(data).secTableReport());
             // re-construct PEData instance
             return data;
@@ -133,7 +125,7 @@ public final class PELoader {
         return size;
     }
 
-    //TODO is this necessary? look it up
+    // TODO is this necessary? look it up
     private COFFFileHeader reloadCOFFFileHeader(PESignature pesig,
             MemoryMappedPE mmBytes, PEData data) throws IOException {
         // coff header starts right after the PE signature
@@ -289,21 +281,27 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-        File file = new File(
-                "/home/katja/samples/VirMC.exe"); //TODO create Unit test for resource type with name!
-        PEData data = loadPE(file);
-        ReportCreator reporter = ReportCreator.newInstance(data.getFile());
-        System.out.println(reporter.resourcesReport());
-        
-//        ReportCreator reporter = ReportCreator.newInstance(data.getFile());
-//        reporter.printReport(); 
-        VisualizerBuilder builder = new VisualizerBuilder();
-        Visualizer vi = builder.build();
-        final BufferedImage entropyImage = vi.createEntropyImage(file);
-        final BufferedImage structureImage = vi.createImage(file);
-        final BufferedImage appendedImage = ImageUtil.appendImages(
-                entropyImage, structureImage);
-        show(appendedImage);
+        File folder = new File("/home/deque/portextestfiles"); // TODO create
+                                                               // Unit test for
+                                                               // resource type
+                                                               // with name!
+        for (File file : folder.listFiles()) {
+            if (new PESignature(file).exists()) {
+                System.out.println(file.getName());
+                ReportCreator reporter = ReportCreator.newInstance(file);
+                System.out.println(reporter.resourcesReport());
+                System.out.println();
+            }
+        }
+        // ReportCreator reporter = ReportCreator.newInstance(data.getFile());
+        // reporter.printReport();
+        // VisualizerBuilder builder = new VisualizerBuilder();
+        // Visualizer vi = builder.build();
+        // final BufferedImage entropyImage = vi.createEntropyImage(file);
+        // final BufferedImage structureImage = vi.createImage(file);
+        // final BufferedImage appendedImage = ImageUtil.appendImages(
+        // entropyImage, structureImage);
+        // show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

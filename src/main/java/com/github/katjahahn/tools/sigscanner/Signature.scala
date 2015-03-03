@@ -18,6 +18,7 @@ package com.github.katjahahn.tools.sigscanner
 import Signature._
 import scala.Array.canBuildFrom
 import com.github.katjahahn.parser.ScalaIOUtil._
+import scala.PartialFunction._
 
 /**
  * @author Katja Hahn
@@ -30,6 +31,9 @@ import com.github.katjahahn.parser.ScalaIOUtil._
  * 				    bytes ("??" in signature file)
  */
 class Signature(val name: String, val epOnly: Boolean, val signature: Array[Option[Byte]]) {
+  
+  def bytesMatched(): Int =
+      signature.count(cond(_) { case Some(s) => true })
 
   override def toString(): String =
     s"""|name: $name

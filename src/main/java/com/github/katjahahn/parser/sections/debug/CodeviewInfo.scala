@@ -43,8 +43,14 @@ object CodeviewInfo {
     byteToHex(part1, "") + "-" + byteToHex(part2, "") + "-" +
       byteToHex(part3, "") + "-" + byteToHex(part4, "") + "-" + byteToHex(part5, "")
   }
+  
+  def getInstance(ptrToRaw: Long, pefile: File): CodeviewInfo = {
+      val maybe = apply(ptrToRaw, pefile)
+      if(maybe.isDefined) maybe.get 
+      else throw new IllegalStateException("RSDS signature not found")
+  }
 
-  def apply(ptrToRaw: Long, pefile: File): CodeviewInfo = {
+  def apply(ptrToRaw: Long, pefile: File): Option[CodeviewInfo] = {
     using(new RandomAccessFile(pefile, "r")) { raf =>
       val age = 0
       val filePath = ""
@@ -54,8 +60,8 @@ object CodeviewInfo {
         val guid = loadBytes(ptrToRaw + guidOffset, guidSize, raf)
         val age = bytesToInt(loadBytes(ptrToRaw + ageOffset, ageSize, raf))
         val filePath = readNullTerminatedUTF8String(ptrToRaw + filePathOffset, raf)
-        new CodeviewInfo(age, guid, filePath)
-      } else throw new IllegalStateException("RSDS signature not found")
+        Some(new CodeviewInfo(age, guid, filePath))
+      } else None
     }
   }
 }

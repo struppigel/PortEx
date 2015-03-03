@@ -107,7 +107,7 @@ public class PESignature {
      * 
      * @return true if the file has the PE signature, false otherwise.
      */
-    public boolean hasSignature() {
+    public boolean exists() {
         try {
             read();
             return true;

@@ -8,17 +8,11 @@ import com.github.katjahahn.parser.IOUtil
 
 class FileTypeScanner(sigscanner: SignatureScanner, file: File) {
 
-  def scanAllReport(): java.util.List[String] =
-    sigscanner.scanAll(file, false)
+  def scanAt(offset: Long): List[ScanResult] =
+    sigscanner._scanAt(file, offset)
 
-  def scanAll(): List[ScanResult] =
-    sigscanner._scanAll(file, false)
-
-  def scanStart(): List[ScanResult] =
-    sigscanner._scanAt(file, 0)
-
-  def scanStartReport(): java.util.List[String] =
-    sigscanner.scanAt(file, 0)
+  def scanAtReport(offset: Long): java.util.List[String] =
+    sigscanner.scanAt(file, offset)
 
 }
 
@@ -28,7 +22,7 @@ object FileTypeScanner {
 
   def main(args: Array[String]): Unit = {
     val file = new File("/home/deque/portextestfiles/unusualfiles/corkami/gui.exe")
-    FileTypeScanner(file).scanStartReport.asScala.foreach(println)
+    FileTypeScanner(file).scanAtReport(0).asScala.foreach(println)
   }
 
   def apply(file: File): FileTypeScanner = {

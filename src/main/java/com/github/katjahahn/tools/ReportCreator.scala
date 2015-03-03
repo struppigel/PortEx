@@ -36,6 +36,10 @@ import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import java.io.File
 import com.github.katjahahn.parser.sections.SectionCharacteristic
 import com.github.katjahahn.parser.sections.debug.DebugType
+import com.github.katjahahn.tools.sigscanner.FileTypeScanner
+import com.github.katjahahn.parser.sections.rsrc.Resource
+import com.github.katjahahn.parser.IOUtil
+import java.io.RandomAccessFile
 
 /**
  * Utility for easy creation of PE file reports.
@@ -196,10 +200,42 @@ class ReportCreator(private val data: PEData) {
       buf.append(title("Resources") + NL)
       val resources = rsrc.getResources.asScala
       for (resource <- resources) {
-        buf.append(resource + NL)
+        var offset = resource.rawBytesLocation.from
+        var fileTypes = FileTypeScanner(data.getFile).scanAt(offset)
+        var longTypes = fileTypes.filter(_._1.bytesMatched >= 3).
+          map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
+        buf.append(resource)
+        if (!longTypes.isEmpty) {
+          buf.append(", signatures: " + longTypes.mkString(", "))
+        }
+        buf.append(NL)
       }
       buf.toString + NL
     } else ""
+  }
+
+  def extensiveResourceReport(resource: Resource): String = {
+    
+    def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
+    //TODO this is just for testing; will fail for large resources, be careful
+    def readBytes(resource: Resource): Array[Byte] =
+      IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt, 
+          new RandomAccessFile(data.getFile, "r"))
+    def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
+    
+    val buf = new StringBuffer()
+    var offset = resource.rawBytesLocation.from
+    var fileTypes = FileTypeScanner(data.getFile).scanAt(offset).
+      map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
+    buf.append(resource + NL)
+    if (!fileTypes.isEmpty) {
+      buf.append("Signatures: " + NL + fileTypes.mkString(NL) + NL)
+    }
+    if (resource.getType == "RT_MANIFEST") { //TODO display all kinds of resources
+      val versionInfo = getResourceString(resource)
+      buf.append(versionInfo + NL)
+    }
+    buf.toString
   }
 
   def jar2ExeReport(): String = {
@@ -413,8 +449,8 @@ class ReportCreator(private val data: PEData) {
 }
 
 object ReportCreator {
-  
-  def apply(file: File): ReportCreator = 
+
+  def apply(file: File): ReportCreator =
     new ReportCreator(PELoader.loadPE(file))
 
   def newInstance(file: File): ReportCreator =
