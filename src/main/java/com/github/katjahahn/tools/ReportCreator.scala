@@ -40,6 +40,8 @@ import com.github.katjahahn.tools.sigscanner.FileTypeScanner
 import com.github.katjahahn.parser.sections.rsrc.Resource
 import com.github.katjahahn.parser.IOUtil
 import java.io.RandomAccessFile
+import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource
+import com.github.katjahahn.parser.sections.rsrc.version.VsVersionInfo
 
 /**
  * Utility for easy creation of PE file reports.
@@ -213,8 +215,24 @@ class ReportCreator(private val data: PEData) {
       buf.toString + NL
     } else ""
   }
-
-  def extensiveResourceReport(resource: Resource): String = {
+  
+  def detailedResourcesReport(): String = {
+     val loader = new SectionLoader(data)
+    val maybeRSRC = loader.maybeLoadResourceSection()
+    if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
+      val rsrc = maybeRSRC.get
+      val buf = new StringBuffer()
+      buf.append(title("Resources") + NL)
+      val resources = rsrc.getResources.asScala.toList
+      for (resource <- resources) {
+        buf.append(detailedResourceReport(resource, resources))
+        buf.append(NL)
+      }
+      buf.toString + NL
+    } else ""
+  }
+  
+  def detailedResourceReport(resource: Resource, resources: List[Resource]): String = {
     
     def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
     //TODO this is just for testing; will fail for large resources, be careful
@@ -231,9 +249,13 @@ class ReportCreator(private val data: PEData) {
     if (!fileTypes.isEmpty) {
       buf.append("Signatures: " + NL + fileTypes.mkString(NL) + NL)
     }
-    if (resource.getType == "RT_MANIFEST") { //TODO display all kinds of resources
+    if (resource.getType == "RT_MANIFEST") { 
       val versionInfo = getResourceString(resource)
-      buf.append(versionInfo + NL)
+      buf.append(NL + versionInfo + NL)
+    }
+    if(resource.getType == "RT_VERSION") {
+      val versionInfo = VsVersionInfo(resource, data.getFile)
+      buf.append(NL + versionInfo + NL)
     }
     buf.toString
   }

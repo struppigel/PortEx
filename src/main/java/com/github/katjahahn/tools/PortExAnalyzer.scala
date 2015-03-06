@@ -53,7 +53,7 @@ object PortExAnalyzer {
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -i,--ico           extract all icons from the resource section
-    | -r,--resources     extract all resources
+    | -r,--resources     show resources
     """.stripMargin
 
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
@@ -81,10 +81,14 @@ object PortExAnalyzer {
           if (file.exists) {
             if (isPEFile(file)) {
               val reporter = ReportCreator.newInstance(file)
+              val showResources = options.contains('resources)
               if (options.contains('output)) {
-                writeReport(reporter, new File(options('output)))
+                writeReport(reporter, new File(options('output)), showResources)
               } else {
                 reporter.printReport()
+                if(showResources) {
+                  println(reporter.detailedResourcesReport)
+                }
                 println("--- end of report ---")
                 println()
               }
@@ -155,7 +159,7 @@ object PortExAnalyzer {
   private def isPEFile(file: File): Boolean =
     new PESignature(file).exists()
 
-  private def writeReport(reporter: ReportCreator, file: File): Unit = {
+  private def writeReport(reporter: ReportCreator, file: File, showResources: Boolean): Unit = {
     if (file.getName().isEmpty()) {
       throw new IOException("File name for output file is empty")
     }
@@ -171,6 +175,10 @@ object PortExAnalyzer {
       fw.write(reporter.specialSectionReports)
       println("Writing analysis reports...")
       fw.write(reporter.additionalReports)
+      if(showResources) {
+        println("Writing detailed resource report")
+        fw.write(reporter.detailedResourcesReport)
+      }
       fw.write("--- end of report ---")
       println("Done!")
     }
@@ -199,6 +207,10 @@ object PortExAnalyzer {
         nextOption(map += ('icons -> value), tail)
       case "--ico" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
+        case "-r" :: tail =>
+        nextOption(map += ('resources -> ""), tail)
+      case "--resources" :: tail =>
+        nextOption(map += ('resources -> ""), tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
       case option :: tail =>
         println("Unknown option " + option + "\n" + usage)

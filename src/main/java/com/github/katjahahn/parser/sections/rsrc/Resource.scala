@@ -67,7 +67,7 @@ class Resource(
    * {@inheritDoc}
    */
   override def toString(): String =
-    "address: 0x" + java.lang.Long.toHexString(rawBytesLocation.from) + 
+    "offset: 0x" + java.lang.Long.toHexString(rawBytesLocation.from) + 
     ", size: 0x" + java.lang.Long.toHexString(rawBytesLocation.size) + ", " +
     levelIDs.mkString(", ")
 
