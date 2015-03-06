@@ -349,7 +349,6 @@ object MemoryMappedPE {
       List(new Mapping(new VirtRange(0, filesize), new PhysRange(0, filesize), data))
     } else {
       /* not low alignment mode, so mappings are applied per section */
-      //TODO check if at least one section exists
       val mappings = getHeaderMappings(secLoader, data) ++ getSectionMappings(secLoader, data)
       // sort mappings to be in ascending order for their virtual start
       val sorted = mappings.sortBy(m => m.virtRange.start)
