@@ -15,9 +15,9 @@ class VsFixedFileInfo(
   val dwProductVersionLS: Long,
   val dwFileFlagsMask: Long,
   val dwFileFlags: Long,
-  val fileOS: FileOS,
-  val dwFileType: Long,
-  val dwFileSubtype: Long,
+  val fileOS: List[FileOS],
+  val fileType: FileType,
+  val fileSubtype: FileSubtype,
   val dwFileDateMS: Long,
   val dwFileDateLS: Long) {
 
@@ -28,9 +28,9 @@ class VsFixedFileInfo(
   |product version: ${dwProductVersionMS}.${dwProductVersionLS}
   |file flags mask: ${hex(dwFileFlagsMask)}
   |file flags: ${hex(dwFileFlags)}
-  |file OS: ${fileOS.getDescription}
-  |file type: ${hex(dwFileType)}
-  |file subtype: ${hex(dwFileSubtype)}
+  |file OS: ${fileOS.map(_.getDescription).mkString(", ")}
+  |file type: ${fileType.getDescription}
+  |file subtype: ${fileSubtype.getDescription}
   |file date: ${dwFileDateMS}.${dwFileDateLS}""".stripMargin
   
 
@@ -59,14 +59,23 @@ object VsFixedFileInfo {
     val dwFileFlags = ByteArrayUtil.bytesToLong(loadBytes(offset + padding + dwordSize * 7, dwordSize, raf))
     val dwFileOS = ByteArrayUtil.bytesToLong(loadBytes(offset + padding + dwordSize * 8, dwordSize, raf))
     //TODO use mask to collect all that fit
-    val fileOS = FileOS.values.toList.find { _.getValue == dwFileOS }.getOrElse(FileOS.VOS_UNKNOWN)
+    val fileOS = FileOS.values.toBuffer.filter { os => (os.getValue & dwFileOS) != 0 }
+    if(fileOS.isEmpty) fileOS += FileOS.VOS_UNKNOWN
     val dwFileType = ByteArrayUtil.bytesToLong(loadBytes(offset + padding + dwordSize * 9, dwordSize, raf))
+    val fileType = FileType.values.find(_.getValue == dwFileType).getOrElse(FileType.VFT_UNKNOWN)
     val dwFileSubtype = ByteArrayUtil.bytesToLong(loadBytes(offset + padding + dwordSize * 10, dwordSize, raf))
+    val fileSubtype = {
+      if(fileType == FileType.VFT_DRV) 
+        DrvFileSubtype.values.find(_.getValue == dwFileSubtype).getOrElse(new UndefinedSubtype(dwFileSubtype, true))
+      else if (fileType == FileType.VFT_FONT)
+        FontFileSubtype.values.find(_.getValue == dwFileSubtype).getOrElse(new UndefinedSubtype(dwFileSubtype, true))
+      else new UndefinedSubtype(dwFileSubtype)
+    }
     val dwFileDateMS = ByteArrayUtil.bytesToLong(loadBytes(offset + padding + dwordSize * 11, dwordSize, raf))
     val dwFileDateLS = ByteArrayUtil.bytesToLong(loadBytes(offset + padding + dwordSize * 12, dwordSize, raf))
     new VsFixedFileInfo(dwSignature, wMajorVersion, wMinorVersion, dwFileVersionMS,
       dwFileVersionLS, dwProductVersionMS, dwProductVersionLS, dwFileFlagsMask,
-      dwFileFlags, fileOS, dwFileType, dwFileSubtype, dwFileDateMS, dwFileDateLS)
+      dwFileFlags, fileOS.toList, fileType, fileSubtype, dwFileDateMS, dwFileDateLS)
   }
 
 }

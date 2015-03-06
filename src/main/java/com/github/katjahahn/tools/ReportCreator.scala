@@ -212,12 +212,37 @@ class ReportCreator(private val data: PEData) {
         }
         buf.append(NL)
       }
-      buf.toString + NL
+      buf.append(NL)
+      buf.append(manifestReport)
+      buf.append(versionReport)
+      buf.toString
     } else ""
   }
-  
+
+  def manifestReport(resources: List[Resource]): String = {
+    def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
+    //TODO this is just for testing; will fail for large resources, be careful
+    def readBytes(resource: Resource): Array[Byte] =
+      IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt,
+        new RandomAccessFile(data.getFile, "r"))
+    def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
+    
+    val buf = new StringBuffer()
+    val manifestResources = resources.filter { _.getType == "RT_MANIFEST" }
+    manifestResources.foreach { resource =>
+      val versionInfo = getResourceString(resource)
+      buf.append(title("Manifest") + NL)
+      buf.append(NL + versionInfo + NL)
+    }
+    buf.toString + NL
+  }
+
+  def versionReport(): String = {
+"" //TODO
+  }
+
   def detailedResourcesReport(): String = {
-     val loader = new SectionLoader(data)
+    val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
@@ -231,16 +256,16 @@ class ReportCreator(private val data: PEData) {
       buf.toString + NL
     } else ""
   }
-  
+
   def detailedResourceReport(resource: Resource, resources: List[Resource]): String = {
-    
+
     def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
     //TODO this is just for testing; will fail for large resources, be careful
     def readBytes(resource: Resource): Array[Byte] =
-      IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt, 
-          new RandomAccessFile(data.getFile, "r"))
+      IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt,
+        new RandomAccessFile(data.getFile, "r"))
     def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
-    
+
     val buf = new StringBuffer()
     var offset = resource.rawBytesLocation.from
     var fileTypes = FileTypeScanner(data.getFile).scanAt(offset).
@@ -249,11 +274,11 @@ class ReportCreator(private val data: PEData) {
     if (!fileTypes.isEmpty) {
       buf.append("Signatures: " + NL + fileTypes.mkString(NL) + NL)
     }
-    if (resource.getType == "RT_MANIFEST") { 
+    if (resource.getType == "RT_MANIFEST") {
       val versionInfo = getResourceString(resource)
       buf.append(NL + versionInfo + NL)
     }
-    if(resource.getType == "RT_VERSION") {
+    if (resource.getType == "RT_VERSION") {
       val versionInfo = VsVersionInfo(resource, data.getFile)
       buf.append(NL + versionInfo + NL)
     }
