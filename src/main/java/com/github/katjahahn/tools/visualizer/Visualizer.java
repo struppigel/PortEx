@@ -139,6 +139,7 @@ public class Visualizer {
 	 *            the settings for the visualizer
 	 */
 	Visualizer(VisualizerSettings settings) {
+		
 		this.additionalGap = settings.additionalGap;
 		this.fileWidth = settings.fileWidth;
 		this.legendWidth = settings.legendWidth;
@@ -151,26 +152,23 @@ public class Visualizer {
 		} else {
 			this.pixelSize = settings.pixelSize;
 		}
+		logger.info("vis settings: fileWidth = " + fileWidth);
+		logger.info("vis settings: height = " + height);
+		logger.info("vis settings: pixelSize = " + pixelSize);
 		this.colorMap = settings.colorMap;
 	}
 
 	public BufferedImage createBytePlot(File file) throws IOException {
 		resetAvailabilityFlags();
-		final int EOF = -1;
-		this.data = PELoader.loadPE(file);
+		this.data = new PEData(null, null, null, null, null, file);
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
-		// bytes to be read at once to calculate local entropy
-		try (FileInputStream fis = new FileInputStream(file)) {
-			byte[] buffer = new byte[1024];
-			int bytesRead = 0;
-			long offset = 0;
-			while ((bytesRead = fis.read(buffer)) != EOF) {
-				for (int i = 0; i < bytesRead; i++) {
-					byte b = buffer[i];
-					Color color = getBytePlotColor(b);
-					drawPixel(color, offset);
-					offset++;
-				}
+		final long minLength = withMinLength(0);
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+			for (long address = 0; address < file.length(); address += minLength) {
+				raf.seek(address);
+				byte b = raf.readByte();
+				Color color = getBytePlotColor(b);
+				drawPixel(color, address);
 			}
 		}
 		return image;
@@ -184,9 +182,10 @@ public class Visualizer {
 		float blueHue = hsbvals[0];
 		Color.RGBtoHSB(0, 255, 0, hsbvals);
 		float greenHue = hsbvals[0];
-		Color.RGBtoHSB(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), hsbvals);
+		Color.RGBtoHSB(Color.yellow.getRed(), Color.yellow.getGreen(),
+				Color.yellow.getBlue(), hsbvals);
 		float yellowHue = hsbvals[0];
-		
+
 		if (byteVal == 0)
 			return Color.black;
 		if (byteVal == 0xff)
@@ -202,7 +201,7 @@ public class Visualizer {
 			return Color.getHSBColor(hue, saturation, brightness);
 		} else { // non-ASCII
 			float saturation = 1;
-			float hue = yellowHue; 
+			float hue = yellowHue;
 			float brightness = (float) ((byteVal - 127) / (float) (255 - 127));
 			return Color.getHSBColor(hue, saturation, brightness);
 		}
@@ -219,7 +218,7 @@ public class Visualizer {
 	 */
 	public BufferedImage createEntropyImage(File file) throws IOException {
 		resetAvailabilityFlags();
-		this.data = PELoader.loadPE(file);
+		this.data = new PEData(null, null, null, null, null, file);
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final int MIN_WINDOW_SIZE = 100;
 		// bytes to be read at once to calculate local entropy
@@ -438,7 +437,11 @@ public class Visualizer {
 				sectionTableSize);
 		for (SectionHeader header : table.getSectionHeaders()) {
 			long sectionOffset = header.getAlignedPointerToRaw();
+			logger.info("drawing section to: " + sectionOffset);
 			long sectionSize = new SectionLoader(data).getReadSize(header);
+			logger.info("drawing section size: " + sectionSize);
+			long pixelStart = getPixelNumber(sectionOffset);
+			logger.info("pixelStart: " + pixelStart);
 			drawPixels(getSectionColor(header), sectionOffset, sectionSize);
 		}
 	}
@@ -563,7 +566,7 @@ public class Visualizer {
 				try {
 					image.setRGB(x, y, color.getRGB());
 				} catch (ArrayIndexOutOfBoundsException e) {
-					logger.warn("tried to set x/y = " + x + "/" + y);
+					//logger.warn("tried to set x/y = " + x + "/" + y);
 				}
 			}
 		}
@@ -762,7 +765,7 @@ public class Visualizer {
 	}
 
 	private int getXPixels() {
-		int result = (int) Math.ceil(this.fileWidth / (double) this.pixelSize);
+		int result = (int) Math.floor(this.fileWidth / (double) this.pixelSize);
 		assert result >= 0;
 		return result;
 	}

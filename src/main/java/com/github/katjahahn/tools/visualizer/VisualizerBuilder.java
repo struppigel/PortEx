@@ -239,9 +239,9 @@ public class VisualizerBuilder {
     // TODO maybe calculate with filelength in visualizer
     public VisualizerBuilder setBytesPerPixel(int bytes, long fileLength) {
         Preconditions.checkArgument(bytes > 0);
-        double nrOfPixels = Math.ceil(fileLength / (double) bytes);
-        double pixelsPerRow = Math.ceil(settings.fileWidth / settings.pixelSize);
-        double pixelsPerCol = Math.ceil(nrOfPixels / pixelsPerRow);
+        double nrOfPixels = fileLength / (double) bytes;
+        double pixelsPerRow = Math.floor(settings.fileWidth / (double) settings.pixelSize);
+        double pixelsPerCol = Math.ceil(nrOfPixels / (double) pixelsPerRow);
         settings.height = (int) Math.ceil(pixelsPerCol * settings.pixelSize);
         return this;
     }

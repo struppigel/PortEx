@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder
@@ -87,12 +89,7 @@ object PortExAnalyzer {
                 println("--- end of report ---")
                 println()
               }
-              if (options.contains('picture)) {
-                val imageFile = new File(options('picture))
-                writePicture(file, imageFile)
-                println("picture successfully created and saved to " + imageFile.getAbsolutePath)
-                println()
-              }
+
               if (options.contains('icons)) {
                 val folder = new File(options('icons))
                 if (folder.isDirectory && folder.exists) {
@@ -102,8 +99,18 @@ object PortExAnalyzer {
                 }
               }
             } else {
-              println("The given file is no PE file!")
-              printFileTypeReport(file)
+              if (options.contains('output)) {
+                writeFileTypeReport(file, new File(options('output)))
+              } else {
+                println("The given file is no PE file!")
+                printFileTypeReport(file)
+              }
+            }
+            if (options.contains('picture)) {
+              val imageFile = new File(options('picture))
+              writePicture(file, imageFile)
+              println("picture successfully created and saved to " + imageFile.getAbsolutePath)
+              println()
             }
           } else {
             System.err.println("file doesn't exist")
@@ -129,15 +136,36 @@ object PortExAnalyzer {
     }
   }
 
-  private def writePicture(peFile: File, imageFile: File): Unit = {
-    val vi = new VisualizerBuilder().build()
-    val entropyImage = vi.createEntropyImage(peFile)
-    val structureImage = vi.createImage(peFile)
-    //more fine grained bytePlot image
-    val bytePlot = new VisualizerBuilder().setPixelSize(1).build().createBytePlot(peFile)
-    val appendedImage = ImageUtil.appendImages(entropyImage, structureImage)
-    val appendedImage2 = ImageUtil.appendImages(bytePlot, appendedImage)
-    ImageIO.write(appendedImage2, "png", imageFile);
+  private def writePicture(file: File, imageFile: File): Unit = {
+    val pixelSize = 4
+    val fileWidth = 512
+    val MAX_HEIGHT = 1000
+    def height(bytes: Int): Int = {
+      val nrOfPixels = file.length / bytes.toDouble
+      val pixelsPerRow = fileWidth / pixelSize.toDouble
+      val pixelsPerCol = nrOfPixels / pixelsPerRow
+      Math.ceil(pixelsPerCol * pixelSize).toInt
+    }
+    val bytesPerPixel = {
+      var res = 1
+      while(height(res) > MAX_HEIGHT) res *= 2
+      res
+    }
+    
+    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length)
+    val vi = viBuilder.build()
+    val vi2 = new VisualizerBuilder().setPixelSize(1).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
+    val entropyImage = vi.createEntropyImage(file)
+    //more fine grained bytePlot image, thus another visualizer
+    val bytePlot = vi2.createBytePlot(file)
+    val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
+    if (isPEFile(file)) {
+      val structureImage = vi.createImage(file)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage, structureImage)
+      ImageIO.write(appendedImage2, "png", imageFile);
+    } else {
+      ImageIO.write(appendedImage, "png", imageFile);
+    }
   }
 
   private def printFileTypeReport(file: File): Unit = {
@@ -152,6 +180,31 @@ object PortExAnalyzer {
     println()
     results.foreach(result =>
       println(s"* ${result._1.name}, ${bytesMatched(result._1)} bytes matched"))
+  }
+
+  private def writeFileTypeReport(file: File, outFile: File): Unit = {
+    if (outFile.getName().isEmpty()) {
+      throw new IOException("File name for output file is empty")
+    }
+    if (outFile.exists()) {
+      throw new IOException("Output file " + file.getAbsoluteFile() + " already exists")
+    }
+
+    def bytesMatched(sig: Signature): Int =
+      sig.signature.count(cond(_) { case Some(s) => true })
+
+    using(new FileWriter(outFile, true)) { fw =>
+      fw.write("The given file is no PE file!")
+      var results = FileTypeScanner(file).scanAt(0)
+      if (results.isEmpty) fw.write("No matching file-type signatures found" + NL)
+      else if (results.size == 1)
+        fw.write("The file could be of the following type: " + NL)
+      else
+        fw.write("The file could be of one of the following types: " + NL)
+      fw.write(NL)
+      results.foreach(result =>
+        fw.write(s"* ${result._1.name}, ${bytesMatched(result._1)} bytes matched" + NL))
+    }
   }
 
   private def isPEFile(file: File): Boolean =
