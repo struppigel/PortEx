@@ -15,8 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.IOUtil.*;
-import static com.google.common.base.Preconditions.*;
+import static com.github.katjahahn.parser.IOUtil.loadBytes;
+import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.awt.AWTException;
 import java.awt.image.BufferedImage;
@@ -37,7 +38,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.sigscanner.FileTypeScanner;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -281,18 +282,20 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-        File folder = new File("/home/deque/portextestfiles"); // TODO create
-                                                               // Unit test for
-                                                               // resource type
-                                                               // with name!
-        for (File file : folder.listFiles()) {
-            if (new PESignature(file).exists()) {
-                System.out.println(file.getName());
-                ReportCreator reporter = ReportCreator.newInstance(file);
-                System.out.println(reporter.resourcesReport());
-                System.out.println();
-            }
-        }
+        FileTypeScanner.main(args);
+          
+//        File folder = new File("/home/deque/portextestfiles"); // TODO create
+//                                                               // Unit test for
+//                                                               // resource type
+//                                                               // with name!
+//        for (File file : folder.listFiles()) {
+//            if (new PESignature(file).exists()) {
+//                System.out.println(file.getName());
+//                ReportCreator reporter = ReportCreator.newInstance(file);
+//                System.out.println(reporter.resourcesReport());
+//                System.out.println();
+//            }
+//        }
         // ReportCreator reporter = ReportCreator.newInstance(data.getFile());
         // reporter.printReport();
         // VisualizerBuilder builder = new VisualizerBuilder();

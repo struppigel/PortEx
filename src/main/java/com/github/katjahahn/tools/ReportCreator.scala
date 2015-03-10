@@ -68,7 +68,7 @@ class ReportCreator(private val data: PEData) {
     delayImportsReport + exportsReport + resourcesReport + debugReport //+ relocReport
 
   def additionalReports(): String = overlayReport +
-    anomalyReport + peidReport + jar2ExeReport + hashReport + maldetReport
+    anomalyReport + peidReport + jar2ExeReport + hashReport //+ maldetReport
 
   /**
    * Prints a report to stdout.
@@ -213,76 +213,39 @@ class ReportCreator(private val data: PEData) {
         buf.append(NL)
       }
       buf.append(NL)
-      buf.append(manifestReport)
-      buf.append(versionReport)
+      buf.append(manifestReport(resources.toList))
+      buf.append(versionReport(resources.toList))
       buf.toString
     } else ""
   }
 
   def manifestReport(resources: List[Resource]): String = {
     def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
-    //TODO this is just for testing; will fail for large resources, be careful
+    //TODO this is just for testing; will fail for large resources
     def readBytes(resource: Resource): Array[Byte] =
       IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt,
         new RandomAccessFile(data.getFile, "r"))
     def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
-    
+
     val buf = new StringBuffer()
     val manifestResources = resources.filter { _.getType == "RT_MANIFEST" }
     manifestResources.foreach { resource =>
+      buf.append(title("Manifest"))
       val versionInfo = getResourceString(resource)
-      buf.append(title("Manifest") + NL)
       buf.append(NL + versionInfo + NL)
     }
     buf.toString + NL
   }
 
-  def versionReport(): String = {
-"" //TODO
-  }
-
-  def detailedResourcesReport(): String = {
-    val loader = new SectionLoader(data)
-    val maybeRSRC = loader.maybeLoadResourceSection()
-    if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
-      val rsrc = maybeRSRC.get
-      val buf = new StringBuffer()
-      buf.append(title("Resources") + NL)
-      val resources = rsrc.getResources.asScala.toList
-      for (resource <- resources) {
-        buf.append(detailedResourceReport(resource, resources))
-        buf.append(NL)
-      }
-      buf.toString + NL
-    } else ""
-  }
-
-  def detailedResourceReport(resource: Resource, resources: List[Resource]): String = {
-
-    def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
-    //TODO this is just for testing; will fail for large resources, be careful
-    def readBytes(resource: Resource): Array[Byte] =
-      IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt,
-        new RandomAccessFile(data.getFile, "r"))
-    def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
-
+  def versionReport(resources: List[Resource]): String = {
     val buf = new StringBuffer()
-    var offset = resource.rawBytesLocation.from
-    var fileTypes = FileTypeScanner(data.getFile).scanAt(offset).
-      map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
-    buf.append(resource + NL)
-    if (!fileTypes.isEmpty) {
-      buf.append("Signatures: " + NL + fileTypes.mkString(NL) + NL)
-    }
-    if (resource.getType == "RT_MANIFEST") {
-      val versionInfo = getResourceString(resource)
-      buf.append(NL + versionInfo + NL)
-    }
-    if (resource.getType == "RT_VERSION") {
+    val versionResources = resources.filter { _.getType == "RT_VERSION" }
+    versionResources.foreach { resource =>
+      buf.append(title("Version Information") + NL)
       val versionInfo = VsVersionInfo(resource, data.getFile)
-      buf.append(NL + versionInfo + NL)
+      buf.append(versionInfo.toString + NL)
     }
-    buf.toString
+    buf.toString + NL
   }
 
   def jar2ExeReport(): String = {

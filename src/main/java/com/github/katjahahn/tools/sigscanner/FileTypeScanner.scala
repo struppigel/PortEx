@@ -21,12 +21,14 @@ object FileTypeScanner {
   private val signatureFile = "customsigs_GCK.txt"
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/deque/portextestfiles/unusualfiles/corkami/gui.exe")
-    FileTypeScanner(file).scanAtReport(0).asScala.foreach(println)
+    val file = new File("/home/katja/samples/test")
+    for (i <- Range(212000, file.length.toInt)) {
+      FileTypeScanner(file).scanAtReport(i).asScala.foreach(println)
+    }
   }
 
   def apply(file: File): FileTypeScanner = {
-    val signatures = loadSignatures()
+    val signatures = loadSignatures().filter { s => s.bytesMatched() >= 4 }
     val sigscanner = new SignatureScanner(signatures)
     new FileTypeScanner(sigscanner, file)
   }

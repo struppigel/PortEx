@@ -15,13 +15,32 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.BASE_RELOCATION_TABLE;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DEBUG;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DELAY_IMPORT_DESCRIPTOR;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.EXPORT_TABLE;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.IMPORT_TABLE;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.RESOURCE_TABLE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.ANOMALY;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.COFF_FILE_HEADER;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.DEBUG_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.DELAY_IMPORT_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTRY_POINT;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.EXPORT_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.IMPORT_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.MSDOS_HEADER;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.OPTIONAL_HEADER;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.OVERLAY;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.RELOC_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.RESOURCE_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_START;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_TABLE;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.EnumMap;
@@ -133,6 +152,28 @@ public class Visualizer {
             this.pixelSize = settings.pixelSize;
         }
         this.colorMap = settings.colorMap;
+    }
+    
+    public BufferedImage createBytePlot(File file) throws IOException {
+    	 resetAvailabilityFlags();
+    	 final int EOF = -1;
+         this.data = PELoader.loadPE(file);
+         image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
+         // bytes to be read at once to calculate local entropy
+         try (FileInputStream fis = new FileInputStream(file)) {
+        	 byte[] buffer = new byte[1024];
+        	 int bytesRead = 0;
+        	 long offset = 0;
+        	 while((bytesRead = fis.read(buffer)) != EOF) {
+        		 for(int i = 0; i < bytesRead; i++) {
+        			int b = buffer[i] & 0xff;
+        			Color color = new Color(b, b, b);
+        			drawPixel(color, offset);
+        			offset++;
+        		 }
+        	 }
+         }
+         return image;
     }
 
     /**
@@ -536,19 +577,24 @@ public class Visualizer {
                     * sizemodifier);
         }
     }
-
-    private void drawPixels(Color color, long fileOffset, long fileLength) {
-        assert color != null;
-        drawPixels(color, fileOffset, fileLength, 0);
+    
+    private void drawPixel(Color color, long fileOffset) {
+    	long size = withMinLength(0);
+        drawPixels(color, fileOffset, size);
     }
 
-    private void drawPixels(Color color, long fileOffset, long fileLength,
+    private void drawPixels(Color color, long fileOffset, long length) {
+        assert color != null;
+        drawPixels(color, fileOffset, length, 0);
+    }
+
+    private void drawPixels(Color color, long fileOffset, long length,
             int additionalGap) {
         assert color != null;
         long pixelStart = getPixelNumber(fileOffset);
         // necessary to avoid gaps due to rounding issues (you can't just do
         // getPixelNumber(fileLength))
-        long pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
+        long pixelLength = getPixelNumber(fileOffset + length) - pixelStart;
         long pixelMax = getXPixels() * getYPixels();
         if (pixelStart > pixelMax) {
             logger.error("too many pixels, max is: " + pixelMax

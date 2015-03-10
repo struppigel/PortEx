@@ -37,9 +37,9 @@ import java.io.FileWriter
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.3.5
+  private val version = """version: 0.3.7
     |author: Katja Hahn
-    |last update: 19. Feb 2015""".stripMargin
+    |last update: 10. Mar 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -133,8 +133,10 @@ object PortExAnalyzer {
     val vi = new VisualizerBuilder().build()
     val entropyImage = vi.createEntropyImage(peFile)
     val structureImage = vi.createImage(peFile)
+    val bytePlot = vi.createBytePlot(peFile)
     val appendedImage = ImageUtil.appendImages(entropyImage, structureImage)
-    ImageIO.write(appendedImage, "png", imageFile);
+    val appendedImage2 = ImageUtil.appendImages(bytePlot, appendedImage)
+    ImageIO.write(appendedImage2, "png", imageFile);
   }
 
   private def printFileTypeReport(file: File): Unit = {
