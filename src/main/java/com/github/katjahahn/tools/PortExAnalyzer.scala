@@ -133,7 +133,8 @@ object PortExAnalyzer {
     val vi = new VisualizerBuilder().build()
     val entropyImage = vi.createEntropyImage(peFile)
     val structureImage = vi.createImage(peFile)
-    val bytePlot = vi.createBytePlot(peFile)
+    //more fine grained bytePlot image
+    val bytePlot = new VisualizerBuilder().setPixelSize(1).build().createBytePlot(peFile)
     val appendedImage = ImageUtil.appendImages(entropyImage, structureImage)
     val appendedImage2 = ImageUtil.appendImages(bytePlot, appendedImage)
     ImageIO.write(appendedImage2, "png", imageFile);
