@@ -38,7 +38,7 @@ public class ResourceSectionTest {
 
     @Test
     public void resourceLoopRobustness() throws IOException {
-        String[] actResources = { "address: 0x1370, size: 0x229, language -> ID: 0, name -> ID: 101, type -> ID: RT_RCDATA" };
+        String[] actResources = { "offset: 0x1370, size: 0x229, language -> ID: 0, name -> ID: 101, type -> ID: RT_RCDATA" };
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
                 + "/unusualfiles/corkami/resource_loop.exe"));
         List<Resource> resources = new SectionLoader(data)
@@ -51,7 +51,7 @@ public class ResourceSectionTest {
     
     @Test
     public void shuffledResourcesRobustness() throws IOException {
-        String[] actResources = { "address: 0x12f0, size: 0x229, language -> ID: 0, name -> ID: 101, type -> ID: RT_RCDATA" };
+        String[] actResources = { "offset: 0x12f0, size: 0x229, language -> ID: 0, name -> ID: 101, type -> ID: RT_RCDATA" };
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
                 + "/unusualfiles/corkami/resource_shuffled.exe"));
         List<Resource> resources = new SectionLoader(data)
@@ -65,21 +65,21 @@ public class ResourceSectionTest {
     @Test
     public void readWinRarResources() throws IOException {
         String[] actResources = {
-                "address: 0x12a04, size: 0x36b0, language -> ID: 1049, name -> , type -> ID: RT_BITMAP",
-                "address: 0x160b4, size: 0x8a8, language -> ID: 1049, name -> ID: 1, type -> ID: RT_ICON",
-                "address: 0x1695c, size: 0x568, language -> ID: 1049, name -> ID: 2, type -> ID: RT_ICON",
-                "address: 0x16ec4, size: 0x2e8, language -> ID: 1049, name -> ID: 3, type -> ID: RT_ICON",
-                "address: 0x171ac, size: 0x128, language -> ID: 1049, name -> ID: 4, type -> ID: RT_ICON",
-                "address: 0x172d4, size: 0xd8, language -> ID: 1049, name -> , type -> ID: RT_DIALOG",
-                "address: 0x173ac, size: 0x12e, language -> ID: 1049, name -> , type -> ID: RT_DIALOG",
-                "address: 0x174dc, size: 0x338, language -> ID: 1049, name -> , type -> ID: RT_DIALOG",
-                "address: 0x17814, size: 0x272, language -> ID: 1049, name -> , type -> ID: RT_DIALOG",
-                "address: 0x17a88, size: 0x22c, language -> ID: 1049, name -> ID: 7, type -> ID: RT_STRING",
-                "address: 0x17cb4, size: 0x376, language -> ID: 1049, name -> ID: 8, type -> ID: RT_STRING",
-                "address: 0x1802c, size: 0x200, language -> ID: 1049, name -> ID: 9, type -> ID: RT_STRING",
-                "address: 0x1822c, size: 0x10, language -> ID: 0, name -> , type -> ID: RT_RCDATA",
-                "address: 0x1823c, size: 0x3e, language -> ID: 1049, name -> ID: 100, type -> ID: RT_GROUP_ICON",
-                "address: 0x1827c, size: 0x331, language -> ID: 1049, name -> ID: 1, type -> ID: RT_MANIFEST" };
+                "offset: 0x12a04, size: 0x36b0, language -> ID: 1049, name -> TITLE_BMP, type -> ID: RT_BITMAP",
+                "offset: 0x160b4, size: 0x8a8, language -> ID: 1049, name -> ID: 1, type -> ID: RT_ICON",
+                "offset: 0x1695c, size: 0x568, language -> ID: 1049, name -> ID: 2, type -> ID: RT_ICON",
+                "offset: 0x16ec4, size: 0x2e8, language -> ID: 1049, name -> ID: 3, type -> ID: RT_ICON",
+                "offset: 0x171ac, size: 0x128, language -> ID: 1049, name -> ID: 4, type -> ID: RT_ICON",
+                "offset: 0x172d4, size: 0xd8, language -> ID: 1049, name -> LICENSEDLG, type -> ID: RT_DIALOG",
+                "offset: 0x173ac, size: 0x12e, language -> ID: 1049, name -> RENAMEDLG, type -> ID: RT_DIALOG",
+                "offset: 0x174dc, size: 0x338, language -> ID: 1049, name -> REPLACEFILEDLG, type -> ID: RT_DIALOG",
+                "offset: 0x17814, size: 0x272, language -> ID: 1049, name -> STARTDLG, type -> ID: RT_DIALOG",
+                "offset: 0x17a88, size: 0x22c, language -> ID: 1049, name -> ID: 7, type -> ID: RT_STRING",
+                "offset: 0x17cb4, size: 0x376, language -> ID: 1049, name -> ID: 8, type -> ID: RT_STRING",
+                "offset: 0x1802c, size: 0x200, language -> ID: 1049, name -> ID: 9, type -> ID: RT_STRING",
+                "offset: 0x1822c, size: 0x10, language -> ID: 0, name -> DVCLAL, type -> ID: RT_RCDATA",
+                "offset: 0x1823c, size: 0x3e, language -> ID: 1049, name -> ID: 100, type -> ID: RT_GROUP_ICON",
+                "offset: 0x1827c, size: 0x331, language -> ID: 1049, name -> ID: 1, type -> ID: RT_MANIFEST" };
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
                 + TestreportsReader.TEST_FILE_DIR + "/WinRar.exe"));
         SectionLoader loader = new SectionLoader(data);
