@@ -28,7 +28,7 @@ object FileTypeScanner {
   }
 
   def apply(file: File): FileTypeScanner = {
-    val signatures = loadSignatures().filter { s => s.bytesMatched() >= 4 }
+    val signatures = loadSignatures().filter { s => s.bytesMatched() >= 3 }
     val sigscanner = new SignatureScanner(signatures)
     new FileTypeScanner(sigscanner, file)
   }

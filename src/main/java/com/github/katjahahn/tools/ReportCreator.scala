@@ -42,6 +42,8 @@ import com.github.katjahahn.parser.IOUtil
 import java.io.RandomAccessFile
 import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource
 import com.github.katjahahn.parser.sections.rsrc.version.VsVersionInfo
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
+import com.google.common.base.Optional
 
 /**
  * Utility for easy creation of PE file reports.
@@ -267,10 +269,14 @@ class ReportCreator(private val data: PEData) {
 
   def overlayReport(): String = {
     val overlay = new Overlay(data.getFile)
-    if (overlay.exists) title("Overlay") + NL + "Overlay at offset " +
-      hexString(overlay.getOffset()) + NL + "Overlay size      " +
-      hexString(overlay.getSize) + NL + NL
-    else ""
+    if (overlay.exists) {
+      val overlayOffset = overlay.getOffset
+      val sigresults = FileTypeScanner(data.getFile).scanAtReport(overlayOffset)
+      val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
+      title("Overlay") + NL + "Overlay at offset " +
+        hexString(overlayOffset) + NL + "Overlay size      " +
+        hexString(overlay.getSize) + NL + NL + "Signatures: " + signatures + NL + NL
+    } else ""
   }
 
   def peidReport(): String = {
@@ -332,6 +338,7 @@ class ReportCreator(private val data: PEData) {
 
   def optHeaderReport(): String = {
     val opt = data.getOptionalHeader
+    val secLoader = new SectionLoader(data)
     val buf = new StringBuffer()
     val colWidth = 17
     val padLength = "pointer to symbol table (deprecated) ".length
@@ -341,10 +348,19 @@ class ReportCreator(private val data: PEData) {
       else "DLL Characteristics  * " +
         opt.getDllCharacteristics.asScala.map(_.getDescription).mkString(NL + "                     * ")
     }
+    val entryPointDescription = {
+      val entryPoint = opt.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+      val maybeHeader = secLoader.maybeGetSectionHeaderByRVA(entryPoint)
+      if (maybeHeader.isPresent)
+        "Entry Point is in section " + maybeHeader.get.getNumber + " with name " + maybeHeader.get.getName
+      else "entry point is not in a section"
+    }
 
     buf.append(title("Optional Header"))
-    buf.append(NL + subsystem)
-    buf.append(NL + dllCharacteristics + NL)
+    buf.append(NL + "Magic Number: " + opt.getMagicNumber.getDescription)
+    buf.append(NL + entryPointDescription)
+    buf.append(NL + dllCharacteristics)
+    buf.append(NL + subsystem + NL)
     val standardHeader = pad("standard field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     val windowsHeader = pad("windows field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     val tableLine = pad("", standardHeader.length, "-") + NL
@@ -360,13 +376,21 @@ class ReportCreator(private val data: PEData) {
       }
     }
     val padLengthDataDir = "delay import descriptor ".length
-    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("file offset", colWidth, " ")
+    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("in section", colWidth, " ") + pad("is valid", colWidth, " ") + pad("file offset", colWidth, " ")
     val dataDirs = opt.getDataDirectory().values.asScala.toList.sortBy(e => e.getTableEntryOffset)
-    buf.append(NL + dataDirHeader + NL + tableLine)
+    val dataDirTableLine = pad("", dataDirHeader.length, "-") + NL
+    buf.append(NL + dataDirHeader + NL + dataDirTableLine)
     for (entry <- dataDirs) {
       val description = entry.getKey.toString
+      val maybeHeader = secLoader.maybeGetSectionHeader(entry.getKey)
+      val valid = {
+        val special = secLoader.maybeLoadSpecialSection(entry.getKey)
+        if (!special.isPresent) "not valid" else if (special.get.isEmpty) "no, empty" else "yes"
+      }
+      val inSection = if (maybeHeader.isPresent) maybeHeader.get.getNumber + " " + maybeHeader.get.getName else "-"
       buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(entry.getVirtualAddress()), colWidth, " ") +
-        pad(hexString(entry.getDirectorySize()), colWidth, " ") + pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
+        pad(hexString(entry.getDirectorySize()), colWidth, " ") + pad(inSection, colWidth, " ") + pad(valid, colWidth, " ") +
+        pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
     }
     buf.toString + NL
   }

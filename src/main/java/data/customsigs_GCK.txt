@@ -466,3 +466,5 @@ UTF-32|UCS-2 file,FF FE,(NONE)
 UTF-32|UCS-4 file,FF FE 00 00,(NONE)
 MSinfo file,FF FE 23 00 6C 00 69 00,MOF
 DOS system driver,FF FF FF FF,SYS
+RSDS Debug info, 52 53 44 53
+NB10 Debug info, 4E 42 31 30

@@ -566,7 +566,7 @@ public class Visualizer {
 				try {
 					image.setRGB(x, y, color.getRGB());
 				} catch (ArrayIndexOutOfBoundsException e) {
-					//logger.warn("tried to set x/y = " + x + "/" + y);
+					logger.warn("tried to set x/y = " + x + "/" + y);
 				}
 			}
 		}
@@ -665,41 +665,13 @@ public class Visualizer {
 	public static void main(String[] args) throws IOException {
 		File file = new File(
 				"/home/deque/portextestfiles/badfiles/VirusShare_7dfcbb865a4a5637efd97a2d021eb4b3");
-		// File file = new File(
-		// "/home/deque/portextestfiles/unusualfiles/corkami/resource_shuffled.exe");
-		// ReportCreator.newInstance(file).printReport();
-		// List<String> problemfiles = new ArrayList<>();
-		// // TODO these are problemfiles, handle them!
-		// String[] problem = {"foldedhdr.exe", "impbyord.exe", "maxvals.exe",
-		// "65535sects.exe"};
-		// List<String> moreproblemfiles = Arrays.asList(problem);
-		// for (File file : folder.listFiles()) {
-		// try {
-		// if (moreproblemfiles.contains(file.getName()))
-		// continue;
 		VisualizerBuilder builder = new VisualizerBuilder();
-		// if(file.length() < 300) {
-		// builder.setFileWidth(150).setBytesPerPixel(1, file.length());
-		// }
 		builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
 		Visualizer vi = builder.build();
-		// System.out.println("creating image for " + file.getName());
-		//
 		final BufferedImage entropyImage = vi.createEntropyImage(file);
 		final BufferedImage structureImage = vi.createImage(file);
-		// final BufferedImage appendedImage = ImageUtil.appendImages(
-		// entropyImage, structureImage);
 		ImageIO.write(structureImage, "png", new File(
 				"/home/deque/git/Thesis/Verteidigung/img/visualizer.png"));
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// problemfiles.add(file.getName());
-		// }
-		// }
-		// System.out.println("Problemfiles");
-		// for (String filename : problemfiles) {
-		// System.out.println(filename);
-		// }
 		show(structureImage);
 	}
 

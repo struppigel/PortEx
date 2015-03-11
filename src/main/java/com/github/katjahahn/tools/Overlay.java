@@ -29,7 +29,7 @@ import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 
 /**
- * Detects and dumps overlay in of PE file.
+ * Detects and dumps overlay of PE files.
  * 
  * @author Katja Hahn
  * 

@@ -25,7 +25,6 @@ class VsVersionInfo(
         |VsFixedFileInfo:
         |$value
       """.stripMargin
-  
 }
 
 object VsVersionInfo {
