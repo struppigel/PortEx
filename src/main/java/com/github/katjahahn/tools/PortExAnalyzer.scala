@@ -102,7 +102,7 @@ object PortExAnalyzer {
               if (options.contains('output)) {
                 writeFileTypeReport(file, new File(options('output)))
               } else {
-                println("The given file is no PE file!")
+                println("The given file is no PE file! ")
                 printFileTypeReport(file)
               }
             }
@@ -151,10 +151,10 @@ object PortExAnalyzer {
       while(height(res) > MAX_HEIGHT) res *= 2
       res
     }
-    
+    val bytePlotPixelSize = if(fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
     val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length)
     val vi = viBuilder.build()
-    val vi2 = new VisualizerBuilder().setPixelSize(1).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
+    val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
     val entropyImage = vi.createEntropyImage(file)
     //more fine grained bytePlot image, thus another visualizer
     val bytePlot = vi2.createBytePlot(file)
