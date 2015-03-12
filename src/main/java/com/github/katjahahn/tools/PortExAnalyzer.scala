@@ -138,7 +138,7 @@ object PortExAnalyzer {
 
   private def writePicture(file: File, imageFile: File): Unit = {
     val pixelSize = 4
-    val fileWidth = 512
+    val fileWidth = 256
     val MAX_HEIGHT = 1000
     def height(bytes: Int): Int = {
       val nrOfPixels = file.length / bytes.toDouble

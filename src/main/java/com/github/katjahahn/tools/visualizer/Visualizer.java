@@ -139,7 +139,7 @@ public class Visualizer {
 	 *            the settings for the visualizer
 	 */
 	Visualizer(VisualizerSettings settings) {
-		
+
 		this.additionalGap = settings.additionalGap;
 		this.fileWidth = settings.fileWidth;
 		this.legendWidth = settings.legendWidth;
@@ -435,6 +435,9 @@ public class Visualizer {
 		long sectionTableSize = table.getSize();
 		drawPixels(colorMap.get(SECTION_TABLE), sectionTableOffset,
 				sectionTableSize);
+		logger.info("x pixels: " + getXPixels());
+		logger.info("y pixels: " + getYPixels());
+		logger.info("bytesPerPixel: " + bytesPerPixel());
 		for (SectionHeader header : table.getSectionHeaders()) {
 			long sectionOffset = header.getAlignedPointerToRaw();
 			logger.info("drawing section to: " + sectionOffset);
@@ -585,7 +588,7 @@ public class Visualizer {
 						image.setRGB(x, y, color.getRGB());
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
-					logger.error("tried to set x/y = " + x + "/" + y);
+					logger.warn("tried to set x/y = " + x + "/" + y);
 				}
 			}
 		}
@@ -647,13 +650,19 @@ public class Visualizer {
 		// * pixelSize,(pixelStart / xPixels) * pixelSize );
 	}
 
+	// convert fileOffset to square pixels
 	private long getPixelNumber(long fileOffset) {
 		assert fileOffset >= 0;
-		long fileSize = data.getFile().length();
-		long result = Math.round(fileOffset * (getXPixels() * getYPixels())
-				/ (double) fileSize);
+		long result = Math.round(fileOffset / bytesPerPixel());
 		assert result >= 0;
 		return result;
+	}
+
+	private int bytesPerPixel() {
+		long fileSize = data.getFile().length();
+		long pixelMax = getXPixels() * (long) getYPixels();
+		// ceil result, because it is a maximum that we use to divide
+		return (int) Math.ceil(fileSize / (double) pixelMax);
 	}
 
 	/**

@@ -70,7 +70,7 @@ class ReportCreator(private val data: PEData) {
     delayImportsReport + exportsReport + resourcesReport + debugReport //+ relocReport
 
   def additionalReports(): String = overlayReport +
-    anomalyReport + peidReport + jar2ExeReport + hashReport //+ maldetReport
+    anomalyReport + peidReport + hashReport //+ jar2ExeReport + maldetReport
 
   /**
    * Prints a report to stdout.
@@ -376,20 +376,16 @@ class ReportCreator(private val data: PEData) {
       }
     }
     val padLengthDataDir = "delay import descriptor ".length
-    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("in section", colWidth, " ") + pad("is valid", colWidth, " ") + pad("file offset", colWidth, " ")
+    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("in section", colWidth, " ") + pad("file offset", colWidth, " ")
     val dataDirs = opt.getDataDirectory().values.asScala.toList.sortBy(e => e.getTableEntryOffset)
     val dataDirTableLine = pad("", dataDirHeader.length, "-") + NL
     buf.append(NL + dataDirHeader + NL + dataDirTableLine)
     for (entry <- dataDirs) {
       val description = entry.getKey.toString
       val maybeHeader = secLoader.maybeGetSectionHeader(entry.getKey)
-      val valid = {
-        val special = secLoader.maybeLoadSpecialSection(entry.getKey)
-        if (!special.isPresent) "not valid" else if (special.get.isEmpty) "no, empty" else "yes"
-      }
       val inSection = if (maybeHeader.isPresent) maybeHeader.get.getNumber + " " + maybeHeader.get.getName else "-"
       buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(entry.getVirtualAddress()), colWidth, " ") +
-        pad(hexString(entry.getDirectorySize()), colWidth, " ") + pad(inSection, colWidth, " ") + pad(valid, colWidth, " ") +
+        pad(hexString(entry.getDirectorySize()), colWidth, " ") + pad(inSection, colWidth, " ") +
         pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
     }
     buf.toString + NL
