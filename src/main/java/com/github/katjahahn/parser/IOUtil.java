@@ -135,6 +135,7 @@ public final class IOUtil {
 	public static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
 			throws IOException {
 		assert length >= 0;
+		assert offset >= 0;
 		raf.seek(offset);
 		byte[] bytes = new byte[length];
 		raf.readFully(bytes);

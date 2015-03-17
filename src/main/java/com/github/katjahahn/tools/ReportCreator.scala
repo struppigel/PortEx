@@ -41,7 +41,7 @@ import com.github.katjahahn.parser.sections.rsrc.Resource
 import com.github.katjahahn.parser.IOUtil
 import java.io.RandomAccessFile
 import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource
-import com.github.katjahahn.parser.sections.rsrc.version.VsVersionInfo
+import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 import com.google.common.base.Optional
 
@@ -244,7 +244,7 @@ class ReportCreator(private val data: PEData) {
     val versionResources = resources.filter { _.getType == "RT_VERSION" }
     versionResources.foreach { resource =>
       buf.append(title("Version Information") + NL)
-      val versionInfo = VsVersionInfo(resource, data.getFile)
+      val versionInfo = VersionInfo(resource, data.getFile)
       buf.append(versionInfo.toString + NL)
     }
     buf.toString + NL

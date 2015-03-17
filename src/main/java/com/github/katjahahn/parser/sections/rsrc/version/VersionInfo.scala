@@ -35,7 +35,7 @@ class VsVersionInfo(
   val padding1: Int,
   val value: VsFixedFileInfo,
   val padding2: Int,
-  val children: Array[FileInfo]) {
+  val children: Array[FileInfo]) extends VersionInfo {
 
   override def toString(): String =
     s"""|wLength: $wLength
@@ -49,12 +49,19 @@ class VsVersionInfo(
         |
         |padding2: $padding2
         |
-        |Children:
+        |children:
         |${children.mkString(NL)}
       """.stripMargin
 }
 
-object VsVersionInfo {
+class EmptyVersionInfo extends VersionInfo {
+  override def toString(): String =
+    "-empty-"
+}
+
+abstract class VersionInfo{}
+
+object VersionInfo {
 
   //TODO move to utility class
   private val byteSize = 1
@@ -64,13 +71,20 @@ object VsVersionInfo {
 
   private val signature = "VS_VERSION_INFO"
 
-  def apply(resource: Resource, file: File): VsVersionInfo = {
+  def apply(resource: Resource, file: File): VersionInfo = {
     require(resource.getType == "RT_VERSION", "No RT_VERSION resource!")
     val loc = resource.rawBytesLocation
-    readVersionInfo(loc, file)
+    if (isValid(loc, file)) {
+      readVersionInfo(loc, file)
+    } else new EmptyVersionInfo()
+  }
+
+  private def isValid(location: PhysicalLocation, file: File): Boolean = {
+    location.from >= 0 && location.size + location.from < file.length
   }
 
   private def readVersionInfo(loc: PhysicalLocation, file: File): VsVersionInfo = {
+
     using(new RandomAccessFile(file, "r")) { raf =>
       val wLength = ByteArrayUtil.bytesToInt(loadBytes(loc.from, wordSize, raf))
       val wValueLength = ByteArrayUtil.bytesToInt(loadBytes(loc.from + wordSize, wordSize, raf))
@@ -81,19 +95,27 @@ object VsVersionInfo {
       val vsFixedFileInfo = VsFixedFileInfo(fixedInfoOffset, wValueLength, raf)
       val padding2 = ByteArrayUtil.bytesToInt(loadBytes(fixedInfoOffset + VsFixedFileInfo.size, wordSize, raf))
       val childrenOffset = fixedInfoOffset + VsFixedFileInfo.size + wordSize + padding2
-      val children = readChildren(childrenOffset, raf)
+      val children = readChildren(childrenOffset, raf, padding2) //TODO implement
       new VsVersionInfo(wLength, wValueLength, wType, szKey, padding1, vsFixedFileInfo, padding2, children)
     }
+
   }
 
-  private def readChildren(offset: Long, raf: RandomAccessFile): Array[FileInfo] = {
-    val varFileInfo = VarFileInfo(offset, raf)
-    if(varFileInfo.szKey == VarFileInfo.signature) {
-    val stringFileInfo = StringFileInfo(offset + varFileInfo.wLength, raf)
-    Array[FileInfo](varFileInfo, stringFileInfo)
-    } else {
-      val stringFileInfo = StringFileInfo(offset, raf)
-      Array(stringFileInfo)
-    }
+  private def readChildren(offset: Long, raf: RandomAccessFile, padding: Int): Array[FileInfo] = {
+
+//    if (VarFileInfo(offset, raf).szKey == VarFileInfo.signature) {
+//      val varFileInfo = VarFileInfo(offset, raf)
+//      val stringFileInfo = StringFileInfo(offset + varFileInfo.wLength + padding, raf)
+//      if (stringFileInfo.szKey == StringFileInfo.signature) {
+//        Array(varFileInfo, stringFileInfo)
+//      } else Array(varFileInfo)
+//    } else if (StringFileInfo(offset, raf).szKey == StringFileInfo.signature) {
+//      val stringFileInfo = VarFileInfo(offset, raf)
+//      val varFileInfo = StringFileInfo(offset + stringFileInfo.wLength + padding, raf)
+//      if (varFileInfo.szKey == StringFileInfo.signature) {
+//        Array(stringFileInfo, varFileInfo)
+//      } else Array(stringFileInfo)
+//    }
+    Array.empty //TODO implement
   }
 }

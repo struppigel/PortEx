@@ -14,7 +14,7 @@ class VersionString(
   val value: String) {
 
   override def toString(): String =
-    s"${szKey}: $value wValueLength: $wValueLength"
+    s"${szKey}: $value wValueLength: $wValueLength padding: $padding"
 }
 
 object VersionString {
@@ -36,9 +36,8 @@ object VersionString {
     val szSize = szBytes.indexWhere { x => val i = prev; prev = x; i == 0 && x == 0 }
     val szKey = new String(szBytes.take(szSize).toArray, "UTF_16LE")
     val padding = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 3 + szSize, wordSize, raf))
-    //TODO padding and +2 might not be correct. Some info is missing here
-    val valueOffset = offset + wordSize * 4 + szSize + padding + 2
-    val value = new String(loadBytes(valueOffset, wValueLength - 2, raf), "UTF_16LE")
+    val valueOffset = offset + wordSize * 4 + szSize + padding 
+    val value = new String(loadBytes(valueOffset, wValueLength, raf), "UTF_16LE")
     new VersionString(wLength, wValueLength, wType, szKey, padding, value)
   }
 
