@@ -37,6 +37,7 @@ import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
+import com.github.katjahahn.parser.sections.idata.BoundImportSection;
 import com.github.katjahahn.parser.sections.idata.DelayLoadSection;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
 import com.github.katjahahn.parser.sections.pdata.ExceptionSection;
@@ -407,6 +408,9 @@ public class SectionLoader {
                 LoadInfo loadInfo = maybeLoadInfo.get();
                 SpecialSection section = null;
                 switch (key) {
+                case BOUND_IMPORT:
+                	section = BoundImportSection.newInstance(loadInfo);
+                	break;
                 case IMPORT_TABLE:
                     section = ImportSection.newInstance(loadInfo);
                     break;
@@ -457,30 +461,63 @@ public class SectionLoader {
         }
         throw new IllegalStateException(message);
     }
-
+    
     /**
-     * Loads all bytes and information of the debug section.
+     * Loads all bytes and information of the bound import section.
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link DebugSection} of the given file
+     * @return {@link ImportSection} of the given file
+     * @throws IOException
+     *             if unable to read the file
+     * @throws IllegalStateException
+     *             if unable to load debug section
+     */
+    public BoundImportSection loadBoundImportSection() throws IOException {
+        Optional<BoundImportSection> bat = maybeLoadBoundImportSection();
+        return (BoundImportSection) getOrThrow(bat,
+                "unable to load bound import section");
+    }
+
+    /**
+     * Loads all bytes and information of the bound import section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link ImportSection} of the given file, absent if file doesn't
+     *         have this section
+     * @throws IOException
+     *             if unable to read the file
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<BoundImportSection> maybeLoadBoundImportSection()
+            throws IOException {
+        return (Optional<BoundImportSection>) maybeLoadSpecialSection(DataDirectoryKey.BOUND_IMPORT);
+    }
+
+    /**
+     * Loads all bytes and information of the delay-load section.
+     * 
+     * The file on disk is read to fetch the information.
+     * 
+     * @return {@link DelayLoadSection} of the given file
      * @throws IOException
      *             if unable to read the file
      * @throws IllegalStateException
      *             if unable to load debug section
      */
     public DelayLoadSection loadDelayLoadSection() throws IOException {
-        Optional<DelayLoadSection> debug = maybeLoadDelayLoadSection();
-        return (DelayLoadSection) getOrThrow(debug,
+        Optional<DelayLoadSection> delayLoad = maybeLoadDelayLoadSection();
+        return (DelayLoadSection) getOrThrow(delayLoad,
                 "unable to load delay-load import section");
     }
 
     /**
-     * Loads all bytes and information of the debug section.
+     * Loads all bytes and information of the delay-load section.
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link DebugSection} of the given file, absent if file doesn't
+     * @return {@link DelayLoadSection} of the given file, absent if file doesn't
      *         have this section
      * @throws IOException
      *             if unable to read the file
@@ -492,11 +529,11 @@ public class SectionLoader {
     }
 
     /**
-     * Loads all bytes and information of the debug section.
+     * Loads all bytes and information of the reloc section.
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link DebugSection} of the given file
+     * @return {@link RelocationSection} of the given file
      * @throws IOException
      *             if unable to read the file
      * @throws IllegalStateException
@@ -509,11 +546,11 @@ public class SectionLoader {
     }
 
     /**
-     * Loads all bytes and information of the debug section.
+     * Loads all bytes and information of the reloc section.
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link DebugSection} of the given file, absent if file doesn't
+     * @return {@link RelocationSection} of the given file, absent if file doesn't
      *         have this section
      * @throws IOException
      *             if unable to read the file
@@ -606,11 +643,11 @@ public class SectionLoader {
     }
 
     /**
-     * Loads all bytes and information of the resource section.
+     * Loads all bytes and information of the exception section.
      * 
      * The file on disk is read to fetch the information.
      * 
-     * @return {@link ResourceSection} of the given file, absent if file doesn't
+     * @return {@link ExceptionSection} of the given file, absent if file doesn't
      *         have this section
      * @throws IOException
      *             if unable to read the file

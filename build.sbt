@@ -6,6 +6,8 @@ version := "1.0.1"
 
 javadocSettings
 
+javacOptions in JavaDoc += "-Xdoclint:none"
+
 sources in (JavaDoc, doc) ~= (_ filterNot (f => f.getName.contains("$") || f.getName.contains("Util") || f.getName.contains("ResourceDataEntry") || f.getName.contains("DirectoryEntry") || f.getName.contains("Scanning")))
 
 libraryDependencies += "org.testng" % "testng" % "6.8.8" % "test"

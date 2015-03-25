@@ -63,10 +63,10 @@ class ReportCreator(private val data: PEData) {
     |
     |""".stripMargin
 
-  def headerReports(): String = msdosHeaderReport +
-    coffHeaderReport + optHeaderReport + secTableReport
+  def headerReports(): String = secTableReport  + msdosHeaderReport +
+    coffHeaderReport + optHeaderReport
 
-  def specialSectionReports(): String = importsReport +
+  def specialSectionReports(): String = importsReport + //boundImportsReport +
     delayImportsReport + exportsReport + resourcesReport + debugReport //+ relocReport
 
   def additionalReports(): String = overlayReport +
@@ -158,6 +158,21 @@ class ReportCreator(private val data: PEData) {
       val buf = new StringBuffer()
       buf.append(title("Imports") + NL)
       val imports = idata.getImports.asScala
+      for (importDll <- imports) {
+        buf.append(importDll + NL)
+      }
+      buf.toString
+    } else ""
+  }
+  
+  def boundImportsReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeImports = loader.maybeLoadBoundImportSection()
+    if (maybeImports.isPresent && !maybeImports.get.isEmpty) {
+      val boundImports = maybeImports.get
+      val buf = new StringBuffer()
+      buf.append(title("Bound Imports") + NL)
+      val imports = boundImports.getImports.asScala
       for (importDll <- imports) {
         buf.append(importDll + NL)
       }
