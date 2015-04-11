@@ -67,7 +67,7 @@ To create a jar:
 $ sbt package
 ```
 
-For a fat jar (not recommended):
+To compile a fat jar that can be used as command line tool, type:
 
 ```
 $ sbt assembly
