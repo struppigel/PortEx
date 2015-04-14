@@ -63,7 +63,7 @@ class ReportCreator(private val data: PEData) {
     |
     |""".stripMargin
 
-  def headerReports(): String = secTableReport  + msdosHeaderReport +
+  def headerReports(): String = secTableReport + msdosHeaderReport +
     coffHeaderReport + optHeaderReport
 
   def specialSectionReports(): String = importsReport + //boundImportsReport +
@@ -131,7 +131,12 @@ class ReportCreator(private val data: PEData) {
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
       }
       if (debug.getDebugType() == DebugType.CODEVIEW) {
-        buf.append(debug.getCodeView().getInfo())
+        try {
+          buf.append(debug.getCodeView().getInfo())
+        } catch {
+          case e: IllegalStateException => 
+            buf.append("-invalid codeview structure-")
+        }
       }
       buf.append(NL)
       buf.toString
@@ -164,7 +169,7 @@ class ReportCreator(private val data: PEData) {
       buf.toString
     } else ""
   }
-  
+
   def boundImportsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeImports = loader.maybeLoadBoundImportSection()

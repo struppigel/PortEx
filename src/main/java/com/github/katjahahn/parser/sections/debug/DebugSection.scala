@@ -60,7 +60,7 @@ class DebugSection private (
 
   def getCodeView(): CodeviewInfo =
     if (maybeCodeView.isDefined) maybeCodeView.get
-    else throw new IllegalStateException()
+    else throw new IllegalStateException("Code View structure not valid")
 
   def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
     directoryTable.asJava
