@@ -25,6 +25,8 @@ import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.Header
+import com.github.katjahahn.parser.HeaderKey
 
 /**
  * Represents a data entry of a resource.
@@ -37,14 +39,38 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param virtualAddress the rva to the resource table
  */
 class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardField],
-  entryOffset: Long, mmBytes: MemoryMappedPE, virtualAddress: Long) {
+                                 entryOffset: Long, mmBytes: MemoryMappedPE, virtualAddress: Long) extends Header[ResourceDataEntryKey] {
 
   /** physical location of the header */
   private lazy val headerLoc = new PhysicalLocation(entryOffset, entrySize)
 
   /**
+   * {@inheritDoc}
+   */
+  override def get(key: ResourceDataEntryKey): Long =
+    if (data.contains(key)) data(key).getValue
+    else throw new IllegalArgumentException("key " + key + " does not exist!")
+
+  /**
+   * {@inheritDoc}
+   */
+  override def getField(key: ResourceDataEntryKey): StandardField =
+    if (data.contains(key)) data(key)
+    else throw new IllegalArgumentException("key " + key + " does not exist!")
+
+  /**
+   * {@inheritDoc}
+   */
+  override def getInfo(): String = this.toString()
+
+  /**
+   * {@inheritDoc}
+   */
+  override def getOffset(): Long = entryOffset
+
+  /**
    * Returns the physical location of the resource data.
-   * 
+   *
    * @return location of the resource
    */
   def getResourceLocation(): PhysicalLocation = {
@@ -60,7 +86,7 @@ class ResourceDataEntry private (val data: Map[ResourceDataEntryKey, StandardFie
 
   /**
    * Returns all file locations of the resource data entry
-   * 
+   *
    * @return all physical locations of the resource data entry
    */
   def locations(): List[PhysicalLocation] = headerLoc ::
@@ -111,7 +137,7 @@ object ResourceDataEntry {
    * @return a resource data entry instance
    */
   def apply(entryBytes: Array[Byte], entryOffset: Long, mmBytes: MemoryMappedPE,
-    virtualAddress: Long): ResourceDataEntry = {
+            virtualAddress: Long): ResourceDataEntry = {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val data = IOUtil.readHeaderEntries(classOf[ResourceDataEntryKey], format,
       specLocation, entryBytes, entryOffset).asScala.toMap
