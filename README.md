@@ -33,10 +33,12 @@ You can include PortEx to your project by adding the following Maven dependency:
 
 ```
 <dependency>
-    	<groupId>com.github.katjahahn</groupId>
-    	<artifactId>portex_2.10</artifactId>
-    	<version>1.0.1</version>
-</dependency>
+   <groupId>com.github.katjahahn</groupId>
+   <artifactId>portex_2.10</artifactId>
+   <version>2.0.0</version>
+   <scope>system</scope>
+   <systemPath>$PORTEXDIR/target/scala-2.10/portex_2.10-2.0.0.jar</systemPath>
+</dependency> 
 ```
 
 #### Including PortEx to an SBT project
