@@ -26,7 +26,6 @@ import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.Header
-import com.github.katjahahn.parser.HeaderKey
 
 /**
  * Represents a data entry of a resource.
