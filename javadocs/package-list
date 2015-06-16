@@ -1,4 +1,3 @@
-com.github.katjahahn
 com.github.katjahahn.parser
 com.github.katjahahn.parser.coffheader
 com.github.katjahahn.parser.msdos
@@ -11,6 +10,7 @@ com.github.katjahahn.parser.sections.pdata
 com.github.katjahahn.parser.sections.reloc
 com.github.katjahahn.parser.sections.rsrc
 com.github.katjahahn.parser.sections.rsrc.icon
+com.github.katjahahn.parser.sections.rsrc.version
 com.github.katjahahn.tools
 com.github.katjahahn.tools.anomalies
 com.github.katjahahn.tools.sigscanner
