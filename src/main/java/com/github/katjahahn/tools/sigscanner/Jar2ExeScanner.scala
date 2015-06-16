@@ -17,6 +17,7 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
+import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import java.io.EOFException
 import java.io.File
@@ -189,7 +190,7 @@ class Jar2ExeScanner(file: File) {
 
 object Jar2ExeScanner {
 
-  private val defaultSigs = "/data/javawrapperdb"
+  private val defaultSigs = IOUtil.SPEC_DIR + "javawrapperdb"
 
   /**
    * Loads the signatures from the given file.

@@ -17,6 +17,7 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
+import com.github.katjahahn.parser.IOUtil;
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.charset.CodingErrorAction
@@ -205,7 +206,7 @@ object SignatureScanner {
    */
   type ScanResult = (Signature, Address)
 
-  private val defaultSigs = "/data/userdb.txt"
+  private val defaultSigs = IOUtil.SPEC_DIR + "userdb.txt"
 
   private val version = """version: 0.1
     |author: Katja Hahn

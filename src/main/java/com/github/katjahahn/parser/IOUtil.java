@@ -55,6 +55,7 @@ public final class IOUtil {
 	 * System independend newline.
 	 */
 	public static final String NL = System.getProperty("line.separator");
+	
 	/**
 	 * The default delimiter for a line in a specification file.
 	 */
@@ -62,7 +63,7 @@ public final class IOUtil {
 	/**
 	 * The folder that contains the specification files
 	 */
-	private static final String SPEC_DIR = "/data/";
+	public static final String SPEC_DIR = File.pathSeparator + "data" + File.pathSeparator;
 
 	/**
 	 * Forbidden. This is a utility class.
