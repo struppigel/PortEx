@@ -15,9 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.IOUtil.loadBytes;
-import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
-import static com.google.common.base.Preconditions.checkState;
+import static com.github.katjahahn.parser.IOUtil.*;
+import static com.google.common.base.Preconditions.*;
 
 import java.awt.AWTException;
 import java.awt.image.BufferedImage;
@@ -38,7 +37,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.sigscanner.FileTypeScanner;
+import com.github.katjahahn.tools.ReportCreator;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -282,9 +281,8 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
-        FileTypeScanner.main(args);
           
-//        File folder = new File("/home/deque/portextestfiles"); // TODO create
+        File file = new File("/home/deque/portextestfiles/launch4jexe.exe"); // TODO create
 //                                                               // Unit test for
 //                                                               // resource type
 //                                                               // with name!
@@ -296,8 +294,8 @@ public final class PELoader {
 //                System.out.println();
 //            }
 //        }
-        // ReportCreator reporter = ReportCreator.newInstance(data.getFile());
-        // reporter.printReport();
+         ReportCreator reporter = ReportCreator.newInstance(file);
+         reporter.printReport();
         // VisualizerBuilder builder = new VisualizerBuilder();
         // Visualizer vi = builder.build();
         // final BufferedImage entropyImage = vi.createEntropyImage(file);

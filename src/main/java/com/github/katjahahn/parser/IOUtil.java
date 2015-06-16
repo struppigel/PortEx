@@ -63,7 +63,7 @@ public final class IOUtil {
 	/**
 	 * The folder that contains the specification files
 	 */
-	public static final String SPEC_DIR = File.pathSeparator + "data" + File.pathSeparator;
+	public static final String SPEC_DIR = File.separator + "data" + File.separator;
 
 	/**
 	 * Forbidden. This is a utility class.
