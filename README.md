@@ -36,6 +36,16 @@ You can include PortEx to your project by adding the following Maven dependency:
    <groupId>com.github.katjahahn</groupId>
    <artifactId>portex_2.10</artifactId>
    <version>2.0.0</version>
+</dependency> 
+```
+
+To use a local build, add the library as follows:
+
+```
+<dependency>
+   <groupId>com.github.katjahahn</groupId>
+   <artifactId>portex_2.10</artifactId>
+   <version>2.0.0</version>
    <scope>system</scope>
    <systemPath>$PORTEXDIR/target/scala-2.10/portex_2.10-2.0.0.jar</systemPath>
 </dependency> 
