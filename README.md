@@ -56,7 +56,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "com.github.katjahahn" % "portex_2.10" % "1.0.1"
+libraryDependencies += "com.github.katjahahn" % "portex_2.10" % "2.0.1"
 ```
 
 ### Building PortEx
