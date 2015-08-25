@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
