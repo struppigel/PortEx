@@ -1,5 +1,3 @@
-before_script:
-- curl -L -o $HOME/.sbt/launchers/0.13.5/sbt-launch.jar http://dl.bintray.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.5/sbt-launch.jar
 language: scala
 scala:
   - 2.10.4
