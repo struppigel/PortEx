@@ -282,10 +282,8 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/deque/portextestfiles/launch4jexe.exe"); // TODO create
-//                                                               // Unit test for
-//                                                               // resource type
-//                                                               // with name!
+        File file = new File("/home/katja/samples/RegisterMe.Oops.exe"); 
+        // TODO create Unit test for resource type with name!
 //        for (File file : folder.listFiles()) {
 //            if (new PESignature(file).exists()) {
 //                System.out.println(file.getName());

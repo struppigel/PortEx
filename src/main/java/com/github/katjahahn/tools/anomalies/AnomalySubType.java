@@ -98,6 +98,54 @@ public enum AnomalySubType {
      */
     TOO_LARGE_IMAGE_BASE(WRONG),
     /**
+     * SizeOfCode is too large
+     */
+    TOO_LARGE_SIZE_OF_CODE(WRONG),
+    /**
+     * SizeOfInitializedData is too large
+     */
+    TOO_LARGE_SIZE_OF_INIT_DATA(WRONG),
+    /**
+     * SizeOfUninitializedData is too large
+     */
+    TOO_LARGE_SIZE_OF_UNINIT_DATA(WRONG),
+    /**
+     * BaseOfData is too large
+     */
+    TOO_LARGE_BASE_OF_DATA(WRONG),
+    /**
+     * BaseOfCode is too large
+     */
+    TOO_LARGE_BASE_OF_CODE(WRONG),
+    /**
+     * SizeOfCode is too small
+     */
+    TOO_SMALL_SIZE_OF_CODE(WRONG),
+    /**
+     * SizeOfInitializedData is too small
+     */
+    TOO_SMALL_SIZE_OF_INIT_DATA(WRONG),
+    /**
+     * SizeOfUninitializedData is too small
+     */
+    TOO_SMALL_SIZE_OF_UNINIT_DATA(WRONG),
+    /**
+     * BaseOfData is too small
+     */
+    TOO_SMALL_BASE_OF_DATA(WRONG),
+    /**
+     * BaseOfCode is too small
+     */
+    TOO_SMALL_BASE_OF_CODE(WRONG),
+    /**
+     * The base of data is zero although there is at least one data section.
+     */
+    ZERO_BASE_OF_DATA(WRONG),
+    /**
+     * The base of code is zero although there is at least one code section.
+     */
+    ZERO_BASE_OF_CODE(WRONG),
+    /**
      * The image base is zero.
      */
     ZERO_IMAGE_BASE(WRONG),
