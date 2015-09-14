@@ -2,6 +2,7 @@
 /portexstats
 /lib
 .factorypath
+.metadata
 *.class
 *.sh
 *.py
