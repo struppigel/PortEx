@@ -239,12 +239,16 @@ public class Visualizer {
 				raf.readFully(bytes);
 				/* calculate and draw entropy square pixel for this window */
 				double entropy = ShannonEntropy.entropy(bytes);
-				int col = (int) (entropy * 255);
-				Color color = new Color(col, col, col);
+				Color color = getColorForEntropy(entropy);
 				drawPixels(color, address, minLength);
 			}
 		}
 		return image;
+	}
+	
+	private static Color getColorForEntropy(double entropy) {
+		int col = (int) (entropy * 255);
+		return new Color(col, col, col);
 	}
 
 	private void resetAvailabilityFlags() {
@@ -483,35 +487,56 @@ public class Visualizer {
 	}
 
 	private void drawLegend() {
-		drawLegendEntry(0, "MSDOS Header", colorMap.get(MSDOS_HEADER));
-		drawLegendEntry(1, "COFF File Header", colorMap.get(COFF_FILE_HEADER));
-		drawLegendEntry(2, "Optional Header", colorMap.get(OPTIONAL_HEADER));
-		drawLegendEntry(3, "Section Table", colorMap.get(SECTION_TABLE));
-		int number = 4;
+		int number = 0;
+		writeLegendTitle(number++, "BytePlot (left)", Color.lightGray);
+		drawLegendEntry(number++, "visible ASCII", Color.blue);
+		drawLegendEntry(number++, "invisible ASCII", Color.green);
+		drawLegendEntry(number++, "non-ASCII", Color.yellow);
+		writeLegendTitle(number++, "Entropy (middle)", Color.lightGray);
+		drawLegendEntry(number++, "0.2 (repetition)", getColorForEntropy(0.2));
+		drawLegendEntry(number++, "0.5 (code)", getColorForEntropy(0.5));
+		drawLegendEntry(number++, "0.8 (packed)", getColorForEntropy(0.8));
+		writeLegendTitle(number++, "PE Structure (right)", Color.lightGray);
+		drawLegendEntry(number++, "MSDOS Header", colorMap.get(MSDOS_HEADER));
+		drawLegendEntry(number++, "COFF File Header", colorMap.get(COFF_FILE_HEADER));
+		drawLegendEntry(number++, "Optional Header", colorMap.get(OPTIONAL_HEADER));
+		drawLegendEntry(number++, "Section Table", colorMap.get(SECTION_TABLE));
 		SectionTable table = data.getSectionTable();
 		for (SectionHeader header : table.getSectionHeaders()) {
 			Color sectionColor = getSectionColor(header);
-			drawLegendEntry(number, header.getName(), sectionColor);
+			drawLegendEntry(number++, header.getName(), sectionColor);
 			sectionColor = variate(sectionColor);
-			number++;
 		}
 		for (DataDirectoryKey special : specials) {
 			if (specialsAvailability.get(special)) {
-				drawLegendEntry(number, getSpecialsDescription(special),
+				drawLegendEntry(number++, getSpecialsDescription(special),
 						getSpecialsColor(special), true);
-				number++;
 			}
 		}
 		if (epAvailable) {
-			drawLegendEntry(number, "Entry Point", colorMap.get(ENTRY_POINT),
+			drawLegendEntry(number++, "Entry Point", colorMap.get(ENTRY_POINT),
 					true);
-			number++;
 		}
 		if (overlayAvailable) {
-			drawLegendEntry(number, "Overlay", colorMap.get(OVERLAY));
-			number++;
+			drawLegendEntry(number++, "Overlay", colorMap.get(OVERLAY));
 		}
 		// drawLegendCrossEntry(number, "Anomalies", anomalyColor);
+	}
+	
+	private void writeLegendTitle(int number, String description, Color color) {
+		assert description != null && color != null;
+		int startX = fileWidth + LEGEND_GAP;
+		int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
+		if (startY >= height) {
+			startX = startX + legendWidth / 2;
+			startY = startY - (height);
+		}
+		int stringX = startX;
+		int stringY = startY + LEGEND_SAMPLE_SIZE;
+		Graphics g = image.getGraphics();
+		g.setColor(color);
+		g.drawString(description, stringX, stringY);
+		g.drawString("---------------------------------", stringX, stringY + LEGEND_SAMPLE_SIZE);
 	}
 
 	// TODO temporary almost-duplicate of drawLegendEntry
@@ -673,15 +698,18 @@ public class Visualizer {
 	 */
 	public static void main(String[] args) throws IOException {
 		File file = new File(
-				"/home/deque/portextestfiles/badfiles/VirusShare_7dfcbb865a4a5637efd97a2d021eb4b3");
+				"/home/katja/samples/RegisterMe.Oops.exe");
 		VisualizerBuilder builder = new VisualizerBuilder();
-		builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
+//		builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
 		Visualizer vi = builder.build();
 		final BufferedImage entropyImage = vi.createEntropyImage(file);
+		final BufferedImage bytePlotImage = vi.createBytePlot(file);
 		final BufferedImage structureImage = vi.createImage(file);
-		ImageIO.write(structureImage, "png", new File(
-				"/home/deque/git/Thesis/Verteidigung/img/visualizer.png"));
-		show(structureImage);
+		BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage, entropyImage);
+		joinedImage = ImageUtil.appendImages(joinedImage, structureImage);
+		ImageIO.write(joinedImage, "png", new File(
+				"/home/katja/visualized.png"));
+		show(joinedImage);
 	}
 
 	private static void show(final BufferedImage image) {

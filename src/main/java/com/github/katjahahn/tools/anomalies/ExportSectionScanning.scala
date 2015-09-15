@@ -46,7 +46,7 @@ trait ExportSectionScanning extends AnomalyScanner {
         val start = edataHeader.get().getAlignedPointerToRaw
         val end = start + loader.getReadSize(edataHeader.get)
         val locEnd = loc.from + loc.size
-        //ignores falty locations (indicated by -1 or larger than file size)
+        //ignores faulty locations (indicated by -1 or larger than file size)
         //FIXME find the cause of -1 entries!
         (loc.from >= data.getFile.length) || (loc.from == -1) || (loc.from >= start && locEnd <= end)
       }

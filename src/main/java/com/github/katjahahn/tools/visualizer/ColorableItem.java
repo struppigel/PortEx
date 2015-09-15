@@ -28,8 +28,8 @@ public enum ColorableItem {
     MSDOS_HEADER("MSDOS Header"), COFF_FILE_HEADER("COFF File Header"), OPTIONAL_HEADER(
             "Optional Header"), SECTION_TABLE("Section Table"),
     /* Special Sections and Tables */
-    IMPORT_SECTION("Import Section"), EXPORT_SECTION("Export Section"), DEBUG_SECTION(
-            "Debug Section"), RESOURCE_SECTION("Resource Section"), RELOC_SECTION(
+    IMPORT_SECTION("Imports"), EXPORT_SECTION("Exports"), DEBUG_SECTION(
+            "Debug Section"), RESOURCE_SECTION("Resources"), RELOC_SECTION(
             "Relocations"), DELAY_IMPORT_SECTION("Delay Imports"),
     /* Other */
     ENTRY_POINT("Entry Point"), OVERLAY("Overlay"), SECTION_START(""), ANOMALY(
