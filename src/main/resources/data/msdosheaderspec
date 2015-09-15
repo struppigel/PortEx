@@ -1,0 +1,31 @@
+SIGNATURE_WORD;0;2;signature word
+LAST_PAGE_SIZE;2;2;last page size
+FILE_PAGES;4;2;file pages
+RELOCATION_ITEMS;6;2;relocation items
+HEADER_PARAGRAPHS;8;2;header paragraphs
+MINALLOC;10;2;minimum number of paragraphs allocated
+MAXALLOC;12;2;maximum number of paragraphs allocated
+INITIAL_SS;14;2;initial SS value
+INITIAL_SP;16;2;initial SP value
+COMPLEMENTED_CHECKSUM;18;2;complemented checksum
+INITIAL_IP;20;2;initial IP value
+PRE_RELOCATED_INITIAL_CS;22;2;pre-relocated initial CS value
+RELOCATION_TABLE_OFFSET;24;2;relocation table offset
+OVERLAY_NR;26;2;overlay number
+E_RESERVED28;28;2;Reserved word 0x1c
+E_RESERVED30;30;2;Reserved word 0x1e
+E_RESERVED32;32;2;Reserved word 0x20
+E_RESERVED34;34;2;Reserved word 0x22
+E_OEMID;36;2;OEM identifier
+E_OEMINFO;38;2;OEM information
+E_RESERVED40;40;2;Reserved word 0x28
+E_RESERVED42;42;2;Reserved word 0x2a
+E_RESERVED44;44;2;Reserved word 0x2c
+E_RESERVED46;46;2;Reserved word 0x2f
+E_RESERVED48;48;2;Reserved word 0x30
+E_RESERVED50;50;2;Reserved word 0x32
+E_RESERVED52;52;2;Reserved word 0x34
+E_RESERVED54;54;2;Reserved word 0x36
+E_RESERVED56;56;2;Reserved word 0x38
+E_RESERVED58;58;2;Reserved word 0x3a
+E_LFANEW;60;4;PE signature offset

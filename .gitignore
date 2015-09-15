@@ -49,7 +49,6 @@ codecover
 .project
 /data
 src/main/target/*
-src/main/resources/*
 *.exe
 *.dll
 

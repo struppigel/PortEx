@@ -39,9 +39,9 @@ import java.io.FileWriter
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.3.7
+  private val version = """version: 0.3.8
     |author: Katja Hahn
-    |last update: 10. Mar 2015""".stripMargin
+    |last update: 14. Sep 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 

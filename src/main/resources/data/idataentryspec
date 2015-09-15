@@ -1,0 +1,5 @@
+I_LOOKUP_TABLE_RVA;import lookup table RVA;0;4
+TIME_DATE_STAMP;time date stamp;4;4
+FORWARDER_CHAIN;forwarder chain;8;4
+NAME_RVA;name RVA;12;4
+I_ADDR_TABLE_RVA;import address table RVA;16;4

@@ -1,0 +1,5 @@
+BEGIN_ADDRESS;begin address;0;4
+END_ADDRESS;end address;4;4
+EXCEPTION_HANDLER;exception handler;8;4
+HANDLER_DATA;handler data;12;4
+PROLOG_END_ADDRESS;prolog end address;16;4

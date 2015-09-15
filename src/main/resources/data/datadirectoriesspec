@@ -1,0 +1,16 @@
+export table;96;112;8
+import table;104;120;8
+resource table;112;128;8
+exception table;120;136;8
+certificate table;128;144;8
+base relocation table;136;152;8
+debug;144;160;8
+architecture;152;168;8
+global ptr;160;176;8
+TLS table;168;184;8
+load config table;176;192;8
+bound import;184;200;8
+IAT;192;208;8
+delay import descriptor;200;216;8
+CLR runtime header;208;224;8
+reserved;216;232;8

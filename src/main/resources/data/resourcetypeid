@@ -1,0 +1,21 @@
+9;RT_ACCELERATOR;Accelerator table
+21;RT_ANICURSOR;Animated cursor
+22;RT_ANIICON;Animated icon
+2;RT_BITMAP;Bitmap resource
+1;RT_CURSOR;Hardware-dependend cursor
+5;RT_DIALOG;Dialog box
+17;RT_DLGINCLUDE;allows a resource editing tool to associate a string with an .rc file
+8;RT_FONT;Font resource
+7;RT_FONTDIR;Font directory source
+12;RT_GROUP_CURSOR;Hardware-independent cursor resource
+14;RT_GROUP_ICON;Hardware-independent icon resource
+23;RT_HTML;HTML resource
+3;RT_ICON;Hardware-dependent icon resource
+24;RT_MANIFEST;Side-by-Side Assembly Manifest
+4;RT_MENU;Menu resource
+11;RT_MESSAGETABLE;Message-table entry
+19;RT_PLUGPLAY;Plug and Play resource
+10;RT_RCDATA;Application-defined resource (raw data)
+6;RT_STRING;String-table entry
+16;RT_VERSION;Version resource
+20;RT_VXD;VXD

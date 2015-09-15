@@ -1,0 +1,21 @@
+IMAGE_BASE;image base;28;24;4;8
+SECTION_ALIGNMENT;section alignment in bytes;32;32;4;4
+FILE_ALIGNMENT;file alignment in bytes;36;36;4;4
+MAJOR_OS_VERSION;major operating system version;40;40;2;2
+MINOR_OS_VERSION;minor operating system version;42;42;2;2
+MAJOR_IMAGE_VERSION;major image version;44;44;2;2
+MINOR_IMAGE_VERSION;minor image version;46;46;2;2
+MAJOR_SUBSYSTEM_VERSION;major subsystem version;48;48;2;2
+MINOR_SUBSYSTEM_VERSION;minor subsystem version;50;50;2;2
+WIN32_VERSION_VALUE;win32 version value (reserved, must be zero);52;52;4;4
+SIZE_OF_IMAGE;size of image in bytes;56;56;4;4
+SIZE_OF_HEADERS;size of headers (MS DOS stub, PE header, and section headers);60;60;4;4
+CHECKSUM;checksum;64;64;4;4
+SUBSYSTEM;subsystem;68;68;2;2
+DLL_CHARACTERISTICS;dll characteristics;70;70;2;2
+SIZE_OF_STACK_RESERVE;size of stack reserve;72;72;4;8
+SIZE_OF_STACK_COMMIT;size of stack commit;76;80;4;8
+SIZE_OF_HEAP_RESERVE;size of heap reserve;80;88;4;8
+SIZE_OF_HEAP_COMMIT;size of heap commit;84;96;4;8
+LOADER_FLAGS;loader flags (reserved, must be zero);88;104;4;4
+NUMBER_OF_RVA_AND_SIZES;number of rva and sizes;92;108;4;4

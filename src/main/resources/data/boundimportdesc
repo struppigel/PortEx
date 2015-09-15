@@ -1,0 +1,3 @@
+TIME_DATE_STAMP;time date stamp;0;4
+OFFSET_MODULE_NAME;offset to the module name;4;2
+NR_OF_MODULE_FORWARDER_REFS;number of module forwarder references;6;2

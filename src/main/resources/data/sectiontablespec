@@ -1,0 +1,10 @@
+NAME;name;0;8
+VIRTUAL_SIZE;virtual size;8;4
+VIRTUAL_ADDRESS;virtual address;12;4
+SIZE_OF_RAW_DATA;size of raw data;16;4
+POINTER_TO_RAW_DATA;pointer to raw data;20;4
+POINTER_TO_RELOCATIONS;pointer to relocations;24;4
+POINTER_TO_LINE_NUMBERS;pointer to line numbers;28;4
+NUMBER_OF_RELOCATIONS;number of relocations;32;2
+NUMBER_OF_LINE_NUMBERS;number of line numbers;34;2
+CHARACTERISTICS;characteristics;36;4

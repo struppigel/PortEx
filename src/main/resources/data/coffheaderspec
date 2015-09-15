@@ -1,0 +1,7 @@
+MACHINE;machine type;0;2
+SECTION_NR;number of sections;2;2
+TIME_DATE;time date stamp;4;4
+POINTER_TO_SYMB_TABLE;pointer to symbol table (deprecated for image);8;4
+NR_OF_SYMBOLS;number of symbols (deprecated for image);12;4
+SIZE_OF_OPT_HEADER;size of optional header;16;2
+CHARACTERISTICS;characteristics;18;2

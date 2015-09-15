@@ -1,0 +1,8 @@
+CHARACTERISTICS;Characteristics;0;4
+TIME_DATE_STAMP;Time/Date Stamp;4;4
+MAJOR_VERSION;Major Version;8;2
+MINOR_VERSION;Minor Version;10;2
+TYPE;Type;12;4
+SIZE_OF_DATA;Size of Data;16;4
+ADDR_OF_RAW_DATA;Address of Raw Data;20;4
+POINTER_TO_RAW_DATA;Pointer to Raw Data;24;4
