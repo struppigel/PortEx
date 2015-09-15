@@ -176,7 +176,7 @@ public enum AnomalySubType {
     /**
      * GLOBAL_PTR data directory size is set, but must be zero
      */
-    GLOBAL_PTR_SIZE_SET(WRONG), //TODO add to thesis
+    GLOBAL_PTR_SIZE_SET(WRONG),
     /**
      * Data directory entry doesn't point to a valid location, i.e. outside the
      * file
@@ -362,11 +362,11 @@ public enum AnomalySubType {
     /**
      * TODO
      */
-    DEPRECATED_NR_OF_RELOC(DEPRECATED), // TODO add to thesis
+    DEPRECATED_NR_OF_RELOC(DEPRECATED),
     /**
      * TODO
      */
-    DEPRECATED_PTR_TO_RELOC(DEPRECATED), // TODO add to thesis
+    DEPRECATED_PTR_TO_RELOC(DEPRECATED),
     //The following are suspicious section characteristics
    /**
     * A section is writeable and executable

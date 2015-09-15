@@ -52,6 +52,10 @@ import scala.collection.mutable.ListBuffer
  * @param exportAddressTable contains addresses to exported functions
  * @param namePointerTable contains addresses to names of exported functions
  * @param ordinalTable contains ordinal number of exported functions
+ * @param exportEntries a list of all exports
+ * @param offset to the beginning of the export section
+ * @param secLoader the section loader instance
+ * @param invalidExportCount the number of invalid export entries
  */
 class ExportSection private (
   private val edataTable: ExportDirectory,
@@ -67,11 +71,17 @@ class ExportSection private (
 
   override def isEmpty(): Boolean = exportEntries.isEmpty
 
+  /**
+   * @return physical location of all ASCII strings with export names
+   */
   private def nameLocations(): List[PhysicalLocation] = {
     namePointerTable.pointerNameList.map(p =>
       new PhysicalLocation(secLoader.getFileOffset(p._1), ExportNamePointerTable.entryLength))
   }
 
+  /**
+   * @return all physical export locations including tables and ASCII strings with export names
+   */
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
     Location.mergeContinuous(
       List(new PhysicalLocation(edataTable.fileOffset, edataTable.size),
@@ -208,21 +218,39 @@ object ExportSection {
       ordinalTable, exportEntries, offset, li.loader, invalidExportCount)
   }
 
+  /**
+   * Loads the ordinal table.
+   * 
+   * @param edataTable export directory table
+   * @param mmBytes the memory mapped bytes
+   * @param virtualAddress to the start of the export section
+   * @param edataOffset file offset to the export section
+   * @return ordinal table
+   */
   private def loadOrdinalTable(edataTable: ExportDirectory,
     mmBytes: MemoryMappedPE, virtualAddress: Long, edataOffset: Long): ExportOrdinalTable = {
     val base = edataTable(ORDINAL_BASE)
     val rva = edataTable(ORDINAL_TABLE_RVA)
     val entries = edataTable(NR_OF_NAME_POINTERS)
-    val fileOffset = edataOffset + rva - virtualAddress
-    ExportOrdinalTable(mmBytes, base.toInt, rva, entries.toInt, virtualAddress, fileOffset)
+    val ordTableFileOffset = edataOffset + rva - virtualAddress
+    ExportOrdinalTable(mmBytes, base.toInt, rva, entries.toInt, virtualAddress, ordTableFileOffset)
   }
 
+  /**
+   * Loads the name pointer table.
+   * 
+   * @param edataTable export directory table
+   * @param mmBytes the memory mapped bytes
+   * @param virtualAddress to the start of the export section
+   * @param edataOffset file offset to the export section
+   * @return name pointer table
+   */
   private def loadNamePointerTable(edataTable: ExportDirectory,
-    mmBytes: MemoryMappedPE, virtualAddress: Long, offset: Long): ExportNamePointerTable = {
+    mmBytes: MemoryMappedPE, virtualAddress: Long, edataOffset: Long): ExportNamePointerTable = {
     val nameTableRVA = edataTable(NAME_POINTER_RVA)
     val namePointers = edataTable(NR_OF_NAME_POINTERS).toInt
-    val fileOffset = offset + nameTableRVA - virtualAddress
-    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress, fileOffset)
+    val nameTableFileOffset = edataOffset + nameTableRVA - virtualAddress
+    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress, nameTableFileOffset)
   }
 
   /**
@@ -242,16 +270,31 @@ object ExportSection {
     ExportAddressTable(mmBytes, addrTableRVA, entries, virtualAddress, fileOffset)
   }
 
+  /**
+   * Loads all assumed valid export entries.
+   * 
+   * An export entry is assumed valid, iff the RVA translates to a fileOffset 
+   * that points inside the file (0 <= offset <= filesize)
+   * 
+   * @param li load information
+   * @param namePointerTable
+   * @param ordinalTable
+   * @param exportAddressTable
+   * @param edataTable
+   * @return list of all assumed valid export entries
+   */
   private def loadExportEntries(li: LoadInfo,
     namePointerTable: ExportNamePointerTable,
     ordinalTable: ExportOrdinalTable,
     exportAddressTable: ExportAddressTable,
     edataTable: ExportDirectory): List[ExportEntry] = {
+    //unpack some loadInfo data
     val optHeader = li.data.getOptionalHeader
     val virtualAddress = li.va
     val sectionLoader = li.loader
     val mmBytes = li.memoryMapped
     val file = li.data.getFile
+    
     // see: http://msdn.microsoft.com/en-us/magazine/cc301808.aspx
     // "if the function's RVA is inside the exports section (as given by the
     // VirtualAddress and Size fields in the DataDirectory), the symbol is forwarded."
@@ -269,47 +312,54 @@ object ExportSection {
 
     val rvas = ListBuffer[Long]()
     val names = namePointerTable.pointerNameList.map(_._2)
-    //limit name entries to read to maximum
+    
+    // limit name entries to read to maximum
     val namesLimited = if (names.length > maxNameEntries) names.take(maxNameEntries) else names
+    // create name entries
     val nameEntries: List[ExportEntry] = (namesLimited map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
-      if (isValidRVA(rva, sectionLoader, file, rvas)) {
-        val forwarder = getForwarder(rva)
+      if (isValidRVAAndCountInvalid(rva, sectionLoader, file, rvas)) {
         val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
-        Some(new ExportNameEntry(rva, name, ordinal, forwarder))
+        Some(new ExportNameEntry(rva, name, ordinal, getForwarder(rva)))
       } else None
     }).flatten
+    
     val addresses = exportAddressTable.addresses
     val ordinalBase = edataTable.get(ExportDirectoryKey.ORDINAL_BASE)
+    
     //TODO this is rather an address maximum
     val ordMax = Math.min(addresses.length, maxOrdEntries)
+    // create ordinal entries
     val ordEntries = (for (
       i <- 0 until ordMax;
       if !ordinalTable.ordinals.contains(i + ordinalBase)
     ) yield {
       val rva = addresses(i)
-      if (isValidRVA(rva, sectionLoader, file, rvas)) {
+      if (isValidRVAAndCountInvalid(rva, sectionLoader, file, rvas)) {
         val forwarder = getForwarder(rva)
         val ordinal = (i + ordinalBase).toInt
         Some(new ExportEntry(rva, ordinal, forwarder))
       } else None
     }).flatten
+    
     //    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
     //    assert(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
     //      edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
-    //TODO better description, add to anomalies
     if (!(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))) {
-      logger.warn("corrupt export entries")
+      logger.warn("corrupt export name entries")
     }
     if (!(ordEntries.size == edataTable.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) -
       edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))) {
-      logger.warn("corrupt export entries")
+      logger.warn("corrupt export ordinal entries")
     }
 
     ordEntries.toList ::: nameEntries.toList
   }
 
-  private def isValidRVA(rva: Long, loader: SectionLoader, file: File, rvas: ListBuffer[Long]): Boolean = {
+  /**
+   * Adds the rva to the rvas list. Counts up if rva invalid. Returns true iff rva is valid.
+   */
+  private def isValidRVAAndCountInvalid(rva: Long, loader: SectionLoader, file: File, rvas: ListBuffer[Long]): Boolean = {
     // no rva duplicates allowed TODO consider, creates false unit tests
     //    if (rvas.contains(rva)) {
     //      invalidExportCount += 1
@@ -358,9 +408,8 @@ object ExportSection {
   private def getASCIIName(nameRVA: Long, virtualAddress: Long,
     mmBytes: MemoryMappedPE): String = {
     val offset = nameRVA
-    //TODO cast to int is insecure. actual int is unsigned, java int is signed
-    val nullindex = mmBytes.indexWhere(_ == 0, offset.toInt)
-    new String(mmBytes.slice(offset.toInt, nullindex))
+    val nullindex = mmBytes.indexWhere(_ == 0, offset)
+    new String(mmBytes.slice(offset, nullindex))
   }
 
   /**
