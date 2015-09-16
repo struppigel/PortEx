@@ -40,7 +40,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.EnumMap;
@@ -245,7 +244,7 @@ public class Visualizer {
 		}
 		return image;
 	}
-	
+
 	private static Color getColorForEntropy(double entropy) {
 		int col = (int) (entropy * 255);
 		return new Color(col, col, col);
@@ -307,7 +306,7 @@ public class Visualizer {
 	public BufferedImage createImage(File file) throws IOException {
 		resetAvailabilityFlags();
 		this.data = PELoader.loadPE(file);
-		image = new BufferedImage(legendWidth + fileWidth, height, IMAGE_TYPE);
+		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 
 		drawSections();
 
@@ -321,9 +320,18 @@ public class Visualizer {
 
 		drawPEHeaders();
 		drawSpecials();
-		drawLegend();
 		assert image != null;
-		assert image.getWidth() == legendWidth + fileWidth;
+		assert image.getWidth() == fileWidth;
+		assert image.getHeight() == height;
+		return image;
+	}
+
+	public BufferedImage createLegendImage(boolean withBytePlot,
+			boolean withEntropy, boolean withPEStructure) {
+		image = new BufferedImage(legendWidth, height, IMAGE_TYPE);
+		drawLegend(withBytePlot, withEntropy, withPEStructure);
+		assert image != null;
+		assert image.getWidth() == legendWidth;
 		assert image.getHeight() == height;
 		return image;
 	}
@@ -486,46 +494,60 @@ public class Visualizer {
 		return colorPart;
 	}
 
-	private void drawLegend() {
+	private void drawLegend(boolean withBytePlot, boolean withEntropy,
+			boolean withPEStructure) {
 		int number = 0;
-		writeLegendTitle(number++, "BytePlot (left)", Color.lightGray);
-		drawLegendEntry(number++, "visible ASCII", Color.blue);
-		drawLegendEntry(number++, "invisible ASCII", Color.green);
-		drawLegendEntry(number++, "non-ASCII", Color.yellow);
-		writeLegendTitle(number++, "Entropy (middle)", Color.lightGray);
-		drawLegendEntry(number++, "0.2 (repetition)", getColorForEntropy(0.2));
-		drawLegendEntry(number++, "0.5 (code)", getColorForEntropy(0.5));
-		drawLegendEntry(number++, "0.8 (packed)", getColorForEntropy(0.8));
-		writeLegendTitle(number++, "PE Structure (right)", Color.lightGray);
-		drawLegendEntry(number++, "MSDOS Header", colorMap.get(MSDOS_HEADER));
-		drawLegendEntry(number++, "COFF File Header", colorMap.get(COFF_FILE_HEADER));
-		drawLegendEntry(number++, "Optional Header", colorMap.get(OPTIONAL_HEADER));
-		drawLegendEntry(number++, "Section Table", colorMap.get(SECTION_TABLE));
-		SectionTable table = data.getSectionTable();
-		for (SectionHeader header : table.getSectionHeaders()) {
-			Color sectionColor = getSectionColor(header);
-			drawLegendEntry(number++, header.getName(), sectionColor);
-			sectionColor = variate(sectionColor);
+		if (withBytePlot) {
+			writeLegendTitle(number++, "BytePlot (left)", Color.lightGray);
+			drawLegendEntry(number++, "0xFF", Color.white);
+			drawLegendEntry(number++, "0x00", Color.black);
+			drawLegendEntry(number++, "visible ASCII", Color.blue);
+			drawLegendEntry(number++, "invisible ASCII", Color.green);
+			drawLegendEntry(number++, "non-ASCII", Color.yellow);
 		}
-		for (DataDirectoryKey special : specials) {
-			if (specialsAvailability.get(special)) {
-				drawLegendEntry(number++, getSpecialsDescription(special),
-						getSpecialsColor(special), true);
+		if (withEntropy) {
+			writeLegendTitle(number++, "Entropy (middle)", Color.lightGray);
+			drawLegendEntry(number++, "0.2 (repetition)",
+					getColorForEntropy(0.2));
+			drawLegendEntry(number++, "0.5 (code)", getColorForEntropy(0.5));
+			drawLegendEntry(number++, "0.8 (packed)", getColorForEntropy(0.8));
+		}
+		if (withPEStructure) {
+			writeLegendTitle(number++, "PE Structure (right)", Color.lightGray);
+			drawLegendEntry(number++, "MSDOS Header",
+					colorMap.get(MSDOS_HEADER));
+			drawLegendEntry(number++, "COFF File Header",
+					colorMap.get(COFF_FILE_HEADER));
+			drawLegendEntry(number++, "Optional Header",
+					colorMap.get(OPTIONAL_HEADER));
+			drawLegendEntry(number++, "Section Table",
+					colorMap.get(SECTION_TABLE));
+			SectionTable table = data.getSectionTable();
+			for (SectionHeader header : table.getSectionHeaders()) {
+				Color sectionColor = getSectionColor(header);
+				drawLegendEntry(number++, header.getName(), sectionColor);
+				sectionColor = variate(sectionColor);
 			}
-		}
-		if (epAvailable) {
-			drawLegendEntry(number++, "Entry Point", colorMap.get(ENTRY_POINT),
-					true);
-		}
-		if (overlayAvailable) {
-			drawLegendEntry(number++, "Overlay", colorMap.get(OVERLAY));
+			for (DataDirectoryKey special : specials) {
+				if (specialsAvailability.get(special)) {
+					drawLegendEntry(number++, getSpecialsDescription(special),
+							getSpecialsColor(special), true);
+				}
+			}
+			if (epAvailable) {
+				drawLegendEntry(number++, "Entry Point",
+						colorMap.get(ENTRY_POINT), true);
+			}
+			if (overlayAvailable) {
+				drawLegendEntry(number++, "Overlay", colorMap.get(OVERLAY));
+			}
 		}
 		// drawLegendCrossEntry(number, "Anomalies", anomalyColor);
 	}
-	
+
 	private void writeLegendTitle(int number, String description, Color color) {
 		assert description != null && color != null;
-		int startX = fileWidth + LEGEND_GAP;
+		int startX = LEGEND_GAP;
 		int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
 		if (startY >= height) {
 			startX = startX + legendWidth / 2;
@@ -536,7 +558,8 @@ public class Visualizer {
 		Graphics g = image.getGraphics();
 		g.setColor(color);
 		g.drawString(description, stringX, stringY);
-		g.drawString("---------------------------------", stringX, stringY + LEGEND_SAMPLE_SIZE);
+		g.drawString("---------------------------------", stringX, stringY
+				+ LEGEND_SAMPLE_SIZE);
 	}
 
 	// TODO temporary almost-duplicate of drawLegendEntry
@@ -544,7 +567,7 @@ public class Visualizer {
 	private void drawLegendCrossEntry(int number, String description,
 			Color color) {
 		assert description != null && color != null;
-		int startX = fileWidth + LEGEND_GAP;
+		int startX = LEGEND_GAP;
 		int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
 		if (startY >= height) {
 			startX = startX + legendWidth / 2;
@@ -566,7 +589,7 @@ public class Visualizer {
 	private void drawLegendEntry(int number, String description, Color color,
 			boolean withOutLine) {
 		assert description != null && color != null;
-		int startX = fileWidth + LEGEND_GAP;
+		int startX = LEGEND_GAP;
 		int startY = LEGEND_GAP + (LEGEND_ENTRY_HEIGHT * number);
 		if (startY >= height) {
 			startX = startX + legendWidth / 2;
@@ -697,18 +720,20 @@ public class Visualizer {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		File file = new File(
-				"/home/katja/samples/RegisterMe.Oops.exe");
+		File file = new File("/home/katja/samples/RegisterMe.Oops.exe");
 		VisualizerBuilder builder = new VisualizerBuilder();
-//		builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
+		// builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
 		Visualizer vi = builder.build();
 		final BufferedImage entropyImage = vi.createEntropyImage(file);
 		final BufferedImage bytePlotImage = vi.createBytePlot(file);
 		final BufferedImage structureImage = vi.createImage(file);
-		BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage, entropyImage);
+		final BufferedImage legendImage = vi.createLegendImage(true, true, true);
+		BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage,
+				entropyImage);
 		joinedImage = ImageUtil.appendImages(joinedImage, structureImage);
-		ImageIO.write(joinedImage, "png", new File(
-				"/home/katja/visualized.png"));
+		joinedImage = ImageUtil.appendImages(joinedImage, legendImage);
+		ImageIO.write(joinedImage, "png",
+				new File("/home/katja/visualized.png"));
 		show(joinedImage);
 	}
 

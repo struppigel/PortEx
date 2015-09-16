@@ -39,9 +39,9 @@ import java.io.FileWriter
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.3.8
+  private val version = """version: 0.3.9
     |author: Katja Hahn
-    |last update: 14. Sep 2015""".stripMargin
+    |last update: 15. Sep 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -54,7 +54,7 @@ object PortExAnalyzer {
     | -v,--version       show version
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
-    | -i,--ico           extract all icons from the resource section
+    | -i,--ico           extract icons from the resource section as .ico file
     """.stripMargin
 
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
@@ -161,10 +161,14 @@ object PortExAnalyzer {
     val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
     if (isPEFile(file)) {
       val structureImage = vi.createImage(file)
-      val appendedImage2 = ImageUtil.appendImages(appendedImage, structureImage)
-      ImageIO.write(appendedImage2, "png", imageFile);
+      val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
+      val legendImage = vi.createLegendImage(true, true, true)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage1, legendImage)
+      ImageIO.write(appendedImage2, "png", imageFile)
     } else {
-      ImageIO.write(appendedImage, "png", imageFile);
+      val legendImage = vi.createLegendImage(true, true, false)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage, legendImage)
+      ImageIO.write(appendedImage2, "png", imageFile)
     }
   }
 
