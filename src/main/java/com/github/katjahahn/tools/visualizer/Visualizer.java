@@ -35,6 +35,12 @@ import static com.github.katjahahn.tools.visualizer.ColorableItem.RELOC_SECTION;
 import static com.github.katjahahn.tools.visualizer.ColorableItem.RESOURCE_SECTION;
 import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_START;
 import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_TABLE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.VISIBLE_ASCII;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.INVISIBLE_ASCII;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.NON_ASCII;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.MAX_BYTE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.MIN_BYTE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTROPY;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -174,35 +180,45 @@ public class Visualizer {
 	}
 
 	private Color getBytePlotColor(byte b) {
+		/* convert byte to int */
 		int byteVal = b & 0xff;
-
+		/* unpack colors */
+		Color visibleASCII = colorMap.get(VISIBLE_ASCII);
+		Color invisibleASCII = colorMap.get(INVISIBLE_ASCII);
+		Color nonASCII = colorMap.get(NON_ASCII);
+		/* get hue for each color */
 		float[] hsbvals = new float[3];
-		Color.RGBtoHSB(0, 0, 255, hsbvals);
-		float blueHue = hsbvals[0];
-		Color.RGBtoHSB(0, 255, 0, hsbvals);
-		float greenHue = hsbvals[0];
-		Color.RGBtoHSB(Color.yellow.getRed(), Color.yellow.getGreen(),
-				Color.yellow.getBlue(), hsbvals);
-		float yellowHue = hsbvals[0];
+		Color.RGBtoHSB(visibleASCII.getRed(), visibleASCII.getGreen(), visibleASCII.getBlue(), hsbvals);
+		float visibleASCIIHue = hsbvals[0];
+		float visibleASCIISaturation = hsbvals[1];
+		Color.RGBtoHSB(invisibleASCII.getRed(), invisibleASCII.getGreen(),
+				invisibleASCII.getBlue(), hsbvals);
+		float invisibleASCIIHue = hsbvals[0];
+		float invisibleASCIISaturation = hsbvals[1];
+		Color.RGBtoHSB(nonASCII.getRed(), nonASCII.getGreen(),
+				nonASCII.getBlue(), hsbvals);
+		float nonASCIIHue = hsbvals[0];
+		float nonASCIISaturation = hsbvals[1];
 
+		/* max or min byte value */
 		if (byteVal == 0)
-			return Color.black;
+			return colorMap.get(MIN_BYTE);
 		if (byteVal == 0xff)
-			return Color.white;
+			return colorMap.get(MAX_BYTE);
 
-		if (byteVal > 0 && byteVal <= 127) { // ASCII
-			float hue = blueHue;
-			float saturation = 1;
+		/* ASCII range */
+		if (byteVal > 0 && byteVal <= 127) {
+			float hue = visibleASCIIHue;
+			float saturation = visibleASCIISaturation;
 			if (byteVal < 33 || byteVal == 127) {
-				hue = greenHue;
+				hue = invisibleASCIIHue;
+				saturation = invisibleASCIISaturation;
 			}
 			float brightness = (float) (byteVal / (float) 127);
 			return Color.getHSBColor(hue, saturation, brightness);
-		} else { // non-ASCII
-			float saturation = 1;
-			float hue = yellowHue;
+		} else { /* non-ASCII range */
 			float brightness = (float) ((byteVal - 127) / (float) (255 - 127));
-			return Color.getHSBColor(hue, saturation, brightness);
+			return Color.getHSBColor(nonASCIIHue, nonASCIISaturation, brightness);
 		}
 	}
 
@@ -245,11 +261,30 @@ public class Visualizer {
 		return image;
 	}
 
-	private static Color getColorForEntropy(double entropy) {
-		int col = (int) (entropy * 255);
-		return new Color(col, col, col);
+	/**
+	 * Creates a color instance based on a given entropy.
+	 * 
+	 * @param entropy
+	 *            value between 0 and 1
+	 * @return Color for given entropy
+	 */
+	private Color getColorForEntropy(double entropy) {
+		assert entropy <= 1;
+		assert entropy >= 0;
+		Color entropyColor = colorMap.get(ENTROPY);
+		float[] hsbvals = new float[3];
+		Color.RGBtoHSB(entropyColor.getRed(), entropyColor.getGreen(), entropyColor.getBlue(), hsbvals);
+		float entropyHue = hsbvals[0];
+		float saturation = hsbvals[1];
+		float brightness = (float) entropy;
+		return Color.getHSBColor(entropyHue, saturation, brightness);
+		//int col = (int) (entropy * 255);
+		//return new Color(col, col, col);
 	}
 
+	/**
+	 * Sets all *Available flags to false.
+	 */
 	private void resetAvailabilityFlags() {
 		epAvailable = false;
 		overlayAvailable = false;
@@ -326,6 +361,17 @@ public class Visualizer {
 		return image;
 	}
 
+	/**
+	 * Creates a buffered image with a basic Legend
+	 * 
+	 * @param withBytePlot
+	 *            show byteplot legend
+	 * @param withEntropy
+	 *            show entropy legend
+	 * @param withPEStructure
+	 *            show PE structure legend
+	 * @return buffered image of the generated legend
+	 */
 	public BufferedImage createLegendImage(boolean withBytePlot,
 			boolean withEntropy, boolean withPEStructure) {
 		image = new BufferedImage(legendWidth, height, IMAGE_TYPE);
@@ -336,6 +382,9 @@ public class Visualizer {
 		return image;
 	}
 
+	/**
+	 * Draws the PE Header to the structure image
+	 */
 	private void drawPEHeaders() {
 		long msdosOffset = 0;
 		long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
@@ -427,6 +476,13 @@ public class Visualizer {
 		}
 	}
 
+	/**
+	 * Returns the entry point of the PE if present and valid, otherwise absent.
+	 * 
+	 * A valid entry point is one within a section.
+	 * 
+	 * @return entry point optional if present, absent otherwise
+	 */
 	private Optional<Long> getEntryPoint() {
 		long rva = data.getOptionalHeader().get(
 				StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
@@ -441,6 +497,9 @@ public class Visualizer {
 		return Optional.absent();
 	}
 
+	/**
+	 * Draw the sections to the structure image.
+	 */
 	private void drawSections() {
 		SectionTable table = data.getSectionTable();
 		long sectionTableOffset = table.getOffset();
@@ -461,32 +520,62 @@ public class Visualizer {
 		}
 	}
 
+	/**
+	 * Generate the color of the given section.
+	 * 
+	 * @param header
+	 *            of the section
+	 * @return color of the section
+	 */
 	private Color getSectionColor(SectionHeader header) {
+		// color is based on section number
 		int nr = header.getNumber();
 		Color sectionColor = colorMap.get(SECTION_START);
+		// modify the color section number times
 		for (int i = 1; i < nr; i++) {
 			sectionColor = variate(sectionColor);
 		}
 		return sectionColor;
 	}
 
+	/**
+	 * Shift the given section color one step.
+	 * 
+	 * This creates a color similar to the given color, but still different
+	 * enough to tell the new color apart from the old one.
+	 * 
+	 * @param color
+	 * @return modified color
+	 */
 	private Color variate(Color color) {
 		assert color != null;
 		final int diff = 30;
+		// darken the color for value of diff
 		int newRed = shiftColorPart(color.getRed() - diff);
 		int newGreen = shiftColorPart(color.getGreen() - diff);
 		int newBlue = shiftColorPart(color.getBlue() - diff);
 		Color newColor = new Color(newRed, newGreen, newBlue);
+		// start at the original section color again if darkening accidentally
+		// resulted in black, which has already the meaning of section caves.
 		if (newColor.equals(Color.black)) {
 			newColor = colorMap.get(SECTION_START);
 		}
 		return newColor;
 	}
 
+	/**
+	 * Makes sure that the new integer is within byte range (0 - 255).
+	 * 
+	 * @param colorPart
+	 * @return 255 if the integer is above, returns 0 if it is below, and the
+	 *         original value otherwise.
+	 */
 	private int shiftColorPart(int colorPart) {
+		// would be 0, return max value
 		if (colorPart < 0) {
 			return 255;
 		}
+		// would be too large --> return 0
 		if (colorPart > 255) {
 			return 0;
 		}
@@ -494,16 +583,26 @@ public class Visualizer {
 		return colorPart;
 	}
 
+	/**
+	 * Draws the legend to the Visualizer image.
+	 * 
+	 * @param withBytePlot
+	 *            legend of the byteplot image is added
+	 * @param withEntropy
+	 *            legend of the entropy image is added
+	 * @param withPEStructure
+	 *            legend of the PE structure image is added
+	 */
 	private void drawLegend(boolean withBytePlot, boolean withEntropy,
 			boolean withPEStructure) {
 		int number = 0;
 		if (withBytePlot) {
 			writeLegendTitle(number++, "BytePlot (left)", Color.lightGray);
-			drawLegendEntry(number++, "0xFF", Color.white);
-			drawLegendEntry(number++, "0x00", Color.black);
-			drawLegendEntry(number++, "visible ASCII", Color.blue);
-			drawLegendEntry(number++, "invisible ASCII", Color.green);
-			drawLegendEntry(number++, "non-ASCII", Color.yellow);
+			drawLegendEntry(number++, "0xFF", colorMap.get(MAX_BYTE));
+			drawLegendEntry(number++, "0x00", colorMap.get(MIN_BYTE));
+			drawLegendEntry(number++, "visible ASCII", colorMap.get(VISIBLE_ASCII));
+			drawLegendEntry(number++, "invisible ASCII", colorMap.get(INVISIBLE_ASCII));
+			drawLegendEntry(number++, "non-ASCII", colorMap.get(NON_ASCII));
 		}
 		if (withEntropy) {
 			writeLegendTitle(number++, "Entropy (middle)", Color.lightGray);
@@ -609,6 +708,20 @@ public class Visualizer {
 		g.drawString(description, stringX, stringY);
 	}
 
+	/**
+	 * Draws a rectangle.
+	 * 
+	 * @param color
+	 *            that fills the rectangle
+	 * @param startX
+	 *            the x value of the upper left corner for the rectangle
+	 * @param startY
+	 *            the y value of the upper left corner for the rectangle
+	 * @param width
+	 *            the width of the rectangle in pixels
+	 * @param height
+	 *            the height of the rectangle in pixels
+	 */
 	private void drawRect(Color color, int startX, int startY, int width,
 			int height) {
 		assert color != null;
@@ -623,7 +736,20 @@ public class Visualizer {
 		}
 	}
 
-	// TODO temporary almost-duplicate of drawRect
+	/**
+	 * Draws a cross.
+	 * 
+	 * @param color
+	 *            of the cross
+	 * @param startX
+	 *            the x value of the upper left corner for the cross
+	 * @param startY
+	 *            the y value of the upper left corner for the cross
+	 * @param width
+	 *            the width of the cross in pixels
+	 * @param height
+	 *            the height of the cross in pixels
+	 */
 	private void drawCross(Color color, int startX, int startY, int width,
 			int height) {
 		assert color != null;
@@ -642,7 +768,6 @@ public class Visualizer {
 		}
 	}
 
-	// TODO temporary almost-duplicate of drawPixels
 	private void drawCrosses(Color color, long fileOffset, long fileLength) {
 		assert color != null;
 		long pixelStart = getPixelNumber(fileOffset);
@@ -663,16 +788,53 @@ public class Visualizer {
 		}
 	}
 
+	/**
+	 * Draws a square pixel at fileOffset with
+	 * color.
+	 * 
+	 * @param color
+	 *            of the square pixel
+	 * @param fileOffset
+	 *            file location that the square pixel represents
+	 */
 	private void drawPixel(Color color, long fileOffset) {
 		long size = withMinLength(0);
 		drawPixels(color, fileOffset, size);
 	}
 
+	/**
+	 * Draws a square pixels at fileOffset with color. Height and width of the
+	 * drawn area are based on the number of bytes that it represents given by 
+	 * the length.
+	 * 
+	 * Square pixels are drawn without visible gap.
+	 * 
+	 * @param color
+	 *            of the square pixels
+	 * @param fileOffset
+	 *            file location that the square pixels represent
+	 * @param length
+	 *            number of bytes that are colored by the square pixels.
+	 */
 	private void drawPixels(Color color, long fileOffset, long length) {
 		assert color != null;
 		drawPixels(color, fileOffset, length, 0);
 	}
 
+	/**
+	 * Draws a square pixels at fileOffset with color. Height and width of the
+	 * drawn area are based on the number of bytes that it represents given by 
+	 * the length.
+	 * 
+	 * @param color
+	 *            of the square pixels
+	 * @param fileOffset
+	 *            file location that the square pixels represent
+	 * @param length
+	 *            number of bytes that are colored by the square pixels.
+	 * @param additionalGap
+	 *            the gap between adjacent square pixels
+	 */
 	private void drawPixels(Color color, long fileOffset, long length,
 			int additionalGap) {
 		assert color != null;
@@ -706,6 +868,11 @@ public class Visualizer {
 		return result;
 	}
 
+	/**
+	 * Calculates how many bytes are covered by one square pixel.
+	 *
+	 * @return bytes covered by one square pixel
+	 */
 	private int bytesPerPixel() {
 		long fileSize = data.getFile().length();
 		long pixelMax = getXPixels() * (long) getYPixels();
@@ -720,14 +887,19 @@ public class Visualizer {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		File file = new File("/home/katja/samples/RegisterMe.Oops.exe");
+		File file = new File("/home/katja/samples/VirMC.exe");
 		VisualizerBuilder builder = new VisualizerBuilder();
+		builder.setColor(VISIBLE_ASCII, Color.red);
+		builder.setColor(NON_ASCII, Color.green);
+		builder.setColor(INVISIBLE_ASCII, Color.orange);
+		builder.setColor(ENTROPY, Color.cyan);
 		// builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
 		Visualizer vi = builder.build();
 		final BufferedImage entropyImage = vi.createEntropyImage(file);
 		final BufferedImage bytePlotImage = vi.createBytePlot(file);
 		final BufferedImage structureImage = vi.createImage(file);
-		final BufferedImage legendImage = vi.createLegendImage(true, true, true);
+		final BufferedImage legendImage = vi
+				.createLegendImage(true, true, true);
 		BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage,
 				entropyImage);
 		joinedImage = ImageUtil.appendImages(joinedImage, structureImage);

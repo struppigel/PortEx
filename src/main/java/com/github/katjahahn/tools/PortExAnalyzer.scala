@@ -33,6 +33,8 @@ import com.github.katjahahn.tools.sigscanner.Signature
 import java.io.File
 import java.nio.file.Paths
 import java.io.FileWriter
+import com.github.katjahahn.tools.visualizer.ColorableItem
+import java.awt.Color
 
 /**
  * Command line frontend of PortEx
@@ -152,7 +154,7 @@ object PortExAnalyzer {
       res
     }
     val bytePlotPixelSize = if(fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
-    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length)
+    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY,Color.cyan)
     val vi = viBuilder.build()
     val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
     val entropyImage = vi.createEntropyImage(file)

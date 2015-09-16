@@ -24,24 +24,29 @@ package com.github.katjahahn.tools.visualizer;
  */
 public enum ColorableItem {
 
-    /* Header */
-    MSDOS_HEADER("MSDOS Header"), COFF_FILE_HEADER("COFF File Header"), OPTIONAL_HEADER(
-            "Optional Header"), SECTION_TABLE("Section Table"),
-    /* Special Sections and Tables */
-    IMPORT_SECTION("Imports"), EXPORT_SECTION("Exports"), DEBUG_SECTION(
-            "Debug Section"), RESOURCE_SECTION("Resources"), RELOC_SECTION(
-            "Relocations"), DELAY_IMPORT_SECTION("Delay Imports"),
-    /* Other */
-    ENTRY_POINT("Entry Point"), OVERLAY("Overlay"), SECTION_START(""), ANOMALY(
-            "Anomaly");
+	/* Header */
+	MSDOS_HEADER("MSDOS Header"), COFF_FILE_HEADER("COFF File Header"), OPTIONAL_HEADER(
+			"Optional Header"), SECTION_TABLE("Section Table"),
+	/* Special Sections and Tables */
+	IMPORT_SECTION("Imports"), EXPORT_SECTION("Exports"), DEBUG_SECTION(
+			"Debug Info"), RESOURCE_SECTION("Resources"), RELOC_SECTION(
+			"Relocations"), DELAY_IMPORT_SECTION("Delay Imports"),
+	/* Other */
+	ENTRY_POINT("Entry Point"), OVERLAY("Overlay"), SECTION_START(""), ANOMALY(
+			"Anomaly"),
+	/* BytePlot */
+	VISIBLE_ASCII("Visible ASCII"), INVISIBLE_ASCII("Invisible ASCII"), NON_ASCII(
+			"Non-ASCII"), MAX_BYTE("0xFF"), MIN_BYTE("0x00"),
+	/* Entropy*/
+	ENTROPY("Entropy");
 
-    private final String description;
+	private final String description;
 
-    private ColorableItem(String description) {
-        this.description = description;
-    }
+	private ColorableItem(String description) {
+		this.description = description;
+	}
 
-    public String getLegendDescription() {
-        return description;
-    }
+	public String getLegendDescription() {
+		return description;
+	}
 }
