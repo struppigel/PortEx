@@ -109,7 +109,9 @@ object VersionInfo {
 //      if (stringFileInfo.szKey == StringFileInfo.signature) {
 //        Array(varFileInfo, stringFileInfo)
 //      } else Array(varFileInfo)
-//    } else if (StringFileInfo(offset, raf).szKey == StringFileInfo.signature) {
+//    } 
+    //else 
+//      if (StringFileInfo(offset, raf).szKey == StringFileInfo.signature) {
 //      val stringFileInfo = VarFileInfo(offset, raf)
 //      val varFileInfo = StringFileInfo(offset + stringFileInfo.wLength + padding, raf)
 //      if (varFileInfo.szKey == StringFileInfo.signature) {
