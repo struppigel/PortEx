@@ -23,6 +23,7 @@ import ResourceDirectoryEntry._
 import java.io.File
 import java.io.RandomAccessFile
 import scala.collection.mutable.ListBuffer
+import scala.math.min
 import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.FileFormatException
 import org.apache.logging.log4j.LogManager
@@ -123,6 +124,8 @@ case class Name(rva: Long, name: String) extends IDOrName {
 }
 
 object ResourceDirectoryEntry {
+  
+  val maxNameLength = 30
 
   private val logger = LogManager.getLogger(ResourceDirectoryEntry.getClass().getName())
 
@@ -203,7 +206,7 @@ object ResourceDirectoryEntry {
     mmBytes: MemoryMappedPE, va: Long): IDOrName =
     if (isNameEntry) {
       // if name entry fetch the name string at given rva
-      val name = getStringAtRVA(rva, va, mmBytes)
+      val name = getStringAtRVA(rva, va, mmBytes, maxNameLength)
       Name(rva, name)
       // create id instance otherwise
     } else ID(rva, level)
@@ -214,9 +217,10 @@ object ResourceDirectoryEntry {
    * The first two bytes at the given rva specify the length of following string.
    * @param rva the relative virtual address to the string
    * @param mmbytes the memory mapped PE
+   * @param maxStrLength maximum number of characters to read
    * @return string at rva
    */
-  private def getStringAtRVA(rva: Long, va: Long, mmBytes: MemoryMappedPE): String = {
+  private def getStringAtRVA(rva: Long, va: Long, mmBytes: MemoryMappedPE, maxStrLength: Int): String = {
     // highest bit does not belong to rva, add virtualAddress of resource section
     val address = removeHighestIntBit(rva) + va
     // 2 bytes reserved for length
@@ -226,7 +230,7 @@ object ResourceDirectoryEntry {
       logger.warn("couldn't read string at offset " + address)
     }
     // read the length of the string (number of characters)
-    val strLength = mmBytes.getBytesIntValue(address, length)
+    val strLength = min(mmBytes.getBytesIntValue(address, length), maxStrLength)
     // UTF-16 needs two bytes per character
     val strBytes = strLength * 2
     // the actual address of the string

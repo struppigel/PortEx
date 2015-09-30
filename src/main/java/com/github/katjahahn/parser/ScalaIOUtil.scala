@@ -37,7 +37,7 @@ object ScalaIOUtil {
   def bytes2hex(bytes: Array[Option[Byte]], sep: String): String = {
     bytes.foldLeft("")((s, b) => b match {
       case None => s + sep + "??"
-      case _ => s + sep + "%02x".format(b.get)
+      case _    => s + sep + "%02x".format(b.get)
     })
   }
 
@@ -70,5 +70,17 @@ object ScalaIOUtil {
     if (size >= 0) {
       Array.fill(size)(0.toByte)
     } else Array()
+
+  /**
+   * Filters all control symbols and extended code from the given string. The
+   * filtered string is returned.
+   *
+   * @return filtered string
+   */
+  def filteredString(string: String): String = {
+    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
+    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
+    string.filterNot(controlCode).filterNot(extendedCode)
+  }
 
 }

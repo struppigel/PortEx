@@ -267,6 +267,10 @@ public enum AnomalySubType {
      */
     UNUSUAL_SEC_NAME(NON_DEFAULT),
     /**
+     * The section name is empty.
+     */
+    EMPTY_SEC_NAME(NON_DEFAULT),
+    /**
      * Control symbols in section name. This is a special case of
      * UNUSUAL_SEC_NAME.
      */
@@ -414,6 +418,10 @@ public enum AnomalySubType {
 
     /**************************** Resource Section ******************************/
 
+    /**
+     * Name of a named resource entry is weird
+     */
+    RESOURCE_NAME(NON_DEFAULT),
     /**
      * Resource tree has a loop.
      */

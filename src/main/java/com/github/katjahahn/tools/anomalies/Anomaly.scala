@@ -25,6 +25,8 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.sections.idata.ImportDLL
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.sections.rsrc.Level
+import com.github.katjahahn.parser.sections.rsrc.Resource
 
 /**
  * PE file anomaly or malformation.
@@ -108,6 +110,7 @@ case class SectionAnomaly(val header: SectionHeader,
   override val description: String,
   override val subtype: AnomalySubType,
   readSize: Long) extends Anomaly {
+  
   override def locations = List(new PhysicalLocation(header.getAlignedPointerToRaw(), readSize)).asJava
   override def key = PEStructureKey.SECTION 
 }
@@ -119,6 +122,13 @@ case class SectionNameAnomaly(val header: SectionHeader,
   override def locations = List(new PhysicalLocation(header.getNameOffset,
     header.getNameSize)).asJava
   override def key = SectionHeaderKey.NAME
+}
+
+case class ResourceNameAnomaly(val resource: Resource, val level: Level, 
+    override val description: String, override val subtype: AnomalySubType) extends Anomaly {
+  
+  override def locations = List(resource.rawBytesLocation).asJava
+  override def key = PEStructureKey.RESOURCE_SECTION //TODO correct key?
 }
 
 case class ImportAnomaly(val imports: List[ImportDLL],

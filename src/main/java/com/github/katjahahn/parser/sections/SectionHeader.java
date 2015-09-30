@@ -15,8 +15,11 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import static com.github.katjahahn.parser.IOUtil.*;
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.POINTER_TO_RAW_DATA;
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.SIZE_OF_RAW_DATA;
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.VIRTUAL_ADDRESS;
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.VIRTUAL_SIZE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +28,7 @@ import java.util.Map.Entry;
 
 import com.github.katjahahn.parser.Header;
 import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.ScalaIOUtil;
 import com.github.katjahahn.parser.StandardField;
 
 /**
@@ -145,12 +149,21 @@ public class SectionHeader extends Header<SectionHeaderKey> {
     }
 
     /**
-     * Returns the name of the section table entry
+     * Returns the filtered name of the section table entry
      * 
-     * @return name
+     * @return filtered name
      */
     public String getName() {
-        return name;
+        return ScalaIOUtil.filteredString(name);
+    }
+    
+    /**
+     * Returns the unfiltered name of the section table entry
+     * 
+     * @return section name
+     */
+    public String getUnfilteredName() {
+    	return name;
     }
 
     /**

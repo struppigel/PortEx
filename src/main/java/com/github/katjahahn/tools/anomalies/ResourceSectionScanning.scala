@@ -8,7 +8,10 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.rsrc.ResourceSection
+import com.github.katjahahn.parser.sections.rsrc.Name
 import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry
+import com.github.katjahahn.parser.ScalaIOUtil
 
 trait ResourceSectionScanning extends AnomalyScanner {
   abstract override def scanReport(): String =
@@ -21,8 +24,29 @@ trait ResourceSectionScanning extends AnomalyScanner {
       val anomalyList = ListBuffer[Anomaly]()
       anomalyList ++= checkFractionatedResources(rsrc)
       anomalyList ++= checkResourceLoop(rsrc)
+      anomalyList ++= checkResourceNames(rsrc)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
+  }
+
+  private def checkResourceNames(rsrc: ResourceSection): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val resources = rsrc.getResources.asScala    
+    for (resource <- resources) {
+      for ((lvl, id) <- resource.levelIDs) {
+        id match {
+          case Name(rva, name) =>
+            val max = ResourceDirectoryEntry.maxNameLength
+            val offset = resource.rawBytesLocation.from
+            if (name.length >= max) {
+              val description = s"Resource name in resource ${ScalaIOUtil.hex(offset)} at level ${lvl} has maximum length (${max})";
+              anomalyList += ResourceNameAnomaly(resource, lvl, description, AnomalySubType.RESOURCE_NAME)
+            }
+          case _ => //nothing
+        }
+      }
+    }
+    anomalyList.toList
   }
 
   private def checkResourceLoop(rsrc: ResourceSection): List[Anomaly] = {
@@ -30,9 +54,9 @@ trait ResourceSectionScanning extends AnomalyScanner {
     if (rsrc.hasLoop) {
       val description = "Detected loop in resource tree!"
       //TODO specify exact location of loop?
-      val locs = rsrc.getPhysicalLocations.asScala.toList 
-      anomalyList += StructureAnomaly(PEStructureKey.RESOURCE_SECTION, 
-          description, AnomalySubType.RESOURCE_LOOP, locs)
+      val locs = rsrc.getPhysicalLocations.asScala.toList
+      anomalyList += StructureAnomaly(PEStructureKey.RESOURCE_SECTION,
+        description, AnomalySubType.RESOURCE_LOOP, locs)
     }
     anomalyList.toList
   }
