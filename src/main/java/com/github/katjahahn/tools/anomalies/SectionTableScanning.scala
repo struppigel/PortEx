@@ -86,7 +86,6 @@ trait SectionTableScanning extends AnomalyScanner {
       //Themida
       ".Themida" -> "Themida","Themida" -> "Themida",
       //Other
-      ".packed" -> "Unknown Packer",
       ".Upack" -> "Upack packer",
       ".ByDwing" -> "Upack packer",
       //UPX
