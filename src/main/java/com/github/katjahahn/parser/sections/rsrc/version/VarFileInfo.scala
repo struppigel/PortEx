@@ -10,7 +10,6 @@ class VarFileInfo(
   val wValueLength: Int,
   val wType: Int,
   val szKey: String,
-  val padding: Int,
   val children: Array[Var]) extends FileInfo {
 
   override def toString(): String =
@@ -18,7 +17,6 @@ class VarFileInfo(
         |wValueLength: $wValueLength
         |wType: $wType
         |szKey: $szKey
-        |padding: $padding
         |children: ${children.mkString(NL)}
       """.stripMargin
 
@@ -39,13 +37,13 @@ object VarFileInfo {
     val wValueLength = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize, wordSize, raf))
     val wType = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 2, wordSize, raf))
     val szKey = new String(loadBytes(offset + wordSize * 3, signature.length * wordSize, raf), "UTF_16LE")
-    val padding = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 3 + signature.length * wordSize, wordSize, raf))
-    val childrenOffset = offset + wordSize * 4 + signature.length * wordSize + padding
+    val childrenOffset = offset + wordSize * 3 + signature.length * wordSize
     val children = readChildren(childrenOffset, raf)
-    new VarFileInfo(wLength, wValueLength, wType, szKey, padding, children)
+    new VarFileInfo(wLength, wValueLength, wType, szKey, children)
   }
   
   private def readChildren(offset: Long, raf: RandomAccessFile): Array[Var] = {
+    //TODO implement
     Array.empty
   }
 }

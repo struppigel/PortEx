@@ -57,7 +57,7 @@ object StringTable {
       val childOffset = currOffset + loadBytes(currOffset, 0x50 ,raf).indexWhere(0 !=)
       val elem = VersionString(childOffset, raf)
     	listBuf += elem 
-      currOffset += elem.wLength
+      currOffset = childOffset + elem.wLength
     }
     listBuf.toArray
   }
