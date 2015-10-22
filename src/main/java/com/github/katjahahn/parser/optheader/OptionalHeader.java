@@ -72,6 +72,9 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
     private final byte[] headerbytes;
     /** the magic number that defines a PE32 or PE32+ */
     private MagicNumber magicNumber;
+
+    private StandardField emptyBaseOfData;
+
     /**
      * the value of the NumberOfRVAAndSizes field, the number of directory
      * entries
@@ -260,6 +263,10 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
      * @return the standard field entry for the given key
      */
     public StandardField getStandardFieldEntry(StandardFieldEntryKey key) {
+        if (key == StandardFieldEntryKey.BASE_OF_DATA
+                && !standardFields.containsKey(key)) {
+            return emptyBaseOfData;
+        }
         return standardFields.get(key);
     }
 
@@ -278,7 +285,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
         standardFields = IOUtil.readHeaderEntries(StandardFieldEntryKey.class,
                 format, STANDARD_SPEC, headerbytes, getOffset());
         if (getMagicNumber() == MagicNumber.PE32_PLUS) {
-            standardFields.remove(BASE_OF_DATA);
+            emptyBaseOfData = standardFields.remove(BASE_OF_DATA);
         }
     }
 
@@ -391,8 +398,8 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
                         + getImageBaseDescription(value) + NL);
             } else if (key.equals(SUBSYSTEM)) {
                 // subsystem has only 2 bytes
-                b.append(description + ": "
-                        + getSubsystem().getDescription() + NL);
+                b.append(description + ": " + getSubsystem().getDescription()
+                        + NL);
             } else if (key.equals(DLL_CHARACTERISTICS)) {
                 b.append(NL + description + ": " + NL);
                 b.append(getCharacteristicsInfo(value) + NL);

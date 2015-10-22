@@ -286,9 +286,9 @@ object ResourceDirectory {
           // create and add entry to the list
           val possibleEntry = ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
             level, virtualAddress, rsrcOffset, mmBytes, loopChecker)
-          if(isValidEntry(possibleEntry, file.length())) {
+          //if(isValidEntry(possibleEntry, file.length())) { //TODO find a different solution!
             entries += possibleEntry 
-          } else {logger.warn("invalid resource entry")} //TODO add these to anomalies!
+         // } else {logger.warn("invalid resource entry")} //TODO add these to anomalies!
         } catch {
           // resource loop detected during entry creation
           case e: ResourceLoopException => logger.warn("resource loop detected at va " + offset)

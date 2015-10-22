@@ -154,9 +154,9 @@ public class PEAnomalyScannerTest {
     @Test
     public void fileAlignment() {
         performTest(tinyAnomalies, WindowsEntryKey.FILE_ALIGNMENT,
-                "File Alignment must be between 512 and 64 K");
+                "File Alignment must be between 0x200 and 0xFA00 (64 K)");
         performTest(sectionlessAnomalies, WindowsEntryKey.FILE_ALIGNMENT,
-                "File Alignment must be between 512 and 64 K");
+                "File Alignment must be between 0x200 and 0xFA00 (64 K)");
     }
 
     @Test
