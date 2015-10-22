@@ -12,15 +12,14 @@ class StringTable(
   val wValueLength: Int,
   val wType: Int,
   val szKey: String,
-  val padding: Int,
   val children: Array[VersionString]) {
 
   override def toString(): String =
     s"""|wLength: $wLength
         |wValueLength: $wValueLength
         |wType: $wType
-        |szKey: $szKey
-        |padding: $padding
+        |language ID: 0x${szKey.substring(0,4)}
+        |code page: 0x${szKey.substring(4)}
         |string children: 
         |${children.mkString(NL)}
       """.stripMargin
@@ -45,17 +44,18 @@ object StringTable {
     val wType = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 2, wordSize, raf))
     // always 8 digits
     val szKey = new String(loadBytes(offset + wordSize * 3, signatureDigits * wordSize, raf), "UTF_16LE")
-    val padding = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 3 + signatureDigits * wordSize, wordSize, raf))
-    val childrenOffset = offset + wordSize * 4 + signatureDigits * wordSize + padding
-    val children = readChildren(childrenOffset, offset + wLength, raf)
-    new StringTable(wLength, wValueLength, wType, szKey, padding, children)
+    val childrenOffset = offset + wordSize * 4 + signatureDigits * wordSize
+    val maxOffset = Math.min(offset + wLength, raf.length)
+    val children = readChildren(childrenOffset, maxOffset, raf)
+    new StringTable(wLength, wValueLength, wType, szKey, children)
   }
 
   private def readChildren(offset: Long, maxOffset: Long, raf: RandomAccessFile): Array[VersionString] = {
     var currOffset = offset
     val listBuf = ListBuffer[VersionString]()
     while(currOffset < maxOffset) {
-      val elem = VersionString(currOffset, raf)
+      val childOffset = currOffset + loadBytes(currOffset, 0x50 ,raf).indexWhere(0 !=)
+      val elem = VersionString(childOffset, raf)
     	listBuf += elem 
       currOffset += elem.wLength
     }

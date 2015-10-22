@@ -137,6 +137,10 @@ public final class IOUtil {
 			throws IOException {
 		assert length >= 0;
 		assert offset >= 0;
+		// stay within file bounds
+		offset = Math.min(offset, raf.length());
+		long endOffset = Math.min(offset + length, raf.length());
+		length = (int) (endOffset - offset);
 		raf.seek(offset);
 		byte[] bytes = new byte[length];
 		raf.readFully(bytes);

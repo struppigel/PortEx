@@ -282,14 +282,18 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File folder = new File("/home/katja/samples/torrenlocker_encrypted"); 
+        File folder = new File("/home/katja/samples"); 
         // TODO create Unit test for resource type with name!
         for (File file : folder.listFiles()) {
             if (new PESignature(file).exists()) {
+            	System.out.println("Report for " + file.getName());
             	PEData data = PELoader.loadPE(file);
-            	int nr = data.getSectionTable().getNumberOfSections();
-                System.out.println(file.getName() + ": " + nr);
-                
+            	String report = new ReportCreator(data).versionReport();
+            	System.out.println(report);
+            	System.out.println();
+//            	int nr = data.getSectionTable().getNumberOfSections();
+//                System.out.println(file.getName() + ": " + nr);
+//                
             }
         }
         

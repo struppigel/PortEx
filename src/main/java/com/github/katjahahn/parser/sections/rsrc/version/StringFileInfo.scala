@@ -22,7 +22,7 @@ class StringFileInfo(
         |szKey: $szKey
         |padding: $padding
         |string table children: 
-        |${children.mkString(NL)}
+        |${children.mkString("Next String Table: " + NL + NL)}
       """.stripMargin
 
 }

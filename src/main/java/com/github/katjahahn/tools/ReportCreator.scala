@@ -241,7 +241,7 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
-  def manifestReport(resources: List[Resource]): String = {
+  private def manifestReport(resources: List[Resource]): String = {
     def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
     //TODO this is just for testing; will fail for large resources
     def readBytes(resource: Resource): Array[Byte] =
@@ -258,8 +258,28 @@ class ReportCreator(private val data: PEData) {
     }
     buf.toString + NL
   }
+  
+  def manifestReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeRSRC = loader.maybeLoadResourceSection()
+    if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
+      val rsrc = maybeRSRC.get
+      val resources = rsrc.getResources.asScala
+      manifestReport(resources.toList)
+    } else ""
+  }
+  
+  def versionReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeRSRC = loader.maybeLoadResourceSection()
+    if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
+      val rsrc = maybeRSRC.get
+      val resources = rsrc.getResources.asScala
+      versionReport(resources.toList)
+    } else ""
+  }
 
-  def versionReport(resources: List[Resource]): String = {
+  private def versionReport(resources: List[Resource]): String = {
     val buf = new StringBuffer()
     val versionResources = resources.filter { _.getType == "RT_VERSION" }
     versionResources.foreach { resource =>
