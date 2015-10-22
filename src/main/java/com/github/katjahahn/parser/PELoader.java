@@ -282,20 +282,20 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/katja/samples/couldnotprocess"); 
+        File folder = new File("/home/katja/samples/torrenlocker_encrypted"); 
         // TODO create Unit test for resource type with name!
-//        for (File file : folder.listFiles()) {
-//            if (new PESignature(file).exists()) {
-//                System.out.println(file.getName());
-//                ReportCreator reporter = ReportCreator.newInstance(file);
-//                System.out.println(reporter.resourcesReport());
-//                System.out.println();
-//            }
-//        }
+        for (File file : folder.listFiles()) {
+            if (new PESignature(file).exists()) {
+            	PEData data = PELoader.loadPE(file);
+            	int nr = data.getSectionTable().getNumberOfSections();
+                System.out.println(file.getName() + ": " + nr);
+                
+            }
+        }
         
-         ReportCreator reporter = ReportCreator.newInstance(file);
+         //ReportCreator reporter = ReportCreator.newInstance(file);
 //         System.out.println(reporter.anomalyReport());
-         reporter.printReport();
+         //reporter.printReport();
         // VisualizerBuilder builder = new VisualizerBuilder();
         // Visualizer vi = builder.build();
         // final BufferedImage entropyImage = vi.createEntropyImage(file);

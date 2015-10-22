@@ -188,7 +188,8 @@ public class Visualizer {
 		Color nonASCII = colorMap.get(NON_ASCII);
 		/* get hue for each color */
 		float[] hsbvals = new float[3];
-		Color.RGBtoHSB(visibleASCII.getRed(), visibleASCII.getGreen(), visibleASCII.getBlue(), hsbvals);
+		Color.RGBtoHSB(visibleASCII.getRed(), visibleASCII.getGreen(),
+				visibleASCII.getBlue(), hsbvals);
 		float visibleASCIIHue = hsbvals[0];
 		float visibleASCIISaturation = hsbvals[1];
 		Color.RGBtoHSB(invisibleASCII.getRed(), invisibleASCII.getGreen(),
@@ -218,7 +219,8 @@ public class Visualizer {
 			return Color.getHSBColor(hue, saturation, brightness);
 		} else { /* non-ASCII range */
 			float brightness = (float) ((byteVal - 127) / (float) (255 - 127));
-			return Color.getHSBColor(nonASCIIHue, nonASCIISaturation, brightness);
+			return Color.getHSBColor(nonASCIIHue, nonASCIISaturation,
+					brightness);
 		}
 	}
 
@@ -273,13 +275,14 @@ public class Visualizer {
 		assert entropy >= 0;
 		Color entropyColor = colorMap.get(ENTROPY);
 		float[] hsbvals = new float[3];
-		Color.RGBtoHSB(entropyColor.getRed(), entropyColor.getGreen(), entropyColor.getBlue(), hsbvals);
+		Color.RGBtoHSB(entropyColor.getRed(), entropyColor.getGreen(),
+				entropyColor.getBlue(), hsbvals);
 		float entropyHue = hsbvals[0];
 		float saturation = hsbvals[1];
 		float brightness = (float) entropy;
 		return Color.getHSBColor(entropyHue, saturation, brightness);
-		//int col = (int) (entropy * 255);
-		//return new Color(col, col, col);
+		// int col = (int) (entropy * 255);
+		// return new Color(col, col, col);
 	}
 
 	/**
@@ -600,8 +603,10 @@ public class Visualizer {
 			writeLegendTitle(number++, "BytePlot (left)", Color.lightGray);
 			drawLegendEntry(number++, "0xFF", colorMap.get(MAX_BYTE));
 			drawLegendEntry(number++, "0x00", colorMap.get(MIN_BYTE));
-			drawLegendEntry(number++, "visible ASCII", colorMap.get(VISIBLE_ASCII));
-			drawLegendEntry(number++, "invisible ASCII", colorMap.get(INVISIBLE_ASCII));
+			drawLegendEntry(number++, "visible ASCII",
+					colorMap.get(VISIBLE_ASCII));
+			drawLegendEntry(number++, "invisible ASCII",
+					colorMap.get(INVISIBLE_ASCII));
 			drawLegendEntry(number++, "non-ASCII", colorMap.get(NON_ASCII));
 		}
 		if (withEntropy) {
@@ -789,8 +794,7 @@ public class Visualizer {
 	}
 
 	/**
-	 * Draws a square pixel at fileOffset with
-	 * color.
+	 * Draws a square pixel at fileOffset with color.
 	 * 
 	 * @param color
 	 *            of the square pixel
@@ -804,7 +808,7 @@ public class Visualizer {
 
 	/**
 	 * Draws a square pixels at fileOffset with color. Height and width of the
-	 * drawn area are based on the number of bytes that it represents given by 
+	 * drawn area are based on the number of bytes that it represents given by
 	 * the length.
 	 * 
 	 * Square pixels are drawn without visible gap.
@@ -823,7 +827,7 @@ public class Visualizer {
 
 	/**
 	 * Draws a square pixels at fileOffset with color. Height and width of the
-	 * drawn area are based on the number of bytes that it represents given by 
+	 * drawn area are based on the number of bytes that it represents given by
 	 * the length.
 	 * 
 	 * @param color
@@ -887,26 +891,31 @@ public class Visualizer {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		File file = new File("/home/katja/samples/VirMC.exe");
+		// File file = new File("/home/katja/samples/VirMC.exe");
 		VisualizerBuilder builder = new VisualizerBuilder();
 		builder.setColor(VISIBLE_ASCII, Color.red);
 		builder.setColor(NON_ASCII, Color.green);
 		builder.setColor(INVISIBLE_ASCII, Color.orange);
 		builder.setColor(ENTROPY, Color.cyan);
-		// builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
 		Visualizer vi = builder.build();
-		final BufferedImage entropyImage = vi.createEntropyImage(file);
-		final BufferedImage bytePlotImage = vi.createBytePlot(file);
-		final BufferedImage structureImage = vi.createImage(file);
-		final BufferedImage legendImage = vi
-				.createLegendImage(true, true, true);
-		BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage,
-				entropyImage);
-		joinedImage = ImageUtil.appendImages(joinedImage, structureImage);
-		joinedImage = ImageUtil.appendImages(joinedImage, legendImage);
-		ImageIO.write(joinedImage, "png",
-				new File("/home/katja/visualized.png"));
-		show(joinedImage);
+		// builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
+		File folder = new File("/home/katja/samples/torrentlocker_encrypted");
+		System.out.println("starting to search");
+		for (File file : folder.listFiles()) {
+			System.out.println("processing file " + file.getAbsolutePath());
+			final BufferedImage entropyImage = vi.createEntropyImage(file);
+			final BufferedImage bytePlotImage = vi.createBytePlot(file);
+			//final BufferedImage structureImage = vi.createImage(file);
+			final BufferedImage legendImage = vi.createLegendImage(true, true,
+					false);
+			BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage,
+					entropyImage);
+			//joinedImage = ImageUtil.appendImages(joinedImage, structureImage);
+			joinedImage = ImageUtil.appendImages(joinedImage, legendImage);
+			ImageIO.write(joinedImage, "png", new File(
+					file.getAbsolutePath() + ".png"));
+		}
+		// show(joinedImage);
 	}
 
 	private static void show(final BufferedImage image) {

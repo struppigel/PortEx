@@ -46,6 +46,7 @@ trait SectionTableScanning extends AnomalyScanner {
       //Aspack
       ".aspack" -> "Aspack packer", ".adata" -> "Aspack/Armadillo packer", 
       "ASPack" -> "Aspack packer", ".ASPack" -> "Aspack packer", 
+      ".asspck" -> "Aspack packer",
       //Other
       ".ccg" -> "CCG Packer (Chinese)",
       "BitArts" -> "Crunch 2.0 Packer",
