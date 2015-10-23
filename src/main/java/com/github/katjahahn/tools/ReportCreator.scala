@@ -57,11 +57,9 @@ class ReportCreator(private val data: PEData) {
    */
   val maxSec = 4
 
-  val reportTitle = s"""${title("Report For " + data.getFile.getName)}
-    |file size ${hexString(data.getFile.length)}
-    |full path ${data.getFile.getAbsolutePath}
-    |
-    |""".stripMargin
+  val reportTitle = title("Report For " + data.getFile.getName) + NL + 
+    s"file size ${hexString(data.getFile.length)}" + NL +
+    s"full path ${data.getFile.getAbsolutePath}" + NL + NL
 
   def headerReports(): String = secTableReport + msdosHeaderReport +
     coffHeaderReport + optHeaderReport

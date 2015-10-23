@@ -11,15 +11,12 @@ class CodeviewInfo(private val age: Long,
                    private val guid: Array[Byte],
                    private val filePath: String) {
 
-  def getInfo(): String =
-    s"""|
-        |Codeview
-        |--------
-        |
-        |Age:  $age 
-        |GUID: ${guidToString(guid)}
-        |File: $filePath
-        |""".stripMargin
+  def getInfo(): String = NL +
+    "Codeview" + NL +
+      "--------" + NL +
+      s"Age:  $age" + NL +
+      s"GUID: ${guidToString(guid)}" + NL +
+      s"File: $filePath" + NL
 
 }
 
@@ -43,11 +40,11 @@ object CodeviewInfo {
     byteToHex(part1, "") + "-" + byteToHex(part2, "") + "-" +
       byteToHex(part3, "") + "-" + byteToHex(part4, "") + "-" + byteToHex(part5, "")
   }
-  
+
   def getInstance(ptrToRaw: Long, pefile: File): CodeviewInfo = {
-      val maybe = apply(ptrToRaw, pefile)
-      if(maybe.isDefined) maybe.get 
-      else throw new IllegalStateException("RSDS signature not found")
+    val maybe = apply(ptrToRaw, pefile)
+    if (maybe.isDefined) maybe.get
+    else throw new IllegalStateException("RSDS signature not found")
   }
 
   def apply(ptrToRaw: Long, pefile: File): Option[CodeviewInfo] = {
