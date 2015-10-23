@@ -282,19 +282,19 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/deque/portextestfiles/joined.exe"); 
+        File file = new File("/home/katja/samples/accessibilitycpl.dll"); 
         // TODO create Unit test for resource type with name!
         //for (File file : folder.listFiles()) {
-            if (new PESignature(file).exists()) {
+//            if (new PESignature(file).exists()) {
             	System.out.println("Report for " + file.getName());
             	PEData data = PELoader.loadPE(file);
-            	String report = new ReportCreator(data).versionReport();
-            	System.out.println(report);
-            	System.out.println();
+            	new ReportCreator(data).printReport();
+//            	System.out.println(report);
+//            	System.out.println();
 //            	int nr = data.getSectionTable().getNumberOfSections();
 //                System.out.println(file.getName() + ": " + nr);
 //                
-            }
+//            }
         //}
         
          //ReportCreator reporter = ReportCreator.newInstance(file);

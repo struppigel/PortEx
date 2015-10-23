@@ -36,6 +36,7 @@ import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.SectionCharacteristic
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.EmptyStandardField
 
 /**
  * Scans the Optional Header for anomalies.
@@ -137,13 +138,16 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     }
     
     val sizeOfImage = opt.get(WindowsEntryKey.SIZE_OF_IMAGE)
-    val baseOfData = opt.getStandardFieldEntry(StandardFieldEntryKey.BASE_OF_DATA)
+    val maybeBaseOfData = opt.maybeGetStandardFieldEntry(StandardFieldEntryKey.BASE_OF_DATA)
+    if(maybeBaseOfData.isPresent) {
+     val baseOfData = maybeBaseOfData.get;
      if(actualSizeOfInitData + actualSizeOfUninitData > 0 && baseOfData.getValue == 0L) {
-      val description = s"Optional Header: base of data is zero although data section exists"
-      anomalyList += FieldAnomaly(baseOfData, description, ZERO_BASE_OF_DATA)
-    } else if (baseOfData.getValue > sizeOfImage) {
-      val description = s"Optional Header: base of data is too large, namely ${hexString(baseOfData.getValue)}"
-      anomalyList += FieldAnomaly(baseOfData, description, TOO_LARGE_BASE_OF_DATA)
+        val description = s"Optional Header: base of data is zero although data section exists"
+        anomalyList += FieldAnomaly(baseOfData, description, ZERO_BASE_OF_DATA)
+      } else if (baseOfData.getValue > sizeOfImage) {
+        val description = s"Optional Header: base of data is too large, namely ${hexString(baseOfData.getValue)}"
+        anomalyList += FieldAnomaly(baseOfData, description, TOO_LARGE_BASE_OF_DATA)
+      }
     }
     
     val baseOfCode = opt.getStandardFieldEntry(StandardFieldEntryKey.SIZE_OF_INIT_DATA)
