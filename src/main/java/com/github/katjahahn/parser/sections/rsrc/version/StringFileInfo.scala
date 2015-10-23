@@ -36,10 +36,11 @@ object StringFileInfo {
     val wValueLength = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize, wordSize, raf))
     val wType = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 2, wordSize, raf))
     val szKey = new String(loadBytes(offset + wordSize * 3, signature.length * wordSize, raf), "UTF_16LE")
-
-    val childrenOffset = offset + wordSize * 3 + signature.length * wordSize
-    val children = readChildren(childrenOffset, offset + wLength, raf)
-    new StringFileInfo(wLength, wValueLength, wType, szKey, children)
+    if(szKey == signature) {
+      val childrenOffset = offset + wordSize * 3 + signature.length * wordSize
+      val children = readChildren(childrenOffset, offset + wLength, raf)
+      new StringFileInfo(wLength, wValueLength, wType, szKey, children)
+    } else new StringFileInfo(wLength, wValueLength, wType, szKey, Array.empty)
   }
 
   private def readChildren(offset: Long, maxOffset: Long, raf: RandomAccessFile): Array[StringTable] = {

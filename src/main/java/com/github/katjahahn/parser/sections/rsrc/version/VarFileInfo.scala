@@ -34,9 +34,11 @@ object VarFileInfo {
     val wValueLength = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize, wordSize, raf))
     val wType = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 2, wordSize, raf))
     val szKey = new String(loadBytes(offset + wordSize * 3, signature.length * wordSize, raf), "UTF_16LE")
-    val childrenOffset = offset + wordSize * 3 + signature.length * wordSize
-    val children = readChildren(childrenOffset, raf)
-    new VarFileInfo(wLength, wValueLength, wType, szKey, children)
+    if(szKey == signature) {
+      val childrenOffset = offset + wordSize * 3 + signature.length * wordSize
+      val children = readChildren(childrenOffset, raf)
+      new VarFileInfo(wLength, wValueLength, wType, szKey, children)
+    } else new VarFileInfo(wLength, wValueLength, wType, szKey, Array.empty)
   }
 
   private def readChildren(offset: Long, raf: RandomAccessFile): Array[Var] = {
