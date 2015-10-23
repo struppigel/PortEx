@@ -57,18 +57,31 @@ class ReportCreator(private val data: PEData) {
    */
   val maxSec = 4
 
-  val reportTitle = title("Report For " + data.getFile.getName) + NL + 
+  val reportTitle = title("Report For " + data.getFile.getName) + NL +
     s"file size ${hexString(data.getFile.length)}" + NL +
     s"full path ${data.getFile.getAbsolutePath}" + NL + NL
+
+  private var showAll = false
+  
+  /**
+   * If all is set to true, every report will be created, even unstable and 
+   * time-consuming ones. The standard value is false.
+   * 
+   * @param all set to true if all reports shall be created
+   */
+  def setShowAll(all: Boolean): Unit = { showAll = all }
 
   def headerReports(): String = secTableReport + msdosHeaderReport +
     coffHeaderReport + optHeaderReport
 
-  def specialSectionReports(): String = importsReport + //boundImportsReport +
-    delayImportsReport + exportsReport + resourcesReport + debugReport //+ relocReport
+  def specialSectionReports(): String = importsReport +
+    { if (showAll) boundImportsReport else "" } +
+    delayImportsReport + exportsReport + resourcesReport + debugReport +
+    { if (showAll) relocReport else "" }
 
   def additionalReports(): String = overlayReport +
-    anomalyReport + peidReport + hashReport //+ jar2ExeReport + maldetReport
+    anomalyReport + peidReport + hashReport +
+    { if (showAll) jar2ExeReport + maldetReport else "" }
 
   /**
    * Prints a report to stdout.
@@ -132,7 +145,7 @@ class ReportCreator(private val data: PEData) {
         try {
           buf.append(debug.getCodeView().getInfo())
         } catch {
-          case e: IllegalStateException => 
+          case e: IllegalStateException =>
             buf.append("-invalid codeview structure-")
         }
       }
@@ -256,7 +269,7 @@ class ReportCreator(private val data: PEData) {
     }
     buf.toString + NL
   }
-  
+
   def manifestReport(): String = {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
@@ -266,7 +279,7 @@ class ReportCreator(private val data: PEData) {
       manifestReport(resources.toList)
     } else ""
   }
-  
+
   def versionReport(): String = {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()

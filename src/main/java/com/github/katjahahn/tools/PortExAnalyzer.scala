@@ -41,7 +41,7 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.4.1
+  private val version = """version: 0.4.2
     |author: Katja Hahn
     |last update: 23. Okt 2015""".stripMargin
 
@@ -50,10 +50,11 @@ object PortExAnalyzer {
   private val usage = """usage: 
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
-    | java -jar PortexAnalyzer.jar [-o <outfile>] [-p <imagefile>] [-i <folder>] <PEfile>
+    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile>] [-i <folder>] <PEfile>
     |
     | -h,--help          show help
     | -v,--version       show version
+    | -a,--all           show all info (might be slow and unstable)
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -i,--ico           extract icons from the resource section as .ico file
@@ -84,6 +85,8 @@ object PortExAnalyzer {
           if (file.exists) {
             if (isPEFile(file)) {
               val reporter = ReportCreator.newInstance(file)
+              val all = (options.contains('all))
+              reporter.setShowAll(all)
               if (options.contains('output)) {
                 writeReport(reporter, new File(options('output)))
               } else {
@@ -248,6 +251,10 @@ object PortExAnalyzer {
         nextOption(map += ('version -> ""), tail)
       case "--version" :: tail =>
         nextOption(map += ('version -> ""), tail)
+      case "-a" :: tail => 
+        nextOption(map += ('all -> ""), tail)
+      case "--all" :: tail => 
+        nextOption(map += ('all -> ""), tail)
       case "-o" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
       case "--output" :: value :: tail =>
