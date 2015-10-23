@@ -60,7 +60,7 @@ object VsFixedFileInfo {
   private val dwordSize = 4
   private val qwordSize = 8
 
-  val signature = 0xFEEF04BD
+  val signature = 0xFEEF04BDL
 
   val members = 13
   val size = members * dwordSize

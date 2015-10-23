@@ -285,7 +285,7 @@ public final class PELoader {
         File folder= new File("/home/katja/samples"); 
         // TODO create Unit test for resource type with name!
         for (File file : folder.listFiles()) {
-            if (new PESignature(file).exists()) {
+            if (!file.isDirectory() && new PESignature(file).exists()) {
             	System.out.println("Report for " + file.getName());
             	PEData data = PELoader.loadPE(file);
 //            	new ReportCreator(data).printReport();
