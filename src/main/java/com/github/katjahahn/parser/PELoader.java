@@ -287,6 +287,7 @@ public final class PELoader {
         for (File file : folder.listFiles()) {
             if (!file.isDirectory() && new PESignature(file).exists()) {
             	System.out.println("Report for " + file.getName());
+            	System.out.println();
             	PEData data = PELoader.loadPE(file);
 //            	new ReportCreator(data).printReport();
             	String report = new ReportCreator(data).versionReport();

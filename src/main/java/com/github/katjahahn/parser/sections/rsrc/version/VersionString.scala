@@ -36,8 +36,8 @@ object VersionString {
     val szSize = szBytes.indexWhere { x => val i = prev; prev = x; i == 0 && x == 0 }
     val szKey = new String(szBytes.take(szSize).toArray, "UTF_16LE")
     val valueOffsetStart = offset + wordSize * 3 + szSize
-    val bytesToRead = Math.min(maxOffset - valueOffsetStart, wValueLength * wordSize).toInt
-    val valueOffset = valueOffsetStart + loadBytes(valueOffsetStart, bytesToRead, raf).indexWhere(0 !=)
+    val valueOffset = valueOffsetStart + loadBytes(valueOffsetStart, wValueLength * wordSize, raf).indexWhere(0 !=)
+    val bytesToRead = Math.min(maxOffset - valueOffset, wValueLength * wordSize).toInt
     val value = new String(loadBytes(valueOffset, bytesToRead, raf), "UTF_16LE")
     new VersionString(wLength, wValueLength, wType, szKey, value)
   }
