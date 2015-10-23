@@ -15,15 +15,9 @@ class StringTable(
   val children: Array[VersionString]) {
 
   override def toString(): String =
-    s"""|wLength: $wLength
-        |wValueLength: $wValueLength
-        |wType: $wType
-        |language ID: 0x${szKey.substring(0,4)}
-        |code page: 0x${szKey.substring(4)}
-        |string children: 
-        |${children.mkString(NL)}
-      """.stripMargin
-
+    s"language ID: 0x${szKey.substring(0, 4)}" + NL +
+      s"code page: 0x${szKey.substring(4)}" + NL +
+      children.mkString(NL) + NL + NL
 }
 
 object StringTable {
@@ -53,10 +47,10 @@ object StringTable {
   private def readChildren(offset: Long, maxOffset: Long, raf: RandomAccessFile): Array[VersionString] = {
     var currOffset = offset
     val listBuf = ListBuffer[VersionString]()
-    while(currOffset < maxOffset) {
-      val childOffset = currOffset + loadBytes(currOffset, 0x50 ,raf).indexWhere(0 !=)
+    while (currOffset < maxOffset) {
+      val childOffset = currOffset + loadBytes(currOffset, 0x50, raf).indexWhere(0 !=)
       val elem = VersionString(childOffset, raf)
-    	listBuf += elem 
+      listBuf += elem
       currOffset = childOffset + elem.wLength
     }
     listBuf.toArray

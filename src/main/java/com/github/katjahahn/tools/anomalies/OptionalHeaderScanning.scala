@@ -36,7 +36,6 @@ import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.SectionCharacteristic
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.EmptyStandardField
 
 /**
  * Scans the Optional Header for anomalies.

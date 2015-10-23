@@ -288,9 +288,9 @@ public final class PELoader {
 //            if (new PESignature(file).exists()) {
             	System.out.println("Report for " + file.getName());
             	PEData data = PELoader.loadPE(file);
-            	new ReportCreator(data).printReport();
-//            	System.out.println(report);
-//            	System.out.println();
+            	String report = new ReportCreator(data).versionReport();
+            	System.out.println(report);
+            	System.out.println();
 //            	int nr = data.getSectionTable().getNumberOfSections();
 //                System.out.println(file.getName() + ": " + nr);
 //                

@@ -36,17 +36,10 @@ class VsVersionInfo(
   val children: Array[FileInfo]) extends VersionInfo {
 
   override def toString(): String =
-    s"""|wLength: $wLength
-        |wValueLength: $wValueLength
-        |wType: $wType
-        |szKey: $szKey
-        |
-        |VsFixedFileInfo:
-        |$value
-        |
-        |children:
-        |${children.mkString(NL)}
-      """.stripMargin
+    "VsFixedFileInfo" + NL +
+    "----------------" + NL +
+      value + NL + NL +
+      children.mkString(NL) + NL
 }
 
 class EmptyVersionInfo extends VersionInfo {
@@ -54,7 +47,7 @@ class EmptyVersionInfo extends VersionInfo {
     "-empty-"
 }
 
-abstract class VersionInfo{}
+abstract class VersionInfo {}
 
 object VersionInfo {
 
@@ -86,11 +79,11 @@ object VersionInfo {
       val wType = ByteArrayUtil.bytesToInt(loadBytes(loc.from + wordSize * 2, wordSize, raf))
       val szKey = new String(loadBytes(loc.from + wordSize * 3, signature.length * wordSize, raf), "UTF_16LE")
 
-      val fixedOffsetStart = loc.from + wordSize * 3 + signature.length * wordSize 
-      val fixedInfoOffset = fixedOffsetStart + loadBytes(fixedOffsetStart, 0x50 ,raf).indexWhere(0 !=)
+      val fixedOffsetStart = loc.from + wordSize * 3 + signature.length * wordSize
+      val fixedInfoOffset = fixedOffsetStart + loadBytes(fixedOffsetStart, 0x50, raf).indexWhere(0 !=)
       val vsFixedFileInfo = VsFixedFileInfo(fixedInfoOffset, wValueLength, raf)
       val childrenOffsetStart = fixedInfoOffset + VsFixedFileInfo.size
-      val childrenOffset = childrenOffsetStart + loadBytes(childrenOffsetStart, 0x50 ,raf).indexWhere(0 !=)
+      val childrenOffset = childrenOffsetStart + loadBytes(childrenOffsetStart, 0x50, raf).indexWhere(0 !=)
       val children = readChildren(childrenOffset, raf)
       new VsVersionInfo(wLength, wValueLength, wType, szKey, vsFixedFileInfo, children)
     }
@@ -102,22 +95,19 @@ object VersionInfo {
     if (VarFileInfo(offset, raf).szKey == VarFileInfo.signature) {
       val varFileInfo = VarFileInfo(offset, raf)
       val strFileOffsetStart = offset + varFileInfo.wLength
-      val strFileOffset = strFileOffsetStart + loadBytes(strFileOffsetStart, 0x50 ,raf).indexWhere(0 !=)
+      val strFileOffset = strFileOffsetStart + loadBytes(strFileOffsetStart, 0x50, raf).indexWhere(0 !=)
       val stringFileInfo = StringFileInfo(strFileOffset, raf)
       if (stringFileInfo.szKey == StringFileInfo.signature) {
         Array(varFileInfo, stringFileInfo)
       } else Array(varFileInfo)
-    } 
-    else 
-      if (StringFileInfo(offset, raf).szKey == StringFileInfo.signature) {
-        val stringFileInfo = VarFileInfo(offset, raf)
-        val varFileOffsetStart = offset + stringFileInfo.wLength
-        val varFileOffset = varFileOffsetStart + loadBytes(varFileOffsetStart, 0x50 ,raf).indexWhere(0 !=)
-        val varFileInfo = StringFileInfo(varFileOffset, raf)
-        if (varFileInfo.szKey == StringFileInfo.signature) {
-          Array(stringFileInfo, varFileInfo)
-        } else Array(stringFileInfo)
-    }
-    else Array.empty
+    } else if (StringFileInfo(offset, raf).szKey == StringFileInfo.signature) {
+      val stringFileInfo = StringFileInfo(offset, raf)
+      val varFileOffsetStart = offset + stringFileInfo.wLength
+      val varFileOffset = varFileOffsetStart + loadBytes(varFileOffsetStart, 0x50, raf).indexWhere(0 !=)
+      val varFileInfo = VarFileInfo(varFileOffset, raf)
+      if (varFileInfo.szKey == StringFileInfo.signature) {
+        Array(stringFileInfo, varFileInfo)
+      } else Array(stringFileInfo)
+    } else Array.empty
   }
 }

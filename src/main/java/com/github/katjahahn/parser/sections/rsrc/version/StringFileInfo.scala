@@ -15,14 +15,7 @@ class StringFileInfo(
   val children: Array[StringTable]) extends FileInfo {
 
   override def toString(): String =
-    s"""|wLength: $wLength
-        |wValueLength: $wValueLength
-        |wType: $wType
-        |szKey: $szKey
-        |string table children: 
-        |${children.mkString("Next String Table: " + NL + NL)}
-      """.stripMargin
-
+    szKey + NL + "---------------" + NL + children.mkString(NL + NL) + NL + NL
 }
 
 object StringFileInfo {
@@ -42,7 +35,7 @@ object StringFileInfo {
     val wValueLength = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize, wordSize, raf))
     val wType = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize * 2, wordSize, raf))
     val szKey = new String(loadBytes(offset + wordSize * 3, signature.length * wordSize, raf), "UTF_16LE")
-    
+
     val childrenOffset = offset + wordSize * 3 + signature.length * wordSize
     val children = readChildren(childrenOffset, offset + wLength, raf)
     new StringFileInfo(wLength, wValueLength, wType, szKey, children)
@@ -51,10 +44,10 @@ object StringFileInfo {
   private def readChildren(offset: Long, maxOffset: Long, raf: RandomAccessFile): Array[StringTable] = {
     var currOffset = offset
     val listBuf = ListBuffer[StringTable]()
-    while(currOffset < maxOffset) {
-      val childOffset = currOffset + loadBytes(currOffset, 0x50 ,raf).indexWhere(0 !=)
+    while (currOffset < maxOffset) {
+      val childOffset = currOffset + loadBytes(currOffset, 0x50, raf).indexWhere(0 !=)
       val elem = StringTable(childOffset, raf)
-      listBuf += elem 
+      listBuf += elem
       currOffset = childOffset + elem.wLength
     }
     listBuf.toArray
