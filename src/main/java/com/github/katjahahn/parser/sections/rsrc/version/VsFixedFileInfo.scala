@@ -39,16 +39,16 @@ class VsFixedFileInfo(
   val dwFileDateLS: Long) {
 
   override def toString(): String =
-    s"""|signature: ${hex(dwSignature)}
-  |binary version:  ${wMajorStrucVersion}.${wMinorStrucVersion}
-  |file version: ${dwFileVersionMS}.${dwFileVersionLS}
-  |product version: ${dwProductVersionMS}.${dwProductVersionLS}
-  |file flags mask: ${hex(dwFileFlagsMask)}
-  |file flags: ${hex(dwFileFlags)}
-  |file OS: ${fileOS.map(_.getDescription).mkString(", ")}
-  |file type: ${fileType.getDescription}
-  |file subtype: ${fileSubtype.getDescription}
-  |file date: ${dwFileDateMS}.${dwFileDateLS}""".stripMargin
+    s"signature: ${hex(dwSignature)}" + NL +
+      s"binary version:  ${wMajorStrucVersion}.${wMinorStrucVersion}" + NL +
+      s"file version: ${dwFileVersionMS}.${dwFileVersionLS}" + NL +
+      s"product version: ${dwProductVersionMS}.${dwProductVersionLS}" + NL +
+      s"file flags mask: ${hex(dwFileFlagsMask)}" + NL +
+      s"file flags: ${hex(dwFileFlags)}" + NL +
+      s"file OS: ${fileOS.map(_.getDescription).mkString(", ")}" + NL +
+      s"file type: ${fileType.getDescription}" + NL +
+      s"file subtype: ${fileSubtype.getDescription}" + NL +
+      s"file date: ${dwFileDateMS}.${dwFileDateLS}"
 
 }
 

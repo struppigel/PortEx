@@ -15,7 +15,8 @@ class StringFileInfo(
   val children: Array[StringTable]) extends FileInfo {
 
   override def toString(): String =
-    szKey + NL + "---------------" + NL + children.mkString(NL + NL) + NL + NL
+    szKey + NL + "---------------" + NL + children.mkString(NL + NL) 
+
 }
 
 object StringFileInfo {

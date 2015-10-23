@@ -13,12 +13,9 @@ class VarFileInfo(
   val children: Array[Var]) extends FileInfo {
 
   override def toString(): String =
-    s"""|wLength: $wLength
-        |wValueLength: $wValueLength
-        |wType: $wType
-        |szKey: $szKey
-        |children: ${children.mkString(NL)}
-      """.stripMargin
+    szKey + NL +
+    "------------" + NL + 
+  children.mkString(NL)
 
 }
 
@@ -41,7 +38,7 @@ object VarFileInfo {
     val children = readChildren(childrenOffset, raf)
     new VarFileInfo(wLength, wValueLength, wType, szKey, children)
   }
-  
+
   private def readChildren(offset: Long, raf: RandomAccessFile): Array[Var] = {
     //TODO implement
     Array.empty

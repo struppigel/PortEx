@@ -17,7 +17,7 @@ class StringTable(
   override def toString(): String =
     s"language ID: 0x${szKey.substring(0, 4)}" + NL +
       s"code page: 0x${szKey.substring(4)}" + NL +
-      children.mkString(NL) + NL + NL
+      children.mkString(NL)
 }
 
 object StringTable {

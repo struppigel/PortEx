@@ -39,7 +39,7 @@ class VsVersionInfo(
     "VsFixedFileInfo" + NL +
     "----------------" + NL +
       value + NL + NL +
-      children.mkString(NL) + NL
+      children.mkString(NL)
 }
 
 class EmptyVersionInfo extends VersionInfo {
