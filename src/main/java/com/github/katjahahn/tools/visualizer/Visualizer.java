@@ -780,16 +780,23 @@ public class Visualizer {
 		// getPixelNumber(fileLength))
 		long pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
 		long pixelMax = getXPixels() * getYPixels();
+		long pixelEnd = pixelStart + pixelLength;
 		if (pixelStart > pixelMax) {
-			logger.warn("too many pixels, max is: " + pixelMax
+			logger.error("too many pixels, max is: " + pixelMax
 					+ " and trying to set: " + pixelStart);
-		}
-		for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
-			int x = (int) ((i % getXPixels()) * pixelSize);
-			int y = (int) ((i / getXPixels()) * pixelSize);
-			int sizemodifier = pixelated ? 2 : 1;
-			drawCross(color, x, y, pixelSize * sizemodifier, pixelSize
-					* sizemodifier);
+		} else {
+			if (pixelEnd > pixelMax) {
+				logger.error("too many pixels, max is: " + pixelMax
+						+ " and trying to set: " + pixelEnd);
+				pixelEnd = pixelMax;
+			}
+			for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
+				int x = (int) ((i % getXPixels()) * pixelSize);
+				int y = (int) ((i / getXPixels()) * pixelSize);
+				int sizemodifier = pixelated ? 2 : 1;
+				drawCross(color, x, y, pixelSize * sizemodifier, pixelSize
+						* sizemodifier);
+			}
 		}
 	}
 
@@ -847,17 +854,24 @@ public class Visualizer {
 		// getPixelNumber(fileLength))
 		long pixelLength = getPixelNumber(fileOffset + length) - pixelStart;
 		long pixelMax = getXPixels() * getYPixels();
+		long pixelEnd = pixelStart + pixelLength;
 		if (pixelStart > pixelMax) {
-			logger.warn("too many pixels, max is: " + pixelMax
+			logger.error("too many pixels, max is: " + pixelMax
 					+ " and trying to set: " + pixelStart);
-		}
-		for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
-			int x = (int) ((i % getXPixels()) * pixelSize);
-			int y = (int) ((i / getXPixels()) * pixelSize);
-			int gap = pixelated ? additionalGap + 1 : additionalGap;
-			int sizemodifier = pixelated ? 2 : 1;
-			drawRect(color, x + gap, y + gap, pixelSize - gap * sizemodifier,
-					pixelSize - gap * sizemodifier);
+		} else {
+			if (pixelEnd > pixelMax) {
+				logger.error("too many pixels, max is: " + pixelMax
+						+ " and trying to set: " + pixelEnd);
+				pixelEnd = pixelMax;
+			}
+			for (long i = pixelStart; i < pixelEnd; i++) {
+				int x = (int) ((i % getXPixels()) * pixelSize);
+				int y = (int) ((i / getXPixels()) * pixelSize);
+				int gap = pixelated ? additionalGap + 1 : additionalGap;
+				int sizemodifier = pixelated ? 2 : 1;
+				drawRect(color, x + gap, y + gap, pixelSize - gap
+						* sizemodifier, pixelSize - gap * sizemodifier);
+			}
 		}
 		// Graphics g = image.getGraphics();
 		// g.drawString(new Long(fileOffset).toString(), (pixelStart % xPixels)
@@ -905,15 +919,16 @@ public class Visualizer {
 			System.out.println("processing file " + file.getAbsolutePath());
 			final BufferedImage entropyImage = vi.createEntropyImage(file);
 			final BufferedImage bytePlotImage = vi.createBytePlot(file);
-			//final BufferedImage structureImage = vi.createImage(file);
+			// final BufferedImage structureImage = vi.createImage(file);
 			final BufferedImage legendImage = vi.createLegendImage(true, true,
 					false);
 			BufferedImage joinedImage = ImageUtil.appendImages(bytePlotImage,
 					entropyImage);
-			//joinedImage = ImageUtil.appendImages(joinedImage, structureImage);
+			// joinedImage = ImageUtil.appendImages(joinedImage,
+			// structureImage);
 			joinedImage = ImageUtil.appendImages(joinedImage, legendImage);
-			ImageIO.write(joinedImage, "png", new File(
-					file.getAbsolutePath() + ".png"));
+			ImageIO.write(joinedImage, "png", new File(file.getAbsolutePath()
+					+ ".png"));
 		}
 		// show(joinedImage);
 	}

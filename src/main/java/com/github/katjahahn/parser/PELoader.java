@@ -15,8 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.IOUtil.*;
-import static com.google.common.base.Preconditions.*;
+import static com.github.katjahahn.parser.IOUtil.loadBytes;
+import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.awt.AWTException;
 import java.awt.image.BufferedImage;
@@ -38,6 +39,9 @@ import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.tools.visualizer.ImageUtil;
+import com.github.katjahahn.tools.visualizer.Visualizer;
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -282,33 +286,34 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File folder= new File("/home/katja/samples"); 
+        File file= new File("/home/katja/samples/gamaruevisproblem"); 
         // TODO create Unit test for resource type with name!
-        for (File file : folder.listFiles()) {
+//        for (File file : folder.listFiles()) {
             if (!file.isDirectory() && new PESignature(file).exists()) {
-            	System.out.println("Report for " + file.getName());
-            	System.out.println();
+//            	System.out.println("Report for " + file.getName());
+//            	System.out.println();
             	PEData data = PELoader.loadPE(file);
-//            	new ReportCreator(data).printReport();
-            	String report = new ReportCreator(data).versionReport();
-            	System.out.println(report);
+            	new ReportCreator(data).printReport();
+//            	new VisualizerBuil
+//            	String report = new ReportCreator(data).versionReport();
+//            	System.out.println(report);
 //            	System.out.println();
 //            	int nr = data.getSectionTable().getNumberOfSections();
 //                System.out.println(file.getName() + ": " + nr);
 //                
             }
-        }
+//        }
         
-         //ReportCreator reporter = ReportCreator.newInstance(file);
+//         ReportCreator reporter = ReportCreator.newInstance(file);
 //         System.out.println(reporter.anomalyReport());
          //reporter.printReport();
-        // VisualizerBuilder builder = new VisualizerBuilder();
-        // Visualizer vi = builder.build();
-        // final BufferedImage entropyImage = vi.createEntropyImage(file);
-        // final BufferedImage structureImage = vi.createImage(file);
-        // final BufferedImage appendedImage = ImageUtil.appendImages(
-        // entropyImage, structureImage);
-        // show(appendedImage);
+         VisualizerBuilder builder = new VisualizerBuilder();
+         Visualizer vi = builder.build();
+         final BufferedImage entropyImage = vi.createEntropyImage(file);
+         final BufferedImage structureImage = vi.createImage(file);
+         final BufferedImage appendedImage = ImageUtil.appendImages(
+         entropyImage, structureImage);
+         show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {
