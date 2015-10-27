@@ -781,7 +781,7 @@ public class Visualizer {
 		long pixelLength = getPixelNumber(fileOffset + fileLength) - pixelStart;
 		long pixelMax = getXPixels() * getYPixels();
 		if (pixelStart > pixelMax) {
-			logger.error("too many pixels, max is: " + pixelMax
+			logger.warn("too many pixels, max is: " + pixelMax
 					+ " and trying to set: " + pixelStart);
 		}
 		for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
@@ -848,7 +848,7 @@ public class Visualizer {
 		long pixelLength = getPixelNumber(fileOffset + length) - pixelStart;
 		long pixelMax = getXPixels() * getYPixels();
 		if (pixelStart > pixelMax) {
-			logger.error("too many pixels, max is: " + pixelMax
+			logger.warn("too many pixels, max is: " + pixelMax
 					+ " and trying to set: " + pixelStart);
 		}
 		for (long i = pixelStart; i < pixelStart + pixelLength; i++) {
