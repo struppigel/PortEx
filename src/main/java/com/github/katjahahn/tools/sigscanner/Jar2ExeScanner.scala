@@ -111,12 +111,16 @@ class Jar2ExeScanner(file: File) {
 
     val zipAddr = _getZipAddresses().map("0x" + _.toHexString)
     val classAddr = _getPossibleClassAddresses.map("0x" + _.toHexString)
-    val addresses = { if (classAddr.nonEmpty) {
-      ".class offsets: " + classAddr.mkString(", ") + "\n"
-    } else "" } ++ 
-    { if (zipAddr.nonEmpty) {
-      "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n"
-    } else "" }
+    val addresses = {
+      if (classAddr.nonEmpty) {
+        ".class offsets: " + classAddr.mkString(", ") + "\n"
+      } else ""
+    } ++
+      {
+        if (zipAddr.nonEmpty) {
+          "ZIP/Jar offsets: " + zipAddr.mkString(", ") + "\n"
+        } else ""
+      }
 
     "Signatures found:\n" + sigs + "\n" + addresses
   }
@@ -198,25 +202,7 @@ object Jar2ExeScanner {
    * @return a list containing the signatures of the file
    */
   private def loadDefaultSigs(): List[Signature] = {
-    implicit val codec = Codec("UTF-8")
-    //replace malformed input
-    codec.onMalformedInput(CodingErrorAction.REPLACE)
-    codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
-
-    val sigs = ListBuffer[Signature]()
-    val is = this.getClass().getResourceAsStream(defaultSigs)
-    val it = scala.io.Source.fromInputStream(is)(codec).getLines
-    while (it.hasNext) {
-      val line = it.next
-      if (line.startsWith("[") && it.hasNext) {
-        val line2 = it.next
-        if (it.hasNext) {
-          val ep = line.split("=")(1).trim == "true"
-          sigs += Signature(line, ep, line2)
-        }
-      }
-    }
-    sigs.toList
+    SignatureScanner._loadSignatures(defaultSigs, true)
   }
 
 }
