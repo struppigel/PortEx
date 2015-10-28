@@ -1,0 +1,260 @@
+; Overlay specific signatures
+
+[CreateInstall]
+signature = 'aWAW'
+
+[7-zip Installer]
+signature = ';!@Install@!UTF-8!'
+
+[ActiveMark protector]
+signature = 00'TMSAMVOH' 
+
+[Actual Installer]
+signature = ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 'MSCF' 00 
+
+[Adveractive Installer]
+signature = '10JP' 
+
+[Aeco Systems installer]
+signature = 'EWETAR  FILE!! VER 1.00 <<<>>>'
+
+[ARJSFX32]
+signature = C0 AB ?? ?? ?? ?? 60 EA
+
+[ARJ archive]
+signature = 60 EA
+
+[ARQ archive]
+signature = 67 57 04 02
+
+[AutoPlay Media Studio installer]
+signature =  0B 0B AF AF 0B 0B A4
+
+[ClickTeam installer]
+signature = 'wwgT)'
+
+[ClickTeam installer]
+signature = ?? 12 01 00 ?? ?? 00 00
+
+[CrypKey Installer archive]
+signature = 'CK16'
+
+[Dimd SFX , CAB]
+signature =  ?? ?? ?? ?? 'DIMDMSCF'
+
+[distutils installer]
+signature = '[meta]'
+
+[Envoy Packager]
+signature = B2 97 E1 69
+
+[Eschalon Installer archive, SPIS LH5]
+signature = 'EPSF'
+
+[GPInstall]
+signature = ?? ?? ?? ?? 'SPIS' 1A 'LH5'
+
+[GZip archive]
+signature = 1F 8B 08
+
+[Inno Setup Installer]
+signature = 'zlb' 1A
+
+[Inno Setup Installer]
+signature = 'idska32' 1A
+
+[Inno Setup Uninstall]
+signature = 'Inno Setup Messages'
+
+[zlib archive]
+signature = 78 DA
+
+[LucasArts Update Installer]
+signature = '1CNT'
+
+[MP-ZipTool SFX32]
+signature = 'MPU' 0D
+
+[MPQ archive]
+signature = 'MPQ' 1A 20
+
+[NOS Installer]
+signature = 'PK??NOS_PO'
+
+[NOS Installer]
+signature = 'NOS_PO'
+
+[Pantaray QSetup 10.x]
+signature = 97 03 00 00 02 01
+
+[Pantaray QSetup 11.x]
+signature = 37 07 00 00 02 01
+
+[Paquet archive]
+signature = 04 'PBG'
+
+[QT installer data]
+signature = 'qres'
+
+[RTPatch archive]
+signature = 4B 2A 9A
+
+[RTPatch archive]
+signature = 4B 2A 84
+
+[Setup Factory installer 8.x/9.x]
+signature = E0 E0 E1 E1 E2 E2 E3 E3 E4 E4 E5 E5 E6 E6 E7 E7
+
+[Setup Factory installer 4.x/5.x]
+signature = E0 E1 E2 E3 E4 E5 E6
+
+[STATICSUP installer]
+signature = 67 15 52 34 FF 4D 36 42
+
+[Vise Installer]
+signature = 'ESIV'
+
+[WinImage SFX]
+signature = 'RsDl'
+
+[IMP archive]
+signature = 'IMP' 0A
+
+[WinPatch Apply Program]
+signature = '@Daisy@Lucy@xyzzy@' ?? ?? ?? ?? ?? ?? ?? ?? 1F 8B 08
+
+[WinRAR Installer]
+signature = '***messages***'
+
+[RAR archive]
+signature = 'Rar!'
+
+[ZipCentral SFX-32]
+signature = 'MPV*'
+
+[PCInstall]
+signature = '[20/20]'
+
+[InstallShield 18.x]
+signature = 'ISSetupStream'
+
+[Adobe Flash]
+signature = 'FWS'
+
+[Adobe Flash]
+signature = 'CWS'
+
+[Smart Install Maker]
+signature = 'Smart Install Maker v'
+;version = overlay:17
+
+[PackageForTheWeb, InstallShield]
+signature = ?? ?? 00 00 DC ED BD
+
+[Microsoft Compound]
+signature = D0 CF 11 E0 A1 B1 1A E1
+
+[Autodesk Self-Extract]
+signature = '00000000000000BD00000000000000010000000000000001'
+at_offset = 19A0
+
+[Ghost Installer archive, xored MSCF, mask: 8D]
+signature = C0 DE CE CD 8D 8D 8D 8D
+
+[CreateInstall 2003.3.5]
+signature = 02 06 0A 04 05 FD 59
+
+[VMWare Installation Launcher]
+signature = 'RWMV'
+
+[Codegear Installer]
+signature = ?? ?? ?? ?? 'GRCSETUPINFORMATION'
+
+[Spoon Studio]
+signature = 'xvm' 00 03
+
+[Advanced Installer, MS Compound-like format]
+signature = 2F 30 EE 1F 5E 4E E5 1E
+
+[Adobe SVG Installer, gzip]
+signature = '^OPT'
+;signature = '^ARC' 1F 8B 08
+;until_offset = 50
+
+[Chilkat ZIP Self-Extractor]
+signature = 07 D2 6C BF 21 59 AB AA 01 00 00 00 00
+
+[Dolphin Virtual Machine, 5.0]
+signature = 'IST'00
+
+[CodeFusion Wizard]
+signature = '@._P-DATA_.@'
+
+[avast! Antivirus installer]
+signature = 'ASWsetupFPkgFil3'
+
+[zlib]
+signature = 78 9C
+
+[InstallAnywhere, zip]
+signature = 5B 3E
+;signature = 'PK'0304
+;until_offset = 500
+
+[NSIS]
+signature = ?? ?? ?? ?? EF BE AD DE 'NullsoftInst'
+
+[Internet Download Manager Installer]
+signature = ?? ?? ?? ?? ?? ?? ?? ?? fe c1 cd 66 6e bc cf 01 fe c1 cd 66 6e bc cf 01 00 ?? ?? ?? ?? ?? ?? ?? 78 da
+
+[Install4j installer]
+signature = D5 13 E4 E8 01 00 00 00
+
+[7-zip Installer]
+signature = EF BB BF ';!@Install@!UTF-8!'
+
+[Sony Windows installer]
+signature = 'UM' 03 0A 00
+
+[ADS Self Extractor]
+signature = 7B 00 32 00 30 00 37 00 32 00 36 00 33 00 37 00 37 00 2D 00
+until_offset = 100
+
+[CChaos Software Installer]
+signature = 27 63 27 63 12 26 09 75 13 18 01 78
+
+[Gentee Installer]
+signature = 'OWS9G1'
+at_offset = B
+
+[Squeez SFX]
+signature = 'SQ5SFX'
+
+[Inno Setup]
+signature = 'Inno Setup Setup Data'
+
+[CAB archive, possibly InstallShield]
+signature = 'MSCF'
+until_offset = 100
+
+[InstallShield archive]
+signature = 'ISc('
+until_offset = 100
+
+[Excelsior Installer]
+signature = 'ExcelsiorII1'
+
+[InstallShield 2.x-3.x]
+signature = 'InstallShield' 00
+
+[Multimedia Fusion Installer]
+signature = 'wwwwI' 87 47 12
+
+[BZIP2]
+signature = 'BZh'
+
+[PIMP Installer]
+signature = 'PIMPFILE' 00
+
+[Tarma Installer, zlib]
+signature = 'tiz1' ?? ?? ?? ?? 78 DA

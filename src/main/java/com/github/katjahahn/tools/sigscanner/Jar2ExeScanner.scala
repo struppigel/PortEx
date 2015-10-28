@@ -211,7 +211,8 @@ object Jar2ExeScanner {
       if (line.startsWith("[") && it.hasNext) {
         val line2 = it.next
         if (it.hasNext) {
-          sigs += Signature(line, it.next, line2)
+          val ep = line.split("=")(1).trim == "true"
+          sigs += Signature(line, ep, line2)
         }
       }
     }

@@ -322,7 +322,9 @@ class ReportCreator(private val data: PEData) {
     val overlay = new Overlay(data.getFile)
     if (overlay.exists) {
       val overlayOffset = overlay.getOffset
-      val sigresults = FileTypeScanner(data.getFile).scanAtReport(overlayOffset)
+      val overlaySigs = SignatureScanner.loadOverlaySigs()
+      //TODO special overlay scanner
+      val sigresults = new SignatureScanner(overlaySigs).scanAt(data.getFile, overlayOffset)
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
       title("Overlay") + NL + "Overlay at offset " +
         hexString(overlayOffset) + NL + "Overlay size      " +

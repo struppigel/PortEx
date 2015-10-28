@@ -17,26 +17,27 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
-import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.IOUtil
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.charset.CodingErrorAction
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Map
 import scala.io.Codec
-
+import scala.util.control.Breaks._
 import org.apache.logging.log4j.LogManager
-
 import com.github.katjahahn.parser.FileFormatException
 import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.ScalaIOUtil.{bytes2hex, using}
+import com.github.katjahahn.parser.ScalaIOUtil.{ bytes2hex, using }
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey._
 import com.github.katjahahn.parser.sections.SectionLoader
-
 import Signature._
 import SignatureScanner._
+import com.github.katjahahn.tools.ReportCreator
+import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.PESignature
+import com.github.katjahahn.tools.Overlay
 
 /**
  * Scans PE files for compiler and packer signatures.
@@ -77,11 +78,11 @@ class SignatureScanner(signatures: List[Signature]) {
    * @return list of scanresults with all matches found at the specified position
    */
   def _scanAt(file: File, offset: Long): List[ScanResult] = { //use from scala
-    if(offset < 0){
+    if (offset < 0) {
       logger.warn("offset must not be negative")
       return Nil
-    } 
-    if(offset >= file.length()){
+    }
+    if (offset >= file.length()) {
       logger.warn("offset is larger than file")
       return Nil
     }
@@ -196,6 +197,8 @@ class SignatureScanner(signatures: List[Signature]) {
 
 object SignatureScanner {
 
+  private val logger = LogManager.getLogger(SignatureScanner.getClass.getName)
+
   /**
    * A file offset/address
    */
@@ -207,12 +210,13 @@ object SignatureScanner {
   type ScanResult = (Signature, Address)
 
   private val defaultSigs = IOUtil.SPEC_DIR + "userdb.txt"
+  private val overlaySigs = IOUtil.SPEC_DIR + "overlaysignatures"
 
   private val version = """version: 0.1
     |author: Katja Hahn
     |last update: 5.Feb 2014""".stripMargin
 
-  private val title = "peiscan v0.1 -- by deque"
+  private val title = "peiscan v0.1"
 
   private val usage = """Usage: java -jar peiscan.jar [-s <signaturefile>] [-ep true|false] <PEfile>
     """.stripMargin
@@ -243,7 +247,7 @@ object SignatureScanner {
    */
   private def loadDefaultSigs(): List[Signature] = {
     implicit val codec = Codec("UTF-8")
-    //replace malformed input
+    // replace malformed input
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
@@ -255,36 +259,80 @@ object SignatureScanner {
       if (line.startsWith("[") && it.hasNext) {
         val line2 = it.next
         if (it.hasNext) {
-          sigs += Signature(line, it.next, line2)
+          val ep = it.next().split("=")(1).trim == "true"
+          sigs += Signature(line, ep, line2)
         }
       }
     }
     sigs.toList
   }
+
+  def loadOverlaySigs(): List[Signature] = {
+    _loadSignatures(overlaySigs, true)
+  }
+
   /**
    * Loads the signatures from the given file.
    *
    * @param sigFile the file containing the signatures
    * @return a list containing the signatures of the file
    */
-  def _loadSignatures(sigFile: File): List[Signature] = {
+  def _loadSignatures(sigFile: String, fromResource: Boolean = false): List[Signature] = {
     implicit val codec = Codec("UTF-8")
-    //replace malformed input
+    // replace malformed input
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
     val sigs = ListBuffer[Signature]()
-    val it = scala.io.Source.fromFile(sigFile)(codec).getLines
+    val it = {
+      if (fromResource) {
+        val is = this.getClass().getResourceAsStream(sigFile)
+        if(is == null) logger.fatal("could not read file " + sigFile)
+        scala.io.Source.fromInputStream(is)(codec).getLines
+      } else
+        scala.io.Source.fromFile(new File(sigFile))(codec).getLines
+    }
     while (it.hasNext) {
-      val line = it.next
-      if (line.startsWith("[") && it.hasNext) {
-        val line2 = it.next
-        if (it.hasNext) {
-          sigs += Signature(line, it.next, line2)
+      var nameLine = it.next()
+      while (nameLine.startsWith("[")) {
+        val (maybeSig, nextNameLine) = readSignatureEntry(nameLine, it)
+        if (maybeSig.isDefined) {
+          sigs += maybeSig.get
+        } else {
+          logger.error("could not read signature in file " + sigFile)
         }
+        nameLine = nextNameLine
       }
     }
     sigs.toList
+  }
+
+  private def readSignatureEntry(nameLine: String, it: Iterator[String]): (Option[Signature], String) = {
+    var nextNameLine = ""
+    var ep = false
+    var sig: Option[String] = None
+    var addOffset = 0L
+    var untilOffset = 0L
+    breakable {
+      while (it.hasNext) {
+        val line = it.next()
+        if (line.startsWith("[")) {
+          nextNameLine = line
+          break
+        } else if (line.startsWith("ep_only") && line.split("=").length > 1) {
+          ep = line.split("=")(1).trim == "true"
+        } else if (line.startsWith("signature")) {
+          sig = Some(line.split("=")(1).trim)
+        } else if (line.startsWith("at_offset") && line.split("=").length > 1) {
+          addOffset = java.lang.Long.decode("0x" + line.split("=")(1).replace(" ","").trim()) //TODO test
+        } else if (line.startsWith("until_offset") && line.split("=").length > 1) {
+          untilOffset = java.lang.Long.decode("0x" + line.split("=")(1).replace(" ","").trim()) //TODO test
+        }
+      }
+    }
+    if (sig.isDefined) {
+      (Some(Signature(nameLine, ep, sig.get, addOffset.toInt, untilOffset)), nextNameLine)
+    } else (None, nextNameLine)
   }
 
   /**
@@ -294,7 +342,7 @@ object SignatureScanner {
    * @return list containing the loaded signatures
    */
   def loadSignatures(sigFile: File): java.util.List[Signature] =
-    _loadSignatures(sigFile).asJava
+    _loadSignatures(sigFile.getAbsolutePath).asJava
 
   def toMatchedSignature(result: ScanResult): MatchedSignature = {
     val (sig, addr) = result
@@ -303,10 +351,18 @@ object SignatureScanner {
   }
 
   def main(args: Array[String]): Unit = {
-    //    val file = new File("/home/deque/portextestfiles/Holiday_Island.exe")
-    //    val scanner = SignatureScanner()
-    //    scanner.scanAll(file).asScala.foreach(println)
-    invokeCLI(args)
+    val folder = new File("/home/katja/samples")
+    for (file <- folder.listFiles()) {
+      if (!file.isDirectory() && new PESignature(file).exists()) {
+        val data = PELoader.loadPE(file)
+        val reporter = new ReportCreator(data)
+        if (new Overlay(data).exists) {
+          println(file.getName)
+          println("******************************")
+          println(reporter.overlayReport())
+        }
+      }
+    }
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
@@ -348,7 +404,7 @@ object SignatureScanner {
     try {
       val scanner = {
         if (signatures.isDefined)
-          new SignatureScanner(_loadSignatures(signatures.get))
+          new SignatureScanner(_loadSignatures(signatures.get.getAbsolutePath))
         else SignatureScanner()
       }
       val list = scanner.scanAll(pefile, eponly).asScala

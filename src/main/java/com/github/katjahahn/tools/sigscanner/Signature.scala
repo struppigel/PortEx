@@ -19,6 +19,7 @@ import Signature._
 import scala.Array.canBuildFrom
 import com.github.katjahahn.parser.ScalaIOUtil._
 import scala.PartialFunction._
+import org.apache.logging.log4j.LogManager
 
 /**
  * @author Katja Hahn
@@ -30,7 +31,8 @@ import scala.PartialFunction._
  * @param sigmature the byte signature, where the Option None denotes unknown
  * 				    bytes ("??" in signature file)
  */
-class Signature(val name: String, val epOnly: Boolean, val signature: Array[Option[Byte]]) {
+class Signature(val name: String, val epOnly: Boolean, 
+    val signature: Array[Option[Byte]], val untilOffset: Long) {
   
   def bytesMatched(): Int =
       signature.count(cond(_) { case Some(s) => true })
@@ -43,19 +45,8 @@ class Signature(val name: String, val epOnly: Boolean, val signature: Array[Opti
 }
 
 object Signature {
-
-  /**
-   * @param name name of packer or compiler
-   * @param ep epOnly flag as string, will be converted to boolean true iff 
-   * 		   the string is "true"
-   * @param sig byte sequence as hex string, uknown bytes are marked as "??"
-   * @return an instance of Signature with the fields applied
-   */
-  def apply(name: String, ep: String, sig: String): Signature = {
-    val ep_only = ep.split("=")(1).trim == "true"
-    val sigbytes = hex2bytes(sig.split("=")(1).trim)
-    new Signature(name, ep_only, sigbytes)
-  }
+  
+  private val logger = LogManager.getLogger(Signature.getClass.getName)
   
   /**
    * @param name name of packer or compiler
@@ -64,8 +55,34 @@ object Signature {
    * @return an instance of Signature with the fields applied
    */
   def apply(name: String, ep: Boolean, sig: String): Signature = {
-    val sigbytes = hex2bytes(sig)
-    new Signature(name, ep, sigbytes)
+    apply(name, ep, sig, 0, 0L)
+  }
+  
+  /**
+   * @param name name of packer or compiler
+   * @param ep epOnly flag
+   * @param sig byte sequence as hex string, uknown bytes are marked as "??"
+   * @return an instance of Signature with the fields applied
+   */
+  def apply(name: String, ep: Boolean, sig: String, addOffset: Int, untilOffset: Long): Signature = {
+    // convert quotes to hex string representation
+    val quote = '\''
+    var inQuote = false
+    var convertedSig = ("??" * addOffset) + sig.toList.foldRight(""){(ch, concat) => 
+      if(ch == quote) { 
+        inQuote = !inQuote 
+        concat
+      } else if(inQuote) {
+        val convertedChar = Integer.toHexString(ch & 0xFF)
+        convertedChar + concat
+      } else {
+        ch + concat
+      }
+    }
+    // convert hex string to byte array
+    val sigbytes = hex2bytes(convertedSig)
+    // create signature
+    new Signature(name, ep, sigbytes, untilOffset)
   }
 
   /**

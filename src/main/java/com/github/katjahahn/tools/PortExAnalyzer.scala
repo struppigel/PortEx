@@ -41,9 +41,9 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.4.3
+  private val version = """version: 0.4.5
     |author: Katja Hahn
-    |last update: 23. Okt 2015""".stripMargin
+    |last update: 28. Okt 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
