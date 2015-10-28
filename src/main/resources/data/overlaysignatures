@@ -2,7 +2,6 @@
 
 [CreateInstall]
 signature = 'aWAW'
-ep_only = true
 
 [7-zip Installer]
 signature = ';!@Install@!UTF-8!'
@@ -147,7 +146,7 @@ signature = 'CWS'
 
 [Smart Install Maker]
 signature = 'Smart Install Maker v'
-version = overlay:17
+;version = overlay:17
 
 [PackageForTheWeb, InstallShield]
 signature = ?? ?? 00 00 DC ED BD
@@ -157,7 +156,7 @@ signature = D0 CF 11 E0 A1 B1 1A E1
 
 [Autodesk Self-Extract]
 signature = '00000000000000BD00000000000000010000000000000001'
-at_offset = 19 A0
+at_offset = 19A0
 
 [Ghost Installer archive, xored MSCF, mask: 8D]
 signature = C0 DE CE CD 8D 8D 8D 8D
@@ -179,8 +178,8 @@ signature = 2F 30 EE 1F 5E 4E E5 1E
 
 [Adobe SVG Installer, gzip]
 signature = '^OPT'
-signature = '^ARC' 1F 8B 08
-until_offset = 50
+;signature = '^ARC' 1F 8B 08
+;until_offset = 50
 
 [Chilkat ZIP Self-Extractor]
 signature = 07 D2 6C BF 21 59 AB AA 01 00 00 00 00
@@ -199,8 +198,8 @@ signature = 78 9C
 
 [InstallAnywhere, zip]
 signature = 5B 3E
-signature = 'PK'0304
-until_offset = 500
+;signature = 'PK'0304
+;until_offset = 500
 
 [NSIS]
 signature = ?? ?? ?? ?? EF BE AD DE 'NullsoftInst'

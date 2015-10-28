@@ -68,7 +68,7 @@ object Signature {
     // convert quotes to hex string representation
     val quote = '\''
     var inQuote = false
-    var convertedSig = ("??" * addOffset) + sig.toList.foldRight(""){(ch, concat) => 
+    var convertedSig = sig.toList.foldRight(""){(ch, concat) => 
       if(ch == quote) { 
         inQuote = !inQuote 
         concat
