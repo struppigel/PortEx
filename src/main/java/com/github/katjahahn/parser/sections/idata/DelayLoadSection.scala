@@ -109,6 +109,7 @@ object DelayLoadSection {
      */
     def isEmpty(entry: DelayLoadDirectoryEntry): Boolean =
       entry(DelayLoadDirectoryKey.MODULE_HANDLE) == 0
+      
     val entry = DelayLoadDirectoryEntry(loadInfo, nr)
     if (isEmpty(entry)) None else
       Some(entry)

@@ -306,6 +306,31 @@ public class SectionLoader {
      * @return file offset
      */
     public long getFileOffset(long rva) {
+        // standard value if rva doesn't point into a section
+        long fileOffset = rva;
+        Optional<Long> maybeOffset = maybeGetFileOffset(rva);
+        // file offset is not within file --> warning
+        if (!maybeOffset.isPresent()) {
+            logger.warn("invalid file offset: 0x"
+                    + Long.toHexString(fileOffset) + " for file: "
+                    + file.getName() + " with length 0x"
+                    + Long.toHexString(file.length()));
+        } else {
+        	fileOffset = maybeOffset.get();
+        }
+        return fileOffset;
+    }
+    
+    /**
+     * Returns the file offset for the given RVA. Returns absent if file offset
+     * is not within file.
+     * 
+     * @param rva
+     *            the relative virtual address that shall be converted to a
+     *            plain file offset
+     * @return file offset
+     */
+    public Optional<Long> maybeGetFileOffset(long rva) {
         Optional<SectionHeader> section = maybeGetSectionHeaderByRVA(rva);
         // standard value if rva doesn't point into a section
         long fileOffset = rva;
@@ -315,14 +340,15 @@ public class SectionLoader {
             long pointerToRawData = section.get().get(POINTER_TO_RAW_DATA);
             fileOffset = rva - (virtualAddress - pointerToRawData);
         }
-        // file offset is not within file --> warning
+        // file offset is not within file --> return absent
         if (fileOffset > file.length() || fileOffset < 0) {
-            logger.warn("invalid file offset: 0x"
+        	logger.warn("invalid file offset: 0x"
                     + Long.toHexString(fileOffset) + " for file: "
                     + file.getName() + " with length 0x"
                     + Long.toHexString(file.length()));
+            return Optional.absent();
         }
-        return fileOffset;
+        return Optional.of(fileOffset);
     }
 
     /**
@@ -435,10 +461,10 @@ public class SectionLoader {
                 default:
                     return Optional.absent();
                 }
-                if (section.isEmpty()) {
+                if (section != null && section.isEmpty()) {
                     logger.warn("empty data directory: " + key);
                 }
-                return Optional.of(section);
+                return Optional.fromNullable(section);
             }
         } catch (FileFormatException e) {
             logger.warn(e);

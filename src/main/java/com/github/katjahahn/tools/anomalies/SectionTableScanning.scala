@@ -60,6 +60,8 @@ trait SectionTableScanning extends AnomalyScanner {
       ".MPRESS1" -> "MPRESS Packer", ".MPRESS2" -> "MPRESS Packer",
       //Neolite
       ".neolite" -> "Neolite Packer", ".neolit" -> "Neolite Packer",
+      //NSIS
+      ".ndata" -> "Nullsoft Installer",
       //NS Pack
       ".nsp0" -> "NsPack packer",".nsp1" -> "NsPack packer",".nsp2" -> "NsPack packer",
       "nsp0" -> "NsPack packer","nsp0" -> "NsPack packer","nsp0" -> "NsPack packer",

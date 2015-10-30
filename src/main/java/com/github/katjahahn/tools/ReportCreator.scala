@@ -62,11 +62,11 @@ class ReportCreator(private val data: PEData) {
     s"full path ${data.getFile.getAbsolutePath}" + NL + NL
 
   private var showAll = false
-  
+
   /**
-   * If all is set to true, every report will be created, even unstable and 
+   * If all is set to true, every report will be created, even unstable and
    * time-consuming ones. The standard value is false.
-   * 
+   *
    * @param all set to true if all reports shall be created
    */
   def setShowAll(all: Boolean): Unit = { showAll = all }
@@ -429,17 +429,20 @@ class ReportCreator(private val data: PEData) {
       }
     }
     val padLengthDataDir = "delay import descriptor ".length
-    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("virtual address", colWidth, " ") + pad("size", colWidth, " ") + pad("in section", colWidth, " ") + pad("file offset", colWidth, " ")
+    val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("rva", colWidth, " ") + pad("-> offset", colWidth, " ") + pad("size", colWidth, " ") + pad("in section", colWidth, " ") + pad("file offset", colWidth, " ")
     val dataDirs = opt.getDataDirectory().values.asScala.toList.sortBy(e => e.getTableEntryOffset)
     val dataDirTableLine = pad("", dataDirHeader.length, "-") + NL
     buf.append(NL + dataDirHeader + NL + dataDirTableLine)
     for (entry <- dataDirs) {
       val description = entry.getKey.toString
       val maybeHeader = secLoader.maybeGetSectionHeader(entry.getKey)
+      val dataVA = entry.getVirtualAddress()
+      val dataOffset = new SectionLoader(data).maybeGetFileOffset(entry.getVirtualAddress())
+      val dataOffsetStr = if(dataOffset.isPresent()) hexString(dataOffset.get()) else "n.a."
       val inSection = if (maybeHeader.isPresent) maybeHeader.get.getNumber + " " + maybeHeader.get.getName else "-"
-      buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(entry.getVirtualAddress()), colWidth, " ") +
-        pad(hexString(entry.getDirectorySize()), colWidth, " ") + pad(inSection, colWidth, " ") +
-        pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
+      buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(dataVA), colWidth, " ") + 
+        pad(dataOffsetStr, colWidth, " ") + pad(hexString(entry.getDirectorySize()), colWidth, " ") + 
+        pad(inSection, colWidth, " ") + pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
     }
     buf.toString + NL
   }
