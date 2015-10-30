@@ -286,14 +286,15 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file= new File("/home/katja/samples/visualizercrash"); 
+        File folder= new File("/home/katja/samples/"); 
         // TODO create Unit test for resource type with name!
-//        for (File file : folder.listFiles()) {
+        for (File file : folder.listFiles()) {
             if (!file.isDirectory() && new PESignature(file).exists()) {
-//            	System.out.println("Report for " + file.getName());
+            	System.out.println("Report for " + file.getName());
 //            	System.out.println();
             	PEData data = PELoader.loadPE(file);
-            	new ReportCreator(data).printReport();
+            	System.out.println(new ReportCreator(data).maldetReport());
+            	System.out.println();
 //            	new VisualizerBuil
 //            	String report = new ReportCreator(data).versionReport();
 //            	System.out.println(report);
@@ -302,18 +303,18 @@ public final class PELoader {
 //                System.out.println(file.getName() + ": " + nr);
 //                
             }
-//        }
+        }
         
 //         ReportCreator reporter = ReportCreator.newInstance(file);
 //         System.out.println(reporter.anomalyReport());
          //reporter.printReport();
-         VisualizerBuilder builder = new VisualizerBuilder();
-         Visualizer vi = builder.build();
-         final BufferedImage entropyImage = vi.createEntropyImage(file);
-         final BufferedImage structureImage = vi.createImage(file);
-         final BufferedImage appendedImage = ImageUtil.appendImages(
-         entropyImage, structureImage);
-         show(appendedImage);
+//         VisualizerBuilder builder = new VisualizerBuilder();
+//         Visualizer vi = builder.build();
+//         final BufferedImage entropyImage = vi.createEntropyImage(file);
+//         final BufferedImage structureImage = vi.createImage(file);
+//         final BufferedImage appendedImage = ImageUtil.appendImages(
+//         entropyImage, structureImage);
+//         show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

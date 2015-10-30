@@ -310,8 +310,7 @@ class ReportCreator(private val data: PEData) {
   def maldetReport(): String = {
     val scoring = FileScoring.newInstance(data.getFile)
     val report1 = title("File Scoring") + NL + "Malware probability: " +
-      ("%3.2f" format (scoring.malwareProbability * 100.0)) +
-      " %"
+      (scoring.malwareProbability * 100.0) + " %"
     val report2 = "File Score: " + scoring.fileScore() + NL + NL +
       "Score based on: " + NL +
       scoring._scoreParts.map(m => m._1 + ": " + m._2).mkString(NL)
