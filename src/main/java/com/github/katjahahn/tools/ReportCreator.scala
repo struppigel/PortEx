@@ -493,8 +493,8 @@ class ReportCreator(private val data: PEData) {
       build.append(sectionEntryLine(sections, "Virtual Size",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_SIZE))))
       build.append(sectionEntryLine(sections, "-> actual virtual size", (s: SectionHeader) =>
-        if (s.get(VIRTUAL_SIZE) != s.getAlignedVirtualSize())
-          hexString(s.getAlignedVirtualSize()) else ""))
+        if (s.get(VIRTUAL_SIZE) != loader.getActualVirtSize(s))
+          hexString(loader.getActualVirtSize(s)) else ""))
       build.append(sectionEntryLine(sections, "Pointer To Relocations",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RELOCATIONS))))
       build.append(sectionEntryLine(sections, "Number Of Relocations",

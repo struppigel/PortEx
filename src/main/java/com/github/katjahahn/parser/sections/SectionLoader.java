@@ -227,6 +227,15 @@ public class SectionLoader {
         assert readSize >= 0;
         return readSize;
     }
+    
+    public long getActualVirtSize(SectionHeader header) {
+        Preconditions.checkNotNull(header);
+        long virtSize = header.getAlignedVirtualSize();
+        if(virtSize == 0) {
+        	return header.getAlignedSizeOfRaw();
+        } 
+        return virtSize;
+    }
 
     /**
      * Adjusts the readsize of a section to the size of the file.
