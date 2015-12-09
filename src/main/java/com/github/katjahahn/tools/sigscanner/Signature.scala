@@ -36,10 +36,12 @@ class Signature(val name: String, val epOnly: Boolean,
   
   def bytesMatched(): Int =
       signature.count(cond(_) { case Some(s) => true })
+      
+  def signatureString(): String = bytes2hex(signature, " ")
 
   override def toString(): String =
     s"""|name: $name
-    	|signature: ${bytes2hex(signature, " ")}
+    	|signature: $signatureString
 	    |ep_only: $epOnly """.stripMargin
 
 }

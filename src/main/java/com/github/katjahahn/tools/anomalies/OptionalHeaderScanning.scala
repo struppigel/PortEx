@@ -100,7 +100,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     //calculate sum of readsizes
     sections.foldRight[Long](0L)((section, size) =>
       if (section.getCharacteristics.contains(chara))
-        loader.getActualVirtSize(section) + size
+        loader.getReadSize(section) + size
       else size)
   }
 

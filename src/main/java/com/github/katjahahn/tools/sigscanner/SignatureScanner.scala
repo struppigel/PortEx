@@ -103,12 +103,13 @@ class SignatureScanner(signatures: List[Signature]) {
    * @param file the file to be scanned
    * @param offset the file offset to be matched
    *
-   * @return list of scanresults with all matches found at the specified position
+   * @return list of strings with all matches found
    */
   def scanAt(file: File, offset: Long): java.util.List[String] = {
     val matches = _scanAt(file, offset)
     (for ((m, addr) <- matches)
-      yield m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr)).asJava
+      yield (m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr) + 
+        IOUtil.NL + "pattern: " + m.signatureString)).asJava
   }
 
   /**
@@ -128,7 +129,8 @@ class SignatureScanner(signatures: List[Signature]) {
   def scanAll(file: File, epOnly: Boolean = true): java.util.List[String] = { //use from Java
     val matches = _scanAll(file, epOnly)
     (for ((m, addr) <- matches)
-      yield m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr)).asJava
+      yield (m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr) + 
+        IOUtil.NL + "pattern: " + m.signatureString)).asJava
   }
 
   /**
