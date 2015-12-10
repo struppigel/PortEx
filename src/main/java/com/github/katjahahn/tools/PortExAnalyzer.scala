@@ -41,22 +41,23 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.4.5
+  private val version = """version: 0.4.6
     |author: Katja Hahn
-    |last update: 28. Okt 2015""".stripMargin
+    |last update: 10. Dec 2015""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
   private val usage = """usage: 
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
-    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile>] [-i <folder>] <PEfile>
+    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
     |
     | -h,--help          show help
     | -v,--version       show version
     | -a,--all           show all info (might be slow and unstable)
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
+    | -bps               bytes per square in the image
     | -i,--ico           extract icons from the resource section as .ico file
     """.stripMargin
 
@@ -113,7 +114,12 @@ object PortExAnalyzer {
             }
             if (options.contains('picture)) {
               val imageFile = new File(options('picture))
-              writePicture(file, imageFile)
+              if(options.contains('bps)) {
+                val bps = options('bps).toInt
+                writePictureWithBPS(file, imageFile, bps)
+              } else {
+                writePicture(file, imageFile)
+              }
               println("picture successfully created and saved to " + imageFile.getAbsolutePath)
               println()
             }
@@ -138,6 +144,38 @@ object PortExAnalyzer {
       val dest = Paths.get(folder.getAbsolutePath, nr + ".ico").toFile
       icoFile.saveTo(dest)
       println("file " + dest.getName() + " written")
+    }
+  }
+  
+  private def writePictureWithBPS(file: File, imageFile: File, bps: Int): Unit = {
+    val pixelSize = 4
+    val fileWidth = 256
+    val MAX_HEIGHT = 1000
+    def height(bytes: Int): Int = {
+      val nrOfPixels = file.length / bytes.toDouble
+      val pixelsPerRow = fileWidth / pixelSize.toDouble
+      val pixelsPerCol = nrOfPixels / pixelsPerRow
+      Math.ceil(pixelsPerCol * pixelSize).toInt
+    }
+    val bytesPerPixel = bps
+    val bytePlotPixelSize = if(fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
+    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY,Color.cyan)
+    val vi = viBuilder.build()
+    val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
+    val entropyImage = vi.createEntropyImage(file)
+    //more fine grained bytePlot image, thus another visualizer
+    val bytePlot = vi2.createBytePlot(file)
+    val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
+    if (isPEFile(file)) {
+      val structureImage = vi.createImage(file)
+      val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
+      val legendImage = vi.createLegendImage(true, true, true)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage1, legendImage)
+      ImageIO.write(appendedImage2, "png", imageFile)
+    } else {
+      val legendImage = vi.createLegendImage(true, true, false)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage, legendImage)
+      ImageIO.write(appendedImage2, "png", imageFile)
     }
   }
 
@@ -263,6 +301,8 @@ object PortExAnalyzer {
         nextOption(map += ('picture -> value), tail)
       case "--picture" :: value :: tail =>
         nextOption(map += ('picture -> value), tail)
+      case "-bps" :: value :: tail =>
+        nextOption(map += ('bps -> value), tail)
       case "-i" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
       case "--ico" :: value :: tail =>
