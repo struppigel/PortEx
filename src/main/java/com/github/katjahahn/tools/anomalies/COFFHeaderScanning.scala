@@ -28,6 +28,7 @@ import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.PhysicalLocation
 import java.util.Date
+import java.util.Calendar
 
 /**
  * Scans the COFF File Header for anomalies.
@@ -62,15 +63,18 @@ trait COFFHeaderScanning extends AnomalyScanner {
   private def checkTimeStamp(coff: COFFFileHeader): List[Anomaly] = {
     val timestampField = coff.getField(COFFHeaderKey.TIME_DATE)
     val timestamp = timestampField.getValue
-    val dateObj = coff.getTimeDate
+    val date = coff.getTimeDate
+    val cal = Calendar.getInstance();
+    cal.setTime(date);
+    val year = cal.get(Calendar.YEAR);
     val currentDate = new Date()
     if (timestamp == 0x2A425E19) { //date is exactly Sat Jun 20 00:22:17 1992
        List(FieldAnomaly(timestampField,
         "COFF Header: Time date stamp 0x2A425E19 is a known bug for Delphi 4 - Delphi 2006 ", TIME_DATE_TOO_LOW))
-    } else if (dateObj.getYear < 1995) { //date is in past
+    } else if (year < 1995) { //date is in past
       List(FieldAnomaly(timestampField,
         "COFF Header: Time date stamp is too far in the past", TIME_DATE_TOO_LOW))
-    } else if (currentDate.compareTo(dateObj) < 0) { //date is in future
+    } else if (currentDate.compareTo(date) < 0) { //date is in future
       List(FieldAnomaly(timestampField,
         "COFF Header: Time date stamp is in the future", TIME_DATE_IN_FUTURE))
     } else Nil
