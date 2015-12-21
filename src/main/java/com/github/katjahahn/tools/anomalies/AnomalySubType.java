@@ -47,6 +47,14 @@ public enum AnomalySubType {
     /*************************** COFF File Header *****************************/
 
     /**
+     * Timestamp is too far in the past.
+     */
+    TIME_DATE_TOO_LOW(NON_DEFAULT),
+    /**
+     * Timestamp is in future.
+     */
+    TIME_DATE_IN_FUTURE(NON_DEFAULT),
+    /**
      * The PE File Header was moved to overlay, this is the result of
      * manipulating e_lfanew to point to the overlay.
      */

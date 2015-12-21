@@ -27,6 +27,7 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.PhysicalLocation
+import java.util.Date
 
 /**
  * Scans the COFF File Header for anomalies.
@@ -48,7 +49,31 @@ trait COFFHeaderScanning extends AnomalyScanner {
     anomalyList ++= checkNumberOfSections(coff)
     anomalyList ++= checkSizeOfOptHeader(coff)
     anomalyList ++= checkPEHeaderLocation(coff)
+    anomalyList ++= checkTimeStamp(coff)
     super.scan ::: anomalyList.toList
+  }
+  
+  /**
+   * Checks if the time stamp is too low or in the future
+   * TODO add future time stamp
+   * @param coff the coff file header
+   * @return list of anomalies
+   */
+  private def checkTimeStamp(coff: COFFFileHeader): List[Anomaly] = {
+    val timestampField = coff.getField(COFFHeaderKey.TIME_DATE)
+    val timestamp = timestampField.getValue
+    val dateObj = coff.getTimeDate
+    val currentDate = new Date()
+    if (timestamp == 0x2A425E19) { //date is exactly Sat Jun 20 00:22:17 1992
+       List(FieldAnomaly(timestampField,
+        "COFF Header: Time date stamp 0x2A425E19 is a known bug for Delphi 4 - Delphi 2006 ", TIME_DATE_TOO_LOW))
+    } else if (dateObj.getYear < 1995) { //date is in past
+      List(FieldAnomaly(timestampField,
+        "COFF Header: Time date stamp is too far in the past", TIME_DATE_TOO_LOW))
+    } else if (currentDate.compareTo(dateObj) < 0) { //date is in future
+      List(FieldAnomaly(timestampField,
+        "COFF Header: Time date stamp is in the future", TIME_DATE_IN_FUTURE))
+    } else Nil
   }
 
   /**
