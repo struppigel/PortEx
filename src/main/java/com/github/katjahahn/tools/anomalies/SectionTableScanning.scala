@@ -53,7 +53,7 @@ trait SectionTableScanning extends AnomalyScanner {
       "DAStub" -> "DAStub Dragon Armor protector",
       "!EPack" -> "EPack packer",
       "kkrunchy" -> "kkrunchy packer",
-      ".mackt" -> "ImpRec-created section",
+      ".mackt" -> "ImpRec-created section, this file was patched/cracked",
       ".MaskPE" -> "MaskPE Packer",
       "MEW" -> "MEW packer",
       //MPRESS

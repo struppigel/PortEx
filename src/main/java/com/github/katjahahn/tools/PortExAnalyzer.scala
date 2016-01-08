@@ -234,7 +234,7 @@ object PortExAnalyzer {
       throw new IOException("File name for output file is empty")
     }
     if (outFile.exists()) {
-      throw new IOException("Output file " + file.getAbsoluteFile() + " already exists")
+      throw new IOException("Output file " + outFile.getAbsoluteFile() + " already exists")
     }
 
     def bytesMatched(sig: Signature): Int =
