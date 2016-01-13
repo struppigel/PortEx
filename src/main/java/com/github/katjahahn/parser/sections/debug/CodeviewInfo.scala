@@ -7,9 +7,9 @@ import java.io.File
 import com.github.katjahahn.parser.ByteArrayUtil._
 import CodeviewInfo._
 
-class CodeviewInfo(private val age: Long,
-                   private val guid: Array[Byte],
-                   private val filePath: String) {
+class CodeviewInfo(val age: Long,
+                   val guid: Array[Byte],
+                   val filePath: String) {
 
   def getInfo(): String = NL +
     "Codeview" + NL +
