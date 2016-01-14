@@ -1,0 +1,16 @@
+1;IMAGE_FILE_RELOCS_STRIPPED;Image only, Windows CE, and Windows NT and later.
+2;IMAGE_FILE_EXECUTABLE_IMAGE;Image only.
+4;IMAGE_FILE_LINE_NUMS_STRIPPED;COFF line numbers have been removed. DEPRECATED
+8;IMAGE_FILE_LOCAL_SYMS_STRIPPED;COFF symbol table entries for local symbols have been removed. DEPRECATED
+10;IMAGE_FILE_AGGRESSIVE_WS_TRIM;Aggressively trim working set. DEPRECATED for Windows 2000 and later.
+20;IMAGE_FILE_LARGE_ADDRESS_AWARE;Application can handle > 2 GB addresses.
+40;RESERVED_40;Value 40, reserved for future use.
+80;IMAGE_FILE_BYTES_REVERSED_LO;little endian. DEPRECATED
+100;IMAGE_FILE_32BIT_MACHINE;Machine is based on a 32-bit-word architecture.
+200;IMAGE_FILE_DEBUG_STRIPPED;Debugging is removed from the image file.
+400;IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP;If the image is on removable media, fully load it and copy it to the swap file.
+800;IMAGE_FILE_NET_RUN_FROM_SWAP;If the image is on network media, fully load it and copy it to the swap file.
+1000;IMAGE_FILE_SYSTEM;The image file is a system file, not a user program.
+2000;IMAGE_FILE_DLL;The image file is a dynamic-link library (DLL). Such files are considered executable files for almost all purposes, although they cannot be directly run.
+4000;IMAGE_FILE_UP_SYSTEM_ONLY;The file should be run only on a uniprocessor machine.
+8000;IMAGE_FILE_BYTES_REVERSED_HI;big endian. DEPRECATED
