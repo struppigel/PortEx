@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.ScalaIOUtil.using
@@ -25,6 +27,7 @@ import com.github.katjahahn.parser.PELoader
 import java.io.RandomAccessFile
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.Reader
 
 /**
  * @author Katja Hahn
@@ -41,7 +44,7 @@ object StringExtractor {
     val file = new File("/home/deque/portextestfiles/MinecraftForceOp.exe")
     println(readStrings(file, 4).asScala.mkString("\n"))
   }
-  
+
   /**
    * Reads all 2-byte (Unicode) and 1-byte (ASCII) based character-strings
    * contained in the file. Only printable ASCII characters are determined as string.
@@ -51,10 +54,11 @@ object StringExtractor {
    * @return List containing the Strings found
    */
   def readStrings(file: File, minLength: Int): java.util.List[String] = {
-    (_readASCIIStrings(file, minLength) ::: _readStrings(file, minLength, Integer.MAX_VALUE, Integer.MAX_VALUE, "UTF-16LE")).asJava
+    (_readASCIIStrings(file, minLength, Integer.MAX_VALUE, Integer.MAX_VALUE) ::: 
+        _readStrings(file, minLength, Integer.MAX_VALUE, Integer.MAX_VALUE, "UTF-16LE")).asJava
   }
 
-   /**
+  /**
    * Reads all 1-byte (ASCII) based character-strings
    * contained in the file. Only printable ASCII characters are determined as string.
    *
@@ -63,29 +67,31 @@ object StringExtractor {
    * @return List containing the Strings found
    */
   def readASCIIStrings(file: File, minLength: Int): java.util.List[String] = {
-    _readASCIIStrings(file, minLength).asJava
+    _readASCIIStrings(file, minLength, Integer.MAX_VALUE, Integer.MAX_VALUE).asJava
   }
 
-  def _readASCIIStrings(file: File, minLength: Int): List[String] = {
+  def _readASCIIStrings(file: File, minLength: Int, maxLength: Int, maxNumber: Int, filter: String => Boolean = { _ => true }): List[String] = {
     // TODO make more efficient
     // initialize listbuffer to save all strings found
     val strings = new ListBuffer[String]
-    using(new FileInputStream(file)) { is =>
+    using(new BufferedReader(new InputStreamReader(new FileInputStream(file)))) { is =>
       // read one byte
       var byte: Int = is.read()
       // until EOF
-      while (byte != -1) {
+      while (byte != -1 && strings.size < maxNumber) {
         // drop all bytes that are not ascii
         byte = dropWhile(is, !isASCIIPrintable(_))
         // check for EOF
         if (byte != -1) {
           // take all bytes that are ascii
-          val (taken, b) = takeWhile(is, isASCIIPrintable(_))
+          val (taken: String, b: Int) = takeWhile(is, isASCIIPrintable(_))
           // check if string has minimum length
-          if (taken.length() > minLength) {
+          if (taken.length > minLength && filter(byte.toChar + taken)) {
             // save string with very first char/byte prepended, which had to be 
             // read by dropWhile
-            strings.append(byte.toChar + taken)
+            if (taken.length <= maxLength)
+              strings.append(byte.toChar + taken)
+            else strings.append((byte.toChar + taken).take(maxLength) + "[...]")
           }
           byte = b
         }
@@ -96,7 +102,7 @@ object StringExtractor {
 
   private def isASCIIPrintable(i: Int) = i >= 32 && i < 127
 
-  private def takeWhile(is: InputStream, f: Int => Boolean): (String, Int) = {
+  private def takeWhile(is: Reader, f: Int => Boolean): (String, Int) = {
     // read first byte
     var byte: Int = is.read()
     val str = new StringBuffer()
@@ -109,7 +115,7 @@ object StringExtractor {
     (str.toString(), byte)
   }
 
-  private def dropWhile(is: InputStream, f: Int => Boolean): Int = {
+  private def dropWhile(is: Reader, f: Int => Boolean): Int = {
     // read first byte
     var byte: Int = is.read()
     // read bytes as long as they fulfill f
@@ -120,7 +126,7 @@ object StringExtractor {
     byte
   }
 
- /**
+  /**
    * Reads all 2-byte (Unicode) based character-strings
    * contained in the file. Only printable ASCII characters are determined as string.
    *
