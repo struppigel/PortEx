@@ -23,6 +23,8 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.PELoader
 import java.io.RandomAccessFile
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 /**
  * @author Katja Hahn
@@ -49,7 +51,7 @@ object StringExtractor {
    * @return List containing the Strings found
    */
   def readStrings(file: File, minLength: Int): java.util.List[String] = {
-    (_readASCIIStrings(file, minLength) ::: _readUnicodeStrings(file, minLength)).asJava
+    (_readASCIIStrings(file, minLength) ::: _readStrings(file, minLength, Integer.MAX_VALUE, Integer.MAX_VALUE, "UTF-16LE")).asJava
   }
 
    /**
@@ -127,35 +129,37 @@ object StringExtractor {
    * @return List containing the Strings found
    */
   def readUnicodeStrings(file: File, minLength: Int): java.util.List[String] = {
-    _readUnicodeStrings(file, minLength).asJava
+    _readStrings(file, minLength, Integer.MAX_VALUE, Integer.MAX_VALUE, "UTF-16LE").asJava
   }
 
-  //TODO not really tested
-  def _readUnicodeStrings(file: File, minLength: Int): List[String] = {
+  def _readStrings(file: File, minLength: Int, maxLength: Int, maxNumber: Int, charset: String, isAllowed: String => Boolean = { _ => true }): List[String] = {
     val strings = new ListBuffer[String]
-    var str = new StringBuilder()
-    using(new FileInputStream(file)) { is =>
-      var prev: Int = is.read()
-      if (prev == -1) return strings.toList
-      var byte: Int = is.read()
-      var lastWasASCII = false
+    var codepoints = ListBuffer.empty[Int]
 
-      while (prev != -1 && byte != -1) {
-        val c = (prev << 8) + byte
-        if (isASCIIPrintable(c)) {
-          str.append(c)
-        } else if (lastWasASCII) {
-          if (str.length > minLength) {
-            strings.append(str.toString)
-          }
-          str = new StringBuilder()
-        } 
-        lastWasASCII = isASCIIPrintable(c)
-        prev = is.read()
-        if (prev != -1) byte = is.read()
+    def maybeAppendToResults(cps: ListBuffer[Int]): Unit = {
+      if (cps.length >= minLength && isAllowed(new String(cps.toArray, 0, cps.length))) {
+        if (cps.length <= maxLength)
+          strings.append(new String(cps.toArray, 0, cps.length))
+        else strings.append(new String(cps.toArray, 0, maxLength) + "[...]")
       }
-
     }
+
+    using(new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))) { br =>
+      var readInt = br.read()
+      if (readInt != -1) codepoints += readInt
+      var prev = 0
+      while (readInt != -1 && strings.size < maxNumber) {
+        if (readInt == 0) {
+          maybeAppendToResults(codepoints)
+          codepoints = ListBuffer.empty[Int]
+        }
+        prev = readInt
+        readInt = br.read()
+        if (readInt != -1) codepoints += readInt
+      }
+      maybeAppendToResults(codepoints)
+    }
+    //    strings.foreach { str => if (str.toLowerCase().contains("cheat")) println(str) }
     strings.toList
   }
 }

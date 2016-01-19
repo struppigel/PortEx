@@ -286,15 +286,14 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File folder= new File("/home/katja/samples/"); 
+        File file= new File("/home/katja/samples/fixthis"); 
         // TODO create Unit test for resource type with name!
-        for (File file : folder.listFiles()) {
-            if (!file.isDirectory() && new PESignature(file).exists()) {
+//        for (File file : folder.listFiles()) {
+//            if (!file.isDirectory() && new PESignature(file).exists()) {
             	System.out.println("Report for " + file.getName());
 //            	System.out.println();
             	PEData data = PELoader.loadPE(file);
-            	System.out.println(new ReportCreator(data).maldetReport());
-            	System.out.println();
+            	new ReportCreator(data).printReport();
 //            	new VisualizerBuil
 //            	String report = new ReportCreator(data).versionReport();
 //            	System.out.println(report);
@@ -302,8 +301,8 @@ public final class PELoader {
 //            	int nr = data.getSectionTable().getNumberOfSections();
 //                System.out.println(file.getName() + ": " + nr);
 //                
-            }
-        }
+//            }
+//        }
         
 //         ReportCreator reporter = ReportCreator.newInstance(file);
 //         System.out.println(reporter.anomalyReport());
