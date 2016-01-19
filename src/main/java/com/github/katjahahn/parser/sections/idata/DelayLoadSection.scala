@@ -76,6 +76,7 @@ object DelayLoadSection {
     val directoryTable = ListBuffer[DelayLoadDirectoryEntry]()
     var isLastEntry = false
     var i = 0
+    val dirEntryMax = 10000
     do {
       logger.debug(s"reading ${i + 1}. entry")
       readDirEntry(i, loadInfo) match {
@@ -87,7 +88,7 @@ object DelayLoadSection {
         case None => isLastEntry = true
       }
       i += 1
-    } while (!isLastEntry)
+    } while (!isLastEntry && i < dirEntryMax)
     directoryTable.toList
   }
 
@@ -108,7 +109,7 @@ object DelayLoadSection {
      * @return true iff the given entry is not the last empty entry or null entry
      */
     def isEmpty(entry: DelayLoadDirectoryEntry): Boolean =
-      entry(DelayLoadDirectoryKey.MODULE_HANDLE) == 0
+      entry(DelayLoadDirectoryKey.MODULE_HANDLE) == 0 || entry.lookupTableEntriesSize == 0
       
     val entry = DelayLoadDirectoryEntry(loadInfo, nr)
     if (isEmpty(entry)) None else

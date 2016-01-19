@@ -290,30 +290,24 @@ public final class PELoader {
         // TODO create Unit test for resource type with name!
 //        for (File file : folder.listFiles()) {
 //            if (!file.isDirectory() && new PESignature(file).exists()) {
-            	System.out.println("Report for " + file.getName());
+//            	System.out.println("Report for " + file.getName());
 //            	System.out.println();
             	PEData data = PELoader.loadPE(file);
-            	new ReportCreator(data).printReport();
-//            	new VisualizerBuil
-//            	String report = new ReportCreator(data).versionReport();
-//            	System.out.println(report);
-//            	System.out.println();
-//            	int nr = data.getSectionTable().getNumberOfSections();
-//                System.out.println(file.getName() + ": " + nr);
-//                
+
+            	ReportCreator reporter = new ReportCreator(data);
+            	
+            	reporter.printReport();
+            	System.out.println();
 //            }
 //        }
         
-//         ReportCreator reporter = ReportCreator.newInstance(file);
-//         System.out.println(reporter.anomalyReport());
-         //reporter.printReport();
-//         VisualizerBuilder builder = new VisualizerBuilder();
-//         Visualizer vi = builder.build();
-//         final BufferedImage entropyImage = vi.createEntropyImage(file);
-//         final BufferedImage structureImage = vi.createImage(file);
-//         final BufferedImage appendedImage = ImageUtil.appendImages(
-//         entropyImage, structureImage);
-//         show(appendedImage);
+         VisualizerBuilder builder = new VisualizerBuilder();
+         Visualizer vi = builder.build();
+         final BufferedImage entropyImage = vi.createEntropyImage(file);
+         final BufferedImage structureImage = vi.createImage(file);
+         final BufferedImage appendedImage = ImageUtil.appendImages(
+         entropyImage, structureImage);
+         show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

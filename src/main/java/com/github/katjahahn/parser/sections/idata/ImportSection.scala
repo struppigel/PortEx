@@ -198,7 +198,7 @@ object ImportSection {
     val directoryTable = ListBuffer[DirectoryEntry]()
     var isLastEntry = false
     var i = 0
-    val dirEntryMax = 10000 //TODO ?
+    val dirEntryMax = 10000
     do {
       logger.debug(s"reading ${i + 1}. entry")
       readDirEntry(i, mmbytes, virtualAddress, fileOffset) match {

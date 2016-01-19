@@ -53,6 +53,8 @@ class DelayLoadDirectoryEntry private (
       case e: NameEntry =>
         new PhysicalLocation(e.hintNameEntry.fileOffset, e.hintNameEntry.size)
     })
+  
+  def lookupTableEntriesSize: Int = lookupTableEntries.size
 
   def getInfo(): String = s"""${entries.values.mkString(NL)}
     |ASCII name: $name
