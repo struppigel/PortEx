@@ -19,13 +19,16 @@ package com.github.katjahahn.parser.sections.rsrc.version
 
 import java.io.File
 import java.io.RandomAccessFile
-
 import com.github.katjahahn.parser.ByteArrayUtil
 import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.sections.rsrc.Resource
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
+import com.google.common.base.Optional
+import com.github.katjahahn.parser.sections.SectionLoader
 
 class VsVersionInfo(
   val wLength: Int,
@@ -34,6 +37,33 @@ class VsVersionInfo(
   val szKey: String,
   val value: Option[VsFixedFileInfo],
   val children: Array[FileInfo]) extends VersionInfo {
+  
+  def getChildren(): java.util.List[FileInfo] = children.toList.asJava
+  
+  def getStringFileInfo(): Optional[StringFileInfo] = {
+    children.find(child => child.isInstanceOf[StringFileInfo]) match {
+      case Some(f) => Optional.of(f.asInstanceOf[StringFileInfo])
+      case None => Optional.absent()
+    }
+  }
+  
+  def getVersionStrings(): java.util.Map[String, String] = {
+    val stringFileInfo = children.find(child => child.isInstanceOf[StringFileInfo])
+    stringFileInfo match {
+      case Some(f) => {
+        val map = scala.collection.mutable.Map[String, String]()
+        val stringTables = f.asInstanceOf[StringFileInfo].children
+        for(table <- stringTables) {
+          val versionStrings = table.children
+          for(versionString <- versionStrings) {
+            map += ((versionString.szKey, versionString.value))
+          }
+        }
+        map.asJava
+      }
+      case None => Map[String, String]().asJava
+    }
+  }
 
   override def toString(): String = {
     {
@@ -48,11 +78,26 @@ class VsVersionInfo(
 }
 
 class EmptyVersionInfo extends VersionInfo {
+  
+  def getVersionStrings(): java.util.Map[String, String] = 
+    Map[String,String]().asJava
+  
+  def getStringFileInfo(): Optional[StringFileInfo] = 
+    Optional.absent()
+  
+  def getChildren(): java.util.List[FileInfo] = 
+    List[FileInfo]().asJava
+  
+   
   override def toString(): String =
     "-empty-"
 }
 
-abstract class VersionInfo {}
+abstract class VersionInfo {
+  def getVersionStrings(): java.util.Map[String, String]
+  def getStringFileInfo(): Optional[StringFileInfo]
+  def getChildren(): java.util.List[FileInfo]
+}
 
 object VersionInfo {
 
@@ -70,6 +115,18 @@ object VersionInfo {
     if (isValid(loc, file)) {
       readVersionInfo(loc, file)
     } else new EmptyVersionInfo()
+  }
+  
+  def parseFromResources(file: File): java.util.List[VersionInfo] = {
+    val loader = new SectionLoader(file)
+    val maybeRSRC = loader.maybeLoadResourceSection()
+    if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
+      val rsrc = maybeRSRC.get
+      val resources = rsrc.getResources.asScala
+      val versionResources = resources.filter { _.getType == "RT_VERSION" }
+      (for ( resource <- versionResources.toList) 
+        yield VersionInfo(resource, file)).asJava
+    } else List[VersionInfo]().asJava
   }
 
   private def isValid(location: PhysicalLocation, file: File): Boolean = {
