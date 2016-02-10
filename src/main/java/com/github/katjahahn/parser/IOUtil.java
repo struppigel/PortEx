@@ -135,8 +135,14 @@ public final class IOUtil {
 	 */
 	public static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
 			throws IOException {
-		assert length >= 0;
-		assert offset >= 0;
+		if(length < 0) {
+			length = 0;
+			logger.error("Negative length: " + length);
+		}
+		if(offset < 0) {
+			offset = 0;
+			logger.error("Negative offset: " + offset);
+		}
 		// stay within file bounds
 		offset = Math.min(offset, raf.length());
 		long endOffset = Math.min(offset + length, raf.length());

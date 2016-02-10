@@ -51,6 +51,10 @@ trait SectionTableScanning extends AnomalyScanner {
       ".ccg" -> "CCG Packer (Chinese)",
       "BitArts" -> "Crunch 2.0 Packer",
       "DAStub" -> "DAStub Dragon Armor protector",
+      // Enigma Virtual Box
+      ".enigma1" -> "Enigma Virtual Box protector",
+      ".enigma2" -> "Enigma Virtual Box protector",
+      //Other
       "!EPack" -> "EPack packer",
       "kkrunchy" -> "kkrunchy packer",
       ".mackt" -> "ImpRec-created section, this file was patched/cracked",
