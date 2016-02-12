@@ -477,7 +477,7 @@ public class SectionLoader {
             }
         } catch (FileFormatException e) {
             logger.warn(e);
-        }
+        } 
         return Optional.absent();
     }
 
