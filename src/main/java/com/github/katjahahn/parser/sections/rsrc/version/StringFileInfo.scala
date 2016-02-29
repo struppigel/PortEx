@@ -44,6 +44,8 @@ object StringFileInfo {
   private val wordSize = 2
   private val dwordSize = 4
   private val qwordSize = 8
+  
+  private val MAX_READ_ITEMS = 100
 
   val signature = "StringFileInfo"
 
@@ -64,7 +66,7 @@ object StringFileInfo {
   private def readChildren(offset: Long, maxOffset: Long, raf: RandomAccessFile): Array[StringTable] = {
     var currOffset = offset
     val listBuf = ListBuffer[StringTable]()
-    while (currOffset < maxOffset) {
+    while (currOffset < maxOffset && listBuf.size <= MAX_READ_ITEMS) {
       val childOffset = currOffset + loadBytes(currOffset, 0x50, raf).indexWhere(0 !=)
       val elem = StringTable(childOffset, raf)
       listBuf += elem

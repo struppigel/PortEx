@@ -24,6 +24,8 @@ import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.parser.FileFormatException
+import org.apache.logging.log4j.LogManager
 
 class StringTable(
   val wLength: Int,
@@ -39,12 +41,16 @@ class StringTable(
 }
 
 object StringTable {
+  
+  private final val logger = LogManager.getLogger(StringTable.getClass().getName())
 
   //TODO move to utility class
   private val byteSize = 1
   private val wordSize = 2
   private val dwordSize = 4
   private val qwordSize = 8
+
+  private val MAX_READ_ITEMS = 100
 
   private val signatureDigits = 8
 
@@ -65,11 +71,15 @@ object StringTable {
   private def readChildren(offset: Long, maxOffset: Long, raf: RandomAccessFile): Array[VersionString] = {
     var currOffset = offset
     val listBuf = ListBuffer[VersionString]()
-    while (currOffset < maxOffset) {
-      val childOffset = currOffset + loadBytes(currOffset, 0x50, raf).indexWhere(0 !=)
-      val elem = VersionString(childOffset, raf)
-      listBuf += elem
-      currOffset = childOffset + elem.wLength
+    try {
+      while (currOffset < maxOffset && listBuf.size <= MAX_READ_ITEMS) {
+        val childOffset = currOffset + loadBytes(currOffset, 0x50, raf).indexWhere(0 !=)
+        val elem = VersionString(childOffset, raf)
+        listBuf += elem
+        currOffset = childOffset + elem.wLength
+      }
+    } catch {
+      case e: FileFormatException => logger.warn(e.getMessage)
     }
     listBuf.toArray
   }

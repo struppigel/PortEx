@@ -22,6 +22,7 @@ import java.io.RandomAccessFile
 import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.ScalaIOUtil.{ using, hex }
 import com.github.katjahahn.parser.ByteArrayUtil
+import com.github.katjahahn.parser.FileFormatException
 
 class VersionString(
   val wLength: Int,
@@ -45,6 +46,9 @@ object VersionString {
   private val szKeyMaxDigits = "LegalTrademarks ".length
 
   def apply(offset: Long, raf: RandomAccessFile): VersionString = {
+    
+    def isValidKey(key: String):Boolean = !(key.trim.isEmpty)
+    
     val wLength = ByteArrayUtil.bytesToInt(loadBytes(offset, wordSize, raf))
     val maxOffset = offset + wLength
     val wValueLength = ByteArrayUtil.bytesToInt(loadBytes(offset + wordSize, wordSize, raf))
@@ -53,11 +57,15 @@ object VersionString {
     var prev = 0
     val szSize = szBytes.indexWhere { x => val i = prev; prev = x; i == 0 && x == 0 }
     val szKey = new String(szBytes.take(szSize).toArray, "UTF_16LE")
-    val valueOffsetStart = offset + wordSize * 3 + szSize
-    val valueOffset = valueOffsetStart + loadBytes(valueOffsetStart, wValueLength * wordSize, raf).indexWhere(0 !=)
-    val bytesToRead = Math.min(maxOffset - valueOffset, wValueLength * wordSize).toInt
-    val value = new String(loadBytes(valueOffset, bytesToRead, raf), "UTF_16LE")
-    new VersionString(wLength, wValueLength, wType, szKey, value)
+    if (isValidKey(szKey)) {
+      val valueOffsetStart = offset + wordSize * 3 + szSize
+      val valueOffset = valueOffsetStart + loadBytes(valueOffsetStart, wValueLength * wordSize, raf).indexWhere(0 !=)
+      val bytesToRead = Math.min(maxOffset - valueOffset, wValueLength * wordSize).toInt
+      val value = new String(loadBytes(valueOffset, bytesToRead, raf), "UTF_16LE")
+      new VersionString(wLength, wValueLength, wType, szKey, value)
+    } else {
+      throw new FileFormatException("invalid version string szKey");
+    }
   }
 
 }
