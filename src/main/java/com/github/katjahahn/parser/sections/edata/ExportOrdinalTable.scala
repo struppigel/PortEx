@@ -22,6 +22,7 @@ import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.MemoryMappedPE
 import ExportOrdinalTable.entrySize
+import com.github.katjahahn.parser.FileFormatException
 
 class ExportOrdinalTable private (
   val ordinals: List[Int],
@@ -46,6 +47,9 @@ object ExportOrdinalTable {
 
   def apply(mmBytes: MemoryMappedPE, base: Int, rva: Long, entries: Int,
     virtualAddress: Long, fileOffset: Long): ExportOrdinalTable = {
+    if(entries <= 0) throw new FileFormatException("number of ordinal entries <= 0")
+    if(rva <= 0) throw new FileFormatException("rva for ordinal table <= 0")
+    if(fileOffset <= 0) throw new FileFormatException("file offset for ordinal table <= 0")
     val initialOffset = (rva - virtualAddress).toInt
     val end = entrySize * entries + initialOffset
     val ordinals = new ListBuffer[Int]
