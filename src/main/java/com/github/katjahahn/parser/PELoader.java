@@ -24,6 +24,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -38,10 +40,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.tools.ReportCreator;
-import com.github.katjahahn.tools.visualizer.ImageUtil;
-import com.github.katjahahn.tools.visualizer.Visualizer;
-import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
+import com.github.katjahahn.tools.DiffReportCreator;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -286,16 +285,17 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file= new File("/home/katja/samples/breakspo"); 
+        File file = new File("/home/katja/samples/tesla1"); 
+        File file2 = new File("/home/katja/samples/tesla2");
+        List<File> list = new ArrayList<>();
+        list.add(file);
+        list.add(file2);
         // TODO create Unit test for resource type with name!
 //        for (File file : folder.listFiles()) {
 //            if (!file.isDirectory() && new PESignature(file).exists()) {
 //            	System.out.println("Report for " + file.getName());
 //            	System.out.println();
-            	PEData data = PELoader.loadPE(file);
-            	System.out.println("reporter started");
-            	ReportCreator reporter = new ReportCreator(data);
-            	reporter.printReport();
+            	DiffReportCreator.newInstance(list).printReport();
 //            }
 //        }
         

@@ -24,6 +24,7 @@ import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
+import scala.io.Source._
 import javax.imageio.ImageIO
 import com.github.katjahahn.parser.IOUtil.NL
 import com.github.katjahahn.parser.PESignature
@@ -41,15 +42,16 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.4.6
+  private val version = """version: 0.5.0
     |author: Katja Hahn
-    |last update: 10. Dec 2015""".stripMargin
+    |last update: 21. Mar 2016""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
   private val usage = """usage: 
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
+    | java -jar PortexAnalyzer.jar --diff <filelist or folder> 
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
     |
     | -h,--help          show help
@@ -79,6 +81,14 @@ object PortExAnalyzer {
       if (options.contains('help)) {
         println(usage)
         println()
+      }
+      if (options.contains('diff)) {
+        val file = new File(options('diff))
+        if (file.exists) {
+          writeDiffReport(file)
+        } else {
+          System.err.println("file doesn't exist")
+        }
       }
       if (options.contains('inputfile)) {
         try {
@@ -114,7 +124,7 @@ object PortExAnalyzer {
             }
             if (options.contains('picture)) {
               val imageFile = new File(options('picture))
-              if(options.contains('bps)) {
+              if (options.contains('bps)) {
                 val bps = options('bps).toInt
                 writePictureWithBPS(file, imageFile, bps)
               } else {
@@ -133,6 +143,12 @@ object PortExAnalyzer {
     }
   }
 
+  private def writeDiffReport(file: File): Unit = {
+    val files : List[File] = (if (file.isDirectory()) file.listFiles().toList
+    else fromFile(file).getLines.map(new File(_))).toList
+    DiffReportCreator.apply(files).printReport()
+  }
+
   private def extractIcons(peFile: File, folder: File): Unit = {
     val grpIcoResources = IconParser.extractGroupIcons(peFile).asScala
     var nr = 0
@@ -146,7 +162,7 @@ object PortExAnalyzer {
       println("file " + dest.getName() + " written")
     }
   }
-  
+
   private def writePictureWithBPS(file: File, imageFile: File, bps: Int): Unit = {
     val pixelSize = 4
     val fileWidth = 256
@@ -158,8 +174,8 @@ object PortExAnalyzer {
       Math.ceil(pixelsPerCol * pixelSize).toInt
     }
     val bytesPerPixel = bps
-    val bytePlotPixelSize = if(fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
-    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY,Color.cyan)
+    val bytePlotPixelSize = if (fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
+    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY, Color.cyan)
     val vi = viBuilder.build()
     val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
     val entropyImage = vi.createEntropyImage(file)
@@ -191,11 +207,11 @@ object PortExAnalyzer {
     }
     val bytesPerPixel = {
       var res = 1
-      while(height(res) > MAX_HEIGHT) res *= 2
+      while (height(res) > MAX_HEIGHT) res *= 2
       res
     }
-    val bytePlotPixelSize = if(fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
-    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY,Color.cyan)
+    val bytePlotPixelSize = if (fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
+    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY, Color.cyan)
     val vi = viBuilder.build()
     val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
     val entropyImage = vi.createEntropyImage(file)
@@ -274,7 +290,7 @@ object PortExAnalyzer {
       println("Writing analysis reports...")
       fw.write(reporter.additionalReports)
       fw.write("--- end of report ---")
-      println("Done!")
+      println("Report done!")
     }
   }
 
@@ -289,9 +305,9 @@ object PortExAnalyzer {
         nextOption(map += ('version -> ""), tail)
       case "--version" :: tail =>
         nextOption(map += ('version -> ""), tail)
-      case "-a" :: tail => 
+      case "-a" :: tail =>
         nextOption(map += ('all -> ""), tail)
-      case "--all" :: tail => 
+      case "--all" :: tail =>
         nextOption(map += ('all -> ""), tail)
       case "-o" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
@@ -307,6 +323,8 @@ object PortExAnalyzer {
         nextOption(map += ('icons -> value), tail)
       case "--ico" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
+      case "--diff" :: value :: tail =>
+        nextOption(map += ('diff -> value), list.tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
       case option :: tail =>
         println("Unknown option " + option + "\n" + usage)
