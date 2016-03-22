@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -255,6 +256,15 @@ public class COFFFileHeader extends Header<COFFHeaderKey> {
         assert get(SECTION_NR) == (int) get(SECTION_NR);
         // 2-byte value can be casted to int
         return (int) get(SECTION_NR);
+    }
+    
+    /**
+     * Returns a list of the header entries.
+     * 
+     * @return a list of header entries
+     */
+    public List<StandardField> getHeaderEntries() {
+        return new LinkedList<>(data.values());
     }
 
     /**

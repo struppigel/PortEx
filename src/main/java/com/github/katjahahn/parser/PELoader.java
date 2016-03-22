@@ -286,7 +286,7 @@ public final class PELoader {
         logger.entry();
           
         File file = new File("/home/katja/samples/tesla1"); 
-        File file2 = new File("/home/katja/samples/tesla2");
+        File file2 = new File("/home/katja/samples/breaksversion");
         List<File> list = new ArrayList<>();
         list.add(file);
         list.add(file2);
