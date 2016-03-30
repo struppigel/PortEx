@@ -256,19 +256,34 @@ class ReportCreator(private val data: PEData) {
   }
 
   private def manifestReport(resources: List[Resource]): String = {
+
+    val MAX_MANIFEST_SIZE = 0x2000;
+
     def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
-    //TODO this is just for testing; will fail for large resources
+
     def readBytes(resource: Resource): Array[Byte] =
       IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt,
         new RandomAccessFile(data.getFile, "r"))
+
     def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
+
+    def isLegitManifest(resource: Resource): Boolean = {
+      val offset = resource.rawBytesLocation.from
+      val size = resource.rawBytesLocation.size.toInt
+      offset > 0 && size > 0 && size < MAX_MANIFEST_SIZE
+    }
 
     val buf = new StringBuffer()
     val manifestResources = resources.filter { _.getType == "RT_MANIFEST" }
     manifestResources.foreach { resource =>
-      buf.append(title("Manifest"))
-      val versionInfo = getResourceString(resource)
-      buf.append(NL + versionInfo + NL)
+      if (isLegitManifest(resource)) {
+        buf.append(title("Manifest"))
+        val versionInfo = getResourceString(resource)
+        buf.append(NL + versionInfo + NL)
+      } else {
+        buf.append(title("Manifest"))
+        buf.append(NL + "-broken manifest-" + NL)
+      }
     }
     buf.toString + NL
   }
@@ -440,10 +455,10 @@ class ReportCreator(private val data: PEData) {
       val maybeHeader = secLoader.maybeGetSectionHeader(entry.getKey)
       val dataVA = entry.getVirtualAddress()
       val dataOffset = new SectionLoader(data).maybeGetFileOffset(entry.getVirtualAddress())
-      val dataOffsetStr = if(dataOffset.isPresent()) hexString(dataOffset.get()) else "n.a."
+      val dataOffsetStr = if (dataOffset.isPresent()) hexString(dataOffset.get()) else "n.a."
       val inSection = if (maybeHeader.isPresent) maybeHeader.get.getNumber + " " + maybeHeader.get.getName else "-"
-      buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(dataVA), colWidth, " ") + 
-        pad(dataOffsetStr, colWidth, " ") + pad(hexString(entry.getDirectorySize()), colWidth, " ") + 
+      buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(dataVA), colWidth, " ") +
+        pad(dataOffsetStr, colWidth, " ") + pad(hexString(entry.getDirectorySize()), colWidth, " ") +
         pad(inSection, colWidth, " ") + pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
     }
     buf.toString + NL

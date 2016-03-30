@@ -73,7 +73,8 @@ public final class IOUtil {
 
 	/**
 	 * Loads the bytes at the offset into a byte array with the given length
-	 * using the raf. If EOF, the byte array is zero padded.
+	 * using the raf. If EOF, the byte array is zero padded. If offset < 0 
+	 * it will return a zero sized array.
 	 * 
 	 * @param offset
 	 *            to seek
@@ -88,6 +89,7 @@ public final class IOUtil {
 	public static byte[] loadBytesSafely(long offset, int length,
 			RandomAccessFile raf) throws IOException {
 		Preconditions.checkArgument(length >= 0);
+		if(offset < 0) return new byte[0];
 		raf.seek(offset);
 		int readsize = length;
 		if (readsize + offset > raf.length()) {
