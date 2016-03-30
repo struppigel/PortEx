@@ -32,6 +32,11 @@ public class NameImport implements Import {
      * The relative virtual address to the symbol
      */
     private long rva;
+    
+    /**
+     * The virtual address to the symbol
+     */
+    private long va;
 
     /**
      * The relative virtual address to the name
@@ -70,9 +75,10 @@ public class NameImport implements Import {
      * @param locations
      *            list of file locations the import is in
      */
-    public NameImport(long rva, String name, int hint, long nameRVA,
+    public NameImport(long rva, long va, String name, int hint, long nameRVA,
             DirectoryEntry parent, List<PhysicalLocation> locations) {
         this.rva = rva;
+        this.va = va;
         this.hint = hint;
         this.name = name;
         this.nameRVA = nameRVA;
@@ -92,8 +98,9 @@ public class NameImport implements Import {
      */
     @Override
     public String toString() {
-        return "rva: " + rva + " (0x" + Long.toHexString(rva) + "), name: "
-                + name + ", hint: " + hint;
+        return "rva: 0x" + Long.toHexString(rva) + ", va: 0x" + 
+        		Long.toHexString(va) + ", name: " + 
+        		name + ", hint: " + hint;
     }
 
     /**

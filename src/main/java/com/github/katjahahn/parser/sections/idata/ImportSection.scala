@@ -36,6 +36,7 @@ import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -163,6 +164,7 @@ object ImportSection {
       }
       var offset = iRVA - virtualAddress
       var relOffset = iRVA
+      var iVA = iRVA + optHeader.get(WindowsEntryKey.IMAGE_BASE)
       logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + 
           mmbytes.length() + " virtualAddress " + virtualAddress)
       val EntrySize = optHeader.getMagicNumber match {
@@ -177,7 +179,7 @@ object ImportSection {
         val entryFileOffset = fileOffset + offset 
 //        val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work
         entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, 
-            virtualAddress, relOffset, dirEntry, entryFileOffset)
+            virtualAddress, relOffset, iVA, dirEntry, entryFileOffset)
         if (!entry.isInstanceOf[NullEntry]) {
           dirEntry.addLookupTableEntry(entry)
           entryCounter += 1

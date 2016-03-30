@@ -58,7 +58,7 @@ abstract class LookupTableEntry(val size: Int, val offset: Long) {
  * @param size
  * @param offset
  */
-case class OrdinalEntry(val ordNumber: Int, val rva: Long,
+case class OrdinalEntry(val ordNumber: Int, val rva: Long, val va: Long,
   dirEntry: DirectoryEntry, override val size: Int,
   override val offset: Long) extends LookupTableEntry(size, offset) {
 
@@ -70,7 +70,7 @@ case class OrdinalEntry(val ordNumber: Int, val rva: Long,
   /**
    * {@inheritDoc}
    */
-  override def toImport(): Import = new OrdinalImport(ordNumber, rva, dirEntry, List(location).asJava)
+  override def toImport(): Import = new OrdinalImport(ordNumber, rva, va, dirEntry, List(location).asJava)
 }
 
 /**
@@ -84,7 +84,7 @@ case class OrdinalEntry(val ordNumber: Int, val rva: Long,
  * @param offset the file offset
  */
 case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
-  val rva: Long, val dirEntry: DirectoryEntry, override val size: Int, override val offset: Long)
+  val rva: Long, val va: Long, val dirEntry: DirectoryEntry, override val size: Int, override val offset: Long)
   extends LookupTableEntry(size, offset) {
 
   /**
@@ -97,7 +97,7 @@ case class NameEntry(val nameRVA: Long, val hintNameEntry: HintNameEntry,
    * {@inheritDoc}
    */
   override def toImport(): Import =
-    new NameImport(rva, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry, List(location).asJava)
+    new NameImport(rva, va, hintNameEntry.name, hintNameEntry.hint, nameRVA, dirEntry, List(location).asJava)
 }
 
 /**
@@ -134,17 +134,16 @@ object LookupTableEntry {
    * @return lookup table entry
    */
   def apply(mmbytes: MemoryMappedPE, entryRVA: Int, entrySize: Int,
-    virtualAddress: Long, iltRVA: Long, dirEntry: DirectoryEntry, fileOffset: Long): LookupTableEntry = {
+    virtualAddress: Long, iltRVA: Long, iltVA: Long, dirEntry: DirectoryEntry, fileOffset: Long): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     try {
-      //TODO remove get array call
       val value = mmbytes.getBytesLongValue(entryRVA + virtualAddress, entrySize)
       if (value == 0) {
         NullEntry(entrySize, fileOffset)
       } else if ((value & ordFlagMask) != 0) {
-        createOrdEntry(value, iltRVA, dirEntry, entrySize, fileOffset)
+        createOrdEntry(value, iltRVA, iltVA, dirEntry, entrySize, fileOffset)
       } else {
-        createNameEntry(value, mmbytes, virtualAddress, iltRVA, dirEntry, entrySize, fileOffset)
+        createNameEntry(value, mmbytes, virtualAddress, iltRVA, iltVA, dirEntry, entrySize, fileOffset)
       }
     } catch {
       case e: Exception =>
@@ -155,7 +154,7 @@ object LookupTableEntry {
   }
 
   private def createNameEntry(value: Long, mmbytes: MemoryMappedPE,
-    virtualAddress: Long, rva: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): LookupTableEntry = {
+    virtualAddress: Long, rva: Long, va: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
     val nameRVA = (addrMask & value)
     logger.debug("rva: " + nameRVA)
@@ -170,13 +169,14 @@ object LookupTableEntry {
     val name = getASCII(address + 2, mmbytes)
     val hintOffset = mmbytes.virtToPhysAddress(nameRVA)
     val hintNameEntry = new HintNameEntry(hint, name, hintOffset)
-    NameEntry(nameRVA, hintNameEntry, rva, dirEntry, entrySize, offset: Long)
+    NameEntry(nameRVA, hintNameEntry, rva, va, dirEntry, entrySize, offset: Long)
   }
 
-  private def createOrdEntry(value: Long, rva: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): OrdinalEntry = {
+  private def createOrdEntry(value: Long, rva: Long, va: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): OrdinalEntry = {
     val ordMask = 0xFFFFL
     val ord = (ordMask & value).toInt
-    OrdinalEntry(ord, rva, dirEntry, entrySize, offset)
+    
+    OrdinalEntry(ord, rva, va, dirEntry, entrySize, offset)
   }
 
   private def getASCII(offset: Long, mmbytes: MemoryMappedPE): String = {

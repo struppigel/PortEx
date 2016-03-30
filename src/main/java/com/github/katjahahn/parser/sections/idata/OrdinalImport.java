@@ -37,6 +37,11 @@ public class OrdinalImport implements Import {
      * The relative virtual address of the symbol
      */
     private long rva;
+    
+    /**
+     * The virtual address of the symbol
+     */
+    private long va;
 
     /**
      * The directory entry this import belongs to
@@ -56,10 +61,11 @@ public class OrdinalImport implements Import {
      * @param locations
      *            list of file locations the import is in
      */
-    public OrdinalImport(int ordinal, long rva, DirectoryEntry parent,
+    public OrdinalImport(int ordinal, long rva, long va, DirectoryEntry parent,
             List<PhysicalLocation> locations) {
         this.ordinal = ordinal;
         this.rva = rva;
+        this.va = va;
         this.parent = parent;
         this.locations = locations;
     }
@@ -94,8 +100,8 @@ public class OrdinalImport implements Import {
      */
     @Override
     public String toString() {
-        return "ordinal: " + ordinal + ", rva: " + rva + " (0x"
-                + Long.toHexString(rva) + ")";
+        return "ordinal: " + ordinal + ", rva: 0x"
+                + Long.toHexString(rva) + ", va: 0x" + Long.toHexString(va);
     }
 
     /**

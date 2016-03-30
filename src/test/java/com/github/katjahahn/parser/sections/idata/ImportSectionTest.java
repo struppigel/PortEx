@@ -87,7 +87,7 @@ public class ImportSectionTest {
             ImportDLL newDLL = new ImportDLL(dll.getName());
             for (NameImport nameImport : dll.getNameImports()) {
                 long rva = nameImport.getRVA() - imageBase;
-                NameImport newImport = new NameImport(rva, nameImport.getName(),
+                NameImport newImport = new NameImport(rva, 0L, nameImport.getName(),
                         nameImport.getHint(), nameImport.getNameRVA(), null,
                         nameImport.getLocations());
                 newDLL.add(newImport);
@@ -95,7 +95,7 @@ public class ImportSectionTest {
             for (OrdinalImport ordImport : dll.getOrdinalImports()) {
                 long rva = ordImport.getRVA() - imageBase;
                 OrdinalImport newImport = new OrdinalImport(ordImport.getOrdinal(),
-                        rva, null, ordImport.getLocations());
+                        rva, 0L, null, ordImport.getLocations());
                 newDLL.add(newImport);
             }
             list.add(newDLL);

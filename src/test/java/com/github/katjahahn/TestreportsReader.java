@@ -80,12 +80,12 @@ public class TestreportsReader {
                     List<PhysicalLocation> empty = new ArrayList<>();
                     if (!entry[3].contains("None")) {
                         int ordinal = Integer.parseInt(entry[3]);
-                        OrdinalImport ord = new OrdinalImport(ordinal, rva,
+                        OrdinalImport ord = new OrdinalImport(ordinal, rva, 0L,
                                 null, empty);
                         dll.add(ord);
                     } else {
                         int hint = Integer.parseInt(entry[2]);
-                        NameImport nameImp = new NameImport(rva, name, hint,
+                        NameImport nameImp = new NameImport(rva, 0L, name, hint,
                                 -1, null, empty);
                         dll.add(nameImp);
                     }

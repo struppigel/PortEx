@@ -33,6 +33,7 @@ import com.github.katjahahn.parser.sections.idata.DelayLoadDirectoryKey._
 import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.idata.DelayLoadDirectoryEntry._
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
 
 class DelayLoadDirectoryEntry private (
   private val entries: Map[DelayLoadDirectoryKey, StandardField],
@@ -115,6 +116,7 @@ object DelayLoadDirectoryEntry {
     var iRVA = entries(DELAY_IMPORT_NAME_TABLE).getValue
     var offset = iRVA - virtualAddress
     var relOffset = iRVA
+    var iVA = iRVA + loadInfo.data.getOptionalHeader.get(WindowsEntryKey.IMAGE_BASE)
     val lookupTableEntries = ListBuffer[LookupTableEntry]()
     logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " +
       mmbytes.length() + " virtualAddress " + virtualAddress)
@@ -132,7 +134,7 @@ object DelayLoadDirectoryEntry {
       //FIXME dummy
       val dummy = new DirectoryEntry(null, 0)
       entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize,
-        virtualAddress, relOffset, dummy, entryFileOffset)
+        virtualAddress, relOffset, iVA, dummy, entryFileOffset)
       if (!entry.isInstanceOf[NullEntry]) lookupTableEntries += entry
       offset += EntrySize
       relOffset += EntrySize
