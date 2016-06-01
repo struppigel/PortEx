@@ -99,8 +99,8 @@ public class NameImport implements Import {
     @Override
     public String toString() {
         return "rva: 0x" + Long.toHexString(rva) + ", va: 0x" + 
-        		Long.toHexString(va) + ", name: " + 
-        		name + ", hint: " + hint;
+        		Long.toHexString(va) + ", hint: " + hint + ", name: " + 
+        		name;
     }
 
     /**

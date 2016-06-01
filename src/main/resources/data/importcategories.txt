@@ -1,0 +1,1185 @@
+[String]
+CharLower
+CharLowerBuff
+CharNext
+CharNextExA
+CharPrev
+CharPrevExA
+CharToOem
+CharToOemBuff
+CharUpper
+CharUpperBuff
+IsCharAlpha
+IsCharAlphaNumeric
+IsCharLower
+IsCharUpper
+LoadString
+lstrcat
+lstrcmp
+lstrcmpi
+lstrcpy
+lstrcpyn
+lstrlen
+OemToChar
+OemToCharBuff
+wsprintf
+wvsprintf
+
+[Synchronization]
+<Asynchronous>
+APCProc;An application-defined callback function used with the QueueUserAPC function.
+GetOverlappedResult;Retrieves the results of an overlapped operation.
+GetOverlappedResultEx;Retrieves the results of an overlapped operation within a specified timeout interval.
+QueueUserAPC;Adds a user-mode asynchronous procedure call (APC) object to the APC queue of the specified thread.
+
+<Condition variable and SRW lock>
+AcquireSRWLockExclusive;Acquires a slim reader/writer (SRW) lock in exclusive mode.
+AcquireSRWLockShared;Acquires a slim reader/writer (SRW) lock in shared mode.
+InitializeConditionVariable;Initializes a condition variable.
+InitializeSRWLock;Initialize a slim reader/writer (SRW) lock.
+ReleaseSRWLockExclusive;Releases a slim reader/writer (SRW) lock that was acquired in exclusive mode.
+ReleaseSRWLockShared;Releases a slim reader/writer (SRW) lock that was acquired in shared mode.
+SleepConditionVariableCS;Sleeps on the specified condition variable and releases the specified critical section as an atomic operation.
+SleepConditionVariableSRW;Sleeps on the specified condition variable and releases the specified lock as an atomic operation.
+TryAcquireSRWLockExclusive;Attempts to acquire a slim reader/writer (SRW) lock in exclusive mode. If the call is successful, the calling thread takes ownership of the lock.
+TryAcquireSRWLockShared;Attempts to acquire a slim reader/writer (SRW) lock in shared mode. If the call is successful, the calling thread takes ownership of the lock.
+WakeAllConditionVariable;Wake all threads waiting on the specified condition variable.
+WakeConditionVariable;Wake a single thread waiting on the specified condition variable.
+
+<Critical section>
+DeleteCriticalSection;Releases all resources used by an unowned critical section object.
+EnterCriticalSection;Waits for ownership of the specified critical section object.
+InitializeCriticalSection;Initializes a critical section object.
+InitializeCriticalSectionAndSpinCount;Initializes a critical section object and sets the spin count for the critical section.
+InitializeCriticalSectionEx;Initializes a critical section object with a spin count and optional flags.
+LeaveCriticalSection;Releases ownership of the specified critical section object.
+SetCriticalSectionSpinCount;Sets the spin count for the specified critical section.
+TryEnterCriticalSection;Attempts to enter a critical section without blocking.
+
+<Event>
+CreateEvent;Creates or opens a named or unnamed event object.
+CreateEventEx;Creates or opens a named or unnamed event object and returns a handle to the object.
+OpenEvent;Opens an existing named event object.
+PulseEvent;Sets the specified event object to the signaled state and then resets it to the nonsignaled state after releasing the appropriate number of waiting threads.
+ResetEvent;Sets the specified event object to the nonsignaled state.
+SetEvent;Sets the specified event object to the signaled state.
+
+<One-time initialization>
+InitOnceBeginInitialize;Begins one-time initialization.
+InitOnceComplete;Completes one-time initialization.
+InitOnceExecuteOnce;Executes the specified function successfully one time. No other threads that specify the same one-time initialization structure can execute this function while it is being executed by the current thread.
+InitOnceInitialize;Initializes a one-time initialization structure.
+
+<Interlocked>
+InterlockedAdd;Performs an atomic addition operation on the specified LONG values.
+InterlockedAddAcquire;Performs an atomic addition operation on the specified LONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedAddRelease;Performs an atomic addition operation on the specified LONG values. The operation is performed with release memory ordering semantics.
+InterlockedAddNoFence;Performs an atomic addition operation on the specified LONG values. The operation is performed atomically, but without using memory barriers
+InterlockedAdd64;Performs an atomic addition operation on the specified LONGLONG values.
+InterlockedAddAcquire64;Performs an atomic addition operation on the specified LONGLONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedAddRelease64;Performs an atomic addition operation on the specified LONGLONG values. The operation is performed with release memory ordering semantics.
+InterlockedAddNoFence64;Performs an atomic addition operation on the specified LONGLONG values. The operation is performed atomically, but without using memory barriers
+InterlockedAnd;Performs an atomic AND operation on the specified LONG values.
+InterlockedAndAcquire;Performs an atomic AND operation on the specified LONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedAndRelease;Performs an atomic AND operation on the specified LONG values. The operation is performed with release memory ordering semantics.
+InterlockedAndNoFence;Performs an atomic AND operation on the specified LONG values. The operation is performed atomically, but without using memory barriers
+InterlockedAnd8;Performs an atomic AND operation on the specified char values.
+InterlockedAnd8Acquire;Performs an atomic AND operation on the specified char values. The operation is performed with acquire memory ordering semantics.
+InterlockedAnd8Release;Performs an atomic AND operation on the specified char values. The operation is performed with release memory ordering semantics.
+InterlockedAnd8NoFence;Performs an atomic AND operation on the specified char values. The operation is performed atomically, but without using memory barriers
+InterlockedAnd16;Performs an atomic AND operation on the specified SHORT values.
+InterlockedAnd16Acquire;Performs an atomic AND operation on the specified SHORT values. The operation is performed with acquire memory ordering semantics.
+InterlockedAnd16Release;Performs an atomic AND operation on the specified SHORT values. The operation is performed with release memory ordering semantics.
+InterlockedAnd16NoFence;Performs an atomic AND operation on the specified SHORT values. The operation is performed atomically, but without using memory barriers
+InterlockedAnd64;Performs an atomic AND operation on the specified LONGLONG values.
+InterlockedAnd64Acquire;Performs an atomic AND operation on the specified LONGLONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedAnd64Release;Performs an atomic AND operation on the specified LONGLONG values. The operation is performed with release memory ordering semantics.
+InterlockedAnd64NoFence;Performs an atomic AND operation on the specified LONGLONG values. The operation is performed atomically, but without using memory barriers
+InterlockedBitTestAndComplement;Tests the specified bit of the specified LONG value and complements it.
+InterlockedBitTestAndComplement64;Tests the specified bit of the specified LONG64 value and complements it. The operation is atomic
+InterlockedBitTestAndResetAcquire;Tests the specified bit of the specified LONG value and sets it to 0. The operation is atomic, and it is performed with acquire memory ordering semantics
+InterlockedBitTestAndResetRelease;Tests the specified bit of the specified LONG value and sets it to 0. The operation is atomic, and it is performed using memory release semantics
+InterlockedBitTestAndSetAcquire;Tests the specified bit of the specified LONG value and sets it to 1. The operation is atomic, and it is performed with acquire memory ordering semantics
+InterlockedBitTestAndSetRelease;Tests the specified bit of the specified LONG value and sets it to 1. The operation is atomic, and it is performed with release memory ordering semantics
+InterlockedBitTestAndReset;Tests the specified bit of the specified LONG value and sets it to 0.
+InterlockedBitTestAndReset64;Tests the specified bit of the specified LONG64 value and sets it to 0.
+InterlockedBitTestAndSet;Tests the specified bit of the specified LONG value and sets it to 1.
+InterlockedBitTestAndSet64;Tests the specified bit of the specified LONG64 value and sets it to 1.
+InterlockedCompare64Exchange128;Performs an atomic compare-and-exchange operation on the specified values. The function compares the specified 64-bit values and exchanges with the specified 128-bit value based on the outcome of the comparison.
+InterlockedCompare64ExchangeAcquire128;Performs an atomic compare-and-exchange operation on the specified values. The function compares the specified 64-bit values and exchanges with the specified 128-bit value based on the outcome of the comparison. The operation is performed with acquire memory ordering semantics.
+InterlockedCompare64ExchangeRelease128;Performs an atomic compare-and-exchange operation on the specified values. The function compares the specified 64-bit values and exchanges with the specified 128-bit value based on the outcome of the comparison. The operation is performed with release memory ordering semantics.
+InterlockedCompareExchange;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 32-bit values and exchanges with another 32-bit value based on the outcome of the comparison.
+InterlockedCompareExchangeAcquire;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 32-bit values and exchanges with another 32-bit value based on the outcome of the comparison. The operation is performed with acquire memory ordering semantics.
+InterlockedCompareExchangeRelease;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 32-bit values and exchanges with another 32-bit value based on the outcome of the comparison. The exchange is performed with release memory ordering semantics.
+InterlockedCompareExchangeNoFence;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 32-bit values and exchanges with another 32-bit value based on the outcome of the comparison. The operation is performed atomically, but without using memory barriers
+InterlockedCompareExchange64;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 64-bit values and exchanges with another 64-bit value based on the outcome of the comparison.
+InterlockedCompareExchangeAcquire64;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 64-bit values and exchanges with another 64-bit value based on the outcome of the comparison. The exchange is performed with acquire memory ordering semantics.
+InterlockedCompareExchangeRelease64;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 64-bit values and exchanges with another 64-bit value based on the outcome of the comparison. The exchange is performed with release memory ordering semantics.
+InterlockedCompareExchangeNoFence64;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 64-bit values and exchanges with another 64-bit value based on the outcome of the comparison. The operation is performed atomically, but without using memory barriers
+InterlockedCompareExchange16;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 16-bit values and exchanges with another 16-bit value based on the outcome of the comparison
+InterlockedCompareExchange16Acquire;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 16-bit values and exchanges with another 16-bit value based on the outcome of the comparison. The operation is performed with acquire memory ordering semantics
+InterlockedCompareExchange16Release;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 16-bit values and exchanges with another 16-bit value based on the outcome of the comparison. The exchange is performed with release memory ordering semantics
+InterlockedCompareExchange16NoFence;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 16-bit values and exchanges with another 16-bit value based on the outcome of the comparison. The operation is performed atomically, but without using memory barriers
+InterlockedCompareExchange128;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified 128-bit values and exchanges with another 128-bit value based on the outcome of the comparison
+InterlockedCompareExchangePointer;Performs an atomic compare-and-exchange operation on the specified pointer values. The function compares two specified pointer values and exchanges with another pointer value based on the outcome of the comparison.
+InterlockedCompareExchangePointerAcquire;Performs an atomic compare-and-exchange operation on the specified pointer values. The function compares two specified pointer values and exchanges with another pointer value based on the outcome of the comparison. The operation is performed with acquire memory ordering semantics.
+InterlockedCompareExchangePointerRelease;Performs an atomic compare-and-exchange operation on the specified pointer values. The function compares two specified pointer values and exchanges with another pointer value based on the outcome of the comparison. The operation is performed with release memory ordering semantics.
+InterlockedCompareExchangePointerNoFence;Performs an atomic compare-and-exchange operation on the specified values. The function compares two specified pointer values and exchanges with another pointer value based on the outcome of the comparison. The operation is performed atomically, but without using memory barriers
+InterlockedDecrement;Decrements (decreases by one) the value of the specified 32-bit variable as an atomic operation.
+InterlockedDecrementAcquire;Decrements (decreases by one) the value of the specified 32-bit variable as an atomic operation. The operation is performed with acquire memory ordering semantics.
+InterlockedDecrementRelease;Decrements (decreases by one) the value of the specified 32-bit variable as an atomic operation. The operation is performed with release memory ordering semantics.
+InterlockedDecrementNoFence;Decrements (decreases by one) the value of the specified 32-bit variable as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedDecrement16;Decrements (decreases by one) the value of the specified 16-bit variable as an atomic operation
+InterlockedDecrement16Acquire;Decrements (decreases by one) the value of the specified 16-bit variable as an atomic operation. The operation is performed with acquire memory ordering semantics
+InterlockedDecrement16Release;Decrements (decreases by one) the value of the specified 16-bit variable as an atomic operation. The operation is performed with release memory ordering semantics
+InterlockedDecrement16NoFence;Decrements (decreases by one) the value of the specified 16-bit variable as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedDecrement64;Decrements (decreases by one) the value of the specified 64-bit variable as an atomic operation.
+InterlockedDecrementAcquire64;Decrements (decreases by one) the value of the specified 64-bit variable as an atomic operation. The operation is performed with acquire memory ordering semantics.
+InterlockedDecrementRelease64;Decrements (decreases by one) the value of the specified 64-bit variable as an atomic operation. The operation is performed with release memory ordering semantics.
+InterlockedDecrementNoFence64;Decrements (decreases by one) the value of the specified 64-bit variable as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedExchange;Sets a 32-bit variable to the specified value as an atomic operation.
+InterlockedExchangeAcquire;Sets a 32-bit variable to the specified value as an atomic operation. The operation is performed with acquire memory ordering semantics.
+InterlockedExchangeNoFence;Sets a 64-bit variable to the specified value as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedExchange8;Sets an 8-bit variable to the specified value as an atomic operation
+InterlockedExchange16;Sets a 16-bit variable to the specified value as an atomic operation.
+InterlockedExchange16Acquire;Sets a 16-bit variable to the specified value as an atomic operation. The operation is performed using acquire memory ordering semantics
+InterlockedExchange16NoFence;Sets a 16-bit variable to the specified value as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedExchange64;Sets a 64-bit variable to the specified value as an atomic operation.
+InterlockedExchangeAcquire64;Sets a 32-bit variable to the specified value as an atomic operation. The operation is performed with acquire memory ordering semantics.
+InterlockedExchangeNoFence64;Sets a 64-bit variable to the specified value as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedExchangePointer;Atomically exchanges a pair of pointer values.
+InterlockedExchangePointerAcquire;Atomically exchanges a pair of pointer values. The operation is performed with acquire memory ordering semantics.
+InterlockedExchangePointerNoFence;Atomically exchanges a pair of addresses. The operation is performed atomically, but without using memory barriers
+InterlockedExchangeSubtract;Performs an atomic subtraction of two values.
+InterlockedExchangeAdd;Performs an atomic addition of two 32-bit values.
+InterlockedExchangeAddAcquire;Performs an atomic addition of two 32-bit values. The operation is performed with acquire memory ordering semantics.
+InterlockedExchangeAddRelease;Performs an atomic addition of two 32-bit values. The operation is performed with release memory ordering semantics.
+InterlockedExchangeAddNoFence;Performs an atomic addition of two 32-bit values. The operation is performed atomically, but without using memory barriers
+InterlockedExchangeAdd64;Performs an atomic addition of two 64-bit values.
+InterlockedExchangeAddAcquire64;Performs an atomic addition of two 64-bit values. The operation is performed with acquire memory ordering semantics.
+InterlockedExchangeAddRelease64;Performs an atomic addition of two 64-bit values. The operation is performed with release memory ordering semantics.
+InterlockedExchangeAddNoFence64;Performs an atomic addition of two 64-bit values. The operation is performed atomically, but without using memory barriers
+InterlockedIncrement;Increments (increases by one) the value of the specified 32-bit variable as an atomic operation.
+InterlockedIncrementAcquire;Increments (increases by one) the value of the specified 32-bit variable as an atomic operation. The operation is performed using acquire memory ordering semantics.
+InterlockedIncrementRelease;Increments (increases by one) the value of the specified 32-bit variable as an atomic operation. The operation is performed using release memory ordering semantics.
+InterlockedIncrementNoFence;Increments (increases by one) the value of the specified 32-bit variable as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedIncrement16;Increments (increases by one) the value of the specified 16-bit variable as an atomic operation
+InterlockedIncrement16Acquire;Increments (increases by one) the value of the specified 16-bit variable as an atomic operation. The operation is performed using acquire memory ordering semantics
+InterlockedIncrement16Release;Increments (increases by one) the value of the specified 16-bit variable as an atomic operation. The operation is performed using release memory ordering semantics
+InterlockedIncrement16NoFence;Increments (increases by one) the value of the specified 16-bit variable as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedIncrement64;Increments (increases by one) the value of the specified 64-bit variable as an atomic operation.
+InterlockedIncrementAcquire64;Increments (increases by one) the value of the specified 64-bit variable as an atomic operation. The operation is performed using acquire memory ordering semantics.
+InterlockedIncrementRelease64;Increments (increases by one) the value of the specified 64-bit variable as an atomic operation. The operation is performed using release memory ordering semantics.
+InterlockedIncrementNoFence64;Increments (increases by one) the value of the specified 64-bit variable as an atomic operation. The operation is performed atomically, but without using memory barriers
+InterlockedOr;Performs an atomic OR operation on the specified LONG values.
+InterlockedOrAcquire;Performs an atomic OR operation on the specified LONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedOrRelease;Performs an atomic OR operation on the specified LONG values. The operation is performed with release memory ordering semantics.
+InterlockedOrNoFence;Performs an atomic OR operation on the specified LONG values. The operation is performed atomically, but without using memory barriers
+InterlockedOr8;Performs an atomic OR operation on the specified char values.
+InterlockedOr8Acquire;Performs an atomic OR operation on the specified char values. The operation is performed with acquire memory ordering semantics.
+InterlockedOr8Release;Performs an atomic OR operation on the specified char values. The operation is performed with release memory ordering semantics.
+InterlockedOr8NoFence;Performs an atomic OR operation on the specified char values. The operation is performed atomically, but without using memory barriers
+InterlockedOr16;Performs an atomic OR operation on the specified SHORT values.
+InterlockedOr16Acquire;Performs an atomic OR operation on the specified SHORT values. The operation is performed with acquire memory ordering semantics.
+InterlockedOr16Release;Performs an atomic OR operation on the specified SHORT values. The operation is performed with release memory ordering semantics.
+InterlockedOr16NoFence;Performs an atomic OR operation on the specified SHORT values. The operation is performed atomically, but without using memory barriers
+InterlockedOr64;Performs an atomic OR operation on the specified LONGLONG values.
+InterlockedOr64Acquire;Performs an atomic OR operation on the specified LONGLONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedOr64Release;Performs an atomic OR operation on the specified LONGLONG values. The operation is performed with release memory ordering semantics.
+InterlockedOr64NoFence;Performs an atomic OR operation on the specified LONGLONG values. The operation is performed atomically, but without using memory barriers
+InterlockedXor;Performs an atomic XOR operation on the specified LONG values.
+InterlockedXorAcquire;Performs an atomic XOR operation on the specified LONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedXorRelease;Performs an atomic XOR operation on the specified LONG values. The operation is performed with release memory ordering semantics.
+InterlockedXorNoFence;Performs an atomic XOR operation on the specified LONG values. The operation is performed atomically, but without using memory barriers
+InterlockedXor8;Performs an atomic XOR operation on the specified char values.
+InterlockedXor8Acquire;Performs an atomic XOR operation on the specified char values. The operation is performed with acquire memory ordering semantics.
+InterlockedXor8Release;Performs an atomic XOR operation on the specified char values. The operation is performed with release memory ordering semantics.
+InterlockedXor8NoFence;Performs an atomic XOR operation on the specified char values. The operation is performed atomically, but without using memory barriers
+InterlockedXor16;Performs an atomic XOR operation on the specified SHORT values.
+InterlockedXor16Acquire;Performs an atomic XOR operation on the specified SHORT values. The operation is performed with acquire memory ordering semantics.
+InterlockedXor16Release;Performs an atomic XOR operation on the specified SHORT values. The operation is performed with release memory ordering semantics.
+InterlockedXor16NoFence;Performs an atomic XOR operation on the specified SHORT values. The operation is performed atomically, but without using memory barriers
+InterlockedXor64;Performs an atomic XOR operation on the specified LONGLONG values.
+InterlockedXor64Acquire;Performs an atomic XOR operation on the specified LONGLONG values. The operation is performed with acquire memory ordering semantics.
+InterlockedXor64Release;Performs an atomic XOR operation on the specified LONGLONG values. The operation is performed with release memory ordering semantics.
+InterlockedXor64NoFence;Performs an atomic XOR operation on the specified LONGLONG values. The operation is performed atomically, but without using memory barriers
+
+<Mutex>
+CreateMutex;Creates or opens a named or unnamed mutex object.
+CreateMutexEx;Creates or opens a named or unnamed mutex object and returns a handle to the object.
+OpenMutex;Opens an existing named mutex object.
+ReleaseMutex;Releases ownership of the specified mutex object.
+
+<Private namespace>
+AddSIDToBoundaryDescriptor;Adds a new security identifier (SID) to the specified boundary descriptor.
+AddIntegrityLabelToBoundaryDescriptor;Adds a new required security identifier (SID) to the specified boundary descriptor.
+ClosePrivateNamespace;Closes an open namespace handle.
+CreateBoundaryDescriptor;Creates a boundary descriptor.
+CreatePrivateNamespace;Creates a private namespace.
+DeleteBoundaryDescriptor;Deletes the specified boundary descriptor.
+OpenPrivateNamespace;Opens a private namespace.
+
+<Semaphore>
+CreateSemaphore;Creates or opens a named or unnamed semaphore object.
+CreateSemaphoreEx;Creates or opens a named or unnamed semaphore object and returns a handle to the object.
+OpenSemaphore;Opens an existing named semaphore object.
+ReleaseSemaphore;Increases the count of the specified semaphore object by a specified amount.
+
+<Singly-linked list>	
+InitializeSListHead;Initializes the head of a singly linked list.
+InterlockedFlushSList;Flushes the entire list of items in a singly linked list.
+InterlockedPopEntrySList;Removes an item from the front of a singly linked list.
+InterlockedPushEntrySList;Inserts an item at the front of a singly linked list.
+InterlockedPushListSList;Inserts a singly-linked list at the front of another singly linked list.
+InterlockedPushListSListEx;Inserts a singly-linked list at the front of another singly linked list. Access to the lists is synchronized on a multiprocessor system. This version of the method does not use the __fastcall calling convention
+QueryDepthSList;Retrieves the number of entries in the specified singly linked list.
+RtlFirstEntrySList;Retrieves the first entry in a singly linked list.
+RtlInitializeSListHead;Initializes the head of a singly linked list. Applications should call InitializeSListHead instead.
+RtlInterlockedFlushSList;Flushes the entire list of items in a singly linked list. Applications should call InterlockedFlushSList instead.
+RtlInterlockedPopEntrySList;Removes an item from the front of a singly linked list. Applications should call InterlockedPopEntrySList instead.
+RtlInterlockedPushEntrySList;Inserts an item at the front of a singly linked list. Applications should call InterlockedPushEntrySList instead.
+RtlQueryDepthSList;Retrieves the number of entries in the specified singly linked list. Applications should call QueryDepthSList instead.
+
+<Synchronization barrier>
+DeleteSynchronizationBarrier;Deletes a synchronization barrier.
+EnterSynchronizationBarrier;Enters a synchronization barrier and waits for the appropriate number of threads to rendezvous at the barrier.
+InitializeSynchronizationBarrier;Initializes a new synchronization barrier.
+
+<Timer-queue timer>
+ChangeTimerQueueTimer;Updates a timer-queue timer.
+CreateTimerQueue;Creates a queue for timers.
+CreateTimerQueueTimer;Creates a timer-queue timer.
+DeleteTimerQueue;Deletes a timer queue.
+DeleteTimerQueueEx;Deletes a timer queue.
+DeleteTimerQueueTimer;Cancels a timer-queue timer.
+
+<Wait>
+MsgWaitForMultipleObjects;Waits until one or all of the specified objects are in the signaled state or the time-out interval elapses. The objects can include input event objects.
+MsgWaitForMultipleObjectsEx;Waits until one or all of the specified objects are in the signaled state, an I/O completion routine or asynchronous procedure call (APC) is queued to the thread, or the time-out interval elapses. The array of objects can include input event objects.
+RegisterWaitForSingleObject;Directs a wait thread in the thread pool to wait on the object.
+SignalObjectAndWait;Signals one object and waits on another object as a single operation.
+UnregisterWait;Cancels a registered wait operation.
+UnregisterWaitEx;Cancels a registered wait operation.
+WaitForMultipleObjects;Waits until one or all of the specified objects are in the signaled state or the time-out interval elapses.
+WaitForMultipleObjectsEx;Waits until one or all of the specified objects are in the signaled state, an I/O completion routine or asynchronous procedure call (APC) is queued to the thread, or the time-out interval elapses.
+WaitForSingleObject;Waits until the specified object is in the signaled state or the time-out interval elapses.
+WaitForSingleObjectEx;Waits until the specified object is in the signaled state, an I/O completion routine or asynchronous procedure call (APC) is queued to the thread, or the time-out interval elapses.
+WaitOnAddress;Waits for the value at the specified address to change.
+WaitOrTimerCallback;An application-defined function that serves as the starting address for a timer callback or a registered wait callback.
+WakeByAddressAll;Wakes all threads waiting for the value of an address to change.
+WakeByAddressSingle;Wakes a thread waiting for the value of an address to change.
+
+<Waitable-timer>
+CancelWaitableTimer;Sets the specified waitable timer to the inactive state.
+CreateWaitableTimer;Creates or opens a waitable timer object.
+CreateWaitableTimerEx;Creates or opens a waitable timer object and returns a handle to the object.
+OpenWaitableTimer;Opens an existing named waitable timer object.
+SetWaitableTimer;Activates the specified waitable timer.
+SetWaitableTimerEx;Activates the specified waitable timer and provides context information for the timer. .
+TimerAPCProc;Application-defined timer completion routine used with the SetWaitableTimer function.
+
+[Memory Management]
+<General Memory Management>
+AddSecureMemoryCacheCallback;Registers a callback function to be called when a secured memory range is freed or its protections are changed.
+CopyMemory;Copies a block of memory from one location to another.
+CreateMemoryResourceNotification;Creates a memory resource notification object.
+FillMemory;Fills a block of memory with a specified value.
+GetLargePageMinimum;Retrieves the minimum size of a large page.
+GetPhysicallyInstalledSystemMemory;Retrieves the amount of RAM that is physically installed on the computer.
+GetSystemFileCacheSize;Retrieves the current size limits for the working set of the system cache.
+GetWriteWatch;Retrieves the addresses of the pages that have been written to in a region of virtual memory.
+GlobalMemoryStatusEx;Obtains information about the system's current usage of both physical and virtual memory.
+MoveMemory;Moves a block of memory from one location to another.
+QueryMemoryResourceNotification;Retrieves the state of the specified memory resource object.
+RemoveSecureMemoryCacheCallback;Unregisters a callback function that was previously registered with the AddSecureMemoryCacheCallback function.
+ResetWriteWatch;Resets the write-tracking state for a region of virtual memory.
+SecureMemoryCacheCallback;An application-defined function that is called when a secured memory range is freed or its protections are changed.
+SecureZeroMemory;Fills a block of memory with zeros.
+SetSystemFileCacheSize;Limits the size of the working set for the file system cache.
+ZeroMemory;Fills a block of memory with zeros.
+
+<Data Execution Prevention>
+GetProcessDEPPolicy;Retrieves DEP settings for a process.
+GetSystemDEPPolicy;Retrieves DEP settings for the system.
+SetProcessDEPPolicy;Changes DEP settings for a process.
+
+<File Mapping>
+CreateFileMapping;Creates or opens a named or unnamed file mapping object for a specified file.
+CreateFileMappingFromApp;Creates or opens a named or unnamed file mapping object for a specified file from a Windows Store app.
+CreateFileMappingNuma;Creates or opens a named or unnamed file mapping object for a specified file, and specifies the NUMA node for the physical memory.
+FlushViewOfFile;Writes to the disk a byte range within a mapped view of a file.
+GetMappedFileName;Checks whether the specified address is within a memory-mapped file in the address space of the specified process. If so, the function returns the name of the memory-mapped file.
+MapViewOfFile;Maps a view of a file mapping into the address space of a calling process.
+MapViewOfFileEx;Maps a view of a file mapping into the address space of a calling process. A caller can optionally specify a suggested memory address for the view.
+MapViewOfFileExNuma;Maps a view of a file mapping into the address space of a calling process, and specifies the NUMA node for the physical memory.
+MapViewOfFileFromApp;Maps a view of a file mapping into the address space of a calling process from a Windows Store app.
+OpenFileMapping;Opens a named file mapping object.
+UnmapViewOfFile;Unmaps a mapped view of a file from the calling process's address space.
+
+<AWE>
+AllocateUserPhysicalPages;Allocates physical memory pages to be mapped and unmapped within any AWE region of the process.
+FreeUserPhysicalPages;Frees physical memory pages previously allocated with AllocateUserPhysicalPages.
+MapUserPhysicalPages;Maps previously allocated physical memory pages at the specified address within an AWE region.
+MapUserPhysicalPagesScatter;Maps previously allocated physical memory pages at the specified address within an AWE region.
+
+<Heap>
+GetProcessHeap;Obtains a handle to the heap of the calling process.
+GetProcessHeaps;Obtains handles to all of the heaps that are valid for the calling process.
+HeapAlloc;Allocates a block of memory from a heap.
+HeapCompact;Coalesces adjacent free blocks of memory on a heap.
+HeapCreate;Creates a heap object.
+HeapDestroy;Destroys the specified heap object.
+HeapFree;Frees a memory block allocated from a heap.
+HeapLock;Attempts to acquire the lock associated with a specified heap.
+HeapQueryInformation;Retrieves information about the specified heap.
+HeapReAlloc;Reallocates a block of memory from a heap.
+HeapSetInformation;Sets heap information for the specified heap.
+HeapSize;Retrieves the size of a memory block allocated from a heap.
+HeapUnlock;Releases ownership of the lock associated with a specified heap.
+HeapValidate;Attempts to validate a specified heap.
+HeapWalk;Enumerates the memory blocks in a specified heap.
+
+<Virtual Memory>
+DiscardVirtualMemory;Discards the memory contents of a range of memory pages, without decommitting the memory. The contents of discarded memory is undefined and must be rewritten by the application.
+OfferVirtualMemory;Indicates that the data contained in a range of memory pages is no longer needed by the application and can be discarded by the system if necessary.
+PrefetchVirtualMemory;Prefetches virtual address ranges into physical memory.
+ReclaimVirtualMemory;Reclaims a range of memory pages that were offered to the system with OfferVirtualMemory.
+VirtualAlloc;Reserves or commits a region of pages in the virtual address space of the calling process.
+VirtualAllocEx;Reserves or commits a region of pages in the virtual address space of the specified process.
+VirtualAllocExNuma;Reserves or commits a region of memory within the virtual address space of the specified process, and specifies the NUMA node for the physical memory.
+VirtualFree;Releases or decommits a region of pages within the virtual address space of the calling process.
+VirtualFreeEx;Releases or decommits a region of memory within the virtual address space of a specified process.
+VirtualLock;Locks the specified region of the process's virtual address space into physical memory.
+VirtualProtect;Changes the access protection on a region of committed pages in the virtual address space of the calling process.
+VirtualProtectEx;Changes the access protection on a region of committed pages in the virtual address space of the calling process.
+VirtualQuery;Provides information about a range of pages in the virtual address space of the calling process.
+VirtualQueryEx;Provides information about a range of pages in the virtual address space of the calling process.
+VirtualUnlock;Unlocks a specified range of pages in the virtual address space of a process.
+
+<Global and Local>
+GlobalAlloc
+LocalAlloc
+GlobalDiscard
+LocalDiscard
+GlobalFlags
+LocalFlags
+GlobalFree
+GlobalHandle
+LocalHandle
+GlobalLock
+LocalLock
+GlobalReAlloc
+LocalReAlloc
+GlobalSize
+LocalSize
+GlobalUnlock
+LocalUnlock
+
+<Bad Memory>
+BadMemoryCallbackRoutine;An application-defined function registered with the RegisterBadMemoryNotification function that is called when one or more bad memory pages are detected.
+GetMemoryErrorHandlingCapabilities;Gets the memory error handling capabilities of the system.
+RegisterBadMemoryNotification;Registers a bad memory notification that is called when one or more bad memory pages are detected.
+UnregisterBadMemoryNotification;Closes the specified bad memory notification handle.
+
+<Enclave>
+CreateEnclave;Creates a new uninitialized enclave. An enclave is an isolated region of code and data within the address space for an application. Only code that runs within the enclave can access data within the same enclave.
+InitializeEnclave;Initializes an enclave that you created and loaded with data.
+IsEnclaveTypeSupported;Retrieves whether the specified type of enclave is supported.
+LoadEnclaveData;Loads data into an uninitialized enclave that you created by calling CreateEnclave.
+
+<Obsolete>
+IsBadCodePtr
+IsBadReadPtr
+IsBadStringPtr
+IsBadWritePtr
+GlobalMemoryStatus
+
+[Process and Thread]
+<Process>
+CreateProcess;Creates a new process and its primary thread.
+CreateProcessAsUser;Creates a new process and its primary thread. The new process runs in the security context of the user represented by the specified token.
+CreateProcessWithLogonW;Creates a new process and its primary thread. The new process then runs the specified executable file in the security context of the specified credentials (user, domain, and password).
+CreateProcessWithTokenW;Creates a new process and its primary thread. The new process runs in the security context of the specified token.
+ExitProcess;Ends the calling process and all its threads.
+FlushProcessWriteBuffers;Flushes the write queue of each processor that is running a thread of the current process.
+FreeEnvironmentStrings;Frees a block of environment strings.
+GetCommandLine;Retrieves the command-line string for the current process.
+GetCurrentProcess;Retrieves a pseudo handle for the current process.
+GetCurrentProcessId;Retrieves the process identifier of the calling process.
+GetCurrentProcessorNumber;Retrieves the number of the processor the current thread was running on during the call to this function.
+GetEnvironmentStrings;Retrieves the environment block for the current process.
+GetEnvironmentVariable;Retrieves the value of the specified variable from the environment block of the calling process.
+GetExitCodeProcess;Retrieves the termination status of the specified process.
+GetGuiResources;Retrieves the count of handles to graphical user interface (GUI) objects in use by the specified process.
+GetLogicalProcessorInformation;Retrieves information about logical processors and related hardware.
+GetPriorityClass;Retrieves the priority class for the specified process.
+GetProcessAffinityMask;Retrieves a process affinity mask for the specified process and the system affinity mask for the system.
+GetProcessGroupAffinity;Retrieves the processor group affinity of the specified process.
+GetProcessHandleCount;Retrieves the number of open handles that belong to the specified process.
+GetProcessId;Retrieves the process identifier of the specified process.
+GetProcessIdOfThread;Retrieves the process identifier of the process associated with the specified thread.
+GetProcessIoCounters;Retrieves accounting information for all I/O operations performed by the specified process.
+GetProcessMitigationPolicy;Retrieves mitigation policy settings for the calling process.
+GetProcessPriorityBoost;Retrieves the priority boost control state of the specified process.
+GetProcessShutdownParameters;Retrieves shutdown parameters for the currently calling process.
+GetProcessTimes;Retrieves timing information about for the specified process.
+GetProcessVersion;Retrieves the major and minor version numbers of the system on which the specified process expects to run.
+GetProcessWorkingSetSize;Retrieves the minimum and maximum working set sizes of the specified process.
+GetProcessWorkingSetSizeEx;Retrieves the minimum and maximum working set sizes of the specified process.
+GetProcessorSystemCycleTime;Retrieves the cycle time each processor in the specified group spent executing deferred procedure calls (DPCs) and interrupt service routines (ISRs).
+GetStartupInfo;Retrieves the contents of the STARTUPINFO structure that was specified when the calling process was created.
+IsImmersiveProcess;Determines whether the process belongs to a Windows Store app.
+NeedCurrentDirectoryForExePath;Determines whether the current directory should be included in the search path for the specified executable.
+OpenProcess;Opens an existing local process object.
+QueryFullProcessImageName;Retrieves the full name of the executable image for the specified process.
+QueryProcessAffinityUpdateMode;Retrieves the affinity update mode of the specified process.
+QueryProcessCycleTime;Retrieves the sum of the cycle time of all threads of the specified process.
+SetEnvironmentVariable;Sets the value of an environment variable for the current process.
+SetPriorityClass;Sets the priority class for the specified process.
+SetProcessAffinityMask;Sets a processor affinity mask for the threads of a specified process.
+SetProcessAffinityUpdateMode;Sets the affinity update mode of the specified process.
+SetProcessMitigationPolicy;Sets the mitigation policy for the calling process.
+SetProcessPriorityBoost;Disables the ability of the system to temporarily boost the priority of the threads of the specified process.
+SetProcessRestrictionExemption;Exempts the calling process from restrictions preventing desktop processes from interacting with the Windows Store app environment. This function is used by development and debugging tools.
+SetProcessShutdownParameters;Sets shutdown parameters for the currently calling process.
+SetProcessWorkingSetSize;Sets the minimum and maximum working set sizes for the specified process.
+SetProcessWorkingSetSizeEx;Sets the minimum and maximum working set sizes for the specified process.
+TerminateProcess;Terminates the specified process and all of its threads.
+
+<Process Enumeration>
+EnumProcesses;Retrieves the process identifier for each process object in the system.
+Process32First;Retrieves information about the first process encountered in a system snapshot.
+Process32Next;Retrieves information about the next process recorded in a system snapshot.
+WTSEnumerateProcesses;Retrieves information about the active processes on the specified terminal server.
+
+<Policy>
+QueryProtectedPolicy;Queries the value associated with a protected policy.
+SetProtectedPolicy;Sets a protected policy.
+
+<Thread>
+AttachThreadInput;Attaches the input processing mechanism of one thread to that of another thread.
+CreateRemoteThread;Creates a thread that runs in the virtual address space of another process.
+CreateRemoteThreadEx;Creates a thread that runs in the virtual address space of another process and optionally specifies extended attributes such as processor group affinity.
+CreateThread;Creates a thread to execute within the virtual address space of the calling process.
+ExitThread;Ends the calling thread.
+GetCurrentThread;Retrieves a pseudo handle for the current thread.
+GetCurrentThreadId;Retrieves the thread identifier of the calling thread.
+GetExitCodeThread;Retrieves the termination status of the specified thread.
+GetThreadGroupAffinity;Retrieves the processor group affinity of the specified thread.
+GetThreadId;Retrieves the thread identifier of the specified thread.
+GetThreadIdealProcessorEx;Retrieves the processor number of the ideal processor for the specified thread.
+GetThreadIOPendingFlag;Determines whether a specified thread has any I/O requests pending.
+GetThreadPriority;Retrieves the priority value for the specified thread.
+GetThreadPriorityBoost;Retrieves the priority boost control state of the specified thread.
+GetThreadTimes;Retrieves timing information for the specified thread.
+OpenThread;Opens an existing thread object.
+QueryIdleProcessorCycleTime;Retrieves the cycle time for the idle thread of each processor in the system.
+QueryThreadCycleTime;Retrieves the cycle time for the specified thread.
+ResumeThread;Decrements a thread's suspend count.
+SetThreadAffinityMask;Sets a processor affinity mask for the specified thread.
+SetThreadGroupAffinity;Sets the processor group affinity for the specified thread.
+SetThreadIdealProcessor;Specifies a preferred processor for a thread.
+SetThreadIdealProcessorEx;Sets the ideal processor for the specified thread and optionally retrieves the previous ideal processor.
+SetThreadPriority;Sets the priority value for the specified thread.
+SetThreadPriorityBoost;Disables the ability of the system to temporarily boost the priority of a thread.
+SetThreadStackGuarantee;Sets the stack guarantee for the calling thread.
+Sleep;Suspends the execution of the current thread for a specified interval.
+SleepEx;Suspends the current thread until the specified condition is met.
+SuspendThread;Suspends the specified thread.
+SwitchToThread;Causes the calling thread to yield execution to another thread that is ready to run on the current processor.
+TerminateThread;Terminates a thread.
+ThreadProc;An application-defined function that serves as the starting address for a thread.
+TlsAlloc;Allocates a thread local storage (TLS) index.
+TlsFree;Releases a TLS index.
+TlsGetValue;Retrieves the value in the calling thread's TLS slot for a specified TLS index.
+TlsSetValue;Stores a value in the calling thread's TLS slot for a specified TLS index.
+WaitForInputIdle;Waits until the specified process is waiting for user input with no input pending, or until the time-out interval has elapsed.
+
+<Process and Thread Extended Attribute>
+DeleteProcThreadAttributeList;Deletes the specified list of attributes for process and thread creation.
+InitializeProcThreadAttributeList;Initializes the specified list of attributes for process and thread creation.
+UpdateProcThreadAttribute;Updates the specified attribute in the specified list of attributes for process and thread creation.
+
+<WOW64>
+IsWow64Message;Determines whether the last message read from the current thread's queue originated from a WOW64 process.
+IsWow64Process;Determines whether the specified process is running under WOW64.
+Wow64SuspendThread;Suspends the specified WOW64 thread.
+
+<Job Object>
+AssignProcessToJobObject;Associates a process with an existing job object.
+CreateJobObject;Creates or opens a job object.
+IsProcessInJob;Determines whether the process is running in the specified job.
+OpenJobObject;Opens an existing job object.
+QueryInformationJobObject;Retrieves limit and job state information from the job object.
+SetInformationJobObject;Set limits for a job object.
+TerminateJobObject;Terminates all processes currently associated with the job.
+UserHandleGrantAccess;Grants or denies access to a handle to a User object to a job that has a user-interface restriction.
+
+<Thread Pool>
+CallbackMayRunLong;Indicates that the callback may not return quickly.
+CancelThreadpoolIo;Cancels the notification from the StartThreadpoolIo function.
+CloseThreadpool;Closes the specified thread pool.
+CloseThreadpoolCleanupGroup;Closes the specified cleanup group.
+CloseThreadpoolCleanupGroupMembers;Releases the members of the specified cleanup group, waits for all callback functions to complete, and optionally cancels any outstanding callback functions.
+CloseThreadpoolIo;Releases the specified I/O completion object.
+CloseThreadpoolTimer;Releases the specified timer object.
+CloseThreadpoolWait;Releases the specified wait object.
+CloseThreadpoolWork;Releases the specified work object.
+CreateThreadpool;Allocates a new pool of threads to execute callbacks.
+CreateThreadpoolCleanupGroup;Creates a cleanup group that applications can use to track one or more thread pool callbacks.
+CreateThreadpoolIo;Creates a new I/O completion object.
+CreateThreadpoolTimer;Creates a new timer object.
+CreateThreadpoolWait;Creates a new wait object.
+CreateThreadpoolWork;Creates a new work object.
+DestroyThreadpoolEnvironment;Deletes the specified callback environment. Call this function when the callback environment is no longer needed for creating new thread pool objects.
+DisassociateCurrentThreadFromCallback;Removes the association between the currently executing callback function and the object that initiated the callback. The current thread will no longer count as executing a callback on behalf of the object.
+FreeLibraryWhenCallbackReturns;Specifies the DLL that the thread pool will unload when the current callback completes.
+InitializeThreadpoolEnvironment;Initializes a callback environment.
+IsThreadpoolTimerSet;Determines whether the specified timer object is currently set.
+LeaveCriticalSectionWhenCallbackReturns;Specifies the critical section that the thread pool will release when the current callback completes.
+QueryThreadpoolStackInformation;Retrieves the stack reserve and commit sizes for threads in the specified thread pool.
+ReleaseMutexWhenCallbackReturns;Specifies the mutex that the thread pool will release when the current callback completes.
+ReleaseSemaphoreWhenCallbackReturns;Specifies the semaphore that the thread pool will release when the current callback completes.
+SetEventWhenCallbackReturns;Specifies the event that the thread pool will set when the current callback completes.
+SetThreadpoolCallbackCleanupGroup;Associates the specified cleanup group with the specified callback environment.
+SetThreadpoolCallbackLibrary;Ensures that the specified DLL remains loaded as long as there are outstanding callbacks.
+SetThreadpoolCallbackPersistent;Specifies that the callback should run on a persistent thread.
+SetThreadpoolCallbackPool;Sets the thread pool to be used when generating callbacks.
+SetThreadpoolCallbackPriority;Specifies the priority of a callback function relative to other work items in the same thread pool.
+SetThreadpoolCallbackRunsLong;Indicates that callbacks associated with this callback environment may not return quickly.
+SetThreadpoolStackInformation;Sets the stack reserve and commit sizes for new threads in the specified thread pool.
+SetThreadpoolThreadMaximum;Sets the maximum number of threads that the specified thread pool can allocate to process callbacks.
+SetThreadpoolThreadMinimum;Sets the minimum number of threads that the specified thread pool must make available to process callbacks.
+SetThreadpoolTimerEx;Sets the timer object. A worker thread calls the timer object's callback after the specified timeout expires.
+SetThreadpoolTimer;Sets the timer object. A worker thread calls the timer object's callback after the specified timeout expires.
+SetThreadpoolWait;Sets the wait object. A worker thread calls the wait object's callback function after the handle becomes signaled or after the specified timeout expires.
+SetThreadpoolWaitEx;Sets the wait object. A worker thread calls the wait object's callback function after the handle becomes signaled or after the specified timeout expires.
+StartThreadpoolIo;Notifies the thread pool that I/O operations may possibly begin for the specified I/O completion object. A worker thread calls the I/O completion object's callback function after the operation completes on the file handle bound to this object.
+SubmitThreadpoolWork;Posts a work object to the thread pool. A worker thread calls the work object's callback function.
+TpInitializeCallbackEnviron;Initializes a callback environment for the thread pool.
+TpDestroyCallbackEnviron;Deletes the specified callback environment. Call this function when the callback environment is no longer needed for creating new thread pool objects.
+TpSetCallbackActivationContext;Assigns an activation context to the callback environment.
+TpSetCallbackCleanupGroup;Associates the specified cleanup group with the specified callback environment.
+TpSetCallbackFinalizationCallback;Indicates a function to call when the callback environment is finalized.
+TpSetCallbackLongFunction;Indicates that callbacks associated with this callback environment may not return quickly.
+TpSetCallbackNoActivationContext;Indicates that the callback environment has no activation context.
+TpSetCallbackPersistent;Specifies that the callback should run on a persistent thread.
+TpSetCallbackPriority;Specifies the priority of a callback function relative to other work items in the same thread pool.
+TpSetCallbackRaceWithDll;Ensures that the specified DLL remains loaded as long as there are outstanding callbacks.
+TpSetCallbackThreadpool;Assigns a thread pool to a callback environment.
+TrySubmitThreadpoolCallback;Requests that a thread pool worker thread call the specified callback function.
+WaitForThreadpoolIoCallbacks;Waits for outstanding I/O completion callbacks to complete and optionally cancels pending callbacks that have not yet started to execute.
+WaitForThreadpoolTimerCallbacks;Waits for outstanding timer callbacks to complete and optionally cancels pending callbacks that have not yet started to execute.
+WaitForThreadpoolWaitCallbacks;Waits for outstanding wait callbacks to complete and optionally cancels pending callbacks that have not yet started to execute.
+WaitForThreadpoolWorkCallbacks;Waits for outstanding work callbacks to complete and optionally cancels pending callbacks that have not yet started to execute.
+BindIoCompletionCallback;Associates the I/O completion port owned by the thread pool with the specified file handle. On completion of an I/O request involving this file, a non-I/O worker thread will execute the specified callback function.
+QueueUserWorkItem;Queues a work item to a worker thread in the thread pool.
+RegisterWaitForSingleObject;Directs a wait thread in the thread pool to wait on the object.
+UnregisterWaitEx;Waits until one or all of the specified objects are in the signaled state or the time-out interval elapses.
+
+<Thread Ordering Service>
+AvQuerySystemResponsiveness;Retrieves the system responsiveness setting used by the multimedia class scheduler service.
+AvRtCreateThreadOrderingGroup;Creates a thread ordering group.
+AvRtCreateThreadOrderingGroupEx;Creates a thread ordering group and associates the server thread with a task.
+AvRtDeleteThreadOrderingGroup;Deletes the specified thread ordering group created by the caller.
+AvRtJoinThreadOrderingGroup;Joins client threads to a thread ordering group.
+AvRtLeaveThreadOrderingGroup;Enables client threads to leave a thread ordering group.
+AvRtWaitOnThreadOrderingGroup;Enables client threads of a thread ordering group to wait until they should execute.
+
+<Multimedia Class Scheduler Service>
+AvRevertMmThreadCharacteristics;Indicates that a thread is no longer performing work associated with the specified task.
+AvSetMmMaxThreadCharacteristics;Associates the calling thread with the specified tasks.
+AvSetMmThreadCharacteristics;Associates the calling thread with the specified task.
+AvSetMmThreadPriority;Adjusts the thread priority of the calling thread relative to other threads performing the same task.
+
+<Fiber>
+ConvertFiberToThread;Converts the current fiber into a thread.
+ConvertThreadToFiber;Converts the current thread into a fiber.
+ConvertThreadToFiberEx;Converts the current thread into a fiber.
+CreateFiber;Allocates a fiber object, assigns it a stack, and sets up execution to begin at the specified start address.
+CreateFiberEx;Allocates a fiber object, assigns it a stack, and sets up execution to begin at the specified start address.
+DeleteFiber;Deletes an existing fiber.
+FiberProc;An application-defined function used with the CreateFiber function.
+FlsAlloc;Allocates a fiber local storage (FLS) index.
+FlsFree;Releases an FLS index.
+FlsGetValue;Retrieves the value in the calling fiber's FLS slot for a specified FLS index.
+FlsSetValue;Stores a value in the calling fiber's FLS slot for a specified FLS index.
+IsThreadAFiber;Determines whether the current thread is a fiber.
+SwitchToFiber;Schedules a fiber.
+
+<NUMA Support>
+AllocateUserPhysicalPagesNuma;Reserves or commits a region of memory within the virtual address space of the specified process, and specifies the NUMA node for the physical memory.
+GetLogicalProcessorInformation;Retrieves information about logical processors and related hardware.
+GetNumaAvailableMemoryNode;Retrieves the amount of memory available in the specified node.
+GetNumaAvailableMemoryNodeEx;Retrieves the amount of memory that is available in the specified node as a USHORT value.
+GetNumaHighestNodeNumber;Retrieves the node that currently has the highest number.
+GetNumaNodeNumberFromHandle;Retrieves the NUMA node associated with the underlying device for a file handle.
+GetNumaNodeProcessorMask;Retrieves the processor mask for the specified node.
+GetNumaNodeProcessorMaskEx;Retrieves the processor mask for the specified NUMA node as a USHORT value.
+GetNumaProcessorNode;Retrieves the node number for the specified processor.
+GetNumaProcessorNodeEx;Retrieves the node number of the specified logical processor as a USHORT value.
+GetNumaProximityNode;Retrieves the node number for the specified proximity identifier.
+GetNumaProximityNodeEx;Retrieves the node number as a USHORT value for the specified proximity identifier.
+VirtualAllocExNuma;Reserves or commits a region of memory within the virtual address space of the specified process, and specifies the NUMA node for the physical memory.
+
+<Processor>
+GetActiveProcessorCount;Returns the number of active processors in a processor group or in the system.
+GetActiveProcessorGroupCount;Returns the number of active processor groups in the system.
+GetCurrentProcessorNumber;Retrieves the number of the processor the current thread was running on during the call to this function.
+GetCurrentProcessorNumberEx;Retrieves the processor group and number of the logical processor in which the calling thread is running.
+GetLogicalProcessorInformation;Retrieves information about logical processors and related hardware.
+GetLogicalProcessorInformationEx;Retrieves information about the relationships of logical processors and related hardware.
+GetMaximumProcessorCount;Returns the maximum number of logical processors that a processor group or the system can have.
+GetMaximumProcessorGroupCount;Returns the maximum number of processor groups that the system can have.
+QueryIdleProcessorCycleTime;Retrieves the cycle time for the idle thread of each processor in the system.
+QueryIdleProcessorCycleTimeEx;Retrieves the accumulated cycle time for the idle thread on each logical processor in the specified processor group. 
+
+<User-Mode Scheduling>
+CreateUmsCompletionList;Creates a UMS completion list.
+CreateUmsThreadContext;Creates a UMS thread context to represent a UMS worker thread.
+DeleteUmsCompletionList;Deletes the specified UMS completion list. The list must be empty.
+DeleteUmsThreadContext;Deletes the specified UMS thread context. The thread must be terminated.
+DequeueUmsCompletionListItems;Retrieves UMS worker threads from the specified UMS completion list.
+EnterUmsSchedulingMode;Converts the calling thread into a UMS scheduler thread.
+ExecuteUmsThread;Runs the specified UMS worker thread.
+GetCurrentUmsThread;Returns the UMS thread context of the calling UMS thread.
+GetNextUmsListItem;Returns the next UMS thread context in a list of UMS thread contexts.
+GetUmsCompletionListEvent;Retrieves a handle to the event associated with the specified UMS completion list.
+GetUmsSystemThreadInformation;Queries whether the specified thread is a UMS scheduler thread, a UMS worker thread, or a non-UMS thread.
+QueryUmsThreadInformation;Retrieves information about the specified UMS worker thread.
+SetUmsThreadInformation;Sets application-specific context information for the specified UMS worker thread.
+UmsSchedulerProc;The application-defined UMS scheduler entry point function associated with a UMS completion list.
+UmsThreadYield;Yields control to the UMS scheduler thread on which the calling UMS worker thread is running.
+
+<Obsolete>
+NtGetCurrentProcessorNumber
+NtQueryInformationProcess
+NtQueryInformationThread
+WinExec
+ZwQueryInformationProcess
+
+[Dynamic-Link Library]
+AddDllDirectory;Adds a directory to the process DLL search path.
+DisableThreadLibraryCalls;Disables thread attach and thread detach notifications for the specified DLL.
+DllMain;An optional entry point into a DLL.
+FreeLibrary;Decrements the reference count of the loaded DLL. When the reference count reaches zero, the module is unmapped from the address space of the calling process.
+FreeLibraryAndExitThread;Decrements the reference count of a loaded DLL by one, and then calls ExitThread to terminate the calling thread.
+GetDllDirectory;Retrieves the application-specific portion of the search path used to locate DLLs for the application.
+GetModuleFileName;Retrieves the fully qualified path for the file containing the specified module.
+GetModuleFileNameEx;Retrieves the fully qualified path for the file containing the specified module.
+GetModuleHandle;Retrieves a module handle for the specified module.
+GetModuleHandleEx;Retrieves a module handle for the specified module.
+GetProcAddress;Retrieves the address of an exported function or variable from the specified DLL.
+LoadLibrary;Maps the specified executable module into the address space of the calling process.
+LoadLibraryEx;Maps the specified executable module into the address space of the calling process.
+LoadPackagedLibrary;Maps the specified packaged module and its dependencies into the address space of the calling process. Only Windows Store apps can call this function.
+RemoveDllDirectory;Removes a directory that was added to the process DLL search path by using AddDllDirectory.
+SetDefaultDllDirectories;Specifies a default set of directories to search when the calling process loads a DLL.
+SetDllDirectory;Modifies the search path used to locate DLLs for the application.
+
+<Obsolete>
+LoadModule
+
+[File Management]
+AddUsersToEncryptedFile;Adds user keys to the specified encrypted file.
+AreFileApisANSI;Determines whether the file I/O functions are using the ANSI or OEM character set code page.
+CancelIo;Cancels all pending input and output (I/O) operations that are issued by the calling thread for the specified file.
+CancelIoEx;Marks any outstanding I/O operations for the specified file handle. The function only cancels I/O operations in the current process, regardless of which thread created the I/O operation.
+CancelSynchronousIo;Marks pending synchronous I/O operations that are issued by the specified thread as canceled.
+CheckNameLegalDOS8Dot3;Determines whether the specified name can be used to create a file on a FAT file system.
+CloseEncryptedFileRaw;Closes an encrypted file after a backup or restore operation, and frees associated system resources.
+CopyFile;Copies an existing file to a new file.
+CopyFile2;Copies an existing file to a new file, notifying the application of its progress through a callback function.
+CopyFile2ProgressRoutine;An application-defined callback function used with the CopyFile2 function.
+CopyFileEx;Copies an existing file to a new file, notifying the application of its progress through a callback function.
+CopyFileTransacted;Copies an existing file to a new file as a transacted operation, notifying the application of its progress through a callback function.
+CopyProgressRoutine;An application-defined callback function used with the CopyFileEx, MoveFileTransacted, and MoveFileWithProgress functions.
+CreateFile;Creates or opens a file or I/O device. The most commonly used I/O devices are as follows: file, file stream, directory, physical disk, volume, console buffer, tape drive, communications resource, mailslot, and pipe.
+CreateFile2;Creates or opens a file.
+CreateFileTransacted;Creates or opens a file, file stream, or directory as a transacted operation.
+CreateHardLink;Establishes a hard link between an existing file and a new file.
+CreateHardLinkTransacted;Establishes a hard link between an existing file and a new file as a transacted operation.
+CreateIoCompletionPort;Creates an input/output (I/O) completion port and associates it with a specified file handle, or creates an I/O completion port that is not yet associated with a file handle, allowing association at a later time.
+CreateSymbolicLink;Creates a symbolic link.
+CreateSymbolicLinkTransacted;Creates a symbolic link as a transacted operation.
+DecryptFile;Decrypts an encrypted file or directory.
+DeleteFile;Deletes an existing file.
+DeleteFileTransacted;Deletes an existing file as a transacted operation.
+DuplicateEncryptionInfoFile;Copies the EFS metadata from one file or directory to another.
+EncryptFile;Encrypts a file or directory.
+EncryptionDisable;Disables or enables encryption of the specified directory and the files in it.
+ExportCallback;An application-defined callback function used with ReadEncryptedFileRaw.
+FileEncryptionStatus;Retrieves the encryption status of the specified file.
+FileIOCompletionRoutine;An application-defined callback function used with the ReadFileEx and WriteFileEx functions. It is called when the asynchronous input and output (I/O) operation is completed or canceled and the calling thread is in an alertable state.
+FindClose;Closes a file search handle opened by the FindFirstFile, FindFirstFileEx, FindFirstFileNameW, FindFirstFileNameTransactedW, FindFirstFileTransacted, FindFirstStreamTransactedW, or FindFirstStreamW functions.
+FindFirstFile;Searches a directory for a file or subdirectory with a name that matches a specific name (or partial name if wildcards are used).
+FindFirstFileEx;Searches a directory for a file or subdirectory with a name and attributes that match those specified.
+FindFirstFileNameTransactedW;Creates an enumeration of all the hard links to the specified file as a transacted operation. The function returns a handle to the enumeration that can be used on subsequent calls to the FindNextFileNameW function.
+FindFirstFileNameW;Creates an enumeration of all the hard links to the specified file. The FindFirstFileNameW function returns a handle to the enumeration that can be used on subsequent calls to the FindNextFileNameW function.
+FindFirstFileTransacted;Searches a directory for a file or subdirectory with a name that matches a specific name as a transacted operation.
+FindFirstStreamTransactedW;Enumerates the first stream in the specified file or directory as a transacted operation.
+FindFirstStreamW;Enumerates the first stream with a ::$DATA stream type in the specified file or directory.
+FindNextFile;Continues a file search from a previous call to the FindFirstFile, FindFirstFileEx, or FindFirstFileTransacted functions.
+FindNextFileNameW;Continues enumerating the hard links to a file using the handle returned by a successful call to the FindFirstFileNameW function.
+FindNextStreamW;Continues a stream search started by a previous call to the FindFirstStreamW function.
+FlushFileBuffers;Flushes the buffers of a specified file and causes all buffered data to be written to a file.
+FreeEncryptionCertificateHashList;Frees a certificate hash list.
+GetBinaryType;Determines whether a file is an executable (.exe) file, and if so, which subsystem runs the executable file.
+GetCompressedFileSize;Retrieves the actual number of bytes of disk storage used to store a specified file.
+GetCompressedFileSizeTransacted;Retrieves the actual number of bytes of disk storage used to store a specified file as a transacted operation.
+GetExpandedName;Retrieves the original name of a compressed file, if the file was compressed by the Lempel-Ziv algorithm.
+GetFileAttributes;Retrieves file system attributes for a specified file or directory.
+GetFileAttributesEx;Retrieves attributes for a specified file or directory.
+GetFileAttributesTransacted;Retrieves file system attributes for a specified file or directory as a transacted operation.
+GetFileBandwidthReservation;Retrieves the bandwidth reservation properties of the volume on which the specified file resides.
+GetFileInformationByHandle;Retrieves file information for the specified file.
+GetFileInformationByHandleEx;Retrieves file information for the specified file.
+GetFileSize;Retrieves the size of the specified file, in bytes.
+GetFileSizeEx;Retrieves the size of the specified file.
+GetFileType;Retrieves the file type of the specified file.
+GetFinalPathNameByHandle;Retrieves the final path for the specified file.
+GetFullPathName;Retrieves the full path and file name of the specified file.
+GetFullPathNameTransacted;Retrieves the full path and file name of the specified file as a transacted operation.
+GetLongPathName;Converts the specified path to its long form.
+GetLongPathNameTransacted;Converts the specified path to its long form as a transacted operation.
+GetQueuedCompletionStatus;Attempts to dequeue an I/O completion packet from the specified I/O completion port.
+GetQueuedCompletionStatusEx;Retrieves multiple completion port entries simultaneously.
+GetShortPathName;Retrieves the short path form of the specified path.
+GetTempFileName;Creates a name for a temporary file. If a unique file name is generated, an empty file is created and the handle to it is released; otherwise, only a file name is generated.
+GetTempPath;Retrieves the path of the directory designated for temporary files.
+ImportCallback;An application-defined callback function used with WriteEncryptedFileRaw. The system calls ImportCallback one or more times, each time to retrieve a portion of a backup file's data.
+LockFile;Locks the specified file for exclusive access by the calling process.
+LockFileEx;Locks the specified file for exclusive access by the calling process. This function can operate either synchronously or asynchronously and can request either an exclusive or a shared lock.
+LZClose;Closes a file that was opened by using the LZOpenFile function.
+LZCopy;Copies a source file to a destination file.
+LZInit;Allocates memory for the internal data structures required to decompress files, and then creates and initializes them.
+LZOpenFile;Creates, opens, reopens, or deletes the specified file.
+LZRead;Reads (at most) the specified number of bytes from a file and copies them into a buffer.
+LZSeek;Moves a file pointer the specified number of bytes from a starting position.
+MoveFile;Moves an existing file or a directory, including its children.
+MoveFileEx;Moves an existing file or directory, including its children, with various move options.
+MoveFileTransacted;Moves an existing file or a directory, including its children, as a transacted operation.
+MoveFileWithProgress;Moves a file or directory, including its children. You can provide a callback function that receives progress notifications.
+OpenEncryptedFileRaw;Opens an encrypted file in order to backup (export) or restore (import) the file.
+OpenFile;Creates, opens, reopens, or deletes a file.
+OpenFileById;Opens the file that matches the specified identifier.
+PostQueuedCompletionStatus;Posts an I/O completion packet to an I/O completion port.
+QueryRecoveryAgentsOnEncryptedFile;Retrieves a list of recovery agents for the specified file.
+QueryUsersOnEncryptedFile;Retrieves a list of users for the specified file.
+ReadEncryptedFileRaw;Backs up (export) encrypted files.
+ReadFile;Reads data from the specified file or input/output (I/O) device. Reads occur at the position specified by the file pointer if supported by the device.
+ReadFileEx;Reads data from the specified file or input/output (I/O) device. It reports its completion status asynchronously, calling the specified completion routine when reading is completed or canceled and the calling thread is in an alertable wait state.
+ReadFileScatter;Reads data from a file and stores it in an array of buffers.
+RemoveUsersFromEncryptedFile;Removes specified certificate hashes from a specified file.
+ReOpenFile;Reopens the specified file system object with different access rights, sharing mode, and flags.
+ReplaceFile;Replaces one file with another file, with the option of creating a backup copy of the original file.
+SearchPath;Searches for a specified file in a specified path.
+SetEndOfFile;Sets the physical file size for the specified file to the current position of the file pointer.
+SetFileApisToANSI;Causes the file I/O functions to use the ANSI character set code page for the current process.
+SetFileApisToOEM;Causes the file I/O functions for the process to use the OEM character set code page.
+SetFileAttributes;Sets the attributes for a file or directory.
+SetFileAttributesTransacted;Sets the attributes for a file or directory as a transacted operation.
+SetFileBandwidthReservation;Requests that bandwidth for the specified file stream be reserved. The reservation is specified as a number of bytes in a period of milliseconds for I/O requests on the specified file handle.
+SetFileCompletionNotificationModes;Sets the notification modes for a file handle, allowing you to specify how completion notifications work for the specified file.
+SetFileInformationByHandle;Sets the file information for the specified file.
+SetFileIoOverlappedRange;Associates a virtual address range with the specified file handle.
+SetFilePointer;Moves the file pointer of the specified file.
+SetFilePointerEx;Moves the file pointer of the specified file.
+SetFileShortName;Sets the short name for the specified file.
+SetFileValidData;Sets the valid data length of the specified file. This function is useful in very limited scenarios. For more information, see the Remarks section.
+SetSearchPathMode;Sets the per-process mode that the SearchPath function uses when locating files.
+SetUserFileEncryptionKey;Sets the user's current key to the specified certificate.
+UnlockFile;Unlocks a region in an open file.
+UnlockFileEx;Unlocks a region in the specified file. This function can operate either synchronously or asynchronously.
+WofEnumEntries;Enumerates all the data sources from a specified provider for a specified volume.
+WofEnumEntryProc;Callback function that gets called for each data source in response to a call to WofEnumEntries.
+WofEnumFilesProc;Callback function that gets called for each file backed by an external data source, such as a WIM file.
+WofFileEnumFiles;Enumerates all of the files which are compressed with a specified compression algorithm on a specified volume.
+WofGetDriverVersion;Used to query the version of the driver used to support a particular provider.
+WofIsExternalFile;Used to determine if a file is being backed by a physical file or is backed by a system data provider, and optionally indicates which provider or additional data about the file.
+WofSetFileDataLocation;Used to change a file from being backed by a physical file to one backed by a system data provider.
+WofShouldCompressBinaries;Indicates whether compression should be used on a particular volume, and if so, which compression algorithm should be used.
+WofWimAddEntry;Adds a single WIM data source to a volume such that files can be created on the volume which are stored within the WIM.
+WofWimEnumFiles;Enumerates all of the files which are being backed by a specified WIM data source on a specified volume.
+WofWimRemoveEntry;Removes a single WIM data source from backing files on a volume.
+WofWimSuspendEntry;Temporarily removes a WIM data source from backing files on a volume until the volume is remounted or the data source is updated with WofWimUpdateEntry.
+WofWimUpdateEntry;Updates a WIM entry to point to a different WIM file location.
+Wow64DisableWow64FsRedirection;Disables file system redirection for the calling thread. File system redirection is enabled by default.
+Wow64EnableWow64FsRedirection;Enables or disables file system redirection for the calling thread.
+Wow64RevertWow64FsRedirection;Restores file system redirection for the calling thread.
+WriteEncryptedFileRaw;Restores (import) encrypted files.
+WriteFile;Writes data to the specified file or input/output (I/O) device.
+WriteFileEx;Writes data to the specified file or input/output (I/O) device. It reports its completion status asynchronously, calling the specified completion routine when writing is completed or canceled and the calling thread is in an alertable wait state.
+WriteFileGather;Retrieves data from an array of buffers and writes the data to a file.
+
+[Time]
+<System Time>
+GetSystemTime;Retrieves the current system date and time in UTC format.
+GetSystemTimeAdjustment;Determines whether the system is applying periodic time adjustments to its time-of-day clock.
+GetTimeFormat;Formats a system time as a time string for a specified locale.
+NtQuerySystemTime;Returns the system time.
+RtlLocalTimeToSystemTime;Converts the specified local time to system time.
+RtlTimeToSecondsSince1970;Converts the specified system time to the number of seconds since the first second of January 1, 1970.
+SetSystemTime;Sets the current system time and date.
+SetSystemTimeAdjustment;Enables or disables periodic time adjustments to the system's time-of-day clock.
+SystemTimeToFileTime;Converts a system time to a file time.
+SystemTimeToTzSpecificLocalTime;Converts a UTC time to a specified time zone's corresponding local time.
+TzSpecificLocalTimeToSystemTime;Converts a local time to a UTC time.
+
+<Local Time>
+GetSystemTime;Retrieves the current system date and time in UTC format.
+GetSystemTimeAdjustment;Determines whether the system is applying periodic time adjustments to its time-of-day clock.
+GetTimeFormat;Formats a system time as a time string for a specified locale.
+NtQuerySystemTime;Returns the system time.
+RtlLocalTimeToSystemTime;Converts the specified local time to system time.
+RtlTimeToSecondsSince1970;Converts the specified system time to the number of seconds since the first second of January 1, 1970.
+SetSystemTime;Sets the current system time and date.
+SetSystemTimeAdjustment;Enables or disables periodic time adjustments to the system's time-of-day clock.
+SystemTimeToFileTime;Converts a system time to a file time.
+SystemTimeToTzSpecificLocalTime;Converts a UTC time to a specified time zone's corresponding local time.
+TzSpecificLocalTimeToSystemTime;Converts a local time to a UTC time.
+
+<File Time>
+CompareFileTime;Compares two file times.
+FileTimeToLocalFileTime;Converts a UTC file time to a local file time.
+FileTimeToSystemTime;Converts a file time to system time format.
+GetFileTime;Retrieves the date and time that the specified file or directory was created, last accessed, and last modified.
+GetSystemTimeAsFileTime;Retrieves the current system date and time in UTC format.
+LocalFileTimeToFileTime;Converts a local file time to a file time based on UTC.
+SetFileTime;Sets the date and time that the specified file or directory was created, last accessed, or last modified.
+SystemTimeToFileTime;Converts a system time to a file time.
+
+<MS-DOS Date and Time>
+DosDateTimeToFileTime;Converts MS-DOS date and time values to a file time.
+FileTimeToDosDateTime;Converts a file time to MS-DOS date and time values.
+
+<Windows Time>
+GetSystemTimes;Retrieves system timing information.
+GetTickCount;Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
+GetTickCount64;Retrieves the number of milliseconds that have elapsed since the system was started.
+
+[Debugging]
+CheckRemoteDebuggerPresent;Determines whether the specified process is being debugged.
+ContinueDebugEvent;Enables a debugger to continue a thread that previously reported a debugging event.
+DebugActiveProcess;Enables a debugger to attach to an active process and debug it.
+DebugActiveProcessStop;Stops the debugger from debugging the specified process.
+DebugBreak;Causes a breakpoint exception to occur in the current process.
+DebugBreakProcess;Causes a breakpoint exception to occur in the specified process.
+DebugSetProcessKillOnExit;Sets the action to be performed when the calling thread exits.
+FatalExit;Transfers execution control to the debugger.
+FlushInstructionCache;Flushes the instruction cache for the specified process.
+GetThreadContext;Retrieves the context of the specified thread.
+GetThreadSelectorEntry;Retrieves a descriptor table entry for the specified selector and thread.
+IsDebuggerPresent;Determines whether the calling process is being debugged by a user-mode debugger.
+OutputDebugString;Sends a string to the debugger for display.
+ReadProcessMemory;Reads data from an area of memory in a specified process.
+SetThreadContext;Sets the context for the specified thread.
+WaitForDebugEvent;Waits for a debugging event to occur in a process being debugged.
+Wow64GetThreadContext;Retrieves the context of the specified WOW64 thread.
+Wow64GetThreadSelectorEntry;Retrieves a descriptor table entry for the specified selector and WOW64 thread.
+Wow64SetThreadContext;Sets the context of the specified WOW64 thread.
+WriteProcessMemory;Writes data to an area of memory in a specified process.
+
+[National Language Support]
+AdjustCalendarDate;Deprecated. Adjusts a date by a specified number of years, months, weeks or days.
+CompareString;Compares two character strings, for a locale specified by identifier.
+CompareStringEx;Compares two Unicode (wide character) strings, for a locale specified by name.
+CompareStringOrdinal;Compares two Unicode strings to test binary equivalence.
+ConvertCalDateTimeToSystemTime;Deprecated. Converts a specified CALDATETIME structure to a SYSTEMTIME structure.
+ConvertDefaultLocale;Converts a default locale value to an actual locale identifier.
+ConvertSystemTimeToCalDateTime;Deprecated. Converts a specified SYSTEMTIME structure to a CALDATETIME structure.
+DownlevelGetLocaleScripts;Provides a list of scripts for the specified locale.
+DownlevelGetParentLocaleLCID;Retrieves the locale identifier for the parent of the supplied locale.
+DownlevelGetParentLocaleName;Retrieves the locale name for the parent of the supplied locale.
+DownlevelGetStringScripts;Provides a list of scripts used in the specified Unicode string.
+DownlevelLCIDToLocaleName;Converts a locale identifier to a locale name.
+DownlevelLocaleNameToLCID;Converts a locale name to a locale identifier that can be used to get information from the operating system.
+DownlevelVerifyScripts;Compares two enumerated lists of scripts.
+EnumCalendarInfo;Enumerates calendar information for a specified locale.
+EnumCalendarInfoEx;Enumerates calendar information for a locale specified by identifier.
+EnumCalendarInfoExEx;Enumerates calendar information for a locale specified by name.
+EnumCalendarInfoProc;An application-defined callback function that processes enumerated calendar information provided by the EnumCalendarInfo function.
+EnumCalendarInfoProcEx;An application-defined callback function that processes enumerated calendar information provided by the EnumCalendarInfoEx function.
+EnumCalendarInfoProcExEx;An application-defined callback function that processes enumerated calendar information provided by the EnumCalendarInfoExEx function.
+EnumCodePagesProc;An application-defined callback function that processes enumerated code page information provided by the EnumSystemCodePages function.
+EnumDateFormats;Enumerates the long date, short date, or year/month formats that are available for a specified locale.
+EnumDateFormatsEx;Enumerates the long date, short date, or year/month formats that are available for a specified locale.
+EnumDateFormatsExEx;Enumerates the long date, short date, or year/month formats that are available for a locale specified by name.
+EnumDateFormatsProc;An application-defined callback function that processes date format information provided by the EnumDateFormats function.
+EnumDateFormatsProcEx;An application-defined callback function that processes date format information provided by the EnumDateFormatsEx function.
+EnumDateFormatsProcExEx;An application-defined callback function that processes date format information provided by the EnumDateFormatsExEx function.
+EnumGeoInfoProc;An application-defined callback function that processes enumerated geographical location information provided by the EnumSystemGeoID function.
+EnumLanguageGroupLocales;Enumerates the locales in a specified language group.
+EnumLanguageGroupLocalesProc;An application-defined callback function that processes enumerated language group locale information provided by the EnumLanguageGroupLocales function.
+EnumLanguageGroupsProc;An application-defined callback function that processes enumerated language group information provided by the EnumSystemLanguageGroups function.
+EnumLocalesProc;An application-defined callback function that processes enumerated locale information provided by the EnumSystemLocales function.
+EnumLocalesProcEx;An application-defined callback function that processes enumerated locale information provided by the EnumSystemLocalesEx function.
+EnumSystemCodePages;Enumerates the code pages that are either installed on or supported by an operating system.
+EnumSystemGeoID;Enumerates the geographical location identifiers (type GEOID) that are available on the operating system.
+EnumSystemLanguageGroups;Enumerates the language groups that are either installed on or supported by an operating system.
+EnumSystemLocales;Enumerates the locales that are either installed on or supported by an operating system.
+EnumSystemLocalesEx;Enumerates the locales that are either installed on or supported by an operating system.
+EnumTimeFormats;Enumerates the time formats that are available for a locale specified by identifier.
+EnumTimeFormatsEx;Enumerates the time formats that are available for a locale specified by name.
+EnumTimeFormatsProc;An application-defined callback function that processes enumerated time format information provided by the EnumTimeFormats function.
+EnumTimeFormatsProcEx;An application-defined callback function that processes enumerated time format information provided by the EnumTimeFormatsEx function.
+FindNLSString;Locates a Unicode string (wide characters) or its equivalent in another Unicode string for a locale specified by identifier.
+FindNLSStringEx;Locates a Unicode string (wide characters) or its equivalent in another Unicode string for a locale specified by identifier.
+FindStringOrdinal;Locates a Unicode string (wide characters) in another Unicode string for a non-linguistic comparison.
+FoldString;Maps one Unicode string to another, performing the specified transformation.
+GetACP;Retrieves the current Windows ANSI code page identifier for the system.
+GetCalendarDateFormatEx;Deprecated. Retrieves a properly formatted date string for the specified locale using the specified date.
+GetCalendarInfo;Retrieves information about a calendar for a locale specified by identifier.
+GetCalendarInfoEx;Retrieves information about a calendar for a locale specified by name.
+GetCalendarSupportedDateRange;Deprecated. Gets the supported date range for a specified calendar.
+GetCPInfo;Retrieves information about any valid installed or available code page.
+GetCPInfoEx;Retrieves information about any valid installed or available code page.
+GetCurrencyFormat;Formats a number string as a currency string for a locale specified by identifier.
+GetCurrencyFormatEx;Formats a number string as a currency string for a locale specified by name.
+GetDateFormat;Formats a date as a date string for a locale specified by identifier.
+GetDateFormatEx;Formats a date as a date string for a locale specified by name.
+GetDurationFormat;Formats a duration of time as a time string for a locale specified by identifier.
+GetDurationFormatEx;Formats a duration of time as a time string for a locale specified by name.
+GetGeoInfo;Gets information about a specified geographical location.
+GetLocaleInfo;Retrieves information about a locale specified by identifier.
+GetLocaleInfoEx;Retrieves information about a locale specified by name.
+GetNLSVersion;Gets information about the current version of a specified NLS capability for a locale specified by identifier.
+GetNLSVersionEx;Gets information about the current version of a specified NLS capability for a locale specified by name.
+GetNumberFormat;Formats a number string as a number string customized for a locale specified by identifier.
+GetNumberFormatEx;Formats a number string as a number string customized for a locale specified by name.
+GetOEMCP;Retrieves the current original equipment manufacturer (OEM) code page identifier for the operating system.
+GetStringScripts;Provides a list of scripts used in the specified string.
+GetStringTypeA;Deprecated. Retrieves character type information for the characters in the specified ANSI source string.
+GetStringTypeEx;Retrieves character type information for the characters in the specified source string.
+GetStringTypeW;Retrieves character type information for the characters in the specified Unicode source string.
+GetSystemDefaultLangID;Returns the language identifier for the system locale.
+GetSystemDefaultLCID;Returns the locale identifier for the system locale.
+GetSystemDefaultLocaleName;Retrieves the system default locale name.
+GetThreadLocale;Returns the locale identifier of the current locale for the calling thread.
+GetTimeFormat;Formats time as a time string for a locale specified by identifier.
+GetTimeFormatEx;Formats time as a time string for a locale specified by name.
+GetUserDefaultLangID;Returns the language identifier for the current user locale.
+GetUserDefaultLCID;Returns the locale identifier for the user default locale.
+GetUserDefaultLocaleName;Retrieves the user default locale name.
+GetUserGeoID;Retrieves information about the geographical location of the user.
+IdnToAscii;Converts an internationalized domain name (IDN) or other internationalized label to a Unicode (wide character) representation of the ASCII string that represents the name in the Punycode transfer encoding syntax.
+IdnToNameprepUnicode;Converts an internationalized domain name (IDN) or another internationalized label to the NamePrep form specified by Network Working Group RFC 3491, but does not perform the additional conversion to Punycode.
+IdnToUnicode;Converts the Punycode form of an internationalized domain name (IDN) or another internationalized label to the normal Unicode UTF-16 encoding syntax.
+IsCalendarLeapYear;Deprecated. Identifies whether the specified year is a leap year within the given era for the specific calendar.
+IsNLSDefinedString;Determines if each character in a string has a defined result for a specified NLS capability.
+IsNormalizedString;Verifies that a string is normalized according to Unicode 4.0 TR#15.
+IsValidCodePage;Determines if a specified code page is valid.
+IsValidLanguageGroup;Determines if a language group is installed or supported on the operating system.
+IsValidLocale;Determines if the specified locale is installed or supported on the operating system.
+IsValidLocaleName;Determines if the specified locale name is valid for a locale that is installed or supported on the operating system.
+IsValidNLSVersion;Determines if the NLS version is valid for a given NLS function.
+LCIDToLocaleName;Converts a locale identifier to a locale name.
+LCMapString;For a locale specified by identifier, maps one input character string to another using a specified transformation, or generates a sort key for the input string.
+LCMapStringEx;For a locale specified by name, maps one input character string to another using a specified transformation, or generates a sort key for the input string.
+LoadStringByReference;Unsupported. This function may be altered or unavailable. Instead, use SHLoadIndirectString.
+LocaleNameToLCID;Converts a locale name to locale identifier.
+NormalizeString;Normalizes characters of a text string according to Unicode 4.0 TR#15.
+NotifyUILanguageChange;Unsupported. This function may be altered or unavailable.
+ResolveLocaleName;Finds a possible locale name match for the supplied name.
+RtlIsValidLocaleName;Determines if a specified locale is installed or supported on the operating system.
+SetCalendarInfo;Sets an item of locale information for a calendar.
+SetLocaleInfo;Sets an item of information in the user override portion of the current locale.
+SetThreadLocale;Sets the current locale of the calling thread.
+SetUserGeoID;Sets the geographical location identifier for the user.
+UpdateCalendarDayOfWeek;Gets the day of week that corresponds with a specified day and populates the DayOfWeek field in the given CALDATETIME structure.
+VerifyScripts;Compares two enumerated lists of scripts.
+
+[Structured Exception Handling]
+AbnormalTermination;Indicates whether the __try block of a termination handler terminated normally.
+AddVectoredContinueHandler;Registers a vectored continue handler.
+AddVectoredExceptionHandler;Registers a vectored exception handler.
+GetExceptionCode;Retrieves a code that identifies the type of exception that occurred.
+GetExceptionInformation;Retrieves a machine-independent description of an exception, and information about the machine state that existed for the thread when the exception occurred.
+RaiseException;Raises an exception in the calling thread.
+RemoveVectoredContinueHandler;Unregisters a vectored continue handler.
+RemoveVectoredExceptionHandler;Unregisters a vectored exception handler.
+RtlAddGrowableFunctionTable;Informs the system of a dynamic function table representing a region of memory containing code.
+RtlDeleteGrowableFunctionTable;Informs the system that a previously reported dynamic function table is no longer in use.
+RtlGrowFunctionTable;Reports that a dynamic function table has increased in size.
+SetUnhandledExceptionFilter;Enables an application to supersede the top-level exception handler of each thread and process.
+UnhandledExceptionFilter;Passes unhandled exceptions to the debugger, if the process is being debugged.
+VectoredHandler;An application-defined function that serves as a vectored exception handler.;RtlAddFunctionTable;Adds a dynamic function table to the dynamic function table list.
+RtlCaptureContext;Retrieves a context record in the context of the caller.
+RtlDeleteFunctionTable;Removes a dynamic function table from the dynamic function table list.
+RtlInstallFunctionTableCallback;Adds a dynamic function table to the dynamic function table list.
+RtlRestoreContext;Restores the context of the caller to the specified context record.
+
+[Error Handling]
+Beep;Generates simple tones on the speaker.
+CaptureStackbackTrace;Captures a stack back trace by walking up the stack and recording the information for each frame.
+FatalAppExit;Displays a message box and terminates the application when the message box is closed.
+FlashWindow;Flashes the specified window one time.
+FlashWindowEx;Flashes the specified window.
+FormatMessage;Formats a message string.
+GetErrorMode;Retrieves the error mode for the current process.
+GetLastError;Retrieves the calling thread's last-error code value.
+GetThreadErrorMode;Retrieves the error mode for the calling thread.
+MessageBeep;Plays a waveform sound.
+RtlLookupFunctionEntry;Searches the active function tables for an entry that corresponds to the specified PC value.
+RtlNtStatusToDosError;Retrieves the system error code that corresponds to the specified NT error code.
+RtlPcToFileHeader;Retrieves the base address of the image that contains the specified PC value.
+RtlUnwind;Initiates an unwind of procedure call frames.
+RtlUnwind2;Initiates an unwind of procedure call frames.
+RtlUnwindEx;Initiates an unwind of procedure call frames.
+RtlVirtualUnwind;Retrieves the invocation context of the function that precedes the specified function context.
+SetErrorMode;Controls whether the system will handle the specified types of serious errors, or whether the process will handle them.
+SetLastError;Sets the last-error code for the calling thread.
+SetLastErrorEx;Sets the last-error code for the calling thread.
+SetThreadErrorMode;Controls whether the system will handle the specified types of serious errors or whether the calling thread will handle them.
+
+[Version Information]
+GetFileVersionInfo
+GetFileVersionInfoEx
+GetFileVersionInfoSize
+GetFileVersionInfoSizeEx
+VerFindFile
+VerInstallFile
+VerLanguageName
+VerQueryValue
+
+[System Information]
+CeipIsOptedIn;Checks whether the user has opted in for SQM data collection as part of the Customer Experience Improvement Program (CEIP).
+DnsHostnameToComputerName;Converts a DNS name to a NetBIOS name.
+EnumSystemFirmwareTables;Enumerates all system firmware tables of the specified type.
+ExpandEnvironmentStrings;Replaces environment-variable strings with their defined values.
+GetComputerName;Retrieves the NetBIOS name of the local computer.
+GetComputerNameEx;Retrieves the NetBIOS or DNS name of the local computer.
+GetComputerObjectName;Retrieves the local computer's name in a specified format.
+GetCurrentHwProfile;Retrieves the current hardware profile for the local computer.
+GetFirmwareEnvironmentVariable;Retrieves the value of the specified firmware environment variable from NVRAM.
+GetFirmwareEnvironmentVariableEx;Retrieves the value of the specified firmware environment variable and its attributes.
+GetFirmwareType;Retrieves the firmware type of the local computer.
+GetIntegratedDisplaySize;Retrieves the best estimate of the diagonal size of the built-in screen, in inches.
+GetNativeSystemInfo;Retrieves information about the current system for an application running under WOW64.
+GetProductInfo;Retrieves the product type for the operating system on the local computer, and maps the type to the product types supported by the specified operating system.
+GetSystemDirectory;Retrieves the path of the system directory.
+GetSystemFirmwareTable;Retrieves the specified firmware table from the firmware table provider.
+GetSystemInfo;Retrieves information about the current system.
+GetSystemRegistryQuota;Retrieves the current size of the registry and the maximum size that the registry is allowed to attain on the system.
+GetSystemWindowsDirectory;Retrieves the path of the shared Windows directory on a multi-user system.
+GetSystemWow64Directory;Retrieves the path of the system directory used by WOW64.
+GetUserName;Retrieves the user name of the current thread.
+GetUserNameEx;Retrieves the name of the user or other security principal associated with the calling thread. You can specify the format of the returned name.
+GetVersion;Retrieves the version number of the current operating system.
+GetVersionEx;Retrieves information about the current operating system.
+GetWindowsDirectory;Retrieves the path of the Windows directory.
+IsNativeVhdBoot;Indicates if the OS was booted from a VHD container.
+IsProcessorFeaturePresent;Determines whether a processor feature is supported by the current computer.
+IsWow64Message;Determines whether the last message read from the queue of the current process originated from a WOW64 process.
+IsWow64Process;Determines whether a process is running under WOW64.
+QueryPerformanceCounter;Retrieves the current value of the high-resolution performance counter.
+QueryPerformanceFrequency;Retrieves the frequency of the high-resolution performance counter.
+RtlGetSuiteMask;Retrieves a bit mask that identifies the product suites available on the system. If this function is called in an application that runs in the context of a server silo, the suite mask for the server silo is retrieved instead.
+SetComputerName;Sets a new NetBIOS name for the local computer.
+SetComputerNameEx;Sets a new NetBIOS or DNS name for the local computer.
+SetFirmwareEnvironmentVariable;Sets the value of the specified firmware environment variable.
+SetFirmwareEnvironmentVariableEx;Sets the value of the specified firmware environment variable and its attributes.
+TranslateName;Converts a directory service object name from one format to another.
+VerifyVersionInfo;Compares a set of version requirements to the values for the current operating system.
+VerSetConditionMask;Builds the condition mask for the VerifyVersionInfo function.
+Wow64DisableWow64FsRedirection;Disables file system redirection for the calling thread.
+Wow64EnableWow64FsRedirection;Enables or disables file system redirection for the calling thread.
+Wow64RevertWow64FsRedirection;Restores file system redirection for the calling thread.
+
+[Handle and Object]
+CloseHandle;Closes an open object handle.
+CompareObjectHandles;Compares two object handles to determine if they refer to the same underlying kernel object.
+DuplicateHandle;Duplicates an object handle.
+GetHandleInformation;Retrieves certain properties of an object handle.
+SetHandleInformation;Sets certain properties of an object handle.
+
+[Unicode and Character Set]
+GetTextCharset;Retrieves a character set identifier for the font that is currently selected into a specified device context.
+GetTextCharsetInfo;Retrieves information about the character set of the font that is currently selected into a specified device context.
+IsDBCSLeadByte;Determines if a specified character is a lead byte for the system default Windows ANSI code page (CP_ACP).
+IsDBCSLeadByteEx;Determines if a specified character is potentially a lead byte.
+IsTextUnicode;Determines if a buffer is likely to contain a form of Unicode text.
+MultiByteToWideChar;Maps a character string to a UTF-16 (wide character) string.
+TranslateCharsetInfo;Translates character set information and sets all members of a destination structure to appropriate values.
+WideCharToMultiByte;Maps a UTF-16 (wide character) string to a new character string.
+BytesToUnicode;Do not use.
+NlsDllCodePageTranslation;Do not use.
+UnicodeToBytes;Do not use.
+
+[Directory Management]
+CreateDirectory;Creates a new directory.
+CreateDirectoryEx;Creates a new directory with the attributes of a specified template directory.
+CreateDirectoryTransacted;Creates a new directory as a transacted operation, with the attributes of a specified template directory.
+FindCloseChangeNotification;Stops change notification handle monitoring.
+FindFirstChangeNotification;Creates a change notification handle and sets up initial change notification filter conditions.
+FindNextChangeNotification;Requests that the operating system signal a change notification handle the next time it detects an appropriate change.
+GetCurrentDirectory;Retrieves the current directory for the current process.
+ReadDirectoryChangesW;Retrieves information that describes the changes within the specified directory.
+RemoveDirectory;Deletes an existing empty directory.
+RemoveDirectoryTransacted;Deletes an existing empty directory as a transacted operation.
+SetCurrentDirectory;Changes the current directory for the current process.
+
+[Console]
+AddConsoleAlias;Defines a console alias for the specified executable.
+AllocConsole;Allocates a new console for the calling process.
+AttachConsole;Attaches the calling process to the console of the specified process.
+CreateConsoleScreenBuffer;Creates a console screen buffer.
+FillConsoleOutputAttribute;Sets the text and background color attributes for a specified number of character cells.
+FillConsoleOutputCharacter;Writes a character to the console screen buffer a specified number of times.
+FlushConsoleInputBuffer;Flushes the console input buffer.
+FreeConsole;Detaches the calling process from its console.
+GenerateConsoleCtrlEvent;Sends a specified signal to a console process group that shares the console associated with the calling process.
+GetConsoleAlias;Retrieves the specified alias for the specified executable.
+GetConsoleAliases;Retrieves all defined console aliases for the specified executable.
+GetConsoleAliasesLength;Returns the size, in bytes, of the buffer needed to store all of the console aliases for the specified executable.
+GetConsoleAliasExes;Retrieves the names of all executables with console aliases defined.
+GetConsoleAliasExesLength;Returns the size, in bytes, of the buffer needed to store the names of all executables that have console aliases defined.
+GetConsoleCP;Retrieves the input code page used by the console associated with the calling process.
+GetConsoleCursorInfo;Retrieves information about the size and visibility of the cursor for the specified console screen buffer.
+GetConsoleDisplayMode;Retrieves the display mode of the current console.
+GetConsoleFontSize;Retrieves the size of the font used by the specified console screen buffer.
+GetConsoleHistoryInfo;Retrieves the history settings for the calling process's console.
+GetConsoleMode;Retrieves the current input mode of a console's input buffer or the current output mode of a console screen buffer.
+GetConsoleOriginalTitle;Retrieves the original title for the current console window.
+GetConsoleOutputCP;Retrieves the output code page used by the console associated with the calling process.
+GetConsoleProcessList;Retrieves a list of the processes attached to the current console.
+GetConsoleScreenBufferInfo;Retrieves information about the specified console screen buffer.
+GetConsoleScreenBufferInfoEx;Retrieves extended information about the specified console screen buffer.
+GetConsoleSelectionInfo;Retrieves information about the current console selection.
+GetConsoleTitle;Retrieves the title for the current console window.
+GetConsoleWindow;Retrieves the window handle used by the console associated with the calling process.
+GetCurrentConsoleFont;Retrieves information about the current console font.
+GetCurrentConsoleFontEx;Retrieves extended information about the current console font.
+GetLargestConsoleWindowSize;Retrieves the size of the largest possible console window.
+GetNumberOfConsoleInputEvents;Retrieves the number of unread input records in the console's input buffer.
+GetNumberOfConsoleMouseButtons;Retrieves the number of buttons on the mouse used by the current console.
+GetStdHandle;Retrieves a handle for the standard input, standard output, or standard error device.
+HandlerRoutine;An application-defined function used with the SetConsoleCtrlHandler function.
+PeekConsoleInput;Reads data from the specified console input buffer without removing it from the buffer.
+ReadConsole;Reads character input from the console input buffer and removes it from the buffer.
+ReadConsoleInput;Reads data from a console input buffer and removes it from the buffer.
+ReadConsoleOutput;Reads character and color attribute data from a rectangular block of character cells in a console screen buffer.
+ReadConsoleOutputAttribute;Copies a specified number of foreground and background color attributes from consecutive cells of a console screen buffer.
+ReadConsoleOutputCharacter;Copies a number of characters from consecutive cells of a console screen buffer.
+ScrollConsoleScreenBuffer;Moves a block of data in a screen buffer.
+SetConsoleActiveScreenBuffer;Sets the specified screen buffer to be the currently displayed console screen buffer.
+SetConsoleCP;Sets the input code page used by the console associated with the calling process.
+SetConsoleCtrlHandler;Adds or removes an application-defined HandlerRoutine from the list of handler functions for the calling process.
+SetConsoleCursorInfo;Sets the size and visibility of the cursor for the specified console screen buffer.
+SetConsoleCursorPosition;Sets the cursor position in the specified console screen buffer.
+SetConsoleDisplayMode;Sets the display mode of the specified console screen buffer.
+SetConsoleHistoryInfo;Sets the history settings for the calling process's console.
+SetConsoleMode;Sets the input mode of a console's input buffer or the output mode of a console screen buffer.
+SetConsoleOutputCP;Sets the output code page used by the console associated with the calling process.
+SetConsoleScreenBufferInfoEx;Sets extended information about the specified console screen buffer.
+SetConsoleScreenBufferSize;Changes the size of the specified console screen buffer.
+SetConsoleTextAttribute;Sets the foreground (text) and background color attributes of characters written to the console screen buffer.
+SetConsoleTitle;Sets the title for the current console window.
+SetConsoleWindowInfo;Sets the current size and position of a console screen buffer's window.
+SetCurrentConsoleFontEx;Sets extended information about the current console font.
+SetStdHandle;Sets the handle for the standard input, standard output, or standard error device.
+WriteConsole;Writes a character string to a console screen buffer beginning at the current cursor location.
+WriteConsoleInput;Writes data directly to the console input buffer.
+WriteConsoleOutput;Writes character and color attribute data to a specified rectangular block of character cells in a console screen buffer.
+WriteConsoleOutputAttribute;Copies a number of foreground and background color attributes to consecutive cells of a console screen buffer.
+WriteConsoleOutputCharacter;Copies a number of characters to consecutive cells of a console screen buffer.

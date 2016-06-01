@@ -15,7 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.ByteArrayUtil.*;
+import static com.github.katjahahn.parser.ByteArrayUtil.getBytesLongValue;
+import static com.github.katjahahn.parser.ByteArrayUtil.getBytesLongValueSafely;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,6 +26,7 @@ import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -35,6 +37,8 @@ import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.katjahahn.parser.sections.idata.SymbolDescription;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 /**
@@ -55,7 +59,7 @@ public final class IOUtil {
 	 * System independend newline.
 	 */
 	public static final String NL = System.getProperty("line.separator");
-	
+
 	/**
 	 * The default delimiter for a line in a specification file.
 	 */
@@ -73,8 +77,8 @@ public final class IOUtil {
 
 	/**
 	 * Loads the bytes at the offset into a byte array with the given length
-	 * using the raf. If EOF, the byte array is zero padded. If offset < 0 
-	 * it will return a zero sized array.
+	 * using the raf. If EOF, the byte array is zero padded. If offset < 0 it
+	 * will return a zero sized array.
 	 * 
 	 * @param offset
 	 *            to seek
@@ -89,7 +93,8 @@ public final class IOUtil {
 	public static byte[] loadBytesSafely(long offset, int length,
 			RandomAccessFile raf) throws IOException {
 		Preconditions.checkArgument(length >= 0);
-		if(offset < 0) return new byte[0];
+		if (offset < 0)
+			return new byte[0];
 		raf.seek(offset);
 		int readsize = length;
 		if (readsize + offset > raf.length()) {
@@ -137,11 +142,11 @@ public final class IOUtil {
 	 */
 	public static byte[] loadBytes(long offset, int length, RandomAccessFile raf)
 			throws IOException {
-		if(length < 0) {
+		if (length < 0) {
 			length = 0;
 			logger.error("Negative length: " + length);
 		}
-		if(offset < 0) {
+		if (offset < 0) {
 			offset = 0;
 			logger.error("Negative offset: " + offset);
 		}
@@ -358,6 +363,41 @@ public final class IOUtil {
 			assert map != null;
 			return map;
 		}
+	}
+
+	/**
+	 * Reads a list of symbol descriptions
+	 * 
+	 * @param filename
+	 * @return list of SymbolDescriptions
+	 * @throws IOException
+	 */
+	public static List<SymbolDescription> readSymbolDescriptions()
+			throws IOException {
+		String filename = "importcategories.txt";
+		List<SymbolDescription> list = new ArrayList<>();
+		List<String[]> lines = readArray(filename);
+		String category = "";
+		String subCategory = null;
+		for (String[] array : lines) {
+			if (array.length > 0) {
+				String mainItem = array[0];
+				if(mainItem.startsWith("[")) {
+					category = mainItem;
+					subCategory = null;
+				} else if (mainItem.startsWith("<")) {
+					subCategory = mainItem;
+				} else {
+					String description = null;
+					if(array.length > 1) {
+						description = array[1];
+					}
+					list.add(new SymbolDescription(mainItem, Optional.fromNullable(description), 
+							category, Optional.fromNullable(subCategory)));
+				}
+			}
+		}
+		return list;
 	}
 
 	/**

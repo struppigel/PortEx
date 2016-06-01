@@ -15,11 +15,13 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.PhysicalLocation;
+import com.google.common.base.Optional;
 
 /**
  * Represents all imports from a single DLL.
@@ -28,75 +30,82 @@ import com.github.katjahahn.parser.PhysicalLocation;
  *
  */
 public class ImportDLL {
-	
-    /**
-     * The name of the DLL
-     */
+
+	/**
+	 * The name of the DLL
+	 */
 	private final String name;
-	
+
 	/**
 	 * Imports by name
 	 */
 	private final List<NameImport> nameImports;
-	
+
 	/**
 	 * Imports by ordinal
 	 */
 	private final List<OrdinalImport> ordinalImports;
-	
+
 	/**
 	 * Creates an ImportDLL instance
 	 * 
-	 * @param name the DLL's name
-	 * @param nameImports the imports by name
-	 * @param ordinalImports the imports by ordinal
+	 * @param name
+	 *            the DLL's name
+	 * @param nameImports
+	 *            the imports by name
+	 * @param ordinalImports
+	 *            the imports by ordinal
 	 */
-	public ImportDLL(String name, List<NameImport> nameImports, List<OrdinalImport> ordinalImports) {
+	public ImportDLL(String name, List<NameImport> nameImports,
+			List<OrdinalImport> ordinalImports) {
 		this.name = name;
 		this.nameImports = new ArrayList<>(nameImports);
 		this.ordinalImports = new ArrayList<>(ordinalImports);
 	}
-	
+
 	public List<PhysicalLocation> getLocations() {
-	    List<PhysicalLocation> locs = new ArrayList<>();
-	    for(NameImport i : nameImports) {
-	        locs.addAll(i.getLocations());
-	    }
-	    for(OrdinalImport i : ordinalImports) {
-            locs.addAll(i.getLocations());
-        }
-	    return locs;
+		List<PhysicalLocation> locs = new ArrayList<>();
+		for (NameImport i : nameImports) {
+			locs.addAll(i.getLocations());
+		}
+		for (OrdinalImport i : ordinalImports) {
+			locs.addAll(i.getLocations());
+		}
+		return locs;
 	}
-	
+
 	/**
 	 * Creates an empty ImportDLL instance (without symbol imports)
 	 * 
-	 * @param name the DLL's name
+	 * @param name
+	 *            the DLL's name
 	 */
 	public ImportDLL(String name) {
 		this.name = name;
 		this.nameImports = new ArrayList<>();
 		this.ordinalImports = new ArrayList<>();
 	}
-	
+
 	/**
 	 * Adds an import by name to the list
 	 * 
-	 * @param nameImport the import by name
+	 * @param nameImport
+	 *            the import by name
 	 */
 	public void add(NameImport nameImport) {
 		this.nameImports.add(nameImport);
 	}
-	
+
 	/**
 	 * Adds an import by ordinal to the list
 	 * 
-	 * @param ordImport the import by ordinal
+	 * @param ordImport
+	 *            the import by ordinal
 	 */
 	public void add(OrdinalImport ordImport) {
 		this.ordinalImports.add(ordImport);
 	}
-	
+
 	/**
 	 * Returns the name of the DLL
 	 * 
@@ -105,7 +114,7 @@ public class ImportDLL {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * Returns a copied list of all imports by name.
 	 * 
@@ -114,27 +123,54 @@ public class ImportDLL {
 	public List<NameImport> getNameImports() {
 		return new ArrayList<>(nameImports);
 	}
-	
+
 	/**
-     * Returns a copied list of all imports by ordinal.
-     * 
-     * @return imports by ordinal
-     */
+	 * Returns a copied list of all imports by ordinal.
+	 * 
+	 * @return imports by ordinal
+	 */
 	public List<OrdinalImport> getOrdinalImports() {
 		return new ArrayList<>(ordinalImports);
 	}
-	
+
+	private static Optional<SymbolDescription> findSymbolByName(
+			List<SymbolDescription> list, String name) {
+		for (SymbolDescription symbol : list) {
+			if (symbol.getSymbolName().equals(name)) {
+				return Optional.of(symbol);
+			}
+		}
+		if (name.endsWith("W") || name.endsWith("A")) {
+			return findSymbolByName(list, name.substring(0, name.length() - 1));
+		}
+		return Optional.absent();
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public String toString() {
+		List<SymbolDescription> symbolDescriptions = null;
+		try {
+			symbolDescriptions = IOUtil.readSymbolDescriptions();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		StringBuilder buffer = new StringBuilder();
 		buffer.append(name + IOUtil.NL);
-		for(Import nameImport : nameImports) {
-			buffer.append(nameImport.toString() + IOUtil.NL);
+		for (NameImport nameImport : nameImports) {
+			buffer.append(nameImport.toString());
+			if (symbolDescriptions != null) {
+				Optional<SymbolDescription> symbol = findSymbolByName(
+						symbolDescriptions, nameImport.getName());
+				if (symbol.isPresent()) {
+					buffer.append(" -> " + symbol.get().getDescription().or(symbol.get().getCategory()));
+				}
+			}
+			buffer.append(IOUtil.NL);
 		}
-		for(Import ordImport : ordinalImports) {
+		for (Import ordImport : ordinalImports) {
 			buffer.append(ordImport.toString() + IOUtil.NL);
 		}
 		return buffer.toString();
