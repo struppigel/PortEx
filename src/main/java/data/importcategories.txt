@@ -2459,7 +2459,7 @@ URLAssociationDialog;Invokes the unregistered URL protocol dialog box. This dial
 WinExecError;Retrieves the error value generated if the WinExec function cannot run a specified application.
 WinHelp;Launches Windows Help (Winhelp.exe) and passes additional data that indicates the nature of the help requested by the application.
 
-[COM]
+[COM Fundamentals]
 BindMoniker;Locates an object by means of its moniker, activates the object if it is inactive, and retrieves a pointer to the specified interface on that object.
 CLSIDFromProgID;Looks up a CLSID in the registry, given a ProgID.
 CLSIDFromProgIDEx;Triggers automatic installation if the COMClassStore policy is enabled.
@@ -2590,6 +2590,118 @@ ProgIDFromCLSID;Retrieves the ProgID for a given CLSID.
 StringFromCLSID;Converts a CLSID into a string of printable characters. Different CLSIDs always convert to different strings.
 StringFromGUID2;Converts a globally unique identifier (GUID) into a string of printable characters.
 StringFromIID;Converts an interface identifier into a string of printable characters.
+
+[COM OLE and Data Transfer]
+CreateDataAdviseHolder
+CreateDataCache
+CreateFormatEnumerator
+CreateOleAdviseHolder
+DoDragDrop
+OleCreate
+OleCreateDefaultHandler
+OleCreateEmbeddingHelper
+OleCreateEx
+OleCreateFontIndirect
+OleCreateFromData
+OleCreateFromDataEx
+OleCreateFromFile
+OleCreateFromFileEx
+OleCreateLink
+OleCreateLinkEx
+OleCreateLinkFromData
+OleCreateLinkFromDataEx
+OleCreateLinkToFile
+OleCreateLinkToFileEx
+OleCreateMenuDescriptor
+OleCreatePictureIndirect
+OleCreateStaticFromData
+OleDestroyMenuDescriptor
+OleDraw
+OleDuplicateData
+OleFlushClipboard
+OleGetClipboard
+OleInitialize
+OleIsCurrentClipboard
+OleIsRunning
+OleLoad
+OleLoadFromStream
+OleLoadPicture
+OleLoadPictureEx
+OleLockRunning
+OleMetafilePictFromIconAndLabel
+OleNoteObjectVisible
+OleQueryCreateFromData
+OleQueryLinkFromData
+OleRegEnumFormatEtc
+OleRegEnumVerbs
+OleRun
+OleSave
+OleSaveToStream
+OleSetClipboard
+OleSetContainedObject
+OleSetMenuDescriptor
+OleTranslateAccelerator
+OleUIAddVerbMenu
+OleUIBusy
+OleUICanConvertOrActivateAs
+OleUIChangeIcon
+OleUIChangeSource
+OleUIConvert
+OleUIEditLinks
+OleUIInsertObject
+OleUIObjectProperties
+OleUIPasteSpecial
+OleUIPromptUser
+OleUIUpdateLinks
+OleUninitialize
+RegisterDragDrop
+ReleaseStgMedium
+RevokeDragDrop
+
+[Structured Storage]
+CreateILockBytesOnHGlobal
+CreateStreamOnHGlobal
+FmtIdToPropStgName
+FreePropVariantArray
+GetConvertStg
+GetHGlobalFromILockBytes
+GetHGlobalFromStream
+OleConvertIStorageToOLESTREAM
+OleConvertIStorageToOLESTREAMEx
+OleConvertOLESTREAMToIStorage
+OleConvertOLESTREAMToIStorageEx
+PropStgNameToFmtId
+PropVariantClear
+PropVariantCopy
+PropVariantInit
+ReadClassStg
+ReadClassStm
+ReadFmtUserTypeStg
+StgConvertPropertyToVariant
+SetConvertStg
+StgConvertVariantToProperty
+StgCreateDocfile
+StgCreateDocfileOnILockBytes
+StgCreatePropSetStg
+StgCreatePropStg
+StgCreateStorageEx
+StgDeserializePropVariant
+StgGetIFillLockBytesOnFile
+StgGetIFillLockBytesOnILockBytes
+StgIsStorageFile
+StgIsStorageILockBytes
+StgOpenAsyncDocfileOnIFillLockBytes
+StgOpenLayoutDocfile
+StgOpenPropStg
+StgOpenStorage
+StgOpenStorageEx
+StgOpenStorageOnILockBytes
+StgPropertyLengthAsVariant
+StgSerializePropVariant
+StgSetTimes
+WriteClassStg
+WriteClassStm
+WriteFmtUserTypeStg
 
 [Public Device Installation]
 DiInstallDevice
@@ -3009,3 +3121,479 @@ SHRegSetValue;Sets a registry value.
 Use RegSetValue in its place.
 SHRegWriteUSValue;Writes a value to a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
 SHSetValue;Sets the value of a registry key.
+
+[Deprecated Shell APIs]
+AUTO_SCROLL_DATA;AUTO_SCROLL_DATA may be altered or unavailable.
+CABINETSTATE;CABINETSTATE may be altered or unavailable.
+DESKBANDINFO;Receives information about a band object. This structure is used with the deprecated IDeskBand::GetBandInfo method.
+SECURELOCK;Deprecated. This enumeration is used by the BASEBROWSERDATA structure to indicate the base browser's lock icon status.
+FOLDERSETDATA;Deprecated. Data used in IBrowserService2::GetFolderSetData.
+TOOLBARITEM;Deprecated. Data used in IBrowserService2::_GetToolbarItem, IBrowserService2::v_MayGetNextToolbarFocus, and IBrowserService2::_SetFocus to define a toolbar item.
+AddMRUStringW;Adds a string to the top of the most recently used (MRU) list.
+CallCPLEntry16;Performs no function. Provided for backward compatibility.
+CanShareFolderW;Used to determine whether to show the Share this folder option in web view.
+CharLowerWrapW;Converts a Unicode character string or a single character to lowercase. If the operand is a character string, the function converts the characters in place.
+CharUpperBuffWrapW;Converts lowercase characters in a buffer to uppercase characters. The function converts the characters in place.
+CIDLData_CreateFromIDArray;CIDLData_CreateFromIDArray may be altered or unavailable.
+CompareStringWrapW;Compares two Unicode character strings, using a specified locale.
+ConnectToConnectionPoint;Establishes or terminates a connection between a client's sink and a connection point container.
+CreateHardwareEventMoniker;Creates a moniker representing a hardware component and its associated event handler. AutoPlay uses this function to allow applications to use AutoPlay events.
+CreateUserProfileEx;Creates a user profile for a specified user.
+CscSearchApiGetInterface;Creates an instance of a CCscSearchApiInterface object.
+DAD_AutoScroll;Scrolls the window while an image is being dragged.
+DAD_DragEnterEx;Locks updates to the specified window during a drag operation and displays the drag image at the specified position within the window.
+DAD_DragEnterEx2;Locks updates to the specified window during a drag-and-drop operation and displays the drag image at the specified position within the window.
+DAD_DragLeave;Unlocks the window locked by the DAD_DragEnterEx function.
+DAD_DragMove;Moves the image that is being dragged during a drag-and-drop operation.
+DAD_SetDragImage;Sets the drag image.
+DAD_ShowDragImage;Shows or hides the image being dragged.
+DoEnvironmentSubst;Parses an input string that contains references to one or more environment variables and replaces them with their fully expanded values.
+DriveType;DriveType may be altered or unavailable.
+EnumMRUListW;Enumerates the contents of the MRU list. Optionally retrieves an item from the enumeration.
+EstimateFileRiskLevel;Estimates the risk of executing unknown code when a handler is called on a given file. This risk is based on an understanding of the handler and the code content of the file.
+ExtractAssociatedIconEx;ExtractAssociatedIconEx may be altered or unavailable.
+FindResourceWrapW;Determines the location of a resource with the specified type and name, in the specified module.
+GetDateFormatWrapW;Formats a date as a date string for a specified locale. The function formats either a specified date or the local system date.
+GetFileNameFromBrowse;Creates an Open dialog box so that the user can specify the drive, directory, and name of a file to open.
+GetMenuPosFromID;GetMenuPosFromID may be altered or unavailable.
+GetTimeFormatWrapW;Formats time as a time string for a specified locale. The function formats either a specified time or the local system time.
+GUIDFromString;Converts a string to a GUID.
+ILLoadFromStream;Deprecated. Loads an ITEMIDLIST structure from a stream.
+ILLoadFromStreamEx(IStream*, PIDLIST_ABSOLUTE*);This function may be altered or unavailable.
+ILLoadFromStreamEx(IStream*, PIDLIST_RELATIVE*);This function may be altered or unavailable.
+ILLoadFromStreamEx(IStream*, PITEMID_CHILD*);This function may be altered or unavailable.
+IsCharAlphaNumericWrapW;Determines whether a character is either an alphabetical or a numeric character. This determination is based on the semantics of the language selected by the user during setup or through Control Panel.
+IsNetDrive;Tests whether a drive is a network drive.
+IsUserAnAdmin;IsUserAnAdmin may be altered or unavailable.
+LPFNDFMCALLBACK;LPFNDFMCALLBACK may be altered or unavailable.
+LPFNVIEWCALLBACK;Defines the prototype for the callback function used by the system folder view object. This function essentially duplicates the functionality of IShellFolderViewCB.
+LinkWindow_RegisterClass;Registers a window class that allows for the SysLink common control to be used in a window.
+LinkWindow_UnregisterClass;Unregisters a window class registered by LinkWindow_RegisterClass.
+MLFreeLibrary;Unmaps a resource DLL loaded by the MLLoadLibrary function.
+MLHtmlHelp;Displays a help window that corresponds to the current UI language setting.
+MLLoadLibrary;Maps an appropriate resource DLL into the address space of the calling function, based on the user's default UI language.
+MLWinHelp;Starts Windows Help (Winhelp.exe) and passes additional data that indicates the nature of the help requested by the application.
+OpenRegStream;OpenRegStream may be altered or unavailable. Instead, use SHOpenRegStream2 or SHOpenRegStream.
+OutputDebugStringWrapW;Sends a Unicode string to the debugger for display.
+ParseField;Reads a line from Setup.inf and extracts the specified field from the string.
+PassportWizardRunDll;Launches the Passport Wizard when used with Rundll32.exe.
+PathCleanupSpec;PathCleanupSpec may be altered or unavailable.
+PathGetShortPath;PathGetShortPath may be altered or unavailable.
+PathIsExe;PathIsExe may be altered or unavailable.
+PathIsSlow;PathIsSlow may be altered or unavailable.
+PathProcessCommand;Deprecated. Processes a string that contains a command line and generates a suitably quoted string, with arguments attached if required.
+PathResolve;PathResolve may be altered or unavailable.
+PerUserInit;Creates My Documents and other special folders, initializes them as needed, and creates the Send To shortcut menu item for My Documents.
+PFNASYNCICONTASKCALLBACK;Defines the prototype for the callback function used by SHMapIDListToImageListIndexAsync.
+PickIconDlg;PickIconDlg may be altered or unavailable.
+ReadCabinetState;ReadCabinetState may be altered or unavailable.
+RealDriveType;RealDriveType may be altered or unavailable.
+RestartDialog;Displays a dialog box that prompts the user to restart Windows. When the user clicks the button, the function calls ExitWindowsEx to attempt to restart Windows.
+RestartDialogEx;Displays a dialog box that asks the user to restart Windows. When the user clicks the button, the function calls ExitWindowsEx to attempt to restart Windows.
+SHAddFromPropSheetExtArray;Adds pages to a property sheet extension array created by SHCreatePropSheetExtArray.
+SHAlloc;Allocates memory from the Shell's heap.
+SHAllocShared;SHAllocShared may be altered or unavailable.
+SHAnsiToAnsi;Copies an ANSI string.
+SHAnsiToUnicode;Converts a string from the ANSI code page to the Unicode code page.
+SHChangeDWORDAsIDList;SHChangeDWORDAsIDList may be altered or unavailable.
+SHChangeProductKeyAsIDList;SHChangeUpdateImageIDList;SHChangeUpdateImageIDList may be altered or unavailable.
+SHCloneSpecialIDList;SHCloneSpecialIDList may be altered or unavailable. Instead, use SHGetSpecialFolderLocation.
+SHCLSIDFromString;Takes the string form of a class identifier (CLSID) and creates the corresponding CLSID.
+SHCoCreateInstance;SHCoCreateInstance may be altered or unavailable. Instead, use CoCreateInstance.
+SHCreateDirectory;Creates a new file system folder.
+SHCreateDirectoryEx;Creates a new file system folder, with optional security attributes.
+SHCreateFileExtractIcon;SHCreateFileExtractIcon may be altered or unavailable.
+SHCreateProcessAsUserW;Creates a new user-mode process and its primary thread to run a specified executable file.
+SHCREATEPROCESSINFOW;Contains the information needed by SHCreateProcessAsUserW to create a process.
+SHCreatePropSheetExtArray;SHCreatePropSheetExtArray may be altered or unavailable.
+SHCreateQueryCancelAutoPlayMoniker;Deprecated. Creates a QueryCancelAutoPlay class moniker, which can then be used to register the IQueryCancelAutoPlay handler in the running object table (ROT).
+SHCreateStdEnumFmtEtc;SHCreateStdEnumFmtEtc may be altered or unavailable.
+SHCreateStreamOnFile;SHCreateStreamOnFile may be altered or unavailable. Instead, use SHCreateStreamOnFileEx.
+SHDestroyPropSheetExtArray;Frees property sheet handlers that are pointed to an array created by SHCreatePropSheetExtArray.
+Shell_GetCachedImageIndex;Shell_GetCachedImageIndex may be altered or unavailable.
+Shell_GetImageLists;Retrieves system image lists for large and small icons.
+Shell_MergeMenus;Shell_MergeMenus may be altered or unavailable.
+ShellMessageBox;ShellMessageBox may be altered or unavailable.
+SHExtractIconsW;Creates an array of handles to icons extracted from a specified file.
+SHFind_InitMenuPopup;SHFind_InitMenuPopup may be altered or unavailable.
+SHFindFiles;SHFindFiles may be altered or unavailable.
+SHFlushClipboard;Carries out the clipboard shutdown sequence. It also releases the IDataObject pointer placed on the clipboard by the OleSetClipboard function.
+SHFlushSFCache;SHFlushSFCache may be altered or unavailable.
+SHFormatDateTime;SHFormatDateTime may be altered or unavailable.
+SHFormatDrive;SHFormatDrive may be altered or unavailable.
+SHFree;Frees the memory allocated by SHAlloc.
+SHFreeShared;SHFreeShared may be altered or unavailable.
+SHGetAttributesFromDataObject;SHGetAttributesFromDataObject may be altered or unavailable.
+SHGetFolderLocation;Deprecated. Retrieves the path of a folder as an ITEMIDLIST structure.
+SHGetFolderPath;Deprecated. Gets the path of a folder identified by a CSIDL value.
+SHGetFolderPathAndSubDir;Gets the path of a folder and appends a user-provided subfolder path.
+SHGetInverseCMAP;Retrieves the inverse color table mapping for the halftone palette.
+SHGetMalloc;Retrieves a pointer to the Shell's IMalloc interface.
+SHGetRealIDL;SHGetRealIDL may be altered or unavailable.
+SHGetSetFolderCustomSettings;SHGetSetFolderCustomSettings may be altered or unavailable.
+SHGetSetSettings;SHGetSetSettings may be altered or unavailable.
+SHGetShellStyleHInstance;Deprecated. Attempts to get a handle to the Shellstyle.dll file.
+SHGetSpecialFolderLocation;SHGetSpecialFolderLocation is not supported and may be altered or unavailable in the future. Instead, use SHGetFolderLocation.
+SHGetSpecialFolderPath;SHGetSpecialFolderPath is not supported. Instead, use ShGetFolderPath.
+SHGetViewStatePropertyBag;SHGetViewStatePropertyBag may be altered or unavailable.
+SHHandleUpdateImage;SHHandleUpdateImage may be altered or unavailable.
+SHILCreateFromPath;SHILCreateFromPath may be altered or unavailable.
+SHInvokePrinterCommand;Executes a command on a printer object.
+SHIsChildOrSelf;Compares whether a window is equal to, a child of, or a descendant of, a second window.
+SHLimitInputEdit;Sets limits on valid characters for an edit control.
+SHLoadOLE;Deprecated. Provided for backward compatibility.
+SHLockShared;SHLockShared may be altered or unavailable.
+SHMapIDListToImageListIndexAsync;Retrieves an index in the system image list when given an IShellFolder and an ITEMIDLIST that is contained in it. This function also gets the final icon from the callback if necessary.
+SHMapPIDLToSystemImageListIndex;SHMapPIDLToSystemImageListIndex may be altered or unavailable.
+SHMessageBoxCheck;SHMessageBoxCheck may be altered or unavailable.
+SHObjectProperties;SHObjectProperties may be altered or unavailable.
+SHOpenPropSheet;SHOpenPropSheet may be altered or unavailable.
+SHOpenRegStream;Deprecated. Opens a registry value and supplies a stream that can be used to read from or write to the value.
+SHRegGetBoolValueFromHKCUHKLM;Evaluates a registry key value and returns a boolean value that reflects whether the value exists and the expected state matches the actual state. This function will first check HKEY_CURRENT_USER for the requested information in the specified subkey. If the information does not exist under the HKEY_CURRENT_USER subtree it will check the HKEY_LOCAL_MACHINE subtree for the same information.
+SHRegGetValue;Retrieves a registry value.
+SHRegGetValueFromHKCUHKLM;Obtains specified information from the registry. This function will check HKEY_CURRENT_USER for the requested information in the specified subkey. If the information does not exist under the HKEY_CURRENT_USER subtree, the function checks the HKEY_LOCAL_MACHINE subtree for the same information.
+SHReplaceFromPropSheetExtArray;Requests each property sheet in a property sheet extension array to replace pages. Each page is allowed up to one replacement.
+SHRestricted;SHRestricted may be altered or unavailable.
+SHSetFolderPath;Deprecated. Assigns a new path to a system folder identified by its CSIDL.
+SHSendMessageBroadcast;Sends a message to all top-level windows in the system.
+SHShellFolderView_Message;SHShellFolderView_Message may be altered or unavailable.
+SHSimpleIDListFromPath;Deprecated. Returns a pointer to an ITEMIDLIST structure when passed a path.
+SHStartNetConnectionDialog;SHStartNetConnectionDialog may be altered or unavailable.
+SHStripMneumonic;Removes the mnemonic marker from a string.
+SHUnicodeToAnsi;Converts a string from the Unicode code page to the ANSI code page.
+SHUnicodeToUnicode;Copies a Unicode string.
+SHUnlockShared;SHUnlockShared may be altered or unavailable.
+SHValidateUNC;SHValidateUNC may be altered or unavailable.
+SignalFileOpen;SignalFileOpen may be altered or unavailable.
+StopWatchFlush;StopWatchFlush may be altered or unavailable.
+StopWatchMode;StopWatchMode may be altered or unavailable.
+UpdateAllDesktopSubscriptions;Deprecated. Enumerates the URLs of all the Desktop components and then tests to see if they are subscribed to. If they are subscribed to, the subscriptions are delivered.
+UrlFixupW;UrlFixupW may be altered or unavailable.
+WhichPlatform;WhichPlatform may be altered or unavailable.
+Win32DeleteFile;Win32DeleteFile may be altered or unavailable.
+WOWShellExecute;Performs an operation on a specified file. WOWShellExecute exists only for use with the Microsoft Windows NT Virtual DOS Machine (Ntvdm.exe), which allows disk operating system (DOS) and 16-bit software to run on a Windows system, and should not be used by anyone else. Use ShellExecute instead.
+WriteCabinetState;WriteCabinetState may be altered or unavailable.
+SHLWAPI Wrapper Functions;The tables in this document list wrapper functions from Shlwapi.dll that provide limited Unicode functionality to Windows 95, Windows 98, and Windows Millennium Edition (Windows Me).
+FileOpen;Supports the File Open common dialog box.
+FileTypes;Creates the File Types page of the Folder Options property sheet that the user displays by clicking Folder Options on the Windows Explorer Tools menu.
+FolderItemsFDF;Represents a Shell folder and all its children.
+ImageRecompress;Used to recompress an image.
+MenuBand;Supports Shell menu bands.
+MenuBandSite;Gets or sets menu band site information.
+NewMenu;Creates a New context menu for a Shell item.
+ShellFldSetExt;Creates a Folder Options dialog box.
+ShellFolderBand;Manages folder bands. The Quick Launch bar is an example of a folder band.
+Shell Image Store;Creates an instance of an IShellImageStore object.
+IBrowserService;Deprecated. The methods exposed by this interface are analogous to virtual protected methods in normal C++ inheritance. The objects' inheritance hierarchy spans multiple DLLs. The hierarchy is made up of a base class and several derived classes that correspond to controls, including CLSID_WebBrowser and the user's desktop. Objects not in the hierarchy should not implement this interface or use most of its methods.
+IBrowserService2;Deprecated. IBrowserService2 extends IBrowserService. The methods exposed by this interface are analogous to virtual protected methods in normal C++ inheritance. The objects' inheritance hierarchy spans multiple DLLs. The hierarchy is made up of a base class and several derived classes that correspond to controls including CLSID_WebBrowser and the user's desktop. Objects not in the hierarchy should not implement this interface or use most of its methods.
+IBrowserService3;Deprecated. The methods exposed by this interface are analogous to virtual protected methods in normal C++ inheritance. The inheritance hierarchy of the objects spans multiple DLLs. The hierarchy is made up of a base class and several derived classes that correspond to controls, including CLSID_WebBrowser and the user's desktop. Objects not in the hierarchy should not implement this interface, nor use most of its methods.
+IBrowserService4;Deprecated.
+ICDBurnExt;ICDBurnExt may be altered or unavailable.
+IColumnProvider;Exposes methods that enable the addition of custom columns in the Windows Explorer Details view.
+IContextMenuSite;Implemented by the default folder view created using SHCreateShellFolderView. An implementation of IContextMenuSite supports IContextMenu::QueryContextMenu, IContextMenu::InvokeCommand, and TrackPopupMenu and any message forwarding necessary for that function. IContextMenuSite typically updates the status bar as well.
+IDefViewFrame;Used only for its IUnknown functionality. It has no methods of its own.
+IDefViewID;IDefViewID may be altered or unavailable.
+IDefViewSafety;Deprecated. Exposes one method that determines a page's web content zone setting before the page is accessed.
+IDeskBand;Used to obtain information about a band object.
+Important  You should use thumbnail toolbars in new development in place of desk bands, which are not supported as of Windows 7.
+IDeskBand2;Exposes methods to enable and query translucency effects in a deskband object.
+Important  You should use thumbnail toolbars in new development in place of desk bands, which are not supported as of Windows 7.
+IDeskBandInfo;Exposes a method for getting the default Desk Band bandwidth.
+IDeskBar;Exposes methods that enable desk bar manipulation.
+IDocViewSite;Used as a site object by the IShellView interface.
+IDVGetEnum;Exposes methods that allow the system folder view object to provide another object with an enumeration of items, without the second object running a redundant enumeration itself.
+IEnumSyncItems;Exposes methods that provide enumeration of all items in a synchronization schedule.
+IEnumSyncSchedules;Provides enumeration of all synchronization schedules.
+IEnumUserIdentity;IEnumUserIdentity is not supported and may be altered or unavailable in the future. Instead, use User Accounts with Fast User Switching and Remote Desktop.
+IExpDispSupport;Deprecated. Exposes methods that allow the retrieval of properties, translation of keyboard accelerators, and determination of a connection point for certain events.
+IExpDispSupportXP;Deprecated. Exposes methods that allow the retrieval of properties, translation of keyboard accelerators, and determination of a connection point for certain events.
+IFolderBandPriv;IFolderBandPriv is available for use in the operating systems specified in the Requirements section. It may be altered or unavailable in subsequent versions.
+IIdentityChangeNotify;Deprecated. Provides notification of modifications to user identities on the system, as well as user requests to switch the current user identity.
+IInsertItem;IInsertItem may be altered or unavailable.
+IMenuBand;Exposes methods that allow a Component Object Model (COM) object to receive and translate appropriate messages.
+IPassportClientServices;The IPassportClientServices interface exposes a method to determine whether a Windows Live ID exists.
+IPassportWizard;Exposes a method that invokes the Windows XP Passport Wizard.
+IRegTreeItem;Exposes methods that retrieve and set the state of items in a tree-view control that have the Tree-View Control Window Styles flag set.
+IShellExecuteHook;Exposes a method that extends the behavior of the ShellExecute or ShellExecuteEx functions. It is typically implemented by subsystems that expose the names of objects that the user can specify in the Run dialog box after clicking the Windows Start button.
+IShellFolderBand;IShellFolderBand may be altered or unavailable.
+IShellFolderView;Exposes methods that manipulate Shell folder views.
+IShellIconOverlayManager;IShellIconOverlayManager may be altered or unavailable.
+IShellImageData;Exposes methods and properties that display, manipulate, and describe image data.
+IShellImageStore;Deprecated. Exposes methods that manipulate the image cache.
+IShellService;Deprecated. IShellService Exposes one method that declares ownership when a service component implementing a certain interface is shared among multiple clients, such as Windows Internet Explorer and Windows Explorer.
+IShellTaskScheduler;IShellTaskScheduler may be altered or unavailable.
+IShellTaskScheduler2;Extends the functionality of IShellTaskScheduler by inheriting all of its methods, providing the ability to place a task in the queue with reference to other tasks of its priority, and adding a method to reset a task's priority.
+ISyncSchedule;Exposes methods associated with an individual synchronization schedule.
+ISyncScheduleMgr;Exposes methods to set up and control a synchronization scheduler for synchronization management.
+IThumbnailCapture;Exposes a method that obtains a thumbnail representation of an HTML wallpaper.
+ITravelEntry;Deprecated. Exposes methods to identify, invoke, and update an individual item in the browser's travel history.
+ITravelLog;Deprecated. Exposes methods that maintain and manipulate a record of travel in the browser.
+IUserIdentity;IUserIdentity is not supported and may be altered or unavailable in the future. Instead, use User Accounts with Fast User Switching and Remote Desktop.
+IUserIdentity2;IUserIdentity2 is not supported and may be altered or unavailable in the future. Instead, use User Accounts with Fast User Switching and Remote Desktop.
+IUserIdentityManager;IUserIdentityManager is not supported and may be altered or unavailable in the future. Instead, use User Accounts with Fast User Switching and Remote Desktop.
+SFVM_DIDDRAGDROP;SFVM_DIDDRAGDROP may be altered or unavailable.
+SFVM_GETDETAILSOF;SFVM_GETDETAILSOF may be altered or unavailable.
+SFVM_GETPANE;SFVM_GETPANE may be altered or unavailable.
+SFVM_GETZONE;Allows the callback object to provide Internet zone information. Used by IShellFolderViewCB::MessageSFVCB.
+SFVM_QUERYFSNOTIFY;SFVM_QUERYFSNOTIFY may be altered or unavailable.
+SFVM_SETISFV;Notifies the callback object of the container site. This is used only when IObjectWithSite::SetSite is not supported and SHCreateShellFolderViewEx is used. Used by IShellFolderViewCB::MessageSFVCB.
+SFVM_THISIDLIST;SFVM_THISIDLIST may be altered or unavailable.
+
+[Timer]
+KillTimer;Destroys the specified timer. 
+SetCoalscableTimer;Creates a timer with the specified time-out value and coalescing tolerance delay.
+SetTimer;Creates a timer with the specified time-out value.
+TimerProc;An application-defined callback function that processes WM_TIMER messages. The TIMERPROC type defines a pointer to this callback function. TimerProc is a placeholder for the application-defined function name.
+
+[System Services Setup API]
+InstallHinfSection
+SetupAddInstallSectionToDiskSpaceList
+SetupAddSectionToDiskSpaceList
+SetupAddToDiskSpaceList
+SetupAddToSourceList
+SetupAdjustDiskSpaceList
+SetupBackupError
+SetupCancelTemporarySourceList
+SetupCloseFileQueue
+SetupCloseInfFile
+SetupCommitFileQueue
+SetupConfigureWmiFromInfSection
+SetupCopyError
+SetupCopyOEMInf
+SetupCreateDiskSpaceList
+SetupDecompressOrCopyFile
+SetupDefaultQueueCallback
+SetupDeleteError
+SetupDestroyDiskSpaceList
+SetupDuplicateDiskSpaceList
+SetupEnumInfSections
+SetupFindFirstLine
+SetupFindNextLine
+SetupFindNextMatchLine
+SetupFreeSourceList
+SetupGetBinaryField
+SetupGetFieldCount
+SetupGetFileCompressionInfo
+SetupGetFileCompressionInfoEx
+SetupGetFileQueueCount
+SetupGetFileQueueFlags
+SetupGetInfFileList
+SetupGetInfInformation
+SetupGetIntField
+SetupGetLineByIndex
+SetupGetLineCount
+SetupGetLineText
+SetupGetMultiSzField
+SetupGetSourceFileLocation
+SetupGetSourceFileSize
+SetupGetSourceInfo
+SetupGetStringField
+SetupGetTargetPath
+SetupInitDefaultQueueCallback
+SetupInitDefaultQueueCallbackEx
+SetupInitializeFileLog
+SetupInstallFile
+SetupInstallFileEx
+SetupInstallFilesFromInfSection
+SetupInstallFromInfSection
+SetupInstallServicesFromInfSection
+SetupInstallServicesFromInfSectionEx
+SetupIterateCabinet
+SetupLogFile
+SetupLogError
+SetupOpenAppendInfFile
+SetupOpenFileQueue
+SetupOpenInfFile
+SetupOpenMasterInf
+SetupPromptForDisk
+SetupPromptReboot
+SetupQueryDrivesInDiskSpaceList
+SetupQueryFileLog
+SetupQueryInfFileInformation
+SetupQueryInfOriginalFileInformation
+SetupQueryInfVersionInformation
+SetupQuerySourceList
+SetupQuerySpaceRequiredOnDrive
+SetupQueueCopy
+SetupQueueCopyIndirect
+SetupQueueCopySection
+SetupQueueDefaultCopy
+SetupQueueDelete
+SetupQueueDeleteSection
+SetupQueueRename
+SetupQueueRenameSection
+SetupRemoveFileLogEntry
+SetupRemoveFromDiskSpaceList
+SetupRemoveFromSourceList
+SetupRemoveInstallSectionFromDiskSpaceList
+SetupRemoveSectionFromDiskSpaceList
+SetupRenameError
+SetupScanFileQueue
+SetupSetDirectoryId
+SetupSetDirectoryIdEx
+SetupSetFileQueueAlternatePlatform
+SetupSetFileQueueFlags
+SetupSetPlatformPathOverride
+SetupSetSourceList
+SetupTermDefaultQueueCallback
+SetupTerminateFileLog
+SetupUninstallNewlyCopiedInfs
+SetupUninstallOEMInf
+SetupVerifyInfFile
+
+[Network Management]
+<Alert>
+NetAlertRaise;Notifies all registered clients that a particular event has occurred.
+NetAlertRaiseEx;Simplifies notifying registered clients that a particular event has occurred, because, unlike NetAlertRaise, NetAlertRaiseEx does not require a STD_ALERT structure.
+
+<API Buffer>
+NetApiBufferAllocate;Allocates memory from the heap. Call this function when you require compatibility with the NetApiBufferFree function.
+NetApiBufferFree;Frees memory allocated by the NetApiBufferAllocate function and other network management functions.
+NetApiBufferReallocate;Changes the size of a buffer allocated by a call to the NetApiBufferAllocate function.
+NetApiBufferSize;Returns the size, in bytes, of a buffer allocated by a call to the NetApiBufferAllocate function.
+
+<Azure Active Directory Join Information>
+NetFreeAadJoinInformation;Frees the memory allocated for the specified DSREG_JOIN_INFO structure, which contains join information for a tenant and which you retrieved by calling the NetGetAadJoinInformation function.
+NetGetAadJoinInformation;Retrieves the join information for the specified tenant. This function examines the join information for Microsoft Azure Active Directory and the work account that the current user added.
+
+<Directory Service and Domain Join>
+NetAddAlternateComputerName;Adds an alternate name for the specified computer.
+NetCreateProvisioningPackage;Provisions a computer account for later use in an offline domain join operation.
+NetEnumerateComputerNames;Enumerates names for the specified computer.
+NetGetJoinableOUs;Retrieves a list of organizational units (OUs) in which a computer account can be created.
+NetGetJoinInformation;Retrieves join status information for the specified computer.
+NetJoinDomain;Joins a computer to a workgroup or domain.
+NetLogonSetServiceBits;Notifies the Netlogon service of the running state of the services on a domain controller. The caller must be running in the context of either the LocalSystem or the LocalService account.
+NetProvisionComputerAccount;Provisions a computer account for later used in an offline domain join operation.
+NetRemoveAlternateComputerName;Removes an alternate name for the specified computer.
+NetRenameMachineInDomain;Changes the name of a computer in a domain.
+NetRequestOfflineDomainJoin;Executes locally on a machine to modify a Windows operating system image mounted on a volume. The registry is loaded for the image and provisioning blob data is written where it can be retrieved during the completion phase of an offline domain join operation.
+NetRequestProvisioningPackageInstall;Executes locally on a machine to modify a Windows operating system image mounted on a volume. The registry is loaded from the image and provisioning package data is written where it can be retrieved during the completion phase of an offline domain join operation.
+NetSetPrimaryComputerName;Sets the primary computer name for the specified computer.
+NetUnjoinDomain;Unjoins a computer from a workgroup or a domain.
+NetValidateName;Verifies the validity of a computer name, workgroup name, or domain name.
+
+<Get>
+NetGetAnyDCName;Returns the name of any domain controller for a domain that is directly trusted by a specified server.
+NetGetDCName;Returns the name of the primary domain controller (PDC) for the specified domain.
+NetGetDisplayInformationIndex;Returns the index of the first display information entry whose name begins with a specified string or alphabetically follows the string.
+NetQueryDisplayInformation;Returns user, computer, or global group account information.
+
+<Group>
+NetGroupAdd;Creates a global group.
+NetGroupAddUser;Adds one user to an existing global group.
+NetGroupDel;Removes a global group whether or not the group has any members.
+NetGroupDelUser;Removes one user name from a global group.
+NetGroupEnum;Lists all global groups on a server.
+NetGroupGetInfo;Returns information about a particular global group.
+NetGroupGetUsers;Lists all members of a particular global group.
+NetGroupSetInfo;Sets general information about a global group.
+NetGroupSetUsers;Assigns members to a new global group; replaces the members of an existing group.
+
+<Local Group>
+NetLocalGroupAdd;Creates a local group.
+NetLocalGroupAddMembers;Adds one or more users or global groups to an existing local group.
+NetLocalGroupDel;Deletes a local group, removing all existing members from the group.
+NetLocalGroupDelMembers;Removes one or more members from an existing local group.
+NetLocalGroupEnum;Returns information about each local group account on a server.
+NetLocalGroupGetInfo;Returns information about a particular local group account on a server.
+NetLocalGroupGetMembers;Lists all members of a specified local group.
+NetLocalGroupSetInfo;Sets general information about a local group.
+NetLocalGroupSetMembers;Assigns members to a local group.
+
+<Message>
+NetMessageBufferSend;Sends a message to a registered message alias.
+NetMessageNameAdd;Registers a message alias in the message name table.
+NetMessageNameDel;Deletes a message alias from the message name table.
+NetMessageNameEnum;Lists all the message aliases stored in the message name table.
+NetMessageNameGetInfo;Returns information about a particular message alias in the message name table.
+
+<NetFile>
+NetFileClose;Forces a resource to close.
+NetFileEnum;Returns information about open files on a server.
+NetFileGetInfo;Returns information about a particular opening of a server resource.
+
+<Remote Utility>
+NetRemoteComputerSupports;Queries the redirector to retrieve the optional features that a remote system supports.
+NetRemoteTOD;Enables applications to access the time-of-day information on a remote server.
+
+<Schedule>
+NetScheduleJobAdd;Submits a job to run at a specified future date and time.
+NetScheduleJobDel;Cancels a range of jobs queued to run on a computer.
+NetScheduleJobEnum;Lists the jobs queued on a specified computer.
+NetScheduleJobGetInfo;Returns information about a particular job queued on a computer.
+GetNetScheduleAccountInformation;Retrieves the AT Service account name.
+SetNetScheduleAccountInformation;Sets the AT Service account name and password.
+
+<Server>
+NetServerDiskEnum;Returns a list of local disk drives on a server.
+NetServerEnum;Lists all visible servers of a particular type (or types) in the specified domain.
+NetServerGetInfo;Returns configuration information about a specified server.
+NetServerSetInfo;Sets the operating parameters for a server.
+
+<Server and Workstation Transport>
+NetServerComputerNameAdd;Binds an emulated server name to each of the transport protocols on which a server is active. (Combines the functionality of the NetServerTransportEnum function and the NetServerTransportAddEx function.)
+NetServerComputerNameDel;Disconnects each network transport protocol from an emulated server name set by a previous call to the NetServerComputerNameAdd function.
+NetServerTransportAdd;Binds the specified server to the transport protocol. (This function supports only the SERVER_TRANSPORT_INFO_0 information level.)
+NetServerTransportAddEx;Binds the specified server to the transport protocol. (This extended function supports the SERVER_TRANSPORT_INFO_1, SERVER_TRANSPORT_INFO_2, and SERVER_TRANSPORT_INFO_3 information levels.)
+NetServerTransportDel;Disconnects the transport protocol from the server.
+NetServerTransportEnum;Enumerates the transport protocols managed by the server.
+NetWkstaTransportEnum;Lists the transport protocols that are managed by the redirector.
+
+<Use>
+NetUseAdd;Creates a connection between a local computer and a server.
+NetUseDel;Ends a connection to a shared resource.
+NetUseEnum;Lists all current connections between the local computer and resources on remote servers.
+NetUseGetInfo;Returns information about a connection to a shared resource.
+
+<User>
+NetUserAdd;Adds a user account and assigns a password and privilege level.
+NetUserChangePassword;Changes a user's password for a specified network server or domain.
+NetUserDel;Deletes a user account from the server.
+NetUserEnum;Lists all user accounts on a server.
+NetUserGetGroups;Returns a list of global group names to which a user belongs.
+NetUserGetInfo;Returns information about a particular user account on a server.
+NetUserGetLocalGroups;Returns a list of local group names to which a user belongs.
+NetUserSetGroups;Sets global group memberships for a specified user account.
+NetUserSetInfo;Sets the password and other elements of a user account.
+
+<User Modals>
+NetUserModalsGet;Returns global information for all users and global groups in the security database, which is the security accounts manager (SAM) database or, in the case of domain controllers, the Active Directory.
+NetUserModalsSet;Sets global information for all users and global groups in the security database.
+
+<Validation>
+NetValidatePasswordPolicyFree;Frees the memory that the NetValidatePasswordPolicy function allocates for the OutputArg parameter,
+NetValidatePasswordPolicy;Enables an application to check password compliance against an application-provided account database and verify that passwords meet the complexity, aging, minimum length, and history reuse requirements of a password policy.
+
+<Workstation and Workstation User>
+NetWkstaGetInfo;Returns information about the configuration elements for a workstation.
+NetWkstaSetInfo;Configures a workstation.
+NetWkstaUserEnum;Lists information about all users currently logged on to the workstation.
+NetWkstaUserGetInfo;Returns information about one currently logged-on user.
+NetWkstaUserSetInfo;Sets the user-specific information for the configuration elements of a workstation.
+
+<Obsolete>
+NetAccessAdd
+NetAccessCheck
+NetAccessDel
+NetAccessEnum
+NetAccessGetInfo
+NetAccessGetUserPerms
+NetAccessSetInfo
+NetAuditClear
+NetAuditRead
+NetAuditWrite
+NetConfigGet
+NetConfigGetAll
+NetConfigSet
+NetErrorLogClear
+NetErrorLogRead
+NetErrorLogWrite
+NetLocalGroupAddMember
+NetLocalGroupDelMember
+NetServiceControl
+NetServiceEnum
+NetServiceGetInfo
+NetServiceInstall
+NetWkstaTransportAdd
+NetWkstaTransportDel
