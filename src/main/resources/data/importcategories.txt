@@ -364,6 +364,7 @@ LocalDiscard
 GlobalFlags
 LocalFlags
 GlobalFree
+LocalFree
 GlobalHandle
 LocalHandle
 GlobalLock
@@ -827,17 +828,21 @@ SystemTimeToTzSpecificLocalTime;Converts a UTC time to a specified time zone's c
 TzSpecificLocalTimeToSystemTime;Converts a local time to a UTC time.
 
 <Local Time>
-GetSystemTime;Retrieves the current system date and time in UTC format.
-GetSystemTimeAdjustment;Determines whether the system is applying periodic time adjustments to its time-of-day clock.
-GetTimeFormat;Formats a system time as a time string for a specified locale.
-NtQuerySystemTime;Returns the system time.
+EnumDynamicTimeZoneInformation;Enumerates dynamic daylight saving time information entries stored in the registry.
+FileTimeToLocalFileTime;Converts a UTC file time to a local file time.
+GetDynamicTimeZoneInformation;Retrieves the current time zone and dynamic daylight saving time settings.
+GetDynamicTimeZoneInformationEffectiveYears;Retrieves a range, expressed in years, for which a DYNAMIC_TIME_ZONE_INFORMATION has valid entries.
+GetLocalTime;Retrieves the current local date and time.
+GetTimeZoneInformation;Retrieves the current time zone settings.
+GetTimeZoneInformationForYear;Retrieves the time zone settings for the specified year and time zone.
 RtlLocalTimeToSystemTime;Converts the specified local time to system time.
-RtlTimeToSecondsSince1970;Converts the specified system time to the number of seconds since the first second of January 1, 1970.
-SetSystemTime;Sets the current system time and date.
-SetSystemTimeAdjustment;Enables or disables periodic time adjustments to the system's time-of-day clock.
-SystemTimeToFileTime;Converts a system time to a file time.
+SetDynamicTimeZoneInformation;Sets the current time zone and dynamic daylight saving time settings.
+SetLocalTime;Sets the current local time and date.
+SetTimeZoneInformation;Sets the current time zone settings.
 SystemTimeToTzSpecificLocalTime;Converts a UTC time to a specified time zone's corresponding local time.
+SystemTimeToTzSpecificLocalTimeEx;Converts a UTC time with dynamic daylight saving time settings to a specified time zone's corresponding local time.
 TzSpecificLocalTimeToSystemTime;Converts a local time to a UTC time.
+TzSpecificLocalTimeToSystemTimeEx;Converts a local time with dynamic daylight saving time settings to UTC time.
 
 <File Time>
 CompareFileTime;Compares two file times.
@@ -1183,3 +1188,1824 @@ WriteConsoleInput;Writes data directly to the console input buffer.
 WriteConsoleOutput;Writes character and color attribute data to a specified rectangular block of character cells in a console screen buffer.
 WriteConsoleOutputAttribute;Copies a number of foreground and background color attributes to consecutive cells of a console screen buffer.
 WriteConsoleOutputCharacter;Copies a number of characters to consecutive cells of a console screen buffer.
+
+[Volume Management]
+DefineDosDevice;Defines, redefines, or deletes MS-DOS device names.
+DeleteVolumeMountPoint;Deletes a drive letter or mounted folder.
+FindFirstVolume;Retrieves the name of a volume on a computer.
+FindFirstVolumeMountPoint;Retrieves the name of a mounted folder on the specified volume.
+FindNextVolume;Continues a volume search started by a call to the FindFirstVolume function.
+FindNextVolumeMountPoint;Continues a mounted folder search started by a call to the FindFirstVolumeMountPoint function.
+FindVolumeClose;Closes the specified volume search handle.
+FindVolumeMountPointClose;Closes the specified mounted folder search handle.
+GetDriveType;Determines whether a disk drive is a removable, fixed, CD-ROM, RAM disk, or network drive.
+GetLogicalDrives;Retrieves a bitmask representing the currently available disk drives.
+GetLogicalDriveStrings;Fills a buffer with strings that specify valid drives in the system.
+GetVolumeInformation;Retrieves information about the file system and volume associated with the specified root directory.
+GetVolumeInformationByHandleW;Retrieves information about the file system and volume associated with the specified file.
+GetVolumeNameForVolumeMountPoint;Retrieves a volume GUID path for the volume that is associated with the specified volume mount point ( drive letter, volume GUID path, or mounted folder).
+GetVolumePathName;Retrieves the volume mount point where the specified path is mounted.
+GetVolumePathNamesForVolumeName;Retrieves a list of drive letters and mounted folder paths for the specified volume.
+QueryDosDevice;Retrieves information about MS-DOS device names.
+SetVolumeLabel;Sets the label of a file system volume.
+SetVolumeMountPoint;Associates a volume with a drive letter or a directory on another volume.
+
+[Resource]
+BeginUpdateResource
+CopyImage
+EndUpdateResource
+EnumResLangProc
+EnumResNameProc
+EnumResourceLanguages
+EnumResourceLanguagesEx
+EnumResourceNames
+EnumResourceNamesEx
+EnumResourceTypes
+EnumResourceTypesEx
+EnumResTypeProc
+FindResource
+FindResourceEx
+FreeResource
+LoadImage
+LoadResource
+LockResource
+SizeofResource
+UpdateResource
+
+[Disk Management]
+GetDiskFreeSpace;Retrieves information about the specified disk, including the amount of free space on the disk.
+GetDiskFreeSpaceEx;Retrieves information about the amount of space that is available on a disk volume, which is the total amount of space, the total amount of free space, and the total amount of free space available to the user that is associated with the calling thread.
+CreateFile;Creates or opens a file or I/O device. The most commonly used I/O devices are as follows: file, file stream, directory, physical disk, volume, console buffer, tape drive, communications resource, mailslot, and pipe.
+DeleteFile;Deletes an existing file.
+
+[Atom]
+AddAtom
+DeleteAtom
+FindAtom
+GetAtomName
+GlobalAddAtom
+GlobalDeleteAtom
+GlobalFindAtom
+GlobalGetAtomName
+InitAtomTable
+
+[Delphi]
+SetHandleCount;Sets the number of file handles available to a process. 
+
+[Registry]
+GetSystemRegistryQuota;Retrieves the current size of the registry and the maximum size that the registry is allowed to attain on the system.
+RegCloseKey;Closes a handle to the specified registry key.
+RegConnectRegistry;Establishes a connection to a predefined registry handle on another computer.
+RegCopyTree;Copies the specified registry key, along with its values and subkeys, to the specified destination key.
+RegCreateKeyEx;Creates the specified registry key.
+RegCreateKeyTransacted;Creates the specified registry key and associates it with a transaction.
+RegDeleteKey;Deletes a subkey and its values.
+RegDeleteKeyEx;Deletes a subkey and its values from the specified platform-specific view of the registry.
+RegDeleteKeyTransacted;Deletes a subkey and its values from the specified platform-specific view of the registry as a transacted operation.
+RegDeleteKeyValue;Removes the specified value from the specified registry key and subkey.
+RegDeleteTree;Deletes the subkeys and values of the specified key recursively.
+RegDeleteValue;Removes a named value from the specified registry key.
+RegDisablePredefinedCache;Disables handle caching for the predefined registry handle for HKEY_CURRENT_USER for the current process.
+RegDisablePredefinedCacheEx;Disables handle caching for all predefined registry handles for the current process.
+RegDisableReflectionKey;Disables registry reflection for the specified key.
+RegEnableReflectionKey;Enables registry reflection for the specified disabled key.
+RegEnumKeyEx;Enumerates the subkeys of the specified open registry key.
+RegEnumValue;Enumerates the values for the specified open registry key.
+RegFlushKey;Writes all attributes of the specified open registry key into the registry.
+RegGetKeySecurity;Retrieves a copy of the security descriptor protecting the specified open registry key.
+RegGetValue;Retrieves the type and data for the specified registry value.
+RegLoadKey;Creates a subkey under HKEY_USERS or HKEY_LOCAL_MACHINE and stores registration information from a specified file into that subkey.
+RegLoadMUIString;Loads the specified string from the specified key and subkey.
+RegNotifyChangeKeyValue;Notifies the caller about changes to the attributes or contents of a specified registry key.
+RegOpenCurrentUser;Retrieves a handle to the HKEY_CURRENT_USER key for the user the current thread is impersonating.
+RegOpenKeyEx;Opens the specified registry key.
+RegOpenKeyTransacted;Opens the specified registry key and associates it with a transaction.
+RegOpenUserClassesRoot;Retrieves a handle to the HKEY_CLASSES_ROOT key for the specified user.
+RegOverridePredefKey;Maps a predefined registry key to a specified registry key.
+RegQueryInfoKey;Retrieves information about the specified registry key.
+RegQueryMultipleValues;Retrieves the type and data for a list of value names associated with an open registry key.
+RegQueryReflectionKey;Determines whether reflection has been disabled or enabled for the specified key.
+RegQueryValueEx;Retrieves the type and data for a specified value name associated with an open registry key.
+RegReplaceKey;Replaces the file backing a registry key and all its subkeys with another file.
+RegRestoreKey;Reads the registry information in a specified file and copies it over the specified key.
+RegSaveKey;Saves the specified key and all of its subkeys and values to a new file.
+RegSaveKeyEx;Saves the specified key and all of its subkeys and values to a new file. You can specify the format for the saved key or hive.
+RegSetKeyValue;Sets the data for the specified value in the specified registry key and subkey.
+RegSetKeySecurity;Sets the security of an open registry key.
+RegSetValueEx;Sets the data and type of a specified value under a registry key.
+RegUnLoadKey;Unloads the specified registry key and its subkeys from the registry.
+
+<Initialization-File only 16-bit>
+GetPrivateProfileInt;Retrieves an integer associated with a key in the specified section of an initialization file.
+GetPrivateProfileSection;Retrieves all the keys and values for the specified section of an initialization file.
+GetPrivateProfileSectionNames;Retrieves the names of all sections in an initialization file.
+GetPrivateProfileString;Retrieves a string from the specified section in an initialization file.
+GetPrivateProfileStruct;Retrieves the data associated with a key in the specified section of an initialization file.
+GetProfileInt;Retrieves an integer from a key in the specified section of the Win.ini file.
+GetProfileSection;Retrieves all the keys and values for the specified section of the Win.ini file.
+GetProfileString;Retrieves the string associated with a key in the specified section of the Win.ini file.
+WritePrivateProfileSection;Replaces the keys and values for the specified section in an initialization file.
+WritePrivateProfileString;Copies a string into the specified section of an initialization file.
+WritePrivateProfileStruct;Copies data into a key in the specified section of an initialization file.
+WriteProfileSection;Replaces the contents of the specified section in the Win.ini file with specified keys and values.
+WriteProfileString;Copies a string into the specified section of the Win.ini file.
+
+<Obsolete>
+RegCreateKey
+RegEnumKey
+RegOpenKey
+RegQueryValue
+RegSetValue
+
+[Message]
+BroadcastSystemMessage
+BroadcastSystemMessageEx
+DispatchMessage
+GetInputState
+GetMessage
+GetMessageExtraInfo
+GetMessagePos
+GetMessageTime
+GetQueueStatus
+InSendMessage
+InSendMessageEx
+PeekMessage
+PostMessage
+PostQuitMessage
+PostThreadMessage
+RegisterWindowMessage
+ReplyMessage
+SendAsyncProc
+SendMessage
+SendMessageCallback
+SendMessageTimeout
+SendNotifyMessage
+SetMessageExtraInfo
+TranslateMessage
+WaitMessage
+
+[Dialog Box]
+CreateDialog
+CreateDialogIndirect
+CreateDialogIndirectParam
+CreateDialogParam
+DefDlgProc
+DialogBox
+DialogBoxIndirect
+DialogBoxIndirectParam
+DialogBoxParam
+DialogProc
+EndDialog
+GetDialogBaseUnits
+GetDlgCtrlID
+GetDlgItem
+GetDlgItemInt
+GetDlgItemText
+GetNextDlgGroupItem
+GetNextDlgTabItem
+IsDialogMessage
+MapDialogRect
+MessageBox
+MessageBoxEx
+MessageBoxIndirect
+SendDlgItemMessage
+SetDlgItemInt
+SetDlgItemText
+
+[Windows Class]
+GetClassInfo
+GetClassInfoEx
+GetClassLong
+GetClassLongPtr
+GetClassName
+GetClassWord
+GetWindowLong
+GetWindowLongPtr
+RegisterClass
+RegisterClassEx
+SetClassLong
+SetClassLongPtr
+SetClassWord
+SetWindowLong
+SetWindowLongPtr
+UnregisterClass
+
+[Mouse Input]
+_TrackMouseEvent;Posts messages when the mouse pointer leaves a window or hovers over a window for a specified amount of time. This function calls TrackMouseEvent if it exists, otherwise it emulates it.
+DragDetect;Captures the mouse and tracks its movement until the user releases the left button, presses the ESC key, or moves the mouse outside the drag rectangle around the specified point. The width and height of the drag rectangle are specified by the SM_CXDRAG and SM_CYDRAG values returned by the GetSystemMetrics function.
+GetCapture;Retrieves a handle to the window (if any) that has captured the mouse. Only one window at a time can capture the mouse; this window receives mouse input whether or not the cursor is within its borders.
+GetDoubleClickTime;Retrieves the current double-click time for the mouse. A double-click is a series of two clicks of the mouse button, the second occurring within a specified time after the first. The double-click time is the maximum number of milliseconds that may occur between the first and second click of a double-click. The maximum double-click time is 5000 milliseconds.
+GetMouseMovePointsEx;Retrieves a history of up to 64 previous coordinates of the mouse or pen.
+mouse_event;The mouse_event function synthesizes mouse motion and button clicks.
+ReleaseCapture;Releases the mouse capture from a window in the current thread and restores normal mouse input processing. A window that has captured the mouse receives all mouse input, regardless of the position of the cursor, except when a mouse button is clicked while the cursor hot spot is in the window of another thread.
+SetCapture;Sets the mouse capture to the specified window belonging to the current thread.
+SetDoubleClickTime;Sets the double-click time for the mouse. A double-click is a series of two clicks of a mouse button, the second occurring within a specified time after the first. The double-click time is the maximum number of milliseconds that may occur between the first and second clicks of a double-click.
+SwapMouseButton;Reverses or restores the meaning of the left and right mouse buttons.
+TrackMouseEvent;Posts messages when the mouse pointer leaves a window or hovers over a window for a specified amount of time.
+
+[Painting and Drawing]
+BeginPaint;Prepares a window for painting.
+DrawAnimatedRects;Draws a rectangle and animates it to indicate icon or window activity.
+DrawCaption;Draws a window caption.
+DrawEdge;Draws one or more edges of rectangle.
+DrawFocusRect;Draws a rectangle in the style that indicates the rectangle has the focus.
+DrawFrameControl;Draws a frame control.
+DrawState;Displays an image and applies a visual effect to indicate a state.
+DrawStateProc;A callback function that renders a complex image for DrawState.
+EndPaint;Marks the end of painting in a window.
+ExcludeUpdateRgn;Prevents drawing within invalid areas of a window.
+GdiFlush;Flushes the calling thread's current batch.
+GdiGetBatchLimit;Returns the maximum number of function calls that can be accumulated in the calling thread's current batch.
+GdiSetBatchLimit;Sets the maximum number of function calls that can be accumulated in the calling thread's current batch.
+GetBkColor;Returns the background color for a device context.
+GetBkMode;Returns the background mix mode for a device context.
+GetBoundsRect;Gets the accumulated bounding rectangle for a device context.
+GetROP2;Gets the foreground mix mode of a device context.
+GetUpdateRect;Gets the coordinates of the smallest rectangle that encloses the update region of a window.
+GetUpdateRgn;Gets the update region of a window.
+GetWindowDC;Gets the device context for a window, including title bar, menus, and scroll bars.
+GetWindowRgn;Gets a copy of the window region of a window.
+GetWindowRgnBox;Gets the dimensions of the tightest bounding rectangle for the window region of a window.
+GrayString;Draws gray text at a location.
+InvalidateRect;Adds a rectangle to a window's update region.
+InvalidateRgn;Invalidates the client area within a region.
+LockWindowUpdate;Disables or enables drawing in a window.
+OutputProc;A callback function used with the GrayString function. It is used to draw a string.
+PaintDesktop;Fills the clipping region in a device context with a pattern.
+RedrawWindow;Updates a region in a window's client area.
+SetBkColor;Sets the background to a color value.
+SetBkMode;Sets the background mix mode of a device context.
+SetBoundsRect;Controls the accumulation of bounding rectangle information for a device context.
+SetROP2;Sets the foreground mix mode.
+SetWindowRgn;Sets the window region of a window.
+UpdateWindow;Updates the client area of a window.
+ValidateRect;Validates the client area within a rectangle.
+ValidateRgn;Validates the client area within a region.
+WindowFromDC;Returns a handle to the window associated with a device context.
+
+[Cryptography Functions]
+<CryptXML>
+CryptXmlCreateReference;Creates a reference to an XML signature.
+CryptXmlAddObject;Adds the Object element to the Signature in the Document Context opened for encoding.
+CryptXmlClose;Closes a cryptographic XML object handle.
+CryptXmlDigestReference;Used by an application to digest the resolved reference. This function applies transforms before updating the digest.
+CryptXmlDllCloseDigest;Frees the CRYPT_XML_DIGEST allocated by the CryptXmlDllCreateDigest function.
+CryptXmlDllCreateDigest;Creates a digest object for the specified method.
+CryptXmlDllCreateKey;Parses the KeyValue element and creates a Cryptography API: Next Generation (CNG) BCrypt key handle to verify a signature.
+CryptXmlDllDigestData;Puts data into the digest.
+CryptXmlDllEncodeAlgorithm;Encodes SignatureMethod or DigestMethod elements for agile algorithms with default parameters.
+CryptXmlDllEncodeKeyValue;Encodes a KeyValue element.
+CryptXmlDllFinalizeDigest;Retrieves the digest value.
+CryptXmlDllGetAlgorithmInfo;Decodes the XML algorithm and returns information about the algorithm.
+CryptXmlDllGetInterface;Retrieves a pointer to the cryptographic extension functions for the specified algorithm.
+CryptXmlDllSignData;Signs data.
+CryptXmlDllVerifySignature;Verifies a signature.
+CryptXmlEncode;Encodes signature data by using the supplied XML writer callback function.
+CryptXmlGetAlgorithmInfo;Decodes the CRYPT_XML_ALGORITHM structure and returns information about the algorithm.
+CryptXmlGetDocContext;Returns the document context specified by the supplied handle.
+CryptXmlGetReference;Returns the Reference element specified by the supplied handle.
+CryptXmlGetSignature;Returns an XML Signature element.
+CryptXmlGetStatus;Returns a CRYPT_XML_STATUS structure that contains status information about the object specified by the supplied handle.
+CryptXmlGetTransforms;Returns information about the default transform chain engine.
+CryptXmlImportPublicKey;Imports the public key specified by the supplied handle.
+CryptXmlOpenToEncode;Opens an XML digital signature to encode and returns a handle of the opened Signature element. The handle encapsulates a document context with a single CRYPT_XML_SIGNATURE structure and remains open until the CryptXmlClose function is called.
+CryptXmlOpenToDecode;Opens an XML digital signature to decode and returns the handle of the document context that encapsulates a CRYPT_XML_SIGNATURE structure. The document context can include one or more Signature elements.
+CryptXmlSetHMACSecret;Sets the HMAC secret on the handle before calling the CryptXmlSign or CryptXmlVerify function.
+CryptXmlSign;Creates a cryptographic signature of a SignedInfo element.
+CryptXmlVerifySignature;Performs a cryptographic signature validation of a SignedInfo element.
+PFN_CRYPT_XML_WRITE_CALLBACK;Creates a transform for a specified data provider.
+PFN_CRYPT_XML_CREATE_TRANSFORM;Writes cryptographic XML data.
+PFN_CRYPT_XML_DATA_PROVIDER_READ;Reads cryptographic XML data.
+PFN_CRYPT_XML_DATA_PROVIDER_CLOSE;Releases the cryptographic XML data provider.
+PFN_CRYPT_XML_ENUM_ALG_INFO;Enumerates predefined and registered CRYPT_XML_ALGORITHM_INFO entries.
+
+<Signer>
+SignerFreeSignerContext;Frees a SIGNER_CONTEXT structure allocated by a previous call to the SignerSignEx function.
+SignError;Calls the GetLastError function and converts the return code to an HRESULT.
+SignerSign;Signs the specified file.
+SignerSignEx;Signs the specified file and returns a pointer to the signed data.
+SignerSignEx2;Signs and time stamps the specified file, allowing multiple nested signatures.
+SignerTimeStamp;Time stamps the specified subject. This function supports Authenticode time stamping. To perform X.509 Public Key Infrastructure (RFC 3161) time stamping, use the SignerTimeStampEx2 function.
+SignerTimeStampEx;Time stamps the specified subject and optionally returns a pointer to a SIGNER_CONTEXT structure that contains a pointer to a BLOB. This function supports Authenticode time stamping. To perform X.509 Public Key Infrastructure (RFC 3161) time stamping, use the SignerTimeStampEx2 function.
+SignerTimeStampEx2;Time stamps the specified subject and optionally returns a pointer to a SIGNER_CONTEXT structure that contains a pointer to a BLOB. This function can be used to perform X.509 Public Key Infrastructure, RFC 3161–compliant, time stamps.
+SignerTimeStampEx3;Time stamps the specified subject and supports setting time stamps on multiple signatures.
+
+<Service Provider>
+CryptAcquireContext;Acquires a handle to the current user's key container within a particular CSP.
+CryptContextAddRef;Increments the reference count on an HCRYPTPROV handle.
+CryptEnumProviders;Enumerates the providers on a computer.
+CryptEnumProviderTypes;Enumerates the types of providers supported on the computer.
+CryptGetDefaultProvider;Determines the default CSP either for the current user or for the computer for a specified provider type.
+CryptGetProvParam;Retrieves the parameters that govern the operations of a CSP.
+CryptInstallDefaultContext;Installs a previously acquired HCRYPTPROV context to be used as a default context.
+CryptReleaseContext;Releases the handle acquired by the CryptAcquireContext function.
+CryptSetProvider and CryptSetProviderEx;Specifies the user default CSP for a particular CSP type.
+CryptSetProvParam;Specifies attributes of a CSP.
+CryptUninstallDefaultContext;Removes a default context previously installed by CryptInstallDefaultContext.
+FreeCryptProvFromCertEx;Releases the handle either to a cryptographic service provider (CSP) or to a Cryptography API: Next Generation (CNG) key.
+
+<Key Generation/Exchange>
+Function	Description
+CryptDeriveKey;Creates a key derived from a password.
+CryptDestroyKey;Destroys a key.
+CryptDuplicateKey;Makes an exact copy of a key, including the state of the key.
+CryptExportKey;Transfers a key from the CSP into a key BLOB in the application's memory space.
+CryptGenKey;Creates a random key.
+CryptGenRandom;Generates random data.
+CryptGetKeyParam;Retrieves a key's parameters.
+CryptGetUserKey;Gets a handle to the key exchange or signature key.
+CryptImportKey;Transfers a key from a key BLOB to a CSP.
+CryptSetKeyParam;Specifies a key's parameters.
+
+<Object Decoding/Encoding>
+CryptDecodeObject;Decodes a structure of type lpszStructType.
+CryptDecodeObjectEx;Decodes a structure of type lpszStructType. CryptDecodeObjectEx supports the one-pass memory allocation option.
+CryptEncodeObject;Encodes a structure of type lpszStructType.
+CryptEncodeObjectEx;Encodes a structure of type lpszStructType. CryptEncodeObjectEx supports the one-pass memory allocation option.
+
+<Data Encryption/Decryption>
+CryptDecrypt;Decrypts a section of ciphertext by using the specified encryption key.
+CryptEncrypt;Encrypts a section of plaintext by using the specified encryption key.
+CryptProtectData;Performs encryption on the data in a DATA_BLOB structure.
+CryptProtectMemory;Encrypts memory to protect sensitive information.
+CryptUnprotectData;Performs a decryption and integrity check of the data in a DATA_BLOB.
+CryptUnprotectMemory;Decrypts memory that was encrypted using CryptProtectMemory.
+
+<Hash and Digital Signature>
+CryptCreateHash;Creates an empty hash object.
+CryptDestroyHash;Destroys a hash object.
+CryptDuplicateHash;Duplicates a hash object.
+CryptGetHashParam;Retrieves a hash object parameter.
+CryptHashData;Hashes a block of data, adding it to the specified hash object.
+CryptHashSessionKey;Hashes a session key, adding it to the specified hash object.
+CryptSetHashParam;Sets a hash object parameter.
+CryptSignHash;Signs the specified hash object.
+CryptUIWizDigitalSign;Displays a wizard that digitally signs a document or a BLOB.
+CryptUIWizFreeDigitalSignContext;Releases a pointer to a CRYPTUI_WIZ_DIGITAL_SIGN_CONTEXT structure.
+CryptVerifySignature;Verifies a digital signature, given a handle to the hash object.
+PFNCFILTERPROC;Filters the certificates that appear in the digital signature wizard displayed by the CryptUIWizDigitalSign function.
+
+<Certificate Store>
+CryptCreateHash;Creates an empty hash object.
+CryptDestroyHash;Destroys a hash object.
+CryptDuplicateHash;Duplicates a hash object.
+CryptGetHashParam;Retrieves a hash object parameter.
+CryptHashData;Hashes a block of data, adding it to the specified hash object.
+CryptHashSessionKey;Hashes a session key, adding it to the specified hash object.
+CryptSetHashParam;Sets a hash object parameter.
+CryptSignHash;Signs the specified hash object.
+CryptUIWizDigitalSign;Displays a wizard that digitally signs a document or a BLOB.
+CryptUIWizFreeDigitalSignContext;Releases a pointer to a CRYPTUI_WIZ_DIGITAL_SIGN_CONTEXT structure.
+CryptVerifySignature;Verifies a digital signature, given a handle to the hash object.
+PFNCFILTERPROC;Filters the certificates that appear in the digital signature wizard displayed by the CryptUIWizDigitalSign function.
+
+<Certificate and Certificate Store Maintenance>
+CertAddSerializedElementToStore;Adds the serialized certificate or CRL element to the store.
+CertCreateContext;Creates the specified context from the encoded bytes. The new context is not put into a store.
+CertEnumSubjectInSortedCTL;Enumerates the TrustedSubjects in a sorted CTL context.
+CertFindSubjectInCTL;Finds the specified subject in a CTL.
+CertFindSubjectInSortedCTL;Finds the specified subject in a sorted CTL.
+OpenPersonalTrustDBDialog	Displays the Certificates dialog box.
+OpenPersonalTrustDBDialogEx Displays the Certificates dialog box.
+
+<Certificate>
+CertAddCertificateContextToStore;Adds a certificate context to the certificate store.
+CertAddCertificateLinkToStore;Adds a link in a certificate store to a certificate context in a different store.
+CertAddEncodedCertificateToStore;Converts the encoded certificate to a certificate context, and then adds the context to the certificate store.
+CertAddRefServerOcspResponse;Increments the reference count for an HCERT_SERVER_OCSP_RESPONSE handle.
+CertAddRefServerOcspResponseContext;Increments the reference count for a CERT_SERVER_OCSP_RESPONSE_CONTEXT structure.
+CertCloseServerOcspResponse;Closes an online certificate status protocol (OCSP) server response handle.
+CertCreateCertificateContext;Creates a certificate context from an encoded certificate. The created context is not put in a certificate store.
+CertCreateSelfSignCertificate;Creates a self-signed certificate.
+CertDeleteCertificateFromStore;Deletes a certificate from the certificate store.
+CertDuplicateCertificateContext;Duplicates a certificate context by incrementing its reference count.
+CertEnumCertificatesInStore;Enumerates the certificate contexts in the certificate store.
+CertFindCertificateInStore;Finds the first, or next, certificate context in the certificate store that meets a search criterion.
+CertFreeCertificateContext;Frees a certificate context.
+CertGetIssuerCertificateFromStore;Gets a certificate context from the certificate store for the first, or next, issuer of the specified subject certificate.
+CertGetServerOcspResponseContext;Retrieves a non-blocking, time valid online certificate status protocol (OCSP) response context for the specified handle.
+CertGetSubjectCertificateFromStore;Gets from the certificate store the subject certificate context, which is uniquely identified by its issuer and serial number.
+CertGetValidUsages;Returns an array of usages that consist of the intersection of the valid usages for all certificates in an array of certificates.
+CertOpenServerOcspResponse;Opens a handle to an online certificate status protocol (OCSP) response associated with a server certificate chain.
+CertRetrieveLogoOrBiometricInfo;Performs a URL retrieval of logo or biometric information specified in either the szOID_LOGOTYPE_EXT or szOID_BIOMETRIC_EXT certificate extension.
+CertSelectCertificate;Presents a dialog box that allows the user to select certificates from a set of certificates that match a given criteria.
+CertSelectCertificateChains;Retrieves certificate chains based on specified selection criteria.
+CertSelectionGetSerializedBlob;A helper function used to retrieve a serialized certificate BLOB from a CERT_SELECTUI_INPUT structure.
+CertSerializeCertificateStoreElement;Serializes a certificate context's encoded certificate and an encoded representation of its properties.
+CertVerifySubjectCertificateContext;Performs the enabled verification checks on the subject certificate using the issuer.
+CryptUIDlgCertMgr;Displays a dialog box that allows the user to manage certificates.
+CryptUIDlgSelectCertificate;Displays a dialog box that allows a user to select a certificate.
+CryptUIDlgSelectCertificateFromStore;Displays a dialog box that allows the selection of a certificate from a specified store.
+CryptUIDlgViewCertificate;Presents a dialog box that displays a specified certificate.
+CryptUIDlgViewContext;Displays a certificate, CRL, or CTL.
+CryptUIDlgViewSignerInfo;Displays a dialog box that contains the signer information for a signed message.
+GetFriendlyNameOfCert;Retrieves the display name for a certificate.
+RKeyCloseKeyService;Closes a key service handle.
+RKeyOpenKeyService;Opens a key service handle on a remote computer.
+RKeyPFXInstall;Installs a certificate on a remote computer.
+
+<Certificate Revokation List>
+CertAddCRLContextToStore;Adds a CRL context to the certificate store.
+CertAddCRLLinkToStore;Adds a link in a store to a CRL context in a different store.
+CertAddEncodedCRLToStore;Converts the encoded CRL to a CRL context, and then adds the context to the certificate store.
+CertCreateCRLContext;Creates a CRL context from an encoded CRL. The created context is not put in a certificate store.
+CertDeleteCRLFromStore;Deletes a CRL from the certificate store.
+CertDuplicateCRLContext;Duplicates a CRL context by incrementing the reference count.
+CertEnumCRLsInStore;Enumerates the CRL contexts in a store.
+CertFindCertificateInCRL;Searches the certificate revocation list (CRL) for the specified certificate.
+CertFindCRLInStore;Finds the first, or next, CRL context in the certificate store that matches a specific criterion.
+CertFreeCRLContext;Frees a CRL context.
+CertGetCRLFromStore;Gets the first, or next, CRL context from the certificate store for the specified issuer certificate.
+CertSerializeCRLStoreElement;Serializes the CRL context's encoded CRL and its properties.
+
+<Certificate Trust List>
+CertAddCTLContextToStore;Adds a CTL context to the certificate store.
+CertAddCTLLinkToStore;Adds a link in a store to a CRL context in a different store.
+CertAddEncodedCTLToStore;Converts the encoded CTL to a CTL context, and then adds the context to the certificate store.
+CertCreateCTLContext;Creates a CTL context from an encoded certificate trust list. The created context is not put in a certificate store.
+CertDeleteCTLFromStore;Deletes a CTL from the certificate store.
+CertDuplicateCTLContext;Duplicates a CTL context by incrementing the reference count.
+CertEnumCTLsInStore;Enumerates the CTL contexts in the certificate store.
+CertFindCTLInStore;Finds the first, or next, CTL context in the certificate store that matches a specific criteria.
+CertFreeCTLContext;Frees a CTL context.
+CertModifyCertificatesToTrust;Modifies the set of certificates in a CTL for a given purpose.
+CertSerializeCTLStoreElement;Serializes the CTL context's encoded CTL and its properties.
+
+<Extended Property>
+CertAddCTLContextToStore;Adds a CTL context to the certificate store.
+CertAddCTLLinkToStore;Adds a link in a store to a CRL context in a different store.
+CertAddEncodedCTLToStore;Converts the encoded CTL to a CTL context, and then adds the context to the certificate store.
+CertCreateCTLContext;Creates a CTL context from an encoded certificate trust list. The created context is not put in a certificate store.
+CertDeleteCTLFromStore;Deletes a CTL from the certificate store.
+CertDuplicateCTLContext;Duplicates a CTL context by incrementing the reference count.
+CertEnumCTLsInStore;Enumerates the CTL contexts in the certificate store.
+CertFindCTLInStore;Finds the first, or next, CTL context in the certificate store that matches a specific criteria.
+CertFreeCTLContext;Frees a CTL context.
+CertModifyCertificatesToTrust;Modifies the set of certificates in a CTL for a given purpose.
+CertSerializeCTLStoreElement;Serializes the CTL context's encoded CTL and its properties.
+
+<MakeCert>
+FreeCryptProvFromCert;Releases the handle to a cryptographic service provider (CSP) and optionally deletes the temporary container created by the GetCryptProvFromCert function.
+GetCryptProvFromCert;Gets a handle to a CSP and a key specification for a certificate context.
+PvkFreeCryptProv;Releases the handle to a CSP and optionally deletes the temporary container created by the PvkGetCryptProv function.
+PvkGetCryptProv;Gets a handle to a CSP based on either a private key file name or a key container name.
+PvkPrivateKeyAcquireContextFromMemory;Creates a temporary container in the CSP and loads a private key from memory into the container.
+PvkPrivateKeySave;Saves a private key and its corresponding public key to a specified file.
+SignError;Calls GetLastError and converts the return code to an HRESULT. 
+
+<Certificate Verification>
+CertVerifyCTLUsage;Verifies the usage of a CTL.
+CryptMsgEncodeAndSignCTL;Encodes and signs a CTL as a message.
+CryptMsgGetAndVerifySigner;Retrieves and verifies a CTL from a message.
+CryptMsgSignCTL;Signs a message that contains a CTL.
+CertCreateCertificateChainEngine;Creates a new, nondefault chain engine for an application.
+CertCreateCTLEntryFromCertificateContextProperties;Creates a CTL entry whose attributes are the certificate context's properties.
+CertDuplicateCertificateChain;Duplicates a certificate chain by incrementing the chain's reference count and returning a pointer to the chain.
+CertFindChainInStore;Finds the first, or next, certificate chain context in a store.
+CertFreeCertificateChain;Frees a certificate chain by reducing its reference count.
+CertFreeCertificateChainEngine;Frees a nondefault certificate chain engine.
+CertFreeCertificateChainList;Frees the array of pointers to chain contexts.
+CertGetCertificateChain;Builds a chain context starting from an end certificate and going back to a trusted root certificate, if possible.
+CertIsValidCRLForCertificate;Checks a CRL to determine whether it would include a specific certificate if that certificate were revoked.
+CertSetCertificateContextPropertiesFromCTLEntry;Sets properties on the certificate context using the attributes in the CTL entry.
+CertVerifyCertificateChainPolicy;Checks a certificate chain to verify its validity, including its compliance with any specified validity policy criteria.
+
+<Low-level Message>
+CryptMsgCalculateEncodedLength;Calculates the length of an encoded cryptographic message.
+CryptMsgClose;Closes a handle of a cryptographic message.
+CryptMsgControl;Performs a special control function after the final CryptMsgUpdate of an encoded or decoded cryptographic message.
+CryptMsgCountersign;Countersigns an already existing signature in a message.
+CryptMsgCountersignEncoded;Countersigns an already existing signature (encoded SignerInfo, as defined by PKCS #7).
+CryptMsgDuplicate;Duplicates a cryptographic message handle by incrementing the reference count. The reference count keeps track of the lifetime of the message.
+CryptMsgGetParam;Acquires a parameter after encoding or decoding a cryptographic message.
+CryptMsgOpenToDecode;Opens a cryptographic message for decoding.
+CryptMsgOpenToEncode;Opens a cryptographic message for encoding.
+CryptMsgUpdate;Updates the contents of a cryptographic message.
+CryptMsgVerifyCountersignatureEncoded;Verifies a countersignature in terms of the SignerInfo structure (as defined by PKCS #7).
+CryptMsgVerifyCountersignatureEncodedEx;Verifies that the pbSignerInfoCounterSignature parameter contains the encrypted hash of the encryptedDigest field of the pbSignerInfo parameter structure.
+
+<Simplified Message>
+CryptDecodeMessage;Decodes a cryptographic message.
+CryptDecryptAndVerifyMessageSignature;Decrypts the specified message, and verifies the signer.
+CryptDecryptMessage;Decrypts the specified message.
+CryptEncryptMessage;Encrypts the message for the recipient or recipients.
+CryptGetMessageCertificates;Returns the certificate store that contains the message's certificates and CRLs.
+CryptGetMessageSignerCount;Returns the count of signers in the signed message.
+CryptHashMessage;Creates a hash of the message.
+CryptSignAndEncryptMessage;Signs the message, and then encrypts it for the recipient or recipients.
+CryptSignMessageWithKey;Signs a message using a CSP's private key specified in the parameters to the function.
+CryptSignMessage;Signs the message.
+CryptVerifyDetachedMessageHash;Verifies a hashed message that contains a detached hash.
+CryptVerifyDetachedMessageSignature;Verifies a signed message that contains a detached signature or signatures.
+CryptVerifyMessageHash;Verifies a hashed message.
+CryptVerifyMessageSignature;Verifies a signed message.
+CryptVerifyMessageSignatureWithKey;Verifies a signed message's signature by using specified public key information.
+
+<Data Management>
+CertCompareCertificate;Compares two certificates to determine whether they are identical.
+CertCompareCertificateName;Compares two certificate names to determine whether they are identical.
+CertCompareIntegerBlob;Compares two integer BLOBs.
+CertComparePublicKeyInfo;Compares two public keys to determine whether they are identical.
+CertFindAttribute;Finds the first attribute identified by its object identifier (OID).
+CertFindExtension;Finds the first extension identified by its OID.
+CertFindRDNAttr;Finds the first RDN attribute identified by its OID in the name list of the Relative Distinguished Names.
+CertGetIntendedKeyUsage;Acquires the intended key usage bytes from the certificate.
+CertGetPublicKeyLength;Acquires the public/private key's bit length from the public key BLOB.
+CertIsRDNAttrsInCertificateName;Compares the attributes in the certificate name with the specified CERT_RDN to determine whether all attributes are included there.
+CertIsStrongHashToSign;Determines whether the specified hash algorithm and the public key in the signing certificate can be used to perform strong signing.
+CertVerifyCRLRevocation;Verifies that the subject certificate is not on the certificate revocation list (CRL).
+CertVerifyCRLTimeValidity;Verifies the time validity of a CRL.
+CertVerifyRevocation;Verifies that the subject certificate is not on the CRL.
+CertVerifyTimeValidity;Verifies the time validity of a certificate.
+CertVerifyValidityNesting;Verifies that the subject's time validity nests within the issuer's time validity.
+CryptExportPKCS8;This function is superseded by the CryptExportPKCS8Ex function.
+CryptExportPKCS8Ex;Exports the private key in PKCS #8 format.
+CryptExportPublicKeyInfo;Exports the public key information associated with the provider's corresponding private key.
+CryptExportPublicKeyInfoEx;Exports the public key information associated with the provider's corresponding private key. This function differs from CryptExportPublicKeyInfo in that the user can specify the public key algorithm, thereby overriding the default provided by the CSP.
+CryptExportPublicKeyInfoFromBCryptKeyHandle;Exports the public key info associated with a provider's corresponding private key.
+CryptFindCertificateKeyProvInfo;Enumerates the cryptographic providers and their key containers to find the private key that corresponds to a certificate's public key.
+CryptFindLocalizedName;Finds the localized name for a specified name, for example, finds the localized name for the store name of the Root system.
+CryptHashCertificate;Hashes the encoded content.
+CryptHashCertificate2;Hashes a block of data by using a Cryptography API: Next Generation (CNG) hash provider.
+CryptHashPublicKeyInfo;Computes the hash of the encoded public key information.
+CryptHashToBeSigned;Computes the hash of the "to be signed" information in the encoded signed content (CERT_SIGNED_CONTENT_INFO).
+CryptImportPKCS8;Imports the private key in PKCS #8 format to a cryptographic service provider (CSP).
+CryptImportPublicKeyInfo;Converts and imports public key information into the provider, and returns a handle of the public key.
+CryptImportPublicKeyInfoEx;Converts and imports the public key information into the provider, and returns a handle of the public key. Additional parameters (over those specified by CryptImportPublicKeyInfo) that can be used to override defaults are provided to supplement CERT_PUBLIC_KEY_INFO.
+CryptImportPublicKeyInfoEx2;Imports a public key into a CNG asymmetric provider.
+CryptMemAlloc;Allocates memory for a buffer. This memory is used by all Crypt32.lib functions that return allocated buffers.
+CryptMemFree;Frees memory allocated by CryptMemAlloc or CryptMemRealloc.
+CryptMemRealloc;Frees memory currently allocated for a buffer, and allocates memory for a new buffer.
+CryptQueryObject;Retrieves information about the content of a BLOB or a file.
+CryptSignAndEncodeCertificate;Encodes the "to be signed" information, signs this encoded information, and encodes the resulting signed, encoded information.
+CryptSignCertificate;Signs the "to be signed" information in the encoded, signed content.
+CryptSIPAddProvider;Adds a Subject Interface Package (SIP).
+CryptSIPCreateIndirectData;Returns a SIP_INDIRECT_DATA structure that contains a hash of the supplied SIP_SUBJECTINFO structure, the digest algorithm, and an encoding attribute. The hash can be used as an indirect reference to the data.
+CryptSIPGetCaps;Retrieves the capabilities of an SIP.
+CryptSIPGetSignedDataMsg;Retrieves an Authenticode signature from the file.
+CryptSIPLoad;Loads the dynamic link library that implements a subject interface package and assigns appropriate library export functions to a SIP_DISPATCH_INFO structure.
+CryptSIPPutSignedDataMsg;Stores an Authenticode Signature in the target file.
+CryptSIPRemoveProvider;Removes a SIP added by a previous call to the CryptSIPAddProvider function.
+CryptSIPRemoveSignedDataMsg;Removes a specified Authenticode signature.
+CryptSIPRetrieveSubjectGuid;Retrieves a GUID based on the header information in a specified file.
+CryptSIPRetrieveSubjectGuidForCatalogFile;Retrieves the subject GUID associated with the specified file.
+CryptSIPVerifyIndirectData;Validates the indirect hashed data against the supplied subject.
+CryptUpdateProtectedState;Migrates the current user's master keys after the user's security identifier (SID) has changed.
+CryptVerifyCertificateSignature;Verifies the signature of a subject certificate or a CRL by using the public key information.
+CryptVerifyCertificateSignatureEx;An extended version of CryptVerifyCertificateSignature.
+GetEncSChannel;Stores the encrypted Schannel DLL contents in memory.
+pCryptSIPGetCaps;Implemented by an SIP to report capabilities.
+
+<Data Conversion>
+CertAlgIdToOID;Converts a CryptoAPI algorithm identifier (ALG_ID) to an Abstract Syntax Notation One (ASN.1) object identifier (OID) string.
+CertGetNameString;Acquires the subject or issuer name from a certificate, and converts it to a null-terminated character string.
+CertNameToStr;Converts a certificate name BLOB to a zero-terminated string.
+CertOIDToAlgId;Converts the ASN.1 Object Identifier string to the CSP algorithm identifier.
+CertRDNValueToStr;Converts a Name Value to a null-terminated string.
+CertStrToName;Converts a null-terminated X.500 string to an encoded certificate name.
+CryptBinaryToString;Converts a binary sequence into a formatted string.
+CryptFormatObject;Formats encoded data, and returns a Unicode string.
+CryptStringToBinary;Converts a formatted string to a binary sequence.
+
+<Enhanced Key Usage>
+CertAddEnhancedKeyUsageIdentifier;Adds a usage identifier to a certificate's EKU property.
+CertGetEnhancedKeyUsage;Acquires, from a certificate, information about the EKU extension or property.
+CertRemoveEnhancedKeyUsageIdentifier;Removes the usage identifier from a certificate's EKU extended property.
+CertSetEnhancedKeyUsage;Sets the EKU property for a certificate.
+
+<Key Identifier>
+CryptCreateKeyIdentifierFromCSP;Creates a key identifier from a CSP's public key BLOB.
+CryptEnumKeyIdentifierProperties;Enumerates key identifiers and their properties.
+CryptGetKeyIdentifierProperty;Acquires a specific property from a specified key identifier.
+CryptSetKeyIdentifierProperty;Sets a property of a specified key identifier.
+
+<OID Support>
+CryptEncodeObject
+CryptEncodeObjectEx
+CryptDecodeObject
+CryptDecodeObjectEx
+CertVerifyRevocation
+CertOpenStore
+CryptEnumOIDFunction;Enumerates the registered OID functions identified by their encoding type, function name, and OID.
+CryptEnumOIDInfo;Enumerates the registered OID information identified by their group, and calls pfnEnumOIDInfo for matches.
+CryptFindOIDInfo;Uses the specified key and group to find OID information.
+CryptFreeOIDFunctionAddress;Releases the handle count that was incremented and returned by CryptGetOIDFunctionAddress or CryptGetDefaultOIDFunctionAddress.
+CryptGetDefaultOIDDllList;Acquires the list of registered default DLL entries for the specified function set and encoding type.
+CryptGetDefaultOIDFunctionAddress;Either acquires the first or next installed default function, or loads the DLL that contains the default function.
+CryptGetOIDFunctionAddress;Searches the list of installed functions for an encoding type and OID match. If a match is not found there, the registry is searched for a match.
+CryptGetOIDFunctionValue;Acquires the value for the specified encoding type, function name, OID, and value name.
+CryptInitOIDFunctionSet;Initializes and returns a handle of the OID function set identified by the function name supplied.
+CryptInstallOIDFunctionAddress;Installs a set of callable OID function addresses.
+CryptRegisterDefaultOIDFunction;Registers the DLL that contains the default function to be called for the specified encoding type and function name.
+CryptRegisterOIDFunction;Registers the DLL that contains the function to be called for the specified encoding type, function name, and OID.
+CryptRegisterOIDInfo;Registers the OID information specified in the CRYPT_OID_INFO structure, persisting it to the registry.
+CryptSetOIDFunctionValue;Sets the value for the specified encoding type, function name, OID, and value name.
+CryptUnregisterDefaultOIDFunction;Removes the registration for the DLL that contains the default function to be called for the specified encoding type and function name.
+CryptUnregisterOIDFunction;Removes the registration for the DLL that contains the function to be called for the specified encoding type, function name, and OID.
+CryptUnregisterOIDInfo;Removes the registration for the specified OID information.
+
+<Remote Object Retrieval>
+CryptGetObjectUrl;Acquires the URL of the remote object from a certificate, CTL, or CRL.
+CryptRetrieveObjectByUrl;Retrieves the PKI object from a location specified by a URL.
+
+<PFX>
+PFXExportCertStore;Exports from the referenced certificate store the certificates and, if available, their associated private keys.
+PFXExportCertStoreEx;Exports from the referenced certificate store the certificates and, if available, their associated private keys.
+PFXImportCertStore;Imports a PFX BLOB, and returns the handle of a store that contains certificates and any associated private keys.
+PFXIsPFXBlob;Attempts to decode the outer layer of a BLOB as a PFX packet.
+PFXVerifyPassword;Attempts to decode the outer layer of a BLOB as a PFX packet and to decrypt it with the given password.
+
+<CSP Connection>
+CPAcquireContext;Acquires a handle to a particular key container within the CSP.
+CPGetProvParam;Retrieves attributes of the CSP.
+CPReleaseContext;Releases the handle acquired by CPAcquireContext.
+CPSetProvParam;Sets specific attributes of a CSP.
+
+<CSP Key Generation and Exchange>
+CPDeriveKey;Creates a key derived from a password.
+CPDestroyKey;Destroys a key.
+CPDuplicateKey;Makes an exact copy of a key, including the state of the key.
+CPExportKey;Transfers a key from the CSP into a key BLOB in the application's memory space.
+CPGenKey;Creates a random key.
+CPGenRandom;Generates random data.
+CPGetKeyParam;Retrieves a key's parameters.
+CPGetUserKey;Gets a handle to the key exchange or signature key.
+CPImportKey;Transfers a key from a key BLOB to a CSP.
+CPSetKeyParam;Specifies a key's parameters.
+
+<CSP Data Encryption>
+CPDecrypt;Decrypts a section of ciphertext using the specified encryption key.
+CPEncrypt;Encrypts a section of plaintext using the specified encryption key.
+
+<CSP Hashing and Digital Signature>
+CPCreateHash;Creates a hash object, and returns a handle to it.
+CPDestroyHash;Destroys a hash object.
+CPDuplicateHash;Makes an exact copy of a hash object and the state the hash is in.
+CPGetHashParam;Retrieves a hash object parameter.
+CPHashData;Hashes a block of data, adding it to the specified hash object.
+CPHashSessionKey;Hashes a session key, adding it to the specified hash object.
+CPSetHashParam;Sets a hash object parameter.
+CPSignHash;Signs the specified hash object.
+CPVerifySignature;Verifies a digital signature.
+
+<CSP Auxiliary>
+OffloadModExpo;Offloads modular exponentiation from a CSP to a hardware accelerator.
+
+<Certificate Services Backup and Restore>
+CertSrvBackupClose;Closes an opened file.
+CertSrvBackupEnd;Ends a backup session.
+CertSrvBackupFree;Frees a buffer allocated by the backup and restore APIs.
+CertSrvBackupGetBackupLogs;Returns a list of log files that need to be backed up.
+CertSrvBackupGetDatabaseNames;Returns a list of database files that need to be backed up.
+CertSrvBackupGetDynamicFileList;Retrieves the list of Certificate Services dynamic file names that need to be backed up for the given backup context.
+CertSrvBackupOpenFile;Opens a file in preparation for backing it up.
+CertSrvBackupPrepare;Prepares the database for the online backup.
+CertSrvBackupRead;Reads the contents of an opened file.
+CertSrvBackupTruncateLogs;Truncates the log files.
+CertSrvIsServerOnline;Determines whether a Certificate Services server is online (actively running).
+CertSrvRestoreEnd;Ends a restore session.
+CertSrvRestoreGetDatabaseLocations;Retrieves database locations (used for both backup and restore scenarios).
+CertSrvRestorePrepare;Begins a restore session.
+CertSrvRestoreRegister;Registers a restore operation.
+CertSrvRestoreRegisterComplete;Completes a previously registered restore operation.
+CertSrvRestoreRegisterThroughFile;Registers a restore operation.
+CertSrvServerControl;Sends a control command to the Certificate Services instance.
+
+<Callback>
+CertChainFindByIssuerCallback;An application-defined callback function that allows the application to filter certificates that might be added to the certificate chain.
+CertDllOpenStoreProv;Defines the store provider open function.
+CertEnumPhysicalStoreCallback;Callback function used by the CertEnumPhysicalStore function to format and present information on each physical store found.
+CertEnumSystemStoreCallback;Callback function used by the CertEnumSystemStore function to format and present information on each physical store found.
+CertEnumSystemStoreLocationCallback;Callback function used by the CertEnumSystemStoreLocation function to format and present information on each physical store found.
+CertStoreProvCloseCallback;Determines what happens when an open store's reference count becomes zero.
+CertStoreProvControl;Allows an application to be notified when there is a difference between the contents of a cached store in use and the contents of that store as it is persisted to storage.
+CertStoreProvDeleteCertCallback;Determines actions to be taken before a certificate is deleted from a certificate store.
+CertStoreProvDeleteCRLCallback;Determines actions to be taken before a certificate revocation list (CRL) is deleted from a certificate store.
+CertStoreProvDeleteCTL;Determines whether a CTL can be deleted.
+CertStoreProvFindCert;Finds the first, or next, certificate in a store that matches specified criteria.
+CertStoreProvFindCRL;Finds the first, or next, CRL in a store that matches specified criteria.
+CertStoreProvFindCTL;Finds the first, or next, CTL in a store that matches specified criteria.
+CertStoreProvFreeFindCert;Frees a previously found certificate context.
+CertStoreProvFreeFindCRL;Frees a previously found CRL context.
+CertStoreProvFreeFindCTL;Frees a previously found CTL context.
+CertStoreProvGetCertProperty;Retrieves a specified property of a certificate.
+CertStoreProvGetCRLProperty;Retrieves a specified property of a CRL.
+CertStoreProvGetCTLProperty;Retrieves a specified property of a CTL.
+CertStoreProvReadCertCallback;Currently not used but might be exported to future CSPs.
+CertStoreProvReadCRLCallback;Currently not used but might be exported to future CSPs.
+CertStoreProvReadCTL;Read the provider's copy of the CTL context, and, if it exists, create a new CTL context.
+CertStoreProvSetCertPropertyCallback;Determines actions to be taken before a call to CertSetCertificateContextProperty or CertGetCertificateContextProperty.
+CertStoreProvSetCRLPropertyCallback;Determines actions to be taken before a call to CertSetCRLContextProperty or CertGetCRLContextProperty.
+CertStoreProvSetCTLProperty;Determines whether a property can be set on a CTL.
+CertStoreProvWriteCertCallback;Determines actions to be taken before adding a certificate to a store.
+CertStoreProvWriteCRLCallback;Determines actions to be taken before adding a CRL to a store.
+CertStoreProvWriteCTL;Determines whether a CTL can be added to the store.
+CRYPT_ENUM_KEYID_PROP;Callback function used by the CryptEnumKeyIdentifierProperties function.
+CRYPT_ENUM_OID_FUNCTION;Callback function used by the CryptEnumOIDFunction function.
+CRYPT_ENUM_OID_INFO;Callback function used by the CryptEnumOIDInfo function.
+CryptGetSignerCertificateCallback;Callback function used with the CRYPT_VERIFY_MESSAGE_PARA structure to get and verify a message signer's certificate.
+PCRYPT_DECRYPT_PRIVATE_KEY_FUNC;Callback function used by the CryptImportPKCS8 function.
+PCRYPT_ENCRYPT_PRIVATE_KEY_FUNC;Callback function used when creating the CRYPT_ENCRYPTED_PRIVATE_KEY_INFO structure.
+PCRYPT_RESOLVE_HCRYPTPROV_FUNC;Callback function used by the CryptImportPKCS8 function.
+PFN_CDF_PARSE_ERROR_CALLBACK;A user-defined function called for Catalog Definition Function errors while parsing a catalog definition file (CDF).
+PFN_CERT_CREATE_CONTEXT_SORT_FUNC;Called for each sorted context entry when a context is created.
+PFN_CMSG_CNG_IMPORT_CONTENT_ENCRYPT_KEY;A CNG object identifier (OID) installable function for import of an already decrypted content encryption key (CEK).
+PFN_CMSG_CNG_IMPORT_KEY_AGREE;Imports a content encryption key for a key transport recipient of an enveloped message.
+PFN_CMSG_CNG_IMPORT_KEY_TRANS;A CNG OID installable function for import and decryption of a key-transport-recipient, encrypted, content encryption key (CEK).
+PFN_CMSG_EXPORT_KEY_AGREE;Encrypts and exports the content encryption key for a key agreement recipient of an enveloped message.
+PFN_CMSG_EXPORT_KEY_TRANS;Encrypts and exports the content encryption key for a key transport recipient of an enveloped message.
+PFN_CMSG_EXPORT_MAIL_LIST;Encrypts and exports the content encryption key for a mailing list recipient of an enveloped message.
+PFN_CMSG_GEN_CONTENT_ENCRYPT_KEY;Generates the symmetric key used to encrypt content for an enveloped message.
+PFN_CMSG_IMPORT_KEY_AGREE;Imports a content encryption key for a key transport recipient of an enveloped message.
+PFN_CMSG_IMPORT_KEY_TRANS;Imports a content encryption key for a key transport recipient of an enveloped message.
+PFN_CMSG_IMPORT_MAIL_LIST;Imports a content encryption key for a key transport recipient of an enveloped message.
+PFN_CRYPT_EXPORT_PUBLIC_KEY_INFO_EX2_FUNC;Called by CryptExportPublicKeyInfoEx to export a public key BLOB and encode it.
+PFN_CRYPT_EXTRACT_ENCODED_SIGNATURE_PARAMETERS_FUNC;Called to decode and return the hash algorithm identifier and optionally the signature parameters.
+PFN_CRYPT_SIGN_AND_ENCODE_HASH_FUNC;Called to sign and encode a computed hash.
+PFN_CRYPT_VERIFY_ENCODED_SIGNATURE_FUNC;Called to decrypt an encoded signature and compare it to a computed hash.
+PFN_IMPORT_PUBLIC_KEY_INFO_EX2_FUNC;Called by CryptImportPublicKeyInfoEx2 to decode the public key algorithm identifier, load the algorithm provider, and import the key pair.
+PFNCCERTDISPLAYPROC;A user-defined callback function that allows the caller of the CryptUIDlgSelectCertificate function to handle the display of certificates that the user selects to view.
+PFNCMFILTERPROC;Filters each certificate to decide if it will appear in the certificate selection dialog box displayed by the CertSelectCertificate function.
+PFNCMHOOKPROC;Called before messages are processed by the certificate selection dialog box produced by the CertSelectCertificate function.
+
+<Catalog Definition>
+CryptCATCDFClose;Closes a catalog definition file and frees the memory for the corresponding CRYPTCATCDF structure.
+CryptCATCDFEnumAttributesWithCDFTag;Enumerates the attributes of member files in the CatalogFiles section of a CDF.
+CryptCATCDFEnumCatAttributes;Enumerates catalog-level attributes within the CatalogHeader section of a CDF.
+CryptCATCDFEnumMembersByCDFTagEx;Enumerates the individual file members in the CatalogFiles section of a CDF.
+CryptCATCDFOpen;Opens an existing CDF for reading and initializes a CRYPTCATCDF structure. 
+
+<Catalog>
+CryptCATAdminAcquireContext;Acquires a handle to a catalog administrator context. This handle can be used by subsequent calls to the CryptCATAdminAddCatalog, CryptCATAdminEnumCatalogFromHash, and CryptCATAdminRemoveCatalog functions.
+CryptCATAdminAcquireContext2;Acquires a handle to a catalog administrator context for a given hash algorithm and hash policy.
+CryptCATAdminAddCatalog;Adds a catalog to the catalog database.
+CryptCATAdminCalcHashFromFileHandle;Calculates the hash for a file.
+CryptCATAdminCalcHashFromFileHandle2;Calculates the hash for a file by using the specified algorithm.
+CryptCATAdminEnumCatalogFromHash;Enumerates the catalogs that contain a specified hash.
+CryptCATAdminReleaseCatalogContext;Releases a handle to a catalog context previously returned by the CryptCATAdminAddCatalog function.
+CryptCATAdminReleaseContext;Releases the handle previously assigned by the CryptCATAdminAcquireContext function.
+CryptCATAdminRemoveCatalog;Deletes a catalog file and removes that catalog's entry from the Windows catalog database.
+CryptCATAdminResolveCatalogPath;Retrieves the fully qualified path of the specified catalog.
+CryptCATCatalogInfoFromContext;Retrieves catalog information from a specified catalog context.
+CryptCATClose;Closes a catalog handle opened previously by the CryptCATOpen function.
+CryptCATEnumerateAttr;Enumerates the attributes associated with a member of a catalog.
+CryptCATEnumerateCatAttr;Enumerates the attributes associated with a catalog.
+CryptCATEnumerateMember;Enumerates the members of a catalog.
+CryptCATGetAttrInfo;Retrieves information about an attribute of a member of a catalog.
+CryptCATGetMemberInfo;Retrieves member information from the catalog's PKCS #7. In addition to retrieving the member information for a specified reference tag, this function opens a member context.
+CryptCATOpen;Opens a catalog, and returns a context handle to the open catalog.
+IsCatalogFile;Retrieves a Boolean value that indicates whether the specified file is a catalog file.
+
+<WinTrust>
+WintrustAddActionID;Adds a trust provider action to the user's system.
+WintrustGetRegPolicyFlags;Retrieves policy flags for a policy provider.
+WintrustAddDefaultForUsage;Specifies the default usage identifier and callback information for a provider
+WintrustGetDefaultForUsage;Retrieves the default usage identifier and callback information.
+WintrustLoadFunctionPointers;Loads function entry points for a specified action GUID.
+WintrustRemoveActionID;Removes an action added by the WintrustAddActionID function.
+WintrustSetDefaultIncludePEPageHashes;Sets the default setting that determines whether page hashes are included when creating subject interface package (SIP) indirect data for portable executable files.
+WintrustSetRegPolicyFlags;Sets policy flags for a policy provider.
+WinVerifyTrust;Performs a trust verification action on a specified object.
+WinVerifyTrustEx;Performs a trust verification action on a specified object and takes a pointer to a WINTRUST_DATA structure.
+WTHelperCertCheckValidSignature;Checks whether a signature is valid.
+WTHelperCertFindIssuerCertificate;Finds an issuer certificate from the specified certificate stores that matches the specified subject certificate.
+WTHelperCertIsSelfSigned;Checks whether a certificate is self-signed.
+WTHelperGetFileHash;Verifies the signature of a signed file and obtains the hash value and algorithm identifier for the file.
+WTHelperGetProvCertFromChain;Retrieves a trust provider certificate from the certificate chain.
+WTHelperGetProvPrivateDataFromChain;Receives a CRYPT_PROVIDER_PRIVDATA structure from the chain by using the provider ID.
+WTHelperGetProvSignerFromChain;Retrieves a signer or countersigner by index from the chain.
+WTHelperProvDataFromStateData;Retrieves trust provider information from a specified handle.
+
+<Object Locator>
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FLUSH;Specifies that an object has changed.
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_GET;Retrieves an object.
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_RELEASE;Releases the provider.
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_PASSWORD;Releases the password used to encrypt a PFX byte array.
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE;Releases the object returned by the provider.
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_IDENTIFIER;Releases memory for an object identifier.
+PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_INITIALIZE;Initializes the provider.
+
+[Service]
+Handler;An application-defined callback function used with the RegisterServiceCtrlHandler function.
+HandlerEx;An application-defined callback function used with the RegisterServiceCtrlHandlerEx function.
+RegisterServiceCtrlHandler;Registers a function to handle service control requests.
+RegisterServiceCtrlHandlerEx;Registers a function to handle extended service control requests.
+ServiceMain;An application-defined function that serves as the starting point for a service.
+SetServiceBits;Registers a service type with the service control manager and the Server service.
+SetServiceStatus;Updates the service control manager's status information for the calling service.
+StartServiceCtrlDispatcher;Connects the main thread of a service process to the service control manager.
+ChangeServiceConfig;Changes the configuration parameters of a service.
+ChangeServiceConfig2;Changes the optional configuration parameters of a service.
+CloseServiceHandle;Closes the specified handle to a service control manager object or a service object.
+ControlService;Sends a control code to a service.
+ControlServiceEx;Sends a control code to a service.
+CreateService;Creates a service object and adds it to the specified service control manager database.
+DeleteService;Marks the specified service for deletion from the service control manager database.
+EnumDependentServices;Retrieves the name and status of each service that depends on the specified service.
+EnumServicesStatusEx;Enumerates services in the specified service control manager database based on the specified information level.
+GetServiceDisplayName;Retrieves the display name of the specified service.
+GetServiceKeyName;Retrieves the service name of the specified service.
+NotifyBootConfigStatus;Reports the boot status to the service control manager.
+NotifyServiceStatusChange;Enables an application to receive notification when the specified service is created or deleted or when its status changes.
+OpenSCManager;Establishes a connection to the service control manager on the specified computer and opens the specified service control manager database.
+OpenService;Opens an existing service.
+QueryServiceConfig;Retrieves the configuration parameters of the specified service.
+QueryServiceConfig2;Retrieves the optional configuration parameters of the specified service.
+QueryServiceDynamicInformation;Retrieves dynamic information related to the current service start.
+QueryServiceObjectSecurity;Retrieves a copy of the security descriptor associated with a service object.
+QueryServiceStatusEx;Retrieves the current status of the specified service based on the specified information level.
+SetServiceObjectSecurity;Sets the security descriptor of a service object.
+StartService;Starts a service.
+
+<Obsolete>
+EnumServicesStatus 
+LockServiceDatabase 
+QueryServiceLockStatus 
+QueryServiceStatus 
+UnlockServiceDatabase 
+
+[Authorization]
+AccessCheck;Determines whether a security descriptor grants a specified set of access rights to the client identified by an access token.
+AccessCheckAndAuditAlarm;Determines whether a security descriptor grants a specified set of access rights to the client being impersonated by the calling thread.
+AccessCheckByType;Determines whether a security descriptor grants a specified set of access rights to the client identified by an access token.
+AccessCheckByTypeAndAuditAlarm;Determines whether a security descriptor grants a specified set of access rights to the client being impersonated by the calling thread.
+AccessCheckByTypeResultList;Determines whether a security descriptor grants a specified set of access rights to the client identified by an access token.
+AccessCheckByTypeResultListAndAuditAlarm;Determines whether a security descriptor grants a specified set of access rights to the client being impersonated by the calling thread.
+AccessCheckByTypeResultListAndAuditAlarmByHandle;Determines whether a security descriptor grants a specified set of access rights to the client that the calling thread is impersonating.
+AddAccessAllowedAce;Adds an access-allowed access control entry (ACE) to an access control list (ACL). The access is granted to a specified security identifier (SID).
+AddAccessAllowedAceEx;Adds an access-allowed access control entry (ACE) to the end of a discretionary access control list (DACL).
+AddAccessAllowedObjectAce;Adds an access-allowed access control entry (ACE) to the end of a discretionary access control list (DACL).
+AddAccessDeniedAce;Adds an access-denied access control entry (ACE) to an access control list (ACL). The access is denied to a specified security identifier (SID).
+AddAccessDeniedAceEx;Adds an access-denied access control entry (ACE) to the end of a discretionary access control list (DACL).
+AddAccessDeniedObjectAce;Adds an access-denied access control entry (ACE) to the end of a discretionary access control list (DACL). The new ACE can deny access to an object, or to a property set or property on an object.
+AddAce;Adds one or more access control entries (ACEs) to a specified access control list (ACL).
+AddAuditAccessAce;Adds a system-audit access control entry (ACE) to a system access control list (ACL). The access of a specified security identifier (SID) is audited.
+AddAuditAccessAceEx;Adds a system-audit access control entry (ACE) to the end of a system access control list (SACL).
+AddAuditAccessObjectAce;Adds a system-audit access control entry (ACE) to the end of a system access control list (SACL).
+AddConditionalAce;Adds a conditional access control entry (ACE) to the specified access control list (ACL).
+AddMandatoryAce;Adds a SYSTEM_MANDATORY_LABEL_ACE access control entry (ACE) to the specified system access control list (SACL).
+AddResourceAttributeAce;Adds a SYSTEM_RESOURCE_ATTRIBUTE_ACEaccess control entry (ACE) to the end of a system access control list (SACL).
+AddScopedPolicyIDAce;Adds a SYSTEM_SCOPED_POLICY_ID_ACEaccess control entry (ACE) to the end of a system access control list (SACL).
+AdjustTokenGroups;Enables or disables groups already present in the specified access token. Access to TOKEN_ADJUST_GROUPS is required to enable or disable groups in an access token.
+AdjustTokenPrivileges;Enables or disables privileges in the specified access token. Enabling or disabling privileges in an access token requires TOKEN_ADJUST_PRIVILEGES access.
+AllocateAndInitializeSid;Allocates and initializes a security identifier (SID) with up to eight subauthorities.
+AllocateLocallyUniqueId;Allocates a locally unique identifier (LUID).
+AreAllAccessesGranted;Checks whether a set of requested access rights has been granted. The access rights are represented as bit flags in an access mask.
+AreAnyAccessesGranted;Tests whether any of a set of requested access rights has been granted. The access rights are represented as bit flags in an access mask.
+AuditComputeEffectivePolicyBySid;Computes the effective audit policy for one or more subcategories for the specified security principal. The function computes effective audit policy by combining system audit policy with per-user policy.
+AuditComputeEffectivePolicyByToken;Computes the effective audit policy for one or more subcategories for the security principal associated with the specified token. The function computes effective audit policy by combining system audit policy with per-user policy.
+AuditEnumerateCategories;Enumerates the available audit-policy categories.
+AuditEnumeratePerUserPolicy;Enumerates users for whom per-user auditing policy is specified.
+AuditEnumerateSubCategories;Enumerates the available audit-policy subcategories.
+AuditFree;Frees the memory allocated by audit functions for the specified buffer.
+AuditLookupCategoryGuidFromCategoryId;Retrieves a GUID structure that represents the specified audit-policy category.
+AuditLookupCategoryIdFromCategoryGuid;Retrieves an element of the POLICY_AUDIT_EVENT_TYPE enumeration that represents the specified audit-policy category.
+AuditLookupCategoryName;Retrieves the display name of the specified audit-policy category.
+AuditLookupSubCategoryName;Retrieves the display name of the specified audit-policy subcategory.
+AuditQueryGlobalSacl;retrieves a global system access control list (SACL) that delegates access to the audit messages.
+AuditQueryPerUserPolicy;Retrieves per-user audit policy in one or more audit-policy subcategories for the specified principal.
+AuditQuerySecurity;Retrieves security descriptor that delegates access to audit policy.
+AuditQuerySystemPolicy;Retrieves system audit policy for one or more audit-policy subcategories.
+AuditSetGlobalSacl;sets a global system access control list (SACL) that delegates access to the audit messages.
+AuditSetPerUserPolicy;Sets per-user audit policy in one or more audit subcategories for the specified principal.
+AuditSetSecurity;Sets a security descriptor that delegates access to audit policy.
+AuditSetSystemPolicy;Sets system audit policy for one or more audit-policy subcategories.
+AuthzAccessCheck;Determines which access bits can be granted to a client for a given set of security descriptors.
+AuthzAccessCheckCallback;An application-defined function that handles callback access control entries (ACEs) during an access check. AuthzAccessCheckCallback is a placeholder for the application-defined function name. The application registers this callback by calling AuthzInitializeResourceManager.
+AuthzAddSidsToContext;Creates a copy of an existing context and appends a given set of security identifiers (SIDs) and restricted SIDs.
+AuthzCachedAccessCheck;Performs a fast access check based on a cached handle containing the static granted bits from a previous AuthzAccessCheck call.
+AuthzComputeGroupsCallback;An application-defined function that creates a list of security identifiers (SIDs) that apply to a client. AuthzComputeGroupsCallback is a placeholder for the application-defined function name.
+AuthzEnumerateSecurityEventSources;Retrieves the registered security event sources that are not installed by default.
+AuthzFreeAuditEvent;Frees the structure allocated by the AuthzInitializeObjectAccessAuditEvent function.
+AuthzFreeCentralAccessPolicyCache;Decreases the CAP cache reference count by one so that the CAP cache can be deallocated.
+AuthzFreeCentralAccessPolicyCallback;The AuthzFreeCentralAccessPolicyCallback function is an application-defined function that frees memory allocated by the AuthzGetCentralAccessPolicyCallback function. AuthzFreeCentralAccessPolicyCallback is a placeholder for the application-defined function name.
+AuthzFreeContext;Frees all structures and memory associated with the client context. The list of handles for a client is freed in this call.
+AuthzFreeGroupsCallback;An application-defined function that frees memory allocated by the AuthzComputeGroupsCallback function. AuthzFreeGroupsCallback is a placeholder for the application-defined function name.
+AuthzFreeHandle;Finds and deletes a handle from the handle list.
+AuthzFreeResourceManager;Frees a resource manager object.
+AuthzGetCentralAccessPolicyCallback;The AuthzGetCentralAccessPolicyCallback function is an application-defined function that retrieves the central access policy. AuthzGetCentralAccessPolicyCallback is a placeholder for the application-defined function name.
+AuthzGetInformationFromContext;Returns information about an Authz context.
+AuthzInitializeCompoundContext;creates a user-mode context from the given user and device security contexts.
+AuthzInitializeContextFromAuthzContext;Creates a new client context based on an existing client context.
+AuthzInitializeContextFromSid;Creates a user-mode client context from a user security identifier (SID).
+AuthzInitializeContextFromToken;Initializes a client authorization context from a kernel token. The kernel token must have been opened for TOKEN_QUERY.
+AuthzInitializeObjectAccessAuditEvent;Initializes auditing for an object.
+AuthzInitializeObjectAccessAuditEvent2;Allocates and initializes an AUTHZ_AUDIT_EVENT_HANDLE handle for use with the AuthzAccessCheck function.
+AuthzInitializeRemoteResourceManager;Allocates and initializes a remote resource manager. The caller can use the resulting handle to make RPC calls to a remote instance of the resource manager configured on a server.
+AuthzInitializeResourceManager;Uses Authz to verify that clients have access to various resources.
+AuthzInitializeResourceManagerEx;Allocates and initializes a resource manager structure.
+AuthzInstallSecurityEventSource;Installs the specified source as a security event source.
+AuthzModifyClaims;Adds, deletes, or modifies user and device claims in the Authz client context.
+AuthzModifySecurityAttributes;Modifies the security attribute information in the specified client context.
+AuthzModifySids;Adds, deletes, or modifies user and device groups in the Authz client context.
+AuthzOpenObjectAudit;Reads the system access control list (SACL) of the specified security descriptor and generates any appropriate audits specified by that SACL.
+AuthzRegisterCapChangeNotification;Registers a CAP update notification callback.
+AuthzRegisterSecurityEventSource;Registers a security event source with the Local Security Authority (LSA).
+AuthzReportSecurityEvent;Generates a security audit for a registered security event source.
+AuthzReportSecurityEventFromParams;Generates a security audit for a registered security event source by using the specified array of audit parameters.
+AuthzSetAppContainerInformation;Sets the app container and capability information in a current Authz context.
+AuthzUninstallSecurityEventSource;Removes the specified source from the list of valid security event sources.
+AuthzUnregisterCapChangeNotification;Removes a previously registered CAP update notification callback.
+AuthzUnregisterSecurityEventSource;Unregisters a security event source with the Local Security Authority (LSA).
+BuildExplicitAccessWithName;Initializes an EXPLICIT_ACCESS structure with data specified by the caller. The trustee is identified by a name string.
+BuildImpersonateExplicitAccessWithName;The BuildImpersonateExplicitAccessWithName function is not supported.
+BuildImpersonateTrustee;The BuildImpersonateTrustee function is not supported.
+BuildSecurityDescriptor;Allocates and initializes a new security descriptor.
+BuildTrusteeWithName;Initializes a TRUSTEE structure. The caller specifies the trustee name. The function sets other members of the structure to default values.
+BuildTrusteeWithObjectsAndName;Initializes a TRUSTEE structure with the object-specific access control entry (ACE) information and initializes the remaining members of the structure to default values. The caller also specifies the name of the trustee.
+BuildTrusteeWithObjectsAndSid;Initializes a TRUSTEE structure with the object-specific access control entry (ACE) information and initializes the remaining members of the structure to default values. The caller also specifies the SID structure that represents the security identifier of the trustee.
+BuildTrusteeWithSid;Initializes a TRUSTEE structure. The caller specifies the security identifier (SID) of the trustee. The function sets other members of the structure to default values and does not look up the name associated with the SID.
+CheckTokenCapability;Checks the capabilities of a given token.
+CheckTokenMembership;Determines whether a specified security identifier (SID) is enabled in an access token.
+CheckTokenMembershipEx;Determines whether the specified SID is enabled in the specified token.
+ConvertSecurityDescriptorToStringSecurityDescriptor;Converts a security descriptor to a string format. You can use the string format to store or transmit the security descriptor.
+ConvertSidToStringSid;Converts a security identifier (SID) to a string format suitable for display, storage, or transmission.
+ConvertStringSecurityDescriptorToSecurityDescriptor;Converts a string-format security descriptor into a valid, functional security descriptor.
+ConvertStringSidToSid;Converts a string-format security identifier (SID) into a valid, functional SID. You can use this function to retrieve a SID that the ConvertSidToStringSid function converted to string format.
+ConvertToAutoInheritPrivateObjectSecurity;Converts a security descriptor and its access control lists (ACLs) to a format that supports automatic propagation of inheritable access control entries (ACEs).
+CopySid;Copies a security identifier (SID) to a buffer.
+CreatePrivateObjectSecurity;Allocates and initializes a self-relative security descriptor for a new private object. A protected server calls this function when it creates a new private object.
+CreatePrivateObjectSecurityEx;Allocates and initializes a self-relative security descriptor for a new private object created by the resource manager calling this function.
+CreatePrivateObjectSecurityWithMultipleInheritance;Allocates and initializes a self-relative security descriptor for a new private object created by the resource manager calling this function.
+CreateRestrictedToken;Creates a new access token that is a restricted version of an existing access token. The restricted token can have disabled security identifiers (SIDs), deleted privileges, and a list of restricting SIDs.
+CreateSecurityPage;Creates a basic security property page that enables the user to view and edit the access rights allowed or denied by the access control entries (ACEs) in an object's discretionary access control list (DACL).
+CreateWellKnownSid;Creates a SID for predefined aliases.
+DeleteAce;Deletes an access control entry (ACE) from an access control list (ACL).
+DestroyPrivateObjectSecurity;Deletes a private object's security descriptor.
+DSCreateSecurityPage;Creates a security property page for an Active Directory object.
+DSCreateISecurityInfoObject;Creates an instance of the ISecurityInformation interface associated with the specified directory service (DS) object.
+DSCreateISecurityInfoObjectEx;Creates an instance of the ISecurityInformation interface associated with the specified directory service (DS) object on the specified server.
+DSEditSecurity;Displays a modal dialog box for editing security on a Directory Services (DS) object.
+DuplicateToken;Creates a new access token that duplicates one already in existence.
+DuplicateTokenEx;Creates a new access token that duplicates an existing token. This function can create either a primary token or an impersonation token.
+EditSecurity;Displays a property sheet that contains a basic security property page. This property page enables the user to view and edit the access rights allowed or denied by the ACEs in an object's DACL.
+EditSecurityAdvanced;Extends the EditSecurity function to include the security page type when displaying the property sheet that contains a basic security property page.
+EqualDomainSid;Determines whether two SIDs are from the same domain.
+EqualPrefixSid;Tests two security-identifier (SID) prefix values for equality. A SID prefix is the entire SID except for the last subauthority value.
+EqualSid;Tests two security identifier (SID) values for equality. Two SIDs must match exactly to be considered equal.
+FindFirstFreeAce;Retrieves a pointer to the first free byte in an access control list (ACL).
+FreeInheritedFromArray;Frees memory allocated by the GetInheritanceSource function.
+FreeSid;Frees a security identifier (SID) previously allocated by using the AllocateAndInitializeSid function.
+GetAce;Obtains a pointer to an access control entry (ACE) in an access control list (ACL).
+GetAclInformation;Retrieves information about an access control list (ACL).
+GetAppContainerNamedObjectPath;Retrieves the named object path for the app container.
+GetAuditedPermissionsFromAcl;Retrieves the audited access rights for a specified trustee.
+GetCurrentProcessToken;Retrieves a pseudo-handle that you can use as a shorthand way to refer to the access token associated with a process.
+GetCurrentThreadEffectiveToken;Retrieves a pseudo-handle that you can use as a shorthand way to refer to the token that is currently in effect for the thread, which is the thread token if one exists and the process token otherwise.
+GetCurrentThreadToken;Retrieves a pseudo-handle that you can use as a shorthand way to refer to the impersonation token that was assigned to the current thread.
+GetEffectiveRightsFromAcl;Retrieves the effective access rights that an ACL structure grants to a specified trustee. The trustee's effective access rights are the access rights that the ACL grants to the trustee or to any groups of which the trustee is a member.
+GetExplicitEntriesFromAcl;Retrieves an array of structures that describe the access control entries (ACEs) in an access control list (ACL).
+GetFileSecurity;Obtains specified information about the security of a file or directory. The information obtained is constrained by the caller's access rights and privileges.
+GetInheritanceSource;Returns information about the source of inherited access control entries (ACEs) in an access control list (ACL).
+GetKernelObjectSecurity;Retrieves a copy of the security descriptor that protects a kernel object.
+GetLengthSid;Returns the length, in bytes, of a valid security identifier (SID).
+GetMultipleTrustee;The GetMultipleTrustee function is not supported.
+GetMultipleTrusteeOperation;The GetMultipleTrusteeOperation function is not supported.
+GetNamedSecurityInfo;Retrieves a copy of the security descriptor for an object specified by name.
+GetPrivateObjectSecurity;Retrieves information from a private object's security descriptor.
+GetSecurityDescriptorControl;Retrieves a security descriptor control and revision information.
+GetSecurityDescriptorDacl;Retrieves a pointer to the discretionary access control list (DACL) in a specified security descriptor.
+GetSecurityDescriptorGroup;Retrieves the primary group information from a security descriptor.
+GetSecurityDescriptorLength;Returns the length, in bytes, of a structurally valid security descriptor. The length includes the length of all associated structures.
+GetSecurityDescriptorOwner;Retrieves the owner information from a security descriptor.
+GetSecurityDescriptorRMControl;Retrieves the resource manager control bits.
+GetSecurityDescriptorSacl;Retrieves a pointer to the system access control list (SACL) in a specified security descriptor.
+GetSecurityInfo;Retrieves a copy of the security descriptor for an object specified by a handle.
+GetSidIdentifierAuthority;Returns a pointer to the SID_IDENTIFIER_AUTHORITY structure in a specified security identifier (SID).
+GetSidLengthRequired;Returns the length, in bytes, of the buffer required to store a SID with a specified number of subauthorities.
+GetSidSubAuthority;Returns a pointer to a specified subauthority in a security identifier (SID). The subauthority value is a relative identifier (RID).
+GetSidSubAuthorityCount;Returns a pointer to the member in a security identifier (SID) structure that contains the subauthority count.
+GetTokenInformation;Retrieves a specified type of information about an access token. The calling process must have appropriate access rights to obtain the information.
+GetTrusteeForm;Retrieves the trustee name from the specified TRUSTEE structure. This value indicates whether the structure uses a name string or a security identifier (SID) to identify the trustee.
+GetTrusteeName;Retrieves the trustee name from the specified TRUSTEE structure.
+GetTrusteeType;Retrieves the trustee type from the specified TRUSTEE structure. This value indicates whether the trustee is a user, a group, or the trustee type is unknown.
+GetUserObjectSecurity;Retrieves security information for the specified user object.
+GetWindowsAccountDomainSid;Receives a security identifier (SID) and returns a SID representing the domain of that SID.
+ImpersonateAnonymousToken;Enables the specified thread to impersonate the system's anonymous logon token.
+ImpersonateLoggedOnUser;Lets the calling thread impersonate the security context of a logged-on user. The user is represented by a token handle.
+ImpersonateNamedPipeClient;Impersonates a named-pipe client application.
+ImpersonateSelf;Obtains an access token that impersonates the security context of the calling process. The token is assigned to the calling thread.
+InitializeAcl;Initializes a new ACL structure.
+InitializeSecurityDescriptor;Initializes a new security descriptor.
+InitializeSid;Initializes a security identifier (SID).
+IsTokenRestricted;Indicates whether a token contains a list of restricted security identifiers (SIDs).
+IsValidAcl;Validates an access control list (ACL).
+IsValidSecurityDescriptor;Determines whether the components of a security descriptor are valid.
+IsValidSid;Validates a security identifier (SID) by verifying that the revision number is within a known range, and that the number of subauthorities is less than the maximum.
+IsWellKnownSid;Compares a SID to a well-known SID and returns TRUE if they match.
+LookupAccountName;Accepts the name of a system and an account as input. It retrieves a security identifier (SID) for the account and the name of the domain on which the account was found.
+LookupAccountSid;Accepts a security identifier (SID) as input. It retrieves the name of the account for this SID and the name of the first domain on which this SID is found.
+LookupPrivilegeDisplayName;Retrieves the display name that represents a specified privilege.
+LookupPrivilegeName;Retrieves the name that corresponds to the privilege represented on a specific system by a specified locally unique identifier (LUID).
+LookupPrivilegeValue;Retrieves the locally unique identifier (LUID) used on a specified system to locally represent the specified privilege name.
+LookupSecurityDescriptorParts;Retrieves security information from a self-relative security descriptor.
+MakeAbsoluteSD;Creates a security descriptor in absolute format by using a security descriptor in self-relative format as a template.
+MakeSelfRelativeSD;Creates a security descriptor in self-relative format by using a security descriptor in absolute format as a template.
+MapGenericMask;Maps the generic access rights in an access mask to specific and standard access rights. The function applies a mapping supplied in a GENERIC_MAPPING structure.
+NtCompareTokens;Compares two access tokens and determines whether they are equivalent with respect to a call to the AccessCheck function.
+ObjectCloseAuditAlarm;Generates an audit message in the security event log when a handle to a private object is deleted.
+ObjectDeleteAuditAlarm;Generates audit messages when an object is deleted.
+ObjectOpenAuditAlarm;Generates audit messages when a client application attempts to gain access to an object or to create a new one.
+ObjectPrivilegeAuditAlarm;Generates an audit message in the security event log.
+OpenProcessToken;Opens the access token associated with a process.
+OpenThreadToken;Opens the access token associated with a thread.
+PrivilegeCheck;Determines whether a specified set of privileges are enabled in an access token.
+PrivilegedServiceAuditAlarm;Generates an audit message in the security event log.
+QuerySecurityAccessMask;Creates an access mask that represents the access permissions necessary to query the specified object security information.
+QueryServiceObjectSecurity;Retrieves a copy of the security descriptor associated with a service object.
+RegGetKeySecurity;Retrieves a copy of the security descriptor protecting the specified open registry key.
+RegSetKeySecurity;Sets the security of an open registry key.
+RevertToSelf;Terminates the impersonation of a client application.
+RtlConvertSidToUnicodeString;Converts a security identifier (SID) to its Unicode character representation.
+SetAclInformation;Sets information about an access control list (ACL).
+SetEntriesInAcl;Creates a new access control list (ACL) by merging new access control or audit control information into an existing ACL structure.
+SetFileSecurity;Sets the security of a file or directory object.
+SetKernelObjectSecurity;Sets the security of a kernel object.
+SetNamedSecurityInfo;Sets specified security information in the security descriptor of a specified object.
+SetPrivateObjectSecurity;Modifies a private object's security descriptor.
+SetPrivateObjectSecurityEx;Modifies the security descriptor of a private object maintained by the resource manager calling this function.
+SetSecurityAccessMask;Creates an access mask that represents the access permissions necessary to set the specified object security information.
+SetSecurityDescriptorControl;Sets the control bits of a security descriptor. The function can set only the control bits that relate to automatic inheritance of ACEs.
+SetSecurityDescriptorDacl;Sets information in a discretionary access control list (DACL). If a DACL is already present in the security descriptor, the DACL is replaced.
+SetSecurityDescriptorGroup;Sets the primary group information of an absolute-format security descriptor, replacing any primary group information already present in the security descriptor.
+SetSecurityDescriptorOwner;Sets the owner information of an absolute-format security descriptor. It replaces any owner information already present in the security descriptor.
+SetSecurityDescriptorRMControl;Sets the resource manager control bits in the SECURITY_DESCRIPTOR structure.
+SetSecurityDescriptorSacl;Sets information in a system access control list (SACL). If there is already a SACL present in the security descriptor, it is replaced.
+SetSecurityInfo;Sets specified security information in the security descriptor of a specified object. The caller identifies the object by a handle.
+SetServiceObjectSecurity;Sets the security descriptor of a service object.
+SetThreadToken;Assigns an impersonation token to a thread. The function can also cause a thread to stop using an impersonation token.
+SetTokenInformation;Sets various types of information for a specified access token.
+SetUserObjectSecurity;Sets the security of a user object. This can be, for example, a window or a DDE conversation.
+TreeResetNamedSecurityInfo;Resets specified security information in the security descriptor of a specified tree of objects.
+TreeSetNamedSecurityInfo;Sets specified security information in the security descriptor of a specified tree of objects.
+
+[Shell]
+PathAllocCanonicalize;Converts a path string into a canonical form.
+PathAllocCombine;Concatenates two path fragments into a single path. This function also canonicalizes any relative path elements, replacing path elements such as "." and "..".
+PathCchAddBackslash;Adds a backslash to the end of a string to create the correct syntax for a path. If the source path already has a trailing backslash, no backslash will be added.
+PathCchAddBackslashEx;Adds a backslash to the end of a string to create the correct syntax for a path. If the source path already has a trailing backslash, no backslash will be added.
+PathCchAddExtension;Adds a file name extension to a path string.
+PathCchAppend;Appends one path to the end of another.
+PathCchAppendEx;Appends one path to the end of another.
+PathCchCanonicalize;Converts a path string into a canonical form.
+PathCchCanonicalizeEx;Simplifies a path by removing navigation elements such as "." and ".." to produce a direct, well-formed path.
+PathCchCombine;Combines two path fragments into a single path. This function also canonicalizes any relative path elements, removing "." and ".." elements to simplify the final path.
+PathCchCombineEx;Combines two path fragments into a single path. This function also canonicalizes any relative path elements, removing "." and ".." elements to simplify the final path.
+PathCchFindExtension;Searches a path to find its file name extension, such as ".exe" or ".ini". This function does not search for a specific extension; it searches for the presence of any extension.
+PathCchIsRoot;Determines whether a path string refers to the root of a volume.
+PathCchRemoveBackslash;Removes the trailing backslash from the end of a path string.
+PathCchRemoveBackslashEx;Removes the trailing backslash from the end of a path string.
+PathCchRemoveExtension;Removes the file name extension from a path, if one is present.
+PathCchRemoveFileSpec;Removes the last element in a path string, whether that element is a file name or a directory name. The element's leading backslash is also removed.
+PathCchRenameExtension;Replaces a file name's extension at the end of a path string with a new extension. If the path string does not end with an extension, the new extension is added.
+PathCchSkipRoot;Retrieves a pointer to the first character in a path following the drive letter or Universal Naming Convention (UNC) server/share path elements.
+PathCchStripPrefix;Removes the "\\?\" prefix, if present, from a file path.
+PathCchStripToRoot;Removes all file and directory elements in a path except for the root information.
+PathIsUNCEx;Determines if a path string is a valid UNC path, as opposed to a path based on a drive letter.
+AssocCreateForClasses;Retrieves an object that implements an IQueryAssociations interface.
+AssocGetDetailsOfPropKey;Retrieves the value for a given property key using the file association information provided by the Namespace Extensions.
+CDefFolderMenu_Create2;Creates a context menu for a selected group of file folder objects.
+CIShutdown;Shuts down the content indexer and closes all open catalogs.
+CommandLineToArgvW;Parses a Unicode command line string and returns an array of pointers to the command line arguments, along with a count of such arguments, in a way that is similar to the standard C run-time argv and argc values.
+CPlApplet;Serves as the entry point for a Control Panel application. This is a library-defined callback function.
+CreateAppContainerProfile;Creates a per-user, per-app profile for Windows Store apps.
+CreateEnvironmentBlock;Retrieves the environment variables for the specified user. This block can then be passed to the CreateProcessAsUser function.
+CreateMRUListW;Creates a new most recently used (MRU) list.
+CreateProfile;Creates a new user profile.
+DefScreenSaverProc;Provides default processing for any messages that a screen saver application does not process.
+DefSubclassProc;Calls the next handler in a window's subclass chain. The last handler in the subclass chain calls the original window procedure for the window.
+DeleteAppContainerProfile;Deletes the specified per-user, per-app profile.
+DeleteProfile;Deletes the user profile and all user-related settings from the specified computer. The caller must have administrative privileges to delete a user's profile.
+DestroyEnvironmentBlock;Frees environment variables created by the CreateEnvironmentBlock function.
+DeriveAppContainerSidFromAppContainerName;Gets the SID of the specified profile.
+DeriveRestrictedAppContainerSidFromAppContainerSidAndRestrictedName;DeriveRestrictedAppContainerSidFromAppContainerSidAndRestrictedName is reserved for future use.
+DllGetVersion;Implemented by many of the Windows Shell DLLs to allow applications to obtain DLL-specific version information.
+DragAcceptFiles;Registers whether a window accepts dropped files.
+DragFinish;Releases memory that the system allocated for use in transferring file names to the application.
+DragQueryFile;Retrieves the names of dropped files that result from a successful drag-and-drop operation.
+DragQueryPoint;Retrieves the position of the mouse pointer at the time a file was dropped during a drag-and-drop operation.
+DuplicateIcon;Creates a duplicate of a specified icon.
+ExpandEnvironmentStringsForUser;Expands the source string by using the environment block established for the specified user.
+ExtractAssociatedIcon;Gets a handle to an icon stored as a resource in a file or an icon stored in a file's associated executable file.
+ExtractIcon;Gets a handle to an icon from the specified executable file, DLL, or icon file.
+To retrieve an array of handles to large or small icons, use the ExtractIconEx function.
+ExtractIconEx;The ExtractIconEx function creates an array of handles to large or small icons extracted from the specified executable file, DLL, or icon file.
+FileIconInit;Initializes or reinitializes the system image list.
+FindExecutable;Retrieves the name of and handle to the executable (.exe) file associated with a specific document file.
+FreeConfirmConflictItem;Frees the resources that have been allocated for a CONFIRM_CONFLICT_ITEM structure.
+FreeIDListArray;Frees the memory used by an pointer to an item identifier list (PIDL) list array.
+FreeIDListArrayChild;Releases the memory space for the array of pointers to child item IDs. This releases both the PITEMID_CHILDs within the array and the array itself.
+FreeIDListArrayFull;Releases the memory space for the PIDL array. This releases both the PIDLIST_ABSOLUTEs within the array and the array itself.
+FreeKnownFolderDefinitionFields;Frees the allocated fields in the result from IKnownFolder::GetFolderDefinition.
+FreeMRUList;Frees the handle associated with the MRU list and writes cached data to the registry.
+GetAllUsersProfileDirectory;Retrieves the path to the root of the directory that contains program data shared by all users.
+GetAppContainerFolderPath;Gets the path of the local app data folder for the specified app container.
+GetAppContainerRegistryLocation;Gets the location of the registry storage associated with an app container.
+GetContractDelegateWindow;Retrieves a window that has been set as a delegate for an app's primary foreground window for the purpose of associating the delegate window with the app's contracts. Use this function if you are a developer writing a Windows Store app in native C++.
+GetCurrentProcessExplicitAppUserModelID;Retrieves the application-defined, explicit Application User Model ID (AppUserModelID) for the current process.
+GetDefaultUserProfileDirectory;Retrieves the path to the root of the default user's profile.
+GetMenuContextHelpId;Retrieves the Help context identifier associated with the specified menu.
+GetProfilesDirectory;Retrieves the path to the root directory where user profiles are stored.
+GetProfileType;Retrieves the type of profile loaded for the current user.
+GetScaleFactorForDevice;Gets the preferred scale factor for a display device.
+GetScaleFactorForMonitor;Gets the scale factor of a specific monitor. This function replaces GetScaleFactorForDevice.
+GetUserProfileDirectory;Retrieves the path to the root directory of the specified user's profile.
+GetWindowContextHelpId;Retrieves the Help context identifier, if any, associated with the specified window.
+GetWindowSubclass;Retrieves the reference data for the specified window subclass callback.
+IDListContainerIsConsistent;Verifies that the container structure of an IDList is valid.
+ILAppendID;Appends or prepends an SHITEMID structure to an ITEMIDLIST structure.
+ILClone;Clones an ITEMIDLIST structure.
+ILCloneChild;Clones a child ITEMIDLIST structure.
+ILCloneFirst;Clones the first SHITEMID structure in an ITEMIDLIST structure.
+ILCloneFull;Clones a full, or absolute, ITEMIDLIST structure.
+ILCombine;Combines two ITEMIDLIST structures.
+ILCreateFromPath;Returns the ITEMIDLIST structure associated with a specified file path.
+ILFindChild;Determines whether a specified ITEMIDLIST structure is the child of another ITEMIDLIST structure.
+ILFindLastID;Returns a pointer to the last SHITEMID structure in an ITEMIDLIST structure.
+ILFree;Frees an ITEMIDLIST structure allocated by the Shell.
+ILGetNext;Retrieves the next SHITEMID structure in an ITEMIDLIST structure.
+ILGetSize;Returns the size, in bytes, of an ITEMIDLIST structure.
+ILIsAligned;Verifies whether a constant ITEMIDLIST is aligned on a pointer boundary, which is a DWORD on 32-bit architectures and a QWORD on 64-bit architectures.
+ILIsChild;Verifies whether a PIDL is a child PIDL, which is a PIDL with exactly one SHITEMID.
+ILIsEmpty;Verifies whether an ITEMIDLIST structure is empty.
+ILIsEqual;Tests whether two ITEMIDLIST structures are equal in a binary comparison.
+ILIsParent;Tests whether an ITEMIDLIST structure is the parent of another ITEMIDLIST structure.
+ILNext(PCUIDLIST_RELATIVE);Retrieves the next SHITEMID structure in an ITEMIDLIST structure.
+ILNext(PUIDLIST_RELATIVE);Retrieves the next SHITEMID structure in an ITEMIDLIST structure.
+ILRemoveLastID;Removes the last SHITEMID structure from an ITEMIDLIST structure.
+ILSaveToStream;Saves an ITEMIDLIST structure to a stream.
+ILSkip(PCUIDLIST_RELATIVE, UINT);Skips a given number of bytes in a constant, unaligned, relative ITEMIDLIST structure.
+ILSkip(PUIDLIST_RELATIVE, UINT);Skips a given number of bytes in an unaligned, relative ITEMIDLIST structure.
+InetIsOffline;Determines whether the system is connected to the Internet.
+InitNetworkAddressControl;Initializes the network address control window class.
+LoadUserProfile;Loads the specified user's profile. The profile can be a local user profile or a roaming user profile.
+MIMEAssociationDialog;Runs the unregistered MIME content type dialog box.
+PathMakeUniqueName;Creates a unique path name from a template.
+PathYetAnotherMakeUniqueName;Creates a unique filename based on an existing filename.
+RegisterAppStateChangeNotification;Enables an app to register a callback function through which it can be notified that its library is going into or coming out of a suspended state. The app can use this information to perform any necessary operations, such as preserving state, that should be performed at that point.
+RegisterDialogClasses;Registers any nonstandard window classes required by a screen saver's configuration dialog box.
+RegisterScaleChangeEvent;Registers for an event that is triggered when the scale has possibly changed. This function replaces RegisterScaleChangeNotifications.
+RegisterScaleChangeNotifications;Registers a window to receive callbacks when scaling information changes.
+RemoveWindowSubclass;Removes a subclass callback from a window.
+RevokeScaleChangeNotifications;Revokes the registration of a window, preventing it from receiving callbacks when scaling information changes.
+ScreenSaverConfigureDialog;Receives messages sent to a screen saver's configuration dialog box. A screen saver that allows user configuration must define this function.
+ScreenSaverProc;Receives messages sent to the specified screen saver window.
+SetContractDelegateWindow;Associates an app window other than the primary foreground window with an app's contracts. Use this function if you are a developer writing a Windows Store app in native C++.
+SetCurrentProcessExplicitAppUserModelID;Specifies a unique application-defined AppUserModelID that identifies the current process to the taskbar. This identifier allows an application to group its associated processes and windows under a single taskbar button.
+SetMenuContextHelpId;Associates a Help context identifier with a menu.
+SetWindowContextHelpId;Associates a Help context identifier with the specified window.
+SetWindowSubclass;Installs or updates a window subclass callback.
+SHAddToRecentDocs;Notifies the system that an item has been accessed, for the purposes of tracking those items used most recently and most frequently. This function can also be used to clear all usage data.
+SHAppBarMessage;Sends an appbar message to the system.
+SHAssocEnumHandlers;Returns an enumeration object for a specified set of file name extension handlers.
+SHAssocEnumHandlersForProtocolByApplication;Gets an enumeration interface that provides access to handlers associated with a given protocol.
+SHBindToFolderIDListParent;Given a Shell namespace item specified in the form of a folder, and an item identifier list relative to that folder, this function binds to the parent of the namespace item and optionally returns a pointer to the final component of the item identifier list.
+SHBindToFolderIDListParentEx;Extends the SHBindToFolderIDListParent function by allowing the caller to specify a bind context.
+SHBindToObject;Retrieves and binds to a specified object by using the Shell namespace IShellFolder::BindToObject method.
+SHBindToParent;Takes a pointer to a fully qualified item identifier list (PIDL), and returns a specified interface pointer on the parent object.
+SHBrowseForFolder;Displays a dialog box that enables the user to select a Shell folder.
+SHChangeNotification_Lock;Locks the shared memory associated with a Shell change notification event.
+SHChangeNotification_Unlock;Unlocks shared memory for a change notification.
+SHChangeNotify;Notifies the system of an event that an application has performed. An application should use this function if it performs an action that may affect the Shell.
+SHChangeNotifyDeregister;Unregisters the client's window process from receiving SHChangeNotify messages.
+SHChangeNotifyRegister;Registers a window to receive notifications from the file system or Shell, if the file system supports notifications.
+SHChangeNotifyRegisterThread;Enables asynchronous register and deregister of a thread.
+SHCreateAssociationRegistration;Creates an IApplicationAssociationRegistration object based on the stock implementation of the interface provided by Windows.
+SHCreateDataObject;Creates a data object in a parent folder.
+SHCreateDefaultContextMenu;Creates an object that represents the Shell's default context menu implementation.
+SHCreateDefaultExtractIcon;Creates a standard icon extractor, whose defaults can be further configured via the IDefaultExtractIconInit interface.
+SHCreateDefaultPropertiesOp;Creates a file operation that sets the default properties on the Shell item that have not already been set.
+SHCreateItemFromIDList;Creates and initializes a Shell item object from a PIDL. The resulting shell item object supports the IShellItem interface.
+SHCreateItemFromParsingName;Creates and initializes a Shell item object from a parsing name.
+SHCreateItemFromRelativeName;Creates and initializes a Shell item object from a relative parsing name.
+SHCreateItemInKnownFolder;Creates a Shell item object for a single file that exists inside a known folder.
+SHCreateItemWithParent;Create a Shell item, given a parent folder and a child item ID.
+SHCreateShellFolderView;Creates a new instance of the default Shell folder view object (DefView).
+SHCreateShellFolderViewEx;Creates a new instance of the default Shell folder view object. It is recommended that you use SHCreateShellFolderView rather than this function.
+SHCreateShellItem;Creates an IShellItem object.
+SHCreateShellItemArray;Creates a Shell item array object.
+SHCreateShellItemArrayFromDataObject;Creates a Shell item array object from a data object.
+SHCreateShellItemArrayFromIDLists;Creates a Shell item array object from a list of ITEMIDLIST structures.
+SHCreateShellItemArrayFromShellItem;Creates an array of one element from a single Shell item.
+SHDefExtractIcon;Provides a default handler to extract an icon from a file.
+SHDoDragDrop;Executes a drag-and-drop operation. Supports drag source creation on demand, as well as drag images.
+Shell_NotifyIcon;Sends a message to the taskbar's status area.
+Shell_NotifyIconGetRect;Gets the screen coordinates of the bounding rectangle of a notification icon.
+ShellAbout;Displays a ShellAbout dialog box.
+ShellDDEInit;Registers the Shell Dynamic Data Exchange (DDE) services in the current process, notifying the system that the current process wishes to host DDE objects.
+ShellExecute;Performs an operation on a specified file.
+ShellExecuteEx;Performs an operation on a specified file.
+SHEmptyRecycleBin;Empties the Recycle Bin on the specified drive.
+SHEnumerateUnreadMailAccounts;Enumerates the user accounts that have unread email.
+SHEvaluateSystemCommandTemplate;Enforces strict validation of parameters used in a call to CreateProcess or ShellExecute.
+SHFileOperation;Copies, moves, renames, or deletes a file system object. This function has been replaced in Windows Vista by IFileOperation.
+SHFreeNameMappings;Frees a file name mapping object that was retrieved by the SHFileOperation function.
+SHGetDataFromIDList;Retrieves extended property data from a relative identifier list.
+SHGetDesktopFolder;Retrieves the IShellFolder interface for the desktop folder, which is the root of the Shell's namespace.
+SHGetDiskFreeSpace;Retrieves disk space information for a disk volume.
+SHGetDiskFreeSpaceEx;Retrieves disk space information for a disk volume.
+SHGetDriveMedia;Returns the type of media that is in the given drive.
+SHGetFileInfo;Retrieves information about an object in the file system, such as a file, folder, directory, or drive root.
+SHGetIconOverlayIndex;Returns the index of the overlay icon in the system image list.
+SHGetIDListFromObject;Retrieves the PIDL of an object.
+SHGetImageList;Retrieves an image list.
+SHGetInstanceExplorer;Retrieves an interface that allows hosted Shell extensions and other components to prevent their host process from closing prematurely. The host process is typically Windows Explorer or Windows Internet Explorer, but this function can also be used by other applications.
+SHGetItemFromDataObject;Creates an IShellItem or related object based on an item specified by an IDataObject.
+SHGetItemFromObject;Retrieves an IShellItem for an object.
+SHGetKnownFolderIDList;Retrieves the path of a known folder as an ITEMIDLIST structure.
+SHGetKnownFolderItem;Retrieves an IShellItem object that represents a known folder.
+SHGetKnownFolderPath;Retrieves the full path of a known folder identified by the folder's KNOWNFOLDERID.
+SHGetLocalizedName;Retrieves the localized name of a file in a Shell folder.
+SHGetNameFromIDList;Retrieves the display name of an item identified by its IDList.
+SHGetNameFromPropertyKey;Retrieves the property's canonical name given its PROPERTYKEY.
+SHGetNewLinkInfo;Creates a name for a new shortcut based on the shortcut's proposed target. This function does not create the shortcut, just the name.
+SHGetPathFromIDList;Converts an item identifier list to a file system path.
+SHGetPathFromIDListEx;Converts an item identifier list to a file system path. This function extends SHGetPathFromIDList by allowing you to set the initial size of the string buffer and declare the options below.
+SHGetSettings;Retrieves the current Shell option settings.
+SHGetStockIconInfo;Retrieves information about system-defined Shell icons.
+SHGetTemporaryPropertyForItem;Retrieves the temporary property for the given item. A temporary property is a read/write store that holds properties only for the lifetime of the IShellItem object, rather than being persisted back into the item.
+SHGetUnreadMailCount;Retrieves a specified user's unread message count for any or all email accounts.
+SHIsFileAvailableOffline;Determines whether a file or folder is available for offline use. This function also determines whether the file would be opened from the network, from the local Offline Files cache, or from both locations.
+SHLoadInProc;Creates an instance of the specified object class from within the context of the Shell's process.
+SHLoadNonloadedIconOverlayIdentifiers;Signals the Shell that during the next operation requiring overlay information, it should load icon overlay identifiers that either failed creation or were not present for creation at startup. Identifiers that have already been loaded are not affected.
+SHLocalStrDup;Makes a copy of a string in newly allocated memory.
+SHMultiFileProperties;Displays a merged property sheet for a set of files. Property values common to all the files are shown while those that differ display the string (multiple values).
+SHOpenFolderAndSelectItems;Opens a Windows Explorer window with specified items in a particular folder selected.
+SHOpenWithDialog;Displays the Open With dialog box.
+ShowShareFolderUI;Displays the Folder Sharing tab on the properties sheet for the specified folder.
+SHParseDisplayName;Translates a Shell namespace object's display name into an item identifier list and returns the attributes of the object. This function is the preferred method to convert a string to a PIDL.
+SHPathPrepareForWrite;Checks to see if the path exists. This includes remounting mapped network drives, prompting for ejectable media to be reinserted, creating the paths, prompting for the media to be formatted, and providing the appropriate user interfaces, if necessary. Read/write permissions for the medium are not checked.
+SHQueryRecycleBin;Retrieves the size of the Recycle Bin and the number of items in it, for a specified drive.
+SHQueryUserNotificationState;Checks the state of the computer for the current user to determine whether sending a notification is appropriate.
+SHRemoveLocalizedName;Removes the localized name of a file in a Shell folder.
+SHRunControlPanel;Opens a Control Panel item.
+SHSetDefaultProperties;Applies the default set of properties on a Shell item.
+SHSetInstanceExplorer;Provides an interface that allows hosted Shell extensions and other components to prevent their host process from closing prematurely. The host process is typically Windows Explorer or Internet Explorer, but this function can also be used by other applications.
+SHSetKnownFolderPath;Redirects a known folder to a new location.
+SHSetLocalizedName;Sets the localized name of a file in a Shell folder.
+SHSetTemporaryPropertyForItem;Sets a temporary property for the specified item. A temporary property is kept in a read/write store that holds properties only for the lifetime of the IShellItem object, instead of writing them back into the item.
+SHSetUnreadMailCount;Stores the current user's unread message count for a specified email account in the registry.
+SHTestTokenMembership;Uses CheckTokenMembership to test whether the given token is a member of the local group with the specified RID.
+SHUpdateImage;Notifies the Shell that an image in the system image list has changed.
+SoftwareUpdateMessageBox;Displays a standard message box that can be used to notify a user that an application has been updated.
+StgMakeUniqueName;Creates a unique name for a stream or storage object from a template.
+StrStrNIW;Finds the first occurrence of a substring within a string. The comparison is case-insensitive.
+StrStrNW;Finds the first occurrence of a substring within a string. The comparison is case-sensitive.
+TranslateURL;Applies common translations to a given URL string, creating a new URL string.
+UnloadUserProfile;Unloads a user's profile that was loaded by the LoadUserProfile function. The caller must have administrative privileges on the computer. For more information, see the Remarks section of the LoadUserProfile function.
+UnregisterAppStateChangeNotification;Cancels a change notification registered through RegisterAppStateChangeNotification.
+UnregisterScaleChangeEvent;Unregisters for the scale change event registered through RegisterScaleChangeEvent. This function replaces RevokeScaleChangeNotifications.
+URLAssociationDialog;Invokes the unregistered URL protocol dialog box. This dialog box allows the user to select an application to associate with a previously unknown protocol.
+WinExecError;Retrieves the error value generated if the WinExec function cannot run a specified application.
+WinHelp;Launches Windows Help (Winhelp.exe) and passes additional data that indicates the nature of the help requested by the application.
+
+[COM]
+BindMoniker;Locates an object by means of its moniker, activates the object if it is inactive, and retrieves a pointer to the specified interface on that object.
+CLSIDFromProgID;Looks up a CLSID in the registry, given a ProgID.
+CLSIDFromProgIDEx;Triggers automatic installation if the COMClassStore policy is enabled.
+CLSIDFromString;Converts a string generated by the StringFromCLSID function back into the original CLSID.
+CoAddRefServerProcess;Increments a global per-process reference count.
+CoAllowSetForegroundWindow;Enables the COM server process called to take focus away from the client application by using the IForegroundTransfer interface.
+CoAllowUnmarshalerCLSID;Adds an unmarshaler CLSID to the allowed list for the calling process only.
+CoCancelCall;Requests cancellation of an outbound DCOM method call pending on a specified thread.
+CoCopyProxy;Makes a private copy of the specified proxy.
+CoCreateFreeThreadedMarshaler;Creates an aggregatable object capable of context-dependent marshaling.
+CoCreateGuid;Creates a GUID, a unique 128-bit integer used for CLSIDs and interface identifiers.
+CoCreateInstance;Creates a single uninitialized object of the class associated with a specified CLSID.
+CoCreateInstanceEx;Creates an instance of a specific class on a specific computer.
+CoCreateInstanceFromApp;Creates an instance of a specific class on a specific computer from within an app container.
+CoDisableCallCancellation;Undoes the action of a call to CoEnableCallCancellation.
+CoDisconnectContext;Disconnects all proxy connections that are being maintained on behalf of all interface pointers that point to objects in the current context.
+CoDisconnectObject;Disconnects all remote process connections being maintained on behalf of all the interface pointers that point to a specified object.
+CoDosDateTimeToFileTime;Converts the MS-DOS representation of the time and date to a FILETIME structure used by Windows.
+CoEnableCallCancellation;Enables cancellation of synchronous calls on the calling thread.
+CoEnterApplicationThreadLifetimeLoop;Waits for and dispatches incoming calls and input to the components in an ASTA thread until its reference count drops to zero.
+CoFileTimeNow;Returns the current time as a FILETIME structure.
+CoFileTimeToDosDateTime;Converts a FILETIME into MS-DOS date and time values.
+CoFreeAllLibraries;Frees all the DLLs that have been loaded with the CoLoadLibrary function (called internally by CoGetClassObject), regardless of whether they are currently in use.
+CoFreeLibrary;Frees a library that, when loaded, was specified to be freed explicitly.
+CoFreeUnusedLibraries;Unloads any DLLs that are no longer in use.
+CoFreeUnusedLibrariesEx;Unloads any DLLs that are no longer in use and whose unload delay has expired.
+CoGetApartmentType;Queries the current apartment type and type qualifier.
+CoGetApplicationThreadReference;Gets a reference to the current ASTA thread to participate in ASTA cooperative lifetime management.
+CoGetCallContext;Retrieves the context of the current call on the current thread.
+CoGetCallerTID;Returns a pointer to a DWORD that contains the apartment ID of the caller's thread.
+CoGetCancelObject;Obtains a pointer to a call control interface, normally ICancelMethodCalls, on the cancel object corresponding to an outbound COM method call pending on the same or another client thread.
+CoGetClassObject;Provides a pointer to an interface on a class object associated with a specified CLSID.
+CoGetContextToken;Returns a pointer to an implementation of IObjContext for the current context.
+CoGetCurrentLogicalThreadId;Returns the logical thread id of the current physical thread.
+CoGetCurrentProcess;Returns a value that is unique to the current thread. CoGetCurrentProcess can be used to avoid thread ID reuse problems.
+CoGetInstanceFromFile;Creates a new object and initializes it from a file using IPersistFile::Load.
+CoGetInstanceFromIStorage;Creates a new object and initializes it from a storage object through an internal call to IPersistFile::Load.
+CoGetInterceptor;Instantiates the appropriate interceptor for the indicated interface to be intercepted and returns the newly created interceptor.
+CoGetInterfaceAndReleaseStream;Unmarshals a buffer containing an interface pointer and releases the stream when an interface pointer has been marshaled from another thread to the calling thread.
+CoGetMalloc;Retrieves a pointer to the default OLE task memory allocator (which supports the system implementation of the IMalloc interface) so applications can call its methods to manage memory.
+CoGetMarshalSizeMax;Returns an upper bound on the number of bytes needed to marshal the specified interface pointer to the specified object.
+CoGetObject;Converts a display name into a moniker that identifies the object named, and then binds to the object identified by the moniker.
+CoGetObjectContext;Returns the context for the current object.
+CoGetPSClsid;Returns the CLSID of the DLL that implements the proxy and stub for the specified interface.
+CoGetStandardMarshal;Creates a default, or standard, marshaling object in either the client process or the server process, depending on the caller, and returns a pointer to that object's IMarshal implementation.
+CoGetStdMarshalEx;Creates an aggregated standard marshaler for use with lightweight client-side handlers.
+CoGetSystemSecurityPermissions;Returns the default values of the Security Descriptors of the machine-wide launch and access permissions, as well as launch and access limits.
+CoGetTreatAsClass;Returns the CLSID of an object that can emulate the specified object.
+CoHandlePriorityEventsFromMessagePump;Provides an opportunity for short-running infrastructural COM calls and other high-priority or short-running COM work to be dispatched between messages.
+CoImpersonateClient;Enables the server to impersonate the client of the current call for the duration of the call.
+CoInitialize;Initializes the COM library on the current thread and identifies the concurrency model as single-thread apartment (STA).
+CoInitializeEx;Initializes the COM library for use by the calling thread, sets the thread's concurrency model, and creates a new apartment for the thread if one is required.
+CoInitializeSecurity;Registers security and sets the default security values for the process.
+CoInstall;Installs the requested COM server application.
+CoInvalidateRemoteMachineBindings;Tells the service control manager to flush any cached RPC binding handles for the specified computer.
+CoIsHandlerConnected;Determines whether a remote object is connected to the corresponding in-process object.
+CoIsOle1Class;Determines whether the specified CLSID represents an OLE 1 object.
+CoLoadLibrary;Loads a specific DLL into the caller's process.
+CoLockObjectExternal;Called either to lock an object to ensure that it stays in memory, or to release such a lock.
+CoMarshalHresult;Marshals an HRESULT to the specified stream, from which it can be unmarshaled using the CoUnmarshalHresult function.
+CoMarshalInterface;Writes into a stream the data required to initialize a proxy object in some client process.
+CoMarshalInterThreadInterfaceInStream;Marshals an interface pointer from one thread to another thread in the same process.
+CoQueryAuthenticationServices;Retrieves a list of the authentication services registered when the process called CoInitializeSecurity.
+CoQueryClientBlanket;Called by the server to find out about the client that invoked the method executing on the current thread.
+CoQueryProxyBlanket;Retrieves the authentication information the client uses to make calls on the specified proxy.
+CoRegisterClassObject;Registers an EXE class object with OLE so other applications can connect to it.
+CoRegisterInitializeSpy;Registers an implementation of the IInitializeSpy interface. The IInitializeSpy interface is defied to allow developers to perform initialization and cleanup on COM apartments.
+CoRegisterMallocSpy;Registers an implementation of the IMallocSpy interface, thereafter requiring OLE to call its wrapper methods around every call to the corresponding IMalloc method.
+CoRegisterMessageFilter;Registers with OLE the instance of an IMessageFilter interface, which is to be used for handling concurrency issues on the current thread.
+CoRegisterPSClsid;Enables a downloaded DLL to register its custom interfaces within its running process so that the marshaling code will be able to marshal those interfaces.
+CoRegisterSurrogate;Registers the surrogate process through its ISurrogate interface pointer.
+CoReleaseMarshalData;Destroys a previously marshaled data packet.
+CoReleaseServerProcess;Decrements the global per-process reference count.
+CoResumeClassObjects;Called by a server that can register multiple class objects to inform the SCM about all registered classes, and permits activation requests for those class objects.
+CoRevertToSelf;Restores the authentication information on a thread of execution.
+CoRevokeClassObject;Informs OLE that a class object, previously registered with the CoRegisterClassObject function, is no longer available for use.
+CoRevokeInitializeSpy;Revokes a registered implementation of the IInitializeSpy interface.
+CoRevokeMallocSpy;Revokes a registered IMallocSpy object.
+CoSetCancelObject;Sets (registers) or resets (unregisters) a cancel object for use during subsequent cancel operations on the current thread.
+CoSetMessageDispatcher;Registers or unregisters the per-thread message dispatcher that is to be invoked when there are window messages available to dispatch within COM wait APIs on an ASTA thread.
+CoSetProxyBlanket;Sets the authentication information that will be used to make calls on the specified proxy.
+CoSuspendClassObjects;Prevents any new activation requests from the SCM on all class objects registered within the process.
+CoSwitchCallContext;Switches the call context object used by CoGetCallContext.
+CoTaskMemAlloc;Allocates a block of task memory in the same way that IMalloc::Alloc does.
+CoTaskMemFree;Frees a block of task memory previously allocated through a call to the CoTaskMemAlloc or CoTaskMemRealloc function.
+CoTaskMemRealloc;Changes the size of a previously allocated block of task memory.
+CoTestCancel;Determines whether the call being executed on the server has been canceled by the client.
+CoTreatAsClass;Establishes or removes an emulation, in which objects of one class are treated as objects of a different class.
+CoUninitialize;Closes the COM library on the current thread, unloads all DLLs loaded by the thread, frees any other resources that the thread maintains, and forces all RPC connections on the thread to close.
+CoUnmarshalHresult;Unmarshals an HRESULT type from the specified stream.
+CoUnmarshalInterface;Initializes a newly created proxy using data written into the stream by a previous call to the CoMarshalInterface function, and returns an interface pointer to that proxy.
+CoWaitForMultipleHandles;Waits for specified handles to be signaled or for a specified timeout period to elapse.
+CoWaitForMultipleObjects;A replacement for CoWaitForMultipleHandles primarily intended for use by Windows Store apps and components. This replacement API hides the options for CoWaitForMultipleHandles that are not supported in ASTA.
+CreateAntiMoniker;Creates and returns a new anti-moniker.
+CreateAsyncBindCtx;Creates an asynchronous bind context for use with asynchronous monikers.
+CreateBindCtx;Returns a pointer to an implementation of IBindCtx (a bind context object). This object stores information about a particular moniker-binding operation.
+CreateClassMoniker;Creates a class moniker that refers to the specified class.
+CreateFileMoniker;Creates a file moniker based on the specified path.
+CreateGenericComposite;Performs a generic composition of two monikers and supplies a pointer to the resulting composite moniker.
+CreateItemMoniker;Creates an item moniker that identifies an object within a containing object (typically a compound document).
+CreateObjrefMoniker;Creates an OBJREF moniker based on a pointer to an object.
+CreatePointerMoniker;Creates a pointer moniker based on a pointer to an object.
+DllCanUnloadNow;Determines whether the DLL that implements this function is in use. If not, the caller can unload the DLL from memory.
+DllDebugObjectRPCHook;Exported by DLLs to enable remote debugging.
+DllGetClassObject;Retrieves the class object from a DLL object handler or object application.
+DllRegisterServer;Instructs an in-process server to create its registry entries for all classes supported in this server module.
+DllUnregisterServer;Instructs an in-process server to remove only those entries created through DllRegisterServer.
+GetClassFile;Returns the CLSID associated with the specified filename.
+GetRunningObjectTable;Returns a pointer to the IRunningObjectTable interface on the local running object table (ROT).
+IIDFromString;Converts a string generated by the StringFromIID function back into the original interface identifier (IID).
+Initialize;Initializes a thread to use Windows Runtime APIs.
+IsAccelerator;Determines whether the specified keystroke maps to an accelerator in the specified accelerator table.
+IsEqualCLSID;Determines whether two CLSIDs are equal.
+IsEqualGUID;Determines whether two GUIDs are equal.
+IsEqualIID;Determines whether two interface identifiers are equal.
+MkParseDisplayName;Converts a string into a moniker that identifies the object named by the string.
+MonikerCommonPrefixWith;Creates a new moniker based on the common prefix that this moniker (the one comprising the data of this moniker object) shares with another moniker.
+MonikerRelativePathTo;Provides a moniker that, when composed onto the end of the first specified moniker (or one with a similar structure), yields the second specified moniker.
+OleDoAutoConvert;Automatically converts an object to a new class if automatic conversion for that object class is set in the registry.
+OleGetAutoConvert;Determines whether the registry is set for objects of a specified CLSID to be automatically converted to another CLSID, and if so, retrieves the new CLSID.
+OleGetIconOfClass;Returns a handle to a metafile containing an icon and a string label for the specified CLSID.
+OleGetIconOfFile;Returns a handle to a metafile containing an icon and string label for the specified file name.
+OleIconToCursor;Converts an icon to a cursor.
+OleRegGetMiscStatus;Returns miscellaneous information about the presentation and behaviors supported by the specified CLSID from the registry.
+OleRegGetUserType;Gets the user type of the specified class from the registry.
+OleSetAutoConvert;Specifies a CLSID for automatic conversion to a different class when an object of that class is loaded.
+ProgIDFromCLSID;Retrieves the ProgID for a given CLSID.
+StringFromCLSID;Converts a CLSID into a string of printable characters. Different CLSIDs always convert to different strings.
+StringFromGUID2;Converts a globally unique identifier (GUID) into a string of printable characters.
+StringFromIID;Converts an interface identifier into a string of printable characters.
+
+[Public Device Installation]
+DiInstallDevice
+DiInstallDriver
+DiRollbackDriver
+DiShowUpdateDevice
+DiUninstallDevice
+InstallSelectedDriver
+SetupDiAskForOEMDisk
+SetupDiBuildClassInfoList
+SetupDiBuildClassInfoListEx
+SetupDiBuildDriverInfoList
+SetupDiCallClassInstaller
+SetupDiCancelDriverInfoSearch
+SetupDiChangeState
+SetupDiClassGuidsFromName
+SetupDiClassGuidsFromNameEx
+SetupDiClassNameFromGuid
+SetupDiClassNameFromGuidEx
+SetupDiCreateDeviceInfo
+SetupDiCreateDeviceInfoList
+SetupDiCreateDeviceInfoListEx
+SetupDiCreateDeviceInterface
+SetupDiCreateDeviceInterfaceRegKey
+SetupDiCreateDevRegKey
+SetupDiDeleteDeviceInfo
+SetupDiDeleteDeviceInterfaceData
+SetupDiDeleteDeviceInterfaceRegKey
+SetupDiDeleteDevRegKey
+SetupDiDestroyClassImageList
+SetupDiDestroyDeviceInfoList
+SetupDiDestroyDriverInfoList
+SetupDiDrawMiniIcon
+SetupDiEnumDeviceInfo
+SetupDiEnumDeviceInterfaces
+SetupDiEnumDriverInfo
+SetupDiFinishInstallAction
+SetupDiGetActualModelsSection
+SetupDiGetActualSectionToInstall
+SetupDiGetActualSectionToInstallEx
+SetupDiGetClassBitmapIndex
+SetupDiGetClassDescription
+SetupDiGetClassDescriptionEx
+SetupDiGetClassDevPropertySheets
+SetupDiGetClassDevs
+SetupDiGetClassDevsEx
+SetupDiGetClassImageIndex
+SetupDiGetClassImageList
+SetupDiGetClassImageListEx
+SetupDiGetClassInstallParams
+SetupDiGetClassProperty
+SetupDiGetClassPropertyEx
+SetupDiGetClassPropertyKeys
+SetupDiGetClassPropertyKeysEx
+SetupDiGetClassRegistryProperty
+SetupDiGetCustomDeviceProperty
+SetupDiGetDeviceInfoListClass
+SetupDiGetDeviceInfoListDetail
+SetupDiGetDeviceInstallParams
+SetupDiGetDeviceInstanceId
+SetupDiGetDeviceInterfaceAlias
+SetupDiGetDeviceInterfaceDetail
+SetupDiGetDeviceInterfaceProperty
+SetupDiGetDeviceInterfacePropertyKeys
+SetupDiGetDeviceProperty
+SetupDiGetDevicePropertyKeys
+SetupDiGetDeviceRegistryProperty
+SetupDiGetDriverInfoDetail
+SetupDiGetDriverInstallParams
+SetupDiGetHwProfileFriendlyName
+SetupDiGetHwProfileFriendlyNameEx
+SetupDiGetHwProfileList
+SetupDiGetHwProfileListEx
+SetupDiGetINFClass
+SetupDiGetSelectedDevice
+SetupDiGetSelectedDriver
+SetupDiGetWizardPage
+SetupDiInstallClass
+SetupDiInstallClassEx
+SetupDiInstallDevice
+SetupDiInstallDeviceInterfaces
+SetupDiInstallDriverFiles
+SetupDiLoadClassIcon
+SetupDiLoadDeviceIcon
+SetupDiOpenClassRegKey
+SetupDiOpenClassRegKeyEx
+SetupDiOpenDeviceInfo
+SetupDiOpenDeviceInterface
+SetupDiOpenDeviceInterfaceRegKey
+SetupDiOpenDevRegKey
+SetupDiRegisterCoDeviceInstallers
+SetupDiRegisterDeviceInfo
+SetupDiRemoveDevice
+SetupDiRemoveDeviceInterface
+SetupDiRestartDevices
+SetupDiSelectBestCompatDrv
+SetupDiSelectDevice
+SetupDiSelectOEMDrv
+SetupDiSetClassInstallParams
+SetupDiSetClassProperty
+SetupDiSetClassPropertyEx
+SetupDiSetClassRegistryProperty
+SetupDiSetDeviceInstallParams
+SetupDiSetDeviceInterfaceDefault
+SetupDiSetDeviceInterfaceProperty
+SetupDiSetDeviceProperty
+SetupDiSetDeviceRegistryProperty
+SetupDiSetDriverInstallParams
+SetupDiSetSelectedDevice
+SetupDiSetSelectedDriver
+SetupDiUnremoveDevice
+UpdateDriverForPlugAndPlayDevices
+
+[Winsock]
+accept;Permits an incoming connection attempt on a socket.
+AcceptEx;Accepts a new connection, returns the local and remote address, and receives the first block of data sent by the client application.
+bind;Associates a local address with a socket.
+closesocket;Closes an existing socket.
+connect;Establishes a connection to a specified socket.
+ConnectEx;Establishes a connection to a specified socket, and optionally sends data once the connection is established. Only supported on connection-oriented sockets.
+DisconnectEx;Closes a connection on a socket, and allows the socket handle to be reused.
+EnumProtocols;Retrieves information about a specified set of network protocols that are active on a local host.
+freeaddrinfo;Frees address information that the getaddrinfo function dynamically allocates in addrinfo structures.
+FreeAddrInfoEx;Frees address information that the GetAddrInfoEx function dynamically allocates in addrinfoex structures.
+FreeAddrInfoW;Frees address information that the GetAddrInfoW function dynamically allocates in addrinfoW structures.
+gai_strerror;Assists in printing error messages based on the EAI_* errors returned by the getaddrinfo function.
+GetAcceptExSockaddrs;Parses the data obtained from a call to the AcceptEx function.
+GetAddressByName;Queries a namespace, or a set of default namespaces, to retrieve network address information for a specified network service. This process is known as service name resolution. A network service can also use the function to obtain local address information that it can use with the bind function.
+getaddrinfo;Provides protocol-independent translation from an ANSI host name to an address.
+GetAddrInfoEx;Provides protocol-independent name resolution with additional parameters to qualify which name space providers should handle the request.
+GetAddrInfoExCancel;Cancels an asynchronous operation by the GetAddrInfoEx function.
+GetAddrInfoExOverlappedResult;Gets the return code for an OVERLAPPED structure used by an asynchronous operation for the GetAddrInfoEx function.
+GetAddrInfoW;Provides protocol-independent translation from a Unicode host name to an address.
+gethostbyaddr;Retrieves the host information corresponding to a network address.
+gethostbyname;Retrieves host information corresponding to a host name from a host database. Deprecated: use getaddrinfo instead.
+gethostname;Retrieves the standard host name for the local computer.
+GetHostNameW;Retrieves the standard host name for the local computer as a Unicode string.
+getipv4sourcefilter;Retrieves the multicast filter state for an IPv4 socket.
+GetNameByType;Retrieves the name of a network service for the specified service type.
+getnameinfo;Provides name resolution from an IPv4 or IPv6 address to an ANSI host name and from a port number to the ANSI service name.
+GetNameInfoW;Provides name resolution from an IPv4 or IPv6 address to a Unicode host name and from a port number to the Unicode service name.
+getpeername;Retrieves the address of the peer to which a socket is connected.
+getprotobyname;Retrieves the protocol information corresponding to a protocol name.
+getprotobynumber;Retrieves protocol information corresponding to a protocol number.
+getservbyname;Retrieves service information corresponding to a service name and protocol.
+getservbyport;Retrieves service information corresponding to a port and protocol.
+GetService;Retrieves information about a network service in the context of a set of default namespaces or a specified namespace.
+getsockname;Retrieves the local name for a socket.
+getsockopt;Retrieves a socket option.
+getsourcefilter;Retrieves the multicast filter state for an IPv4 or IPv6 socket.
+GetTypeByName;Retrieves a service type GUID for a network service specified by name.
+htond;Converts a double from host to TCP/IP network byte order (which is big-endian).
+htonf;Converts a float from host to TCP/IP network byte order (which is big-endian).
+htonl;Converts a u_long from host to TCP/IP network byte order (which is big-endian).
+htonll;Converts an unsigned __int64 from host to TCP/IP network byte order (which is big-endian).
+htons;Converts a u_short from host to TCP/IP network byte order (which is big-endian).
+inet_addr;Converts a string containing an (Ipv4) Internet Protocol dotted address into a proper address for the in_addr structure.
+inet_ntoa;Converts an (IPv4) Internet network address into a string in Internet standard dotted format.
+InetNtop;converts an IPv4 or IPv6 Internet network address into a string in Internet standard format. The ANSI version of this function is inet_ntop.
+InetPton;Converts an IPv4 or IPv6 Internet network address in its standard text presentation form into its numeric binary form. The ANSI version of this function is inet_pton.
+ioctlsocket;Controls the I/O mode of a socket.
+listen;Places a socket a state where it is listening for an incoming connection.
+ntohd;Converts an unsigned __int64 from TCP/IP network order to host byte order (which is little-endian on Intel processors) and returns a double.
+ntohf;Converts an unsigned __int32 from TCP/IP network order to host byte order (which is little-endian on Intel processors) and returns a float.
+ntohl;Converts a u_long from TCP/IP network order to host byte order (which is little-endian on Intel processors).
+ntohll;Converts an unsigned __int64 from TCP/IP network order to host byte order (which is little-endian on Intel processors).
+ntohs;Converts a u_short from TCP/IP network byte order to host byte order (which is little-endian on Intel processors).
+recv;Receives data from a connected or bound socket.
+recvfrom;Receives a datagram and stores the source address.
+RIOCloseCompletionQueue;Closes an existing completion queue used for I/O completion notification by send and receive requests with the Winsock registered I/O extensions.
+RIOCreateCompletionQueue;Creates an I/O completion queue of a specific size for use with the Winsock registered I/O extensions.
+RIOCreateRequestQueue;Creates a registered I/O socket descriptor using a specified socket and I/O completion queues for use with the Winsock registered I/O extensions.
+RIODequeueCompletion;Removes entries from an I/O completion queue for use with the Winsock registered I/O extensions.
+RIODeregisterBuffer;Deregisters a registered buffer used with the Winsock registered I/O extensions.
+RIONotify;Registers the method to use for notification behavior with an I/O completion queue for use with the Winsock registered I/O extensions.
+RIOReceive;Receives network data on a connected registered I/O TCP socket or a bound registered I/O UDP socket for use with the Winsock registered I/O extensions.
+RIOReceiveEx;Receives network data on a connected registered I/O TCP socket or a bound registered I/O UDP socket with additional options for use with the Winsock registered I/O extensions.
+RIORegisterBuffer;Registers a RIO_BUFFERID, a registered buffer descriptor, with a specified buffer for use with the Winsock registered I/O extensions.
+RIOResizeCompletionQueue;Resizes an I/O completion queue to be either larger or smaller for use with the Winsock registered I/O extensions.
+RIOResizeRequestQueue;Resizes a request queue to be either larger or smaller for use with the Winsock registered I/O extensions.
+RIOSend;Sends network data on a connected registered I/O TCP socket or a bound registered I/O UDP socket for use with the Winsock registered I/O extensions.
+RIOSendEx;Sends network data on a connected registered I/O TCP socket or a bound registered I/O UDP socket with additional options for use with the Winsock registered I/O extensions.
+select;Determines the status of one or more sockets, waiting if necessary, to perform synchronous I/O.
+send;Sends data on a connected socket.
+sendto;Sends data to a specific destination.
+SetAddrInfoEx;Registers a host and service name along with associated addresses with a specific namespace provider.
+setipv4sourcefilter;Sets the multicast filter state for an IPv4 socket.
+SetService;Registers or removes from the registry a network service within one or more namespaces. Can also add or remove a network service type within one or more namespaces.
+SetSocketMediaStreamingMode;Indicates whether the network is to be used for transferring streaming media that requires quality of service.
+setsockopt;Sets a socket option.
+setsourcefilter;Sets the multicast filter state for an IPv4 or IPv6 socket.
+shutdown;Disables sends or receives on a socket.
+socket;Creates a socket that is bound to a specific service provider.
+TransmitFile;Transmits file data over a connected socket handle.
+TransmitPackets;Transmits in-memory data or file data over a connected socket.
+WSAAccept;Conditionally accepts a connection based on the return value of a condition function, provides quality of service flow specifications, and allows the transfer of connection data.
+WSAAddressToString;Converts all components of a sockaddr structure into a human-readable string representation of the address.
+WSAAsyncGetHostByAddr;Asynchronously retrieves host information that corresponds to an address.
+WSAAsyncGetHostByName;Asynchronously retrieves host information that corresponds to a host name.
+WSAAsyncGetProtoByName;Asynchronously retrieves protocol information that corresponds to a protocol name.
+WSAAsyncGetProtoByNumber;Asynchronously retrieves protocol information that corresponds to a protocol number.
+WSAAsyncGetServByName;Asynchronously retrieves service information that corresponds to a service name and port.
+WSAAsyncGetServByPort;Asynchronously retrieves service information that corresponds to a port and protocol.
+WSAAsyncSelect;Requests Windows message-based notification of network events for a socket.
+WSACancelAsyncRequest;Cancels an incomplete asynchronous operation.
+WSACleanup;Terminates use of the Ws2_32.DLL.
+WSACloseEvent;Closes an open event object handle.
+WSAConnect;Establishes a connection to another socket application, exchanges connect data, and specifies needed quality of service based on the specified FLOWSPEC structure.
+WSAConnectByList;Establishes a connection to one out of a collection of possible endpoints represented by a set of destination addresses (host names and ports).
+WSAConnectByName;Establishes a connection to another socket application on a specified host and port
+WSACreateEvent;Creates a new event object.
+WSADeleteSocketPeerTargetName;Removes the association between a peer target name and an IP address for a socket.
+WSADuplicateSocket;Returns a structure that can be used to create a new socket descriptor for a shared socket.
+WSAEnumNameSpaceProviders;Retrieves information about available namespaces.
+WSAEnumNameSpaceProvidersEx;Retrieves information about available namespaces.
+WSAEnumNetworkEvents;Discovers occurrences of network events for the indicated socket, clear internal network event records, and reset event objects (optional).
+WSAEnumProtocols;Retrieves information about available transport protocols.
+WSAEventSelect;Specifies an event object to be associated with the specified set of FD_XXX network events.
+__WSAFDIsSet;Specifies whether a socket is included in a set of socket descriptors.
+WSAGetLastError;Returns the error status for the last operation that failed.
+WSAGetOverlappedResult;Retrieves the results of an overlapped operation on the specified socket.
+WSAGetQOSByName;Initializes a QOS structure based on a named template, or it supplies a buffer to retrieve an enumeration of the available template names.
+WSAGetServiceClassInfo;Retrieves the class information (schema) pertaining to a specified service class from a specified namespace provider.
+WSAGetServiceClassNameByClassId;Retrieves the name of the service associated with the specified type.
+WSAHtonl;Converts a u_long from host byte order to network byte order.
+WSAHtons;Converts a u_short from host byte order to network byte order.
+WSAImpersonateSocketPeer;Used to impersonate the security principal corresponding to a socket peer in order to perform application-level authorization.
+WSAInstallServiceClass;Registers a service class schema within a namespace.
+WSAIoctl;Controls the mode of a socket.
+WSAJoinLeaf;Joins a leaf node into a multipoint session, exchanges connect data, and specifies needed quality of service based on the specified structures.
+WSALookupServiceBegin;Initiates a client query that is constrained by the information contained within a WSAQUERYSET structure.
+WSALookupServiceEnd;Frees the handle used by previous calls to WSALookupServiceBegin and WSALookupServiceNext.
+WSALookupServiceNext;Retrieve the requested service information.
+WSANSPIoctl;Developers to make I/O control calls to a registered namespace.
+WSANtohl;Converts a u_long from network byte order to host byte order.
+WSANtohs;Converts a u_short from network byte order to host byte order.
+WSAPoll;Determines status of one or more sockets.
+WSAProviderConfigChange;Notifies the application when the provider configuration is changed.
+WSAQuerySocketSecurity;Queries information about the security applied to a connection on a socket.
+WSARecv;Receives data from a connected socket.
+WSARecvDisconnect;Terminates reception on a socket, and retrieves the disconnect data if the socket is connection oriented.
+WSARecvEx;Receives data from a connected socket.
+WSARecvFrom;Receives a datagram and stores the source address.
+WSARecvMsg;Receives data and optional control information from connected and unconnected sockets.
+WSARemoveServiceClass;Permanently removes the service class schema from the registry.
+WSAResetEvent;Resets the state of the specified event object to nonsignaled.
+WSARevertImpersonation;Terminates the impersonation of a socket peer.
+WSASend;Sends data on a connected socket.
+WSASendDisconnect;Initiates termination of the connection for the socket and sends disconnect data.
+WSASendMsg;Sends data and optional control information from connected and unconnected sockets.
+WSASendTo;Sends data to a specific destination, using overlapped I/O where applicable.
+WSASetEvent;Sets the state of the specified event object to signaled.
+WSASetLastError;Sets the error code.
+WSASetService;Registers or removes from the registry a service instance within one or more namespaces.
+WSASetSocketPeerTargetName;Used to specify the peer target name (SPN) that corresponds to a peer IP address. This target name is meant to be specified by client applications to securely identify the peer that should be authenticated.
+WSASetSocketSecurity;Enables and applies security for a socket.
+WSASocket;Creates a socket that is bound to a specific transport-service provider.
+WSAStartup;Initiates use of WS2_32.DLL by a process.
+WSAStringToAddress;Converts a numeric string to a sockaddr structure.
+WSAWaitForMultipleEvents;Returns either when one or all of the specified event objects are in the signaled state, or when the time-out interval expires.
+
+[Shell Path Handling]
+PathAddBackslash;Adds a backslash to the end of a string to create the correct syntax for a path. If the source path already has a trailing backslash, no backslash will be added.
+PathAddExtension;Adds a file name extension to a path string.
+PathAppend;Appends one path to the end of another.
+PathBuildRoot;Creates a root path from a given drive number.
+PathCanonicalize;Simplifies a path by removing navigation elements such as "." and ".." to produce a direct, well-formed path.
+PathCombine;Concatenates two strings that represent properly formed paths into one path; also concatenates any relative path elements.
+PathCommonPrefix;Compares two paths to determine if they share a common prefix. A prefix is one of these types: "C:\\", ".", "..", "..\\".
+PathCompactPath;Truncates a file path to fit within a given pixel width by replacing path components with ellipses.
+PathCompactPathEx;Truncates a path to fit within a certain number of characters by replacing path components with ellipses.
+PathCreateFromUrl;Converts a file URL to a Microsoft MS-DOS path.
+PathCreateFromUrlAlloc;Creates a path from a file URL.
+PathFileExists;Determines whether a path to a file system object such as a file or folder is valid.
+PathFindExtension;Searches a path for an extension.
+PathFindFileName;Searches a path for a file name.
+PathFindNextComponent;Parses a path and returns the portion of that path that follows the first backslash.
+PathFindOnPath;Searches for a file.
+PathFindSuffixArray;Determines whether a given file name has one of a list of suffixes.
+PathGetArgs;Finds the command line arguments within a given path.
+PathGetCharType;Determines the type of character in relation to a path.
+PathGetDriveNumber;Searches a path for a drive letter within the range of 'A' to 'Z' and returns the corresponding drive number.
+PathIsContentType;Determines if a file's registered content type matches the specified content type. This function obtains the content type for the specified file type and compares that string with the pszContentType. The comparison is not case-sensitive.
+PathIsDirectory;Verifies that a path is a valid directory.
+PathIsDirectoryEmpty;Determines whether a specified path is an empty directory.
+PathIsFileSpec;Searches a path for any path-delimiting characters (for example, ':' or '\' ). If there are no path-delimiting characters present, the path is considered to be a File Spec path.
+PathIsHTMLFile;Determines if a file is an HTML file. The determination is made based on the content type that is registered for the file's extension.
+PathIsLFNFileSpec;Determines whether a file name is in long format.
+PathIsNetworkPath;Determines whether a path string represents a network resource.
+PathIsPrefix;Searches a path to determine if it contains a valid prefix of the type passed by pszPrefix. A prefix is one of these types: "C:\\", ".", "..", "..\\".
+PathIsRelative;Searches a path and determines if it is relative.
+PathIsRoot;Determines whether a path string refers to the root of a volume.
+PathIsSameRoot;Compares two paths to determine if they have a common root component.
+PathIsSystemFolder;Determines if an existing folder contains the attributes that make it a system folder. Alternately, this function indicates if certain attributes qualify a folder to be a system folder.
+PathIsUNC;Determines if a path string is a valid Universal Naming Convention (UNC) path, as opposed to a path based on a drive letter.
+PathIsUNCServer;Determines if a string is a valid UNC for a server path only.
+PathIsUNCServerShare;Determines if a string is a valid UNC share path, \\server\share.
+PathIsURL;Tests a given string to determine if it conforms to a valid URL format.
+PathMakePretty;Converts an all-uppercase path to all lowercase characters to give the path a consistent appearance.
+PathMakeSystemFolder;Gives an existing folder the proper attributes to become a system folder.
+PathMatchSpec;Searches a string using a MS-DOS wildcard match type.
+PathMatchSpecEx;Matches a file name from a path against one or more file name patterns.
+PathParseIconLocation;Parses a file location string that contains a file location and icon index, and returns separate values.
+PathQuoteSpaces;Searches a path for spaces. If spaces are found, the entire path is enclosed in quotation marks.
+PathRelativePathTo;Creates a relative path from one file or folder to another.
+PathRemoveArgs;Removes any arguments from a given path.
+PathRemoveBackslash;Removes the trailing backslash from a given path.
+PathRemoveBlanks;Removes all leading and trailing spaces from a string.
+PathRemoveExtension;Removes the file name extension from a path, if one is present.
+PathRemoveFileSpec;Removes the trailing file name and backslash from a path, if they are present.
+PathRenameExtension;Replaces the extension of a file name with a new extension. If the file name does not contain an extension, the extension will be attached to the end of the string.
+PathSearchAndQualify;Determines if a given path is correctly formatted and fully qualified.
+PathSetDlgItemPath;Sets the text of a child control in a window or dialog box, using PathCompactPath to ensure the path fits in the control.
+PathSkipRoot;Retrieves a pointer to the first character in a path following the drive letter or UNC server/share path elements.
+PathStripPath;Removes the path portion of a fully qualified path and file.
+PathStripToRoot;Removes all file and directory elements in a path except for the root information.
+PathUndecorate;Removes the decoration from a path string.
+PathUnExpandEnvStrings;Replaces certain folder names in a fully qualified path with their associated environment string.
+PathUnmakeSystemFolder;Removes the attributes from a folder that make it a system folder. This folder must actually exist in the file system.
+PathUnquoteSpaces;Removes quotes from the beginning and end of a path.
+SHSkipJunction;Checks a bind context to see if it is safe to bind to a particular component object.
+UrlApplyScheme;Determines a scheme for a specified URL string, and returns a string with an appropriate prefix.
+UrlCanonicalize;Converts a URL string into canonical form.
+UrlCombine;When provided with a relative URL and its base, returns a URL in canonical form.
+UrlCompare;Makes a case-sensitive comparison of two URL strings.
+UrlCreateFromPath;Converts a MS-DOS path to a canonicalized URL.
+UrlEscape;Converts characters or surrogate pairs in a URL that might be altered during transport across the Internet ("unsafe" characters) into their corresponding escape sequences. Surrogate pairs are characters between U+10000 to U+10FFFF (in UTF-32) or between DC00 to DFFF (in UTF-16).
+UrlEscapeSpaces;A macro that converts space characters into their corresponding escape sequence.
+UrlGetLocation;Retrieves the location from a URL.
+UrlGetPart;Accepts a URL string and returns a specified part of that URL.
+UrlHash;Hashes a URL string.
+UrlIs;Tests whether a URL is a specified type.
+UrlIsFileUrl;Tests a URL to determine if it is a file URL.
+UrlIsNoHistory;Returns whether a URL is a URL that browsers typically do not include in navigation history.
+UrlIsOpaque;Returns whether a URL is opaque.
+UrlUnescape;Converts escape sequences back into ordinary characters.
+UrlUnescapeInPlace;Converts escape sequences back into ordinary characters and overwrites the original string.
+
+[Shell Color Palette Handling]
+ColorAdjustLuma;Changes the luminance of a RGB value. Hue and saturation are not affected.
+ColorHLSToRGB;Converts colors from hue-luminance-saturation (HLS) to RGB format.
+ColorRGBToHLS;Converts colors from RGB to hue-luminance-saturation (HLS) format.
+SHCreateShellPalette;Creates a halftone palette for the specified device context.
+
+[Shell Miscellaneous Utility]
+DllInstall;Handles installation and setup for a DLL.
+GetProcessReference;Retrieves the process-specific object supplied by SetProcessReference, incrementing the reference count to keep the process alive.
+HashData;Hashes an array of data.
+IsInternetESCEnabled;Determines whether Windows Internet Explorer is in the Enhanced Security Configuration.
+IsOS;Checks for specified operating systems and operating system features.
+IStream_Copy;Copies a stream to another stream.
+IStream_Read;Reads bytes from a specified stream and returns a value that indicates whether all bytes were successfully read.
+IStream_ReadPidl;Reads a pointer to an item identifier list (PIDL) from an IStream object into a PIDLIST_RELATIVE object.
+IStream_ReadStr;Reads from a stream and writes into a string.
+IStream_Reset;Moves the seek position in a specified stream to the beginning of the stream.
+IStream_Size;Retrieves the size, in bytes, of a specified stream.
+IStream_Write;Writes data of unknown format from a buffer to a specified stream.
+IStream_WritePidl;Writes a PIDL from a PCUIDLIST_RELATIVE object into an IStream object.
+IStream_WriteStr;Reads from a string and writes into a stream.
+IUnknown_AtomicRelease;Releases a Component Object Model (COM) pointer and sets it to NULL.
+IUnknown_GetSite;Calls the specified object's IObjectWithSite::GetSite method.
+IUnknown_GetWindow;Attempts to retrieve a window handle from a COM object by querying for various interfaces that have a GetWindow method.
+IUnknown_QueryService;Retrieves an interface for a service from a specified object.
+IUnknown_Set;Changes the value of a COM interface pointer and releases the previous interface.
+IUnknown_SetSite;Sets the specified object's site by calling its IObjectWithSite::SetSite method.
+ParseURL;Performs rudimentary parsing of a URL.
+QISearch;A table-driven implementation of the IUnknown::QueryInterface method.
+SetProcessReference;Provides a COM object that allows hosted Shell extensions and other components to prevent their host process from closing prematurely. The host process is typically Windows Explorer or Internet Explorer, but this function can also be used by other applications.
+SHAutoComplete;Instructs system edit controls to use AutoComplete to help complete URLs or file system paths.
+SHCreateMemStream;Creates a memory stream using a similar process to CreateStreamOnHGlobal.
+SHCreateStreamOnFileEx;Opens or creates a file and retrieves a stream to read or write to that file.
+SHCreateThread;Creates a thread.
+SHCreateThreadRef;Creates a per-thread reference to a COM object.
+SHCreateThreadWithHandle;Creates a new thread and retrieves its handle.
+SHGetThreadRef;Retrieves the per-thread object reference set by SHSetThreadRef.
+SHGlobalCounterDecrement;Decrements a global counter.
+SHGlobalCounterGetValue;Gets the current value of a global counter.
+SHGlobalCounterIncrement;Increments a global counter.
+SHIsLowMemoryMachine;SHReleaseThreadRef;Releases a thread reference before the thread procedure returns.
+SHSetThreadRef;Stores a per-thread reference to a COM object. This allows the caller to control the thread's lifetime so that it can ensure that Windows won't shut down the thread before the caller is ready.
+
+[Shell Registry Handling]
+AssocCreate;Returns a pointer to an IQueryAssociations object.
+AssocGetPerceivedType;Retrieves a file's perceived type based on its extension.
+AssocIsDangerous;Determines whether a file type is considered a potential security risk.
+AssocQueryKey;Searches for and retrieves a key related to a file or protocol association from the registry.
+AssocQueryString;Searches for and retrieves a file or protocol association-related string from the registry.
+AssocQueryStringByKey;Searches for and retrieves a file association-related string from the registry starting from a specified key.
+SHCopyKey;Recursively copies the subkeys and values of the source subkey to the destination key. SHCopyKey does not copy the security attributes of the keys.
+SHDeleteEmptyKey;Deletes an empty key.
+SHDeleteKey;Deletes a subkey and all its descendants. This function removes the key and all the key's values from the registry.
+SHDeleteValue;Deletes a named value from the specified registry key.
+SHEnumKeyEx;Enumerates the subkeys of the specified open registry key.
+SHEnumValue;Enumerates the values of the specified open registry key.
+SHGetAssocKeys;Retrieves an array of class subkeys associated with an IQueryAssociations object.
+SHGetValue;Retrieves a registry value.
+SHOpenRegStream2;Opens a registry value and supplies a stream that can be used to read from or write to the value. This function supersedes SHOpenRegStream.
+SHQueryInfoKey;Retrieves information about a specified registry key.
+SHQueryValueEx;Opens a registry key and queries it for a specific value.
+SHRegCloseUSKey;Closes a handle to a user-specific registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegCreateUSKey;Creates or opens a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegDeleteEmptyUSKey;Deletes an empty registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegDeleteUSValue;Deletes a registry subkey value in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegDuplicateHKey;Duplicates a registry key's HKEY handle.
+SHRegEnumUSKey;Enumerates the subkeys of a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegEnumUSValue;Enumerates the values of the specified registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegGetBoolUSValue;Retrieves a Boolean value from a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegGetIntW;Reads a numeric string value from the registry and converts it to an integer.
+SHRegGetPath;Retrieves a file path from the registry, expanding environment variables as needed.
+SHRegGetUSValue;Retrieves a value from a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegOpenUSKey;Opens a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegQueryInfoUSKey;Retrieves information about a specified registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegQueryUSValue;Retrieves the type and data for a specified name associated with an open registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegSetPath;Takes a file path, replaces folder names with environment strings, and places the resulting string in the registry.
+SHRegSetUSValue;Sets a registry subkey value in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHRegSetValue;Sets a registry value.
+Use RegSetValue in its place.
+SHRegWriteUSValue;Writes a value to a registry subkey in a user-specific subtree (HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE).
+SHSetValue;Sets the value of a registry key.
