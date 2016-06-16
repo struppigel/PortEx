@@ -17,7 +17,10 @@ package com.github.katjahahn.parser.sections.idata;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.PhysicalLocation;
@@ -152,6 +155,8 @@ public class ImportDLL {
 	@Override
 	public String toString() {
 		List<SymbolDescription> symbolDescriptions = null;
+		Map<String, List<NameImport>> categories = new HashMap<>();
+		categories.put("[Other]", new ArrayList<NameImport>());
 		try {
 			symbolDescriptions = IOUtil.readSymbolDescriptions();
 		} catch (IOException e) {
@@ -159,14 +164,46 @@ public class ImportDLL {
 		}
 		StringBuilder buffer = new StringBuilder();
 		buffer.append(name + IOUtil.NL);
+		for(int i = 0; i < name.length(); i++){
+			buffer.append("-");
+		}
+		buffer.append(IOUtil.NL);
 		for (NameImport nameImport : nameImports) {
-			buffer.append(nameImport.toString());
 			if (symbolDescriptions != null) {
 				Optional<SymbolDescription> symbol = findSymbolByName(
 						symbolDescriptions, nameImport.getName());
 				if (symbol.isPresent()) {
-					buffer.append(" -> " + symbol.get().getDescription().or(symbol.get().getCategory()));
+					String category = symbol.get().getCategory();
+					if (categories.containsKey(category)) {
+						categories.get(category).add(nameImport);
+					} else {
+						List<NameImport> nameImportList = new ArrayList<>();
+						nameImportList.add(nameImport);
+						categories.put(category, nameImportList);
+					}
+				} else {
+					categories.get("[Other]").add(nameImport);
 				}
+			} else {
+				categories.get("[Other]").add(nameImport);
+			}
+		}
+
+		for (Map.Entry<String, List<NameImport>> entry : categories.entrySet()) {
+			if (entry.getValue().isEmpty()) {
+				continue;
+			}
+			buffer.append(entry.getKey() + IOUtil.NL);
+			for (NameImport nameImport : entry.getValue()) {
+				buffer.append(nameImport.toString());
+				Optional<SymbolDescription> symbol = findSymbolByName(
+						symbolDescriptions, nameImport.getName());
+				if (symbol.isPresent()) {
+					buffer.append(" -> "
+							+ symbol.get().getDescription()
+									.or("no description"));
+				}
+				buffer.append(IOUtil.NL);
 			}
 			buffer.append(IOUtil.NL);
 		}
