@@ -3837,3 +3837,205 @@ ImageList_SetImageCount
 ImageList_SetOverlayImage
 ImageList_Write
 ImageList_WriteEx
+
+[Cursor]
+ClipCursor
+CopyCursor
+CreateCursor
+DestroyCursor
+GetClipCursor
+GetCursor
+GetCursorInfo
+GetCursorPos
+GetPhysicalCursorPos
+LoadCursor
+LoadCursorFromFile
+SetCursor
+SetCursorPos
+SetPhysicalCursorPos
+SetSystemCursor
+ShowCursor
+
+[Button Control]
+CheckDlgButton
+CheckRadioButton
+IsDlgButtonChecked
+
+[Menu]
+AppendMenu
+CheckMenuItem
+CheckMenuRadioItem
+CreateMenu
+CreatePopupMenu
+DeleteMenu
+DestroyMenu
+DrawMenuBar
+EnableMenuItem
+EndMenu
+GetMenu
+GetMenuBarInfo
+GetMenuCheckMarkDimensions
+GetMenuDefaultItem
+GetMenuInfo
+GetMenuItemCount
+GetMenuItemID
+GetMenuItemInfo
+GetMenuItemRect
+GetMenuState
+GetMenuString
+GetSubMenu
+GetSystemMenu
+HiliteMenuItem
+InsertMenu
+InsertMenuItem
+IsMenu
+LoadMenu
+LoadMenuIndirect
+MenuItemFromPoint
+ModifyMenu
+RemoveMenu
+SetMenu
+SetMenuDefaultItem
+SetMenuInfo
+SetMenuItemBitmaps
+SetMenuItemInfo
+TrackPopupMenu
+TrackPopupMenuEx
+
+[Coordinate Space and Transformation]
+ClientToScreen;Converts the client-area coordinates of a specified point to screen coordinates.
+CombineTransform;Concatenates two world-space to page-space transformations.
+DPtoLP;Converts device coordinates into logical coordinates.
+GetCurrentPositionEx;Retrieves the current position in logical coordinates.
+GetDisplayAutoRotationPreferences;Gets the orientation preferences of the display.
+GetGraphicsMode;Retrieves the current graphics mode for the specified device context.
+GetMapMode;Retrieves the current mapping mode.
+GetViewportExtEx;Retrieves the x-extent and y-extent of the current viewport for the specified device context.
+GetViewportOrgEx;Retrieves the x-coordinates and y-coordinates of the viewport origin for the specified device context.
+GetWindowExtEx;Retrieves the x-extent and y-extent of the window for the specified device context.
+GetWindowOrgEx;Retrieves the x-coordinates and y-coordinates of the window origin for the specified device context.
+GetWorldTransform;Retrieves the current world-space to page-space transformation.
+LPtoDP;Converts logical coordinates into device coordinates.
+MapWindowPoints;Converts (maps) a set of points from a coordinate space relative to one window to a coordinate space relative to another window.
+ModifyWorldTransform;Changes the world transformation for a device context using the specified mode.
+OffsetViewportOrgEx;Modifies the viewport origin for a device context using the specified horizontal and vertical offsets.
+OffsetWindowOrgEx;Modifies the window origin for a device context using the specified horizontal and vertical offsets.
+ScaleViewportExtEx;Modifies the viewport for a device context using the ratios formed by the specified multiplicands and divisors.
+ScaleWindowExtEx;Modifies the window for a device context using the ratios formed by the specified multiplicands and divisors.
+ScreenToClient;Converts the screen coordinates of a specified point on the screen to client coordinates.
+SetDisplayAutoRotationPreferences;Sets the orientation preferences of the display.
+SetGraphicsMode;Sets the graphics mode for the specified device context.
+SetMapMode;Sets the mapping mode of the specified device context.
+SetViewportExtEx;Sets the horizontal and vertical extents of the viewport for a device context by using the specified values.
+SetViewportOrgEx;Specifies which device point maps to the window origin (0,0).
+SetWindowExtEx;Sets the horizontal and vertical extents of the window for a device context by using the specified values.
+SetWindowOrgEx;Specifies which window point maps to the viewport origin (0,0).
+SetWorldTransform;Sets a two-dimensional linear transformation between world space and page space for the specified device context.
+
+[Filled Shape]
+Chord;Draws an area bounded by an ellipse and a line segment.
+Ellipse;Draws an ellipse.
+FillRect;Fills a rectangle using a brush.
+FrameRect;Draws a border around a rectangle using a brush.
+InvertRect;Inverts the color values of the pixels in a rectangle.
+Pie;Draws a pie-shaped wedge bounded by an ellipse and two radials.
+Polygon;Draws a polygon.
+PolyPolygon;draws a series of closed polygons.
+Rectangle;Draws a rectangle.
+RoundRect;Draws a rectangle with rounded corners.
+
+[Configuration]
+GetSystemMetrics
+SystemParametersInfo
+
+[Clipboard]
+AddClipboardFormatListener
+ChangeClipboardChain
+CloseClipboard
+CountClipboardFormats
+EmptyClipboard
+EnumClipboardFormats
+GetClipboardData
+GetClipboardFormatName
+GetClipboardOwner
+GetClipboardSequenceNumber
+GetClipboardViewer
+GetOpenClipboardWindow
+GetPriorityClipboardFormat
+GetUpdatedClipboardFormats
+IsClipboardFormatAvailable
+OpenClipboard
+RegisterClipboardFormat
+RemoveClipboardFormatListener
+SetClipboardData
+SetClipboardViewer
+
+[Keyboard Input]
+ActivateKeyboardLayout
+BlockInput
+EnableWindow
+GetActiveWindow
+GetAsyncKeyState
+GetFocus
+GetKBCodePage
+GetKeyboardLayout
+GetKeyboardLayoutList
+GetKeyboardLayoutName
+GetKeyboardState
+GetKeyboardType
+GetKeyNameText
+GetKeyState
+GetLastInputInfo
+IsWindowEnabled
+keybd_event
+LoadKeyboardLayout
+MapVirtualKey
+MapVirtualKeyEx
+OemKeyScan
+RegisterHotKey
+SendInput
+SetActiveWindow
+SetFocus
+SetKeyboardState
+ToAscii
+ToAsciiEx
+ToUnicode
+ToUnicodeEx
+UnloadKeyboardLayout
+UnregisterHotKey
+VkKeyScan
+VkKeyScanEx
+
+[Window Procedure]
+CallWindowProc;Passes message information to the specified window procedure.
+DefWindowProc;Calls the default window procedure to provide default processing for any window messages that an application does not process.
+WindowProc;An application-defined function that processes messages sent to a window. The WNDPROC type defines a pointer to this callback function.
+
+[Bitmap]
+AlphaBlend;Displays a bitmap with transparent or semitransparent pixels.
+BitBlt;Performs a bit-block transfer.
+CreateBitmap;Creates a bitmap.
+CreateBitmapIndirect;Creates a bitmap.
+CreateCompatibleBitmap;Creates a bitmap compatible with a device.
+CreateDIBitmap;Creates a device-dependent bitmap (DDB) from a DIB.
+CreateDIBSection;Creates a DIB that applications can write to directly.
+ExtFloodFill;Fills an area of the display surface with the current brush.
+GetBitmapDimensionEx;Gets the dimensions of a bitmap.
+GetDIBColorTable;Retrieves RGB color values from a DIB section bitmap.
+GetDIBits;Copies a bitmap into a buffer.
+GetPixel;Gets the RGB color value of the pixel at a given coordinate.
+GetStretchBltMode;Gets the current stretching mode.
+GradientFill;Fills rectangle and triangle structures.
+LoadBitmap;Loads a bitmap from a module's executable file.
+MaskBlt;Combines the color data in the source and destination bitmaps.
+PlgBlt;Performs a bit-block transfer.
+SetBitmapDimensionEx;Sets the preferred dimensions to a bitmap.
+SetDIBColorTable;Sets RGB values in a DIB.
+SetDIBits;Sets the pixels in a bitmap using color data from a DIB.
+SetDIBitsToDevice;Sets the pixels in a rectangle using color data from a DIB.
+SetPixel;Sets the color for a pixel.
+SetPixelV;Sets a pixel to the best approximation of a color.
+SetStretchBltMode;Sets the bitmap stretching mode.
+StretchBlt;Copies a bitmap and stretches or compresses it.
+StretchDIBits;Copies the color data in a DIB.
+TransparentBlt;Performs a bit-block transfer of color data.
