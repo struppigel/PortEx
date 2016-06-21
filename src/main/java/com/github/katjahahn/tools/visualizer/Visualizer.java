@@ -782,11 +782,11 @@ public class Visualizer {
 		long pixelMax = getXPixels() * getYPixels();
 		long pixelEnd = pixelStart + pixelLength;
 		if (pixelStart > pixelMax) {
-			logger.error("too many pixels, max is: " + pixelMax
+			logger.warn("too many pixels, max is: " + pixelMax
 					+ " and trying to set: " + pixelStart);
 		} else {
 			if (pixelEnd > pixelMax) {
-				logger.error("too many pixels, max is: " + pixelMax
+				logger.warn("too many pixels, max is: " + pixelMax
 						+ " and trying to set: " + pixelEnd);
 				pixelEnd = pixelMax;
 			}
@@ -856,11 +856,11 @@ public class Visualizer {
 		long pixelMax = getXPixels() * getYPixels();
 		long pixelEnd = pixelStart + pixelLength;
 		if (pixelStart > pixelMax) {
-			logger.error("too many pixels, max is: " + pixelMax
+			logger.warn("too many pixels, max is: " + pixelMax
 					+ " and trying to set: " + pixelStart);
 		} else {
 			if (pixelEnd > pixelMax) {
-				logger.error("too many pixels, max is: " + pixelMax
+				logger.warn("too many pixels, max is: " + pixelMax
 						+ " and trying to set: " + pixelEnd);
 				pixelEnd = pixelMax;
 			}

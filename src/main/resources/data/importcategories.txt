@@ -3597,3 +3597,243 @@ NetServiceGetInfo
 NetServiceInstall
 NetWkstaTransportAdd
 NetWkstaTransportDel
+
+[Window]
+AdjustWindowRect
+AdjustWindowRectEx
+AllowSetForegroundWindow
+AnimateWindow
+AnyPopup
+ArrangeIconicWindows
+BeginDeferWindowPos
+BringWindowToTop
+CalculatePopupWindowPosition
+CascadeWindows
+ChangeWindowMessageFilter
+ChangeWindowMessageFilterEx
+ChildWindowFromPoint
+ChildWindowFromPointEx
+CloseWindow
+CreateWindow
+CreateWindowEx
+DeferWindowPos
+DeregisterShellHookWindow
+DestroyWindow
+EndDeferWindowPos
+EndTask
+EnumChildProc
+EnumChildWindows
+EnumThreadWindows
+EnumThreadWndProc
+EnumWindows
+EnumWindowsProc
+FindWindow
+FindWindowEx
+GetAltTabInfo
+GetAncestor
+GetClientRect
+GetDesktopWindow
+GetForegroundWindow
+GetGUIThreadInfo
+GetLastActivePopup
+GetLayeredWindowAttributes
+GetNextWindow
+GetParent
+GetProcessDefaultLayout
+GetShellWindow
+GetSysColor
+GetTitleBarInfo
+GetTopWindow
+GetWindow
+GetWindowDisplayAffinity
+GetWindowInfo
+GetWindowModuleFileName
+GetWindowPlacement
+GetWindowRect
+GetWindowText
+GetWindowTextLength
+GetWindowThreadProcessId
+InternalGetWindowText
+IsChild
+IsGUIThread
+IsHungAppWindow
+IsIconic
+IsProcessDPIAware
+IsWindow
+IsWindowUnicode
+IsWindowVisible
+IsZoomed
+LockSetForegroundWindow
+LogicalToPhysicalPoint
+MoveWindow
+OpenIcon
+PhysicalToLogicalPoint
+RealChildWindowFromPoint
+RealGetWindowClass
+RegisterShellHookWindow
+SetForegroundWindow
+SetLayeredWindowAttributes
+SetParent
+SetProcessDefaultLayout
+SetProcessDPIAware
+SetSysColors
+SetWindowDisplayAffinity
+SetWindowFeedbackSettings
+SetWindowPlacement
+SetWindowPos
+SetWindowText
+ShowOwnedPopups
+ShowWindow
+ShowWindowAsync
+SoundSentry
+SwitchToThisWindow
+TileWindows
+UpdateLayeredWindow
+UpdateLayeredWindowIndirect
+WindowFromPhysicalPoint
+WindowFromPoint
+WinMain
+
+[Device Context]
+CancelDC;Cancels any pending operation on the specified device context.
+ChangeDisplaySettings;Changes the settings of the default display device to the specified graphics mode.
+ChangeDisplaySettingsEx;Changes the settings of the specified display device to the specified graphics mode.
+CreateCompatibleDC;Creates a memory device context compatible with the specified device.
+CreateDC;Creates a device context for a device using the specified name.
+CreateIC;Creates an information context for the specified device.
+DeleteDC;Deletes the specified device context.
+DeleteObject;Deletes a logical pen, brush, font, bitmap, region, or palette, freeing all system resources associated with the object.
+DeviceCapabilities;Retrieves the capabilities of a printer device driver.
+DrawEscape;Provides drawing capabilities of the specified video display that are not directly available through the graphics device interface.
+EnumDisplayDevices;Retrieves information about the display devices in a system.
+EnumDisplaySettings;Retrieves information about one of the graphics modes for a display device.
+EnumDisplaySettingsEx;Retrieves information about one of the graphics modes for a display device.
+EnumObjects;Enumerates the pens or brushes available for the specified device context.
+EnumObjectsProc;An application-defined callback function used with the EnumObjects function.
+GetCurrentObject;Retrieves a handle to an object of the specified type that has been selected into the specified device context.
+GetDC;Retrieves a handle to a display device context for the client area of a specified window or for the entire screen.
+GetDCBrushColor;Retrieves the current brush color for the specified device context.
+GetDCEx;Retrieves a handle to a display device context for the client area of a specified window or for the entire screen.
+GetDCOrgEx;Retrieves the final translation origin for a specified device context.
+GetDCPenColor;Retrieves the current pen color for the specified device context.
+GetDeviceCaps;Retrieves device-specific information for the specified device.
+GetLayout;Retrieves the layout of a device context.
+GetObject;Retrieves information for the specified graphics object.
+GetObjectType;Retrieves the type of the specified object.
+GetStockObject;Retrieves a handle to one of the stock pens, brushes, fonts, or palettes.
+ReleaseDC;Releases a device context, freeing it for use by other applications.
+ResetDC;Updates the specified printer or plotter device context using the specified information.
+RestoreDC;Restores a device context to the specified state.
+SaveDC;Saves the current state of the specified device context by copying data describing selected objects and graphic modes to a context stack.
+SelectObject;Selects an object into the specified device context.
+SetDCBrushColor;Sets the current device context brush color to the specified color value.
+SetDCPenColor;Sets the current device context pen color to the specified color value.
+SetLayout;Sets the layout for a device context.
+WindowFromDC;Returns a handle to the window associated with a device context.
+
+[Font and Text]
+AddFontMemResourceEx;Adds an embedded font to the system font table.
+AddFontResource;Adds a font resource to the system font table.
+AddFontResourceEx;Adds a private or non-enumerable font to the system font table.
+CreateFont;Creates a logical font.
+CreateFontIndirect;Creates a logical font from a structure.
+CreateFontIndirectEx;Creates a logical font from a structure.
+DrawText;Draws formatted text in a rectangle.
+DrawTextEx;Draws formatted text in rectangle.
+EnumFontFamExProc;An application definedcallback function used with EnumFontFamiliesEx to process fonts.
+EnumFontFamiliesEx;Enumerates all fonts in the system with certain characteristics.
+ExtTextOut;Draws a character string.
+GetAspectRatioFilterEx;Gets the setting for the aspect-ratio filter.
+GetCharABCWidths;Gets the widths of consecutive characters from the TrueType font.
+GetCharABCWidthsFloat;Gets the widths of consecutive characters from the current font.
+GetCharABCWidthsI;Gets the widths of consecutive glyph indices or from an array of glyph indices from the TrueType font.
+GetCharacterPlacement;Gets information about a character string.
+GetCharWidth32;Gets the widths of consecutive characters from the current font.
+GetCharWidthFloat;Gets the fractional widths of consecutive characters from the current font.
+GetCharWidthI;Gets the widths of consecutive glyph indices or an array of glyph indices from the current font.
+GetFontData;Gets metric data for a TrueType font.
+GetFontLanguageInfo;Returns information about the selected font for a display context.
+GetFontUnicodeRanges;Tells which Unicode characters are supported by a font.
+GetGlyphIndices;Translates a string into an array of glyph indices.
+GetGlyphOutline;Gets the outline or bitmap for a character in the TrueType font.
+GetKerningPairs;Gets the character-kerning pairs for a font.
+GetOutlineTextMetrics;Gets text metrics for TrueType fonts.
+GetRasterizerCaps;Tells whether TrueType fonts are installed.
+GetTabbedTextExtent;Computes the width and height of a character string, including tabs.
+GetTextAlign;Gets the text-alignment setting for a device context.
+GetTextCharacterExtra;Gets the current intercharacter spacing for a device context.
+GetTextColor;Gets the text color for a device context.
+GetTextExtentExPoint;Gets the number of characters in a string that will fit within a space.
+GetTextExtentExPointI;Gets the number of glyph indices that will fit within a space.
+GetTextExtentPoint32;Computes the width and height of a string of text.
+GetTextExtentPointI;Computes the width and height of an array of glyph indices.
+GetTextFace;Gets the name of the font that is selected into a device context.
+GetTextMetrics;Fills a buffer with the metrics for a font.
+PolyTextOut;Draws several strings using the font and text colors in a device context.
+RemoveFontMemResourceEx;Removes a font whose source was embedded in a document from the system font table.
+RemoveFontResource;Removes the fonts in a file from the system font table.
+RemoveFontResourceEx;Removes a private or non-enumerable font from the system font table.
+SetMapperFlags;Alters the algorithm used to map logical fonts to physical fonts.
+SetTextAlign;Sets the text-alignment flags for a device context.
+SetTextCharacterExtra;Sets the intercharacter spacing.
+SetTextColor;Sets the text color for a device context.
+SetTextJustification;Specifies the amount of space the system should add to the break characters in a string.
+TabbedTextOut;Writes a character string at a location, expanding tabs to specified values.
+TextOut;Writes a character string at a location.
+
+[Large Integer]
+Int32x32To64;Multiplies two signed 32-bit integers, returning a signed 64-bit integer result.
+Int64ShllMod32;Performs a left logical shift operation on an unsigned 64-bit integer value. The function provides improved shifting code for left logical shifts where the shift count is in the range 0-31.
+Int64ShraMod32;Performs a right arithmetic shift operation on a signed 64-bit integer value. The function provides improved shifting code for right arithmetic shifts where the shift count is in the range 0-31.
+Int64ShrlMod32;Performs a right logical shift operation on an unsigned 64-bit integer value. The function provides improved shifting code for right logical shifts where the shift count is in the range 0-31.
+MulDiv;Multiplies two 32-bit values and then divides the 64-bit result by a third 32-bit value.
+Multiply128;Multiplies two 64-bit integers to produce a 128-bit integer.
+MultiplyExtract128;Multiplies two 64-bit integers to produce a 128-bit integer, shifts the product to the right by the specified number of bits, and returns the low 64 bits of the result.
+MultiplyHigh;Multiplies two 64-bit integers to produce a 128-bit integer and gets the high 64 bits.
+PopulationCount64;Counts the number of one bits (population count) in a 64-bit unsigned integer.
+ShiftLeft128;Shifts 128-bit left.
+ShiftRight128;Shifts 128-bit right.
+UInt32x32To64;Multiplies two unsigned 32-bit integers, returning an unsigned 64-bit integer result.
+UnsignedMultiply128;Multiplies two unsigned 64-bit integers to produce an unsigned 128-bit integer.
+UnsignedMultiplyExtract128;Multiplies two unsigned 64-bit integers to produce an unsigned 128-bit integer, shifts the product to the right by the specified number of bits, and returns the low 64 bits of the result.
+UnsignedMulitplyHigh;Multiplies two 64-bit integers to produce a 128-bit integer and gets the high unsigned 64 bits.
+
+[Image List]
+HIMAGELIST_QueryInterface
+ImageList_Add
+ImageList_AddMasked
+ImageList_BeginDrag
+ImageList_CoCreateInstance
+ImageList_Copy
+ImageList_Create
+ImageList_Destroy
+ImageList_DragEnter
+ImageList_DragLeave
+ImageList_DragMove
+ImageList_DragShowNolock
+ImageList_Draw
+ImageList_DrawEx
+ImageList_DrawIndirect
+ImageList_Duplicate
+ImageList_EndDrag
+ImageList_GetBkColor
+ImageList_GetDragImage
+ImageList_GetIcon
+ImageList_GetIconSize
+ImageList_GetImageCount
+ImageList_GetImageInfo
+ImageList_LoadImage
+ImageList_Merge
+ImageList_Read
+ImageList_ReadEx
+ImageList_Remove
+ImageList_Replace
+ImageList_ReplaceIcon
+ImageList_SetBkColor
+ImageList_SetColorTable
+ImageList_SetDragCursorImage
+ImageList_SetIconSize
+ImageList_SetImageCount
+ImageList_SetOverlayImage
+ImageList_Write
+ImageList_WriteEx

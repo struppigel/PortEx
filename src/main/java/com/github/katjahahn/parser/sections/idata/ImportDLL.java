@@ -173,7 +173,7 @@ public class ImportDLL {
 				Optional<SymbolDescription> symbol = findSymbolByName(
 						symbolDescriptions, nameImport.getName());
 				if (symbol.isPresent()) {
-					String category = symbol.get().getCategory();
+					String category = symbol.get().getCategory() + " " + symbol.get().getSubCategory().or("");
 					if (categories.containsKey(category)) {
 						categories.get(category).add(nameImport);
 					} else {
