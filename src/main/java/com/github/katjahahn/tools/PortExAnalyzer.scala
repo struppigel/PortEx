@@ -42,9 +42,9 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.5.5
+  private val version = """version: 0.5.6
     |author: Katja Hahn
-    |last update: 21. Jun 2016""".stripMargin
+    |last update: 19. July 2016""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -52,15 +52,17 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
     | java -jar PortexAnalyzer.jar --diff <filelist or folder> 
+    | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
     |
     | -h,--help          show help
     | -v,--version       show version
-    | -a,--all           show all info (might be slow and unstable)
+    | -a,--all           show all info (slow and unstable!)
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
-    | --diff             compare several files and show common characteristics
+    | --diff             compare several files and show common characteristics (alpha feature)
+    | --pdiff            create a diff visualization
     | -i,--ico           extract icons from the resource section as .ico file
     """.stripMargin
 
@@ -135,7 +137,19 @@ object PortExAnalyzer {
               println()
             }
           } else {
-            System.err.println("file doesn't exist")
+            if (options.contains('pdiffA) && options.contains('pdiffB)) {
+              val pdiffAFile = new File(options('pdiffA))
+              val pdiffBFile = new File(options('pdiffB))
+              val outFile = file
+              if (pdiffAFile.length > pdiffBFile.length) {
+                writeDiffPicture(pdiffAFile, pdiffBFile, outFile)
+              } else writeDiffPicture(pdiffBFile, pdiffAFile, outFile)
+
+              println("picture successfully created and saved to " + outFile.getAbsolutePath)
+              println()
+            } else {
+              System.err.println("file doesn't exist")
+            }
           }
         } catch {
           case e: Exception => System.err.println("Error: " + e.getMessage); e.printStackTrace();
@@ -145,7 +159,7 @@ object PortExAnalyzer {
   }
 
   private def writeDiffReport(file: File): Unit = {
-    val files : List[File] = (if (file.isDirectory()) file.listFiles().toList
+    val files: List[File] = (if (file.isDirectory()) file.listFiles().toList
     else fromFile(file).getLines.map(new File(_))).toList
     DiffReportCreator.apply(files).printReport()
   }
@@ -161,6 +175,48 @@ object PortExAnalyzer {
       val dest = Paths.get(folder.getAbsolutePath, nr + ".ico").toFile
       icoFile.saveTo(dest)
       println("file " + dest.getName() + " written")
+    }
+  }
+
+  private def writeDiffPicture(fileBig: File, fileSmall: File, imageFile: File): Unit = {
+    val pixelSize = 4
+    val fileWidth = 256
+    val MAX_HEIGHT = 1000
+    def height(bytes: Int): Int = {
+      val nrOfPixels = fileBig.length / bytes.toDouble
+      val pixelsPerRow = fileWidth / pixelSize.toDouble
+      val pixelsPerCol = nrOfPixels / pixelsPerRow
+      Math.ceil(pixelsPerCol * pixelSize).toInt
+    }
+    val bytesPerPixel = {
+      var res = 1
+      while (height(res) > MAX_HEIGHT) res *= 2
+      res
+    }
+    val bytePlotPixelSize = if (fileWidth * height(bytesPerPixel) > fileBig.length()) pixelSize else 1
+    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, fileBig.length).setColor(ColorableItem.ENTROPY, Color.cyan)
+    val vi = viBuilder.build()
+    val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
+    val entropyImageBig = vi.createEntropyImage(fileBig)
+    val entropyImageSmall = vi.createEntropyImage(fileSmall)
+    val entropyImage = vi.createDiffImage(entropyImageBig, entropyImageSmall)
+    //more fine grained bytePlot image, thus another visualizer
+    val bytePlotSmall = vi2.createBytePlot(fileSmall)
+    val bytePlotBig = vi2.createBytePlot(fileBig)
+    val bytePlot = vi2.createDiffImage(bytePlotBig, bytePlotSmall)
+    val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
+    if (isPEFile(fileBig) && isPEFile(fileSmall)) {
+      val structureImageBig = vi.createImage(fileBig)
+      val structureImageSmall = vi.createImage(fileSmall)
+      val structureImage = vi.createDiffImage(structureImageBig, structureImageSmall)
+      val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
+      val legendImage = vi.createLegendImage(true, true, true)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage1, legendImage)
+      ImageIO.write(appendedImage2, "png", imageFile)
+    } else {
+      val legendImage = vi.createLegendImage(true, true, false)
+      val appendedImage2 = ImageUtil.appendImages(appendedImage, legendImage)
+      ImageIO.write(appendedImage2, "png", imageFile)
     }
   }
 
@@ -326,6 +382,8 @@ object PortExAnalyzer {
         nextOption(map += ('icons -> value), tail)
       case "--diff" :: value :: tail =>
         nextOption(map += ('diff -> value), list.tail)
+      case "--pdiff" :: value1 :: value2 :: tail =>
+        nextOption(map += ('pdiffA -> value1, 'pdiffB -> value2), tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
       case option :: tail =>
         println("Unknown option " + option + "\n" + usage)

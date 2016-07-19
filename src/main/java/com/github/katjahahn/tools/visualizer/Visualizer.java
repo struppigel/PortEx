@@ -333,6 +333,29 @@ public class Visualizer {
 	}
 
 	/**
+	 * Creates a buffered image containing the diff of both files.
+	 * @param firstFile
+	 * @param secondFile
+	 * @return
+	 * @throws IOException
+	 */
+	public BufferedImage createDiffImage(BufferedImage firstImage, BufferedImage secondImage)
+			throws IOException {
+		BufferedImage diffImage = new BufferedImage(firstImage.getWidth(),
+				firstImage.getHeight(), IMAGE_TYPE);
+
+		for (int x = 0; x < firstImage.getWidth() && x < secondImage.getWidth(); x++) {
+			for (int y = 0; y < firstImage.getHeight() && y < secondImage.getHeight(); y++) {
+				int pixelA = firstImage.getRGB(x, y);
+				int pixelB = secondImage.getRGB(x, y);
+				int diffRGB = Math.abs(pixelA - pixelB);
+				diffImage.setRGB(x, y, diffRGB);
+			}
+		}
+		return diffImage;
+	}
+
+	/**
 	 * Creates a buffered image that displays the structure of the PE file.
 	 * 
 	 * @param file
