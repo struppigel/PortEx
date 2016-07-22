@@ -1,5 +1,8 @@
 ; Overlay specific signatures
 
+[PyInstaller]
+signature = 'PYZ'
+
 [CreateInstall]
 signature = 'aWAW'
 
