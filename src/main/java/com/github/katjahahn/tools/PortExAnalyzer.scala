@@ -126,6 +126,7 @@ object PortExAnalyzer {
               }
             }
             if (options.contains('picture)) {
+              println("creating visualization...")
               val imageFile = new File(options('picture))
               if (options.contains('bps)) {
                 val bps = options('bps).toInt
