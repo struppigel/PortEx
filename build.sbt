@@ -2,12 +2,12 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "2.0.8_SNAPSHOT"
+version := "2.0.9_SNAPSHOT"
 
 javadocSettings
 
 //add this if you have problems with invalid javadocs in Java 8
-//javacOptions in JavaDoc += "-Xdoclint:none"
+javacOptions in JavaDoc += "-Xdoclint:none"
 
 sources in (JavaDoc, doc) ~= (_ filterNot (f => f.getName.contains("$") || f.getName.contains("Util") || f.getName.contains("ResourceDataEntry") || f.getName.contains("DirectoryEntry") || f.getName.contains("Scanning")))
 
