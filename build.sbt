@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "2.0.6"
+version := "2.0.7"
 
 javadocSettings
 
@@ -24,7 +24,7 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.0-rc1"
 // Import default settings. This changes `publishTo` settings to use the Sonatype repository and add several commands for publishing.
 sonatypeSettings
 
-// Your project orgnization (package name)
+// Your project organization (package name)
 organization := "com.github.katjahahn"
 
 // To sync with Maven central, you need to supply the following information:
