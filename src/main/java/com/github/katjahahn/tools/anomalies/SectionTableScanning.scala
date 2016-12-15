@@ -43,6 +43,22 @@ import com.github.katjahahn.tools.ShannonEntropy
 trait SectionTableScanning extends AnomalyScanner {
   
   private val packerNames = HashMap(
+      //common
+      ".arch" -> "Alpha-architecture section",
+      ".bindat" -> "Binary data, e.g., by downware installers",
+      ".cormeta" -> "CLR Metadata section",
+      ".complua" -> "LUA compiler",
+      ".fasm" -> "Flat Assembler", ".flat" -> "Flat Assembler",
+      ".idlsym" -> "IDL Attributes (registered SEH)",
+      ".impdata" -> "Alternative import section",
+      ".orpc" -> "Code section inside rpcrt4.dll",
+      ".rodata" -> "Read-only data section",
+      ".script" -> "Section containing script",
+      ".stab" -> "GHC compiled (Haskell)", ".stabstr" -> "GHC compiled (Haskell)",
+      ".sxdata" -> "Registered Exception Handlers section",
+      ".xdata" -> "Exception information section",
+      "DGROUP" -> "Legacy data group section",
+      "INIT" -> "INIT section of drivers", "PAGE" -> "PAGE section of drivers",
       //Aspack
       ".aspack" -> "Aspack packer", ".adata" -> "Aspack/Armadillo packer", 
       "ASPack" -> "Aspack packer", ".ASPack" -> "Aspack packer", 
@@ -51,12 +67,13 @@ trait SectionTableScanning extends AnomalyScanner {
       ".ccg" -> "CCG Packer (Chinese)",
       "BitArts" -> "Crunch 2.0 Packer",
       "DAStub" -> "DAStub Dragon Armor protector",
+      ".charmve" -> "Added by the PIN tool",
       // Enigma Virtual Box
       ".enigma1" -> "Enigma Virtual Box protector",
       ".enigma2" -> "Enigma Virtual Box protector",
       //Other
       "!EPack" -> "EPack packer",
-      "kkrunchy" -> "kkrunchy packer",
+      "" -> "kkrunchy packer",
       ".mackt" -> "ImpRec-created section, this file was patched/cracked",
       ".MaskPE" -> "MaskPE Packer",
       "MEW" -> "MEW packer",
@@ -76,14 +93,17 @@ trait SectionTableScanning extends AnomalyScanner {
       //PECompact
       "PEC2TO" -> "PECompact packer","PEC2" -> "PECompact packer",
       "pec1" -> "PECompact packer","pec2" -> "PECompact packer",
-      "PEC2MO" -> "PECompact packer",
+      "PEC2MO" -> "PECompact packer", "PEC2TO" -> "PECompact packer",
+      "PECompact2" -> "PECompact packer",
       //Other
       "PELOCKnt" -> "PELock Protector",
       ".perplex" -> "Perplex PE-Protector",
       "PESHiELD" -> "PEShield Packer",
       ".petite" -> "Petite Packer",
+      ".pinclie" -> "Added by the PIN tool",
       "ProCrypt" -> "ProCrypt Packer",
       ".RLPack" -> "RLPack Packer", //second section
+      ".rmnet" -> "Ramnit virus marker",
       //RPCrypt
       "RCryptor" -> "RPCrypt Packer", ".RPCrypt" -> "RPCrypt Packer",
       //Other
@@ -92,7 +112,10 @@ trait SectionTableScanning extends AnomalyScanner {
       ".svkp" -> "SVKP packer",
       //Themida
       ".Themida" -> "Themida","Themida" -> "Themida",
+      //TSULoader
+      ".tsuarch" -> "TSULoader", ".tsustub" -> "TSULoader",
       //Other
+      "PEPACK!!" -> "Pepack",
       ".Upack" -> "Upack packer",
       ".ByDwing" -> "Upack packer",
       //UPX
