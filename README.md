@@ -103,7 +103,7 @@ $ sbt eclipse
 Import the project to Eclipse via the *Import Wizard*.
 
 ### Author and Contact
-Katja Hahn  
+Karsten Hahn (previously Katja Hahn)
 E-Mail: portx (at) gmx (dot) de
 
 ### License
