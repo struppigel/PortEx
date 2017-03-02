@@ -9,6 +9,7 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.idata.ImportDLL
+import scala.collection.immutable.HashMap
 
 trait ImportSectionScanning extends AnomalyScanner {
 
@@ -23,10 +24,53 @@ trait ImportSectionScanning extends AnomalyScanner {
       anomalyList ++= checkFractionatedImports(idata)
       anomalyList ++= checkKernel32Imports(idata)
       anomalyList ++= checkVirtualImports(idata)
+      anomalyList ++= checkProcessInjectionImports(idata)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
   }
-
+  
+  private def checkProcessInjectionImports(idata: ImportSection): List[Anomaly] = {
+    val imports = idata.getImports.asScala
+    val anomalyList = ListBuffer[Anomaly]()
+    val injectionMap = HashMap( //TODO complete this list, test this list!
+      "Process32First" -> "is used to obtain handle to victim process",
+      "Process32Next" -> "is used to obtain handle to victim process",
+      "CreateToolhelp32snapshot" -> "is used to obtain handle to victim process",
+      "CreateRemoteThread" -> "is used to open and execute a thread in the victim process",
+      "NtUnmapViewOfSection" -> "is used to remove code segment from memory",
+      "LoadLibraryA" -> "maps module into the address space of the calling process",
+      "LoadLibrary" -> "maps module into the address space of the calling process",
+      "GlobalAddAtom" -> "used for AtomBombing injection",
+      "GlobalGetAtomName" -> "used for AtomBombing injection",
+      "QueueUserApc" -> "adds APC object to queue",
+      "NtQueueApcThread" -> "adds APC object to queue",
+      "CreateProcess" -> "creates a process",
+      "OpenProcess" -> "opens a process (check if PROCESS_ALL_ACCESS is set)",
+      "VirtualAllocEx" -> "allocates memory",
+      "WriteProcessMemory" -> "writes to memory",
+      "Thread32First" -> "obtains thread ID of target process",
+      "Thread32Next" -> "obtains thread ID of target process",
+      "SetWindowsHookEx" -> "injects DLL into process by hooking a Windows message",
+      "VirtualAllocEx" -> "is used for cave injection",
+      "SuspendThread" -> "may suspend a thread as preparation to write to memory",
+      "ResumeThread" -> "may resume thread after injection",
+      "GetThreadContext" -> "may be used to extract the EIP of the thread",
+      "SetThreadContext" -> "may be used to change EIP to continue execution in injected code"
+    )
+    for(imp <- imports) {
+      val nameImps = imp.getNameImports().asScala
+      for(nameImp <- nameImps) {
+        val name = nameImp.getName
+        if(injectionMap.contains(name)) {
+          val description = "Import function typical for code injection: " + name + " " + injectionMap(name)
+          anomalyList += ImportAnomaly(List(imp), description, 
+              AnomalySubType.PROCESS_INJECTION_IMPORT, PEStructureKey.IMPORT_SECTION)
+        }
+      }
+    }
+    anomalyList.toList
+  }
+    
   private def checkVirtualImports(idata: ImportSection): List[Anomaly] = {
     val fileSize = data.getFile.length
     def isVirtual(imp: ImportDLL): Boolean = {
