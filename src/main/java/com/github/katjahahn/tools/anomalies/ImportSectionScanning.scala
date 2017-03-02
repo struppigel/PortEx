@@ -73,8 +73,8 @@ trait ImportSectionScanning extends AnomalyScanner {
           }
           stripped
         }
-        if(injectionMap.contains(name)) {
-          val description = "Import function typical for code injection: " + name + " " + injectionMap(name)
+        if(injectionMap.contains(strippedName)) {
+          val description = "Import function typical for code injection: " + name + " " + injectionMap(strippedName)
           anomalyList += ImportAnomaly(List(imp), description, 
               AnomalySubType.PROCESS_INJECTION_IMPORT, PEStructureKey.IMPORT_SECTION)
         }

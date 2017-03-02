@@ -42,7 +42,7 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.6.2
+  private val version = """version: 0.6.3
     |author: Karsten Hahn
     |last update: 2. March 2017""".stripMargin
 
