@@ -37,21 +37,20 @@ trait ImportSectionScanning extends AnomalyScanner {
       "Process32Next" -> "is used to obtain handle to victim process",
       "CreateToolhelp32snapshot" -> "is used to obtain handle to victim process",
       "CreateRemoteThread" -> "is used to open and execute a thread in the victim process",
-      "NtUnmapViewOfSection" -> "is used to remove code segment from memory",
-      "LoadLibraryA" -> "maps module into the address space of the calling process",
+      "UnmapViewOfSection" -> "is used to remove code segment from memory",
       "LoadLibrary" -> "maps module into the address space of the calling process",
       "GlobalAddAtom" -> "used for AtomBombing injection",
       "GlobalGetAtomName" -> "used for AtomBombing injection",
       "QueueUserApc" -> "adds APC object to queue",
-      "NtQueueApcThread" -> "adds APC object to queue",
+      "QueueApcThread" -> "adds APC object to queue",
       "CreateProcess" -> "creates a process",
       "OpenProcess" -> "opens a process (check if PROCESS_ALL_ACCESS is set)",
-      "VirtualAllocEx" -> "allocates memory",
+      "VirtualAlloc" -> "allocates memory",
       "WriteProcessMemory" -> "writes to memory",
       "Thread32First" -> "obtains thread ID of target process",
       "Thread32Next" -> "obtains thread ID of target process",
-      "SetWindowsHookEx" -> "injects DLL into process by hooking a Windows message",
-      "VirtualAllocEx" -> "is used for cave injection",
+      "SetWindowsHook" -> "injects DLL into process by hooking a Windows message",
+      "VirtualAlloc" -> "is used for cave injection",
       "SuspendThread" -> "may suspend a thread as preparation to write to memory",
       "ResumeThread" -> "may resume thread after injection",
       "GetThreadContext" -> "may be used to extract the EIP of the thread",
@@ -61,6 +60,19 @@ trait ImportSectionScanning extends AnomalyScanner {
       val nameImps = imp.getNameImports().asScala
       for(nameImp <- nameImps) {
         val name = nameImp.getName
+        val strippedName = {
+          var stripped = name
+          if(name.endsWith("A") || name.endsWith("W")) {
+            stripped = name.substring(0,name.length() - 1)
+          }
+          if(name.endsWith("Ex")){
+            stripped = name.substring(0,name.length() - 2)
+          }
+          if(name.startsWith("Nt") || name.startsWith("Zw")) {
+            stripped = name.substring(2)
+          }
+          stripped
+        }
         if(injectionMap.contains(name)) {
           val description = "Import function typical for code injection: " + name + " " + injectionMap(name)
           anomalyList += ImportAnomaly(List(imp), description, 
