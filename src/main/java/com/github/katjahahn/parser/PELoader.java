@@ -286,9 +286,9 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/katja/samples/holycrypt2"); 
+        File file = new File("/home/katja/samples/corruptedPortex"); 
         ReportCreator reporter = ReportCreator.newInstance(file);
-        reporter.printReport();
+        System.out.println(reporter.resourcesReport());
 //        File file2 = new File("/home/katja/samples/tesla2");
 //        List<File> list = new ArrayList<>();
 //        list.add(file);

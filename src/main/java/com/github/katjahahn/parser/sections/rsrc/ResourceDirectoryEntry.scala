@@ -58,7 +58,7 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsr
 
   private lazy val idLoc = id match {
     case Name(rva, name) => List(new PhysicalLocation(rva + rsrcOffset, name.length * 2))
-    case _ => Nil
+    case _               => Nil
   }
 
   /**
@@ -90,7 +90,7 @@ case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int, rsrcOf
 
   private lazy val idLoc = id match {
     case Name(rva, name) => List(new PhysicalLocation(rva + rsrcOffset, name.length * 2))
-    case _ => Nil
+    case _               => Nil
   }
 
   override def locations(): List[PhysicalLocation] = idLoc ::: data.locations
@@ -116,6 +116,25 @@ case class ID(id: Long, level: Level) extends IDOrName {
 
   override def toString(): String =
     "ID: " + { if (level == Level.typeLevel()) idString else id.toString }
+  
+  def canEqual(other: Any) = {
+    other.isInstanceOf[ID]
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  override def equals(other: Any) = {
+    other match {
+      case that: ID => that.canEqual(ID.this) && id == that.id && level.equals(that.level)
+      case _ => false
+    }
+  }
+  
+  override def hashCode() = {
+    val prime = 41
+    prime * (prime + id.hashCode) + level.hashCode
+  } 
 
 }
 
@@ -124,7 +143,7 @@ case class Name(rva: Long, name: String) extends IDOrName {
 }
 
 object ResourceDirectoryEntry {
-  
+
   val maxNameLength = 30
 
   private val logger = LogManager.getLogger(ResourceDirectoryEntry.getClass().getName())
@@ -160,23 +179,25 @@ object ResourceDirectoryEntry {
    * @return {@link ResourceDirectoryEntry}
    */
   def apply(file: File, isNameEntry: Boolean, entryBytes: Array[Byte],
-    entryNr: Int, level: Level, virtualAddress: Long, rsrcOffset: Long,
-    mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): ResourceDirectoryEntry = {
+            entryNr: Int, level: Level, virtualAddress: Long, rsrcOffset: Long,
+            mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): ResourceDirectoryEntry = {
     // read all fields of this resource directory entry
     val entries = readEntries(entryBytes)
     // fetch rva to subdirectory or data entry
     val rva = entries("DATA_ENTRY_RVA_OR_SUBDIR_RVA")
     // fetch id or name field
-    val id = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes, virtualAddress)
+    val optionalEntry = getIDOrName(entries("NAME_RVA_OR_INTEGER_ID"), isNameEntry, level, mmBytes, virtualAddress)
     // rva determines if this is a subdirectory or a data entry
-    if (isDataEntryRVA(rva)) {
-      // create and return data entry
-      createDataEntry(rva, id, entryNr, virtualAddress, rsrcOffset, mmBytes)
-    } else {
-      // create and return subdirectory
-      createSubDirEntry(file, rva, id, entryNr, level,
-        virtualAddress, rsrcOffset, mmBytes, loopChecker)
-    }
+    if (optionalEntry.isDefined) {
+      if (isDataEntryRVA(rva)) {
+        // create and return data entry
+        createDataEntry(rva, optionalEntry.get, entryNr, virtualAddress, rsrcOffset, mmBytes)
+      } else {
+        // create and return subdirectory
+        createSubDirEntry(file, rva, optionalEntry.get, entryNr, level,
+          virtualAddress, rsrcOffset, mmBytes, loopChecker)
+      }
+    } else throw new IllegalArgumentException("invalid resource directory entry at va " + (rsrcOffset+virtualAddress))
   }
 
   /**
@@ -200,16 +221,20 @@ object ResourceDirectoryEntry {
    * @param isNameEntry true if name entry is returned, false if ID entry is returned
    * @param level the level of the entry within the resource tree
    * @param mmBytes the memory mapped PE
-   * @return ID entry or name entry
+   * @return Option of ID entry or name entry or None if invalid
    */
   private def getIDOrName(rva: Long, isNameEntry: Boolean, level: Level,
-    mmBytes: MemoryMappedPE, va: Long): IDOrName =
-    if (isNameEntry) {
-      // if name entry fetch the name string at given rva
-      val name = getStringAtRVA(rva, va, mmBytes, maxNameLength)
-      Name(rva, name)
-      // create id instance otherwise
-    } else ID(rva, level)
+                          mmBytes: MemoryMappedPE, va: Long): Option[IDOrName] =
+    try {
+      if (isNameEntry) {
+        // if name entry fetch the name string at given rva
+        val name = getStringAtRVA(rva, va, mmBytes, maxNameLength)
+        Some(Name(rva, name))
+        // create id instance otherwise
+      } else Some(ID(rva, level))
+    } catch {
+      case e: IllegalArgumentException => None
+    }
 
   /**
    * Returns the string at the specified rva.
@@ -228,6 +253,7 @@ object ResourceDirectoryEntry {
     // check if able to read
     if (address + length > mmBytes.length) {
       logger.warn("couldn't read string at offset " + address)
+      throw new IllegalArgumentException()
     }
     // read the length of the string (number of characters)
     val strLength = min(mmBytes.getBytesIntValue(address, length), maxStrLength)
@@ -269,8 +295,8 @@ object ResourceDirectoryEntry {
    * @return a data entry
    */
   private def createDataEntry(rva: Long, id: IDOrName, entryNr: Int,
-    virtualAddress: Long, rsrcOffset: Long,
-    mmBytes: MemoryMappedPE): DataEntry = {
+                              virtualAddress: Long, rsrcOffset: Long,
+                              mmBytes: MemoryMappedPE): DataEntry = {
     // calculate virtual start of the data entry
     val virtStart = rva + virtualAddress
     // calculate virtual end of the data entry
@@ -298,8 +324,8 @@ object ResourceDirectoryEntry {
    * @return a subdirectory entry
    */
   private def createSubDirEntry(file: File, rva: Long, id: IDOrName, entryNr: Int, level: Level,
-    virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
-    loopChecker: ResourceLoopChecker): SubDirEntry = {
+                                virtualAddress: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
+                                loopChecker: ResourceLoopChecker): SubDirEntry = {
     // highest bit does not belong to actual rva
     val address = removeHighestIntBit(rva)
     // parse and create underlying resource directory of the subdirectory entry

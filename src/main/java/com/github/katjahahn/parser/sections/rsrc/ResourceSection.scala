@@ -79,14 +79,14 @@ class ResourceSection private (
   def getResourceTree(): ResourceDirectory = resourceTree
 
   /**
-   * Collects the resources from the root resource directory table and
-   * returns them.
+   * Collects the resources from the root resource directory table, removes 
+   * duplicates and returns them.
    *
    * @return a List of {@link Resource} instances
    */
-  def getResources(): java.util.List[Resource] =
-    resourceTree.getResources()
-
+  def getResources(): java.util.List[Resource] = 
+    resourceTree.getUniqueResources()
+ 
 }
 
 object ResourceSection {

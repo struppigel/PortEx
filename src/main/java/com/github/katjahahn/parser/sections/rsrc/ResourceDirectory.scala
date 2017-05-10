@@ -48,9 +48,9 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param fileOffset the offset of the resource directory
  */
 class ResourceDirectory private (private val level: Level,
-  private val header: Header,
-  private val entries: List[ResourceDirectoryEntry],
-  private val fileOffset: Long) extends Equals {
+                                 private val header: Header,
+                                 private val entries: List[ResourceDirectoryEntry],
+                                 private val fileOffset: Long) extends Equals {
 
   private val headerLoc = new PhysicalLocation(fileOffset, resourceDirSize)
 
@@ -103,6 +103,17 @@ class ResourceDirectory private (private val level: Level,
   def getHeaderValue(key: ResourceDirectoryKey): Long = header(key).getValue
 
   /**
+   * Collects and returns a distinct list of resources that this 
+   * resource table tree has.
+   *
+   * @param mmBytes the memory mapped PE
+   * @return a list of all resources
+   */
+  def getUniqueResources(): java.util.List[Resource] =
+    _getResources().distinct.asJava
+
+  
+  /**
    * Collects and returns all resources that this resource table tree has.
    *
    * @param mmBytes the memory mapped PE
@@ -110,7 +121,7 @@ class ResourceDirectory private (private val level: Level,
    */
   def getResources(): java.util.List[Resource] =
     _getResources().asJava
-
+    
   /**
    * Collects and returns all resources that this resource table tree has.
    * <p>
@@ -191,14 +202,14 @@ object ResourceDirectory {
   /**
    * Maximum of resource entries for each directory
    */
-  val entryMaximum = 1000
+  val entryMaximum = 500
 
   /**
    * Creates a resource directory.
    *
    * @param file the PE file
    * @param level the level in the resource tree of the resource directory to create
-   * @param rsrcDirRVA the relative virtual address to the resource directory, 
+   * @param rsrcDirRVA the relative virtual address to the resource directory,
    *        relative to the resource table va
    * @param rsrcVA the rva to the resource table
    * @param rsrcOffset the file offset to the resource table
@@ -207,8 +218,8 @@ object ResourceDirectory {
    * @return resource directory
    */
   def apply(file: File, level: Level, rsrcDirRVA: Long,
-    rsrcVA: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
-    loopChecker: ResourceLoopChecker): ResourceDirectory = {
+            rsrcVA: Long, rsrcOffset: Long, mmBytes: MemoryMappedPE,
+            loopChecker: ResourceLoopChecker): ResourceDirectory = {
     // fetch the bytes of the resource directory header
     val headerBytes = mmBytes.slice(rsrcVA + rsrcDirRVA, resourceDirSize + rsrcDirRVA + rsrcVA)
     // read the header data from the bytes
@@ -249,7 +260,7 @@ object ResourceDirectory {
    *
    * @param file the PE file
    * @param header the resource directory header
-   * @param rsrcDirRVA the relative virtual address to the resource directory, 
+   * @param rsrcDirRVA the relative virtual address to the resource directory,
    *        relative to the resource table va
    * @param level the level of the current directory within the resource tree
    * @param virtualAddress the rva to the resource table
@@ -259,17 +270,22 @@ object ResourceDirectory {
    * @return a list of resource directory entries
    */
   private def readEntries(file: File, header: Header, rsrcDirRVA: Long,
-    level: Level, virtualAddress: Long, rsrcOffset: Long,
-    mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): List[ResourceDirectoryEntry] = {
+                          level: Level, virtualAddress: Long, rsrcOffset: Long,
+                          mmBytes: MemoryMappedPE, loopChecker: ResourceLoopChecker): List[ResourceDirectoryEntry] = {
     // fetch number of name entries
     val nameEntries = header(NR_OF_NAME_ENTRIES).getValue.toInt
+    logger.debug("number of name entries: " + nameEntries)
     // fetch number of id entries
     val idEntries = header(NR_OF_ID_ENTRIES).getValue.toInt
+    logger.debug("number of id entries: " + idEntries)
     // number of all entries
     val entriesSum = nameEntries + idEntries
+    logger.debug("entriesSum: " + entriesSum)
     // we limit the number to maximum if reached
     val limitedEntriesSum = if (entriesSum < entryMaximum) entriesSum else entryMaximum
+    logger.debug("limited entriesSum: " + limitedEntriesSum)
     val entries = ListBuffer.empty[ResourceDirectoryEntry]
+    val offsets: ListBuffer[Long] = scala.collection.mutable.ListBuffer.empty
     try {
       for (i <- 0 until limitedEntriesSum) {
         // calculate the offset for the entry
@@ -286,12 +302,12 @@ object ResourceDirectory {
           // create and add entry to the list
           val possibleEntry = ResourceDirectoryEntry(file, isNameEntry, entryBytes, entryNr,
             level, virtualAddress, rsrcOffset, mmBytes, loopChecker)
-         // if(isValidEntry(possibleEntry, file.length())) { //TODO find a different solution!
-            entries += possibleEntry 
+          // if(isValidEntry(possibleEntry, file.length())) { //TODO find a different solution!
+            entries += possibleEntry
           //} else {logger.warn("invalid resource entry")} //TODO add these to anomalies!
         } catch {
           // resource loop detected during entry creation
-          case e: ResourceLoopException => logger.warn("resource loop detected at va " + offset)
+          case e: ResourceLoopException => logger.warn("resource loop detected at va " + offset);
         }
       }
     } catch {
@@ -300,7 +316,7 @@ object ResourceDirectory {
     }
     entries.toList
   }
-  
-  private def isValidEntry(entry: ResourceDirectoryEntry, maximum : Long) : Boolean = 
+
+  private def isValidEntry(entry: ResourceDirectoryEntry, maximum: Long): Boolean =
     entry.locations().forall { loc => loc.from > 0 && (loc.size + loc.from) < maximum }
 }

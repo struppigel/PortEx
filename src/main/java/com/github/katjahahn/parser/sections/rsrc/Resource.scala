@@ -33,7 +33,7 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param levelIDs the levelIDs of the resource
  */
 class Resource(
-  val rawBytesLocation: PhysicalLocation,
+  val rawBytesLocation: PhysicalLocation, 
   var levelIDs: Map[Level, IDOrName]) {
 
   /**
@@ -57,12 +57,7 @@ class Resource(
    * @param resourceBytes the bytes that make up the data of the resource
    */
   def this(rawBytesLocation: PhysicalLocation) = this(rawBytesLocation, Map.empty)
-
-  //  /** TODO
-  //   * Creates an UTF8 string of the resource bytes
-  //   */
-  //  def getResourceBytesString(): String = new java.lang.String(resourceBytes, "UTF8").trim()
-
+  
   /**
    * {@inheritDoc}
    */
@@ -70,5 +65,32 @@ class Resource(
     "offset: 0x" + java.lang.Long.toHexString(rawBytesLocation.from) + 
     ", size: 0x" + java.lang.Long.toHexString(rawBytesLocation.size) + ", " +
     levelIDs.mkString(", ")
+
+  def canEqual(other: Any) = {
+    other.isInstanceOf[Resource]
+  }
+
+  override def equals(other: Any) = {
+    other match {
+      case that: Resource => that.canEqual(Resource.this) && rawBytesLocation == that.rawBytesLocation && levelIDsAreEqual(levelIDs, that.levelIDs)
+      case _ => false
+    }
+  }
+  
+  private def levelIDsAreEqual(m1: Map[Level, IDOrName], m2: Map[Level, IDOrName]): Boolean = {
+    val diff = (m1.keySet -- m2.keySet) ++ (m2.keySet -- m1.keySet)
+    if(!diff.isEmpty) false 
+    else {
+      for(k <- m1.keySet){
+        if(!m1(k).equals(m2(k))) return false
+      }  
+      true
+    }
+  }
+
+  override def hashCode() = {
+    val prime = 41
+    prime * (prime + rawBytesLocation.hashCode) + levelIDs.hashCode
+  }
 
 }
