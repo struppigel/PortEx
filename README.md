@@ -5,7 +5,6 @@ PortEx ![build status](https://travis-ci.org/katjahahn/PortEx.svg?branch=master)
 
 PortEx is a Java library for static malware analysis of Portable Executable files. Its focus is on PE malformation robustness, and anomaly detection. 
 PortEx is written in Java and Scala, and targeted at Java applications.  
-Visit the [PortEx project page](http://katjahahn.github.io/PortEx/).
 
 ![visualizer example](http://i.imgur.com/7NBze4O.png)
 
