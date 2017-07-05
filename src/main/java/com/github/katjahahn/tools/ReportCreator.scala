@@ -215,16 +215,13 @@ class ReportCreator(private val data: PEData) {
     val loader = new SectionLoader(data)
     val maybeExports = loader.maybeLoadExportSection()
     if (maybeExports.isPresent && !maybeExports.get.isEmpty) {
-      println("not empty")
       val edata = maybeExports.get
       val buf = new StringBuffer()
       buf.append(title("Exports") + NL)
       val exports = edata.getExportEntries.asScala
-      println("retrieving export entry")
       for (export <- exports) {
         buf.append(export + NL)
       }
-      println("exports done")
       buf.toString + NL
     } else ""
   }

@@ -233,12 +233,10 @@ object ExportSection {
     val rva = edataTable(ORDINAL_TABLE_RVA)
     val entries = edataTable(NR_OF_NAME_POINTERS)
     val ordTableFileOffset = edataOffset + rva - virtualAddress
-    if(ordTableFileOffset <= 0) {
-      throw new FileFormatException("Offset for ordinal export entries invalid!");
+    if(ordTableFileOffset <= 0 || entries < 0) {
+      // create empty ExportOrdinalTable
+      return new ExportOrdinalTable(List.empty[Int], base.toInt, 0L)
     } 
-    if(entries < 0) {
-      throw new FileFormatException("Number of name pointer entries is < 0!");
-    }
     ExportOrdinalTable(mmBytes, base.toInt, rva, entries.toInt, virtualAddress, ordTableFileOffset)
   }
 

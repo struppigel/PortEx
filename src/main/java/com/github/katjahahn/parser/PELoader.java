@@ -34,11 +34,13 @@ import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.testng.Reporter;
 
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.DiffReportCreator;
 import com.github.katjahahn.tools.ReportCreator;
@@ -286,9 +288,10 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/katja/samples/corruptedPortex"); 
-        ReportCreator reporter = ReportCreator.newInstance(file);
-        System.out.println(reporter.resourcesReport());
+        File file = new File("/home/katja/samples/petna"); 
+        ReportCreator r = ReportCreator.newInstance(file);
+        System.out.println(r.exportsReport());
+        
 //        File file2 = new File("/home/katja/samples/tesla2");
 //        List<File> list = new ArrayList<>();
 //        list.add(file);

@@ -24,7 +24,7 @@ import com.github.katjahahn.parser.MemoryMappedPE
 import ExportOrdinalTable.entrySize
 import com.github.katjahahn.parser.FileFormatException
 
-class ExportOrdinalTable private (
+class ExportOrdinalTable (
   val ordinals: List[Int],
   val base: Int,
   val fileOffset: Long) {
