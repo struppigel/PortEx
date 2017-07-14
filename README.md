@@ -26,6 +26,10 @@ PortEx is written in Java and Scala, and targeted at Java applications.
 
 For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
 
+### PortExAnalyzer
+
+PortExAnalyzer is a command line tool that runs the library PortEx under the hood. If you are looking for a readily compiled command line PE scanner to analyse files with it, download it from here [PortexAnalyzer.jar](https://github.com/katjahahn/PortEx/raw/master/progs/PortexAnalyzer.jar)
+
 ### Using PortEx
 
 #### Including PortEx to a Maven Project
