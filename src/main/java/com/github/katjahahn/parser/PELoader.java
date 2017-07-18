@@ -38,6 +38,7 @@ import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.tools.PEAutoRepair;
 import com.github.katjahahn.tools.ReportCreator;
 
 /**
@@ -283,10 +284,8 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/katja/samples/petna"); 
-        ReportCreator r = ReportCreator.newInstance(file);
-        System.out.println(r.exportsReport());
-        
+        File file = new File("/home/katja/samples/fixme5"); 
+        PEAutoRepair.apply(file, new File("/home/katja/samples/fixme5.repaired")).repair();
 //        File file2 = new File("/home/katja/samples/tesla2");
 //        List<File> list = new ArrayList<>();
 //        list.add(file);

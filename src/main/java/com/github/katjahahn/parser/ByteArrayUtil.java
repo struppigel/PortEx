@@ -209,7 +209,7 @@ public class ByteArrayUtil {
         return value;
     }
     
-  //TODO create decent (flexible) version
+    //TODO create decent (flexible) version
     public static byte[] intToWord(int a) {
     	byte[] ret = new byte[2];
         ret[0] = (byte) (a & 0xFF);   

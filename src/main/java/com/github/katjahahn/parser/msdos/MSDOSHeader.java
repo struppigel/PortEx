@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.msdos;
 
-import static com.github.katjahahn.parser.IOUtil.*;
+import static com.github.katjahahn.parser.IOUtil.NL;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,162 +42,171 @@ import com.google.common.base.Preconditions;
  */
 public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 
-    private static final Logger logger = LogManager.getLogger(MSDOSHeader.class
-            .getName());
+	private static final Logger logger = LogManager.getLogger(MSDOSHeader.class
+			.getName());
 
-    /**
-     * The size of the formatted header is {@value} bytes
-     * <p>
-     * Note: The actual header may be larger, containing optional values.
-     */
-    public static final int FORMATTED_HEADER_SIZE = 64;
-    /** The size one paragraph in bytes */
-    private static final int PARAGRAPH_SIZE = 16; // in Byte
+	/**
+	 * The size of the formatted header is {@value} bytes
+	 * <p>
+	 * Note: The actual header may be larger, containing optional values.
+	 */
+	public static final int FORMATTED_HEADER_SIZE = 64;
+	/** The size one paragraph in bytes */
+	private static final int PARAGRAPH_SIZE = 16; // in Byte
 
-    /** the bytes of the MZ signature */
-    private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
-    /** the specification name */
-    private static final String SPEC_LOCATION = "msdosheaderspec";
-    /** the header fields */
-    private Map<MSDOSHeaderKey, StandardField> headerData;
+	/** the bytes of the MZ signature */
+	private static final byte[] MZ_SIGNATURE = "MZ".getBytes();
+	/** the specification name */
+	private static final String SPEC_LOCATION = "msdosheaderspec";
+	/** the header fields */
+	private Map<MSDOSHeaderKey, StandardField> headerData;
 
-    /** the bytes that make up the header */
-    private final byte[] headerbytes;
-    /** the file offset of the header */
-    private final long offset = 0;
-    /** the offset of the PE signature */
-    private final long peSigOffset;
+	/** the bytes that make up the header */
+	private final byte[] headerbytes;
+	/** the file offset of the header */
+	private final long offset = 0;
+	/** the offset of the PE signature */
+	private final long peSigOffset;
 
-    /**
-     * Creates an instance of the optional header.
-     * 
-     * @param headerbytes
-     * @param offset
-     */
-    private MSDOSHeader(byte[] headerbytes, long peSigOffset) {
-        assert headerbytes != null;
-        this.headerbytes = headerbytes.clone();
-        this.peSigOffset = peSigOffset;
-    }
+	/**
+	 * Creates an instance of the optional header.
+	 * 
+	 * @param headerbytes
+	 * @param offset
+	 */
+	private MSDOSHeader(byte[] headerbytes, long peSigOffset) {
+		assert headerbytes != null;
+		this.headerbytes = headerbytes.clone();
+		this.peSigOffset = peSigOffset;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getOffset() {
-        return offset;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public long getOffset() {
+		return offset;
+	}
 
-    /**
-     * Reads the header fields.
-     */
-    private void read() throws IOException {
-        // check headerbytes
-        Preconditions.checkState(headerbytes.length >= 28,
-                "not enough headerbytes for MS DOS Header");
-        // check MZ signature
-        if (!hasSignature(headerbytes)) {
-            throw new IOException("No MZ Signature found");
-        }
-        // define specification format
-        SpecificationFormat format = new SpecificationFormat(0, 3, 1, 2);
-        // read header fields
-        try {
-            headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format,
-                    SPEC_LOCATION, headerbytes, getOffset());
-        } catch (IOException e) {
-            logger.error("unable to read the msdos specification: "
-                    + e.getMessage());
-        }
-    }
+	/**
+	 * Reads the header fields.
+	 */
+	private void read() throws IOException {
+		// check headerbytes
+		Preconditions.checkState(headerbytes.length >= 28,
+				"not enough headerbytes for MS DOS Header");
+		// check MZ signature
+		if (!hasSignature(headerbytes)) {
+			throw new IOException("No MZ Signature found");
+		}
+		// define specification format
+		SpecificationFormat format = new SpecificationFormat(0, 3, 1, 2);
+		// read header fields
+		try {
+			headerData = IOUtil.readHeaderEntries(MSDOSHeaderKey.class, format,
+					SPEC_LOCATION, headerbytes, getOffset());
+		} catch (IOException e) {
+			logger.error("unable to read the msdos specification: "
+					+ e.getMessage());
+		}
+	}
 
-    /**
-     * Calculates and returns the size of the header.
-     * 
-     * @return size of header
-     */
-    // TODO this is size of header + stub ?
-    public long getHeaderSize() {
-        long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS)
-                * PARAGRAPH_SIZE;
-        if (headerSize > peSigOffset) {
-            return peSigOffset;
-        }
-        assert headerSize >= 0;
-        return headerSize;
-    }
+	/**
+	 * Calculates and returns the size of the header.
+	 * 
+	 * @return size of header
+	 */
+	// TODO this is size of header + stub ?
+	public long getHeaderSize() {
+		long headerSize = get(MSDOSHeaderKey.HEADER_PARAGRAPHS)
+				* PARAGRAPH_SIZE;
+		if (headerSize > peSigOffset) {
+			return peSigOffset;
+		}
+		assert headerSize >= 0;
+		return headerSize;
+	}
 
-    private boolean hasSignature(byte[] headerbytes) {
-        assert headerbytes != null;
-        // check each signature byte
-        for (int i = 0; i < MZ_SIGNATURE.length; i++) {
-            if (MZ_SIGNATURE[i] != headerbytes[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
+	public static boolean hasSignature(byte[] headerbytes) {
+		assert headerbytes != null;
+		// check each signature byte
+		for (int i = 0; i < MZ_SIGNATURE.length; i++) {
+			if (MZ_SIGNATURE[i] != headerbytes[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-    /**
-     * Returns a list of the header entries.
-     * 
-     * @return a list of header entries
-     */
-    public List<StandardField> getHeaderEntries() {
-        return new LinkedList<>(headerData.values());
-    }
+	public static void repairSignature(File file) throws FileNotFoundException, IOException {
+		try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+			raf.seek(0L);
+			raf.writeBytes("MZ");
+			System.out.println("Repairing 'MZ' signature ...");
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long get(MSDOSHeaderKey key) {
-        return getField(key).getValue();
-    }
+	/**
+	 * Returns a list of the header entries.
+	 * 
+	 * @return a list of header entries
+	 */
+	public List<StandardField> getHeaderEntries() {
+		return new LinkedList<>(headerData.values());
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StandardField getField(MSDOSHeaderKey key) {
-        return headerData.get(key);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public long get(MSDOSHeaderKey key) {
+		return getField(key).getValue();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getInfo() {
-        if (headerData == null) {
-            return "No MS DOS Header found!" + NL;
-        } else {
-            StringBuilder b = new StringBuilder("-------------" + NL
-                    + "MS DOS Header" + NL + "-------------" + NL);
-            for (StandardField entry : headerData.values()) {
-                b.append(entry.getDescription() + ": " + entry.getValue() + " (0x"
-                        + Long.toHexString(entry.getValue()) + ")" + NL);
-            }
-            return b.toString();
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public StandardField getField(MSDOSHeaderKey key) {
+		return headerData.get(key);
+	}
 
-    /**
-     * Creates and returns an instance of the MSDOSHeader with the given bytes
-     * and the file offset of the PE signature.
-     * 
-     * @param headerbytes
-     *            the bytes that make up the MSDOSHeader
-     * @param peSigOffset
-     *            file offset to the PE signature
-     * @return MSDOSHeader instance
-     * @throws IOException
-     *             if header can not be read.
-     */
-    public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset)
-            throws IOException {
-        MSDOSHeader header = new MSDOSHeader(headerbytes, peSigOffset);
-        header.read();
-        return header;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getInfo() {
+		if (headerData == null) {
+			return "No MS DOS Header found!" + NL;
+		} else {
+			StringBuilder b = new StringBuilder("-------------" + NL
+					+ "MS DOS Header" + NL + "-------------" + NL);
+			for (StandardField entry : headerData.values()) {
+				b.append(entry.getDescription() + ": " + entry.getValue()
+						+ " (0x" + Long.toHexString(entry.getValue()) + ")"
+						+ NL);
+			}
+			return b.toString();
+		}
+	}
+
+	/**
+	 * Creates and returns an instance of the MSDOSHeader with the given bytes
+	 * and the file offset of the PE signature.
+	 * 
+	 * @param headerbytes
+	 *            the bytes that make up the MSDOSHeader
+	 * @param peSigOffset
+	 *            file offset to the PE signature
+	 * @return MSDOSHeader instance
+	 * @throws IOException
+	 *             if header can not be read.
+	 */
+	public static MSDOSHeader newInstance(byte[] headerbytes, long peSigOffset)
+			throws IOException {
+		MSDOSHeader header = new MSDOSHeader(headerbytes, peSigOffset);
+		header.read();
+		return header;
+	}
 
 }

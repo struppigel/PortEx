@@ -42,15 +42,16 @@ import java.awt.Color
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.6.7
+  private val version = """version: 0.7.0
     |author: Karsten Hahn
-    |last update: 05. July 2017""".stripMargin
+    |last update: 18. July 2017""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
   private val usage = """usage: 
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
+    | java -jar PortexAnalyzer.jar --repair <file>
     | java -jar PortexAnalyzer.jar --diff <filelist or folder> 
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
@@ -61,6 +62,7 @@ object PortExAnalyzer {
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
+    | --repair           repair the PE file
     | --diff             compare several files and show common characteristics (alpha feature)
     | --pdiff            create a diff visualization
     | -i,--ico           extract icons from the resource section as .ico file
@@ -93,6 +95,15 @@ object PortExAnalyzer {
           System.err.println("file doesn't exist")
         }
       }
+      if (options.contains('repair)) {
+        val inFile = new File(options('repair))
+        val outFile = new File(options('repair) + ".repaired")
+        if (inFile.exists) {
+          PEAutoRepair.apply(inFile, outFile).repair()
+        } else {
+          System.err.println("file doesn't exist")
+        }
+      }
       if (options.contains('inputfile)) {
         try {
           val file = new File(options('inputfile))
@@ -121,7 +132,8 @@ object PortExAnalyzer {
               if (options.contains('output)) {
                 writeFileTypeReport(file, new File(options('output)))
               } else {
-                println("The given file is no PE file! ")
+                println("The given file is no PE file!" + NL +
+                  "Try '--repair' option if you think it is a broken PE." + NL)
                 printFileTypeReport(file)
               }
             }
@@ -315,7 +327,8 @@ object PortExAnalyzer {
       sig.signature.count(cond(_) { case Some(s) => true })
 
     using(new FileWriter(outFile, true)) { fw =>
-      fw.write("The given file is no PE file!")
+      fw.write("The given file is no PE file!" + NL +
+        "Try '--repair' option if you think it is a broken PE." + NL)
       var results = FileTypeScanner(file).scanAt(0)
       if (results.isEmpty) fw.write("No matching file-type signatures found" + NL)
       else if (results.size == 1)
@@ -367,6 +380,8 @@ object PortExAnalyzer {
         nextOption(map += ('all -> ""), tail)
       case "--all" :: tail =>
         nextOption(map += ('all -> ""), tail)
+      case "--repair" :: value :: tail =>
+        nextOption(map += ('repair -> value), tail)
       case "-o" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
       case "--output" :: value :: tail =>
