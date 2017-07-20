@@ -17,6 +17,8 @@
  */
 package com.github.katjahahn.parser
 
+import java.io.File
+
 /**
  * Utilities for Scala specific IO and small conversions related to IO.
  * <p>
@@ -26,6 +28,16 @@ package com.github.katjahahn.parser
  */
 object ScalaIOUtil {
 
+  def nonExistingFileFor(file: File): File = {
+    if (!file.exists()) file else {
+      var nr = 1
+      while (new File(file.getAbsolutePath + "(" + nr + ")").exists()) {
+        nr += 1
+      }
+      new File(file.getAbsolutePath + "(" + nr + ")")
+    }
+  }
+  
   /**
    * Converts an array of Option bytes to its hex string representation. None is
    * converted to "??"

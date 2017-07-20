@@ -9,9 +9,14 @@ import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.msdos.MSDOSHeader
 import com.github.katjahahn.parser.PELoader
-
+/**
+ * Automatic repair for PE files or files that should be PE files.
+ */
 class PEAutoRepair(private val inFile: File, private val outFile: File) {
 
+  /**
+   * Repair everything automatically.
+   */
   def repair(): Unit = {
     // copy file before editing
     Files.copy(inFile.toPath, outFile.toPath, StandardCopyOption.REPLACE_EXISTING)

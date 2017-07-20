@@ -36,15 +36,17 @@ import java.nio.file.Paths
 import java.io.FileWriter
 import com.github.katjahahn.tools.visualizer.ColorableItem
 import java.awt.Color
+import java.nio.file.Path
+import java.nio.file.Files
 
 /**
  * Command line frontend of PortEx
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.7.0
+  private val version = """version: 0.7.1
     |author: Karsten Hahn
-    |last update: 18. July 2017""".stripMargin
+    |last update: 20. July 2017""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -52,7 +54,8 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
     | java -jar PortexAnalyzer.jar --repair <file>
-    | java -jar PortexAnalyzer.jar --diff <filelist or folder> 
+    | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> 
+    | java -jar PortexAnalyzer.jar --diff <filelist or folder>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
     |
@@ -62,7 +65,8 @@ object PortExAnalyzer {
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
-    | --repair           repair the PE file
+    | --repair           repair the PE file, use this if your file is not recognized as PE
+    | --dump             dump resources, overlay, sections, icons 
     | --diff             compare several files and show common characteristics (alpha feature)
     | --pdiff            create a diff visualization
     | -i,--ico           extract icons from the resource section as .ico file
@@ -109,23 +113,30 @@ object PortExAnalyzer {
           val file = new File(options('inputfile))
           if (file.exists) {
             if (isPEFile(file)) {
-              val reporter = ReportCreator.newInstance(file)
-              val all = (options.contains('all))
-              reporter.setShowAll(all)
-              if (options.contains('output)) {
-                writeReport(reporter, new File(options('output)))
-              } else {
-                reporter.printReport()
-                println("--- end of report ---")
-                println()
-              }
 
-              if (options.contains('icons)) {
-                val folder = new File(options('icons))
-                if (folder.isDirectory && folder.exists) {
-                  extractIcons(file, folder)
+              if (options.contains('dump)) {
+                val dumpOption = options('dump)
+                dumpStuff(file, dumpOption)
+              } else {
+                val reporter = ReportCreator.newInstance(file)
+                val all = (options.contains('all))
+                reporter.setShowAll(all)
+                if (options.contains('output)) {
+                  writeReport(reporter, new File(options('output)))
                 } else {
-                  println("No valid directory: " + folder.getAbsolutePath)
+                  reporter.printReport()
+                  println("--- end of report ---")
+                  println()
+                }
+
+                if (options.contains('icons)) {
+                  val folder = new File(options('icons))
+                  if (folder.isDirectory && folder.exists) {
+                    val dumper = new PEFileDumper(PELoader.loadPE(file), folder)
+                    dumper.dumpIcons()
+                  } else {
+                    println("No valid directory: " + folder.getAbsolutePath)
+                  }
                 }
               }
             } else {
@@ -171,24 +182,41 @@ object PortExAnalyzer {
     }
   }
 
+  private def dumpStuff(file: File, dumpOption: String) = {
+    try {
+      val peData = PELoader.loadPE(file)
+      val outFolder = Paths.get(file.getParentFile.getAbsolutePath, "portex.dumps")
+      if (!outFolder.toFile.exists) {
+        Files.createDirectory(outFolder)
+      }
+      if (outFolder.toFile.isDirectory()) {
+        val dumper = new PEFileDumper(peData, outFolder.toFile)
+        dumpOption match {
+          case "all" =>
+            dumper.dumpPEFiles()
+            dumper.dumpResources()
+            dumper.dumpOverlay()
+            dumper.dumpSections()
+            dumper.dumpIcons()
+          case "pe"        => dumper.dumpPEFiles()
+          case "resources" => dumper.dumpResources()
+          case "overlay"   => dumper.dumpOverlay()
+          case "sections"  => dumper.dumpSections()
+          case "ico"       => dumper.dumpIcons()
+          case _           => System.err.println("dump option " + dumpOption + " does not exist.")
+        }
+      } else {
+        System.err.println("There is already a file named " + outFolder.toFile.getAbsolutePath + " that is not a folder!")
+      }
+    } catch {
+      case e: Exception => System.err.println("The given file is no PE file!")
+    }
+  }
+
   private def writeDiffReport(file: File): Unit = {
     val files: List[File] = (if (file.isDirectory()) file.listFiles().toList
     else fromFile(file).getLines.map(new File(_))).toList
     DiffReportCreator.apply(files).printReport()
-  }
-
-  private def extractIcons(peFile: File, folder: File): Unit = {
-    val grpIcoResources = IconParser.extractGroupIcons(peFile).asScala
-    var nr = 0
-    for (grpIconResource <- grpIcoResources) {
-      val icoFile = grpIconResource.toIcoFile()
-      while (Paths.get(folder.getAbsolutePath, nr + ".ico").toFile.exists()) {
-        nr += 1
-      }
-      val dest = Paths.get(folder.getAbsolutePath, nr + ".ico").toFile
-      icoFile.saveTo(dest)
-      println("file " + dest.getName() + " written")
-    }
   }
 
   private def writeDiffPicture(fileBig: File, fileSmall: File, imageFile: File): Unit = {
@@ -382,6 +410,8 @@ object PortExAnalyzer {
         nextOption(map += ('all -> ""), tail)
       case "--repair" :: value :: tail =>
         nextOption(map += ('repair -> value), tail)
+      case "--dump" :: value :: tail =>
+        nextOption(map += ('dump -> value), tail)
       case "-o" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
       case "--output" :: value :: tail =>
@@ -406,5 +436,4 @@ object PortExAnalyzer {
         sys.exit(1)
     }
   }
-
 }

@@ -44,6 +44,7 @@ import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource
 import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 import com.google.common.base.Optional
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
 
 /**
  * Utility for easy creation of PE file reports.
@@ -60,6 +61,8 @@ class ReportCreator(private val data: PEData) {
   val reportTitle = title("Report For " + data.getFile.getName) + NL +
     s"file size ${hexString(data.getFile.length)}" + NL +
     s"full path ${data.getFile.getAbsolutePath}" + NL + NL
+
+  private var checksumDescription = ""
 
   private var showAll = false
 
@@ -337,7 +340,6 @@ class ReportCreator(private val data: PEData) {
     if (overlay.exists) {
       val overlayOffset = overlay.getOffset
       val overlaySigs = SignatureScanner.loadOverlaySigs()
-      //TODO special overlay scanner
       val sigresults = new SignatureScanner(overlaySigs).scanAt(data.getFile, overlayOffset)
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
       title("Overlay") + NL + "Overlay at offset " +
@@ -356,6 +358,7 @@ class ReportCreator(private val data: PEData) {
     val anomalies = PEAnomalyScanner.newInstance(data).getAnomalies.asScala
     if (anomalies.isEmpty) ""
     else title("Anomalies") + NL +
+      (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
       ("* " + anomalies.map(a => a.toString).mkString(NL + "* ")) + NL + NL
   }
 
@@ -423,8 +426,16 @@ class ReportCreator(private val data: PEData) {
       else "entry point is not in a section"
     }
 
+    if (showAll) checksumDescription = {
+      val actualChecksum = ChecksumVerifier.computeChecksum(data)
+      val headerChecksum = data.getOptionalHeader.get(WindowsEntryKey.CHECKSUM)
+      if (actualChecksum == headerChecksum) "Checksum is valid!" else
+        "Checksum is invalid. Actual checksum is " + hexString(actualChecksum)
+    }
+
     buf.append(title("Optional Header"))
     buf.append(NL + "Magic Number: " + opt.getMagicNumber.getDescription)
+    buf.append(NL + checksumDescription)
     buf.append(NL + entryPointDescription)
     buf.append(NL + dllCharacteristics)
     buf.append(NL + subsystem + NL)

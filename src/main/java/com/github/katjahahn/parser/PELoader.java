@@ -284,8 +284,10 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/katja/samples/fixme5"); 
-        PEAutoRepair.apply(file, new File("/home/katja/samples/fixme5.repaired")).repair();
+        File file = new File("/home/katja/samples/tesla2"); 
+        ReportCreator reporter = ReportCreator.apply(file);
+        reporter.setShowAll(true);
+        reporter.printReport();
 //        File file2 = new File("/home/katja/samples/tesla2");
 //        List<File> list = new ArrayList<>();
 //        list.add(file);

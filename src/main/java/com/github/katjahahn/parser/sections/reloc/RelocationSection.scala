@@ -19,6 +19,7 @@
 package com.github.katjahahn.parser.sections.reloc
 
 import com.github.katjahahn.parser.ScalaIOUtil.hex
+import com.github.katjahahn.parser.IOUtil.NL
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.optheader.WindowsEntryKey
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
@@ -34,7 +35,7 @@ class RelocationSection(
   private val blocks: List[BaseRelocBlock],
   private val offset: Long) extends SpecialSection {
 
-  override def getInfo(): String = blocks.mkString("\n")
+  override def getInfo(): String = blocks.mkString(NL)
 
   override def isEmpty(): Boolean = blocks.isEmpty
 

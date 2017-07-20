@@ -20,6 +20,7 @@ import static com.github.katjahahn.parser.ByteArrayUtil.getBytesLongValueSafely;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
@@ -73,6 +74,44 @@ public final class IOUtil {
 	 * Forbidden. This is a utility class.
 	 */
 	private IOUtil() {
+	}
+
+	/**
+	 * Dumps the given part of the inFile to outFile. The part to dump is
+	 * represented by loc. This will read safely from inFile which means
+	 * locations outside of inFile are written as zero bytes to outFile. 
+	 * 
+	 * outFile must not exist yet. 
+	 * inFile must exist and must not be a directory.
+	 * 
+	 * @param loc
+	 * @param file
+	 * @throws IOException
+	 */
+	public static void dumpLocationToFile(PhysicalLocation loc, File inFile,
+			File outFile) throws IOException {
+		Preconditions.checkArgument(!outFile.exists());
+		Preconditions.checkArgument(inFile.exists(), inFile.isFile());
+
+		final int BUFFER_SIZE = 2048;
+
+		try (RandomAccessFile raf = new RandomAccessFile(inFile, "r");
+				FileOutputStream out = new FileOutputStream(outFile)) {
+			byte[] buffer;
+			long remainingBytes = loc.size();
+			long offset = loc.from();
+			while (remainingBytes >= BUFFER_SIZE) {
+				buffer = loadBytesSafely(offset, BUFFER_SIZE, raf);
+				out.write(buffer);
+				remainingBytes -= BUFFER_SIZE;
+				offset += BUFFER_SIZE;
+			}
+
+			if (remainingBytes > 0) {
+				buffer = loadBytesSafely(offset, (int) remainingBytes, raf);
+				out.write(buffer);
+			}
+		}
 	}
 
 	/**
@@ -382,18 +421,19 @@ public final class IOUtil {
 		for (String[] array : lines) {
 			if (array.length > 0) {
 				String mainItem = array[0];
-				if(mainItem.startsWith("[")) {
+				if (mainItem.startsWith("[")) {
 					category = mainItem;
 					subCategory = null;
 				} else if (mainItem.startsWith("<")) {
 					subCategory = mainItem;
 				} else {
 					String description = null;
-					if(array.length > 1) {
+					if (array.length > 1) {
 						description = array[1];
 					}
-					list.add(new SymbolDescription(mainItem, Optional.fromNullable(description), 
-							category, Optional.fromNullable(subCategory)));
+					list.add(new SymbolDescription(mainItem, Optional
+							.fromNullable(description), category, Optional
+							.fromNullable(subCategory)));
 				}
 			}
 		}
