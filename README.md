@@ -12,9 +12,10 @@ PortEx is written in Java and Scala, and targeted at Java applications.
 
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading standard section formats: Import Section, Resource Section, Export Section, Debug Section, Relocations
-* Dumping of sections, overlay, embedded ZIP, JAR or .class files
+* Dumping of sections, resources, overlay, embedded ZIP, JAR or .class files
 * Scanning for file anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values.
 * Visualize a PE file structure as it is on disk and visualize the local entropies of the file
+* Automatic repair of PE files
 * Calculate Shannon Entropy for files and sections
 * Calculate hash values for files and sections
 * Scan for PEiD signatures or your own signature database
