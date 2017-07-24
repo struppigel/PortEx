@@ -34,7 +34,7 @@ class PEFileDumper(val pedata: PEData, val outFolder: File) {
       for (r <- resources) {
         nr += 1
         val loc = adjustLocation(r.rawBytesLocation)
-        val outFile = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + ".resource").toFile)
+        val outFile = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + "." + r.getType + ".resource").toFile)
         println("Writing resource to " + outFile.getAbsolutePath)
         IOUtil.dumpLocationToFile(loc, pedata.getFile, outFile)
       }
@@ -57,7 +57,7 @@ class PEFileDumper(val pedata: PEData, val outFolder: File) {
       val from = header.getAlignedPointerToRaw
       val size = header.getAlignedSizeOfRaw
       val loc = adjustLocation(new PhysicalLocation(from, size))
-      val outFile = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + ".section").toFile)
+      val outFile = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + header.getName + ".section").toFile)
       println("Writing section to " + outFile.getAbsolutePath)
       IOUtil.dumpLocationToFile(loc, pedata.getFile, outFile)
     }
@@ -76,6 +76,7 @@ class PEFileDumper(val pedata: PEData, val outFolder: File) {
       icoFile.saveTo(dest)
       println("file " + dest.getName() + " written")
     }
+    if(grpIcoResources.isEmpty) println("No icons found.")
   }
   
   private def adjustLocation(loc: PhysicalLocation): PhysicalLocation = {
