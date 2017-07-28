@@ -469,3 +469,4 @@ DOS system driver,FF FF FF FF,SYS
 RSDS Debug info, 52 53 44 53
 NB10 Debug info, 4E 42 31 30
 Visual Basic, 56 42 35 21
+MS-DOS or Portable Executable, 4D 5A
