@@ -198,7 +198,6 @@ MS COFF relocatable object code,4C 01,OBJ
 Windows help file_3,4C 4E 02 00,GID|HLP
 Logical File Evidence Format,4C 56 46 09 0D 0A FF 00,E01
 Merriam-Webster Pocket Dictionary,4D 2D 57 20 50 6F 63 6B,PDB
-Mozilla archive,4D 41 52 31 00,MAR
 Microsoft|MSN MARC archive,4D 41 52 43,MAR
 MAr compressed archive,4D 41 72 30 00,MAR
 TargetExpress target file,4D 43 57 20 54 65 63 68 6E 6F 67 6F 6C 69 65 73,MTE
@@ -219,7 +218,7 @@ MIDI sound file,4D 54 68 64,MID|MIDI
 CD Stomper Pro label file,4D 56,DSN
 Milestones project management file_1,4D 56 32 31 34,MLS
 Milestones project management file_2,4D 56 32 43,MLS
-Windows|DOS executable file,4D 5A,COM|DLL|DRV|EXE|PIF|QTS|QTX|SYS
+MS-DOS or Portable Executable,4D 5A,COM|DLL|DRV|EXE|PIF|QTS|QTX|SYS
 MS audio compression manager driver,4D 5A,ACM
 Library cache file,4D 5A,AX
 Control panel application,4D 5A,CPL
@@ -466,7 +465,6 @@ UTF-32|UCS-2 file,FF FE,(NONE)
 UTF-32|UCS-4 file,FF FE 00 00,(NONE)
 MSinfo file,FF FE 23 00 6C 00 69 00,MOF
 DOS system driver,FF FF FF FF,SYS
-RSDS Debug info, 52 53 44 53
-NB10 Debug info, 4E 42 31 30
-Visual Basic, 56 42 35 21
-MS-DOS or Portable Executable, 4D 5A
+RSDS Debug info,52 53 44 53
+NB10 Debug info,4E 42 31 30
+Visual Basic,56 42 35 21

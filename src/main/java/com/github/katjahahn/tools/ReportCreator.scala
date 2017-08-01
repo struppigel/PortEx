@@ -240,7 +240,7 @@ class ReportCreator(private val data: PEData) {
       for (resource <- resources) {
         var offset = resource.rawBytesLocation.from
         var fileTypes = FileTypeScanner(data.getFile).scanAt(offset)
-        var longTypes = fileTypes.filter(_._1.bytesMatched >= 3).
+        var longTypes = fileTypes.
           map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
         buf.append(resource)
         if (!longTypes.isEmpty) {
