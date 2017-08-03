@@ -44,9 +44,9 @@ import java.nio.file.Files
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.7.3
+  private val version = """version: 0.7.4
     |author: Karsten Hahn
-    |last update: 1. August 2017""".stripMargin
+    |last update: 3. August 2017""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -54,7 +54,7 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
     | java -jar PortexAnalyzer.jar --repair <file>
-    | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> 
+    | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
     | java -jar PortexAnalyzer.jar --diff <filelist or folder>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
@@ -143,7 +143,7 @@ object PortExAnalyzer {
               if (options.contains('output)) {
                 writeFileTypeReport(file, new File(options('output)))
               } else {
-                println("The given file is no PE file!" + NL +
+                println("The given file is no PE file!" + NL + file.getAbsolutePath + NL +
                   "Try '--repair' option if you think it is a broken PE." + NL)
                 printFileTypeReport(file)
               }
@@ -185,7 +185,9 @@ object PortExAnalyzer {
   private def dumpStuff(file: File, dumpOption: String) = {
     try {
       val peData = PELoader.loadPE(file)
-      val outFolder = Paths.get(file.getParentFile.getAbsolutePath, "portex.dumps")
+      val outFolder = if (file.getParentFile != null) {
+        Paths.get(file.getParentFile.getAbsolutePath, "portex.dumps")
+      } else Paths.get("portex.dumps")
       if (!outFolder.toFile.exists) {
         Files.createDirectory(outFolder)
       }
@@ -209,7 +211,7 @@ object PortExAnalyzer {
         System.err.println("There is already a file named " + outFolder.toFile.getAbsolutePath + " that is not a folder!")
       }
     } catch {
-      case e: Exception => System.err.println("The given file is no PE file!")
+      case e: Exception => System.err.println(e.getMessage); e.printStackTrace();
     }
   }
 
