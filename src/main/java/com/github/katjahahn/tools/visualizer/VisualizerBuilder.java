@@ -20,8 +20,10 @@ import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 import java.awt.Color;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
+import com.github.katjahahn.parser.PhysicalLocation;
 import com.google.common.base.Preconditions;
 
 /**
@@ -94,6 +96,9 @@ public class VisualizerBuilder {
 
 	/* Entropy color */ //TODO implement
 	private static final Color DEFAULT_ENTROPY_COLOR = new Color(0, 0, 0);
+	
+	/* VisOverlay color */ 
+	private static final Color DEFAULT_VISOVERLAY_COLOR = Color.magenta;
 
 	private final VisualizerSettings settings = new VisualizerSettings();
 
@@ -111,6 +116,7 @@ public class VisualizerBuilder {
 		public int height = DEFAULT_HEIGHT;
 		public int legendWidth = DEFAULT_LEGEND_WIDTH;
 		public Map<ColorableItem, Color> colorMap;
+		public List<PhysicalLocation> visOverlay;
 
 		public VisualizerSettings() {
 			initDefaultColorMap();
@@ -143,6 +149,8 @@ public class VisualizerBuilder {
 			colorMap.put(NON_ASCII, DEFAULT_NON_ASCII_COLOR);
 			/* Entropy colors */
 			colorMap.put(ENTROPY, DEFAULT_ENTROPY_COLOR);
+			/* VisOverlay color */
+			colorMap.put(VISOVERLAY, DEFAULT_VISOVERLAY_COLOR);
 		}
 	}
 
@@ -229,6 +237,12 @@ public class VisualizerBuilder {
 	public VisualizerBuilder setPixelSize(int pixelSize) {
 		Preconditions.checkArgument(pixelSize > 0);
 		settings.pixelSize = pixelSize;
+		return this;
+	}
+	
+	public VisualizerBuilder setVisOverlay(List<PhysicalLocation> visOverlay) {
+		Preconditions.checkNotNull(visOverlay);
+		settings.visOverlay = visOverlay;
 		return this;
 	}
 

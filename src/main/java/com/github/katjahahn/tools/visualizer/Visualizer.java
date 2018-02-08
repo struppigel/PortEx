@@ -15,32 +15,8 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.BASE_RELOCATION_TABLE;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DEBUG;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DELAY_IMPORT_DESCRIPTOR;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.EXPORT_TABLE;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.IMPORT_TABLE;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.RESOURCE_TABLE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.ANOMALY;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.COFF_FILE_HEADER;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.DEBUG_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.DELAY_IMPORT_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTRY_POINT;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.EXPORT_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.IMPORT_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.MSDOS_HEADER;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.OPTIONAL_HEADER;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.OVERLAY;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.RELOC_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.RESOURCE_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_START;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_TABLE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.VISIBLE_ASCII;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.INVISIBLE_ASCII;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.NON_ASCII;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.MAX_BYTE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.MIN_BYTE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTROPY;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -137,6 +113,8 @@ public class Visualizer {
 
 	private Map<ColorableItem, Color> colorMap;
 
+	private List<PhysicalLocation> visOverlay;
+
 	/**
 	 * Creates a visualizer instance.
 	 * 
@@ -150,6 +128,7 @@ public class Visualizer {
 		this.legendWidth = settings.legendWidth;
 		this.height = settings.height;
 		this.pixelated = settings.pixelated;
+		this.visOverlay = settings.visOverlay;
 		// TODO maybe check this in builder
 		if (settings.pixelated
 				&& settings.pixelSize < 2 + settings.additionalGap) {
@@ -176,6 +155,7 @@ public class Visualizer {
 				drawPixel(color, address);
 			}
 		}
+		drawVisOverlay(false);
 		return image;
 	}
 
@@ -260,6 +240,7 @@ public class Visualizer {
 				drawPixels(color, address, minLength);
 			}
 		}
+		drawVisOverlay(true);
 		return image;
 	}
 
@@ -334,18 +315,20 @@ public class Visualizer {
 
 	/**
 	 * Creates a buffered image containing the diff of both files.
+	 * 
 	 * @param firstFile
 	 * @param secondFile
 	 * @return
 	 * @throws IOException
 	 */
-	public BufferedImage createDiffImage(BufferedImage firstImage, BufferedImage secondImage)
-			throws IOException {
+	public BufferedImage createDiffImage(BufferedImage firstImage,
+			BufferedImage secondImage) throws IOException {
 		BufferedImage diffImage = new BufferedImage(firstImage.getWidth(),
 				firstImage.getHeight(), IMAGE_TYPE);
 
 		for (int x = 0; x < firstImage.getWidth() && x < secondImage.getWidth(); x++) {
-			for (int y = 0; y < firstImage.getHeight() && y < secondImage.getHeight(); y++) {
+			for (int y = 0; y < firstImage.getHeight()
+					&& y < secondImage.getHeight(); y++) {
 				int pixelA = firstImage.getRGB(x, y);
 				int pixelB = secondImage.getRGB(x, y);
 				int diffRGB = Math.abs(pixelA - pixelB);
@@ -500,6 +483,22 @@ public class Visualizer {
 			long size = withMinLength(0);
 			drawPixels(colorMap.get(ENTRY_POINT), ep.get(), size, additionalGap);
 		}
+		drawVisOverlay(true);
+	}
+
+	private void drawVisOverlay(boolean withGap) {
+		if (visOverlay != null) {
+			for (Location loc : visOverlay) {
+				long start = loc.from();
+				long size = withMinLength(loc.size());
+				if (withGap) {
+					drawPixels(colorMap.get(VISOVERLAY), start, size,
+							additionalGap);
+				} else {
+					drawPixels(colorMap.get(VISOVERLAY), start, size);
+				}
+			}
+		}
 	}
 
 	/**
@@ -631,6 +630,10 @@ public class Visualizer {
 			drawLegendEntry(number++, "invisible ASCII",
 					colorMap.get(INVISIBLE_ASCII));
 			drawLegendEntry(number++, "non-ASCII", colorMap.get(NON_ASCII));
+			if (visOverlay != null) {
+				drawLegendEntry(number++, "Read Chunks",
+						colorMap.get(VISOVERLAY));
+			}
 		}
 		if (withEntropy) {
 			writeLegendTitle(number++, "Entropy (middle)", Color.lightGray);
@@ -638,6 +641,10 @@ public class Visualizer {
 					getColorForEntropy(0.2));
 			drawLegendEntry(number++, "0.5 (code)", getColorForEntropy(0.5));
 			drawLegendEntry(number++, "0.8 (packed)", getColorForEntropy(0.8));
+			if (visOverlay != null) {
+				drawLegendEntry(number++, "Read Chunks",
+						colorMap.get(VISOVERLAY), true);
+			}
 		}
 		if (withPEStructure) {
 			writeLegendTitle(number++, "PE Structure (right)", Color.lightGray);
@@ -667,6 +674,10 @@ public class Visualizer {
 			}
 			if (overlayAvailable) {
 				drawLegendEntry(number++, "Overlay", colorMap.get(OVERLAY));
+			}
+			if (visOverlay != null) {
+				drawLegendEntry(number++, "Read Chunks",
+						colorMap.get(VISOVERLAY), true);
 			}
 		}
 		// drawLegendCrossEntry(number, "Anomalies", anomalyColor);

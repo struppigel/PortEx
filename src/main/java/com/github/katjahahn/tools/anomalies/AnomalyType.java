@@ -40,7 +40,7 @@ public enum AnomalyType {
 	NON_DEFAULT,
 	/**
 	 * These values or characteristics are reserved and should be zero, but
-	 * where set nevertheless
+	 * were set nevertheless
 	 */
 	RESERVED,
 	/**

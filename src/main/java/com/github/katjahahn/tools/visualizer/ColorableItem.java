@@ -19,7 +19,7 @@ package com.github.katjahahn.tools.visualizer;
 /**
  * Keys for colorable items in the visualizer.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public enum ColorableItem {
@@ -38,7 +38,9 @@ public enum ColorableItem {
 	VISIBLE_ASCII("Visible ASCII"), INVISIBLE_ASCII("Invisible ASCII"), NON_ASCII(
 			"Non-ASCII"), MAX_BYTE("0xFF"), MIN_BYTE("0x00"),
 	/* Entropy*/
-	ENTROPY("Entropy");
+	ENTROPY("Entropy"),
+	/* VisOverlay */
+	VISOVERLAY("Read Chunks");
 
 	private final String description;
 

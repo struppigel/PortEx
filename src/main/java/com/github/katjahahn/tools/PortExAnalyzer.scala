@@ -19,6 +19,7 @@ package com.github.katjahahn.tools
 
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder
 import com.github.katjahahn.tools.sigscanner.FileTypeScanner
+import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
 import com.github.katjahahn.parser.PELoader
 import com.github.katjahahn.parser.ScalaIOUtil.using
@@ -44,9 +45,9 @@ import java.nio.file.Files
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.7.4
+  private val version = """version: 0.7.5
     |author: Karsten Hahn
-    |last update: 3. August 2017""".stripMargin
+    |last update: 8. February 2018""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -57,7 +58,7 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
     | java -jar PortexAnalyzer.jar --diff <filelist or folder>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
-    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>]] [-i <folder>] <PEfile>
+    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>] [--visoverlay <textfile>]] [-i <folder>] <PEfile>
     |
     | -h,--help          show help
     | -v,--version       show version
@@ -65,6 +66,7 @@ object PortExAnalyzer {
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
+    | --visoverlay       text file input with square pixels to mark on the visualization
     | --repair           repair the PE file, use this if your file is not recognized as PE
     | --dump             dump resources, overlay, sections, icons 
     | --diff             compare several files and show common characteristics (alpha feature)
@@ -153,9 +155,19 @@ object PortExAnalyzer {
               val imageFile = new File(options('picture))
               if (options.contains('bps)) {
                 val bps = options('bps).toInt
-                writePictureWithBPS(file, imageFile, bps)
+                if (options.contains('visoverlay)) {
+                  val visFile = new File(options('visoverlay))
+                  writePicture(file, imageFile, Some(bps), Some(visFile))
+                } else {
+                  writePicture(file, imageFile, Some(bps))
+                }
               } else {
-                writePicture(file, imageFile)
+                if (options.contains('visoverlay)) {
+                  val visFile = new File(options('visoverlay))
+                  writePicture(file, imageFile, None, Some(visFile))
+                } else {
+                  writePicture(file, imageFile)
+                }
               }
               println("picture successfully created and saved to " + imageFile.getAbsolutePath)
               println()
@@ -263,39 +275,48 @@ object PortExAnalyzer {
     }
   }
 
-  private def writePictureWithBPS(file: File, imageFile: File, bps: Int): Unit = {
-    val pixelSize = 4
-    val fileWidth = 256
-    val MAX_HEIGHT = 1000
-    def height(bytes: Int): Int = {
-      val nrOfPixels = file.length / bytes.toDouble
-      val pixelsPerRow = fileWidth / pixelSize.toDouble
-      val pixelsPerCol = nrOfPixels / pixelsPerRow
-      Math.ceil(pixelsPerCol * pixelSize).toInt
+  private def readVisOverlay(file: File): java.util.List[PhysicalLocation] = {
+    val list = new java.util.ArrayList[PhysicalLocation]()
+    if (file.exists()) {  
+      var offset: Option[Int] = None
+      var size: Option[Int] = None
+      for (line <- scala.io.Source.fromFile(file).getLines) {
+        if (line.contains("offset")) {
+          offset = readVisFileValue(line)
+        } else if (line.contains("size")) {
+          size = readVisFileValue(line)
+        }
+
+        if(offset.isDefined && size.isDefined) {
+          list.add(new PhysicalLocation(offset.get, size.get))
+          offset = None
+          size = None
+        }
+        
+        if (line.contains("}")) {
+          offset = None
+          size = None
+        }
+      }
+
     }
-    val bytesPerPixel = bps
-    val bytePlotPixelSize = if (fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
-    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY, Color.cyan)
-    val vi = viBuilder.build()
-    val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
-    val entropyImage = vi.createEntropyImage(file)
-    //more fine grained bytePlot image, thus another visualizer
-    val bytePlot = vi2.createBytePlot(file)
-    val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
-    if (isPEFile(file)) {
-      val structureImage = vi.createImage(file)
-      val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
-      val legendImage = vi.createLegendImage(true, true, true)
-      val appendedImage2 = ImageUtil.appendImages(appendedImage1, legendImage)
-      ImageIO.write(appendedImage2, "png", imageFile)
-    } else {
-      val legendImage = vi.createLegendImage(true, true, false)
-      val appendedImage2 = ImageUtil.appendImages(appendedImage, legendImage)
-      ImageIO.write(appendedImage2, "png", imageFile)
-    }
+    list
   }
 
-  private def writePicture(file: File, imageFile: File): Unit = {
+  private def readVisFileValue(line: String): Option[Int] = {
+    val splitLine = line.split(":")
+    if (splitLine.length > 1) {
+      var offsetString = splitLine(1).replace("\"", "").replace(",", "").trim()
+      if (offsetString.contains("x")) {
+        offsetString = offsetString.split("x")(1)
+      }
+      val value = Integer.parseInt(offsetString, 16)
+      Some(value)
+    } else None
+  }
+
+  private def writePicture(file: File, imageFile: File, bps: Option[Int] = None,
+                           visFile: Option[File] = None): Unit = {
     val pixelSize = 4
     val fileWidth = 256
     val MAX_HEIGHT = 1000
@@ -306,14 +327,19 @@ object PortExAnalyzer {
       Math.ceil(pixelsPerCol * pixelSize).toInt
     }
     val bytesPerPixel = {
-      var res = 1
-      while (height(res) > MAX_HEIGHT) res *= 2
-      res
+      if (bps.isDefined) bps.get else {
+        var res = 1
+        while (height(res) > MAX_HEIGHT) res *= 2
+        res
+      }
     }
     val bytePlotPixelSize = if (fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
     val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY, Color.cyan)
+    if (visFile.isDefined) viBuilder.setVisOverlay(readVisOverlay(visFile.get))
     val vi = viBuilder.build()
-    val vi2 = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel)).build()
+    val vi2Builder = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel))
+    if (visFile.isDefined) vi2Builder.setVisOverlay(readVisOverlay(visFile.get))
+    val vi2 = vi2Builder.build()
     val entropyImage = vi.createEntropyImage(file)
     //more fine grained bytePlot image, thus another visualizer
     val bytePlot = vi2.createBytePlot(file)
@@ -424,6 +450,8 @@ object PortExAnalyzer {
         nextOption(map += ('picture -> value), tail)
       case "-bps" :: value :: tail =>
         nextOption(map += ('bps -> value), tail)
+      case "--visoverlay" :: value :: tail =>
+        nextOption(map += ('visoverlay -> value), tail)
       case "-i" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
       case "--ico" :: value :: tail =>
