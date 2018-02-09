@@ -49,8 +49,9 @@ object ExportOrdinalTable {
     virtualAddress: Long, fileOffset: Long): ExportOrdinalTable = {
     if(entries <= 0) throw new FileFormatException("number of ordinal entries <= 0")
     if(rva <= 0) throw new FileFormatException("rva for ordinal table <= 0")
+    if(rva >= mmBytes.length()) throw new FileFormatException("rva for ordinal table is too large: " + rva)
     if(fileOffset <= 0) throw new FileFormatException("file offset for ordinal table <= 0")
-    val initialOffset = (rva - virtualAddress).toInt
+    val initialOffset = rva - virtualAddress
     val end = entrySize * entries + initialOffset
     val ordinals = new ListBuffer[Int]
     for (offset <- initialOffset until end by entrySize) {
