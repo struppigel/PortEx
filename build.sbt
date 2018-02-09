@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "2.0.9_SNAPSHOT"
+version := "2.0.9"
 
 javadocSettings
 
