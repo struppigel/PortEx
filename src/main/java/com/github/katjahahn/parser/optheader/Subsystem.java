@@ -108,6 +108,7 @@ public enum Subsystem implements Characteristic {
                 return subsystem;
             }
         }
-        throw new IllegalArgumentException("No subsystem for value " + value);
+        // not found
+        return IMAGE_SUBSYSTEM_UNKNOWN;
     }
 }

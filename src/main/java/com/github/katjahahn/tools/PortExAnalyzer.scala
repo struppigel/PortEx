@@ -45,9 +45,9 @@ import java.nio.file.Files
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.7.6
+  private val version = """version: 0.7.7
     |author: Karsten Hahn
-    |last update: 9. February 2018""".stripMargin
+    |last update: 27. March 2018""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
