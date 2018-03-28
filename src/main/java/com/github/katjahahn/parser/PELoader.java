@@ -284,7 +284,7 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/karsten/samples/d_resource.dll"); 
+        File file = new File("/home/karsten/samples/65535sects.exe"); 
         ReportCreator reporter = ReportCreator.apply(file);
         reporter.printReport();
 //        File file2 = new File("/home/katja/samples/tesla2");

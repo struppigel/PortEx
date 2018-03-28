@@ -636,7 +636,13 @@ public class Visualizer {
 			}
 		}
 		if (withEntropy) {
-			writeLegendTitle(number++, "Entropy (middle)", Color.lightGray);
+			String entropyTitle = "Entropy ";
+			if(withPEStructure) { 
+				entropyTitle += "(middle)";
+			} else {
+				entropyTitle += "(right)";
+			}
+			writeLegendTitle(number++, entropyTitle, Color.lightGray);
 			drawLegendEntry(number++, "0.2 (repetition)",
 					getColorForEntropy(0.2));
 			drawLegendEntry(number++, "0.5 (code)", getColorForEntropy(0.5));
