@@ -20,8 +20,11 @@ package com.github.katjahahn.tools
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder
 import com.github.katjahahn.tools.sigscanner.FileTypeScanner
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
+import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.optheader.DataDirectoryKey._
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import scala.PartialFunction._
 import scala.collection.JavaConverters._
@@ -39,22 +42,25 @@ import com.github.katjahahn.tools.visualizer.ColorableItem
 import java.awt.Color
 import java.nio.file.Path
 import java.nio.file.Files
+import com.github.katjahahn.parser.coffheader.COFFFileHeader
+import com.github.katjahahn.parser.sections.SectionLoader
 
 /**
  * Command line frontend of PortEx
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.7.8
+  private val version = """version: 0.7.9
     |author: Karsten Hahn
-    |last update: 28. March 2018""".stripMargin
+    |last update: 13. Jul 2018""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
   private val usage = """usage: 
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
-    | java -jar PortexAnalyzer.jar --repair <file>
+    | java -jar PortexAnalyzer.jar -l <offset1,offset2,offset3,...> <PEfile>
+    | java -jar PortexAnalyzer.jar --repair <PEfile>
     | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
     | java -jar PortexAnalyzer.jar --diff <filelist or folder>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
@@ -66,6 +72,7 @@ object PortExAnalyzer {
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
+    | -l,--loc           show location for specified offset
     | --visoverlay       text file input with square pixels to mark on the visualization
     | --repair           repair the PE file, use this if your file is not recognized as PE
     | --dump             dump resources, overlay, sections, icons 
@@ -115,8 +122,11 @@ object PortExAnalyzer {
           val file = new File(options('inputfile))
           if (file.exists) {
             if (isPEFile(file)) {
-
-              if (options.contains('dump)) {
+              if (options.contains('location)){
+                val offsetStr = options('location)
+                printLocationsFor(offsetStr, file)
+              }
+              else if (options.contains('dump)) {
                 val dumpOption = options('dump)
                 dumpStuff(file, dumpOption)
               } else {
@@ -193,8 +203,70 @@ object PortExAnalyzer {
       }
     }
   }
+  
+  private def printIffBetween(offset: Long, offsetA: Long, sizeA: Long, message: String): Unit = {
+    if(offset >= offsetA && offset <= offsetA + sizeA) {
+        println(offset + ": " + message)
+     }
+  }
+  
+  private def printLocationsFor(offsetsStr: String, file: File): Unit = {
+    try {
+      val data = PELoader.loadPE(file)
+      val offsets = offsetsStr.split(",")
+      for (offsetStr <- offsets) {
+        val offset = offsetStr.toLong
+        val table = data.getSectionTable()
+        val loader = new SectionLoader(data)
+        // Headers
+        printIffBetween(offset, 0L, data.getMSDOSHeader().getHeaderSize(), "MSDOS Header")
+        printIffBetween(offset, data.getOptionalHeader().getOffset(), data.getOptionalHeader().getSize(), "Optional Header")
+        printIffBetween(offset, data.getCOFFFileHeader().getOffset(), COFFFileHeader.HEADER_SIZE, "COFF File Header")
+        printIffBetween(offset, table.getOffset(), table.getSize(), "Section Table")
+        
+        // Sections
+        for (header <- table.getSectionHeaders().asScala) {
+          val sectionOffset = header.getAlignedPointerToRaw();
+          val sectionSize = loader.getReadSize(header)
+          printIffBetween(offset, sectionOffset, sectionSize, "Section " + header.getNumber)
+        }
+        
+        val specials = List(RESOURCE_TABLE, IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE, BASE_RELOCATION_TABLE, DEBUG)
+        
+        // Special Sections
+        for (specialKey <- specials) {
+          val section = loader.maybeLoadSpecialSection(specialKey)
+          if (section.isPresent()) {
+            for (loc <- section.get().getPhysicalLocations().asScala) {
+              if (loc.from != -1) {
+                printIffBetween(offset, loc.from, loc.size, specialKey.toString)
+              }  
+            }
+          }
+        }
+        
+        // Entry point
+        val epRVA = data.getOptionalHeader().get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
+        val epSection = loader.maybeGetSectionHeaderByRVA(epRVA);
+        if (epSection.isPresent()) {
+          val phystovirt = epSection.get().get(SectionHeaderKey.VIRTUAL_ADDRESS) - epSection.get().get(SectionHeaderKey.POINTER_TO_RAW_DATA)
+          val ep = epRVA - phystovirt
+          printIffBetween(offset, ep - 0x6000, ep + 0x6000, "Entry Point (+/-0x6000)")
+        }
+        
+        // Overlay
+        val overlay = new Overlay(data);
+        if (overlay.exists()) {
+          printIffBetween(offset, overlay.getOffset, file.length, "Overlay")
+        }
+      }
+    } catch {
+      case e: NumberFormatException => System.err.println("Invalid offset")
+      case e: Exception => System.err.println(e.getMessage); e.printStackTrace();
+    }
+  }
 
-  private def dumpStuff(file: File, dumpOption: String) = {
+  private def dumpStuff(file: File, dumpOption: String): Unit = {
     try {
       val peData = PELoader.loadPE(file)
       val outFolder = if (file.getParentFile != null) {
@@ -442,6 +514,10 @@ object PortExAnalyzer {
         nextOption(map += ('dump -> value), tail)
       case "-o" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
+      case "-l" :: value :: tail =>
+        nextOption(map += ('location -> value), tail)
+      case "--location" :: value :: tail =>
+        nextOption(map += ('location -> value), tail)
       case "--output" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
       case "-p" :: value :: tail =>
