@@ -29,7 +29,7 @@ public enum ColorableItem {
 			"Optional Header"), SECTION_TABLE("Section Table"),
 	/* Special Sections and Tables */
 	IMPORT_SECTION("Imports"), EXPORT_SECTION("Exports"), DEBUG_SECTION(
-			"Debug Info"), RESOURCE_SECTION("Resources"), RELOC_SECTION(
+			"Debug Info"), RESOURCE_SECTION("Resource Table"), RELOC_SECTION(
 			"Relocations"), DELAY_IMPORT_SECTION("Delay Imports"),
 	/* Other */
 	ENTRY_POINT("Entry Point"), OVERLAY("Overlay"), SECTION_START(""), ANOMALY(

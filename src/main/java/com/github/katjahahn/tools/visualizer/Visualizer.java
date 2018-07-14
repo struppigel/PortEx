@@ -15,8 +15,33 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.BASE_RELOCATION_TABLE;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DEBUG;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DELAY_IMPORT_DESCRIPTOR;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.EXPORT_TABLE;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.IMPORT_TABLE;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.RESOURCE_TABLE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.ANOMALY;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.COFF_FILE_HEADER;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.DEBUG_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.DELAY_IMPORT_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTROPY;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTRY_POINT;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.EXPORT_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.IMPORT_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.INVISIBLE_ASCII;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.MAX_BYTE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.MIN_BYTE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.MSDOS_HEADER;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.NON_ASCII;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.OPTIONAL_HEADER;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.OVERLAY;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.RELOC_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.RESOURCE_SECTION;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_START;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_TABLE;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.VISIBLE_ASCII;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.VISOVERLAY;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +75,8 @@ import com.github.katjahahn.parser.sections.SectionHeaderKey;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.SpecialSection;
+import com.github.katjahahn.parser.sections.rsrc.Resource;
+import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.ShannonEntropy;
 import com.github.katjahahn.tools.anomalies.Anomaly;
@@ -87,6 +115,7 @@ public class Visualizer {
 	private static final DataDirectoryKey[] specials = { RESOURCE_TABLE,
 			IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE,
 			BASE_RELOCATION_TABLE, DEBUG };
+	private Map<String, Color> resTypeColors = new HashMap<>();
 
 	private Map<DataDirectoryKey, Boolean> specialsAvailability = new EnumMap<>(
 			DataDirectoryKey.class);
@@ -364,6 +393,7 @@ public class Visualizer {
 
 		drawPEHeaders();
 		drawSpecials();
+		drawResourceTypes();
 		assert image != null;
 		assert image.getWidth() == fileWidth;
 		assert image.getHeight() == height;
@@ -390,7 +420,34 @@ public class Visualizer {
 		assert image.getHeight() == height;
 		return image;
 	}
-
+	
+	private void drawResourceTypes() {
+		SectionLoader loader = new SectionLoader(data);
+		ResourceSection rsrc;
+		try {
+			rsrc = loader.loadResourceSection();
+			List<Resource> resources = rsrc.getResources();
+			Color color = new Color(220, 255, 220);
+			for (Resource r : resources) {
+				String resType = r.getType();
+				PhysicalLocation loc = r.rawBytesLocation();
+				long start = loc.from();
+				long size = withMinLength(loc.size());
+				if (resTypeColors.containsKey(resType)){
+					drawPixels(resTypeColors.get(resType), start, size,
+							additionalGap);
+				} else {
+					drawPixels(color, start, size,
+							additionalGap);
+					resTypeColors.put(resType, color);
+					color = variate(color);
+				}
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Draws the PE Header to the structure image
 	 */
@@ -673,6 +730,9 @@ public class Visualizer {
 					drawLegendEntry(number++, getSpecialsDescription(special),
 							getSpecialsColor(special), true);
 				}
+			}
+			for (Map.Entry<String, Color> entry : resTypeColors.entrySet()){
+				drawLegendEntry(number++, entry.getKey(), entry.getValue(), true);
 			}
 			if (epAvailable) {
 				drawLegendEntry(number++, "Entry Point",

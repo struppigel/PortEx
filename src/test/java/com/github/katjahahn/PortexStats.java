@@ -75,31 +75,34 @@ public class PortexStats {
 
 	public static void main(String[] args) throws IOException {
 		System.out.println();
+		System.out.println("Locating samples ...");
+		locateSamples(new File("/home/karsten/git/PortEx/bigmalwarelist.csv"), new File(BAD_FILES));
+		System.out.println();
 		System.out.println("Preparing anomaly stats ...");
-//		anomalyStats(cleanFilesGData());
-//		System.out.println();
-//		System.out.println("Preparing anomaly count ...");
-//		anomalyCount(cleanFilesGData(), "clean");
-//		System.out.println();
-//		System.out.println("Overlay prevalence analysis ...");
-//		overlayPrevalence(cleanFilesGData());
-//		System.out.println();
-//		System.out.println("Entropy analysis ...");
-//		entropies(cleanFilesGData());
-//		System.out.println("Section Name Counting ...");
-//		sectionNameCount(cleanFilesGData(), "clean");
-//		System.out.println();
+		anomalyStats(malwareFilesGData());
+		System.out.println();
+		System.out.println("Preparing anomaly count ...");
+		anomalyCount(malwareFilesGData(), "malware");
+		System.out.println();
+		System.out.println("Overlay prevalence analysis ...");
+		overlayPrevalence(malwareFilesGData());
+		System.out.println();
+		System.out.println("Entropy analysis ...");
+		entropies(malwareFilesGData());
+		System.out.println("Section Name Counting ...");
+		sectionNameCount(malwareFilesGData(), "malware");
+		System.out.println();
 		System.out.println("<3 ALL DONE! <3");
 	}
 
 	/**
 	 * Turns hash list into list of sample pathes.
+	 * Removes non-PE files.
 	 * 
 	 * @param hashList
 	 * @param outList
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unused")
 	private static void locateSamples(File hashList, File outList)
 			throws IOException {
 		String samples = "";

@@ -50,9 +50,9 @@ import com.github.katjahahn.parser.sections.SectionLoader
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.7.9
+  private val version = """version: 0.8.0
     |author: Karsten Hahn
-    |last update: 13. Jul 2018""".stripMargin
+    |last update: 14. Jul 2018""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -228,7 +228,17 @@ object PortExAnalyzer {
         for (header <- table.getSectionHeaders().asScala) {
           val sectionOffset = header.getAlignedPointerToRaw();
           val sectionSize = loader.getReadSize(header)
-          printIffBetween(offset, sectionOffset, sectionSize, "Section " + header.getNumber)
+          val sectionEnd = sectionOffset + sectionSize
+          var sizeLimit = 0x10000L
+          var currOffset = sectionOffset
+          while (currOffset < sectionEnd) {
+            if (sizeLimit + currOffset > sectionEnd) { sizeLimit = sectionEnd }
+            printIffBetween(offset, currOffset, sizeLimit, "Section" + header.getNumber + " (" + (currOffset - sectionOffset) + "-" + ((currOffset + sizeLimit) - sectionOffset) + ")") 
+            currOffset += sizeLimit
+          }
+          if (header.getNumber == table.getNumberOfSections()) {
+            printIffBetween(offset, sectionOffset, sectionSize, "Last Section")
+          }
         }
         
         val specials = List(RESOURCE_TABLE, IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE, BASE_RELOCATION_TABLE, DEBUG)
@@ -243,6 +253,15 @@ object PortExAnalyzer {
               }  
             }
           }
+        }
+        
+        // Special resources
+        val rsrc = loader.loadResourceSection()
+        val resources = rsrc.getResources().asScala
+        for (resource <- resources) {
+          val resType = resource.getType()
+          val resLoc = resource.rawBytesLocation
+          printIffBetween(offset, resLoc.from, resLoc.size, resType)
         }
         
         // Entry point
