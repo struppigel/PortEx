@@ -420,27 +420,30 @@ public class Visualizer {
 		assert image.getHeight() == height;
 		return image;
 	}
-	
+
 	private void drawResourceTypes() {
 		SectionLoader loader = new SectionLoader(data);
 		ResourceSection rsrc;
 		try {
-			rsrc = loader.loadResourceSection();
-			List<Resource> resources = rsrc.getResources();
-			Color color = new Color(220, 255, 220);
-			for (Resource r : resources) {
-				String resType = r.getType();
-				PhysicalLocation loc = r.rawBytesLocation();
-				long start = loc.from();
-				long size = withMinLength(loc.size());
-				if (resTypeColors.containsKey(resType)){
-					drawPixels(resTypeColors.get(resType), start, size,
-							additionalGap);
-				} else {
-					drawPixels(color, start, size,
-							additionalGap);
-					resTypeColors.put(resType, color);
-					color = variate(color);
+			Optional<ResourceSection> maybeRsrc = loader
+					.maybeLoadResourceSection();
+			if (maybeRsrc.isPresent()) {
+				rsrc = maybeRsrc.get();
+				List<Resource> resources = rsrc.getResources();
+				Color color = new Color(220, 255, 220);
+				for (Resource r : resources) {
+					String resType = r.getType();
+					PhysicalLocation loc = r.rawBytesLocation();
+					long start = loc.from();
+					long size = withMinLength(loc.size());
+					if (resTypeColors.containsKey(resType)) {
+						drawPixels(resTypeColors.get(resType), start, size,
+								additionalGap);
+					} else {
+						drawPixels(color, start, size, additionalGap);
+						resTypeColors.put(resType, color);
+						color = variate(color);
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -448,6 +451,7 @@ public class Visualizer {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * Draws the PE Header to the structure image
 	 */
@@ -694,7 +698,7 @@ public class Visualizer {
 		}
 		if (withEntropy) {
 			String entropyTitle = "Entropy ";
-			if(withPEStructure) { 
+			if (withPEStructure) {
 				entropyTitle += "(middle)";
 			} else {
 				entropyTitle += "(right)";
@@ -731,8 +735,9 @@ public class Visualizer {
 							getSpecialsColor(special), true);
 				}
 			}
-			for (Map.Entry<String, Color> entry : resTypeColors.entrySet()){
-				drawLegendEntry(number++, entry.getKey(), entry.getValue(), true);
+			for (Map.Entry<String, Color> entry : resTypeColors.entrySet()) {
+				drawLegendEntry(number++, entry.getKey(), entry.getValue(),
+						true);
 			}
 			if (epAvailable) {
 				drawLegendEntry(number++, "Entry Point",
