@@ -37,7 +37,6 @@ import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * @author Katja Hahn
@@ -65,8 +64,12 @@ class DebugSection private (
   def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
     directoryTable.asJava
 
-  def getPhysicalLocations(): java.util.List[PhysicalLocation] =
-    (new PhysicalLocation(offset, getSize) :: Nil).asJava
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
+    if (maybeCodeView.isDefined) {
+      return (getCodeView().getPhysicalLocations().asScala.toList :+ new PhysicalLocation(offset, getSize)).asJava
+    }
+    return (new PhysicalLocation(offset, getSize) :: Nil).asJava
+  }
 
   override def isEmpty: Boolean = directoryTable.isEmpty
 
@@ -123,7 +126,7 @@ object DebugSection {
   private val debugspec = "debugdirentryspec"
 
   def main(args: Array[String]): Unit = {
-    val file = new File("/home/katja/samples/WarpBrothers Crypter")
+    val file = new File("/home/karsten/samples/WarpBrothers Crypter")
     val data = PELoader.loadPE(file)
     val loader = new SectionLoader(data)
     val debug = loader.loadDebugSection()

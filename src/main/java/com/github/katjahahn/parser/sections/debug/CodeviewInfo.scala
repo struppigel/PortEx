@@ -6,10 +6,17 @@ import java.io.RandomAccessFile
 import java.io.File
 import com.github.katjahahn.parser.ByteArrayUtil._
 import CodeviewInfo._
+import com.github.katjahahn.parser.PhysicalLocation
+import scala.collection.JavaConverters._
 
 class CodeviewInfo(val age: Long,
                    val guid: Array[Byte],
-                   val filePath: String) {
+                   val filePath: String,
+                   val offset: Long) {
+  
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] = 
+    (new PhysicalLocation(offset, filePathOffset + filePath.length()) :: Nil).asJava
+  
 
   def getInfo(): String = NL +
     "Codeview" + NL +
@@ -57,7 +64,7 @@ object CodeviewInfo {
         val guid = loadBytes(ptrToRaw + guidOffset, guidSize, raf)
         val age = bytesToInt(loadBytes(ptrToRaw + ageOffset, ageSize, raf))
         val filePath = readNullTerminatedUTF8String(ptrToRaw + filePathOffset, raf)
-        Some(new CodeviewInfo(age, guid, filePath))
+        Some(new CodeviewInfo(age, guid, filePath, ptrToRaw))
       } else None
     }
   }

@@ -50,7 +50,7 @@ import com.github.katjahahn.parser.sections.SectionLoader
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.8.1
+  private val version = """version: 0.8.3
     |author: Karsten Philipp Boris Hahn
     |last update: 17. Jul 2018""".stripMargin
 
@@ -204,8 +204,8 @@ object PortExAnalyzer {
     }
   }
   
-  private def printIffBetween(offset: Long, offsetA: Long, sizeA: Long, message: String): Unit = {
-    if(offset >= offsetA && offset <= offsetA + sizeA) {
+  private def printIffBetween(offset: Long, offsetA: Long, offsetB: Long, message: String): Unit = {
+    if(offset >= offsetA && offset <= offsetB) {
         println(offset + ": " + message)
      }
   }
@@ -218,11 +218,19 @@ object PortExAnalyzer {
         val offset = offsetStr.toLong
         val table = data.getSectionTable()
         val loader = new SectionLoader(data)
+        // start and end of file
+        printIffBetween(offset, 0L, 0x1000, "StartOfFile0x1000")
+        printIffBetween(offset, 0L, 0x5000, "StartOfFile0x5000")
+        printIffBetween(offset, 0L, 0x10000, "StartOfFile0x10000")
+        printIffBetween(offset, file.length() - 0x6000L, file.length(), "EndOfFile0x6000")
+        printIffBetween(offset, file.length() - 0x10000L, file.length(), "EndOfFile0x10000")
         // Headers
         printIffBetween(offset, 0L, data.getMSDOSHeader().getHeaderSize(), "MSDOS Header")
-        printIffBetween(offset, data.getOptionalHeader().getOffset(), data.getOptionalHeader().getSize(), "Optional Header")
-        printIffBetween(offset, data.getCOFFFileHeader().getOffset(), COFFFileHeader.HEADER_SIZE, "COFF File Header")
-        printIffBetween(offset, table.getOffset(), table.getSize(), "Section Table")
+        val optHeaderOffset = data.getOptionalHeader().getOffset()
+        printIffBetween(offset, optHeaderOffset, optHeaderOffset + data.getOptionalHeader().getSize(), "Optional Header")
+        val coffHeaderOffset = data.getCOFFFileHeader().getOffset()
+        printIffBetween(offset, coffHeaderOffset, coffHeaderOffset + COFFFileHeader.HEADER_SIZE, "COFF File Header")
+        printIffBetween(offset, table.getOffset(), table.getOffset() + table.getSize(), "Section Table")
         
         // Sections
         for (header <- table.getSectionHeaders().asScala) {
@@ -230,14 +238,21 @@ object PortExAnalyzer {
           val sectionSize = loader.getReadSize(header)
           val sectionEnd = sectionOffset + sectionSize
           var sizeLimit = 0x10000L
-          var currOffset = sectionOffset
-          while (currOffset < sectionEnd) {
-            if (sizeLimit + currOffset > sectionEnd) { sizeLimit = sectionEnd }
-            printIffBetween(offset, currOffset, sizeLimit, "Section" + header.getNumber + " (" + (currOffset - sectionOffset) + "-" + ((currOffset + sizeLimit) - sectionOffset) + ")") 
-            currOffset += sizeLimit
+          printIffBetween(offset, sectionOffset, sectionEnd, "Section" + header.getNumber) 
+          if (sectionSize < sizeLimit) {
+            sizeLimit = sectionSize
+          }
+          printIffBetween(offset, sectionOffset, sectionOffset + sizeLimit, "Section"+header.getNumber+"Start")
+          if (sectionSize > 0x10000L) {
+        	  printIffBetween(offset, sectionEnd - sizeLimit, sectionEnd, "Section"+header.getNumber+"End")
           }
           if (header.getNumber == table.getNumberOfSections()) {
-            printIffBetween(offset, sectionOffset, sectionSize, "Last Section")
+            printIffBetween(offset, sectionOffset, sectionEnd, "LastSection")
+            printIffBetween(offset, sectionOffset, sectionOffset + sizeLimit, "LastSectionStart")
+            if (sectionSize > 0x10000L) {
+              printIffBetween(offset, sectionEnd - sizeLimit, sectionEnd, "LastSectionEnd")
+              printIffBetween(offset, sectionEnd - 0x6000, sectionEnd, "EndOfPE")
+            }
           }
         }
         
@@ -249,7 +264,7 @@ object PortExAnalyzer {
           if (section.isPresent()) {
             for (loc <- section.get().getPhysicalLocations().asScala) {
               if (loc.from != -1) {
-                printIffBetween(offset, loc.from, loc.size, specialKey.toString)
+                printIffBetween(offset, loc.from, loc.from + loc.size, specialKey.toString)
               }  
             }
           }
@@ -261,7 +276,7 @@ object PortExAnalyzer {
         for (resource <- resources) {
           val resType = resource.getType()
           val resLoc = resource.rawBytesLocation
-          printIffBetween(offset, resLoc.from, resLoc.size, resType)
+          printIffBetween(offset, resLoc.from, resLoc.from + resLoc.size, "ResourceType " + resType)
         }
         
         // Entry point
@@ -277,6 +292,7 @@ object PortExAnalyzer {
         val overlay = new Overlay(data);
         if (overlay.exists()) {
           printIffBetween(offset, overlay.getOffset, file.length, "Overlay")
+          printIffBetween(offset, overlay.getOffset, overlay.getOffset + 0x10000, "OverlayStart")
         }
       }
     } catch {
