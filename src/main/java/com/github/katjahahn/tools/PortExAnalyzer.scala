@@ -18,6 +18,7 @@
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder
+import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.tools.sigscanner.FileTypeScanner
 import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
@@ -50,9 +51,9 @@ import com.github.katjahahn.parser.sections.SectionLoader
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.8.3
+  private val version = """version: 0.8.4
     |author: Karsten Philipp Boris Hahn
-    |last update: 17. Jul 2018""".stripMargin
+    |last update: 23. May 2019""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -61,6 +62,7 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -h
     | java -jar PortexAnalyzer.jar -l <offset1,offset2,offset3,...> <PEfile>
     | java -jar PortexAnalyzer.jar --repair <PEfile>
+    | java -jar PortexAnalyzer.jar --rawep <PEfile>
     | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
     | java -jar PortexAnalyzer.jar --diff <filelist or folder>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
@@ -73,6 +75,7 @@ object PortExAnalyzer {
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
     | -l,--loc           show location for specified offset
+    | --rawep            print file offset of entry point (decimal)
     | --visoverlay       text file input with square pixels to mark on the visualization
     | --repair           repair the PE file, use this if your file is not recognized as PE
     | --dump             dump resources, overlay, sections, icons 
@@ -125,6 +128,13 @@ object PortExAnalyzer {
               if (options.contains('location)){
                 val offsetStr = options('location)
                 printLocationsFor(offsetStr, file)
+              }
+              else if (options.contains('rawep)) {
+                val pedata = PELoader.loadPE(file)
+                val ep = pedata.getOptionalHeader.getStandardFieldEntry(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT).getValue
+                val mappedPE = MemoryMappedPE(pedata, new SectionLoader(pedata))
+                val rawep = mappedPE.virtToPhysAddress(ep)
+                println("entry point file offset: " + rawep)
               }
               else if (options.contains('dump)) {
                 val dumpOption = options('dump)
@@ -553,6 +563,8 @@ object PortExAnalyzer {
         nextOption(map += ('location -> value), tail)
       case "--location" :: value :: tail =>
         nextOption(map += ('location -> value), tail)
+      case "--rawep" :: tail =>
+        nextOption(map += ('rawep -> ""), tail)
       case "--output" :: value :: tail =>
         nextOption(map += ('output -> value), tail)
       case "-p" :: value :: tail =>

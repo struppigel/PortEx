@@ -405,7 +405,7 @@ public class SectionLoader {
     }
 
     private VirtualLocation getVirtualSectionLocation(SectionHeader header) {
-        long vSize = header.getAlignedVirtualSize();
+        long vSize = getActualVirtSize(header);
         long vAddress = header.getAlignedVirtualAddress();
         return new VirtualLocation(vAddress, vSize);
     }

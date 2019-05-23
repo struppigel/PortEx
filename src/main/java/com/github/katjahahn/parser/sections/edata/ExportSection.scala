@@ -325,7 +325,10 @@ object ExportSection {
       if (isValidRVAAndCountInvalid(rva, sectionLoader, file, rvas)) {
         val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
         Some(new ExportNameEntry(rva, name, ordinal, getForwarder(rva)))
-      } else None
+      } else {
+        None
+      }
+        
     }).flatten
     
     val addresses = exportAddressTable.addresses
@@ -343,7 +346,9 @@ object ExportSection {
         val forwarder = getForwarder(rva)
         val ordinal = (i + ordinalBase).toInt
         Some(new ExportEntry(rva, ordinal, forwarder))
-      } else None
+      } else {
+        None
+      }
     }).flatten
     
     //    assert(nameEntries.size == edataTable.get(ExportDirectoryKey.NR_OF_NAME_POINTERS))
@@ -390,8 +395,12 @@ object ExportSection {
    * @return the ordinal for the given function name
    */
   private def getOrdinalForName(name: String, ordinalTable: ExportOrdinalTable,
-    namePointerTable: ExportNamePointerTable): Int =
-    ordinalTable.ordinals(namePointerTable(name))
+    namePointerTable: ExportNamePointerTable): Int = {
+      val addr = namePointerTable(name)
+      if (addr >= 0 && addr < ordinalTable.ordinals.length)
+        ordinalTable.ordinals(addr)
+      else -1
+  }
 
   /**
    * Returns the relative virtual address for a given function name.

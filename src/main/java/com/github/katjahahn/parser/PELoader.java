@@ -37,7 +37,9 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.tools.PEAutoRepair;
 import com.github.katjahahn.tools.ReportCreator;
 
@@ -284,9 +286,11 @@ public final class PELoader {
     public static void main(String[] args) throws IOException, AWTException {
         logger.entry();
           
-        File file = new File("/home/karsten/samples/65535sects.exe"); 
-        ReportCreator reporter = ReportCreator.apply(file);
-        reporter.printReport();
+        File file = new File("/home/karsten/exec_.exe_repaired"); 
+        SectionLoader secLoad = new SectionLoader(file);
+        ExportSection expSec = secLoad.loadExportSection();
+
+        
 //        File file2 = new File("/home/katja/samples/tesla2");
 //        List<File> list = new ArrayList<>();
 //        list.add(file);
