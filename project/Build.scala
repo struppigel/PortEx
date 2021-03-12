@@ -7,7 +7,7 @@ object HelloBuild extends Build {
 
   val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
     libraryDependencies += compilerPlugin("com.typesafe.genjavadoc" %%
-      "genjavadoc-plugin" % "0.5" cross CrossVersion.full),
+      "genjavadoc-plugin" % "0.16" cross CrossVersion.full),
     scalacOptions <+= target map (t => "-P:genjavadoc:out=" + (t / "java")),
     packageDoc in Compile <<= packageDoc in JavaDoc,
     sources in JavaDoc <<=

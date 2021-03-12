@@ -1,6 +1,8 @@
 /ignore
 /portexstats
 /lib
+/sbt
+.history
 .factorypath
 .metadata
 *.class

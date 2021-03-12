@@ -51,9 +51,9 @@ import com.github.katjahahn.parser.sections.SectionLoader
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.8.4
+  private val version = """version: 0.9.0
     |author: Karsten Philipp Boris Hahn
-    |last update: 23. May 2019""".stripMargin
+    |last update: 12. March 2021""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
