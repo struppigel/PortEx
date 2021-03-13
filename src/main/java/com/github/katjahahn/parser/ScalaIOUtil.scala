@@ -24,7 +24,7 @@ import java.io.File
  * <p>
  * This class is not meant to be used by library users.
  *
- * @author Katja Hahn
+ * @author Karsten Hahn
  */
 object ScalaIOUtil {
 
@@ -75,7 +75,7 @@ object ScalaIOUtil {
   /**
    * Fills an array with 0 bytes of the size
    *
-   * @param the size of the array
+   * @param size of the array
    * @return byte array, zero filled
    */
   def zeroBytes(size: Int): Array[Byte] =
@@ -90,8 +90,8 @@ object ScalaIOUtil {
    * @return filtered string
    */
   def filteredString(string: String): String = {
-    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
-    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
+    val controlCode: Char => Boolean = (c: Char) => c <= 32 || c == 127
+    val extendedCode: Char => Boolean = (c: Char) => c <= 32 || c > 127
     string.filterNot(controlCode).filterNot(extendedCode)
   }
 
