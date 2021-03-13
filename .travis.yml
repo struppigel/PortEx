@@ -3,6 +3,5 @@ scala:
   - 2.12.13
 jdk:
   - openjdk8
-  - openjdk11
 sudo: false
 script: "sbt ++$TRAVIS_SCALA_VERSION compile test"
