@@ -17,34 +17,24 @@
  */
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.tools.visualizer.VisualizerBuilder
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.tools.sigscanner.FileTypeScanner
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
-import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.optheader.DataDirectoryKey._
+import com.github.katjahahn.parser.IOUtil.NL
+import com.github.katjahahn.parser.{MemoryMappedPE, PELoader, PESignature, PhysicalLocation}
 import com.github.katjahahn.parser.ScalaIOUtil.using
+import com.github.katjahahn.parser.coffheader.COFFFileHeader
+import com.github.katjahahn.parser.optheader.DataDirectoryKey._
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
+import com.github.katjahahn.parser.sections.{SectionHeaderKey, SectionLoader}
+import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Signature}
+import com.github.katjahahn.tools.visualizer.{ColorableItem, ImageUtil, VisualizerBuilder}
+
+import java.awt.Color
+import java.io.{File, FileWriter, IOException}
+import java.nio.file.{Files, Paths}
+import javax.imageio.ImageIO
 import scala.PartialFunction._
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.io.Source._
-import javax.imageio.ImageIO
-import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.PESignature
-import java.io.IOException
-import com.github.katjahahn.tools.visualizer.ImageUtil
-import com.github.katjahahn.tools.sigscanner.Signature
-import java.io.File
-import java.nio.file.Paths
-import java.io.FileWriter
-import com.github.katjahahn.tools.visualizer.ColorableItem
-import java.awt.Color
-import java.nio.file.Path
-import java.nio.file.Files
-import com.github.katjahahn.parser.coffheader.COFFFileHeader
-import com.github.katjahahn.parser.sections.SectionLoader
 
 /**
  * Command line frontend of PortEx
@@ -141,7 +131,7 @@ object PortExAnalyzer {
                 dumpStuff(file, dumpOption)
               } else {
                 val reporter = ReportCreator.newInstance(file)
-                val all = (options.contains('all))
+                val all = options.contains('all)
                 reporter.setShowAll(all)
                 if (options.contains('output)) {
                   writeReport(reporter, new File(options('output)))
@@ -226,7 +216,7 @@ object PortExAnalyzer {
       val offsets = offsetsStr.split(",")
       for (offsetStr <- offsets) {
         val offset = offsetStr.toLong
-        val table = data.getSectionTable()
+        val table = data.getSectionTable
         val loader = new SectionLoader(data)
         // start and end of file
         printIffBetween(offset, 0L, 0x1000, "StartOfFile0x1000")
@@ -235,16 +225,16 @@ object PortExAnalyzer {
         printIffBetween(offset, file.length() - 0x6000L, file.length(), "EndOfFile0x6000")
         printIffBetween(offset, file.length() - 0x10000L, file.length(), "EndOfFile0x10000")
         // Headers
-        printIffBetween(offset, 0L, data.getMSDOSHeader().getHeaderSize(), "MSDOS Header")
-        val optHeaderOffset = data.getOptionalHeader().getOffset()
-        printIffBetween(offset, optHeaderOffset, optHeaderOffset + data.getOptionalHeader().getSize(), "Optional Header")
-        val coffHeaderOffset = data.getCOFFFileHeader().getOffset()
+        printIffBetween(offset, 0L, data.getMSDOSHeader.getHeaderSize, "MSDOS Header")
+        val optHeaderOffset = data.getOptionalHeader.getOffset
+        printIffBetween(offset, optHeaderOffset, optHeaderOffset + data.getOptionalHeader.getSize, "Optional Header")
+        val coffHeaderOffset = data.getCOFFFileHeader.getOffset
         printIffBetween(offset, coffHeaderOffset, coffHeaderOffset + COFFFileHeader.HEADER_SIZE, "COFF File Header")
-        printIffBetween(offset, table.getOffset(), table.getOffset() + table.getSize(), "Section Table")
+        printIffBetween(offset, table.getOffset, table.getOffset + table.getSize, "Section Table")
         
         // Sections
-        for (header <- table.getSectionHeaders().asScala) {
-          val sectionOffset = header.getAlignedPointerToRaw();
+        for (header <- table.getSectionHeaders.asScala) {
+          val sectionOffset = header.getAlignedPointerToRaw
           val sectionSize = loader.getReadSize(header)
           val sectionEnd = sectionOffset + sectionSize
           var sizeLimit = 0x10000L
@@ -256,7 +246,7 @@ object PortExAnalyzer {
           if (sectionSize > 0x10000L) {
         	  printIffBetween(offset, sectionEnd - sizeLimit, sectionEnd, "Section"+header.getNumber+"End")
           }
-          if (header.getNumber == table.getNumberOfSections()) {
+          if (header.getNumber == table.getNumberOfSections) {
             printIffBetween(offset, sectionOffset, sectionEnd, "LastSection")
             printIffBetween(offset, sectionOffset, sectionOffset + sizeLimit, "LastSectionStart")
             if (sectionSize > 0x10000L) {
@@ -271,8 +261,8 @@ object PortExAnalyzer {
         // Special Sections
         for (specialKey <- specials) {
           val section = loader.maybeLoadSpecialSection(specialKey)
-          if (section.isPresent()) {
-            for (loc <- section.get().getPhysicalLocations().asScala) {
+          if (section.isPresent) {
+            for (loc <- section.get().getPhysicalLocations.asScala) {
               if (loc.from != -1) {
                 printIffBetween(offset, loc.from, loc.from + loc.size, specialKey.toString)
               }  
@@ -290,23 +280,23 @@ object PortExAnalyzer {
         }
         
         // Entry point
-        val epRVA = data.getOptionalHeader().get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
-        val epSection = loader.maybeGetSectionHeaderByRVA(epRVA);
-        if (epSection.isPresent()) {
+        val epRVA = data.getOptionalHeader.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
+        val epSection = loader.maybeGetSectionHeaderByRVA(epRVA)
+        if (epSection.isPresent) {
           val phystovirt = epSection.get().get(SectionHeaderKey.VIRTUAL_ADDRESS) - epSection.get().get(SectionHeaderKey.POINTER_TO_RAW_DATA)
           val ep = epRVA - phystovirt
           printIffBetween(offset, ep - 0x6000, ep + 0x6000, "Entry Point (+/-0x6000)")
         }
         
         // Overlay
-        val overlay = new Overlay(data);
+        val overlay = new Overlay(data)
         if (overlay.exists()) {
           printIffBetween(offset, overlay.getOffset, file.length, "Overlay")
           printIffBetween(offset, overlay.getOffset, overlay.getOffset + 0x10000, "OverlayStart")
         }
       }
     } catch {
-      case e: NumberFormatException => System.err.println("Invalid offset")
+      case _: NumberFormatException => System.err.println("Invalid offset")
       case e: Exception => System.err.println(e.getMessage); e.printStackTrace();
     }
   }
@@ -320,7 +310,7 @@ object PortExAnalyzer {
       if (!outFolder.toFile.exists) {
         Files.createDirectory(outFolder)
       }
-      if (outFolder.toFile.isDirectory()) {
+      if (outFolder.toFile.isDirectory) {
         val dumper = new PEFileDumper(peData, outFolder.toFile)
         dumpOption match {
           case "all" =>
@@ -345,8 +335,8 @@ object PortExAnalyzer {
   }
 
   private def writeDiffReport(file: File): Unit = {
-    val files: List[File] = (if (file.isDirectory()) file.listFiles().toList
-    else fromFile(file).getLines.map(new File(_))).toList
+    val files: List[File] = (if (file.isDirectory) file.listFiles().toList
+    else using(fromFile(file)){_.getLines}.map(new File(_))).toList
     DiffReportCreator.apply(files).printReport()
   }
 
@@ -397,7 +387,7 @@ object PortExAnalyzer {
     if (file.exists()) {  
       var offset: Option[Int] = None
       var size: Option[Int] = None
-      for (line <- scala.io.Source.fromFile(file).getLines) {
+      for (line <- using(scala.io.Source.fromFile(file)){_.getLines}) {
         if (line.contains("offset")) {
           offset = readVisFileValue(line)
         } else if (line.contains("size")) {
@@ -476,8 +466,9 @@ object PortExAnalyzer {
 
   private def printFileTypeReport(file: File): Unit = {
     def bytesMatched(sig: Signature): Int =
-      sig.signature.count(cond(_) { case Some(s) => true })
-    var results = FileTypeScanner(file).scanAt(0)
+      sig.signature.count(cond(_) { case Some(_) => true })
+
+    val results = FileTypeScanner(file).scanAt(0)
     if (results.isEmpty) println("No matching file-type signatures found")
     else if (results.size == 1)
       println("The file could be of the following type: ")
@@ -489,20 +480,20 @@ object PortExAnalyzer {
   }
 
   private def writeFileTypeReport(file: File, outFile: File): Unit = {
-    if (outFile.getName().isEmpty()) {
+    if (outFile.getName.isEmpty) {
       throw new IOException("File name for output file is empty")
     }
     if (outFile.exists()) {
-      throw new IOException("Output file " + outFile.getAbsoluteFile() + " already exists")
+      throw new IOException("Output file " + outFile.getAbsoluteFile + " already exists")
     }
 
     def bytesMatched(sig: Signature): Int =
-      sig.signature.count(cond(_) { case Some(s) => true })
+      sig.signature.count(cond(_) { case Some(_) => true })
 
     using(new FileWriter(outFile, true)) { fw =>
       fw.write("The given file is no PE file!" + NL +
         "Try '--repair' option if you think it is a broken PE." + NL)
-      var results = FileTypeScanner(file).scanAt(0)
+      val results = FileTypeScanner(file).scanAt(0)
       if (results.isEmpty) fw.write("No matching file-type signatures found" + NL)
       else if (results.size == 1)
         fw.write("The file could be of the following type: " + NL)
@@ -518,26 +509,27 @@ object PortExAnalyzer {
     new PESignature(file).exists()
 
   private def writeReport(reporter: ReportCreator, file: File): Unit = {
-    if (file.getName().isEmpty()) {
+    if (file.getName.isEmpty) {
       throw new IOException("File name for output file is empty")
     }
     if (file.exists()) {
-      throw new IOException("Output file " + file.getAbsoluteFile() + " already exists")
+      throw new IOException("Output file " + file.getAbsoluteFile + " already exists")
     }
     using(new FileWriter(file, true)) { fw =>
       println("Creating report file...")
       fw.write(reporter.reportTitle)
       println("Writing header reports...")
-      fw.write(reporter.headerReports)
+      fw.write(reporter.headerReports())
       println("Writing section reports...")
-      fw.write(reporter.specialSectionReports)
+      fw.write(reporter.specialSectionReports())
       println("Writing analysis reports...")
-      fw.write(reporter.additionalReports)
+      fw.write(reporter.additionalReports())
       fw.write("--- end of report ---")
       println("Report done!")
     }
   }
 
+  @tailrec
   private def nextOption(map: OptionMap, list: List[String]): OptionMap = {
     list match {
       case Nil => map
@@ -579,12 +571,12 @@ object PortExAnalyzer {
         nextOption(map += ('icons -> value), tail)
       case "--ico" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
-      case "--diff" :: value :: tail =>
+      case "--diff" :: value :: _ =>
         nextOption(map += ('diff -> value), list.tail)
       case "--pdiff" :: value1 :: value2 :: tail =>
         nextOption(map += ('pdiffA -> value1, 'pdiffB -> value2), tail)
       case value :: Nil => nextOption(map += ('inputfile -> value), list.tail)
-      case option :: tail =>
+      case option :: _ =>
         println("Unknown option " + option + "\n" + usage)
         sys.exit(1)
     }
