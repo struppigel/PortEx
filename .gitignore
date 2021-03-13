@@ -2,6 +2,7 @@
 /portexstats
 /lib
 /sbt
+.idea
 .history
 .factorypath
 .metadata
