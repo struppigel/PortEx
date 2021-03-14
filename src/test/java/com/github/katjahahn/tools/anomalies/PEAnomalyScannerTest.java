@@ -26,8 +26,7 @@ public class PEAnomalyScannerTest {
     private static final Logger logger = LogManager
             .getLogger(PEAnomalyScannerTest.class.getName());
     private static final String RESOURCE_FOLDER = TestreportsReader.RESOURCE_DIR;
-    public static final String UNUSUAL_FOLDER = RESOURCE_FOLDER
-            + "/unusualfiles/";
+    public static final String UNUSUAL_FOLDER = RESOURCE_FOLDER;
     private List<Anomaly> tinyAnomalies;
     private List<Anomaly> maxSecXPAnomalies;
     private List<Anomaly> sectionlessAnomalies;
@@ -36,20 +35,20 @@ public class PEAnomalyScannerTest {
 
     @BeforeClass
     public void prepare() {
-        File file = new File(UNUSUAL_FOLDER + "tinype/tinyest.exe");
+        File file = Paths.get(RESOURCE_FOLDER, "corkami", "tiny.exe").toFile();
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         tinyAnomalies = scanner.getAnomalies();
-        file = Paths.get(UNUSUAL_FOLDER, "corkami", "max_secXP.exe").toFile();
+        file = Paths.get(RESOURCE_FOLDER, "corkami", "maxsecXP.exe").toFile();
         scanner = PEAnomalyScanner.newInstance(file);
         maxSecXPAnomalies = scanner.getAnomalies();
-        file = Paths.get(UNUSUAL_FOLDER, "corkami", "sectionless.exe").toFile();
+        file = Paths.get(RESOURCE_FOLDER, "corkami", "nosectionW7.exe").toFile();
         scanner = PEAnomalyScanner.newInstance(file);
         sectionlessAnomalies = scanner.getAnomalies();
-        file = Paths.get(UNUSUAL_FOLDER, "corkami", "duplicate_section.exe")
+        file = Paths.get(RESOURCE_FOLDER, "corkami", "dupsec.exe")
                 .toFile();
         scanner = PEAnomalyScanner.newInstance(file);
         dupe = scanner.getAnomalies();
-        file = Paths.get(UNUSUAL_FOLDER, "corkami", "imagebase_null.exe")
+        file = Paths.get(RESOURCE_FOLDER, "corkami", "ibnullXP.exe")
                 .toFile();
         scanner = PEAnomalyScanner.newInstance(file);
         zeroImageBase = scanner.getAnomalies();
@@ -132,10 +131,11 @@ public class PEAnomalyScannerTest {
 
     @Test
     public void sectionNrAnomaly() {
-        File file = Paths.get(UNUSUAL_FOLDER, "corkami", "max_secW7.exe")
+        File file = Paths.get(RESOURCE_FOLDER, "corkami", "maxsecXP.exe")
                 .toFile();
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         List<Anomaly> anomalies = scanner.getAnomalies();
+        //for (Anomaly a : anomalies) logger.debug(a.toString());
         performTest(anomalies, AnomalyType.STRUCTURE, "Section Number");
     }
 

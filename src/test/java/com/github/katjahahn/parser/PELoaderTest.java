@@ -49,7 +49,7 @@ public class PELoaderTest {
     }
 
     public static Map<String, PEData> getPEData() throws IOException {
-        if (peData == null || peData.size() == 0) {
+        if (peData.size() == 0) {
             loadPE();
         }
         return peData;
@@ -59,7 +59,8 @@ public class PELoaderTest {
     public void ableToParse() throws IOException {
         String[] filenames = {"d_tiny.dll", "d_resource.dll", "d_nonnull.dll"};
         for (String filename : filenames) {
-            PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/unusualfiles/corkami/" + filename));
+            File testfile = new File(TestreportsReader.RESOURCE_DIR + "/corkami/" + filename);
+            PELoader.loadPE(testfile);
         }
     }
 }

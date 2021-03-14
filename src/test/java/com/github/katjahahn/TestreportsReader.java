@@ -40,7 +40,7 @@ public class TestreportsReader {
             .getLogger(TestreportsReader.class.getName());
     public static final String NL = System.getProperty("line.separator");
 
-    public static final String RESOURCE_DIR = "/home/deque/portextestfiles";
+    public static final String RESOURCE_DIR = "portextestfiles";
     public static final String TEST_FILE_DIR = "/testfiles";
     private static final String TEST_REPORTS_DIR = "/reports";
     private static final String EXPORT_REPORTS_DIR = "/exportreports";
@@ -138,6 +138,7 @@ public class TestreportsReader {
     public static List<TestData> readTestDataList() throws IOException {
         List<TestData> data = new LinkedList<>();
         File directory = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR).toFile();
+        System.out.println("reading test dir" + directory.getAbsolutePath());
         for (File file : directory.listFiles()) {
             if (!file.isDirectory()) {
                 data.add(readTestData(file.getName()));
@@ -163,25 +164,30 @@ public class TestreportsReader {
      * @throws IOException
      */
     public static TestData readTestData(String filename) throws IOException {
+
         TestData data = new TestData();
         data.filename = filename;
         logger.debug("reading file report " + filename);
         Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
+        System.out.println("reading test file " + testfile.toString());
+
         try (BufferedReader reader = Files.newBufferedReader(testfile,
-                Charset.forName("ISO-8859-1"))) {
+                Charset.forName("UTF-8"))) {
             String line = null;
             while ((line = reader.readLine()) != null) {
-                if (line.contains("DOS header")) {
+                if (line.contains("DOS header") || line.contains("DOS Header")) {
                     readDOSAndPESig(data, reader);
                 }
-                if (line.contains("COFF header")) {
+                if (line.contains("COFF header") || line.contains("COFF/File header")) {
                     data.coff = readCOFF(reader);
                 }
-                if (line.contains("Optional (PE) header")) {
+                if (line.contains("Optional (PE) header") || line.contains("Optional/Image header")) {
                     readOpt(data, reader);
                 }
-                if (line.contains("Data directories")) {
+                if (line.contains("Data directories") || line.contains("Directory")) {
                     readDataDirs(data, reader);
+                }
+                if (line.contains("Sections")){
                     readSections(data, reader);
                     readResourceTypes(data, reader);
                 }
@@ -205,7 +211,7 @@ public class TestreportsReader {
     private static void readSections(TestData data, BufferedReader reader)
             throws IOException {
         data.sections = new ArrayList<>();
-        String line = null;
+        String line;
         int number = 0;
         while ((line = reader.readLine()) != null) {
             number++;
@@ -271,27 +277,26 @@ public class TestreportsReader {
         Integer virtualAddress = null;
         Integer size = null;
         while ((line = reader.readLine()) != null) {
+            if(line.contains("Directory")) {
+                continue;
+            }
             String[] split = line.split(":");
-            if (split.length < 2 || split[0].contains("Sections")) {
+            if (split.length < 2 || split[0].contains("Sections") || line.contains("Imported functions")) {
+                logger.debug("Data Dir entry reading finished. Returning");
                 break;
             }
-            if (split[0].contains("Name")) {
-                name = split[1].trim();
-            } else if (split[0].contains("Virtual Address")) {
-                virtualAddress = convertToInt(split[1].trim());
-            } else if (split[0].contains("Size")) {
-                size = convertToInt(split[1].trim());
-            }
-            if (name != null && virtualAddress != null && size != null) {
-                reader.readLine(); // last empty line
-                DataDirectoryKey key = getDataDirKeyForName(name);
-                if (key != null) {
-                    return new DataDirEntry(key, virtualAddress, size, -1);
-                } else {
-                    logger.warn("null data dir key returned for: " + name
+            name = split[0].trim();
+            String[] rest = split[1].split("\\(");
+            virtualAddress = convertToInt(rest[0].trim());
+            size = convertToInt(rest[1].trim());
+            DataDirectoryKey key = getDataDirKeyForName(name);
+            if (key != null) {
+                logger.debug("Read Data Dir entry: " + name + " va: " + virtualAddress + " size: " + size);
+                return new DataDirEntry(key, virtualAddress, size, -1);
+            } else {
+                logger.warn("null data dir key returned for: " + name
                             + " and " + line);
-                    return null;
-                }
+                return null;
             }
         }
         return null;
@@ -299,6 +304,7 @@ public class TestreportsReader {
 
     private static void readDOSAndPESig(TestData data, BufferedReader reader)
             throws IOException {
+        logger.debug("read DOS and PE sig");
         Map<MSDOSHeaderKey, String> dos = new HashMap<>();
         String line = null;
         while ((line = reader.readLine()) != null) {
@@ -327,6 +333,9 @@ public class TestreportsReader {
         data.standardOpt = new HashMap<>();
         while ((line = reader.readLine()) != null) {
             String[] split = line.split(":");
+            if (line.contains("Data directories")) {
+                break;
+            }
             if (split.length < 2) {
                 continue;
             }
@@ -374,222 +383,272 @@ public class TestreportsReader {
     // TODO test for correctly extracted entry number
     private static MSDOSHeaderKey getMSDOSKeyFor(String string) {
         if (string.contains("Bytes in last page")) {
+            logger.debug("Last page size found");
             return MSDOSHeaderKey.LAST_PAGE_SIZE;
         }
         if (string.contains("Pages in file")) {
+            logger.debug("Pages in file found");
             return MSDOSHeaderKey.FILE_PAGES;
         }
         if (string.contains("Relocations")) {
+            logger.debug("Relocations found");
             return MSDOSHeaderKey.RELOCATION_ITEMS;
         }
         if (string.contains("Size of header in paragraphs")) {
+            logger.debug("Header paragraphs found");
             return MSDOSHeaderKey.HEADER_PARAGRAPHS;
         }
         if (string.contains("Minimum extra paragraphs")) {
+            logger.debug("Minalloc found");
             return MSDOSHeaderKey.MINALLOC;
         }
         if (string.contains("Maximum extra paragraphs")) {
+            logger.debug("Maxalloc found");
             return MSDOSHeaderKey.MAXALLOC;
         }
         if (string.contains("SS value")) {
+            logger.debug("Initial SS found");
             return MSDOSHeaderKey.INITIAL_SS;
         }
         if (string.contains("IP value")) {
+            logger.debug("Initial IP found");
             return MSDOSHeaderKey.INITIAL_IP;
         }
         if (string.contains("SP value")) {
+            logger.debug("Initial SP found");
             return MSDOSHeaderKey.INITIAL_SP;
         }
         if (string.contains("CS value")) {
+            logger.debug("Pre relocated initial CS found");
             return MSDOSHeaderKey.PRE_RELOCATED_INITIAL_CS;
         }
         if (string.contains("Address of relocation table")) {
+            logger.debug("Relocation table offset found");
             return MSDOSHeaderKey.RELOCATION_TABLE_OFFSET;
         }
         if (string.contains("Overlay number")) {
+            logger.debug("Overlay nr found");
             return MSDOSHeaderKey.OVERLAY_NR;
         }
         if (string.contains("OEM identifier")) {
+            logger.debug("OEM identifer found, but discarded");
             return null;
         }
         if (string.contains("OEM information")) {
+            logger.debug("OEM information found, but discarded");
             return null;
         }
         if (string.contains("Magic number")) { // not testing MZ signature is on
                                                // purpose
+            logger.debug("Magic number found, but discarded");
             return null;
         }
         // TODO: OEM identifier and OEM information missing in MSDOSspec
         // TODO: not covered in testfiles: complemented_checksum and
         // signature_word
-        System.err.println("missing msdos key: " + string);
+        logger.warn("missing msdos key: " + string);
         return null;
     }
 
     private static COFFHeaderKey getCOFFHeaderKeyFor(String string) {
         if (string.contains("Machine")) {
+            logger.debug("Machine found");
             return COFFHeaderKey.MACHINE;
         }
         if (string.contains("Number of sections")) {
+            logger.debug("Section Nr found");
             return COFFHeaderKey.SECTION_NR;
         }
         if (string.contains("Date/time stamp")) {
+            logger.debug("Timestamp found");
             return COFFHeaderKey.TIME_DATE;
         }
         if (string.contains("Symbol Table offset")) {
+            logger.debug("Symbol Table Offset found but discarded - TODO?");
             return null; // TODO ?
         }
         if (string.contains("Number of symbols")) {
+            logger.debug("Nr of Symbols found but discarded - TODO?");
             return null; // TODO ?
         }
         if (string.contains("Size of optional header")) {
+            logger.debug("Size of Optional Header found");
             return COFFHeaderKey.SIZE_OF_OPT_HEADER;
         }
         if (string.contains("Characteristics")) {
+            logger.debug("Characteristics found");
             return COFFHeaderKey.CHARACTERISTICS;
         }
-        System.err.println("missing coff header key: " + string);
+        logger.warn("missing coff header key: " + string);
         return null;
     }
 
     private static StandardFieldEntryKey getStandardKeyFor(String string) {
         if (string.contains("Magic number")) {
+            logger.debug("Magic number found");
             return StandardFieldEntryKey.MAGIC_NUMBER;
         }
         if (string.contains("Linker major version")) {
+            logger.debug("Linker major version found");
             return StandardFieldEntryKey.MAJOR_LINKER_VERSION;
         }
         if (string.contains("Linker minor version")) {
+            logger.debug("Linker minor version found");
             return StandardFieldEntryKey.MINOR_LINKER_VERSION;
         }
-        if (string.contains("Entry point")) {
+        if (string.contains("Entry point") || string.contains("Entrypoint")) {
+            logger.debug("Entrypoint found");
             return StandardFieldEntryKey.ADDR_OF_ENTRY_POINT;
         }
-        if (string.contains("Address of .code")) {
+        if (string.contains("Address of .code") || string.contains("Address of .text section")) {
+            logger.debug("Base of Code found");
             return StandardFieldEntryKey.BASE_OF_CODE;
         }
         if (string.contains("Address of .data")) {
+            logger.debug("Base of data found");
             return StandardFieldEntryKey.BASE_OF_DATA;
         }
-        if (string.contains("Size of .code")) {
+        if (string.contains("Size of .code") || string.contains("Size of .text")) {
+            logger.debug("Size of code found");
             return StandardFieldEntryKey.SIZE_OF_CODE;
         }
         if (string.contains("Size of .data")) {
+            logger.debug("Size of data found");
             return StandardFieldEntryKey.SIZE_OF_INIT_DATA;
         }
         if (string.contains("Size of .bss")) {
+            logger.debug("Size of Uninit Data found");
             return StandardFieldEntryKey.SIZE_OF_UNINIT_DATA;
         }
         if (getWindowsKeyFor(string) == null) {
-            System.err.println("missing standard field key: " + string);
+            logger.warn("missing standard field key: " + string);
         }
         return null;
     }
 
     private static WindowsEntryKey getWindowsKeyFor(String string) {
-        if (string.contains("checksum")) {
+        if (string.contains("checksum") || string.contains("Checksum")) {
+            logger.debug("Checksum found");
             return WindowsEntryKey.CHECKSUM;
         }
         if (string.contains("DLL characteristics")) {
+            logger.debug("DLL Characteristics found");
             return WindowsEntryKey.DLL_CHARACTERISTICS;
         }
         if (string.contains("Alignment factor")) {
+            logger.debug("File alignment found");
             return WindowsEntryKey.FILE_ALIGNMENT;
         }
-        if (string.contains("Imagebase")) {
+        if (string.contains("Imagebase") || string.contains("ImageBase")) {
+            logger.debug("Image base found");
             return WindowsEntryKey.IMAGE_BASE;
         }
-        if (string.contains("Address of .code")) {
+        if (string.contains("Address of .code")) { //TODO is that correct?
+            logger.debug("Loader flags/addr of .code found");
             return WindowsEntryKey.LOADER_FLAGS;
         }
         if (string.contains("Major version of image")) {
+            logger.debug("Major image version found");
             return WindowsEntryKey.MAJOR_IMAGE_VERSION;
         }
         if (string.contains("Major version of required OS")) {
+            logger.debug("Major OS version found");
             return WindowsEntryKey.MAJOR_OS_VERSION;
         }
         if (string.contains("Major version of subsystem")) {
+            logger.debug("Major subsystem version found");
             return WindowsEntryKey.MAJOR_SUBSYSTEM_VERSION;
         }
         if (string.contains("Minor version of image")) {
+            logger.debug("Minor image version found");
             return WindowsEntryKey.MINOR_IMAGE_VERSION;
         }
         if (string.contains("Minor version of required OS")) {
+            logger.debug("Minor OS version found");
             return WindowsEntryKey.MINOR_OS_VERSION;
         }
         if (string.contains("Minor version of subsystem")) {
+            logger.debug("Minor subsystem version");
             return WindowsEntryKey.MINOR_SUBSYSTEM_VERSION;
         }
         if (string.contains("Data-dictionary entries")) {
+            logger.debug("Nr of RVA and sizes found");
             return WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES;
         }
         if (string.contains("Alignment of sections")) {
+            logger.debug("Section alignment found");
             return WindowsEntryKey.SECTION_ALIGNMENT;
         }
         if (string.contains("Size of headers")) {
+            logger.debug("Size of headers found");
             return WindowsEntryKey.SIZE_OF_HEADERS;
         }
         if (string.contains("Size of heap space to commit")) {
+            logger.debug("Size of heap commit found");
             return WindowsEntryKey.SIZE_OF_HEAP_COMMIT;
         }
         if (string.contains("Size of heap space to reserve")) {
+            logger.debug("Size of heap reserve found");
             return WindowsEntryKey.SIZE_OF_HEAP_RESERVE;
         }
         if (string.contains("Size of image")) {
+            logger.debug("Size of image found");
             return WindowsEntryKey.SIZE_OF_IMAGE;
         }
         if (string.contains("Size of stack to commit")) {
+            logger.debug("Size of stack to commit found");
             return WindowsEntryKey.SIZE_OF_STACK_COMMIT;
         }
         if (string.contains("Size of stack to reserve")) {
+            logger.debug("Size of stack reserve found");
             return WindowsEntryKey.SIZE_OF_STACK_RESERVE;
         }
         if (string.contains("Subsystem required")) {
+            logger.debug("Subsystem found");
             return WindowsEntryKey.SUBSYSTEM;
         }
         // if (string.contains("")) { TODO missing in report (?)
         // return WindowsEntryKey.WIN32_VERSION_VALUE;
         // }
-        System.err.println("missing windows key: " + string);
+        logger.warn("missing windows key: " + string);
         return null;
     }
 
     private static DataDirectoryKey getDataDirKeyForName(String name) {
-        if (name.contains("Import Table")) {
+        if (name.contains("Import Table") || name.contains("IMAGE_DIRECTORY_ENTRY_IMPORT")) {
             return DataDirectoryKey.IMPORT_TABLE;
         }
-        if (name.contains("Resource Table")) {
+        if (name.contains("Resource Table") || name.contains("IMAGE_DIRECTORY_ENTRY_RESOURCE")) {
             return DataDirectoryKey.RESOURCE_TABLE;
         }
-        if (name.contains("Certificate")) {
+        if (name.contains("Certificate") || name.contains("IMAGE_DIRECTORY_ENTRY_SECURITY")) {
             return DataDirectoryKey.CERTIFICATE_TABLE;
         }
-        if (name.contains("Debug")) {
+        if (name.contains("Debug") || name.contains("IMAGE_DIRECTORY_ENTRY_DEBUG")) {
             return DataDirectoryKey.DEBUG;
         }
-        if (name.contains("Load Config Table")) {
+        if (name.contains("Load Config Table") || name.contains("IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG")) {
             return DataDirectoryKey.LOAD_CONFIG_TABLE;
         }
-        if (name.contains("Import Address Table")) {
+        if (name.contains("Import Address Table") || name.contains("IMAGE_DIRECTORY_ENTRY_IAT")) {
             return DataDirectoryKey.IAT;
         }
         if (name.contains("TLS")) {
             return DataDirectoryKey.TLS_TABLE;
         }
-        // TODO verify the following keys
         if (name.contains("Exception")) {
             return DataDirectoryKey.EXCEPTION_TABLE;
         }
         if (name.contains("Architecture")) {
             return DataDirectoryKey.ARCHITECTURE;
         }
-        if (name.contains("Relocation")) {
+        if (name.contains("Relocation") || name.contains("IMAGE_DIRECTORY_ENTRY_BASERELOC")) {
             return DataDirectoryKey.BASE_RELOCATION_TABLE;
         }
         if (name.contains("Bound Import")) {
             return DataDirectoryKey.BOUND_IMPORT;
         }
-        if (name.contains("Runtime Header")) {
+        if (name.contains("Runtime Header") || name.contains("IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR")) {
             return DataDirectoryKey.CLR_RUNTIME_HEADER;
         }
         if (name.contains("Delay Import")) {
@@ -601,28 +660,31 @@ public class TestreportsReader {
         if (name.contains("Global")) {
             return DataDirectoryKey.GLOBAL_PTR;
         }
-        System.err.println("missing data dir key: " + name);
+        logger.warn("missing data dir key: " + name);
         return null;
     }
 
     private static SectionHeaderKey getSectionKeyFor(String name) {
-        if (name.contains("Virtual size")) {
+        if (name.contains("Virtual size") || name.contains("Virtual Size")) {
             return SectionHeaderKey.VIRTUAL_SIZE;
         }
-        if (name.contains("Virtual address")) {
+        if (name.contains("Virtual address") || name.contains("Virtual Address")) {
             return SectionHeaderKey.VIRTUAL_ADDRESS;
         }
-        if (name.contains("Data size")) {
+        if (name.contains("Data size") || name.contains("Size Of Raw Data")) {
             return SectionHeaderKey.SIZE_OF_RAW_DATA;
         }
-        if (name.contains("Data offset")) {
+        if (name.contains("Data offset") || name.contains("Pointer To Raw Data")) {
             return SectionHeaderKey.POINTER_TO_RAW_DATA;
+        }
+        if (name.contains("Number Of Relocations")) {
+            return SectionHeaderKey.NUMBER_OF_RELOCATIONS;
         }
         if (name.contains("Characteristics")) {
             return SectionHeaderKey.CHARACTERISTICS;
         }
 
-        System.err.println("missing section table entry " + name);
+        logger.warn("missing section table entry " + name);
         return null;
     }
 
