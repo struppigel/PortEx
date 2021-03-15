@@ -61,7 +61,9 @@ trait SectionTableScanning extends AnomalyScanner {
       "BSS" -> "Uninitialized Data section (Borland)",
       "CODE" -> "Code section (Borland)",
       "DATA" -> "Data section (Borland)",
-      "INIT" -> "INIT section of drivers", "PAGE" -> "PAGE section of drivers",
+      "INIT" -> "INIT section of drivers",
+      "PAGE" -> "PAGE section of drivers",
+      "t.Policy" -> "Trustlet section with metadata for secure kernel policy",
       //Aspack
       ".aspack" -> "Aspack packer", ".adata" -> "Aspack/Armadillo packer", 
       "ASPack" -> "Aspack packer", ".ASPack" -> "Aspack packer", 
