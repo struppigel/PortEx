@@ -18,7 +18,7 @@ import com.github.katjahahn.tools.anomalies.PEAnomalyScannerTest;
 public class RobustnessTest {
 
     public static final String PROBLEMFILES_DIR = TestreportsReader.RESOURCE_DIR
-            + "/problemfiles/";
+            + "/corkami/";
     
     public static void main(String... args) {
         testAll();
@@ -86,6 +86,7 @@ public class RobustnessTest {
     public void loadProblemfiles() throws IOException {
         File folder = new File(PROBLEMFILES_DIR);
         for (File file : folder.listFiles()) {
+            System.out.println(file.getName());
             PEData data = PELoader.loadPE(file);
             SectionLoader loader = new SectionLoader(data);
             loader.maybeLoadDebugSection();

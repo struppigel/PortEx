@@ -1,5 +1,6 @@
 /ignore
 /portexstats
+/portextestfiles
 /lib
 /sbt
 .idea
@@ -39,13 +40,6 @@ arbeit.pdf
 *.thm
 *.toc
 
-fileanomalies
-literature
-filelist
-pevscript.sh
-BinaryCollection
-todo
-Virus.Tirtas
 codecover
 .settings
 .classpath

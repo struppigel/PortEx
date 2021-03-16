@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ import static org.testng.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,23 +47,19 @@ public class COFFFileHeaderTest {
         testdata = PELoaderTest.getTestData();
         pedata = PELoaderTest.getPEData();
         winRarCoff = PELoader.loadPE(
-                new File(TestreportsReader.RESOURCE_DIR + "/WinRar.exe"))
+                Paths.get(TestreportsReader.RESOURCE_DIR, TestreportsReader.TEST_FILE_DIR, "WinRar.exe").toFile())
                 .getCOFFFileHeader();
     }
 
     @Test
     public void get() {
-        for (TestData testdatum : testdata) {
-            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-            for (Entry<COFFHeaderKey, String> entry : testdatum.coff.entrySet()) {
-                COFFHeaderKey key = entry.getKey();
-                COFFFileHeader coff = pedatum.getCOFFFileHeader();
-                int actual = (int) coff.get(key);
-                String value = entry.getValue().trim();
-                int expected = convertToInt(value);
-                assertEquals(expected, actual);
-            }
-        }
+        assertEquals(winRarCoff.get(COFFHeaderKey.MACHINE), 0x14c);
+        assertEquals(winRarCoff.get(COFFHeaderKey.TIME_DATE), 0x45adfc46);
+        assertEquals(winRarCoff.get(COFFHeaderKey.SECTION_NR), 0x4);
+        assertEquals(winRarCoff.get(COFFHeaderKey.NR_OF_SYMBOLS), 0x0);
+        assertEquals(winRarCoff.get(COFFHeaderKey.POINTER_TO_SYMB_TABLE), 0x0);
+        assertEquals(winRarCoff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER), 0xe0);
+        assertEquals(winRarCoff.get(COFFHeaderKey.CHARACTERISTICS), 0x10f);
     }
 
     private int convertToInt(String value) {
@@ -86,19 +83,6 @@ public class COFFFileHeaderTest {
     }
 
     @Test
-    public void getCharacteristics() {
-        for (TestData testdatum : testdata) {
-            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-            String value = testdatum.coff.get(COFFHeaderKey.CHARACTERISTICS)
-                    .trim();
-            int expected = convertToInt(value);
-            int actual = (int) pedatum.getCOFFFileHeader().get(
-                    COFFHeaderKey.CHARACTERISTICS);
-            assertEquals(expected, actual);
-        }
-    }
-
-    @Test
     public void getInfo() {
         String info = winRarCoff.getInfo();
         assertNotNull(info);
@@ -113,26 +97,11 @@ public class COFFFileHeaderTest {
 
     @Test
     public void getNumberOfSections() {
-        for (TestData testdatum : testdata) {
-            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-            String value = testdatum.coff.get(COFFHeaderKey.SECTION_NR).trim();
-            int expected = convertToInt(value);
-            int actual = pedatum.getCOFFFileHeader().getNumberOfSections();
-            assertEquals(expected, actual);
-        }
         assertEquals(winRarCoff.getNumberOfSections(), 0x04);
     }
 
     @Test
     public void getSizeOfOptionalHeader() {
-        for (TestData testdatum : testdata) {
-            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-            String value = testdatum.coff.get(COFFHeaderKey.SIZE_OF_OPT_HEADER)
-                    .trim();
-            int expected = convertToInt(value);
-            int actual = pedatum.getCOFFFileHeader().getSizeOfOptionalHeader();
-            assertEquals(expected, actual);
-        }
         assertEquals(winRarCoff.getSizeOfOptionalHeader(), 0x00e0);
     }
 

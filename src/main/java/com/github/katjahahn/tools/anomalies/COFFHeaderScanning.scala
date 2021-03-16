@@ -136,7 +136,7 @@ trait COFFHeaderScanning extends AnomalyScanner {
    * @return anomaly list
    */
   private def checkNumberOfSections(coff: COFFFileHeader): List[Anomaly] = {
-    val sectionMax = 96
+    val sectionMax = 95
     val sectionNr = coff.get(COFFHeaderKey.SECTION_NR)
     val entry = coff.getField(COFFHeaderKey.SECTION_NR)
     val locations = List(new PhysicalLocation(entry.getOffset(), entry.getSize()))

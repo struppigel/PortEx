@@ -94,14 +94,11 @@ public class MSDOSHeaderTest {
         String info = pedata.get("strings.exe").getMSDOSHeader().getInfo();
         assertNotNull(info);
         assertTrue(info.length() > 0);
-        // String noHeaderBytes = new MSDOSHeader(null).getInfo(); //TODO
-        // System.out.println(noHeaderBytes);
-        // assertTrue(noHeaderBytes.contains("No MS DOS Header found!"));
     }
 
     @Test
     public void getHeaderSize() throws IOException {
-        File file = new File(TestreportsReader.RESOURCE_DIR + "/WinRar.exe");
+        File file = new File(TestreportsReader.RESOURCE_DIR + "/testfiles/WinRar.exe");
         long size = PELoader.loadPE(file).getMSDOSHeader().getHeaderSize();
         assertTrue(size > 0 && size < file.length());
     }

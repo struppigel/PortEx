@@ -210,6 +210,7 @@ public class TestreportsReader {
 
     private static void readSections(TestData data, BufferedReader reader)
             throws IOException {
+        logger.debug("Reading sections");
         data.sections = new ArrayList<>();
         String line;
         int number = 0;

@@ -41,7 +41,7 @@ public class ImportSectionTest {
     @Test
     public void virtualImportDescriptor() throws IOException {
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
-                + "/unusualfiles/corkami/imports_virtdesc.exe"));
+                + "/corkami/imports_virtdesc.exe"));
         System.out.println(data.getInfo());
         ImportSection idata = new SectionLoader(data).loadImportSection();
         List<ImportDLL> imports = idata.getImports();

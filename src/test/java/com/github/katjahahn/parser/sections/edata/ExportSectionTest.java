@@ -40,7 +40,7 @@ public class ExportSectionTest {
     @Test
     public void forwarderTest() throws IOException {
         File forwarder = new File(TestreportsReader.RESOURCE_DIR
-                + "/unusualfiles/corkami/forwarder.dll");
+                + "/corkami/dllfw.dll");
         PEData data = PELoader.loadPE(forwarder);
         ExportSection edata = new SectionLoader(data).loadExportSection();
         List<ExportEntry> exportEntries = edata.getExportEntries();
@@ -49,7 +49,7 @@ public class ExportSectionTest {
         }
 
         File nonforwarder = new File(TestreportsReader.RESOURCE_DIR
-                + "/testfiles/DLL2.dll");
+                + "/corkami/exports_order.exe");
         data = PELoader.loadPE(nonforwarder);
         edata = new SectionLoader(data).loadExportSection();
         exportEntries = edata.getExportEntries();

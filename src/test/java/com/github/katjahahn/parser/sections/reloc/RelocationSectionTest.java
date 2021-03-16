@@ -26,19 +26,17 @@ public class RelocationSectionTest {
     @Test
     public void relocsNumber() throws IOException {
         String[] relocArr = {
-                "/home/deque/portextestfiles/testfiles/Lab03-02.dll;6;890",
-                "/home/deque/portextestfiles/testfiles/DLL1.dll;9;740",
-                "/home/deque/portextestfiles/testfiles/Lab11-02.dll;1;100",
-                "/home/deque/portextestfiles/testfiles/ntdll.dll;165;8534",
-                "/home/deque/portextestfiles/testfiles/DLL2.dll;9;742",
-                "/home/deque/portextestfiles/testfiles/Lab07-03.dll;1;46",
-                "/home/deque/portextestfiles/testfiles/Lab17-02.dll;24;3016",
-                "/home/deque/portextestfiles/testfiles/Lab11-03.dll;9;766",
-                "/home/deque/portextestfiles/testfiles/Lab05-01.dll;24;3016",
-                "/home/deque/portextestfiles/testfiles/Lab12-01.dll;9;738",
-                "/home/deque/portextestfiles/testfiles/Lab18-04.exe;1;0",
-                "/home/deque/portextestfiles/testfiles/DLL3.dll;9;748" };
+                "portextestfiles/testfiles/Lab03-02;6;890",
+                "portextestfiles/testfiles/Lab11-02dll;1;100",
+                "portextestfiles/testfiles/Lab07-03;1;46",
+                "portextestfiles/testfiles/Lab17-02dll;24;3016",
+                "portextestfiles/testfiles/Lab11-03dll;9;766",
+                "portextestfiles/testfiles/Lab05-01;24;3016",
+                "portextestfiles/testfiles/Lab12-01dll;9;738",
+                "portextestfiles/testfiles/Lab18-04;1;0"
+        };
         for (String rel : relocArr) {
+            System.out.println(rel);
             String[] split = rel.split(";");
             File file = new File(split[0]);
             int blockNr = Integer.parseInt(split[1]);

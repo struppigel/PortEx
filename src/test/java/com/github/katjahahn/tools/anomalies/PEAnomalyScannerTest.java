@@ -26,6 +26,7 @@ public class PEAnomalyScannerTest {
     private static final Logger logger = LogManager
             .getLogger(PEAnomalyScannerTest.class.getName());
     private static final String RESOURCE_FOLDER = TestreportsReader.RESOURCE_DIR;
+    private static final String TEST_FILE_PATH = RESOURCE_FOLDER + TestreportsReader.TEST_FILE_DIR;
     public static final String UNUSUAL_FOLDER = RESOURCE_FOLDER;
     private List<Anomaly> tinyAnomalies;
     private List<Anomaly> maxSecXPAnomalies;
@@ -35,13 +36,13 @@ public class PEAnomalyScannerTest {
 
     @BeforeClass
     public void prepare() {
-        File file = Paths.get(RESOURCE_FOLDER, "corkami", "tiny.exe").toFile();
+        File file = Paths.get(TEST_FILE_PATH, "smallest-pe.exe").toFile();
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         tinyAnomalies = scanner.getAnomalies();
         file = Paths.get(RESOURCE_FOLDER, "corkami", "maxsecXP.exe").toFile();
         scanner = PEAnomalyScanner.newInstance(file);
         maxSecXPAnomalies = scanner.getAnomalies();
-        file = Paths.get(RESOURCE_FOLDER, "corkami", "nosectionW7.exe").toFile();
+        file = Paths.get(RESOURCE_FOLDER, "corkami", "nosectionXP.exe").toFile();
         scanner = PEAnomalyScanner.newInstance(file);
         sectionlessAnomalies = scanner.getAnomalies();
         file = Paths.get(RESOURCE_FOLDER, "corkami", "dupsec.exe")
@@ -114,41 +115,20 @@ public class PEAnomalyScannerTest {
     }
 
     @Test
-    public void nonZeroSectionHeaderFields() {
-        performTest(tinyAnomalies, SectionHeaderKey.POINTER_TO_RELOCATIONS,
-                "POINTER_TO_RELOCATIONS");
-        performTest(tinyAnomalies, SectionHeaderKey.NUMBER_OF_RELOCATIONS,
-                "NUMBER_OF_RELOCATIONS");
-        performTest(tinyAnomalies, SectionHeaderKey.POINTER_TO_LINE_NUMBERS,
-                "POINTER_TO_LINE_NUMBERS");
-    }
-
-    @Test
-    public void reservedSectionHeaderFields() {
-        performTest(tinyAnomalies, AnomalyType.RESERVED,
-                "Reserved characteristic used: RESERVED_4");
-    }
-
-    @Test
     public void sectionNrAnomaly() {
         File file = Paths.get(RESOURCE_FOLDER, "corkami", "maxsecXP.exe")
                 .toFile();
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         List<Anomaly> anomalies = scanner.getAnomalies();
-        //for (Anomaly a : anomalies) logger.debug(a.toString());
         performTest(anomalies, AnomalyType.STRUCTURE, "Section Number");
     }
 
     @Test
     public void deprecated() {
         performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,
-                "IMAGE_FILE_LINE_NUMS_STRIPPED");
+                "POINTER_TO_LINE_NUMBERS");
         performTest(maxSecXPAnomalies, AnomalyType.DEPRECATED,
-                "IMAGE_FILE_LOCAL_SYMS_STRIPPED");
-        performTest(sectionlessAnomalies, AnomalyType.DEPRECATED,
-                "IMAGE_FILE_LOCAL_SYMS_STRIPPED");
-        performTest(sectionlessAnomalies, AnomalyType.DEPRECATED,
-                "IMAGE_FILE_LINE_NUMS_STRIPPED");
+                "IMAGE_SCN_TYPE_NO_PAD");
     }
 
     @Test
@@ -161,8 +141,8 @@ public class PEAnomalyScannerTest {
 
     @Test
     public void unusualSectionNames() {
-        File file = Paths.get(RESOURCE_FOLDER, "x64viruses",
-                "VirusShare_6fdfdffeb4b1be2d0036bac49cb0d590").toFile();
+        File file = Paths.get(TEST_FILE_PATH,
+                "6fdfdffeb4b1be2d0036bac49cb0d590").toFile();
         PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(file);
         List<Anomaly> anomalies = scanner.getAnomalies();
         performTest(anomalies, SectionHeaderKey.NAME,
@@ -171,9 +151,9 @@ public class PEAnomalyScannerTest {
 
     @Test
     public void sectionAlignment() {
-        performTest(maxSecXPAnomalies, AnomalyType.WRONG, "Size of Image");
+        // TODO add something like: performTest(maxSecXPAnomalies, AnomalyType.WRONG, "Size of Image");
+        // but need to find such sample first, samples below have low alignment mode which seems a valid reason for no alignment?
         performTest(maxSecXPAnomalies, AnomalyType.NON_DEFAULT, "Size of Headers");
-        performTest(sectionlessAnomalies, AnomalyType.WRONG, "Size of Image");
         performTest(sectionlessAnomalies, AnomalyType.NON_DEFAULT, "Size of Headers");
     }
 

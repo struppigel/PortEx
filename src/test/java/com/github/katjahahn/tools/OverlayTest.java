@@ -35,10 +35,8 @@ public class OverlayTest {
     @Test(timeOut = 9000)
     public void hasOverlayTest() throws IOException {
         String[] files = { TestreportsReader.RESOURCE_DIR
-                + "/testfiles/Lab03-04.exe"
-        // TestreportsReader.RESOURCE_DIR //temp. removed, because file not on
-        // disk X|
-        // + "/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb"
+                + "/testfiles/Lab03-04",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/adodb.dll"
         };
         for (String file : files) {
             File infile = new File(file);
@@ -46,9 +44,8 @@ public class OverlayTest {
             assertFalse(overlay.exists());
         }
         String[] overfiles = {
-                TestreportsReader.RESOURCE_DIR + "/Holiday_Island.exe",
-                TestreportsReader.RESOURCE_DIR + "/WinRar.exe",
-                TestreportsReader.RESOURCE_DIR + "/joined.exe" };
+                TestreportsReader.RESOURCE_DIR + "/testfiles/WinRar.exe",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/WMIX.exe" };
         for (String file : overfiles) {
             File infile = new File(file);
             Overlay overlay = new Overlay(infile);
@@ -59,10 +56,8 @@ public class OverlayTest {
     @Test(timeOut = 9000)
     public void eofNoOverlayTest() throws IOException {
         String[] noOverFiles = { TestreportsReader.RESOURCE_DIR
-                + "/testfiles/Lab03-04.exe"
-        // TestreportsReader.RESOURCE_DIR //temp. removed, because file not on
-        // disk X|
-        // + "/badfiles/VirusShare_d4a3a413257e49d81962e3d7ec0944eb"
+                + "/testfiles/Lab03-04",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/adodb.dll"
         };
         for (String file : noOverFiles) {
             File infile = new File(file);
@@ -75,12 +70,11 @@ public class OverlayTest {
     @Test
     public void dumpTo() throws IOException {
         String[] mixedFiles = {
-                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-01.exe",
-                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-04.exe",
-                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-03.exe",
-                TestreportsReader.RESOURCE_DIR + "/Holiday_Island.exe",
-                TestreportsReader.RESOURCE_DIR + "/WinRar.exe",
-                TestreportsReader.RESOURCE_DIR + "/joined.exe" };
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-01",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-04",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/Lab03-03",
+                TestreportsReader.RESOURCE_DIR + "/testfiles/WinRar.exe"
+        };
         File outfile = new File("out");
         for (String file : mixedFiles) {
             File infile = new File(file);

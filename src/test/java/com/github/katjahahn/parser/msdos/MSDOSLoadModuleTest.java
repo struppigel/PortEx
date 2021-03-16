@@ -19,6 +19,7 @@ import static org.testng.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -36,7 +37,7 @@ public class MSDOSLoadModuleTest {
 
     @BeforeClass
     public void prepare() throws IOException {
-        file = new File(TestreportsReader.RESOURCE_DIR + "/WinRar.exe");
+        file = Paths.get(TestreportsReader.RESOURCE_DIR , TestreportsReader.TEST_FILE_DIR, "WinRar.exe").toFile();
         PEData data = PELoader.loadPE(file);
         MSDOSHeader header = data.getMSDOSHeader();
         module = new MSDOSLoadModule(header, file);

@@ -81,7 +81,7 @@ public class OptionalHeaderTest {
     public void getDataDirEntry() {
         OptionalHeader header = pedata.get("strings.exe").getOptionalHeader();
         DataDirectoryKey[] existant = { IMPORT_TABLE, RESOURCE_TABLE,
-                CERTIFICATE_TABLE, DEBUG, LOAD_CONFIG_TABLE, IAT };
+                CERTIFICATE_TABLE,BASE_RELOCATION_TABLE , DEBUG, LOAD_CONFIG_TABLE, IAT };
         for (DataDirectoryKey key : DataDirectoryKey.values()) {
             Optional<DataDirEntry> entry = header.maybeGetDataDirEntry(key);
             assertTrue((entry.isPresent() && isIn(existant, key))

@@ -27,9 +27,9 @@ public class DebugSectionTest {
         DebugSection debug = new SectionLoader(datum).loadDebugSection();
         assertEquals((long) debug.get(MAJOR_VERSION), 0L);
         assertEquals((long) debug.get(MINOR_VERSION), 0L);
-        assertEquals((long) debug.get(ADDR_OF_RAW_DATA), 124392L);
-        assertEquals((long) debug.get(SIZE_OF_DATA), 64L);
-        assertEquals((long) debug.get(POINTER_TO_RAW_DATA), 119272L);
+        assertEquals((long) debug.get(ADDR_OF_RAW_DATA), 323836L);
+        assertEquals((long) debug.get(SIZE_OF_DATA), 71L);
+        assertEquals((long) debug.get(POINTER_TO_RAW_DATA), 317180L);
         assertEquals((long) debug.get(CHARACTERISTICS), 0L);
         assertEquals(debug.getTypeDescription(), "Visual C++ debug information");
         assertEquals(debug.getDebugType(), DebugType.CODEVIEW);

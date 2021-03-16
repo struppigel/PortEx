@@ -33,7 +33,6 @@ public class Jar2ExeScannerTest {
             .getLogger(Jar2ExeScannerTest.class.getName());
 
     @Test
-    // TODO
     public void scanResultTest() {
         Jar2ExeScanner scanner = new Jar2ExeScanner(new File(
                 TestreportsReader.RESOURCE_DIR + "/launch4jexe.exe"));
