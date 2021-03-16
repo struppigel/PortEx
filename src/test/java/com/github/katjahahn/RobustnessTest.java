@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.katjahahn.parser.optheader.OptionalHeaderTest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.parser.PEData;
@@ -79,21 +82,25 @@ public class RobustnessTest {
         List<ImportDLL> imports = new SectionLoader(data).loadImportSection()
                 .getImports();
         assertFalse(imports.isEmpty());
-        assertTrue(imports.get(0).getName().equals("KERNEL32.dll"));
+        assertTrue(imports.get(0).getName().equals("\\\\66.93.68.6\\z"));
     }
 
     @Test
     public void loadProblemfiles() throws IOException {
         File folder = new File(PROBLEMFILES_DIR);
         for (File file : folder.listFiles()) {
-            System.out.println(file.getName());
+            logger.debug("loading problem file: " + file.getAbsolutePath());
             PEData data = PELoader.loadPE(file);
             SectionLoader loader = new SectionLoader(data);
             loader.maybeLoadDebugSection();
             loader.maybeLoadExceptionSection();
+            loader.maybeLoadExportSection();
+            loader.maybeLoadBoundImportSection();
             loader.maybeLoadImportSection();
             loader.maybeLoadResourceSection();
         }
     }
+
+    private static Logger logger = LogManager.getLogger(OptionalHeaderTest.class.getName());
 
 }

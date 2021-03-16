@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,29 +19,26 @@
 package com.github.katjahahn.parser.sections.pdata
 
 import com.github.katjahahn.parser.sections.pdata.ExceptionSection._
+
 import scala.collection.JavaConverters._
 import Function.tupled
 import scala.collection.mutable.ListBuffer
 import java.io.File
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.{FileFormatException, IOUtil, MemoryMappedPE, PELoader, PhysicalLocation, StandardField}
 import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.StandardField
 import com.github.katjahahn.parser.coffheader.MachineType
 import com.github.katjahahn.parser.coffheader.MachineType._
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.IOUtil.{ NL }
+import com.github.katjahahn.parser.IOUtil.NL
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import com.github.katjahahn.parser.MemoryMappedPE
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.PhysicalLocation
 
 //TODO getInfo shows empty values, separate different formats, test different formats
-class ExceptionSection private (
-  offset: Long,
-  private val directory: ExceptionDirectory) extends SpecialSection {
-  
+class ExceptionSection private(
+                                offset: Long,
+                                private val directory: ExceptionDirectory) extends SpecialSection {
+
   override def isEmpty(): Boolean = directory.isEmpty
 
   def getField(key: ExceptionEntryKey): StandardField = directory(key)
@@ -53,11 +50,11 @@ class ExceptionSection private (
   def getInfo(): String = directory.values.mkString(NL)
 
   def getOffset(): Long = offset
-  
+
   //FIXME implement
   def getSize(): Long = 0L
-  
-  def getPhysicalLocations(): java.util.List[PhysicalLocation] = 
+
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] =
     (new PhysicalLocation(getOffset, getSize) :: Nil).asJava
 }
 
@@ -82,7 +79,7 @@ object ExceptionSection {
 
   //TODO wincespec!
   def apply(mmbytes: MemoryMappedPE, machine: MachineType,
-    virtualAddress: Long, offset: Long): ExceptionSection = {
+            virtualAddress: Long, offset: Long): ExceptionSection = {
     if (!machineToSpec.contains(machine)) {
       throw new IllegalArgumentException("spec for machine type not found: " + machine)
     }
@@ -96,12 +93,16 @@ object ExceptionSection {
   }
 
   //TODO refactor parameter list
-  def newInstance(li: LoadInfo): ExceptionSection =
-    apply(li.memoryMapped, li.data.getCOFFFileHeader().getMachineType(), 
-        li.va, li.fileOffset)
+  def newInstance(li: LoadInfo): ExceptionSection = {
+    val key = li.data.getCOFFFileHeader().getMachineType()
+    if (!machineToSpec.contains(key))
+        throw new FileFormatException("spec machine type not found: " + key)
+    else
+      apply(li.memoryMapped, key, li.va, li.fileOffset)
+  }
 
   def main(args: Array[String]): Unit = {
-    val folder = new File("/home/deque/portextestfiles/testfiles/")
+    val folder = new File("portextestfiles/testfiles")
     for (file <- folder.listFiles) {
       val data = PELoader.loadPE(file)
       val entries = data.getOptionalHeader().getDataDirectory()

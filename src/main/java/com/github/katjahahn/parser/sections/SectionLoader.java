@@ -55,7 +55,7 @@ import com.google.common.base.Preconditions;
  * The section loader is able to load special sections like the
  * {@link ImportSection}, {@link ExportSection} and {@link ResourceSection}
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public class SectionLoader {

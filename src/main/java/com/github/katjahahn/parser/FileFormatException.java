@@ -21,7 +21,7 @@ import java.io.IOException;
  * Is thrown if a specification file doesn't have the expected formatting, for
  * example wrong delimiters.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public class FileFormatException extends IOException {
