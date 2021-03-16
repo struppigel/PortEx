@@ -5,9 +5,12 @@ import static org.testng.Assert.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.github.katjahahn.parser.HeaderKey;
+import com.github.katjahahn.parser.StandardField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
@@ -86,16 +89,57 @@ public class SectionTableTest {
 
     @Test
     public void getSectionEntries() {
-        for (TestData testdatum : testdata) {
-            // pev report is wrong there
-            if(!testdatum.filename.equals("normalimports.exe.txt")) { 
-            PEData pedatum = pedata.get(testdatum.filename.replace(".txt", ""));
-            List<SectionHeader> list = pedatum.getSectionTable()
-                    .getSectionHeaders();
-            assertEquals(list.size(), testdatum.sections.size());
-            assertEquality(list, testdatum.sections);
-            assertSectionNumbers(list);
-        }}
+        PEData data = pedata.get("strings.exe");
+        List<SectionHeader> expectedHeaders = new LinkedList<SectionHeader>();
+        Map<SectionHeaderKey, StandardField> textEntries = new HashMap<>();
+        put(textEntries, POINTER_TO_RAW_DATA, 0x400L);
+        put(textEntries, VIRTUAL_ADDRESS, 0x1000L);
+        put(textEntries, VIRTUAL_SIZE,0x3f010L);
+        put(textEntries, CHARACTERISTICS, 1610612768L);
+        put(textEntries, SIZE_OF_RAW_DATA,0x3f200L);
+        expectedHeaders.add(new SectionHeader(textEntries, 1, 0, ".text", 0));
+
+        Map<SectionHeaderKey, StandardField> rdataEntries = new HashMap<>();
+        expectedHeaders.add(new SectionHeader(rdataEntries, 2, 0, ".rdata", 0));
+        put(rdataEntries, POINTER_TO_RAW_DATA, 0x3f600L);
+        put(rdataEntries, VIRTUAL_ADDRESS, 0x41000L);
+        put(rdataEntries, VIRTUAL_SIZE,0xf9f2L);
+        put(rdataEntries, CHARACTERISTICS, 1073741888L);
+        put(rdataEntries, SIZE_OF_RAW_DATA,0xfa00L);
+
+        Map<SectionHeaderKey, StandardField> dataEntries = new HashMap<>();
+        expectedHeaders.add(new SectionHeader(dataEntries, 3, 0, ".data", 0));
+        put(dataEntries, POINTER_TO_RAW_DATA, 0x4f000L);
+        put(dataEntries, VIRTUAL_ADDRESS, 0x51000L);
+        put(dataEntries, VIRTUAL_SIZE,0x1d3cL);
+        put(dataEntries, CHARACTERISTICS, 3221225536L);
+        put(dataEntries, SIZE_OF_RAW_DATA,0xc00L);
+
+        Map<SectionHeaderKey, StandardField> rsrcEntries = new HashMap<>();
+        expectedHeaders.add(new SectionHeader(rsrcEntries, 4, 0, ".rsrc", 0));
+        put(rsrcEntries, POINTER_TO_RAW_DATA, 0x4fc00L);
+        put(rsrcEntries, VIRTUAL_ADDRESS, 0x53000L);
+        put(rsrcEntries, VIRTUAL_SIZE,0x588L);
+        put(rsrcEntries, CHARACTERISTICS, 1073741888L);
+        put(rsrcEntries, SIZE_OF_RAW_DATA,0x600L);
+
+        Map<SectionHeaderKey, StandardField> relocEntries = new HashMap<>();
+        expectedHeaders.add(new SectionHeader(relocEntries, 5, 0, ".reloc", 0));
+        put(relocEntries, POINTER_TO_RAW_DATA, 0x50200L);
+        put(relocEntries, VIRTUAL_ADDRESS, 0x54000L);
+        put(relocEntries, VIRTUAL_SIZE,0x2524L);
+        put(relocEntries, CHARACTERISTICS, 1107296320L);
+        put(relocEntries, SIZE_OF_RAW_DATA,0x2600L);
+
+        List<SectionHeader> actualHeaders = data.getSectionTable().getSectionHeaders();
+
+        assertEquals(actualHeaders.size(), expectedHeaders.size());
+        assertEquality(actualHeaders, expectedHeaders);
+        assertSectionNumbers(actualHeaders);
+    }
+
+    private void put(Map<SectionHeaderKey, StandardField> map, SectionHeaderKey key, long value) {
+        map.put(key, new StandardField(key, "", value, 0, 0) );
     }
 
     private void assertSectionNumbers(List<SectionHeader> list) {

@@ -35,7 +35,7 @@ public class Jar2ExeScannerTest {
     @Test
     public void scanResultTest() {
         Jar2ExeScanner scanner = new Jar2ExeScanner(new File(
-                TestreportsReader.RESOURCE_DIR + "/launch4jexe.exe"));
+                TestreportsReader.RESOURCE_DIR + "/testfiles/launch4jwrapped.exe"));
         List<MatchedSignature> result = scanner.scan();
         assertTrue(contains(result, "[Launch4j]"));
     }
