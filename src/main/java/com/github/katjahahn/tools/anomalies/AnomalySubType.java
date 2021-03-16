@@ -71,7 +71,7 @@ public enum AnomalySubType {
      */
     TOO_LARGE_OPTIONAL_HEADER(WRONG),
     /**
-     * The file has more than 96 sections.
+     * The file has more than 95 sections.
      */
     TOO_MANY_SECTIONS(STRUCTURE),
     /**
