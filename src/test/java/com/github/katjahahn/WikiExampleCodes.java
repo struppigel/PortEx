@@ -54,6 +54,7 @@ import com.github.katjahahn.parser.sections.rsrc.SubDirEntry;
 import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource;
 import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
+import com.github.katjahahn.tools.ImpHash;
 import com.github.katjahahn.tools.Overlay;
 import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.anomalies.Anomaly;
@@ -80,6 +81,15 @@ public class WikiExampleCodes {
 
     public static void main(String[] args) throws IOException {
         resourceSection();
+    }
+
+    public static void imphash() {
+        File file = new File("WinRar.exe");
+        // Get hash as byte array
+        byte[] imphashArray = ImpHash.calculate(file);
+        // Get hash as hex string
+        String imphashStr = ImpHash.createString(file);
+        System.out.println(imphashStr);
     }
 
     @SuppressWarnings("unused")
