@@ -17,9 +17,9 @@
  */
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.parser.PELoader
+import com.github.katjahahn.parser.{PEData, PELoader}
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.idata.ImportDLL
+import com.github.katjahahn.parser.sections.idata.{ImportDLL, NameImport, OrdinalImport}
 
 import java.io.File
 import java.security.MessageDigest
@@ -27,7 +27,7 @@ import scala.collection.JavaConverters._
 
 /**
  * Tool to calculate the imphash of a PE file
- * Based on https://github.com/erocarrera/pefile/blob/master/pefile.py
+ * Based on algorithm in https://github.com/erocarrera/pefile/blob/master/pefile.py
  * First mention of imphash in:
  * https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
  *
@@ -35,7 +35,7 @@ import scala.collection.JavaConverters._
  * <pre>
  * {@code
  * File file = new File("WinRar.exe");
- * String imphash = ImpHash.calculate(file);
+ * String imphash = ImpHash.createString(file);
  * System.out.println(imphash);
  * </pre>
  *
@@ -44,7 +44,7 @@ import scala.collection.JavaConverters._
 object ImpHash extends App {
 
   // has some oleaut ordinals!
-  val hash = calculate(new File("portextestfiles/testfiles/WMIX.exe"))
+  val hash = bytesToString(calculate(new File("portextestfiles/testfiles/WMIX.exe")))
   val expected = "cbc19a820310308f17b0a7c562d044e0"
   if (hash == expected) println("You got it! <3<3<3")
   else {
@@ -54,15 +54,23 @@ object ImpHash extends App {
 
   /**
    * Calculate the Imphash for the given PE file
-   * TODO test case
    *
    * @param file a Portable Executable
    * @return Imphash as string
    */
-  def calculate(file: File): String = {
-    // loading imports iff valid PE and import section
-    val data = PELoader.loadPE(file)
-    val loader = new SectionLoader(data)
+  def calculate(file : File): Array[Byte] = {
+    val pedata = PELoader.loadPE(file)
+    calculate(pedata)
+  }
+
+  /**
+   * Calculate the Imphash for the given PE file
+   *
+   * @param pedata Portable Executable data
+   * @return Imphash as string
+   */
+  def calculate(pedata: PEData): Array[Byte] = {
+    val loader = new SectionLoader(pedata)
     val maybeIdata = loader.maybeLoadImportSection()
     if (!maybeIdata.isPresent) throw new Exception("No imports!")
     val idata = maybeIdata.get()
@@ -70,8 +78,17 @@ object ImpHash extends App {
     val imports = idata.getImports().asScala
     val impstring = constructImportString(imports.toList)
     println(impstring)
-    md5String(impstring)
+    // calculate impHash
+    md5(impstring)
   }
+
+  /**
+   * Calculate the Imphash for the given PE file and create a string representation out of it
+   *
+   * @param file a Portable Executable
+   * @return Imphash as string
+   */
+  def createString(file : File) = bytesToString(calculate(file))
 
   /**
    * Create import string based on pefile algorithm
@@ -86,10 +103,12 @@ object ImpHash extends App {
       for {
         impDLL <- imports
         moduleName = stripExtension(impDLL.getName)
-        // TODO add named imports
-        ordImp <- impDLL.getOrdinalImports.asScala
+        imp <- impDLL.getAllImports.asScala
       } yield {
-        moduleName + "." + ordinalLookup(moduleName, ordImp.getOrdinal).getOrElse("ord" + ordImp.getOrdinal)
+        imp match {
+          case ord : OrdinalImport => moduleName + "." + ordinalLookup(moduleName, ord.getOrdinal).getOrElse("ord" + ord.getOrdinal)
+          case nam : NameImport => moduleName + "." + nam.getName
+        }
       }
     }.mkString(",").toLowerCase
   }
@@ -129,23 +148,19 @@ object ImpHash extends App {
   }
 
   /**
-   * Calculate MD5 hash for the string and convert to hex string representation
+   * Convert byte array to hex string.
    *
-   * @param text
-   * @return hex string of md5 hash
+   * @param arr the byte array
+   * @return hex string represenation of md5 hash
    */
-  private def md5String(text: String): String = {
-    md5(text).map(0xFF & _).map {
-      "%02x".format(_)
-    }.foldLeft("") {
-      _ + _
-    }
+  private def bytesToString(arr : Array[Byte]): String = {
+    arr.map(0xFF & _).map {"%02x".format(_) }.foldLeft("") {_ + _}
   }
 
   /**
    * Calculate MD5 hash of the string
    *
-   * @param text
+   * @param text the string to calculate MD5 for
    * @return MD5 hash as byte array
    */
   private def md5(text: String): Array[Byte] = {

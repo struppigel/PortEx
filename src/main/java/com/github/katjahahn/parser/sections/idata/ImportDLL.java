@@ -50,6 +50,11 @@ public class ImportDLL {
 	private final List<OrdinalImport> ordinalImports;
 
 	/**
+	 * Imports
+	 */
+	private final List<Import> allImports;
+
+	/**
 	 * Creates an ImportDLL instance
 	 * 
 	 * @param name
@@ -60,10 +65,26 @@ public class ImportDLL {
 	 *            the imports by ordinal
 	 */
 	public ImportDLL(String name, List<NameImport> nameImports,
-			List<OrdinalImport> ordinalImports) {
+			List<OrdinalImport> ordinalImports, List<Import> allImports) {
 		this.name = name;
 		this.nameImports = new ArrayList<>(nameImports);
 		this.ordinalImports = new ArrayList<>(ordinalImports);
+		this.allImports = new ArrayList<>(allImports);
+	}
+
+	/**
+	 * Creates an ImportDLL instance
+	 *
+	 * @param name
+	 *            the DLL's name
+	 * @param nameImports
+	 *            the imports by name
+	 * @param ordinalImports
+	 *            the imports by ordinal
+	 */
+	public ImportDLL(String name, List<NameImport> nameImports,
+					 List<OrdinalImport> ordinalImports) {
+		this(name, nameImports, ordinalImports, null);
 	}
 
 	public List<PhysicalLocation> getLocations() {
@@ -87,6 +108,7 @@ public class ImportDLL {
 		this.name = name;
 		this.nameImports = new ArrayList<>();
 		this.ordinalImports = new ArrayList<>();
+		this.allImports = new ArrayList<>();
 	}
 
 	/**
@@ -134,6 +156,15 @@ public class ImportDLL {
 	 */
 	public List<OrdinalImport> getOrdinalImports() {
 		return new ArrayList<>(ordinalImports);
+	}
+
+	/**
+	 * Returns a copied list of all imports, ordinals and by name.
+	 *
+	 * @return all imports, ordinal and by name
+	 */
+	public List<Import> getAllImports() {
+		return new ArrayList<>(allImports);
 	}
 
 	private static Optional<SymbolDescription> findSymbolByName(

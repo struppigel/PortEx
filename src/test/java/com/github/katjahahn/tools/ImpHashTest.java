@@ -33,17 +33,21 @@ public class ImpHashTest {
 
     private File ordfile;
 
+    private File mixedfile;
+
     @BeforeClass
     public void prepare() throws IOException, NoSuchAlgorithmException {
         this.stringsfile = new File(TestreportsReader.RESOURCE_DIR
                 + TestreportsReader.TEST_FILE_DIR + "/strings.exe");
         this.ordfile = new File(TestreportsReader.RESOURCE_DIR
                 + "/corkami/impbyord.exe");
+        this.mixedfile = new File(TestreportsReader.RESOURCE_DIR + TestreportsReader.TEST_FILE_DIR + "/WMIX.exe");
     }
 
     @Test
     public void calculate() {
-        assertEquals(ImpHash.calculate(stringsfile), "cdc0bddd514e6d3c047926379e3c9a62");
-        assertEquals(ImpHash.calculate(ordfile), "806635f2551e40916dcfd4c38c761baa");
+        assertEquals(ImpHash.createString(stringsfile), "cdc0bddd514e6d3c047926379e3c9a62");
+        assertEquals(ImpHash.createString(ordfile), "806635f2551e40916dcfd4c38c761baa");
+        assertEquals(ImpHash.createString(mixedfile), "cbc19a820310308f17b0a7c562d044e0");
     }
 }

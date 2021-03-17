@@ -96,7 +96,8 @@ class DirectoryEntry (
   def toImportDLL(): ImportDLL = {
     val nameImports = lookupTableEntries collect { case i: NameEntry => i.toImport.asInstanceOf[NameImport] }
     val ordImports = lookupTableEntries collect { case i: OrdinalEntry => i.toImport.asInstanceOf[OrdinalImport] }
-    new ImportDLL(name, nameImports.asJava, ordImports.asJava)
+    val allImports = lookupTableEntries.map(_.toImport)
+    new ImportDLL(name, nameImports.asJava, ordImports.asJava, allImports.asJava)
   }
 
   def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryEntryKey])
