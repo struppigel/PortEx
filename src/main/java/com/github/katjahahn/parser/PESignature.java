@@ -1,12 +1,12 @@
-/*******************************************************************************
+/* ******************************************************************************
  * Copyright 2014 Katja Hahn
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,18 +15,18 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.ByteArrayUtil.*;
-import static com.github.katjahahn.parser.IOUtil.*;
+import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.google.common.base.Optional;
-import com.github.katjahahn.parser.ScalaIOUtil;
+import static com.github.katjahahn.parser.ByteArrayUtil.bytesToInt;
+import static com.github.katjahahn.parser.ByteArrayUtil.longToDWord;
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
 
 /**
  * Reads the offset of the PE signature and the signature itself.
@@ -205,8 +205,8 @@ public class PESignature {
 	/**
 	 * Throws FileFormatException and sets peOffset to absent iff b is true.
 	 * 
-	 * @param b
-	 * @throws FileFormatException
+	 * @param b expression
+	 * @throws FileFormatException if expression is true
 	 */
 	private void throwIf(boolean b) throws FileFormatException {
 		if (b) {

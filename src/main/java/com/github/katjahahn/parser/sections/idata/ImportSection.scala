@@ -17,26 +17,18 @@
  */
 package com.github.katjahahn.parser.sections.idata
 
-import ImportSection._
-import DirectoryEntryKey._
-import scala.collection.JavaConverters._
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
-import java.io.File
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.IOUtil.NL
+import com.github.katjahahn.parser._
 import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber._
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.parser.IOUtil.{ NL }
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.optheader.{OptionalHeader, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey._
+import org.apache.logging.log4j.LogManager
+
+import java.io.File
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * Represents the import section, fetches information about the data directory
@@ -52,12 +44,12 @@ class ImportSection private (
   /**
    * {@inheritDoc}
    */
-  override def getOffset(): Long = offset
+  override def getOffset: Long = offset
 
   /**
    * {@inheritDoc}
    */
-  override def isEmpty(): Boolean = directoryTable.isEmpty || (directoryTable.forall(_.getEntries.isEmpty))
+  override def isEmpty: Boolean = directoryTable.isEmpty || directoryTable.forall(_.getEntries().isEmpty)
 
   /**
    * Returns the directory table entries of the import section.
@@ -65,30 +57,30 @@ class ImportSection private (
    *
    * @return a list of the directory table entries of the import section
    */
-  def getDirectory(): java.util.List[DirectoryEntry] = directoryTable.asJava
+  def getDirectory: java.util.List[DirectoryEntry] = directoryTable.asJava
 
   /**
    * Generates a description string of all entries
    */
-  private def entriesDescription(): String =
+  private def entriesDescription: String =
     (for (e <- directoryTable)
       yield e.getInfo() + NL + NL).mkString
 
   /**
    * @return a list of all import entries found
    */
-  def getImports(): java.util.List[ImportDLL] =
-    directoryTable.map(e => e.toImportDLL).asJava
+  def getImports: java.util.List[ImportDLL] =
+    directoryTable.map(e => e.toImportDLL()).asJava
 
   /**
    *
    * @return a list with all locations the import information has been written to.
    */
   //TODO include IAT and ILT, add string locations
-  def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
+  def getPhysicalLocations: java.util.List[PhysicalLocation] = {
     val ranges = Location.mergeContinuous(directoryTable.foldRight(
         List[PhysicalLocation]())((entry, list) => entry.getPhysicalLocations ::: list))
-    ranges.toList.asJava
+    ranges.asJava
   }
 
   /**
@@ -96,7 +88,7 @@ class ImportSection private (
    *
    * @return a description of all entries in the import section
    */
-  override def getInfo(): String =
+  override def getInfo: String =
     s"""|--------------
 	|Import section
 	|--------------
@@ -113,7 +105,7 @@ object ImportSection {
   private var relOffsetMax = 0L
 
   def apply(li: LoadInfo): ImportSection =
-    apply(li.memoryMapped, li.va, li.data.getOptionalHeader(), li.data.getFile().length(), li.fileOffset)
+    apply(li.memoryMapped, li.va, li.data.getOptionalHeader, li.data.getFile.length(), li.fileOffset)
 
   def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
     optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {
@@ -128,11 +120,11 @@ object ImportSection {
           fileSize, fileOffset)
     } catch {
       case e: FailureEntryException => logger.warn(
-          "Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
+          "Invalid LookupTableEntry found, parsing aborted, " + e.getMessage)
     }
     //filter empty directoryTableEntries, they are of no use and probably because
     //of collapsed imports or other malformations, example: tinype
-    directoryTable = directoryTable.filterNot(_.getLookupTableEntries.isEmpty())
+    directoryTable = directoryTable.filterNot(_.getLookupTableEntries().isEmpty())
     new ImportSection(directoryTable, fileOffset)
   }
 
@@ -164,7 +156,7 @@ object ImportSection {
       }
       var offset = iRVA - virtualAddress
       var relOffset = iRVA
-      var iVA = iRVA + optHeader.get(WindowsEntryKey.IMAGE_BASE)
+      val iVA = iRVA + optHeader.get(WindowsEntryKey.IMAGE_BASE)
       logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " + 
           mmbytes.length() + " virtualAddress " + virtualAddress)
       val EntrySize = optHeader.getMagicNumber match {
@@ -193,7 +185,7 @@ object ImportSection {
 
   /**
    * Parses all entries of the import section and writes them into the
-   * {@link #directoryTable}
+   * {@link directoryTable}
    */
   private def readDirEntries(mmbytes: MemoryMappedPE,
     virtualAddress: Long, fileOffset: Long): List[DirectoryEntry] = {
@@ -216,12 +208,6 @@ object ImportSection {
     directoryTable.toList
   }
 
-  /**
-   * Returns the string for the given directory table entry
-   *
-   * @param entry the directory table entry whose name shall be returned
-   * @return string
-   */
   private def getASCIIName(nameRVA: Int, virtualAddress: Long,
     mmbytes: MemoryMappedPE): String = {
     val offset = nameRVA
@@ -301,5 +287,5 @@ object ImportSection {
    */
   private final val ENTRY_SIZE = 20
 
-  private final val logger = LogManager.getLogger(ImportSection.getClass().getName())
+  private final val logger = LogManager.getLogger(ImportSection.getClass.getName)
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/* ******************************************************************************
  * Copyright 2014 Katja Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -84,7 +84,7 @@ public class ImportDLL {
 	 */
 	public ImportDLL(String name, List<NameImport> nameImports,
 					 List<OrdinalImport> ordinalImports) {
-		this(name, nameImports, ordinalImports, null);
+		this(name, nameImports, ordinalImports, new ArrayList<>());
 	}
 
 	public List<PhysicalLocation> getLocations() {
