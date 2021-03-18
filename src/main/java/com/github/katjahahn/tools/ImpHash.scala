@@ -17,7 +17,7 @@
  */
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.parser.{PEData, PELoader}
+import com.github.katjahahn.parser.{FileFormatException, PEData, PELoader}
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.idata.{ImportDLL, NameImport, OrdinalImport}
 
@@ -72,7 +72,7 @@ object ImpHash extends App {
   def calculate(pedata: PEData): Array[Byte] = {
     val loader = new SectionLoader(pedata)
     val maybeIdata = loader.maybeLoadImportSection()
-    if (!maybeIdata.isPresent) throw new Exception("No imports!")
+    if (!maybeIdata.isPresent) throw new FileFormatException("No imports!")
     val idata = maybeIdata.get()
     // construct import string
     val imports = idata.getImports.asScala
@@ -88,7 +88,13 @@ object ImpHash extends App {
    * @param file a Portable Executable
    * @return Imphash as string
    */
-  def createString(file : File) = bytesToString(calculate(file))
+  def createString(file : File) = {
+    try {
+      bytesToString(calculate(file))
+    } catch {
+      case _ : FileFormatException => "No imports!"
+    }
+  }
 
   /**
    * Create import string based on pefile algorithm

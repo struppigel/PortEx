@@ -17,39 +17,26 @@
  */
 package com.github.katjahahn.tools
 
-import scala.PartialFunction._
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.ScalaIOUtil.bytes2hex
-import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.sections.SectionHeaderKey._
-import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
-import com.github.katjahahn.parser.ByteArrayUtil
-import java.security.MessageDigest
-import com.github.katjahahn.tools.sigscanner.SignatureScanner
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader}
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
-import java.io.File
-import com.github.katjahahn.parser.sections.SectionCharacteristic
+import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
+import com.github.katjahahn.parser.sections.SectionHeaderKey._
+import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser.sections.debug.DebugType
-import com.github.katjahahn.tools.sigscanner.FileTypeScanner
 import com.github.katjahahn.parser.sections.rsrc.Resource
-import com.github.katjahahn.parser.IOUtil
-import java.io.RandomAccessFile
-import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource
 import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
-import com.google.common.base.Optional
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
+import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
+
+import java.io.{File, RandomAccessFile}
+import java.security.MessageDigest
+import scala.collection.JavaConverters._
 
 /**
  * Utility for easy creation of PE file reports.
  *
- * @author Katja Hahn
+ * @author Karsten Hahn
  */
 class ReportCreator(private val data: PEData) {
 
@@ -58,7 +45,7 @@ class ReportCreator(private val data: PEData) {
    */
   val maxSec = 4
 
-  val reportTitle = title("Report For " + data.getFile.getName) + NL +
+  val reportTitle : String = title("Report For " + data.getFile.getName) + NL +
     s"file size ${hexString(data.getFile.length)}" + NL +
     s"full path ${data.getFile.getAbsolutePath}" + NL + NL
 
@@ -74,14 +61,28 @@ class ReportCreator(private val data: PEData) {
    */
   def setShowAll(all: Boolean): Unit = { showAll = all }
 
+  /**
+   * Generate repors for Section Table, MSDOS header, COFF File Header and Optional Header
+   * @return description for the headers
+   */
   def headerReports(): String = secTableReport + msdosHeaderReport +
     coffHeaderReport + optHeaderReport
 
+  /**
+   * Generate report for delay imports, exports, resources, debug.
+   * If showAll is true, generate also bound imports and relocactions report.
+   * @return reports for special sections
+   */
   def specialSectionReports(): String = importsReport +
-    { if (showAll) boundImportsReport else "" } +
+    { if (showAll) boundImportsReport() else "" } +
     delayImportsReport + exportsReport + resourcesReport + debugReport +
-    { if (showAll) relocReport else "" }
+    { if (showAll) relocReport() else "" }
 
+  /**
+   * Generate reports for overlay, anomalies, PEID signatures, file and import hashes.
+   * If showAll is true, also generate report for Jar2Exe scan and file scoring
+   * @return additional reports
+   */
   def additionalReports(): String = overlayReport +
     anomalyReport + peidReport + hashReport +
     { if (showAll) jar2ExeReport + maldetReport else "" }
@@ -91,19 +92,24 @@ class ReportCreator(private val data: PEData) {
    */
   def printReport(): Unit = {
     print(reportTitle)
-    print(headerReports)
-    print(specialSectionReports)
-    print(additionalReports)
+    print(headerReports())
+    print(specialSectionReports())
+    print(additionalReports())
   }
 
+  /**
+   * Generate report for file and import hashes.
+   * @return description of file hashes and imphash
+   */
   def hashReport(): String = {
     val hasher = new Hasher(data)
     val buf = new StringBuffer()
     val sha256 = MessageDigest.getInstance("SHA-256")
     val md5 = MessageDigest.getInstance("MD5")
     buf.append(title("Hashes") + NL)
-    buf.append("MD5:    " + hash(hasher.fileHash(md5)) + NL)
-    buf.append("SHA256: " + hash(hasher.fileHash(sha256)) + NL + NL)
+    buf.append("MD5:     " + hash(hasher.fileHash(md5)) + NL)
+    buf.append("SHA256:  " + hash(hasher.fileHash(sha256)) + NL)
+    buf.append("ImpHash: " + ImpHash.createString(data.getFile) + NL + NL)
     val colWidth = 10
     val shaWidth = 64
     val padLength = "1. .rdata    ".length
@@ -111,7 +117,7 @@ class ReportCreator(private val data: PEData) {
     buf.append(tableHeader + NL)
     buf.append(pad("", tableHeader.length, "-") + NL)
     val table = data.getSectionTable
-    for (number <- 1 to table.getNumberOfSections()) {
+    for (number <- 1 to table.getNumberOfSections) {
       val header = table.getSectionHeader(number)
       val secName = filteredString(header.getName)
       buf.append(pad(number + ". " + secName, padLength, " ") + pad("MD5", colWidth, " ") +
@@ -125,6 +131,10 @@ class ReportCreator(private val data: PEData) {
 
   private def hash(array: Array[Byte]): String = ByteArrayUtil.byteToHex(array, "")
 
+  /**
+   * Generate report for the debug structure
+   * @return debug description
+   */
   def debugReport(): String = {
     val loader = new SectionLoader(data)
     val maybeDebug = loader.maybeLoadDebugSection()
@@ -139,7 +149,7 @@ class ReportCreator(private val data: PEData) {
       val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
       buf.append(tableHeader + NL)
       buf.append(pad("", tableHeader.length, "-") + NL)
-      val entries = debug.getDirectoryTable.values().asScala.toList.sortBy(e => e.getOffset)
+      val entries = debug.getDirectoryTable().values().asScala.toList.sortBy(e => e.getOffset)
       for (entry <- entries) {
         buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
           pad(hexString(entry.getOffset), colWidth, " ") + NL)
@@ -148,7 +158,7 @@ class ReportCreator(private val data: PEData) {
         try {
           buf.append(debug.getCodeView().getInfo())
         } catch {
-          case e: IllegalStateException =>
+          case _ : IllegalStateException =>
             buf.append("-invalid codeview structure-")
         }
       }
@@ -157,6 +167,10 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
+  /**
+   * Generate relocations report
+   * @return relocations description
+   */
   def relocReport(): String = {
     val loader = new SectionLoader(data)
     val maybeReloc = loader.maybeLoadRelocSection()
@@ -169,6 +183,10 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
+  /**
+   * Generate report for the PE imports
+   * @return description of PE imports
+   */
   def importsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeImports = loader.maybeLoadImportSection()
@@ -184,6 +202,10 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
+  /**
+   * Generate report for bounds imports
+   * @return description of bounds imports
+   */
   def boundImportsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeImports = loader.maybeLoadBoundImportSection()
@@ -191,7 +213,7 @@ class ReportCreator(private val data: PEData) {
       val boundImports = maybeImports.get
       val buf = new StringBuffer()
       buf.append(title("Bound Imports") + NL)
-      val imports = boundImports.getImports.asScala
+      val imports = boundImports.getImports().asScala
       for (importDll <- imports) {
         buf.append(importDll + NL)
       }
@@ -199,6 +221,10 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
+  /**
+   * Generate report for delay load imports
+   * @return description of delay load imports
+   */
   def delayImportsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeImports = loader.maybeLoadDelayLoadSection()
@@ -206,7 +232,7 @@ class ReportCreator(private val data: PEData) {
       val delayLoad = maybeImports.get
       val buf = new StringBuffer()
       buf.append(title("Delay-Load Imports") + NL)
-      val imports = delayLoad.getImports.asScala
+      val imports = delayLoad.getImports().asScala
       for (importDll <- imports) {
         buf.append(importDll + NL)
       }
@@ -214,6 +240,10 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
+  /**
+   * Generate report for exported functions
+   * @return description of exports
+   */
   def exportsReport(): String = {
     val loader = new SectionLoader(data)
     val maybeExports = loader.maybeLoadExportSection()
@@ -221,7 +251,7 @@ class ReportCreator(private val data: PEData) {
       val edata = maybeExports.get
       val buf = new StringBuffer()
       buf.append(title("Exports") + NL)
-      val exports = edata.getExportEntries.asScala
+      val exports = edata.getExportEntries().asScala
       for (export <- exports) {
         buf.append(export + NL)
       }
@@ -229,6 +259,10 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
+  /**
+   * Generate report for PE resources
+   * @return description of resources
+   */
   def resourcesReport(): String = {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
@@ -236,14 +270,14 @@ class ReportCreator(private val data: PEData) {
       val rsrc = maybeRSRC.get
       val buf = new StringBuffer()
       buf.append(title("Resources") + NL)
-      val resources = rsrc.getResources.asScala
+      val resources = rsrc.getResources().asScala
       for (resource <- resources) {
-        var offset = resource.rawBytesLocation.from
-        var fileTypes = FileTypeScanner(data.getFile).scanAt(offset)
-        var longTypes = fileTypes.
+        val offset = resource.rawBytesLocation.from
+        val fileTypes = FileTypeScanner(data.getFile).scanAt(offset)
+        val longTypes = fileTypes.
           map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
         buf.append(resource)
-        if (!longTypes.isEmpty) {
+        if (longTypes.nonEmpty) {
           buf.append(", signatures: " + longTypes.mkString(", "))
         }
         buf.append(NL)
@@ -257,7 +291,7 @@ class ReportCreator(private val data: PEData) {
 
   private def manifestReport(resources: List[Resource]): String = {
 
-    val MAX_MANIFEST_SIZE = 0x2000;
+    val MAX_MANIFEST_SIZE = 0x2000
 
     def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
 
@@ -293,7 +327,7 @@ class ReportCreator(private val data: PEData) {
     val maybeRSRC = loader.maybeLoadResourceSection()
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
-      val resources = rsrc.getResources.asScala
+      val resources = rsrc.getResources().asScala
       manifestReport(resources.toList)
     } else ""
   }
@@ -303,7 +337,7 @@ class ReportCreator(private val data: PEData) {
     val maybeRSRC = loader.maybeLoadResourceSection()
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
-      val resources = rsrc.getResources.asScala
+      val resources = rsrc.getResources().asScala
       versionReport(resources.toList)
     } else ""
   }
@@ -321,7 +355,7 @@ class ReportCreator(private val data: PEData) {
 
   def jar2ExeReport(): String = {
     val scanner = new Jar2ExeScanner(data.getFile)
-    if (scanner.scan.isEmpty()) ""
+    if (scanner.scan().isEmpty) ""
     else title("Jar to EXE Wrapper Scan") + NL + scanner.createReport + NL
   }
 
@@ -331,7 +365,7 @@ class ReportCreator(private val data: PEData) {
       (scoring.malwareProbability * 100.0) + " %"
     val report2 = "File Score: " + scoring.fileScore() + NL + NL +
       "Score based on: " + NL +
-      scoring._scoreParts.map(m => m._1 + ": " + m._2).mkString(NL)
+      scoring._scoreParts().map(m => m._1 + ": " + m._2).mkString(NL)
     report1 + NL + report2 + NL + NL
   }
 
@@ -349,7 +383,7 @@ class ReportCreator(private val data: PEData) {
   }
 
   def peidReport(): String = {
-    val signatures = SignatureScanner.newInstance().scanAll(data.getFile, true)
+    val signatures = SignatureScanner.newInstance().scanAll(data.getFile)
     if (signatures.isEmpty) ""
     else title("PEID Signatures") + NL + signatures.asScala.mkString(NL) + NL + NL
   }
@@ -359,7 +393,7 @@ class ReportCreator(private val data: PEData) {
     if (anomalies.isEmpty) ""
     else title("Anomalies") + NL +
       (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
-      ("* " + anomalies.map(a => a.toString).mkString(NL + "* ")) + NL + NL
+      ("* " + anomalies.map(a => a.toString()).mkString(NL + "* ")) + NL + NL
   }
 
   def msdosHeaderReport(): String = {
@@ -387,11 +421,11 @@ class ReportCreator(private val data: PEData) {
     buf.append(title("COFF File Header") + NL)
     val padLength1 = "time date stamp  ".length
     buf.append(pad("time date stamp", padLength1, " ") +
-      pad(coff.getTimeDate().toLocaleString(), colWidth, " ") + NL)
+      pad(coff.getTimeDate.toLocaleString, colWidth, " ") + NL)
     buf.append(pad("machine type", padLength1, " ") +
-      pad(coff.getMachineType.getDescription(), colWidth, " ") + NL)
+      pad(coff.getMachineType.getDescription, colWidth, " ") + NL)
     buf.append(pad("characteristics", padLength1, " ") + "* " +
-      coff.getCharacteristics().asScala.map(_.getDescription).mkString(NL + pad("", padLength1, " ") + "* "))
+      coff.getCharacteristics.asScala.map(_.getDescription).mkString(NL + pad("", padLength1, " ") + "* "))
 
     buf.append(NL + NL)
     val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
@@ -414,7 +448,7 @@ class ReportCreator(private val data: PEData) {
     val padLength = "pointer to symbol table (deprecated) ".length
     val subsystem = "Subsystem:           " + opt.getSubsystem.getDescription
     val dllCharacteristics = {
-      if (opt.getDllCharacteristics.isEmpty()) "No DLL Characteristics"
+      if (opt.getDllCharacteristics.isEmpty) "No DLL Characteristics"
       else "DLL Characteristics  * " +
         opt.getDllCharacteristics.asScala.map(_.getDescription).mkString(NL + "                     * ")
     }
@@ -455,18 +489,18 @@ class ReportCreator(private val data: PEData) {
     }
     val padLengthDataDir = "delay import descriptor ".length
     val dataDirHeader = pad("data directory", padLengthDataDir, " ") + pad("rva", colWidth, " ") + pad("-> offset", colWidth, " ") + pad("size", colWidth, " ") + pad("in section", colWidth, " ") + pad("file offset", colWidth, " ")
-    val dataDirs = opt.getDataDirectory().values.asScala.toList.sortBy(e => e.getTableEntryOffset)
+    val dataDirs = opt.getDataDirectory.values.asScala.toList.sortBy(e => e.getTableEntryOffset)
     val dataDirTableLine = pad("", dataDirHeader.length, "-") + NL
     buf.append(NL + dataDirHeader + NL + dataDirTableLine)
     for (entry <- dataDirs) {
       val description = entry.getKey.toString
       val maybeHeader = secLoader.maybeGetSectionHeader(entry.getKey)
-      val dataVA = entry.getVirtualAddress()
-      val dataOffset = new SectionLoader(data).maybeGetFileOffset(entry.getVirtualAddress())
-      val dataOffsetStr = if (dataOffset.isPresent()) hexString(dataOffset.get()) else "n.a."
+      val dataVA = entry.getVirtualAddress
+      val dataOffset = new SectionLoader(data).maybeGetFileOffset(entry.getVirtualAddress)
+      val dataOffsetStr = if (dataOffset.isPresent) hexString(dataOffset.get()) else "n.a."
       val inSection = if (maybeHeader.isPresent) maybeHeader.get.getNumber + " " + maybeHeader.get.getName else "-"
       buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(dataVA), colWidth, " ") +
-        pad(dataOffsetStr, colWidth, " ") + pad(hexString(entry.getDirectorySize()), colWidth, " ") +
+        pad(dataOffsetStr, colWidth, " ") + pad(hexString(entry.getDirectorySize), colWidth, " ") +
         pad(inSection, colWidth, " ") + pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
     }
     buf.toString + NL
@@ -480,8 +514,8 @@ class ReportCreator(private val data: PEData) {
    */
   //TODO duplicate of SectionTableScanning method
   private def filteredString(string: String): String = {
-    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
-    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
+    val controlCode: Char => Boolean = (c: Char) => c <= 32 || c == 127
+    val extendedCode: Char => Boolean = (c: Char) => c <= 32 || c > 127
     string.filterNot(controlCode).filterNot(extendedCode)
   }
 
@@ -493,16 +527,16 @@ class ReportCreator(private val data: PEData) {
     build.append(title("Section Table"))
     for (secs <- allSections.grouped(maxSec).toList) {
       val sections = secs.toList
-      val tableHeader = sectionEntryLine(sections, "", (s: SectionHeader) => s.getNumber() + ". " + filteredString(s.getName))
+      val tableHeader = sectionEntryLine(sections, "", (s: SectionHeader) => s.getNumber + ". " + filteredString(s.getName))
       val tableLine = pad("", tableHeader.length, "-") + NL
       build.append(tableHeader + tableLine)
       val entropy = new ShannonEntropy(data)
       build.append(sectionEntryLine(sections, "Entropy", (s: SectionHeader) =>
-        "%1.2f" format (entropy.forSection(s.getNumber()) * 8)))
+        "%1.2f" format (entropy.forSection(s.getNumber) * 8)))
       build.append(sectionEntryLine(sections, "Pointer To Raw Data",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RAW_DATA))))
       build.append(sectionEntryLine(sections, "-> aligned (act. start)",
-        (s: SectionHeader) => if (s.get(POINTER_TO_RAW_DATA) != s.getAlignedPointerToRaw())
+        (s: SectionHeader) => if (s.get(POINTER_TO_RAW_DATA) != s.getAlignedPointerToRaw)
           hexString(s.getAlignedPointerToRaw) else ""))
       build.append(sectionEntryLine(sections, "Size Of Raw Data",
         (s: SectionHeader) => hexString(s.get(SIZE_OF_RAW_DATA))))
@@ -510,7 +544,7 @@ class ReportCreator(private val data: PEData) {
         (s: SectionHeader) => if (s.get(SIZE_OF_RAW_DATA) != loader.getReadSize(s))
           hexString(loader.getReadSize(s)) else ""))
       build.append(sectionEntryLine(sections, "Physical End",
-        (s: SectionHeader) => hexString(loader.getReadSize(s) + s.getAlignedPointerToRaw())))
+        (s: SectionHeader) => hexString(loader.getReadSize(s) + s.getAlignedPointerToRaw)))
       build.append(sectionEntryLine(sections, "Virtual Address",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_ADDRESS))))
       build.append(sectionEntryLine(sections, "-> aligned",
@@ -531,7 +565,7 @@ class ReportCreator(private val data: PEData) {
         (s: SectionHeader) => hexString(s.get(NUMBER_OF_LINE_NUMBERS))))
       for (ch <- SectionCharacteristic.values) {
         build.append(sectionEntryLine(sections, ch.shortName(),
-          (s: SectionHeader) => if (s.getCharacteristics().contains(ch)) "x" else ""))
+          (s: SectionHeader) => if (s.getCharacteristics.contains(ch)) "x" else ""))
       }
       build.append(NL)
     }
@@ -543,14 +577,14 @@ class ReportCreator(private val data: PEData) {
     val padLength = "POINTER_TO_LINE_NUMBERS  ".length
     val padding = pad(name, padLength, " ")
     val sectionValues = sections.map(s => pad(conv(s), colWidth, " ")).mkString(" ")
-    if (sectionValues.trim.isEmpty()) "" else
+    if (sectionValues.trim.isEmpty) "" else
       padding + sectionValues + NL
   }
 
   private def title(str: String): String = str + NL + pad("", str.length, "*") + NL
 
   private def pad(string: String, length: Int, padStr: String): String = {
-    val padding = (for (i <- string.length until length by padStr.length)
+    val padding = (for (_ <- string.length until length by padStr.length)
       yield padStr).mkString
     string + padding
   }
