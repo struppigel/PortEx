@@ -50,10 +50,10 @@ To use a local build, add the library as follows:
 ```
 <dependency>
    <groupId>com.github.katjahahn</groupId>
-   <artifactId>portex_2.10</artifactId>
-   <version>2.0.9</version>
+   <artifactId>portex_2.12</artifactId>
+   <version>3.0.0</version>
    <scope>system</scope>
-   <systemPath>$PORTEXDIR/target/scala-2.10/portex_2.10-2.0.9.jar</systemPath>
+   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-3.0.0.jar</systemPath>
 </dependency> 
 ```
 
@@ -62,7 +62,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "com.github.katjahahn" % "portex_2.10" % "2.0.9"
+libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "3.0.0"
 ```
 
 ### Building PortEx
