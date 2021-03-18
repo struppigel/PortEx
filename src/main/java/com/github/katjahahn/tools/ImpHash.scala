@@ -75,7 +75,7 @@ object ImpHash extends App {
     if (!maybeIdata.isPresent) throw new Exception("No imports!")
     val idata = maybeIdata.get()
     // construct import string
-    val imports = idata.getImports().asScala
+    val imports = idata.getImports.asScala
     val impstring = constructImportString(imports.toList)
     println(impstring)
     // calculate impHash

@@ -105,7 +105,7 @@ object DelayLoadSection {
     val entrybytes = mmbytes.slice(from, until)
     if (entrybytes.length < delayDirSize) return None
 
-    /**
+    /*
      * @return true iff the given entry is not the last empty entry or null entry
      */
     def isEmpty(entry: DelayLoadDirectoryEntry): Boolean =

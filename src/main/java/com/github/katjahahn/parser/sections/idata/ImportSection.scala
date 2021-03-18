@@ -232,7 +232,7 @@ object ImportSection {
     val entrybytes = mmbytes.slice(from, until)
     if (entrybytes.length < ENTRY_SIZE) return None
 
-    /**
+    /*
      * @return true iff the given entry is not the last empty entry or null entry
      */
     def isEmpty(entry: DirectoryEntry): Boolean =

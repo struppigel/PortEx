@@ -284,9 +284,8 @@ public final class PELoader {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException, AWTException {
-        logger.entry();
-          
-        File file = new File("/home/karsten/exec_.exe_repaired"); 
+
+        File file = new File("/home/karsten/exec_.exe_repaired");
         SectionLoader secLoad = new SectionLoader(file);
         ExportSection expSec = secLoad.loadExportSection();
 
