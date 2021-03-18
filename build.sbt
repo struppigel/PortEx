@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "3.0.0-SNAPSHOT"
+version := "3.0.0"
 
 scalaVersion := "2.12.13"
 
@@ -29,25 +29,34 @@ sonatypeSettings
 // Your project organization (package name)
 organization := "com.github.katjahahn"
 
-// To sync with Maven central, you need to supply the following information:
-pomExtra := {
-  <url>https://github.com/katjahahn/PortEx</url>
-  <licenses>
-    <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
-  <scm>
-    <connection>scm:katjahahn/PortEx.git</connection>
-    <developerConnection>scm:git:git@github.com:katjahahn/PortEx.git</developerConnection>
-    <url>github.com/katjahahn/PortEx</url>
-  </scm>
-  <developers>
-    <developer>
-      <id>katjahahn</id>
-      <name>Katja Hahn</name>
-      <url>https://github.com/katjahahn/PortEx</url>
-    </developer>
-  </developers>
+pomIncludeRepository := { _ => false }
+
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
+
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/katjahahn/PortEx.git"),
+    "scm:git@github.com:katjahahn/PortEx.git"
+  )
+)
+
+developers := List(
+  Developer(
+    id    = "struppigel",
+    name  = "Karsten Hahn",
+    email = "struppigel@googlemail.com",
+    url   = url("https://github.com/katjahahn/PortEx")
+  )
+)
+
+licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+
+description := "Java library to parse Portable Executable files"
+
+homepage := Some(url("https://github.com/katjahahn/PortEx"))
+
+publishMavenStyle := true
