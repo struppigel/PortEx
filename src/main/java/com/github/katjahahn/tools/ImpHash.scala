@@ -77,7 +77,6 @@ object ImpHash extends App {
     // construct import string
     val imports = idata.getImports.asScala
     val impstring = constructImportString(imports.toList)
-    println(impstring)
     // calculate impHash
     md5(impstring)
   }

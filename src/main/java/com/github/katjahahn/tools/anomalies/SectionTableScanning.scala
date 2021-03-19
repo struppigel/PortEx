@@ -17,23 +17,17 @@
  */
 package com.github.katjahahn.tools.anomalies
 
-import java.util.Arrays
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
-import scala.collection.immutable.HashMap
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.sections.SectionCharacteristic
-import com.github.katjahahn.parser.sections.SectionCharacteristic._
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.parser.IOUtil.NL
-import AnomalySubType._
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
 import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.tools.ShannonEntropy
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.sections.SectionCharacteristic._
+import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionHeaderKey, SectionLoader}
+import com.github.katjahahn.tools.Overlay
+import com.github.katjahahn.tools.anomalies.AnomalySubType._
+
+import scala.collection.JavaConverters._
+import scala.collection.immutable.HashMap
+import scala.collection.mutable.ListBuffer
 
 /**
  * Scans the Section Table for anomalies.
@@ -43,6 +37,10 @@ import com.github.katjahahn.tools.ShannonEntropy
 trait SectionTableScanning extends AnomalyScanner {
   
   private val packerNames = HashMap(
+       //Aspack
+      ".aspack" -> "Aspack packer", ".adata" -> "Aspack/Armadillo packer",
+      "ASPack" -> "Aspack packer", ".ASPack" -> "Aspack packer",
+      ".asspck" -> "Aspack packer",
       //common
       ".arch" -> "Alpha-architecture section",
       ".bindat" -> "Binary data, e.g., by downware installers",
@@ -62,26 +60,32 @@ trait SectionTableScanning extends AnomalyScanner {
       "CODE" -> "Code section (Borland)",
       "DATA" -> "Data section (Borland)",
       "INIT" -> "INIT section of drivers",
+      "IPPCode" -> "OpenCV", "IPPDATA" -> "OpenCV",
+      "_NVTEXT3" -> "NVidia",
       "PAGE" -> "PAGE section of drivers",
       "t.Policy" -> "Trustlet section with metadata for secure kernel policy",
-      //Aspack
-      ".aspack" -> "Aspack packer", ".adata" -> "Aspack/Armadillo packer", 
-      "ASPack" -> "Aspack packer", ".ASPack" -> "Aspack packer", 
-      ".asspck" -> "Aspack packer",
+      "TulipLog" -> "Hewlet-Packard test/verification tools",
       //Other
-      ".ccg" -> "CCG Packer (Chinese)",
       "BitArts" -> "Crunch 2.0 Packer",
-      "DAStub" -> "DAStub Dragon Armor protector",
+      ".boom" -> "The Boomerang List Builder ((config+exe xored with a single byte key 0x77))",
+      ".ccg" -> "CCG Packer (Chinese)",
       ".charmve" -> "Added by the PIN tool",
+      "DAStub" -> "DAStub Dragon Armor protector",
       // Enigma Virtual Box
       ".enigma1" -> "Enigma Virtual Box protector",
       ".enigma2" -> "Enigma Virtual Box protector",
       //Other
+      ".ecode" -> "Easy Programming Language",
       "!EPack" -> "EPack packer",
-      "" -> "kkrunchy packer",
+      ".gentee" -> "Gentee installer",
+      ".imrsv" -> "Windows desktop bands application",
+      "kkrunchy" -> "kkrunchy packer",
+      "lz32.dll" -> "Crinkler",
       ".mackt" -> "ImpRec-created section, this file was patched/cracked",
       ".MaskPE" -> "MaskPE Packer",
       "MEW" -> "MEW packer",
+      //Firseria
+      ".mnbvcx1" -> "Firseria PUP downloader", ".mnbvcx2" -> "Firseria PUP downloader",
       //MPRESS
       ".MPRESS1" -> "MPRESS Packer", ".MPRESS2" -> "MPRESS Packer",
       //Neolite
@@ -98,10 +102,14 @@ trait SectionTableScanning extends AnomalyScanner {
       //PECompact
       "PEC2TO" -> "PECompact packer","PEC2" -> "PECompact packer",
       "pec1" -> "PECompact packer","pec2" -> "PECompact packer",
+      "pec3" -> "PECompact packer","pec4" -> "PECompact packer",
+      "pec5" -> "PECompact packer","pec6" -> "PECompact packer",
+      "pec" -> "PECompact packer",
       "PEC2MO" -> "PECompact packer", "PEC2TO" -> "PECompact packer",
       "PECompact2" -> "PECompact packer",
       //Other
       "PELOCKnt" -> "PELock Protector",
+      "PEPACK!!" -> "Pepack",
       ".perplex" -> "Perplex PE-Protector",
       "PESHiELD" -> "PEShield Packer",
       ".petite" -> "Petite Packer",
@@ -112,15 +120,20 @@ trait SectionTableScanning extends AnomalyScanner {
       //RPCrypt
       "RCryptor" -> "RPCrypt Packer", ".RPCrypt" -> "RPCrypt Packer",
       //Other
+      ".seau" -> "SeauSFX Packer",
       ".sforce3" -> "StarForce Protection",
+      // Shrinker
+      ".shrink1" -> "Shrinker", ".shrink2" -> "Shrinker",
+      ".shrink3" -> "Shrinker",
+      //Other
       ".spack" -> "Simple Pack (by bagie)",
       ".svkp" -> "SVKP packer",
+      ".taz" -> "PESpin",
       //Themida
       ".Themida" -> "Themida","Themida" -> "Themida",
       //TSULoader
       ".tsuarch" -> "TSULoader", ".tsustub" -> "TSULoader",
-      //Other
-      "PEPACK!!" -> "Pepack",
+      //Upack
       ".Upack" -> "Upack packer",
       ".ByDwing" -> "Upack packer",
       //UPX
@@ -131,8 +144,11 @@ trait SectionTableScanning extends AnomalyScanner {
       ".vmp0" -> "VMProtect packer",".vmp1" -> "VMProtect packer",".vmp2" -> "VMProtect packer",
       //Other
       "VProtect" -> "Vprotect Packer",
+      ".winapi" -> "API Override tool",
       "WinLicen" -> "WinLicense (Themida) Protector",
-      ".WWPACK" -> "WWPACK Packer",
+      "_winzip_" -> "WinZip Self-Extractor",
+      //WWPACK
+      ".WWPACK" -> "WWPACK Packer", ".WWP32" -> "WWPACK Packer",
       //y0da
       ".yP" -> "Y0da Protector", ".y0da" -> "Y0da Protector"
   )
@@ -160,8 +176,8 @@ trait SectionTableScanning extends AnomalyScanner {
   }
 
   private def checkVirtualSecTable(): List[Anomaly] = {
-    val table = data.getSectionTable()
-    if (table.getOffset() > data.getFile().length()) {
+    val table = data.getSectionTable
+    if (table.getOffset > data.getFile.length()) {
       val description = s"Section Table (offset: ${table.getOffset}) is in virtual space"
       val locations = List(new PhysicalLocation(table.getOffset, table.getSize))
       List(StructureAnomaly(PEStructureKey.SECTION_TABLE, description,
@@ -172,7 +188,7 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkSectionCharacteristics(): List[Anomaly] = {
 
     def isLastSection(header: SectionHeader): Boolean =
-      header.getNumber() == data.getSectionTable().getNumberOfSections()
+      header.getNumber == data.getSectionTable.getNumberOfSections
 
     val charSecNameMap = Map(
       ".bss" -> List(IMAGE_SCN_CNT_UNINITIALIZED_DATA, IMAGE_SCN_MEM_READ,
@@ -214,24 +230,24 @@ trait SectionTableScanning extends AnomalyScanner {
       val characs = header.getCharacteristics.asScala.toList
       val entry = header.getField(SectionHeaderKey.CHARACTERISTICS)
       if (characs.contains(SectionCharacteristic.IMAGE_SCN_MEM_WRITE) && characs.contains(SectionCharacteristic.IMAGE_SCN_MEM_EXECUTE)) {
-        val description = s"Section ${header.getNumber} with name ${sectionName} has write and execute characteristics."
+        val description = s"Section ${header.getNumber} with name $sectionName has write and execute characteristics."
         anomalyList += FieldAnomaly(entry, description, WRITE_AND_EXECUTE_SECTION)
       }
       if (characs.size == 1 && characs.contains(SectionCharacteristic.IMAGE_SCN_MEM_WRITE)) {
-        val description = s"Section ${header.getNumber} with name ${sectionName} has write as only characteristic"
+        val description = s"Section ${header.getNumber} with name $sectionName has write as only characteristic"
         anomalyList += FieldAnomaly(entry, description, WRITEABLE_ONLY_SECTION)
       }
-      if (characs.size == 0) {
-        val description = s"Section ${header.getNumber} with name ${sectionName} has no characteristics"
+      if (characs.isEmpty) {
+        val description = s"Section ${header.getNumber} with name $sectionName has no characteristics"
         anomalyList += FieldAnomaly(entry, description, CHARACTERLESS_SECTION)
       }
       if (loader.containsEntryPoint(header)) {
         if (characs.contains(IMAGE_SCN_MEM_WRITE)) {
-          val description = s"Entry point is in writeable section ${header.getNumber} with name ${sectionName}"
+          val description = s"Entry point is in writeable section ${header.getNumber} with name $sectionName"
           anomalyList += FieldAnomaly(entry, description, EP_IN_WRITEABLE_SEC)
         }
         if (isLastSection(header)) {
-          val description = s"Entry point is in the last section ${header.getNumber} with name ${sectionName}"
+          val description = s"Entry point is in the last section ${header.getNumber} with name $sectionName"
           anomalyList += FieldAnomaly(entry, description, EP_IN_LAST_SECTION)
         }
       }
@@ -241,12 +257,12 @@ trait SectionTableScanning extends AnomalyScanner {
         //this is not an indicator for anything
         val notContainedCharac = mustHaveCharac.filterNot(c => c == IMAGE_SCN_MEM_READ || characs.contains(c))
         val superfluousCharac = characs.filterNot(mustHaveCharac.contains(_))
-        if (!notContainedCharac.isEmpty) {
-          val description = s"Section Header ${header.getNumber()} with name ${sectionName} should (but doesn't) contain the characteristics: ${notContainedCharac.map(_.shortName).mkString(", ")}"
+        if (notContainedCharac.nonEmpty) {
+          val description = s"Section Header ${header.getNumber} with name $sectionName should (but doesn't) contain the characteristics: ${notContainedCharac.map(_.shortName).mkString(", ")}"
           anomalyList += FieldAnomaly(entry, description, UNUSUAL_SEC_CHARACTERISTICS)
         }
-        if (!superfluousCharac.isEmpty) {
-          val description = s"Section Header ${header.getNumber()} with name ${sectionName} has unusual characteristics, that shouldn't be there: ${superfluousCharac.map(_.shortName).mkString(", ")}"
+        if (superfluousCharac.nonEmpty) {
+          val description = s"Section Header ${header.getNumber} with name $sectionName has unusual characteristics, that shouldn't be there: ${superfluousCharac.map(_.shortName).mkString(", ")}"
           anomalyList += FieldAnomaly(entry, description, UNUSUAL_SEC_CHARACTERISTICS)
         }
       }
@@ -270,15 +286,15 @@ trait SectionTableScanning extends AnomalyScanner {
 
   private def physicalSectionRange(section: SectionHeader): SectionRange = {
     val loader = new SectionLoader(data)
-    val start = section.getAlignedPointerToRaw()
+    val start = section.getAlignedPointerToRaw
     val end = loader.getReadSize(section) + start
-    return (start, end)
+    (start, end)
   }
 
   private def virtualSectionRange(section: SectionHeader): SectionRange = {
-    val start = section.getAlignedVirtualAddress()
-    val end = section.getAlignedVirtualSize() + start
-    return (start, end)
+    val start = section.getAlignedVirtualAddress
+    val end = section.getAlignedVirtualSize + start
+    (start, end)
   }
 
   /**
@@ -298,21 +314,21 @@ trait SectionTableScanning extends AnomalyScanner {
     for (section <- sections) {
       val sectionName = section.getName
       if (sectionName != section.getUnfilteredName) {
-        val description = s"Section Header ${section.getNumber()} has control symbols in name: ${filteredSymbols(section.getUnfilteredName).mkString(", ")}"
-        anomalyList += new SectionNameAnomaly(section, description, CTRL_SYMB_IN_SEC_NAME)
+        val description = s"Section Header ${section.getNumber} has control symbols in name: ${filteredSymbols(section.getUnfilteredName).mkString(", ")}"
+        anomalyList += SectionNameAnomaly(section, description, CTRL_SYMB_IN_SEC_NAME)
       }
       val packer = packerNames.get(sectionName)
       if(packer.isDefined) {
-        val description = s"Section name ${sectionName} is typical for ${packer.get}"
-        anomalyList += new SectionNameAnomaly(section, description, UNUSUAL_SEC_NAME)
+        val description = s"Section name $sectionName is typical for ${packer.get}"
+        anomalyList += SectionNameAnomaly(section, description, UNUSUAL_SEC_NAME)
       }
       else if(sectionName == "") {
         val description = s"Section name of section ${section.getNumber} is empty."
-        anomalyList += new SectionNameAnomaly(section, description, EMPTY_SEC_NAME)
+        anomalyList += SectionNameAnomaly(section, description, EMPTY_SEC_NAME)
       }
       else if (!usualNames.contains(section.getName)) {
-        val description = s"Section name is unusual: ${sectionName}"
-        anomalyList += new SectionNameAnomaly(section, description, UNUSUAL_SEC_NAME)
+        val description = s"Section name is unusual: $sectionName"
+        anomalyList += SectionNameAnomaly(section, description, UNUSUAL_SEC_NAME)
       }
     }
     anomalyList.toList
@@ -327,8 +343,8 @@ trait SectionTableScanning extends AnomalyScanner {
    */
   private def filteredSymbols(str: String): List[String] = {
     def getUnicodeValue(c: Char): String = "\\u" + Integer.toHexString(c | 0x10000).substring(1)
-    val controlCode: (Char) => Boolean = (c: Char) => (c <= 32 || c == 127)
-    val extendedCode: (Char) => Boolean = (c: Char) => (c <= 32 || c > 127)
+    val controlCode: Char => Boolean = (c: Char) => c <= 32 || c == 127
+    val extendedCode: Char => Boolean = (c: Char) => c <= 32 || c > 127
     str.map(c => if (controlCode(c) || extendedCode(c)) { getUnicodeValue(c) } else c.toString).toList
   }
 
@@ -346,9 +362,9 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionName = section.getName
       val entry = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val value = entry.getValue
-      val alignedPointerToRaw = section.getAlignedPointerToRaw()
-      if (value + alignedPointerToRaw > data.getFile().length()) {
-        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey} + aligned pointer to raw data is larger (${value + alignedPointerToRaw}) than permitted by file length (${data.getFile.length()})"
+      val alignedPointerToRaw = section.getAlignedPointerToRaw
+      if (value + alignedPointerToRaw > data.getFile.length()) {
+        val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey} + aligned pointer to raw data is larger (${value + alignedPointerToRaw}) than permitted by file length (${data.getFile.length()})"
         anomalyList += FieldAnomaly(entry, description, TOO_LARGE_SIZE_OF_RAW)
       }
     }
@@ -365,12 +381,12 @@ trait SectionTableScanning extends AnomalyScanner {
     val sectionTable = data.getSectionTable
     val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
-      if (section.getCharacteristics().contains(IMAGE_SCN_LNK_NRELOC_OVFL)) {
+      if (section.getCharacteristics.contains(IMAGE_SCN_LNK_NRELOC_OVFL)) {
         val sectionName = section.getName
         val entry = section.getField(SectionHeaderKey.NUMBER_OF_RELOCATIONS)
         val value = entry.getValue
         if (value != 0xffff) {
-          val description = s"Section Header ${section.getNumber()} with name ${sectionName}: has IMAGE_SCN_LNK_NRELOC_OVFL characteristic --> ${entry.getKey} must be 0xffff, but is " + value
+          val description = s"Section Header ${section.getNumber} with name $sectionName: has IMAGE_SCN_LNK_NRELOC_OVFL characteristic --> ${entry.getKey} must be 0xffff, but is " + value
           anomalyList += FieldAnomaly(entry, description, EXTENDED_RELOC_VIOLATIONS)
         }
       }
@@ -397,28 +413,28 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionName = section.getName
       val range1 = physicalSectionRange(section)
       val vrange1 = virtualSectionRange(section)
-      for (i <- section.getNumber() + 1 to sections.length) { //correct?
+      for (i <- section.getNumber + 1 to sections.length) { //correct?
         val sec = sectionTable.getSectionHeader(i)
         val range2 = physicalSectionRange(sec)
         val vrange2 = virtualSectionRange(sec)
         val locations = List(range1, range2).map(r => new PhysicalLocation(r._1, r._2 - r._1))
         //ignore empty sections for shuffle analysis, these get their own anomaly
         if (range1._1 > range2._1 && notEmpty(range1) && notEmpty(range2)) {
-          val description = s"Physically shuffled sections: section ${section.getNumber()} has range ${range1._1}--${range1._2}, section ${sec.getNumber()} has range ${range2._1}--${range2._2}"
+          val description = s"Physically shuffled sections: section ${section.getNumber} has range ${range1._1}--${range1._2}, section ${sec.getNumber} has range ${range2._1}--${range2._2}"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, PHYSICALLY_SHUFFLED_SEC, locations)
         }
         if (range1 == range2) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) has same physical location as section ${sec.getNumber()} with name ${sec.getName}"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: ${range1._1}--${range1._2}) has same physical location as section ${sec.getNumber} with name ${sec.getName}"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, PHYSICALLY_DUPLICATED_SEC, locations)
         } else if (overlaps(range2, range1)) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${range1._1}--${range1._2}) physically overlaps with section ${sec.getName} with number ${sec.getNumber} (range: ${range2._1}--${range2._2})"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: ${range1._1}--${range1._2}) physically overlaps with section ${sec.getName} with number ${sec.getNumber} (range: ${range2._1}--${range2._2})"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, PHYSICALLY_OVERLAPPING_SEC, locations)
         }
         if (vrange1 == vrange2) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${vrange1._1}--${vrange1._2}) has same virtual location as section ${sec.getName} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: ${vrange1._1}--${vrange1._2}) has same virtual location as section ${sec.getName} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, VIRTUALLY_DUPLICATED_SEC, locations)
         } else if (overlaps(vrange1, vrange2)) {
-          val description = s"Section ${section.getNumber()} with name ${sectionName} (range: ${vrange1._1}--${vrange1._2}) virtually overlaps with section ${sec.getName} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: ${vrange1._1}--${vrange1._2}) virtually overlaps with section ${sec.getName} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, VIRTUALLY_OVERLAPPING_SEC, locations)
         }
       }
@@ -435,7 +451,7 @@ trait SectionTableScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val sectionTable = data.getSectionTable
     val sections = sectionTable.getSectionHeaders.asScala
-    var prevVA = -1
+    val prevVA = -1
     for (section <- sections) {
       val sectionName = section.getName
       val entry = section.getField(SectionHeaderKey.VIRTUAL_ADDRESS)
@@ -443,7 +459,7 @@ trait SectionTableScanning extends AnomalyScanner {
       if (sectionVA <= prevVA) {
         val range = physicalSectionRange(section)
         val locations = List(new PhysicalLocation(range._1, range._2 - range._1))
-        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: VIRTUAL_ADDRESS (${sectionVA}) should be greater than of the previous entry (${prevVA})"
+        val description = s"Section Header ${section.getNumber} with name $sectionName: VIRTUAL_ADDRESS ($sectionVA) should be greater than of the previous entry ($prevVA)"
         anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, NOT_ASCENDING_SEC_VA, locations)
       }
     }
@@ -460,12 +476,12 @@ trait SectionTableScanning extends AnomalyScanner {
     val sectionTable = data.getSectionTable
     val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
-      val characteristics = section.getCharacteristics().asScala
+      val characteristics = section.getCharacteristics.asScala
       val entry = section.getField(SectionHeaderKey.CHARACTERISTICS)
       val sectionName = section.getName
       characteristics.foreach(ch =>
         if (ch.isReserved) {
-          val description = s"Section Header ${section.getNumber()} with name ${sectionName}: Reserved characteristic used: ${ch.toString}"
+          val description = s"Section Header ${section.getNumber} with name $sectionName: Reserved characteristic used: ${ch.toString}"
           anomalyList += FieldAnomaly(entry, description, RESERVED_SEC_CHARACTERISTICS)
         })
     }
@@ -485,14 +501,14 @@ trait SectionTableScanning extends AnomalyScanner {
       val ptrLineNrEntry = section.getField(SectionHeaderKey.POINTER_TO_LINE_NUMBERS)
       val lineNrEntry = section.getField(SectionHeaderKey.NUMBER_OF_LINE_NUMBERS)
       val sectionName = section.getName
-      val characteristics = section.getCharacteristics().asScala
+      val characteristics = section.getCharacteristics.asScala
       for (ch <- characteristics if ch.isDeprecated) {
         val entry = section.getField(SectionHeaderKey.CHARACTERISTICS)
-        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: Characteristic ${ch.toString} is deprecated"
+        val description = s"Section Header ${section.getNumber} with name $sectionName: Characteristic ${ch.toString} is deprecated"
         anomalyList += FieldAnomaly(entry, description, DEPRECATED_SEC_CHARACTERISTICS)
       }
       for (entry <- List(ptrLineNrEntry, lineNrEntry) if entry.getValue != 0) {
-        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey} is deprecated, but has value " + entry.getValue
+        val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey} is deprecated, but has value " + entry.getValue
         val subtype = if (entry.getKey == SectionHeaderKey.POINTER_TO_LINE_NUMBERS)
           DEPRECATED_PTR_OF_LINE_NR
         else DEPRECATED_NR_OF_LINE_NR
@@ -509,8 +525,8 @@ trait SectionTableScanning extends AnomalyScanner {
    */
   private def checkZeroValues(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val sectionTable = data.getSectionTable()
-    val sections = sectionTable.getSectionHeaders().asScala
+    val sectionTable = data.getSectionTable
+    val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) yield {
       val sectionName = section.getName
       checkReloc(anomalyList, section, sectionName)
@@ -533,7 +549,7 @@ trait SectionTableScanning extends AnomalyScanner {
     val sizeOfRaw = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
     val virtSize = section.getField(SectionHeaderKey.VIRTUAL_SIZE)
     for (entry <- List(sizeOfRaw, virtSize) if entry.getValue == 0) {
-      val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey} is ${entry.getValue}"
+      val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey} is ${entry.getValue}"
       val subtype = if (entry.getKey == SectionHeaderKey.VIRTUAL_SIZE)
         ZERO_VIRTUAL_SIZE
       else ZERO_SIZE_OF_RAW_DATA
@@ -551,15 +567,15 @@ trait SectionTableScanning extends AnomalyScanner {
    */
   private def checkUninitializedDataConstraints(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
     def containsOnlyUnitializedData(): Boolean =
-      section.getCharacteristics().contains(IMAGE_SCN_CNT_UNINITIALIZED_DATA) &&
-        !section.getCharacteristics().contains(IMAGE_SCN_CNT_INITIALIZED_DATA)
+      section.getCharacteristics.contains(IMAGE_SCN_CNT_UNINITIALIZED_DATA) &&
+        !section.getCharacteristics.contains(IMAGE_SCN_CNT_INITIALIZED_DATA)
 
     if (containsOnlyUnitializedData()) {
       val sizeEntry = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getField(SectionHeaderKey.POINTER_TO_RAW_DATA)
       for (entry <- List(sizeEntry, pointerEntry) if entry.getValue != 0) {
         val value = entry.getValue
-        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey.toString} must be 0 for sections with only uninitialized data, but is: ${value}"
+        val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey.toString} must be 0 for sections with only uninitialized data, but is: $value"
         anomalyList += FieldAnomaly(entry, description, UNINIT_DATA_CONSTRAINTS_VIOLATION)
       }
     }
@@ -573,9 +589,9 @@ trait SectionTableScanning extends AnomalyScanner {
    */
   private def checkFileAlignmentConstrains(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val fileAlignment = data.getOptionalHeader().get(WindowsEntryKey.FILE_ALIGNMENT)
-    val sectionTable = data.getSectionTable()
-    val sections = sectionTable.getSectionHeaders().asScala
+    val fileAlignment = data.getOptionalHeader.get(WindowsEntryKey.FILE_ALIGNMENT)
+    val sectionTable = data.getSectionTable
+    val sections = sectionTable.getSectionHeaders.asScala
     for (section <- sections) {
       val sizeEntry = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val pointerEntry = section.getField(SectionHeaderKey.POINTER_TO_RAW_DATA)
@@ -584,7 +600,7 @@ trait SectionTableScanning extends AnomalyScanner {
         entry <- List(sizeEntry, pointerEntry) if entry != null &&
           fileAlignment != 0 && entry.getValue % fileAlignment != 0
       ) {
-        val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey} (${entry.getValue}) must be a multiple of File Alignment (${fileAlignment})"
+        val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey} (${entry.getValue}) must be a multiple of File Alignment ($fileAlignment)"
         val subtype = if (entry.getKey == SectionHeaderKey.SIZE_OF_RAW_DATA)
           NOT_FILEALIGNED_SIZE_OF_RAW
         else NOT_FILEALIGNED_PTR_TO_RAW
@@ -605,8 +621,8 @@ trait SectionTableScanning extends AnomalyScanner {
   private def checkObjectOnlyCharacteristics(anomalyList: ListBuffer[Anomaly], section: SectionHeader, sectionName: String): Unit = {
     val alignmentCharacteristics = SectionCharacteristic.values.filter(k => k.toString.startsWith("IMAGE_SCN_ALIGN")).toList
     val objectOnly = List(IMAGE_SCN_TYPE_NO_PAD, IMAGE_SCN_LNK_INFO, IMAGE_SCN_LNK_REMOVE, IMAGE_SCN_LNK_COMDAT) ::: alignmentCharacteristics
-    for (characteristic <- section.getCharacteristics().asScala if objectOnly.contains(characteristic)) {
-      val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${characteristic} characteristic is only valid for object files"
+    for (characteristic <- section.getCharacteristics.asScala if objectOnly.contains(characteristic)) {
+      val description = s"Section Header ${section.getNumber} with name $sectionName: $characteristic characteristic is only valid for object files"
       val chEntry = section.getField(SectionHeaderKey.CHARACTERISTICS)
       anomalyList += FieldAnomaly(chEntry, description, OBJECT_ONLY_SEC_CHARACTERISTICS)
     }
@@ -623,7 +639,7 @@ trait SectionTableScanning extends AnomalyScanner {
     val relocEntry = section.getField(SectionHeaderKey.POINTER_TO_RELOCATIONS)
     val nrRelocEntry = section.getField(SectionHeaderKey.NUMBER_OF_RELOCATIONS)
     for (entry <- List(relocEntry, nrRelocEntry) if entry.getValue != 0) {
-      val description = s"Section Header ${section.getNumber()} with name ${sectionName}: ${entry.getKey} should be 0 for images, but has value " + entry.getValue
+      val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey} should be 0 for images, but has value " + entry.getValue
       val subtype = if (entry.getKey == SectionHeaderKey.NUMBER_OF_RELOCATIONS)
         DEPRECATED_NR_OF_RELOC
       else DEPRECATED_PTR_TO_RELOC

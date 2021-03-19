@@ -56,7 +56,7 @@ object CLRSection {
   /**
    * Creates an instance of the DebugSection for the given debug bytes.
    *
-   * @param loadInfo the load information
+   * @param li the load information
    * @return debugsection instance
    */
   def newInstance(li: LoadInfo): CLRSection =
