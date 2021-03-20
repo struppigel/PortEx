@@ -42,7 +42,7 @@ public class ImportSectionTest {
     public void virtualImportDescriptor() throws IOException {
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
                 + "/corkami/imports_virtdesc.exe"));
-        System.out.println(data.getInfo());
+        logger.info(data.getInfo());
         ImportSection idata = new SectionLoader(data).loadImportSection();
         List<ImportDLL> imports = idata.getImports();
         assertEquals(imports.size(), 2);
@@ -60,7 +60,7 @@ public class ImportSectionTest {
                 Optional<ImportSection> idata = loader.maybeLoadImportSection();
                 if (!idata.isPresent()) {
                     for (ImportDLL im : list.getValue()) {
-                        System.out.println(im);
+                        logger.info("Import test on " + im);
                     }
                     assertEquals(list.getValue().size(), 0);
                 } else {

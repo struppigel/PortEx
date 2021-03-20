@@ -138,7 +138,7 @@ public class TestreportsReader {
     public static List<TestData> readTestDataList() throws IOException {
         List<TestData> data = new LinkedList<>();
         File directory = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR).toFile();
-        System.out.println("reading test dir" + directory.getAbsolutePath());
+        logger.info("reading test dir" + directory.getAbsolutePath());
         for (File file : directory.listFiles()) {
             if (!file.isDirectory()) {
                 data.add(readTestData(file.getName()));
@@ -169,7 +169,7 @@ public class TestreportsReader {
         data.filename = filename;
         logger.debug("reading file report " + filename);
         Path testfile = Paths.get(RESOURCE_DIR, TEST_REPORTS_DIR, filename);
-        System.out.println("reading test file " + testfile.toString());
+        logger.info("reading test file " + testfile.toString());
 
         try (BufferedReader reader = Files.newBufferedReader(testfile,
                 Charset.forName("UTF-8"))) {

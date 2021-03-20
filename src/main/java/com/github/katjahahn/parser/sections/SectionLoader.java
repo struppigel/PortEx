@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.github.katjahahn.parser.sections.clr.CLRSection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -531,6 +532,26 @@ public class SectionLoader {
     }
 
     /**
+     * Load all bytes and information of the CLR Runtime Header
+     * The file on disk is read to fetch the information.
+     * @return an Optional containing the {@link CLRSection} of the given file
+     * @throws IOException if unable to read the file
+     */
+    public Optional<CLRSection> maybeLoadCLRSection() throws IOException {
+        return (Optional<CLRSection>) maybeLoadSpecialSection(DataDirectoryKey.CLR_RUNTIME_HEADER);
+    }
+
+    /**
+     * Load all bytes and information of the CLR Runtime Header
+     * The file on disk is read to fetch the information.
+     * @return {@link CLRSection} of the given file
+     * @throws IOException if unable to read the file
+     */
+    public CLRSection loadCLRSection() throws IOException {
+        return (CLRSection) getOrThrow(maybeLoadCLRSection(), "Unable to load CLR runtime header!");
+    }
+
+    /**
      * Loads all bytes and information of the delay-load section.
      * 
      * The file on disk is read to fetch the information.
@@ -544,7 +565,7 @@ public class SectionLoader {
     public DelayLoadSection loadDelayLoadSection() throws IOException {
         Optional<DelayLoadSection> delayLoad = maybeLoadDelayLoadSection();
         return (DelayLoadSection) getOrThrow(delayLoad,
-                "unable to load delay-load import section");
+                "Unable to load delay-load import section");
     }
 
     /**

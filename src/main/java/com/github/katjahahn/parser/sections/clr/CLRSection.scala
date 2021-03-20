@@ -1,14 +1,18 @@
 package com.github.katjahahn.parser.sections.clr
 
+import com.github.katjahahn.parser.IOUtil.SpecificationFormat
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.{MemoryMappedPE, PEData, PhysicalLocation}
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.sections.debug.DebugSection
+import com.github.katjahahn.parser.{FileFormatException, IOUtil, MemoryMappedPE, PEData, PELoader, PhysicalLocation}
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+import com.github.katjahahn.parser.sections.debug.DebugSection.debugspec
+import com.github.katjahahn.parser.sections.debug.{DebugDirectoryKey, DebugSection}
 import org.apache.logging.log4j.LogManager
 
+import collection.JavaConverters._
 import java.util
+import java.io.File
 
-class CLRSection(val generalMetadata: GeneralMetadata) extends SpecialSection {
+class CLRSection() extends SpecialSection {
 
   /**
    * Returns whether the special section has no entries.
@@ -39,18 +43,28 @@ class CLRSection(val generalMetadata: GeneralMetadata) extends SpecialSection {
   override def getInfo: String = ???
 }
 
-object CLRSection {
+object CLRSection extends App {
 
-  /**
-   * BSJB
-   */
-  val magic = 0x424A5342
+  val Magic = "BSJB".getBytes()
+  val metaRootSpec = "clrmetarootspec"
+  val logger = LogManager.getLogger(CLRSection.getClass().getName())
 
-  val logger = LogManager.getLogger(DebugSection.getClass().getName())
+  new SectionLoader(new File("portextestfiles/testfiles/decrypt_STOPDjvu.exe")).loadCLRSection()
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): CLRSection = {
-    val meta = new GeneralMetadata(majorversion = 0, minorversion = 0, extradata = 0, versionLen = 0, versionString = "", fFlags = 0, padding = 0, streamNr = 0)
-    new CLRSection(meta)
+
+    val clrSize = 0x1000 //FIXME this is a temp value
+    val clrbytes = mmbytes.slice(virtualAddress, virtualAddress + clrSize)
+    val signature = clrbytes.take(Magic.length)
+    if(!signature.sameElements(Magic)) {
+      logger.warn("Magic BSJB not found")
+      throw new FileFormatException("Magic BSJB not found!")
+    }
+    //val format = new SpecificationFormat(0, 1, 2, 3)
+    //val entries = IOUtil.readHeaderEntries(classOf[MetadataRootKey],
+    // format, metaRootSpec, clrbytes, offset).asScala.toMap
+    //val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue
+    new CLRSection()
   }
 
   /**

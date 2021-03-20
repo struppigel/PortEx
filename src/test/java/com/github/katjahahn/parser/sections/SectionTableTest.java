@@ -3,22 +3,21 @@ package com.github.katjahahn.parser.sections;
 import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 import static org.testng.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.github.katjahahn.parser.HeaderKey;
-import com.github.katjahahn.parser.StandardField;
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.parser.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.katjahahn.TestreportsReader.TestData;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoaderTest;
 
 public class SectionTableTest {
 
@@ -41,13 +40,13 @@ public class SectionTableTest {
         assertTrue(info.length() > 0);
     }
 
-    // @Test slows down performance too much
-    // public void maxSect() throws IOException {
-    // PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR +
-    // "/unusualfiles/corkami/65535sects.exe"));
-    // System.out.println("Number of sections read: " +
-    // data.getSectionTable().getNumberOfSections());
-    // }
+    @Test
+    public void maxSect() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR +
+        "/corkami/65535sects.exe"));
+        logger.info("Number of sections read: " +
+        data.getSectionTable().getNumberOfSections());
+    }
 
     @Test
     public void getPointerToRawData() {
@@ -78,7 +77,7 @@ public class SectionTableTest {
             SectionTable table = datum.getSectionTable();
             // ignore
             if(datum.getFile().getName().equals("baed21297974b6adf3298585baa78691")) continue;
-            System.out.println(datum.getFile().getName());
+            logger.info(datum.getFile().getName());
             for (SectionHeader header : table.getSectionHeaders()) {
                 SectionHeader entryByNum = table.getSectionHeader(header
                         .getName());

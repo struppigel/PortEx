@@ -36,7 +36,6 @@ public class RelocationSectionTest {
                 "portextestfiles/testfiles/Lab18-04;1;0"
         };
         for (String rel : relocArr) {
-            System.out.println(rel);
             String[] split = rel.split(";");
             File file = new File(split[0]);
             int blockNr = Integer.parseInt(split[1]);
