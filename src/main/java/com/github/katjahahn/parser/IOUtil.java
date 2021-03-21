@@ -85,7 +85,7 @@ public final class IOUtil {
 	 * inFile must exist and must not be a directory.
 	 * 
 	 * @param loc
-	 * @param file
+	 * @param inFile
 	 * @throws IOException
 	 */
 	public static void dumpLocationToFile(PhysicalLocation loc, File inFile,
@@ -270,7 +270,7 @@ public final class IOUtil {
 			// get the absolute file offset for the current field
 			long fieldOffset = headerOffset + offset;
 			// check if value is entirely contained in the headerbytes
-			long value = 0;
+			long value;
 			if (headerbytes.length >= offset + length) {
 				value = getBytesLongValue(headerbytes, offset, length);
 				data.put(key, new StandardField(key, description, value,
@@ -286,7 +286,6 @@ public final class IOUtil {
 			data.put(key, new StandardField(key, description, value,
 					fieldOffset, length));
 		}
-		assert data != null;
 		return data;
 	}
 
@@ -344,7 +343,6 @@ public final class IOUtil {
 			StandardField dummy = new StandardField(key, "not set", 0L, 0L, 0L);
 			map.put(key, dummy);
 		}
-		assert map != null;
 		return map;
 	}
 
@@ -392,22 +390,20 @@ public final class IOUtil {
 		try (InputStreamReader isr = new InputStreamReader(
 				IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
 				BufferedReader reader = new BufferedReader(isr)) {
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				// split line into the values
 				String[] values = line.split(delimiter);
 				// put first element as key, rest as array of value-strings
 				map.put(values[0], Arrays.copyOfRange(values, 1, values.length));
 			}
-			assert map != null;
 			return map;
 		}
 	}
 
 	/**
 	 * Reads a list of symbol descriptions
-	 * 
-	 * @param filename
+	 *
 	 * @return list of SymbolDescriptions
 	 * @throws IOException
 	 */
@@ -479,14 +475,13 @@ public final class IOUtil {
 		try (InputStreamReader isr = new InputStreamReader(
 				IOUtil.class.getResourceAsStream(SPEC_DIR + filename));
 				BufferedReader reader = new BufferedReader(isr)) {
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				// split line into the values
 				String[] values = line.split(delimiter);
 				// add all values as entry to the list
 				list.add(values);
 			}
-			assert list != null;
 			return list;
 		}
 	}
@@ -512,14 +507,13 @@ public final class IOUtil {
 		// read spec as UTF-8 encoded file
 		try (BufferedReader reader = Files.newBufferedReader(file.toPath(),
 				Charset.forName("UTF-8"))) {
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				// split line into the values
 				String[] values = line.split(DEFAULT_DELIMITER);
 				// add all values as entry to the list
 				list.add(values);
 			}
-			assert list != null;
 			return list;
 		}
 	}

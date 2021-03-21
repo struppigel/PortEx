@@ -1,13 +1,13 @@
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat
+import com.github.katjahahn.parser.IOUtil.{SpecificationFormat, _}
 import com.github.katjahahn.parser._
-import com.github.katjahahn.parser.IOUtil._
+import com.github.katjahahn.parser.sections.clr.CLIHeaderKey._
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
 import org.apache.logging.log4j.LogManager
 
-import java.io.{File, RandomAccessFile}
+import java.io.File
 import java.util
 import scala.collection.JavaConverters._
 
@@ -42,7 +42,7 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
    * @return description string
    */
   override def getInfo: String = {
-    val flagsField = cliHeader.get(CLIHeaderKey.FLAGS)
+    val flagsField = cliHeader.get(FLAGS)
     val flagsVal = {
       if (flagsField.isDefined) flagsField.get.getValue else 0
     }
@@ -73,8 +73,8 @@ object CLRSection extends App {
     val cliHeader = IOUtil.readHeaderEntries(classOf[CLIHeaderKey],
       format, cliHeaderSpec, clibytes, offset).asScala.toMap
 
-    val metadataVA = getValOrThrow(cliHeader, CLIHeaderKey.META_DATA_RVA)
-    val metadataSize = getValOrThrow(cliHeader, CLIHeaderKey.META_DATA_SIZE)
+    val metadataVA = getValOrThrow(cliHeader, META_DATA_RVA)
+    val metadataSize = getValOrThrow(cliHeader, META_DATA_SIZE)
     val metaRoot = MetadataRoot(mmbytes, data, metadataVA, metadataSize)
     val clr = new CLRSection(cliHeader, metaRoot, offset)
     println(clr.getInfo)

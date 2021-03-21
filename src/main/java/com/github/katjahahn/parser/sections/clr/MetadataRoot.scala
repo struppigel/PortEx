@@ -2,22 +2,25 @@ package com.github.katjahahn.parser.sections.clr
 import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, PEData, ScalaIOUtil, StandardField}
+import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
+import com.github.katjahahn.parser.{FileFormatException, IOUtil, MemoryMappedPE, PEData, ScalaIOUtil, StandardField}
 
 import java.io.RandomAccessFile
+import java.nio.charset.StandardCharsets
+import scala.annotation.tailrec
 
 class MetadataRoot (
                      val metadataEntries : Map[MetadataRootKey, StandardField],
                      val offset : Long,
-                     val versionString : String){
+                     val versionString : String,
+                     val streamHeaders : List[StreamHeader]){
 
-  def getInfo(): String = "Metadata Root:" + NL + "-------------" + NL + metadataEntries.values.mkString(NL) + NL +
-  "Version: " + versionString + NL
+  def getInfo: String = "Metadata Root:" + NL + "-------------" + NL + metadataEntries.values.mkString(NL) + NL +
+    "version: " + versionString + NL + NL +
+    "Stream headers: " + streamHeaders.map(_.name).mkString(", ") + NL
 }
 
 object MetadataRoot {
-
-  val Magic = "BSJB".getBytes()
   val metaRootSpec = "clrmetarootspec"
   val metaRootSpec2 = "clrmetarootspec2"
 
@@ -29,26 +32,57 @@ object MetadataRoot {
     val metaRootEntriesPart = IOUtil.readHeaderEntries(classOf[MetadataRootKey],
       formatMeta, metaRootSpec, metaBytes, metadataFileOffset).asScala.toMap
     // load version string and determine offset to flags and streams
-    val versionLength = alignVersionLength(metaRootEntriesPart.get(MetadataRootKey.LENGTH).get.getValue)
     val versionOffset = 16
     var versionString = ""
     ScalaIOUtil.using(new RandomAccessFile(data.getFile, "r")) { raf =>
       versionString = IOUtil.readNullTerminatedUTF8String(metadataFileOffset + versionOffset, raf)
     }
-    // load remaining stuff that's dependent on version length
-    val metaOffsetAfterVersion = metadataFileOffset + versionOffset + versionLength
-    val metaRootEntriesTail = IOUtil.readHeaderEntries(classOf[MetadataRootKey],
-      formatMeta, metaRootSpec2, metaBytes, metaOffsetAfterVersion).asScala
-    val flags = metaRootEntriesTail.get(MetadataRootKey.FLAGS).get
-    val streams = metaRootEntriesTail.get(MetadataRootKey.STREAMS).get
-    // construct the full entry map
-    val metaRootEntries = metaRootEntriesPart ++ Map(MetadataRootKey.FLAGS -> flags, MetadataRootKey.STREAMS -> streams)
-    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString)
+    // load remaining header entries that are dependent on version length
+    val versionLength = alignToFourBytes(metaRootEntriesPart(LENGTH).getValue)
+    val flagsVA =  metadataVA + versionOffset + versionLength
+    val tempBytes = mmbytes.slice(flagsVA, flagsVA + 4)
+    val entriesTail = IOUtil.readHeaderEntries(classOf[MetadataRootKey],
+      formatMeta, metaRootSpec2, tempBytes, 0).asScala
+
+    val metaRootEntries = metaRootEntriesPart ++
+      Map(FLAGS -> entriesTail(FLAGS), STREAMS -> entriesTail(STREAMS))
+
+    throwIfBadMagic(metaRootEntries(SIGNATURE).getValue)
+    // load stream headers
+    val streamHeadersVA =  metadataVA + versionOffset + versionLength + 4 // 4 = size of flags + streams
+    val streamHeaders = readStreamHeaders(metaRootEntries(STREAMS).getValue, streamHeadersVA, mmbytes)
+    // create MetadataRoot
+    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders)
   }
 
-  private def alignVersionLength(value: Long): Long = {
-    var x = value
-    while (x % 4 != 0) x += 1
-    x
+  private def throwIfBadMagic(magic : Long): Unit = {
+    // BSJB
+    if(magic != 0x424a5342){
+      throw new FileFormatException("No BSJB signature!")
+    }
   }
+
+  private def readStreamHeaders(nr: Long, startOffset: Long, mmbytes: MemoryMappedPE): List[StreamHeader] = {
+    if(nr <= 0) List()
+    else {
+      val va = startOffset
+      val offset = mmbytes.getBytesLongValue(va, 4)
+      val size = mmbytes.getBytesLongValue(va + 4, 4)
+      val nameOffset = va + 8
+      val nameLen = Math.min(mmbytes.indexWhere(_ == 0, nameOffset) - nameOffset, 32L) + 1 //minimum 32 characters, includes zero term
+      val namePaddedLen = alignToFourBytes(nameLen)
+      val name = new String(mmbytes.slice(nameOffset, nameOffset + nameLen), StandardCharsets.UTF_8)
+      new StreamHeader(offset, size, name) :: readStreamHeaders(nr - 1, nameOffset + namePaddedLen, mmbytes)
+    }
+  }
+
+  @tailrec
+  private def alignToFourBytes(value: Long): Long = {
+    if (value % 4 == 0) value
+    else alignToFourBytes(value + 1)
+  }
+
+
 }
+
+class StreamHeader(val offset: Long, val size : Long, val name: String){}
