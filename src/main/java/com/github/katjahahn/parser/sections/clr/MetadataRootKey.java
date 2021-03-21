@@ -11,5 +11,5 @@ public enum MetadataRootKey implements HeaderKey {
     VERSION,
     FLAGS,
     STREAMS,
-    STREAM_HEADERS;
+    STREAM_HEADERS
 }
