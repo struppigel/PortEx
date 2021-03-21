@@ -468,6 +468,9 @@ public class SectionLoader {
                 case DELAY_IMPORT_DESCRIPTOR:
                     section = DelayLoadSection.newInstance(loadInfo);
                     break;
+                case CLR_RUNTIME_HEADER:
+                    section = CLRSection.newInstance(loadInfo);
+                    break;
                 default:
                     return Optional.absent();
                 }

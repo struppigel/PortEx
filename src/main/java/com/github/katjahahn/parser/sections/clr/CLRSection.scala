@@ -1,70 +1,88 @@
 package com.github.katjahahn.parser.sections.clr
 
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
+import com.github.katjahahn.parser._
+import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.{FileFormatException, IOUtil, MemoryMappedPE, PEData, PELoader, PhysicalLocation}
 import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
-import com.github.katjahahn.parser.sections.debug.DebugSection.debugspec
-import com.github.katjahahn.parser.sections.debug.{DebugDirectoryKey, DebugSection}
 import org.apache.logging.log4j.LogManager
 
-import collection.JavaConverters._
+import java.io.{File, RandomAccessFile}
 import java.util
-import java.io.File
+import scala.collection.JavaConverters._
 
-class CLRSection() extends SpecialSection {
+class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
+                 val metadataRoot: MetadataRoot,
+                 private val fileOffset: Long) extends SpecialSection {
 
   /**
    * Returns whether the special section has no entries.
    *
    * @return true if no entries, false otherwise
    */
-  override def isEmpty: Boolean = ???
+  override def isEmpty: Boolean = cliHeader.isEmpty
 
   /**
    * Returns a list of physical address ranges this special section is parsed from.
    *
    * @return list of locations
    */
-  override def getPhysicalLocations: util.List[PhysicalLocation] = ???
+  override def getPhysicalLocations: util.List[PhysicalLocation] = List[PhysicalLocation]().asJava
 
   /**
    * Returns the file offset for the beginning of the module.
    *
    * @return file offset for the beginning of the module
    */
-  override def getOffset: Long = ???
+  override def getOffset: Long = fileOffset
 
   /**
-   * Returns a description string of the {@link Header}.
+   * Returns a description string of the {@link CLRSection}.
    *
    * @return description string
    */
-  override def getInfo: String = ???
+  override def getInfo: String = {
+    val flagsField = cliHeader.get(CLIHeaderKey.FLAGS)
+    val flagsVal = {
+      if (flagsField.isDefined) flagsField.get.getValue else 0
+    }
+    val flagsList = ComImageFlag.getAllFor(flagsVal).asScala
+    "CLI Header:" + NL +
+      "-----------" + NL +
+      cliHeader.values.mkString(NL) + NL +
+      "Flags:" + NL +
+      "\t* " + flagsList.map(_.getDescription).mkString(NL + "\t* ") + NL + NL +
+      metadataRoot.getInfo
+  }
 }
 
 object CLRSection extends App {
+  val cliHeaderSpec = "cliheaderspec"
+  val logger = LogManager.getLogger(CLRSection.getClass.getName)
 
-  val Magic = "BSJB".getBytes()
-  val metaRootSpec = "clrmetarootspec"
-  val logger = LogManager.getLogger(CLRSection.getClass().getName())
-
-  new SectionLoader(new File("portextestfiles/testfiles/decrypt_STOPDjvu.exe")).loadCLRSection()
+  val testfile = new File("portextestfiles/testfiles/CryptoTester.exe")
+  val pedata = PELoader.loadPE(testfile)
+  //println(new ReportCreator(pedata).headerReports())
+  new SectionLoader(testfile).loadCLRSection()
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): CLRSection = {
+    // load CLI Header
+    val cliHeaderSize = 0x48 //always this value acc. to specification
+    val clibytes = mmbytes.slice(virtualAddress, virtualAddress + cliHeaderSize)
+    val format = new SpecificationFormat(0, 1, 2, 3)
+    val cliHeader = IOUtil.readHeaderEntries(classOf[CLIHeaderKey],
+      format, cliHeaderSpec, clibytes, offset).asScala.toMap
 
-    val clrSize = 0x1000 //FIXME this is a temp value
-    val clrbytes = mmbytes.slice(virtualAddress, virtualAddress + clrSize)
-    val signature = clrbytes.take(Magic.length)
-    if(!signature.sameElements(Magic)) {
-      logger.warn("Magic BSJB not found")
-      throw new FileFormatException("Magic BSJB not found!")
-    }
-    //val format = new SpecificationFormat(0, 1, 2, 3)
-    //val entries = IOUtil.readHeaderEntries(classOf[MetadataRootKey],
-    // format, metaRootSpec, clrbytes, offset).asScala.toMap
-    //val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue
-    new CLRSection()
+    val metadataVA = getValOrThrow(cliHeader, CLIHeaderKey.META_DATA_RVA)
+    val metadataSize = getValOrThrow(cliHeader, CLIHeaderKey.META_DATA_SIZE)
+    val metaRoot = MetadataRoot(mmbytes, data, metadataVA, metadataSize)
+    val clr = new CLRSection(cliHeader, metaRoot, offset)
+    println(clr.getInfo)
+    clr
+  }
+
+  private def getValOrThrow(map: Map[CLIHeaderKey, StandardField], key: CLIHeaderKey): Long = {
+    map.getOrElse(key, throw new FileFormatException("Key not found " + key)).getValue
   }
 
   /**
@@ -73,8 +91,9 @@ object CLRSection extends App {
    * @param li the load information
    * @return debugsection instance
    */
-  def newInstance(li: LoadInfo): CLRSection =
+  def newInstance(li: LoadInfo): CLRSection = {
     apply(li.memoryMapped, li.fileOffset, li.va, li.data)
+  }
 
 
 }

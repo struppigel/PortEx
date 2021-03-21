@@ -1,0 +1,14 @@
+CB;cb;0;4
+MAJOR_RUNTIME_VERSION;major runtime version;4;2
+MINOR_RUNTIME_VERSION;minor runtime version;6;2
+META_DATA_RVA;metadata rva;8;4
+META_DATA_SIZE;metadata size;12;4
+FLAGS;flags;16;4
+ENTRY_POINT_TOKEN;entrypoint token;20;4
+RESOURCES_RVA;managed resources rva;24;4
+RESOURCES_SIZE;managed resources size;28;4
+STRONG_NAME_SIGNATURE;strong name signature;32;8
+CODE_MANAGER_TABLE;code manager table;40;8
+VTABLE_FIXUPS;v-table fixups;48;8
+EXPORT_ADDRESS_TABLE_JUMPS;export address table jumps;56;8
+MANAGED_NATIVE_HEADER;managed native header;64;8

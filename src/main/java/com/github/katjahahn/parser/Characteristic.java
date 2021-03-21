@@ -20,7 +20,7 @@ package com.github.katjahahn.parser;
  * others, file characteristics, dll characteristics, subsystem, machinetype,
  * reloctypes.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public interface Characteristic {

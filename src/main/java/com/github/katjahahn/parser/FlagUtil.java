@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Utility methods for flag-related operations.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  *
  */
 public abstract class FlagUtil {

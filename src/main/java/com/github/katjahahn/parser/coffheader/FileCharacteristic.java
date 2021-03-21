@@ -25,7 +25,7 @@ import com.github.katjahahn.parser.FlagUtil;
  * <p>
  * Descriptions taken from the PECOFF specification.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public enum FileCharacteristic implements Characteristic {

@@ -1,5 +1,5 @@
-SIGNATURE;Signature;0;4
-MAJOR_VERSION;Major version;4;2
-MINOR_VERSION;Minor version;6;2
-RESERVED;Reserved;8;4
-LENGTH;Length;12;4
+SIGNATURE;signature;0;4
+MAJOR_VERSION;major version;4;2
+MINOR_VERSION;minor version;6;2
+RESERVED;reserved;8;4
+LENGTH;length;12;4
