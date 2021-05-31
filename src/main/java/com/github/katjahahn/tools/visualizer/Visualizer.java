@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,12 +87,10 @@ import com.google.common.base.Optional;
 /**
  * Creates an image that represents the structure of a PE file on disk.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public class Visualizer {
-	// TODO handling duplicated sections ?
-	// TODO anomaly visualizing in separate class
 
 	private static final Logger logger = LogManager.getLogger(Visualizer.class
 			.getName());
@@ -108,6 +106,7 @@ public class Visualizer {
 	private int fileWidth;
 	private int height;
 	private int legendWidth;
+	private long fileSize;
 
 	private PEData data;
 	private BufferedImage image;
@@ -125,7 +124,6 @@ public class Visualizer {
 		}
 	}
 
-	// TODO put into colorable
 	private Map<DataDirectoryKey, ColorableItem> specialsColorable = new EnumMap<>(
 			DataDirectoryKey.class);
 	{
@@ -174,6 +172,7 @@ public class Visualizer {
 	public BufferedImage createBytePlot(File file) throws IOException {
 		resetAvailabilityFlags();
 		this.data = new PEData(null, null, null, null, null, file);
+		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final long minLength = withMinLength(0);
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -245,6 +244,7 @@ public class Visualizer {
 	public BufferedImage createEntropyImage(File file) throws IOException {
 		resetAvailabilityFlags();
 		this.data = new PEData(null, null, null, null, null, file);
+		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final int MIN_WINDOW_SIZE = 100;
 		// bytes to be read at once to calculate local entropy
@@ -345,8 +345,8 @@ public class Visualizer {
 	/**
 	 * Creates a buffered image containing the diff of both files.
 	 * 
-	 * @param firstFile
-	 * @param secondFile
+	 * @param firstImage
+	 * @param secondImage
 	 * @return
 	 * @throws IOException
 	 */
@@ -379,6 +379,7 @@ public class Visualizer {
 	public BufferedImage createImage(File file) throws IOException {
 		resetAvailabilityFlags();
 		this.data = PELoader.loadPE(file);
+		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 
 		drawSections();
@@ -491,7 +492,7 @@ public class Visualizer {
 	}
 
 	private long withMinLength(long length) {
-		double minLength = data.getFile().length()
+		double minLength = fileSize
 				/ (double) (getXPixels() * getYPixels());
 		if (minLength < 1) {
 			minLength = 1;
@@ -997,7 +998,6 @@ public class Visualizer {
 	 * @return bytes covered by one square pixel
 	 */
 	private int bytesPerPixel() {
-		long fileSize = data.getFile().length();
 		long pixelMax = getXPixels() * (long) getYPixels();
 		// ceil result, because it is a maximum that we use to divide
 		return (int) Math.ceil(fileSize / (double) pixelMax);
@@ -1010,7 +1010,6 @@ public class Visualizer {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		// File file = new File("/home/katja/samples/VirMC.exe");
 		VisualizerBuilder builder = new VisualizerBuilder();
 		builder.setColor(VISIBLE_ASCII, Color.red);
 		builder.setColor(NON_ASCII, Color.green);
@@ -1018,7 +1017,7 @@ public class Visualizer {
 		builder.setColor(ENTROPY, Color.cyan);
 		Visualizer vi = builder.build();
 		// builder.setFileWidth(400).setHeight(400 - (400 % 8)).setPixelSize(8);
-		File folder = new File("/home/katja/samples/torrentlocker_encrypted");
+		File folder = new File("C:\\Users\\strup\\Repos\\PortEx\\portextestfiles\\testfiles\\");
 		System.out.println("starting to search");
 		for (File file : folder.listFiles()) {
 			System.out.println("processing file " + file.getAbsolutePath());
