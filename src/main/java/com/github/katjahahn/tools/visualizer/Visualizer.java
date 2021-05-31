@@ -176,7 +176,7 @@ public class Visualizer {
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final long minLength = withMinLength(0);
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-			for (long address = 0; address < file.length(); address += minLength) {
+			for (long address = 0; address < fileSize; address += minLength) {
 				raf.seek(address);
 				byte b = raf.readByte();
 				Color color = getBytePlotColor(b);
@@ -253,13 +253,13 @@ public class Visualizer {
 		final long minLength = withMinLength(0);
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			// read until EOF with windowSized steps
-			for (long address = 0; address <= file.length(); address += minLength) {
+			for (long address = 0; address <= fileSize; address += minLength) {
 				// the start of the window (windowHalf to the left)
 				long start = (address - windowHalfSize < 0) ? 0 : address
 						- windowHalfSize;
 				raf.seek(start);
 				// cut byte number if EOF reached, otherwise read full window
-				int bytesToRead = (int) Math.min(file.length() - start,
+				int bytesToRead = (int) Math.min(fileSize - start,
 						windowSize);
 				byte[] bytes = new byte[bytesToRead];
 				raf.readFully(bytes);
