@@ -372,13 +372,17 @@ class ReportCreator(private val data: PEData) {
   def overlayReport(): String = {
     val overlay = new Overlay(data.getFile)
     if (overlay.exists) {
+      val chi = ChiSquared.calculate(data.getFile, overlay.getOffset, overlay.getSize)
+      val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
       val overlaySigs = SignatureScanner.loadOverlaySigs()
       val sigresults = new SignatureScanner(overlaySigs).scanAt(data.getFile, overlayOffset)
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
-      title("Overlay") + NL + "Overlay at offset " +
-        hexString(overlayOffset) + NL + "Overlay size      " +
-        hexString(overlay.getSize) + NL + NL + "Signatures: " + signatures + NL + NL
+      title("Overlay") + NL + "Offset: " +
+        hexString(overlayOffset) + NL + "Size: " +
+        hexString(overlay.getSize) + NL + ("Chi squared: %1.2f" format chi) + NL +
+        ("Entropy: %1.2f" format entropy) + NL +
+        "Signatures: " + signatures + NL + NL
     } else ""
   }
 
@@ -531,8 +535,11 @@ class ReportCreator(private val data: PEData) {
       val tableLine = pad("", tableHeader.length, "-") + NL
       build.append(tableHeader + tableLine)
       val entropy = new ShannonEntropy(data)
+      val chi2 = new ChiSquared(data)
       build.append(sectionEntryLine(sections, "Entropy", (s: SectionHeader) =>
         "%1.2f" format (entropy.forSection(s.getNumber) * 8)))
+      build.append(sectionEntryLine(sections, "Chi squared", (s: SectionHeader) =>
+        "%1.2f" format (chi2.forSection(s.getNumber))))
       build.append(sectionEntryLine(sections, "Pointer To Raw Data",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RAW_DATA))))
       build.append(sectionEntryLine(sections, "-> aligned (act. start)",

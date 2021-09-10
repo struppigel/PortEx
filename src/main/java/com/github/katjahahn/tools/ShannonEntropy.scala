@@ -18,14 +18,16 @@
 package com.github.katjahahn.tools
 
 import java.io.File
-import java.io.FileInputStream
 import scala.collection.JavaConverters.mapAsJavaMapConverter
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader
 import ShannonEntropy._
+
 import java.io.RandomAccessFile
 import com.github.katjahahn.parser.PELoader
+
+import scala.language.postfixOps
 
 /**
  * Tool to calculate Shannon's Entropy for entire files, byte arrays or sections
@@ -52,7 +54,7 @@ class ShannonEntropy(private val data: PEData) {
    * @return Shannon's Entropy for the file
    */
   def forFile(): Double = {
-    val file = data.getFile()
+    val file = data.getFile
     val (byteCounts, total) = countBytes(file)
     entropy(byteCounts, total)
   }
@@ -60,12 +62,12 @@ class ShannonEntropy(private val data: PEData) {
   /**
    * Calculates the entropy for the section with the sectionNumber.
    *
-   * @param sectioNumber number of the section
+   * @param sectionNumber number of the section
    * @return entropy of the section
    */
   def forSection(sectionNumber: Int): Double = {
-    val section = (new SectionLoader(data)).loadSection(sectionNumber)
-    entropy(data.getFile, section.getOffset(), section.getSize())
+    val section = new SectionLoader(data).loadSection(sectionNumber)
+    entropy(data.getFile, section.getOffset, section.getSize)
   }
 
   /**
@@ -83,7 +85,7 @@ class ShannonEntropy(private val data: PEData) {
    * @return map with section number as keys and entropy as values
    */
   private def _forSections(): Map[Int, Double] = {
-    val sectionNr = data.getCOFFFileHeader().getNumberOfSections()
+    val sectionNr = data.getCOFFFileHeader.getNumberOfSections
     (for (i <- 1 to sectionNr) yield (i, forSection(i))) toMap
   }
 }
@@ -149,7 +151,7 @@ object ShannonEntropy {
   /**
    * Determine absolute frequencies of the byte values.
    *
-   * @param bytes
+   * @param bytes array of bytes to count the byte values from
    * @return Tuple with an byte sized array (containing the byte counts) and
    * the total of bytes read
    */
@@ -161,7 +163,7 @@ object ShannonEntropy {
     // count each byte in the given array
     bytes.toList.foreach { byte =>
       // byte to int conversion
-      val index = (byte & 0xff)
+      val index = byte & 0xff
       // count byte, index denotes the read byte value
       byteCounts(index) += 1L
       // add byte to total
