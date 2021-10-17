@@ -52,10 +52,11 @@ class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : A
     val paddingRemoved = dataBlocks.dropWhile(_.sameElements(Array[Byte](0,0,0,0)))
     logger.debug("Removed padding and DanS size " + (decodedRich.length - (paddingRemoved.length * 4)))
     // each entry is 8 bytes, where the first 2 bytes are the pid, the next 2 bytes the pv and the last 4 bytes the pc
+    // note that paddingRemoved consists of blocks with 4 bytes, whereas one entry is 8 bytes
     val result = for(i <- paddingRemoved.indices by 2) yield
       RichEntry(
-        pid = ByteArrayUtil.bytesToInt(paddingRemoved(i).slice(0, 1)), // bytes 0-1 == Pid
-        pv = ByteArrayUtil.bytesToInt(paddingRemoved(i).slice(1, 2)),  // bytes 2-3 == Pv
+        pid = ByteArrayUtil.bytesToInt(paddingRemoved(i).slice(0, 2)), // bytes 0-1 == Pid
+        pv = ByteArrayUtil.bytesToInt(paddingRemoved(i).slice(2, 4)),  // bytes 2-3 == Pv
         pc = ByteArrayUtil.bytesToInt(paddingRemoved(i + 1))           // bytes 4-7 == Pc
       )
     result.toList
@@ -80,7 +81,7 @@ object RichHeader {
     val xorKey = bytes.slice(richOffset + 4, richOffset + 8)
     // decode rich header backwards
     val decodedRich = decodeRichHeader(bytes, richOffset, xorKey)
-    logger.debug(ByteArrayUtil.byteToHex(decodedRich))
+    println(ByteArrayUtil.byteToHex(decodedRich))
     new RichHeader(decodedRich, xorKey)
   }
 
