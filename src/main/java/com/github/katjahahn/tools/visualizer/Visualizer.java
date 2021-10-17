@@ -171,7 +171,7 @@ public class Visualizer {
 
 	public BufferedImage createBytePlot(File file) throws IOException {
 		resetAvailabilityFlags();
-		this.data = new PEData(null, null, null, null, null, file);
+		this.data = new PEData(null, null, null, null, null, file, null);
 		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final long minLength = withMinLength(0);
@@ -243,7 +243,7 @@ public class Visualizer {
 	 */
 	public BufferedImage createEntropyImage(File file) throws IOException {
 		resetAvailabilityFlags();
-		this.data = new PEData(null, null, null, null, null, file);
+		this.data = new PEData(null, null, null, null, null, file, null);
 		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final int MIN_WINDOW_SIZE = 100;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public class PEData {
     private final SectionTable table;
     private final MSDOSHeader msdos;
     private final File file;
+    private final RichHeader rich;
 
     /**
      * Creates a PEData instance.
@@ -61,18 +62,28 @@ public class PEData {
      *            the file the header information was read from
      */
     public PEData(MSDOSHeader msdos, PESignature pesig, COFFFileHeader coff,
-            OptionalHeader opt, SectionTable table, File file) {
+            OptionalHeader opt, SectionTable table, File file, RichHeader rich) {
         this.pesig = pesig;
         this.coff = coff;
         this.opt = opt;
         this.msdos = msdos;
         this.table = table;
         this.file = file;
+        this.rich = rich;
+    }
+
+    /**
+     * Returns the {@link RichHeader}.
+     * 
+     * @return msdos header
+     */
+    public RichHeader getRichHeader() {
+        return rich;
     }
 
     /**
      * Returns the {@link MSDOSHeader}.
-     * 
+     *
      * @return msdos header
      */
     public MSDOSHeader getMSDOSHeader() {

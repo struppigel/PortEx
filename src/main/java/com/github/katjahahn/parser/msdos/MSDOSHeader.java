@@ -72,7 +72,7 @@ public class MSDOSHeader extends Header<MSDOSHeaderKey> {
 	 * Creates an instance of the optional header.
 	 * 
 	 * @param headerbytes
-	 * @param offset
+	 * @param peSigOffset
 	 */
 	private MSDOSHeader(byte[] headerbytes, long peSigOffset) {
 		assert headerbytes != null;

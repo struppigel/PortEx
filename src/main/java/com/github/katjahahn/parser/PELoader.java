@@ -93,12 +93,18 @@ public final class PELoader {
         // read all headers
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             MSDOSHeader msdos = loadMSDOSHeader(raf, pesig.getOffset());
+            RichHeader rich = null;
+            try {
+                rich = loadRichHeader(raf, pesig.getOffset());
+            } catch (FileFormatException e) {
+                logger.info("no rich header found");
+            }
             COFFFileHeader coff = loadCOFFFileHeader(pesig, raf);
             OptionalHeader opt = loadOptionalHeader(pesig, coff, raf);
             SectionTable table = loadSectionTable(pesig, coff, raf);
             table.read();
             // construct PEData instance
-            PEData data = new PEData(msdos, pesig, coff, opt, table, file);
+            PEData data = new PEData(msdos, pesig, coff, opt, table, file, rich);
             /* reload headers in case of dual pe header */
             // MemoryMappedPE mmBytes = MemoryMappedPE.newInstance(data,
             // new SectionLoader(data));
@@ -194,6 +200,22 @@ public final class PELoader {
     }
 
     /**
+     * Loads the Rich header.
+     *
+     * @param raf
+     *            the random access file instance
+     * @return rich header
+     * @throws IOException
+     *             if unable to read rich header
+     */
+    private RichHeader loadRichHeader(RandomAccessFile raf, long peSigOffset)
+            throws IOException {
+        byte[] headerbytes = loadBytesSafely(0,
+                (int) peSigOffset, raf);
+        return RichHeader.newInstance(headerbytes);
+    }
+
+    /**
      * Loads the section table. Presumes a valid PE file.
      * 
      * @param pesig
@@ -285,10 +307,11 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("/home/karsten/exec_.exe_repaired");
-        SectionLoader secLoad = new SectionLoader(file);
-        ExportSection expSec = secLoad.loadExportSection();
+        File file = new File("C:\\Windows\\System32\\kernel32.dll");
+        PEData pe = PELoader.loadPE(file);
+        RichHeader rich = pe.getRichHeader();
 
+        System.out.println(rich.getInfo());
         
 //        File file2 = new File("/home/katja/samples/tesla2");
 //        List<File> list = new ArrayList<>();
