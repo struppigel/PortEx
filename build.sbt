@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "3.0.1-SNAPSHOT"
+version := "3.0.2"
 
 scalaVersion := "2.12.13"
 
@@ -19,9 +19,9 @@ libraryDependencies += "com.google.guava" % "guava" % "17.0"
 
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "2.0.2"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.14.1"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.15.0"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.14.1"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.15.0"
 
 // Import default settings. This changes `publishTo` settings to use the Sonatype repository and add several commands for publishing.
 sonatypeSettings
