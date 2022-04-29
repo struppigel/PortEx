@@ -84,7 +84,10 @@ object MetadataRoot {
       val nameOffset = va + 8
       val nameLen = Math.min(mmbytes.indexWhere(_ == 0, nameOffset) - nameOffset, 32L) + 1 //minimum 32 characters, includes zero term
       val namePaddedLen = alignToFourBytes(nameLen)
-      val name = new String(mmbytes.slice(nameOffset, nameOffset + nameLen), StandardCharsets.UTF_8)
+      // TODO anomaly if not zero terminated header?
+      val name_zero = new String(mmbytes.slice(nameOffset, nameOffset + nameLen), StandardCharsets.UTF_8)
+      // remove zero term
+      val name = name_zero.substring(0,name_zero.length - 1)
       new StreamHeader(offset, size, name) :: readStreamHeaders(nr - 1, nameOffset + namePaddedLen, mmbytes)
     }
   }

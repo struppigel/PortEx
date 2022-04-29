@@ -22,6 +22,8 @@ import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader}
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
+import com.github.katjahahn.parser.sections.clr.CLIHeaderKey.FLAGS
+import com.github.katjahahn.parser.sections.clr.ComImageFlag
 import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
@@ -75,7 +77,7 @@ class ReportCreator(private val data: PEData) {
    */
   def specialSectionReports(): String = importsReport +
     { if (showAll) boundImportsReport() else "" } +
-    delayImportsReport + exportsReport + resourcesReport + debugReport +
+    delayImportsReport + exportsReport + resourcesReport + clrReport + debugReport +
     { if (showAll) relocReport() else "" }
 
   /**
@@ -130,6 +132,86 @@ class ReportCreator(private val data: PEData) {
   }
 
   private def hash(array: Array[Byte]): String = ByteArrayUtil.byteToHex(array, "")
+
+  /**
+   * Generate report for the .NET CLI Header
+   * @return .NET CLI Header description
+   */
+  def cliHeaderReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeCLR = loader.maybeLoadCLRSection()
+    val buf = new StringBuffer()
+    if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
+      val clr = maybeCLR.get()
+      val entries = clr.cliHeader.values
+
+      val colWidth = 15
+      val padLength = "export address table jumps ".length
+      buf.append(title(".NET CLI Header") + NL)
+
+      // construct flags string
+      val flagsField = clr.cliHeader.get(FLAGS)
+      val flagsVal = {
+        if (flagsField.isDefined) flagsField.get.getValue else 0
+      }
+      val flagsList = ComImageFlag.getAllFor(flagsVal).asScala
+      buf.append("Flags:" + NL + "\t* " + flagsList.map(_.getDescription).mkString(NL + "\t* ") + NL + NL)
+
+      // construct string with CLI Header values table
+      val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+      buf.append(tableHeader + NL)
+      buf.append(pad("", tableHeader.length, "-") + NL)
+      for (entry <- entries) {
+        buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
+          pad(hexString(entry.getOffset), colWidth, " ") + NL)
+      }
+    }
+    buf.toString + NL
+  }
+
+  /**
+   * Generate report for the .NET metadata root structure
+   * @return .NET metadata root structure description
+   */
+  def metadataRootReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeCLR = loader.maybeLoadCLRSection()
+    val buf = new StringBuffer()
+    if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
+      val metadataRoot = maybeCLR.get().metadataRoot
+      val entries = metadataRoot.metadataEntries.values
+      val colWidth = 15
+      val padLength = "Stream Header name ".length
+      buf.append(title(".NET Metadata Root") + NL)
+
+      val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+      buf.append(tableHeader + NL)
+      buf.append(pad("", tableHeader.length, "-") + NL)
+      for (entry <- entries) {
+        buf.append(pad(entry.getDescription, padLength, " ") +
+          pad(hexString(entry.getValue), colWidth, " ") +
+          pad(hexString(entry.getOffset), colWidth, " ") + NL)
+      }
+
+      val streamTblHeader = pad("Stream Header name", padLength, " ") + pad("size", colWidth, " ") + pad("offset", colWidth, " ")
+      buf.append(NL + NL + streamTblHeader + NL)
+      buf.append(pad("", tableHeader.length, "-") + NL)
+      for (streamHeader <- metadataRoot.streamHeaders){
+        buf.append(pad(streamHeader.name, padLength, " ") +
+          pad(hexString(streamHeader.size), colWidth, " ") +
+          pad(hexString(streamHeader.offset), colWidth, " ") + NL)
+      }
+    }
+    buf.toString + NL
+  }
+
+  /**
+   * Generate report for the .NET CLR structures
+   * @return .NET structures description
+   */
+  def clrReport(): String = {
+    cliHeaderReport() + metadataRootReport()
+  }
 
   /**
    * Generate report for the debug structure

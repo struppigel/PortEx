@@ -5,6 +5,7 @@ import com.github.katjahahn.parser._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey._
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+import com.github.katjahahn.tools.ReportCreator
 import org.apache.logging.log4j.LogManager
 
 import java.io.File
@@ -56,20 +57,16 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
   }
 }
 
-object CLRSection extends App {
+object CLRSection {
   val cliHeaderSpec = "cliheaderspec"
   val logger = LogManager.getLogger(CLRSection.getClass.getName)
-
-  val testfile = new File("portextestfiles/testfiles/CryptoTester.exe")
-  val pedata = PELoader.loadPE(testfile)
-  //println(new ReportCreator(pedata).headerReports())
-  new SectionLoader(testfile).loadCLRSection()
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): CLRSection = {
     // load CLI Header
     val cliHeaderSize = 0x48 //always this value acc. to specification
     val clibytes = mmbytes.slice(virtualAddress, virtualAddress + cliHeaderSize)
     val format = new SpecificationFormat(0, 1, 2, 3)
+    println("spec" + cliHeaderSpec)
     val cliHeader = IOUtil.readHeaderEntries(classOf[CLIHeaderKey],
       format, cliHeaderSpec, clibytes, offset).asScala.toMap
 
