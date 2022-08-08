@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.9.3
+  private val version = """version: 0.9.5
     |author: Karsten Philipp Boris Hahn
-    |last update: 15. Dec 2021""".stripMargin
+    |last update: 08. August 2022""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 

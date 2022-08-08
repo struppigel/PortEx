@@ -1,0 +1,6 @@
+RESERVED;reserved always 0;0;4
+MAJOR_VERSION;major version of table schemata;4;1
+MINOR_VERSION;minor version of table schemata;5;1
+HEAP_SIZES;bit vector for heap sizes;6;1
+VALID;bit vector of present tables;8;8
+SORTED;bit vector of sorted tables;16;8

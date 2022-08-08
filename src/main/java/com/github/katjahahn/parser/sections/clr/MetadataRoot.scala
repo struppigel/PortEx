@@ -1,8 +1,27 @@
+/**
+ * *****************************************************************************
+ * Copyright 2022 Karsten Hahn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ****************************************************************************
+ */
+
 package com.github.katjahahn.parser.sections.clr
 import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
 import com.github.katjahahn.parser._
+import com.google.common.base.Optional
 
 import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
@@ -13,7 +32,15 @@ class MetadataRoot (
                      val metadataEntries : Map[MetadataRootKey, StandardField],
                      val offset : Long,
                      val versionString : String,
-                     val streamHeaders : List[StreamHeader]){
+                     val streamHeaders : List[StreamHeader],
+                     private val optimizedStream: Option[OptimizedStream]){
+
+  def maybeGetOptimizedStream : Optional[OptimizedStream] = {
+    optimizedStream match {
+      case Some(str) => Optional.of(str)
+      case None => Optional.absent()
+    }
+  }
 
   def getInfo: String = "Metadata Root:" + NL + "-------------" + NL + metadataEntries.values.mkString(NL) + NL +
     "version: " + versionString + NL + NL +
@@ -41,11 +68,20 @@ object MetadataRoot {
       Map(FLAGS -> flagsNStreamsEntries(FLAGS), STREAMS -> flagsNStreamsEntries(STREAMS))
 
     throwIfBadMagic(metaRootEntries(SIGNATURE).getValue)
-    // load stream headers
+    // load stream headers in metadata root
     val streamHeadersVA =  metadataVA + versionOffset + versionLength + 4 // 4 = size of flags + streams
     val streamHeaders = readStreamHeaders(metaRootEntries(STREAMS).getValue, streamHeadersVA, mmbytes)
+    // load optimized stream
+    val optimizedStream = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes)
     // create MetadataRoot
-    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders)
+    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream)
+  }
+
+  private def maybeLoadOptimizedStream( streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE): Option[OptimizedStream] = {
+    streamHeaders.find(_.name == "#~") match {
+      case Some(header) => Some(OptimizedStream(header.size, metadataVA + header.offset, mmbytes))
+      case None => None
+    }
   }
 
   private def loadMetaRootEntriesFirstPart(mmbytes: MemoryMappedPE, metadataVA: Long, metadataSize: Long, metadataFileOffset: Long) = {
