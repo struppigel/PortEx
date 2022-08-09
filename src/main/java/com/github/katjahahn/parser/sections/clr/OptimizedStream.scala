@@ -26,10 +26,13 @@ import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable.ListMap
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
-                       val sortedTableSizes : List[Int]) {
+                       val tableSizes : List[Int]) {
 
   // TODO anomaly: bits above 0x2c are set
   private val tableIdxMap = ListMap(Map(
+                              0x20 -> "Assembly",
+                              0x22 -> "AssemblyOS",
+                              0x21 -> "AssemblyProcessor",
                               0x23 -> "AssemblyRef",
                               0x24 -> "AssemblyRefProcessor",
                               0x25 -> "AssemblyRefOS",
@@ -60,7 +63,7 @@ class OptimizedStream(
                               0x29 -> "NestedClass",
                               0x08 -> "Param",
                               0x17 -> "Property",
-                              0x15-> "PropertyMap",
+                              0x15 -> "PropertyMap",
                               0x11 -> "StandAloneSig",
                               0x02 -> "TypeDef",
                               0x01 -> "TypeRef",
@@ -98,21 +101,21 @@ class OptimizedStream(
    * @return list of all valid tables in the stream according to VALID bitmask
    */
   def getTableNames(): List[String] = {
-    getSortedTableIndices().sorted.map(tableIdxMap(_))
+    getTableIndices().sorted.map(tableIdxMap(_))
   }
 
   /**
    * get a list of all valid tables
    * @return list of all valid tables in the stream according to VALID bitmask
    */
-  def getSortedTableIndices(): List[Int] = {
-    val sortedBitMap = getLongValueOfField(OptimizedStreamKey.VALID)
-    tableIdxMap.keys.filter(key => (sortedBitMap & key.toLong) != 0).toList.sorted
+  def getTableIndices(): List[Int] = {
+    val bitMap = getLongValueOfField(OptimizedStreamKey.VALID)
+    tableIdxMap.keys.filter(key => (bitMap & math.pow(2,key).toLong) != 0).toList.sorted
   }
 
-  def getTableIndicesToSizesMap(): Map[Int,Int] = (getSortedTableIndices() zip sortedTableSizes).toMap
+  def getTableIndicesToSizesMap(): Map[Int,Int] = (getTableIndices() zip tableSizes).toMap
 
-  def getTableNamesToSizesMap(): Map[String,Int] = (getTableNames() zip sortedTableSizes).toMap
+  def getTableNamesToSizesMap(): Map[String,Int] = (getTableNames() zip tableSizes).toMap
 
   def getInfo: String = "#~ Stream" + NL + (entries.values.mkString(NL))
 }
@@ -121,6 +124,8 @@ object OptimizedStream {
 
   private val spec = "optimizedstream"
   private val format = new SpecificationFormat(0, 1, 2, 3)
+
+ // println(nrOfSetBits())
 
   /**
    * Counts the number of bits in a bitvector
@@ -135,16 +140,16 @@ object OptimizedStream {
     val tempBytes = mmbytes.slice(fileOffset, fileOffset + size)
     val entries = readHeaderEntries(classOf[OptimizedStreamKey],
       format, spec, tempBytes, 0).asScala.toMap
-    val bitvector = entries.get(OptimizedStreamKey.SORTED).get.getValue
-    val nrOfSortedTables = nrOfSetBits(bitvector)
+    val bitvector = entries.get(OptimizedStreamKey.VALID).get.getValue
+    val nrOfTables = nrOfSetBits(bitvector)
     val tableSizesOffset = fileOffset + 24
-    val tableSizes = readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset, nrOfSortedTables)
+    val tableSizes = readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset, nrOfTables)
     new OptimizedStream(entries, tableSizes)
   }
 
-  private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfSortedTables: Int ): List[Int] =
+  private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfTables: Int ): List[Int] =
       (
-      for(i <- 0 until nrOfSortedTables)
+      for(i <- 0 until nrOfTables)
         yield mmbytes.getBytesIntValue(tableSizesOffset + (i * 4), 4)
       ).toList
 
