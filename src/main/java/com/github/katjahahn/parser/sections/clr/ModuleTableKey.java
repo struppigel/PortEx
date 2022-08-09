@@ -20,7 +20,7 @@ package com.github.katjahahn.parser.sections.clr;
 
 import com.github.katjahahn.parser.HeaderKey;
 
-public enum ModuleKey implements HeaderKey {
+public enum ModuleTableKey implements HeaderKey {
     GENERATION,
     NAME,
     MVID,

@@ -21,7 +21,7 @@ import com.github.katjahahn.tools.anomalies.FieldOrStructureKey;
  * 
  * Represents a key for a {@link StandardField}.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  *
  */
 public interface HeaderKey extends FieldOrStructureKey {

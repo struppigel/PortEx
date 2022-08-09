@@ -17,13 +17,11 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, StandardField}
+import com.github.katjahahn.parser.{MemoryMappedPE, StandardField}
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.using
-
-import java.io.RandomAccessFile
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable.ListMap
+
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
                        val tableSizes : List[Int]) {
@@ -125,8 +123,6 @@ object OptimizedStream {
   private val spec = "optimizedstream"
   private val format = new SpecificationFormat(0, 1, 2, 3)
 
- // println(nrOfSetBits())
-
   /**
    * Counts the number of bits in a bitvector
    * @param bitvector the bitmask to count the number of bits for
@@ -145,6 +141,10 @@ object OptimizedStream {
     val tableSizesOffset = fileOffset + 24
     val tableSizes = readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset, nrOfTables)
     new OptimizedStream(entries, tableSizes)
+  }
+
+  private def loadModuleTable(moduleOffset : Long, mmbytes: MemoryMappedPE): Unit = {
+
   }
 
   private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfTables: Int ): List[Int] =

@@ -125,14 +125,6 @@ object DebugSection {
 
   private val debugspec = "debugdirentryspec"
 
-  def main(args: Array[String]): Unit = {
-    val file = new File("/home/karsten/samples/WarpBrothers Crypter")
-    val data = PELoader.loadPE(file)
-    val loader = new SectionLoader(data)
-    val debug = loader.loadDebugSection()
-    println(debug.getInfo())
-  }
-
   /**
    * Creates an instance of the DebugSection for the given debug bytes.
    *

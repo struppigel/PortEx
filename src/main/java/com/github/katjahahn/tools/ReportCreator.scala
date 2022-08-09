@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader}
+import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader, StandardField}
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
@@ -67,7 +67,7 @@ class ReportCreator(private val data: PEData) {
    * Generate repors for Section Table, MSDOS header, COFF File Header and Optional Header
    * @return description for the headers
    */
-  def headerReports(): String = secTableReport + msdosHeaderReport +
+  def headerReports(): String = secTableReport + msdosHeaderReport + richHeaderReport +
     coffHeaderReport + optHeaderReport
 
   /**
@@ -157,7 +157,6 @@ class ReportCreator(private val data: PEData) {
       val flagsList = ComImageFlag.getAllFor(flagsVal).asScala
       buf.append("Flags:" + NL + "\t* " + flagsList.map(_.getDescription).mkString(NL + "\t* ") + NL + NL)
 
-      // construct string with CLI Header values table
       val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
       buf.append(tableHeader + NL)
       buf.append(pad("", tableHeader.length, "-") + NL)
@@ -181,21 +180,13 @@ class ReportCreator(private val data: PEData) {
       val metadataRoot = maybeCLR.get().metadataRoot
       val entries = metadataRoot.metadataEntries.values
       val colWidth = 15
-      val padLength = "Stream Header name ".length
-      buf.append(title(".NET Metadata Root") + NL)
+      val padLength = "Stream Header name  ".length
+      val title = ".NET Metadata Root"
+      buf.append(standardFieldsReport(title, colWidth, padLength, entries))
 
-      val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
-      buf.append(tableHeader + NL)
-      buf.append(pad("", tableHeader.length, "-") + NL)
-      for (entry <- entries) {
-        buf.append(pad(entry.getDescription, padLength, " ") +
-          pad(hexString(entry.getValue), colWidth, " ") +
-          pad(hexString(entry.getOffset), colWidth, " ") + NL)
-      }
-
-      val streamTblHeader = pad("Stream Header name", padLength, " ") + pad("size", colWidth, " ") + pad("offset", colWidth, " ")
+      val streamTblHeader = pad("Stream Header name", padLength, " ") + pad("size", colWidth, " ") + pad("start offset (relative to BSJB)", colWidth, " ")
       buf.append(NL + NL + streamTblHeader + NL)
-      buf.append(pad("", tableHeader.length, "-") + NL)
+      buf.append(pad("", streamTblHeader.length, "-") + NL)
       for (streamHeader <- metadataRoot.streamHeaders){
         buf.append(pad(streamHeader.name, padLength, " ") +
           pad(hexString(streamHeader.size), colWidth, " ") +
@@ -205,12 +196,47 @@ class ReportCreator(private val data: PEData) {
     buf.toString + NL
   }
 
+  def optimizedNetStreamReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeCLR = loader.maybeLoadCLRSection()
+    if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
+      val metadataRoot = maybeCLR.get().metadataRoot
+      val maybeOptStream = metadataRoot.maybeGetOptimizedStream
+      if(maybeOptStream.isPresent){
+        val optStream = maybeOptStream.get
+        val entries = optStream.entries.values
+        val padLength = "minor version of table schemata: ".length
+        val additions = NL + "Blob heap size: " + optStream.getBlobHeapSize + " bytes" + NL +
+          "GUID heap size: " + optStream.getGUIDHeapSize + " bytes" + NL +
+          "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL +
+          "Tables: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
+        return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions
+      }
+    }
+    ""
+  }
+
+  def standardFieldsReport(titleStr: String, colWidth : Int, padLength : Int, entries : Iterable[StandardField]) : String = {
+    val buf = new StringBuffer()
+    buf.append(title(titleStr) + NL)
+
+    val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+    buf.append(tableHeader + NL)
+    buf.append(pad("", tableHeader.length, "-") + NL)
+    for (entry <- entries) {
+      buf.append(pad(entry.getDescription, padLength, " ") +
+        pad(hexString(entry.getValue), colWidth, " ") +
+        pad(hexString(entry.getOffset), colWidth, " ") + NL)
+    }
+    buf.toString + NL
+  }
+
   /**
    * Generate report for the .NET CLR structures
    * @return .NET structures description
    */
   def clrReport(): String = {
-    cliHeaderReport() + metadataRootReport()
+    cliHeaderReport() + metadataRootReport() + optimizedNetStreamReport()
   }
 
   /**
@@ -480,6 +506,26 @@ class ReportCreator(private val data: PEData) {
     else title("Anomalies") + NL +
       (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
       ("* " + anomalies.map(a => a.toString()).mkString(NL + "* ")) + NL + NL
+  }
+
+  def richHeaderReport(): String = {
+    val rich = data.getRichHeader
+    val entries = rich.getRichEntries().asScala
+    val padLength = "VS2022 v17.1.0 pre 1.0 build 30818  ".length
+    val padLength2 = "Utc1900_LTCG_CPP  ".length
+    val buf = new StringBuffer()
+    buf.append(title("Rich Header") + NL)
+    val xorKey = rich.getXORKey().asScala
+    val xorStr = "0x" + xorKey.map("%02X" format _).mkString
+    buf.append("XOR key: " + xorStr + NL + NL)
+    val tableHeader = pad("object", padLength2, " ") + pad("product", padLength, " ") + pad("file count", 10, " ")
+    buf.append(tableHeader + NL)
+    buf.append(pad("", tableHeader.length, "-") + NL)
+    for (entry <- entries) {
+      buf.append(pad(entry.getProductIdStr, padLength2, " ") + pad(entry.getBuildStr, padLength, " ") +
+        pad(entry.count, 10, " ") + NL)
+    }
+    buf.toString + NL
   }
 
   def msdosHeaderReport(): String = {
