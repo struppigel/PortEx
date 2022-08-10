@@ -111,7 +111,16 @@ class ReportCreator(private val data: PEData) {
     buf.append(title("Hashes") + NL)
     buf.append("MD5:     " + hash(hasher.fileHash(md5)) + NL)
     buf.append("SHA256:  " + hash(hasher.fileHash(sha256)) + NL)
-    buf.append("ImpHash: " + ImpHash.createString(data.getFile) + NL + NL)
+    buf.append("ImpHash: " + ImpHash.createString(data.getFile) + NL)
+    val maybeRich = hasher.maybeRichHash()
+    if (maybeRich.isPresent) {
+      buf.append("Rich:    " + hash(maybeRich.get()) + NL)
+    }
+    val maybePVRich = hasher.maybeRichPVHash()
+    if (maybePVRich.isPresent) {
+      buf.append("RichPV:  " + hash(maybePVRich.get()) + NL)
+    }
+    buf.append(NL)
     val colWidth = 10
     val shaWidth = 64
     val padLength = "1. .rdata    ".length
@@ -509,23 +518,27 @@ class ReportCreator(private val data: PEData) {
   }
 
   def richHeaderReport(): String = {
-    val rich = data.getRichHeader
-    val entries = rich.getRichEntries().asScala
-    val padLength = "VS2022 v17.1.0 pre 1.0 build 30818  ".length
-    val padLength2 = "Utc1900_LTCG_CPP  ".length
-    val buf = new StringBuffer()
-    buf.append(title("Rich Header") + NL)
-    val xorKey = rich.getXORKey().asScala
-    val xorStr = "0x" + xorKey.map("%02X" format _).mkString
-    buf.append("XOR key: " + xorStr + NL + NL)
-    val tableHeader = pad("object", padLength2, " ") + pad("product", padLength, " ") + pad("file count", 10, " ")
-    buf.append(tableHeader + NL)
-    buf.append(pad("", tableHeader.length, "-") + NL)
-    for (entry <- entries) {
-      buf.append(pad(entry.getProductIdStr, padLength2, " ") + pad(entry.getBuildStr, padLength, " ") +
-        pad(entry.count, 10, " ") + NL)
+    val richOptional = data.maybeGetRichHeader
+    if (richOptional.isPresent) {
+      val rich = richOptional.get()
+      val entries = rich.getRichEntries().asScala
+      val padLength = "VS2022 v17.1.0 pre 1.0 build 30818  ".length
+      val padLength2 = "Utc1900_LTCG_CPP  ".length
+      val buf = new StringBuffer()
+      buf.append(title("Rich Header") + NL)
+      val xorKey = rich.getXORKey().asScala
+      val xorStr = "0x" + xorKey.map("%02X" format _).mkString
+      buf.append("XOR key: " + xorStr + NL + NL)
+      val tableHeader = pad("object", padLength2, " ") + pad("product", padLength, " ") + pad("file count", 10, " ")
+      buf.append(tableHeader + NL)
+      buf.append(pad("", tableHeader.length, "-") + NL)
+      for (entry <- entries) {
+        buf.append(pad(entry.getProductIdStr, padLength2, " ") + pad(entry.getBuildStr, padLength, " ") +
+          pad(entry.count.toString, 10, " ") + NL)
+      }
+      buf.toString + NL
     }
-    buf.toString + NL
+    else ""
   }
 
   def msdosHeaderReport(): String = {

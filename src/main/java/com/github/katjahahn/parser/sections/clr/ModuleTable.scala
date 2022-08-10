@@ -18,6 +18,27 @@
 
 package com.github.katjahahn.parser.sections.clr
 
-object ModuleTable {
+import com.github.katjahahn.parser.{MemoryMappedPE, ScalaIOUtil}
+import com.github.katjahahn.parser.ByteArrayUtil._
 
+import scala.collection.JavaConverters._
+
+class ModuleTable(val nameIndex: Long, val name: String, val mvid: Int) {
+
+}
+
+object ModuleTable {
+  def apply(stringHeapOffset: Long, moduleTblOffset : Long, mmbytes: MemoryMappedPE, guidHeapSize : Int, stringHeapSize : Int): ModuleTable = {
+    val mvid = 0
+    var currOffset = moduleTblOffset + 2 // skip Generation value
+    val nameIndex = getBytesLongValue(mmbytes.slice(currOffset, currOffset + stringHeapSize).toArray, 0, stringHeapSize)
+    val strVA = mmbytes._physToVirtAddresses(stringHeapOffset + nameIndex)(0)
+    println("strPhys: 0x" + (stringHeapOffset + nameIndex).toHexString) // should be 4D0BD
+    println("name Index 0x" + nameIndex.toHexString)
+    println("bsjb 0x" + stringHeapOffset.toHexString)
+    val name = "not implemented"
+   // val name = ScalaIOUtil.readZeroTerminatedUTF8StringAtRVA(strVA, mmbytes, 100)
+    println("NAME: " + name)
+    new ModuleTable(nameIndex, name, mvid)
+  }
 }

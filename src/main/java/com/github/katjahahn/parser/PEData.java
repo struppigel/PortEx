@@ -17,6 +17,7 @@ package com.github.katjahahn.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
@@ -74,11 +75,11 @@ public class PEData {
 
     /**
      * Returns the {@link RichHeader}.
-     * 
+     *
      * @return msdos header
      */
-    public RichHeader getRichHeader() {
-        return rich;
+    public Optional<RichHeader> maybeGetRichHeader() {
+        return Optional.ofNullable(rich);
     }
 
     /**

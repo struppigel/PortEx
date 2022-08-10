@@ -307,25 +307,14 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Windows\\System32\\kernel32.dll");
-        PEData pe = PELoader.loadPE(file);
-        RichHeader rich = pe.getRichHeader();
+        File file = new File("C:\\Malware\\workspace\\richpvtest");
+        PEData data = PELoader.loadPE(file);
 
-        System.out.println(rich.getInfo());
-        
-//        File file2 = new File("/home/katja/samples/tesla2");
-//        List<File> list = new ArrayList<>();
-//        list.add(file);
-//        list.add(file2);
-        // TODO create Unit test for resource type with name!
-//        for (File file : folder.listFiles()) {
-//            if (!file.isDirectory() && new PESignature(file).exists()) {
-//            	System.out.println("Report for " + file.getName());
-//            	System.out.println();
-//            	DiffReportCreator.newInstance(list).printReport();
-//            }
-//        }
-        
+        ReportCreator reporter = ReportCreator.apply(file);
+        System.out.println(reporter.clrReport());
+        System.out.println(reporter.richHeaderReport());
+        System.out.println(reporter.hashReport());
+
 //         VisualizerBuilder builder = new VisualizerBuilder();
 //         Visualizer vi = builder.build();
 //         final BufferedImage entropyImage = vi.createEntropyImage(file);

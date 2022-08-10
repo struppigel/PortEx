@@ -44,10 +44,18 @@ class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : A
    *
    * @return byte array of the decoded Rich header
    */
-  // TODO verify that xorKey is also the checksum of COFFHeader
-  def getDecodedRichHeaderBytes: java.util.List[Byte] = decodedRichHeaderBytes.toList.asJava
+  def getDecodedRichHeaderBytes: Array[Byte] = decodedRich.clone()
 
-  private def decodedRichHeaderBytes: Array[Byte] = decodedRich.clone()
+  /**
+   * Returns the decoded rich header without the count data. Implementation for RichPV hash according to
+   * https://github.com/modubyk/PE_Richness/blob/master/parseRich.py
+   * https://www.giac.org/paper/grem/6321/leveraging-pe-rich-header-static-alware-etection-linking/169729
+   *
+   * @return array of rich header bytes without the count data
+   */
+  def getDecodedRichHeaderBytesWithoutCount: Array[Byte] = {
+    (decodedRich.grouped(4).toList.zipWithIndex collect { case (b , i) if (i > 3) && (i % 2 == 0) => b}).flatten.toArray
+  }
 
   /**
    * Parse and compose list of all entries in the decoded Rich header

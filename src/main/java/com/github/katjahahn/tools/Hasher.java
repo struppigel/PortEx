@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Optional;
 
+import com.github.katjahahn.parser.RichHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,7 +38,7 @@ import com.google.common.base.Preconditions;
 /**
  * Creates hash values of PE files and sections.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public class Hasher {
@@ -63,6 +66,46 @@ public class Hasher {
      */
     public byte[] fileHash(MessageDigest messageDigest) throws IOException {
         return fileHash(data.getFile(), messageDigest);
+    }
+
+    /**
+     * Returns the rich header hash value if present. The hash is the MD5 of the cleartext rich header.
+     *
+     * @return md5 of the rich header if the rich header is present
+     */
+    public Optional<byte[]> maybeRichHash() {
+        Optional<RichHeader> maybeRich = data.maybeGetRichHeader();
+        try {
+            if (maybeRich.isPresent()) {
+                RichHeader rich = maybeRich.get();
+                byte[] richData = rich.getDecodedRichHeaderBytes();
+                byte[] richHash = MessageDigest.getInstance("MD5").digest(richData);
+                return Optional.of(richHash);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Invalid algorithm chosen for rich header hash");
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the rich header hash value if present. The hash is the MD5 of the cleartext rich header, excluding the count fields.
+     *
+     * @return md5 of the rich header if the rich header is present
+     */
+    public Optional<byte[]> maybeRichPVHash() {
+        Optional<RichHeader> maybeRich = data.maybeGetRichHeader();
+        try {
+            if (maybeRich.isPresent()) {
+                RichHeader rich = maybeRich.get();
+                byte[] richData = rich.getDecodedRichHeaderBytesWithoutCount();
+                byte[] richHash = MessageDigest.getInstance("MD5").digest(richData);
+                return Optional.of(richHash);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Invalid algorithm chosen for rich header hash");
+        }
+        return Optional.empty();
     }
 
     /**
