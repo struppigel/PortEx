@@ -54,6 +54,9 @@ class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : A
    * @return array of rich header bytes without the count data
    */
   def getDecodedRichHeaderBytesWithoutCount: Array[Byte] = {
+    // the first 12 bytes are ignored because they are padding
+    // apart from the padding group into 4 bytes each, then remove every second group
+    // afterwards create a flat array of bytes again (the grouping made a list of arrays)
     (decodedRich.grouped(4).toList.zipWithIndex collect { case (b , i) if (i > 3) && (i % 2 == 0) => b}).flatten.toArray
   }
 
