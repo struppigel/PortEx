@@ -41,9 +41,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.9.6
+  private val version = """version: 0.9.7
     |author: Karsten Philipp Boris Hahn
-    |last update: 10. August 2022""".stripMargin
+    |last update: 12. August 2022""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 

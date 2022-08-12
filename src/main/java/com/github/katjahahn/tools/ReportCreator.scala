@@ -523,12 +523,18 @@ class ReportCreator(private val data: PEData) {
       val rich = richOptional.get()
       val entries = rich.getRichEntries().asScala
       val padLength = "VS2022 v17.1.0 pre 1.0 build 30818  ".length
-      val padLength2 = "Utc1900_LTCG_CPP  ".length
+      val padLength2 = "Utc1900_POGO_O_CPP  ".length
       val buf = new StringBuffer()
       buf.append(title("Rich Header") + NL)
-      val xorKey = rich.getXORKey().asScala
+      val xorKey = rich.getXORKey()
       val xorStr = "0x" + xorKey.map("%02X" format _).mkString
-      buf.append("XOR key: " + xorStr + NL + NL)
+      val checksumStr = if(rich.isValidChecksum()) "checksum is valid!" else "checksum is invalid!"
+      buf.append("XOR key: " + xorStr + NL)
+      buf.append(checksumStr + NL + NL)
+      val knownFormats = rich.getKnownFormats().asScala
+      if (knownFormats.size > 0) {
+        buf.append("XOR key known to be emitted by: " + knownFormats.mkString(", "))
+      }
       val tableHeader = pad("object", padLength2, " ") + pad("product", padLength, " ") + pad("file count", 10, " ")
       buf.append(tableHeader + NL)
       buf.append(pad("", tableHeader.length, "-") + NL)

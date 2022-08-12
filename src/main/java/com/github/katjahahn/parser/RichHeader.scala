@@ -15,11 +15,15 @@
  * **************************************************************************** */
 package com.github.katjahahn.parser
 
-import com.github.katjahahn.parser.RichHeader.{buildMap, prodIdMap}
+import com.github.katjahahn.parser.RichHeader.{buildMap, knownXORKeys, prodIdMap}
+
 import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.msdos.MSDOSHeader
 import com.google.common.primitives.Bytes
 import org.apache.logging.log4j.{LogManager, Logger}
+
+import java.math.BigInteger
+import java.util.Optional
 
 /**
  * Reads the Rich Header if it exists
@@ -27,7 +31,7 @@ import org.apache.logging.log4j.{LogManager, Logger}
  * @author Karsten Philipp Boris Hahn
  *
  */
-class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : Array[Byte]) {
+class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : Array[Byte], private val actualChecksum : Array[Byte]) {
 
   case class RichEntry(build: Int, prodId : Int, count : Int) {
     def getProductIdStr : String = prodIdMap.getOrElse(prodId, "0x" + prodId.toHexString)
@@ -61,6 +65,16 @@ class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : A
   }
 
   /**
+   * Some PE types, compilers or formats emit specific XORkeys, this returns a list of all PE types associated with
+   * the XOR key used in this Rich Header
+   *
+   * @return List of descriptions for PE types, compilers, formats that are known to emit the Rich Header's XOR key
+   */
+  def getKnownFormats(): java.util.List[String] = {
+    knownXORKeys.filter(_._2.contains(xorKey)).map(_._1).toList.asJava
+  }
+
+  /**
    * Parse and compose list of all entries in the decoded Rich header
    *
    * @return list of all Rich entries
@@ -85,9 +99,19 @@ class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : A
     result.toList
   }
 
-  def getXORKey() : java.util.List[Byte] = {
-    xorKey.toList.asJava
-  }
+  /**
+   * The XOR key that is saved in the Rich Header
+   * @return xor key as byte array
+   */
+  def getXORKey() : Array[Byte] = xorKey
+
+  /**
+   * Checks if computed checksum and XOR key are the same
+   *
+   * @return true iff computed checksum equals XOR key saved in Rich Header
+   */
+  def isValidChecksum() : Boolean = xorKey.deep == actualChecksum.deep
+
 
   def getInfo : String = richEntries().mkString(IOUtil.NL)
 }
@@ -98,21 +122,75 @@ object RichHeader {
 
   val richMagic : Array[Byte] = "Rich".getBytes
   val danSMagic : Array[Byte] = "DanS".getBytes
+  // based on https://www.virusbulletin.com/virusbulletin/2020/01/vb2019-paper-rich-headers-leveraging-mysterious-artifact-pe-format/
+  val knownXORKeys = Map(
+    "Visual Basic 6.0" -> List(0x886973F3, 0x8869808D, 0x88AA42CF, 0x88AA2A9D, 0x89A99A19, 0x88CECC0B, 0x8897EBCB,
+        0xAC72CCFA, 0x1AAAA993, 0xD05FECFB, 0x183A2CFD, 0xACCF9994, 0xC757AD0B, 0xA7EEAD02, 0xD1197995, 0x83CDAD4,
+        0x8917A389, 0x88CEA841, 0x8917DE83, 0x89AA0373, 0x8ACD8739, 0x8D156179, 0x8ACE4D53, 0x8897FE31, 0x91A515F9,
+        0xD1983193, 0x8D16E113, 0x9AC47EF9, 0x91A80893, 0xAD0350F9, 0xD180F4F9, 0xAD0EF593, 0x9ACA5793, 0x9ACA5793),
+    "NSIS" -> List(0xD28650E9, 0x38BF1A05, 0x6A2AD175, 0xD246D0E9, 0x371742A2, 0xAB930178, 0x69EAD975, 0x69EB1175,
+        0xFB2414A1, 0xFB240DA1),
+    "MASM 6.14 build 8444" -> List(0x88737619, 0x89A56EF9),
+    "WinRar SFX" -> List(0xC47CACAA, 0xFDAFBB1F, 0xD3254748, 0x557B8C97, 0x8DEFA739, 0x723F06DE, 0x16614BC7),
+    "Autoit" -> List(0xBEAFE369, 0xC1FC1252, 0xCDA605B9, 0xA9CBC717, 0x8FEDAD28, 0x273B0B7D, 0xECFA7F86),
+    "Microsoft Cabinet File" -> List(0x43FACBB6),
+    "NTkernelPacker" -> List(0x377824C3),
+    "Thinstall" -> List(0x8B6DF331),
+    "MoleBox Ultra v4" -> List(0x8CABE24D)
+  )
 
   private val wordLen = 4
 
-  def apply(bytes: Array[Byte]) : RichHeader = {
-    val richOffset = Bytes.indexOf(bytes, richMagic)
+  def apply(bytesUntilPE: Array[Byte]) : RichHeader = {
+    val richOffset = Bytes.indexOf(bytesUntilPE, richMagic)
     if(richOffset == -1) throw new FileFormatException("No Rich Header found")
-    if(bytes.length < richOffset + 8) throw new FileFormatException("Rich Header malformed or truncated")
-    val xorKey = bytes.slice(richOffset + 4, richOffset + 8)
+    if(bytesUntilPE.length < richOffset + 8) throw new FileFormatException("Rich Header malformed or truncated")
+    val xorKey = bytesUntilPE.slice(richOffset + 4, richOffset + 8)
     // decode rich header backwards
-    val decodedRich = decodeRichHeader(bytes, richOffset, xorKey)
-    new RichHeader(decodedRich, xorKey)
+    val decodedRich = decodeRichHeader(bytesUntilPE, richOffset, xorKey)
+    val danSOffset = findDanSOffset(bytesUntilPE, richOffset, xorKey)
+    val checksum = calculateChecksum(bytesUntilPE, danSOffset, decodedRich)
+    val checksumBytes = BigInteger.valueOf(checksum).toByteArray.reverse // endianness
+
+    new RichHeader(decodedRich, xorKey, checksumBytes)
   }
 
-  private def decodeRichHeader(bytes: Array[Byte], richOffset: Int, xorKey: Array[Byte]) : Array[Byte] = {
-    // start by finding DanS
+  private def calculateDosChecksum(bytesUntilPEMagic: Array[Byte], danSOffset: Int) : Int = {
+    val elfanew = 0x3c
+    val elfanewLength = 4
+    var checksum = danSOffset
+    for (i <- 0 until danSOffset) {
+      if(!(elfanew <= i && i < elfanew + elfanewLength)) { //skip e_flanew
+        val temp = bytesUntilPEMagic(i) & 0xff
+        checksum += ((temp << (i % 32)) | (temp >> (32 - (i % 32))) & 0xff) //ROL
+        checksum &= 0xffffffff
+      }
+    }
+    checksum
+  }
+
+  private def calculateRichChecksum(decodedRich: Array[Byte]) : Int = {
+    var checksum = 0
+    // skip DanS and padding bytes, we start by slicing into blocks of 4 bytes already removing DanS as first block
+    val dataBlocks = for (i <- wordLen until decodedRich.length by wordLen) yield decodedRich.slice(i, i + wordLen)
+    // remove padding of 0 byte words TODO adjust to 16 byte alignment
+    val dbNoPad = dataBlocks.dropWhile(_.sameElements(Array[Byte](0, 0, 0, 0)))
+    val compids = for (i <- dbNoPad.indices by 2) yield
+      (ByteArrayUtil.bytesToInt(dbNoPad(i).slice(0, 4)), // bytes 0-3 compid
+        ByteArrayUtil.bytesToInt(dbNoPad(i + 1))) // bytes 4-7 count
+    for ((compid, count) <- compids) {
+      //println("compid: 0x" + compid.toHexString + " count: " + count)
+      checksum += (compid << count % 32 | compid >> (32 - (count % 32)))
+      checksum &= 0xffffffff
+     // println("checksum temp: 0x" + checksum.toHexString)
+    }
+    checksum
+  }
+
+  private def calculateChecksum(bytesUntilPEMagic: Array[Byte], danSOffset: Int, decodedRich: Array[Byte]) =
+    calculateDosChecksum(bytesUntilPEMagic, danSOffset) + calculateRichChecksum(decodedRich)
+
+  private def findDanSOffset(bytes: Array[Byte], richOffset: Int, xorKey: Array[Byte]) : Int = {
     var danSOffset = -1
     for (i <- richOffset - richMagic.length to 0 by -wordLen) {
       val encodedDword : Array[Byte] = bytes.slice(i, i + wordLen)
@@ -121,7 +199,11 @@ object RichHeader {
     }
     // no DanS found
     if(danSOffset == -1) throw new FileFormatException("Rich header malformed, no DanS found")
+    danSOffset
+  }
 
+  private def decodeRichHeader(bytes: Array[Byte], richOffset: Int, xorKey: Array[Byte]) : Array[Byte] = {
+    val danSOffset = findDanSOffset(bytes, richOffset, xorKey)
     // construct decoded header bytes, currently doesn't include "Rich"
     val encoded = bytes.slice(danSOffset, richOffset)
     // only decode until "Rich"
