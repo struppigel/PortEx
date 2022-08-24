@@ -307,7 +307,7 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\richpvtest");
+        File file = new File("C:\\Malware\\workspace\\dcrat");
         PEData data = PELoader.loadPE(file);
 
         ReportCreator reporter = ReportCreator.apply(file);

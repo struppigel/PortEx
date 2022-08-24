@@ -18,27 +18,23 @@
 
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.{MemoryMappedPE, ScalaIOUtil}
-import com.github.katjahahn.parser.ByteArrayUtil._
+import com.github.katjahahn.parser.MemoryMappedPE
 
-import scala.collection.JavaConverters._
-
-class ModuleTable(val nameIndex: Long, val name: String, val mvid: Int) {
+class ModuleTable(val generation : Int,
+                  val name : StringIndex,
+                  val mvid : GuidIndex,
+                  val encId : GuidIndex,
+                  val encBaseId : GuidIndex) {
 
 }
 
 object ModuleTable {
-  def apply(stringHeapOffset: Long, moduleTblOffset : Long, mmbytes: MemoryMappedPE, guidHeapSize : Int, stringHeapSize : Int): ModuleTable = {
-    val mvid = 0
-    var currOffset = moduleTblOffset + 2 // skip Generation value
-    val nameIndex = getBytesLongValue(mmbytes.slice(currOffset, currOffset + stringHeapSize).toArray, 0, stringHeapSize)
-    val strVA = mmbytes._physToVirtAddresses(stringHeapOffset + nameIndex)(0)
-    println("strPhys: 0x" + (stringHeapOffset + nameIndex).toHexString) // should be 4D0BD
-    println("name Index 0x" + nameIndex.toHexString)
-    println("bsjb 0x" + stringHeapOffset.toHexString)
-    val name = "not implemented"
-   // val name = ScalaIOUtil.readZeroTerminatedUTF8StringAtRVA(strVA, mmbytes, 100)
-    println("NAME: " + name)
-    new ModuleTable(nameIndex, name, mvid)
+  def apply(offset : Long, mmbytes : MemoryMappedPE, stringsHeap: Option[StringsHeap], guidHeap : Option[GuidHeap]): ModuleTable = {
+    val generation = 0
+    val name = new StringIndex(0, stringsHeap)
+    val mvid = new GuidIndex(0, guidHeap)
+    val encId = new GuidIndex(0, guidHeap)
+    val encBaseId = new GuidIndex(0, guidHeap)
+    new ModuleTable(generation, name, mvid, encId, encBaseId)
   }
 }

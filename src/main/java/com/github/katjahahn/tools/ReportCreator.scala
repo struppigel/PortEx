@@ -205,6 +205,25 @@ class ReportCreator(private val data: PEData) {
     buf.toString + NL
   }
 
+  def stringsHeapReport(): String = {
+    val loader = new SectionLoader(data)
+    val maybeCLR = loader.maybeLoadCLRSection()
+    val buf = new StringBuffer()
+    if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
+      val metadataRoot = maybeCLR.get().metadataRoot
+      val maybeHeap = metadataRoot.maybeGetStringsHeap
+      if(!maybeHeap.isPresent) {
+        return ""
+      }
+      val heap = maybeHeap.get()
+      buf.append(title("#Strings Heap"))
+      for(str <- heap.getArray()) {
+        buf.append(str + NL)
+      }
+    }
+    buf.toString()
+  }
+
   def optimizedNetStreamReport(): String = {
     val loader = new SectionLoader(data)
     val maybeCLR = loader.maybeLoadCLRSection()
@@ -218,7 +237,7 @@ class ReportCreator(private val data: PEData) {
         val additions = NL + "Blob heap size: " + optStream.getBlobHeapSize + " bytes" + NL +
           "GUID heap size: " + optStream.getGUIDHeapSize + " bytes" + NL +
           "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL +
-          "Tables: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
+          "Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
         return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions
       }
     }
@@ -245,7 +264,7 @@ class ReportCreator(private val data: PEData) {
    * @return .NET structures description
    */
   def clrReport(): String = {
-    cliHeaderReport() + metadataRootReport() + optimizedNetStreamReport()
+    cliHeaderReport() + metadataRootReport() + optimizedNetStreamReport() + stringsHeapReport()
   }
 
   /**

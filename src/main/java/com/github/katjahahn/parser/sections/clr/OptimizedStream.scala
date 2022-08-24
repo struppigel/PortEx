@@ -24,7 +24,8 @@ import scala.collection.immutable.ListMap
 
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
-                       val tableSizes : List[Int]) {
+                       val tableSizes : List[Int],
+                       val moduleTable : ModuleTable) {
 
   // TODO anomaly: bits above 0x2c are set
   private val tableIdxMap = ListMap(Map(
@@ -132,19 +133,20 @@ object OptimizedStream {
     if(bitvector == 0) 0
     else 1 + nrOfSetBits(bitvector & (bitvector - 1))
 
-  def apply(size: Long, fileOffset : Long, mmbytes: MemoryMappedPE): OptimizedStream = {
-    val tempBytes = mmbytes.slice(fileOffset, fileOffset + size)
+  def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): OptimizedStream = {
+    val tempBytes = mmbytes.slice(offset, offset + size)
     val entries = readHeaderEntries(classOf[OptimizedStreamKey],
       format, spec, tempBytes, 0).asScala.toMap
     val bitvector = entries.get(OptimizedStreamKey.VALID).get.getValue
     val nrOfTables = nrOfSetBits(bitvector)
-    val tableSizesOffset = fileOffset + 24
+    val tableSizesOffset = offset + 24
     val tableSizes = readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset, nrOfTables)
-    new OptimizedStream(entries, tableSizes)
+    val moduleTable = loadModuleTable(offset, mmbytes, stringsHeap, guidHeap)
+    new OptimizedStream(entries, tableSizes, moduleTable)
   }
 
-  private def loadModuleTable(moduleOffset : Long, mmbytes: MemoryMappedPE): Unit = {
-
+  private def loadModuleTable(offset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): ModuleTable = {
+    ModuleTable(offset, mmbytes, stringsHeap, guidHeap)
   }
 
   private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfTables: Int ): List[Int] =

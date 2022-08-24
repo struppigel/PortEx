@@ -19,7 +19,12 @@ package com.github.katjahahn.parser.sections.clr
 
 import com.github.katjahahn.parser.MemoryMappedPE
 
-class StringHeap(val strings : Array[String]) {
+/**
+ * #Strings stream/heap
+ *
+ * @param strings the array with the UTF-8 strings on the heap
+ */
+class StringsHeap(private val strings : Array[String], private val indexSize : Int) {
 
   /**
    * Retrieve string at the given index, starting with index 1 as it is customary for .NET table indices
@@ -32,13 +37,16 @@ class StringHeap(val strings : Array[String]) {
     strings(index - 1)
   }
 
+  def getArray() : Array[String] = strings
+
+  def getIndexSize() : Int = indexSize
 }
 
-object StringHeap {
+object StringsHeap {
 
-  def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE): StringHeap = {
+  def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, indexSize : Int): StringsHeap = {
     val bytes = mmbytes.slice(offset, offset + size)
     val strings = new String(bytes, "UTF-8").split("\0")
-    new StringHeap(strings)
+    new StringsHeap(strings, indexSize)
   }
 }

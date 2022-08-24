@@ -21,10 +21,10 @@ import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
 import com.github.katjahahn.parser._
-import com.google.common.base.Optional
 
 import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
+import java.util.Optional
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
@@ -33,14 +33,21 @@ class MetadataRoot (
                      val offset : Long,
                      val versionString : String,
                      val streamHeaders : List[StreamHeader],
-                     private val optimizedStream: Option[OptimizedStream]){
+                     private val optimizedStream: Option[OptimizedStream],
+                     private val guidHeap: Option[GuidHeap],
+                     private val stringsHeap: Option[StringsHeap]){
 
-  def maybeGetOptimizedStream : Optional[OptimizedStream] = {
-    optimizedStream match {
-      case Some(str) => Optional.of(str)
-      case None => Optional.absent()
+  def maybeGetOptimizedStream : Optional[OptimizedStream] = optionToOptional(optimizedStream)
+  def maybeGetGuidHeap : Optional[GuidHeap] = optionToOptional(guidHeap)
+  def maybeGetStringsHeap : Optional[StringsHeap] = optionToOptional(stringsHeap)
+
+  private def optionToOptional[A](convertee : Option[A]) : Optional[A] = {
+    convertee match {
+      case Some(s) => Optional.of(s)
+      case None => Optional.empty()
     }
   }
+
 
   def getInfo: String = "Metadata Root:" + NL + "-------------" + NL + metadataEntries.values.mkString(NL) + NL +
     "version: " + versionString + NL + NL +
@@ -55,6 +62,7 @@ object MetadataRoot {
   private val formatMeta = new SpecificationFormat(0, 1, 2, 3)
 
   def apply(mmbytes: MemoryMappedPE, data: PEData, metadataVA: Long, metadataSize: Long): MetadataRoot = {
+
     // load first part of meta data root
     val metadataFileOffset = new SectionLoader(data).getFileOffset(metadataVA)
     val metaRootEntriesPart = loadMetaRootEntriesFirstPart(mmbytes, metadataVA, metadataSize, metadataFileOffset)
@@ -68,18 +76,45 @@ object MetadataRoot {
       Map(FLAGS -> flagsNStreamsEntries(FLAGS), STREAMS -> flagsNStreamsEntries(STREAMS))
 
     throwIfBadMagic(metaRootEntries(SIGNATURE).getValue)
+
     // load stream headers in metadata root
     val streamHeadersVA =  metadataVA + versionOffset + versionLength + 4 // 4 = size of flags + streams
     val streamHeaders = readStreamHeaders(metaRootEntries(STREAMS).getValue, streamHeadersVA, mmbytes)
-    // load optimized stream
-    val optimizedStream = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes)
-    // create MetadataRoot
-    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream)
+    // load opt stream temporarily for reading heap sizes
+    val optTemp = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, None, None)
+    if( optTemp.isDefined) {
+      val strIndexSize = optTemp.get.getStringHeapSize
+      val blobIndexSize = optTemp.get.getBlobHeapSize
+      val guidIndexSize = optTemp.get.getGUIDHeapSize
+      // load streams if present
+      val stringsHeap = maybeLoadStringHeap(streamHeaders, metadataVA, mmbytes, strIndexSize)
+      val guidHeap = maybeLoadGuidHeap(streamHeaders, metadataVA, mmbytes, guidIndexSize)
+      val optimizedStream = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, stringsHeap, guidHeap)
+      // create MetadataRoot with optimized stream
+      return new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream, guidHeap, stringsHeap)
+    }
+    // No optimized stream found, create MetadataRoot without it
+    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, None, None, None)
   }
 
-  private def maybeLoadOptimizedStream( streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE): Option[OptimizedStream] = {
+  private def maybeLoadOptimizedStream( streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE,
+                                        stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): Option[OptimizedStream] = {
     streamHeaders.find(_.name == "#~") match {
-      case Some(header) => Some(OptimizedStream(header.size, metadataVA + header.offset, mmbytes))
+      case Some(header) => Some(OptimizedStream(header.size, metadataVA + header.offset, mmbytes, stringsHeap, guidHeap))
+      case None => None
+    }
+  }
+
+  private def maybeLoadStringHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[StringsHeap] = {
+    streamHeaders.find(_.name == "#Strings") match {
+      case Some(header) => Some(StringsHeap(header.size, metadataVA + header.offset, mmbytes, indexSize)) // TODO implement
+      case None => None
+    }
+  }
+
+  private def maybeLoadGuidHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[GuidHeap] = {
+    streamHeaders.find(_.name == "#GUID") match {
+      case Some(header) => None //Some(GuidHeap(header.size, metadataVA + header.offset, mmbytes)) // TODO implement
       case None => None
     }
   }
