@@ -23,8 +23,6 @@ import com.github.katjahahn.tools.Overlay
 import com.github.katjahahn.parser.IOUtil.{ NL }
 import com.github.katjahahn.parser.coffheader.COFFFileHeader
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.PhysicalLocation
 import java.util.Date

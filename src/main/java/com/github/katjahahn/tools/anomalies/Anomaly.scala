@@ -25,6 +25,7 @@ import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.sections.idata.ImportDLL
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.sections.clr.StreamHeader
 import com.github.katjahahn.parser.sections.rsrc.Level
 import com.github.katjahahn.parser.sections.rsrc.Resource
 
@@ -137,4 +138,10 @@ case class ImportAnomaly(val imports: List[ImportDLL],
   override val key: FieldOrStructureKey) extends Anomaly {
 
   override def locations = imports.flatMap(i => i.getLocations().asScala).asJava
+}
+
+case class ClrStreamAnomaly(override val locations: java.util.List[PhysicalLocation],
+                            override val description: String,
+                            override val subtype: AnomalySubType) extends Anomaly {
+  override def key = PEStructureKey.CLR_SECTION
 }

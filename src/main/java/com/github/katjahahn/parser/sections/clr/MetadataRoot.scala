@@ -172,4 +172,4 @@ object MetadataRoot {
 
 }
 
-class StreamHeader(val offset: Long, val size : Long, val name: String){}
+class StreamHeader(val offset: Long, val size : Long, val name: String)

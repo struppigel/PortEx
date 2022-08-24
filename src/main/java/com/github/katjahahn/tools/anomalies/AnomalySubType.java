@@ -438,7 +438,18 @@ public enum AnomalySubType {
     /**
      * Resource tree has a loop.
      */
-    RESOURCE_LOOP(STRUCTURE);
+    RESOURCE_LOOP(STRUCTURE),
+
+    /**************************** CLR Section ******************************/
+    /**
+     * Several streams with the same name exist
+     */
+    DUPLICATED_STREAMS(STRUCTURE),
+    /**
+     * Usage of unreadable characters for strings in the #Strings heap. Typical obfuscation method.
+     */
+    UNREADABLE_CHARS_IN_STRINGS_HEAP(NON_DEFAULT)
+    ;
 
     private final AnomalyType superType;
 

@@ -307,14 +307,14 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\dcrat");
+        File file = new File("C:\\Malware\\workspace\\netbadstrings");
         PEData data = PELoader.loadPE(file);
 
         ReportCreator reporter = ReportCreator.apply(file);
-        System.out.println(reporter.clrReport());
-        System.out.println(reporter.richHeaderReport());
-        System.out.println(reporter.hashReport());
-
+      //  System.out.println(reporter.clrReport());
+       // System.out.println(reporter.richHeaderReport());
+      //  System.out.println(reporter.hashReport());
+        System.out.println(reporter.anomalyReport());
 //         VisualizerBuilder builder = new VisualizerBuilder();
 //         Visualizer vi = builder.build();
 //         final BufferedImage entropyImage = vi.createEntropyImage(file);

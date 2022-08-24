@@ -217,9 +217,12 @@ class ReportCreator(private val data: PEData) {
       }
       val heap = maybeHeap.get()
       buf.append(title("#Strings Heap"))
-      for(str <- heap.getArray()) {
-        buf.append(str + NL)
-      }
+      val filteredStrings = heap.getArray().filter(filteredString(_).length > 0)
+      // one less because first string is always empty
+      val unreadableCount = heap.getArray().length - filteredStrings.length - 1
+      buf.append("Human-unreadable strings: " + unreadableCount + NL + NL)
+      filteredStrings.foreach(s => buf.append(s + NL))
+      buf.append(NL)
     }
     buf.toString()
   }

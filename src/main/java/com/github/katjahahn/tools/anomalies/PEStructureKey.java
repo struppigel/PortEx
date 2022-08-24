@@ -24,6 +24,6 @@ public enum PEStructureKey implements FieldOrStructureKey {
      * Includes COFF File Header, Optional Header and Section Table
      */
     PE_FILE_HEADER, COFF_FILE_HEADER, OPTIONAL_HEADER, SECTION_TABLE, SECTION,
-    IMPORT_DLL, IMPORT_SECTION, EXPORT_SECTION, RESOURCE_SECTION;
+    IMPORT_DLL, IMPORT_SECTION, EXPORT_SECTION, RESOURCE_SECTION, CLR_SECTION;
 
 }
