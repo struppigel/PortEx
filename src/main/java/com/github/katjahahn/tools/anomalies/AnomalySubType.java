@@ -40,9 +40,17 @@ public enum AnomalySubType {
     RESERVED_MSDOS_FIELD(RESERVED),
     
     /**
-     * e_lfanew oints to second half of file
+     * e_lfanew points to second half of file
      */
     LARGE_E_LFANEW(NON_DEFAULT),
+
+    /**************************** RICH Header ******************************/
+
+    /**
+     * Calculated checksum is not the same as the XOR key/checksum saved in rich header
+     * This is a hint towards Rich header manipulation
+     */
+    RICH_CHECKSUM_INVALID(NON_DEFAULT),
 
     /*************************** COFF File Header *****************************/
 

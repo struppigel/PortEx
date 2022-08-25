@@ -50,11 +50,12 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   abstract override def scan(): List[Anomaly] = {
     val opt = data.getOptionalHeader()
     val anomalyList = ListBuffer[Anomaly]()
-    if (opt == null) return Nil
-    anomalyList ++= dataDirScan(opt)
-    anomalyList ++= windowsFieldScan(opt)
-    anomalyList ++= standardFieldScan(opt)
-    anomalyList ++= dupHeadScan(opt)
+    if (opt != null) {
+      anomalyList ++= dataDirScan(opt)
+      anomalyList ++= windowsFieldScan(opt)
+      anomalyList ++= standardFieldScan(opt)
+      anomalyList ++= dupHeadScan(opt)
+    }
     super.scan ::: anomalyList.toList
   }
 

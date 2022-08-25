@@ -21,6 +21,7 @@ import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
 import com.github.katjahahn.parser._
+import com.github.katjahahn.parser.sections.clr.MetadataRoot.{alignToFourBytes, versionOffset}
 
 import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
@@ -40,6 +41,12 @@ class MetadataRoot (
   def maybeGetOptimizedStream : Optional[OptimizedStream] = optionToOptional(optimizedStream)
   def maybeGetGuidHeap : Optional[GuidHeap] = optionToOptional(guidHeap)
   def maybeGetStringsHeap : Optional[StringsHeap] = optionToOptional(stringsHeap)
+  def getStreamHeaders : java.util.List[StreamHeader] = streamHeaders.asJava
+  def getPhysicalLocations(): List[PhysicalLocation] = {
+    // TODO include stream header table, for now it is metadata root without it
+    val versionLength = alignToFourBytes(metadataEntries.get(MetadataRootKey.LENGTH).get.getValue)
+    List(new PhysicalLocation(offset, versionOffset + versionLength + 4))
+  }
 
   private def optionToOptional[A](convertee : Option[A]) : Optional[A] = {
     convertee match {
@@ -48,6 +55,10 @@ class MetadataRoot (
     }
   }
 
+  def getBSJBOffset(): Long = metadataEntries(MetadataRootKey.SIGNATURE).getOffset
+
+  def maybeGetStreamHeaderByName(name : String): java.util.Optional[StreamHeader] =
+    optionToOptional(streamHeaders.find(_.name == name))
 
   def getInfo: String = "Metadata Root:" + NL + "-------------" + NL + metadataEntries.values.mkString(NL) + NL +
     "version: " + versionString + NL + NL +

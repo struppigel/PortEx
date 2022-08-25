@@ -19,7 +19,7 @@ package com.github.katjahahn.tools.anomalies;
 
 public enum PEStructureKey implements FieldOrStructureKey {
 
-    MSDOS_HEADER, MSDOS_STUB, DATA_DIRECTORY,
+    MSDOS_HEADER, MSDOS_STUB, DATA_DIRECTORY, RICH_HEADER,
     /**
      * Includes COFF File Header, Optional Header and Section Table
      */

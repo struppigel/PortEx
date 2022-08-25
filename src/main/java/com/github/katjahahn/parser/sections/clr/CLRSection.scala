@@ -21,6 +21,7 @@ import com.github.katjahahn.parser.IOUtil.{SpecificationFormat, _}
 import com.github.katjahahn.parser._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey._
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.sections.clr.CLRSection.cliHeaderSize
 import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
 import com.github.katjahahn.tools.ReportCreator
 import org.apache.logging.log4j.LogManager
@@ -45,7 +46,8 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
    *
    * @return list of locations
    */
-  override def getPhysicalLocations: util.List[PhysicalLocation] = List[PhysicalLocation]().asJava
+  override def getPhysicalLocations: util.List[PhysicalLocation] =
+    (new PhysicalLocation(fileOffset, cliHeaderSize) :: metadataRoot.getPhysicalLocations()).asJava
 
   /**
    * Returns the file offset for the beginning of the module.
@@ -77,6 +79,7 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
 object CLRSection {
   val cliHeaderSpec = "cliheaderspec"
   val logger = LogManager.getLogger(CLRSection.getClass.getName)
+  val cliHeaderSize = 0x48 //always this value acc. to specification
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): CLRSection = {
     // load CLI Header
@@ -85,7 +88,6 @@ object CLRSection {
     val format = new SpecificationFormat(0, 1, 2, 3)
     val cliHeader = IOUtil.readHeaderEntries(classOf[CLIHeaderKey],
       format, cliHeaderSpec, clibytes, offset).asScala.toMap
-
     val metadataVA = getValOrThrow(cliHeader, META_DATA_RVA)
     val metadataSize = getValOrThrow(cliHeader, META_DATA_SIZE)
     val metaRoot = MetadataRoot(mmbytes, data, metadataVA, metadataSize)

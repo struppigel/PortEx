@@ -49,7 +49,7 @@ public class VisualizerBuilder {
 	/**
 	 * The default width of the legend is {@value}
 	 */
-	public static final int DEFAULT_LEGEND_WIDTH = 200;
+	public static final int DEFAULT_LEGEND_WIDTH = 300;
 	/**
 	 * The default of the reduced size on each side of pixels that lie on top of
 	 * others. Imagine it like a transparent border. Value is {@value}
@@ -64,6 +64,7 @@ public class VisualizerBuilder {
 
 	/* Default header colors */
 	private static final Color DEFAULT_MSDOS_COLOR = new Color(0, 0, 200);
+	private static final Color DEFAULT_RICH_COLOR = new Color(120,80,75);
 	private static final Color DEFAULT_COFF_HEADER_COLOR = new Color(0, 200, 0);
 	private static final Color DEFAULT_OPTIONAL_HEADER_COLOR = new Color(200,
 			0, 0);
@@ -78,6 +79,8 @@ public class VisualizerBuilder {
 	private static final Color DEFAULT_RELOC_COLOR = new Color(100, 10, 220);
 	private static final Color DEFAULT_DELAY_IMPORT_COLOR = new Color(220, 100,
 			0);
+	private static final Color DEFAULT_NET_STREAMS_COLOR = new Color(255, 198, 226);
+	private static final Color DEFAULT_CLR_METADATA_COLOR = new Color(40,184,232 );
 	
 	/* Other colors */
 	private static final Color DEFAULT_ENTRY_POINT_COLOR = new Color(255, 80,
@@ -126,6 +129,7 @@ public class VisualizerBuilder {
 			colorMap = new EnumMap<>(ColorableItem.class);
 			/* Header */
 			colorMap.put(MSDOS_HEADER, DEFAULT_MSDOS_COLOR);
+			colorMap.put(RICH_HEADER, DEFAULT_RICH_COLOR);
 			colorMap.put(COFF_FILE_HEADER, DEFAULT_COFF_HEADER_COLOR);
 			colorMap.put(OPTIONAL_HEADER, DEFAULT_OPTIONAL_HEADER_COLOR);
 			colorMap.put(SECTION_TABLE, DEFAULT_SECTION_TABLE_COLOR);
@@ -135,6 +139,9 @@ public class VisualizerBuilder {
 			colorMap.put(RESOURCE_SECTION, DEFAULT_RSRC_COLOR);
 			colorMap.put(RELOC_SECTION, DEFAULT_RELOC_COLOR);
 			colorMap.put(DELAY_IMPORT_SECTION, DEFAULT_DELAY_IMPORT_COLOR);
+			/* Everything .NET */
+			colorMap.put(CLR_SECTION, DEFAULT_CLR_METADATA_COLOR);
+			colorMap.put(NET_STREAMS, DEFAULT_NET_STREAMS_COLOR);
 			/* Other */
 			colorMap.put(DEBUG_SECTION, DEFAULT_DEBUG_COLOR);
 			colorMap.put(OVERLAY, DEFAULT_OVERLAY_COLOR);

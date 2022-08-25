@@ -17,13 +17,15 @@
  */
 package com.github.katjahahn.tools.anomalies
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.ScalaIOUtil.filteredString
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.clr.CLRSection
 
 import scala.collection.mutable.ListBuffer
 
+/**
+ * Scans the .NET related structures for anomalies
+ */
 trait ClrScanning extends AnomalyScanner {
   abstract override def scanReport(): String =
     "Applied CLR Anomaly Scanning" + NL + super.scanReport
@@ -31,11 +33,36 @@ trait ClrScanning extends AnomalyScanner {
   abstract override def scan(): List[Anomaly] = {
     val clr = new SectionLoader(data).maybeLoadCLRSection()
     val anomalyList = ListBuffer[Anomaly]()
-    if (!clr.isPresent) return Nil
-    anomalyList ++= checkStringsHeap(clr.get)
+    if (clr.isPresent) {
+      anomalyList ++= checkStreamHeaders(clr.get)
+      anomalyList ++= checkStringsHeap(clr.get)
+    }
     super.scan ::: anomalyList.toList
   }
 
+  /**
+   * Anomaly scanning the stream headers of the metadata root directory
+   * @param clr the CLR section object
+   * @return List of anomalies in stream headers
+   */
+  private def checkStreamHeaders(clr : CLRSection): List[Anomaly] = {
+    val metadataRoot = clr.metadataRoot
+    val names = metadataRoot.streamHeaders.map(_.name)
+    // check stream names for duplicates
+    val duplicates = names.diff(names.distinct).distinct
+    val anomalies = for(name <- duplicates) yield
+      new ClrStreamAnomaly(metadataRoot,
+        metadataRoot.streamHeaders.find(_.name == name).get,
+        "There are several streams named '" + name + "', there should only be one",
+        AnomalySubType.DUPLICATED_STREAMS)
+    anomalies
+  }
+
+  /**
+   * Anomalies in the #Strings heap
+   * @param clr CLR section object
+   * @return list of anomalies in #Strings heap
+   */
   private def checkStringsHeap(clr : CLRSection): List[Anomaly] = {
     val metadataRoot = clr.metadataRoot
     val streamHeader = metadataRoot.streamHeaders.find(_.name == "#Strings")
@@ -46,8 +73,11 @@ trait ClrScanning extends AnomalyScanner {
     // one less because first string is always empty
     val unreadableCount = heap.getArray().length - filteredStrings.length - 1
     if(unreadableCount > 0) {
-      return List(new ClrStreamAnomaly(new java.util.LinkedList[PhysicalLocation](), "There is a total of " + unreadableCount +
-        " unreadable strings in #Strings, this is a common obfuscation", AnomalySubType.UNREADABLE_CHARS_IN_STRINGS_HEAP))
+      return List(new ClrStreamAnomaly(
+        metadataRoot, streamHeader.get,
+        "There is a total of " + unreadableCount + " unreadable strings in #Strings, this is a common obfuscation",
+        AnomalySubType.UNREADABLE_CHARS_IN_STRINGS_HEAP
+      ))
     }
     Nil
   }

@@ -21,27 +21,10 @@ import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DELAY_IMPOR
 import static com.github.katjahahn.parser.optheader.DataDirectoryKey.EXPORT_TABLE;
 import static com.github.katjahahn.parser.optheader.DataDirectoryKey.IMPORT_TABLE;
 import static com.github.katjahahn.parser.optheader.DataDirectoryKey.RESOURCE_TABLE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.ANOMALY;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.COFF_FILE_HEADER;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.DEBUG_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.DELAY_IMPORT_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTROPY;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.ENTRY_POINT;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.EXPORT_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.IMPORT_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.INVISIBLE_ASCII;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.MAX_BYTE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.MIN_BYTE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.MSDOS_HEADER;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.NON_ASCII;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.OPTIONAL_HEADER;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.OVERLAY;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.RELOC_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.RESOURCE_SECTION;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_START;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.SECTION_TABLE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.VISIBLE_ASCII;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.VISOVERLAY;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
+
+import com.github.katjahahn.parser.sections.clr.StreamHeader;
+import com.github.katjahahn.parser.sections.clr.StringsHeap;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -60,6 +43,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import com.github.katjahahn.parser.sections.clr.CLRSection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -413,7 +397,7 @@ public class Visualizer {
 	 * @return buffered image of the generated legend
 	 */
 	public BufferedImage createLegendImage(boolean withBytePlot,
-			boolean withEntropy, boolean withPEStructure) {
+			boolean withEntropy, boolean withPEStructure) throws IOException {
 		image = new BufferedImage(legendWidth, height, IMAGE_TYPE);
 		drawLegend(withBytePlot, withEntropy, withPEStructure);
 		assert image != null;
@@ -456,10 +440,37 @@ public class Visualizer {
 	/**
 	 * Draws the PE Header to the structure image
 	 */
-	private void drawPEHeaders() {
+	private void drawPEHeaders() throws IOException {
 		long msdosOffset = 0;
 		long msdosSize = withMinLength(data.getMSDOSHeader().getHeaderSize());
 		drawPixels(colorMap.get(MSDOS_HEADER), msdosOffset, msdosSize);
+
+		if(data.maybeGetRichHeader().isPresent()){
+			long richOffset = data.maybeGetRichHeader().get().getPhysicalLocation().from();
+			long richSize = withMinLength(data.maybeGetRichHeader().get().getPhysicalLocation().size());
+			drawPixels(colorMap.get(RICH_HEADER), richOffset, richSize);
+		}
+
+
+		Optional<CLRSection> maybeClr = new SectionLoader(data).maybeLoadCLRSection();
+		if(maybeClr.isPresent()){
+			// CLR Meta
+			CLRSection clr = maybeClr.get();
+			long bsjb = clr.metadataRoot().getBSJBOffset();
+			Color clrColor = colorMap.get(CLR_SECTION);
+			for(PhysicalLocation loc : clr.getPhysicalLocations()){
+				drawPixels(clrColor,loc.from(), withMinLength(loc.size()));
+			}
+			// Streams
+			List<StreamHeader> headers = clr.metadataRoot().getStreamHeaders();
+			Color color = colorMap.get(NET_STREAMS);
+			for (StreamHeader header : headers) {
+				long heapOffset = header.offset() + bsjb;
+				long heapSize = withMinLength(header.size());
+				drawPixels(color, heapOffset, heapSize);
+				color = variate(color);
+			}
+		}
 
 		long optOffset = data.getOptionalHeader().getOffset();
 		long optSize = withMinLength(data.getOptionalHeader().getSize());
@@ -681,7 +692,7 @@ public class Visualizer {
 	 *            legend of the PE structure image is added
 	 */
 	private void drawLegend(boolean withBytePlot, boolean withEntropy,
-			boolean withPEStructure) {
+			boolean withPEStructure) throws IOException {
 		int number = 0;
 		if (withBytePlot) {
 			writeLegendTitle(number++, "BytePlot (left)", Color.lightGray);
@@ -718,6 +729,10 @@ public class Visualizer {
 			writeLegendTitle(number++, "PE Structure (right)", Color.lightGray);
 			drawLegendEntry(number++, "MSDOS Header",
 					colorMap.get(MSDOS_HEADER));
+			if(data.maybeGetRichHeader().isPresent()) {
+				drawLegendEntry(number++, "Rich Header",
+						colorMap.get(RICH_HEADER));
+			}
 			drawLegendEntry(number++, "COFF File Header",
 					colorMap.get(COFF_FILE_HEADER));
 			drawLegendEntry(number++, "Optional Header",
@@ -734,6 +749,19 @@ public class Visualizer {
 				if (specialsAvailability.get(special)) {
 					drawLegendEntry(number++, getSpecialsDescription(special),
 							getSpecialsColor(special), true);
+				}
+			}
+			// CLR Meta and Streams
+			Optional<CLRSection> clr = new SectionLoader(data).maybeLoadCLRSection();
+			if(clr.isPresent()){
+				CLRSection clrSec = clr.get();
+				Color clrColor = colorMap.get(CLR_SECTION);
+				drawLegendEntry(number++, "CLR Metadata", clrColor);
+				List<StreamHeader> headers = clrSec.metadataRoot().getStreamHeaders();
+				Color color = colorMap.get(NET_STREAMS);
+				for(StreamHeader header : headers) {
+					drawLegendEntry(number++, header.name(), color);
+					color = variate(color);
 				}
 			}
 			for (Map.Entry<String, Color> entry : resTypeColors.entrySet()) {

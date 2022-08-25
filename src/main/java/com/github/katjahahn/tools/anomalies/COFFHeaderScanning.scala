@@ -41,14 +41,15 @@ trait COFFHeaderScanning extends AnomalyScanner {
   abstract override def scan(): List[Anomaly] = {
     val coff = data.getCOFFFileHeader()
     val anomalyList = ListBuffer[Anomaly]()
-    if (coff == null) return Nil
-    anomalyList ++= checkDeprecated(COFFHeaderKey.NR_OF_SYMBOLS, coff, DEPRECATED_NR_OF_SYMB)
-    anomalyList ++= checkDeprecated(COFFHeaderKey.POINTER_TO_SYMB_TABLE, coff, DEPRECATED_PTR_TO_SYMB_TABLE)
-    anomalyList ++= checkCharacteristics(coff)
-    anomalyList ++= checkNumberOfSections(coff)
-    anomalyList ++= checkSizeOfOptHeader(coff)
-    anomalyList ++= checkPEHeaderLocation(coff)
-    anomalyList ++= checkTimeStamp(coff)
+    if (coff != null) {
+      anomalyList ++= checkDeprecated(COFFHeaderKey.NR_OF_SYMBOLS, coff, DEPRECATED_NR_OF_SYMB)
+      anomalyList ++= checkDeprecated(COFFHeaderKey.POINTER_TO_SYMB_TABLE, coff, DEPRECATED_PTR_TO_SYMB_TABLE)
+      anomalyList ++= checkCharacteristics(coff)
+      anomalyList ++= checkNumberOfSections(coff)
+      anomalyList ++= checkSizeOfOptHeader(coff)
+      anomalyList ++= checkPEHeaderLocation(coff)
+      anomalyList ++= checkTimeStamp(coff)
+    }
     super.scan ::: anomalyList.toList
   }
   

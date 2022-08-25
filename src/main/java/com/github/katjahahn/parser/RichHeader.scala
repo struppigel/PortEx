@@ -15,15 +15,13 @@
  * **************************************************************************** */
 package com.github.katjahahn.parser
 
-import com.github.katjahahn.parser.RichHeader.{buildMap, knownXORKeys, prodIdMap}
+import com.github.katjahahn.parser.RichHeader.{buildMap, knownXORKeys, prodIdMap, richMagic}
 
 import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.msdos.MSDOSHeader
 import com.google.common.primitives.Bytes
 import org.apache.logging.log4j.{LogManager, Logger}
 
 import java.math.BigInteger
-import java.util.Optional
 
 /**
  * Reads the Rich Header if it exists
@@ -31,7 +29,12 @@ import java.util.Optional
  * @author Karsten Philipp Boris Hahn
  *
  */
-class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : Array[Byte], private val actualChecksum : Array[Byte]) {
+class RichHeader( private val decodedRich : Array[Byte],
+                  private val xorKey : Array[Byte],
+                  private val actualChecksum : Array[Byte],
+                  private val danSOffset : Long,
+                  private val richOffset : Long
+                ) {
 
   case class RichEntry(build: Int, prodId : Int, count : Int) {
     def getProductIdStr : String = prodIdMap.getOrElse(prodId, "0x" + prodId.toHexString)
@@ -42,6 +45,24 @@ class RichHeader( private  val decodedRich : Array[Byte], private val xorKey : A
   }
 
   private val logger = LogManager.getLogger(classOf[RichHeader].getName)
+
+  /**
+   * Physical offset of DanS
+   * @return offset in bytes
+   */
+  def getDanSOffset(): Long = danSOffset
+
+  /**
+   * Physical offset of Rich
+   * @return offset in bytes
+   */
+  def getRichOffset(): Long = richOffset
+
+  /**
+   * Physical location of Rich Header from start of DanS to end of Rich
+   * @return Physical location of Rich Header
+   */
+  def getPhysicalLocation(): PhysicalLocation = new PhysicalLocation(danSOffset, (richOffset - danSOffset) + richMagic.size)
 
   /**
    * Returns the decoded Rich header starting and including 'DanS', but excluding 'Rich'
@@ -152,7 +173,7 @@ object RichHeader {
     val checksum = calculateChecksum(bytesUntilPE, danSOffset, decodedRich)
     val checksumBytes = BigInteger.valueOf(checksum).toByteArray.reverse // endianness
 
-    new RichHeader(decodedRich, xorKey, checksumBytes)
+    new RichHeader(decodedRich, xorKey, checksumBytes, danSOffset, richOffset)
   }
 
   private def calculateDosChecksum(bytesUntilPEMagic: Array[Byte], danSOffset: Int) : Int = {

@@ -18,14 +18,12 @@
 package com.github.katjahahn.tools.anomalies
 
 import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.StandardField
+import com.github.katjahahn.parser.{Location, PhysicalLocation, RichHeader, StandardField}
 import com.github.katjahahn.parser.optheader.DataDirEntry
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionHeader
 import com.github.katjahahn.parser.sections.SectionHeaderKey
 import com.github.katjahahn.parser.sections.idata.ImportDLL
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.sections.clr.StreamHeader
+import com.github.katjahahn.parser.sections.clr.{MetadataRoot, MetadataRootKey, StreamHeader}
 import com.github.katjahahn.parser.sections.rsrc.Level
 import com.github.katjahahn.parser.sections.rsrc.Resource
 
@@ -140,8 +138,22 @@ case class ImportAnomaly(val imports: List[ImportDLL],
   override def locations = imports.flatMap(i => i.getLocations().asScala).asJava
 }
 
-case class ClrStreamAnomaly(override val locations: java.util.List[PhysicalLocation],
+case class RichHeaderAnomaly(private val rich : RichHeader,
+                             override val description: String,
+                             override val subtype: AnomalySubType) extends Anomaly {
+  override def key = PEStructureKey.RICH_HEADER
+  override def locations = List(rich.getPhysicalLocation()).asJava
+}
+
+case class ClrStreamAnomaly(private val metadataRoot : MetadataRoot,
+                            private val streamHeader : StreamHeader,
                             override val description: String,
                             override val subtype: AnomalySubType) extends Anomaly {
   override def key = PEStructureKey.CLR_SECTION
+  override def locations = {
+    val bsjb = metadataRoot.getBSJBOffset()
+    val streamOffset = streamHeader.offset
+    val size = streamHeader.size
+    List(new PhysicalLocation(bsjb + streamOffset, size)).asJava
+  }
 }
