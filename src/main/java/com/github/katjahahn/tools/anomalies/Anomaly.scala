@@ -123,8 +123,9 @@ case class SectionNameAnomaly(val header: SectionHeader,
   override def key = SectionHeaderKey.NAME
 }
 
-case class ResourceNameAnomaly(val resource: Resource, val level: Level, 
-    override val description: String, override val subtype: AnomalySubType) extends Anomaly {
+case class ResourceAnomaly(val resource: Resource,
+                           override val description: String,
+                           override val subtype: AnomalySubType) extends Anomaly {
   
   override def locations = List(resource.rawBytesLocation).asJava
   override def key = PEStructureKey.RESOURCE_SECTION //TODO correct key?

@@ -310,12 +310,12 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\redline");
+        File file = new File("C:\\Malware\\workspace\\invalidExports");
         PEData data = PELoader.loadPE(file);
 
         ReportCreator reporter = ReportCreator.apply(file);
       //  System.out.println(reporter.clrReport());
-        System.out.println(reporter.richHeaderReport());
+        System.out.println(reporter.exportsReport());
       //  System.out.println(reporter.hashReport());
         System.out.println(reporter.anomalyReport());
          VisualizerBuilder builder = new VisualizerBuilder();

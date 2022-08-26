@@ -18,7 +18,7 @@
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader, StandardField}
+import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader, PhysicalLocation, StandardField}
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
@@ -28,7 +28,7 @@ import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeade
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
 import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
+import com.github.katjahahn.tools.anomalies.{Anomaly, AnomalySubType, PEAnomalyScanner, PEStructureKey, ResourceAnomaly, SectionAnomaly, StructureAnomaly}
 import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
 
 import java.io.{File, RandomAccessFile}
@@ -532,11 +532,29 @@ class ReportCreator(private val data: PEData) {
   }
 
   def anomalyReport(): String = {
-    val anomalies = PEAnomalyScanner.newInstance(data).getAnomalies.asScala
-    if (anomalies.isEmpty) ""
+    val anomalies = PEAnomalyScanner.newInstance(data).getAnomalies.asScala.toList
+    val descriptions = anomaliesToDescriptions(anomalies)
+    if (descriptions.isEmpty) ""
     else title("Anomalies") + NL +
+      "Total anomalies: " + anomalies.size + NL + NL +
       (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
-      ("* " + anomalies.map(a => a.toString()).mkString(NL + "* ")) + NL + NL
+      ("* " + descriptions.mkString(NL + "* ")) + NL + NL
+  }
+
+  /**
+   * Retrieve descriptions of anomaly list, consolidate anomaly subtypes that occur very often.
+   *
+   * @param anomalies
+   * @return
+   */
+  private def anomaliesToDescriptions(anomalies : List[Anomaly]): List[String] = {
+    val consolidationLimit = 20
+    val subtypeToAnomaly = anomalies.groupBy(_.subtype())
+    (subtypeToAnomaly.map{ case (subtype, anoms) =>
+      if(anoms.size > consolidationLimit) {
+        List(anoms(0).description() + ". There are " + anoms.size + " more cases like this.")
+      } else anoms.map(_.description())
+    } ).flatten.toList
   }
 
   def richHeaderReport(): String = {

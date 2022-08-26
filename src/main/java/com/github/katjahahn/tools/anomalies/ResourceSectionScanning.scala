@@ -25,8 +25,23 @@ trait ResourceSectionScanning extends AnomalyScanner {
       anomalyList ++= checkFractionatedResources(rsrc)
       anomalyList ++= checkResourceLoop(rsrc)
       anomalyList ++= checkResourceNames(rsrc)
+      anomalyList ++= checkInvalidResourceLocations(rsrc, data.getFile.length())
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
+  }
+
+  private def checkInvalidResourceLocations(rsrc : ResourceSection, filesize : Long): List[Anomaly] = {
+    val resources = rsrc.getResources.asScala
+    val invalidRes = resources.filter { res =>
+      val start = res.rawBytesLocation.from
+      val size = res.rawBytesLocation.size
+      val end = start + size
+      (start <= 0 || size <= 0 || end >= filesize)
+    }
+    invalidRes.map(res => new ResourceAnomaly(res,
+      "Invalid resource location for resource at offset " + ScalaIOUtil.hex(res.rawBytesLocation.from) +
+        " with size " + ScalaIOUtil.hex(res.rawBytesLocation.size),
+      AnomalySubType.RESOURCE_LOCATION_INVALID)).toList
   }
 
   private def checkResourceNames(rsrc: ResourceSection): List[Anomaly] = {
@@ -40,7 +55,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
             val offset = resource.rawBytesLocation.from
             if (name.length >= max) {
               val description = s"Resource name in resource ${ScalaIOUtil.hex(offset)} at level ${lvl} has maximum length (${max})";
-              anomalyList += ResourceNameAnomaly(resource, lvl, description, AnomalySubType.RESOURCE_NAME)
+              anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_NAME)
             }
           case _ => //nothing
         }

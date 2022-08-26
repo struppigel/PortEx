@@ -444,9 +444,13 @@ public enum AnomalySubType {
      */
     RESOURCE_NAME(NON_DEFAULT),
     /**
-     * Resource tree has a loop.
+     * Resource tree has a loop
      */
     RESOURCE_LOOP(STRUCTURE),
+    /**
+     * Invalid resource location
+     */
+    RESOURCE_LOCATION_INVALID(WRONG),
 
     /**************************** CLR Section ******************************/
     /**
