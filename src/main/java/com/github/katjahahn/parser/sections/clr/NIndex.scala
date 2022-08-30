@@ -22,16 +22,28 @@ import java.util.{Optional, UUID}
 
 class NIndex(val index : Int) {
 
+  def getIndex(): Int = index
+
 }
 
 class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(index) {
+
+  override def toString(): String = {
+    if (guidHeap.isDefined && index != 0) guidHeap.get.get(index).toString else "0x" + index.toHexString + " (index)"
+  }
+
   def getValue(): Optional[UUID] = if(guidHeap.isDefined) {
     Optional.of(guidHeap.get.get(index))
   } else Optional.empty()
 }
 
-class StringIndex(index : Int, val stringHeap : Option[StringsHeap]) extends NIndex(index) {
-  def getValue(): Optional[String] = if(stringHeap.isDefined) {
-    Optional.of(stringHeap.get.get(index))
+class StringIndex(index : Int, val stringsHeap : Option[StringsHeap]) extends NIndex(index) {
+
+  override def toString(): String = {
+    if (stringsHeap.isDefined) stringsHeap.get.get(index) else "idx 0x" + index.toHexString
+  }
+
+  def getValue(): Optional[String] = if(stringsHeap.isDefined) {
+    Optional.of(stringsHeap.get.get(index))
   } else Optional.empty()
 }

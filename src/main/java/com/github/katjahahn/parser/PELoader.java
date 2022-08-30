@@ -310,21 +310,18 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\invalidExports");
+        File file = new File("C:\\Malware\\workspace\\dcrat");
         PEData data = PELoader.loadPE(file);
 
         ReportCreator reporter = ReportCreator.apply(file);
-      //  System.out.println(reporter.clrReport());
-        System.out.println(reporter.exportsReport());
-      //  System.out.println(reporter.hashReport());
-        System.out.println(reporter.anomalyReport());
-         VisualizerBuilder builder = new VisualizerBuilder();
-         Visualizer vi = builder.build();
-         final BufferedImage entropyImage = vi.createEntropyImage(file);
-         final BufferedImage structureImage = vi.createImage(file);
-         final BufferedImage appendedImage = ImageUtil.appendImages(
-         entropyImage, structureImage);
-         show(appendedImage);
+        System.out.println(reporter.clrReport());
+       //  VisualizerBuilder builder = new VisualizerBuilder();
+        // Visualizer vi = builder.build();
+         //final BufferedImage entropyImage = vi.createEntropyImage(file);
+         //final BufferedImage structureImage = vi.createImage(file);
+        // final BufferedImage appendedImage = ImageUtil.appendImages(
+        // entropyImage, structureImage);
+        // show(appendedImage);
     }
 
     private static void show(final BufferedImage image) {

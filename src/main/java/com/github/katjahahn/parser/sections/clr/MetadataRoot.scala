@@ -43,9 +43,13 @@ class MetadataRoot (
   def maybeGetStringsHeap : Optional[StringsHeap] = optionToOptional(stringsHeap)
   def getStreamHeaders : java.util.List[StreamHeader] = streamHeaders.asJava
   def getPhysicalLocations(): List[PhysicalLocation] = {
-    // TODO include stream header table, for now it is metadata root without it
+    // version length + padding
     val versionLength = alignToFourBytes(metadataEntries.get(MetadataRootKey.LENGTH).get.getValue)
-    List(new PhysicalLocation(offset, versionOffset + versionLength + 4))
+    // total size of metadata root
+    val sizeOfFlagsNStreams = 4
+    val streamHeaderSizes = streamHeaders.map(_.getHeaderSize()).sum
+    val size = versionOffset + versionLength + sizeOfFlagsNStreams + streamHeaderSizes
+    List(new PhysicalLocation(offset, size))
   }
 
   private def optionToOptional[A](convertee : Option[A]) : Optional[A] = {
@@ -118,14 +122,14 @@ object MetadataRoot {
 
   private def maybeLoadStringHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[StringsHeap] = {
     streamHeaders.find(_.name == "#Strings") match {
-      case Some(header) => Some(StringsHeap(header.size, metadataVA + header.offset, mmbytes, indexSize)) // TODO implement
+      case Some(header) => Some(StringsHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
       case None => None
     }
   }
 
   private def maybeLoadGuidHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[GuidHeap] = {
     streamHeaders.find(_.name == "#GUID") match {
-      case Some(header) => None //Some(GuidHeap(header.size, metadataVA + header.offset, mmbytes)) // TODO implement
+      case Some(header) => Some(GuidHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
       case None => None
     }
   }
@@ -175,7 +179,7 @@ object MetadataRoot {
   }
 
   @tailrec
-  private def alignToFourBytes(value: Long): Long = {
+  def alignToFourBytes(value: Long): Long = {
     if (value % 4 == 0) value
     else alignToFourBytes(value + 1)
   }
@@ -183,4 +187,17 @@ object MetadataRoot {
 
 }
 
-class StreamHeader(val offset: Long, val size : Long, val name: String)
+/**
+ * Represents a stream header
+ *
+ * @param offset offset of stream
+ * @param size size of stream
+ * @param name name of stream
+ */
+class StreamHeader(val offset: Long, val size : Long, val name: String) {
+  /**
+   * Size of the header
+   * @return size of header in bytes
+   */
+  def getHeaderSize(): Long = (8 + alignToFourBytes(name.length))
+}

@@ -24,20 +24,26 @@ import com.github.katjahahn.parser.MemoryMappedPE
  *
  * @param strings the array with the UTF-8 strings on the heap
  */
-class StringsHeap(private val strings : Array[String], private val indexSize : Int) {
+class StringsHeap(private val indexSize : Int,
+                  private val mmbytes : MemoryMappedPE,
+                  private val offset: Long,
+                  private val size: Long) {
+
+  private lazy val bytes = mmbytes.slice(offset, offset + size)
+  private val maxStrOffset = offset + size
 
   /**
    * Retrieve string at the given index, starting with index 1 as it is customary for .NET table indices
    * @param index
    * @return string at index
    */
-  def get(index : Int): String = {
+  def get(index : Long): String = {
     assert(index > 0)
-    assert(index < strings.size)
-    strings(index - 1)
+    assert(index < size)
+    new String(mmbytes.slice(offset + index, maxStrOffset).takeWhile(_ != 0), "UTF-8")
   }
 
-  def getArray() : Array[String] = strings
+  def getArray() : Array[String] = new String(bytes, "UTF-8").split("\0")
 
   def getIndexSize() : Int = indexSize
 }
@@ -45,8 +51,6 @@ class StringsHeap(private val strings : Array[String], private val indexSize : I
 object StringsHeap {
 
   def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, indexSize : Int): StringsHeap = {
-    val bytes = mmbytes.slice(offset, offset + size)
-    val strings = new String(bytes, "UTF-8").split("\0")
-    new StringsHeap(strings, indexSize)
+    new StringsHeap(indexSize, mmbytes, offset, size)
   }
 }

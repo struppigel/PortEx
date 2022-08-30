@@ -98,8 +98,12 @@ public class NameImport implements Import {
      */
     @Override
     public String toString() {
+        String offsetStr = "";
+        if(locations.size() > 0){
+            offsetStr = ", offset: 0x" + Long.toHexString(locations.get(0).from());
+        }
         return "rva: 0x" + Long.toHexString(rva) + ", va: 0x" + 
-        		Long.toHexString(va) + ", hint: " + hint + ", name: " + 
+        		Long.toHexString(va) + offsetStr + ", hint: " + hint + ", name: " +
         		name;
     }
 

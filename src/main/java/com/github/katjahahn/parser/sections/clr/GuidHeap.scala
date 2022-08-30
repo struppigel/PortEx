@@ -18,9 +18,29 @@
 
 package com.github.katjahahn.parser.sections.clr
 
+import com.github.katjahahn.parser.MemoryMappedPE
+
 import java.util.UUID
 
-class GuidHeap {
+class GuidHeap(private val indexSize : Int,
+               private val mmbytes : MemoryMappedPE,
+               private val offset: Long,
+               private val size: Long) {
 
-  def get(index : Int) : UUID = UUID.randomUUID()// TODO implement
+  private lazy val bytes = mmbytes.slice(offset, offset + size)
+  val uuidSize = 16
+
+  def get(index : Long) : UUID = {
+    assert(index > 0)
+    assert(index < size)
+    UUID.nameUUIDFromBytes(mmbytes.slice(offset + index, offset + index + uuidSize))
+  }
+
+}
+
+object GuidHeap {
+
+  def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, indexSize : Int): GuidHeap = {
+    new GuidHeap(indexSize, mmbytes, offset, size)
+  }
 }

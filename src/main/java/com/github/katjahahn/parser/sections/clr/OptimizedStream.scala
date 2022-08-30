@@ -25,7 +25,9 @@ import scala.collection.immutable.ListMap
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
                        val tableSizes : List[Int],
-                       val moduleTable : ModuleTable) {
+                       private val moduleTable : ModuleTable) {
+
+  def getModuleTable(): ModuleTable = moduleTable
 
   // TODO anomaly: bits above 0x2c are set
   private val tableIdxMap = ListMap(Map(
@@ -123,6 +125,8 @@ object OptimizedStream {
 
   private val spec = "optimizedstream"
   private val format = new SpecificationFormat(0, 1, 2, 3)
+  // size in bytes for the entry that indicates the number of rows
+  private val rowNrSize = 4
 
   /**
    * Counts the number of bits in a bitvector
@@ -141,18 +145,18 @@ object OptimizedStream {
     val nrOfTables = nrOfSetBits(bitvector)
     val tableSizesOffset = offset + 24
     val tableSizes = readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset, nrOfTables)
-    val moduleTable = loadModuleTable(offset, mmbytes, stringsHeap, guidHeap)
+    val moduleTableOffset = tableSizesOffset + (nrOfTables * rowNrSize)
+    val moduleTable = loadModuleTable(moduleTableOffset, mmbytes, stringsHeap, guidHeap)
     new OptimizedStream(entries, tableSizes, moduleTable)
   }
 
-  private def loadModuleTable(offset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): ModuleTable = {
-    ModuleTable(offset, mmbytes, stringsHeap, guidHeap)
+  private def loadModuleTable(moduleTableOffset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): ModuleTable = {
+    ModuleTable(moduleTableOffset, mmbytes, stringsHeap, guidHeap)
   }
 
-  private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfTables: Int ): List[Int] =
-      (
-      for(i <- 0 until nrOfTables)
-        yield mmbytes.getBytesIntValue(tableSizesOffset + (i * 4), 4)
-      ).toList
+  private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfTables: Int ): List[Int] = {
+    (for(i <- 0 until nrOfTables)
+        yield mmbytes.getBytesIntValue(tableSizesOffset + (i * rowNrSize), rowNrSize)).toList
+  }
 
 }

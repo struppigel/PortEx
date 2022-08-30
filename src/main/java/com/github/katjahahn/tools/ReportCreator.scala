@@ -23,7 +23,7 @@ import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey.FLAGS
-import com.github.katjahahn.parser.sections.clr.ComImageFlag
+import com.github.katjahahn.parser.sections.clr.{ComImageFlag, OptimizedStream}
 import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
@@ -189,17 +189,18 @@ class ReportCreator(private val data: PEData) {
       val metadataRoot = maybeCLR.get().metadataRoot
       val entries = metadataRoot.metadataEntries.values
       val colWidth = 15
-      val padLength = "Stream Header name  ".length
       val title = ".NET Metadata Root"
-      buf.append(standardFieldsReport(title, colWidth, padLength, entries))
+      buf.append(standardFieldsReport(title, colWidth, colWidth, entries))
 
-      val streamTblHeader = pad("Stream Header name", padLength, " ") + pad("size", colWidth, " ") + pad("start offset (relative to BSJB)", colWidth, " ")
+      val streamTblHeader = pad("Stream name", colWidth, " ") + pad("size", colWidth, " ") + pad("offset to BSJB", colWidth + 2, " ") + pad("actual offset", colWidth, " ")
       buf.append(NL + NL + streamTblHeader + NL)
       buf.append(pad("", streamTblHeader.length, "-") + NL)
+      val bsjb = metadataRoot.getBSJBOffset()
       for (streamHeader <- metadataRoot.streamHeaders){
-        buf.append(pad(streamHeader.name, padLength, " ") +
+        buf.append(pad(streamHeader.name, colWidth, " ") +
           pad(hexString(streamHeader.size), colWidth, " ") +
-          pad(hexString(streamHeader.offset), colWidth, " ") + NL)
+          pad(hexString(streamHeader.offset), colWidth + 2, " ") +
+          pad(hexString(streamHeader.offset + bsjb), colWidth, " ") + NL)
       }
     }
     buf.toString + NL
@@ -241,10 +242,17 @@ class ReportCreator(private val data: PEData) {
           "GUID heap size: " + optStream.getGUIDHeapSize + " bytes" + NL +
           "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL +
           "Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
-        return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions
+        return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions + moduleReport(optStream)
       }
     }
     ""
+  }
+
+  private def moduleReport(optStream : OptimizedStream) : String = {
+    val mt = optStream.getModuleTable()
+    title("Module Table (0x00)") + NL + "Generation: " + mt.getGeneration() + NL +
+      "Name: " + mt.getName() + NL + "MVID: " + mt.getMvid() + NL +
+        "EncId: " + mt.getEncId() + NL + "EncBaseid: " + mt.getEncBaseId() + NL + NL
   }
 
   def standardFieldsReport(titleStr: String, colWidth : Int, padLength : Int, entries : Iterable[StandardField]) : String = {
@@ -267,7 +275,7 @@ class ReportCreator(private val data: PEData) {
    * @return .NET structures description
    */
   def clrReport(): String = {
-    cliHeaderReport() + metadataRootReport() + optimizedNetStreamReport() + stringsHeapReport()
+    cliHeaderReport() + metadataRootReport() + optimizedNetStreamReport()
   }
 
   /**

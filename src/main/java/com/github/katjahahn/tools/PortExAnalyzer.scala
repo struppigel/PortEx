@@ -29,6 +29,7 @@ import com.github.katjahahn.tools.visualizer.{ColorableItem, ImageUtil, Visualiz
 
 import java.awt.Color
 import java.io.{File, FileWriter, IOException}
+import java.lang.Long.parseLong
 import java.nio.file.{Files, Paths}
 import javax.imageio.ImageIO
 import scala.PartialFunction._
@@ -41,9 +42,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.9.9
+  private val version = """version: 0.9.11
     |author: Karsten Philipp Boris Hahn
-    |last update: 25. August 2022""".stripMargin
+    |last update: 30. August 2022""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -215,48 +216,36 @@ object PortExAnalyzer {
       val data = PELoader.loadPE(file)
       val offsets = offsetsStr.split(",")
       for (offsetStr <- offsets) {
-        val offset = offsetStr.toLong
+        val offset = if(offsetStr.startsWith("0x")) parseLong(offsetStr.substring(2),16) else offsetStr.toLong
         val table = data.getSectionTable
         val loader = new SectionLoader(data)
-        // start and end of file
-        printIffBetween(offset, 0L, 0x1000, "StartOfFile0x1000")
-        printIffBetween(offset, 0L, 0x5000, "StartOfFile0x5000")
-        printIffBetween(offset, 0L, 0x10000, "StartOfFile0x10000")
-        printIffBetween(offset, file.length() - 0x6000L, file.length(), "EndOfFile0x6000")
-        printIffBetween(offset, file.length() - 0x10000L, file.length(), "EndOfFile0x10000")
         // Headers
         printIffBetween(offset, 0L, data.getMSDOSHeader.getHeaderSize, "MSDOS Header")
         val optHeaderOffset = data.getOptionalHeader.getOffset
+        printIffBetween(offset, data.getPESignature.getOffset, data.getPESignature.getOffset + 4, "PE Signature")
         printIffBetween(offset, optHeaderOffset, optHeaderOffset + data.getOptionalHeader.getSize, "Optional Header")
         val coffHeaderOffset = data.getCOFFFileHeader.getOffset
         printIffBetween(offset, coffHeaderOffset, coffHeaderOffset + COFFFileHeader.HEADER_SIZE, "COFF File Header")
         printIffBetween(offset, table.getOffset, table.getOffset + table.getSize, "Section Table")
-        
+        val rich = data.maybeGetRichHeader()
+        if(rich.isPresent) {
+          val loc = rich.get().getPhysicalLocation()
+          printIffBetween(offset, loc.from, loc.from + loc.size, "Rich Header")
+        }
+
         // Sections
         for (header <- table.getSectionHeaders.asScala) {
           val sectionOffset = header.getAlignedPointerToRaw
           val sectionSize = loader.getReadSize(header)
           val sectionEnd = sectionOffset + sectionSize
-          var sizeLimit = 0x10000L
           printIffBetween(offset, sectionOffset, sectionEnd, "Section" + header.getNumber) 
-          if (sectionSize < sizeLimit) {
-            sizeLimit = sectionSize
-          }
-          printIffBetween(offset, sectionOffset, sectionOffset + sizeLimit, "Section"+header.getNumber+"Start")
-          if (sectionSize > 0x10000L) {
-        	  printIffBetween(offset, sectionEnd - sizeLimit, sectionEnd, "Section"+header.getNumber+"End")
-          }
+
           if (header.getNumber == table.getNumberOfSections) {
             printIffBetween(offset, sectionOffset, sectionEnd, "LastSection")
-            printIffBetween(offset, sectionOffset, sectionOffset + sizeLimit, "LastSectionStart")
-            if (sectionSize > 0x10000L) {
-              printIffBetween(offset, sectionEnd - sizeLimit, sectionEnd, "LastSectionEnd")
-              printIffBetween(offset, sectionEnd - 0x6000, sectionEnd, "EndOfPE")
-            }
           }
         }
         
-        val specials = List(RESOURCE_TABLE, IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE, BASE_RELOCATION_TABLE, DEBUG)
+        val specials = List(RESOURCE_TABLE, IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE, BASE_RELOCATION_TABLE, DEBUG, CLR_RUNTIME_HEADER)
         
         // Special Sections
         for (specialKey <- specials) {
@@ -271,12 +260,14 @@ object PortExAnalyzer {
         }
         
         // Special resources
-        val rsrc = loader.loadResourceSection()
-        val resources = rsrc.getResources().asScala
-        for (resource <- resources) {
-          val resType = resource.getType()
-          val resLoc = resource.rawBytesLocation
-          printIffBetween(offset, resLoc.from, resLoc.from + resLoc.size, "ResourceType " + resType)
+        val rsrc = loader.maybeLoadResourceSection()
+        if(rsrc.isPresent) {
+          val resources = rsrc.get().getResources().asScala
+          for (resource <- resources) {
+            val resType = resource.getType()
+            val resLoc = resource.rawBytesLocation
+            printIffBetween(offset, resLoc.from, resLoc.from + resLoc.size, "ResourceType " + resType)
+          }
         }
         
         // Entry point
