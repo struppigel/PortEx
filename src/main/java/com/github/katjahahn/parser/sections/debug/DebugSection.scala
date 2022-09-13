@@ -55,7 +55,7 @@ class DebugSection private (
 
   override def getOffset(): Long = offset
 
-  def getSize(): Long = debugDirSize
+  def getSize(): Long = debugDirEntrySize
 
   def getCodeView(): CodeviewInfo =
     if (maybeCodeView.isDefined) maybeCodeView.get
@@ -121,7 +121,7 @@ object DebugSection {
 
   type DebugDirectory = Map[DebugDirectoryKey, StandardField]
 
-  val debugDirSize = 28
+  val debugDirEntrySize = 28
 
   private val debugspec = "debugdirentryspec"
 
@@ -146,7 +146,7 @@ object DebugSection {
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): DebugSection = {
     val format = new SpecificationFormat(0, 1, 2, 3)
-    val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirSize)
+    val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirEntrySize)
     val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
       format, debugspec, debugbytes, offset).asScala.toMap
     val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue

@@ -18,7 +18,7 @@ package com.github.katjahahn.parser;
 /**
  * A data class for a typical entry of PE Headers.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public class StandardField {

@@ -1,0 +1,6 @@
+METHOD_RVA;RVA;0;4
+METHOD_IMPLFLAGS;Implementation flags;;2
+METHOD_FLAGS;Flags;;2
+METHOD_NAME;Name;;String
+METHOD_SIGNATURE;Signature;;Blob
+METHOD_PARAMLIST;Parameter list;;Coded

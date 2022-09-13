@@ -208,8 +208,7 @@ public class ByteArrayUtil {
         }
         return value;
     }
-    
-    //TODO create decent (flexible) version
+
     public static byte[] intToWord(int a) {
     	byte[] ret = new byte[2];
         ret[0] = (byte) (a & 0xFF);   
@@ -241,8 +240,7 @@ public class ByteArrayUtil {
         }
         return value;
     }
-    
-    //TODO create decent version
+
     public static byte[] longToDWord(long a) {
     	byte[] ret = new byte[4];
         ret[0] = (byte) (a & 0xFF);   

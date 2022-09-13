@@ -241,7 +241,7 @@ public final class IOUtil {
 	 *            the type for the header key that the returned map shall use
 	 * @return header entries
 	 */
-	public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntries(
+	public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntriesForSpec(
 			Class<T> clazz, SpecificationFormat specFormat,
 			List<String[]> specification, byte[] headerbytes, long headerOffset) {
 		assert clazz != null && specFormat != null && headerbytes != null;
@@ -322,7 +322,7 @@ public final class IOUtil {
 		// get the specification
 		List<String[]> specification = readArray(specName);
 		// call readHeaderEntries for specification
-		return readHeaderEntries(clazz, specFormat, specification, headerbytes,
+		return readHeaderEntriesForSpec(clazz, specFormat, specification, headerbytes,
 				headerOffset);
 	}
 
@@ -340,7 +340,7 @@ public final class IOUtil {
 		// loop through all values of the Enum type and add a dummy field
 		for (T key : clazz.getEnumConstants()) {
 			// TODO init correct description string
-			StandardField dummy = new StandardField(key, "not set", 0L, 0L, 0L);
+			StandardField dummy = new StandardField(key, "this field was not set", 0L, 0L, 0L);
 			map.put(key, dummy);
 		}
 		return map;

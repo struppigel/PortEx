@@ -310,7 +310,7 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\dcrat");
+        File file = new File("C:\\Malware\\workspace\\redline");
         PEData data = PELoader.loadPE(file);
 
         ReportCreator reporter = ReportCreator.apply(file);

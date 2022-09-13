@@ -30,6 +30,8 @@ class GuidHeap(private val indexSize : Int,
   private lazy val bytes = mmbytes.slice(offset, offset + size)
   val uuidSize = 16
 
+  def getIndexSize() : Int = indexSize
+
   def get(index : Long) : UUID = {
     assert(index > 0)
     assert(index < size)

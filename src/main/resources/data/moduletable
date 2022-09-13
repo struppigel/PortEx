@@ -1,0 +1,5 @@
+MODULE_GENERATION;Generation;0;2
+MODULE_NAME;Name;;String
+MODULE_MVID;Mvid;;Guid
+MODULE_ENCID;EncId;;Guid
+MODULE_ENCBASEID;EncBaseId;;Guid

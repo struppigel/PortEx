@@ -1,0 +1,6 @@
+TYPEDEF_FLAGS;Flags;0;4
+TYPEDEF_TYPE_NAME;Type name;;String
+TYPEDEF_TYPE_NAMESPACE;Type namespace;;String
+TYPEDEF_EXTENDS;Extends;;Coded
+TYPEDEF_FIELDLIST;Field list;;Coded
+TYPEDEF_METHODLIST;Method list;;Coded

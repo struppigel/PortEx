@@ -17,59 +17,19 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.{MemoryMappedPE, StandardField}
+import com.github.katjahahn.parser.{HeaderKey, IOUtil, MemoryMappedPE, StandardField}
 import com.github.katjahahn.parser.IOUtil._
-import scala.collection.JavaConverters.mapAsScalaMapConverter
+import com.github.katjahahn.parser.sections.clr.OptimizedStream.tableIdxMap
+import com.github.katjahahn.parser.sections.clr.CLRTable._
+
+import java.util
+import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
                        val tableSizes : List[Int],
-                       private val moduleTable : ModuleTable) {
-
-  def getModuleTable(): ModuleTable = moduleTable
-
-  // TODO anomaly: bits above 0x2c are set
-  private val tableIdxMap = ListMap(Map(
-                              0x20 -> "Assembly",
-                              0x22 -> "AssemblyOS",
-                              0x21 -> "AssemblyProcessor",
-                              0x23 -> "AssemblyRef",
-                              0x24 -> "AssemblyRefProcessor",
-                              0x25 -> "AssemblyRefOS",
-                              0x0F -> "ClassLayout",
-                              0x0B -> "Constant",
-                              0x0C -> "CustomAttribute",
-                              0x0E -> "DeclSecurity",
-                              0x12 -> "EventMap",
-                              0x14 -> "Event",
-                              0x27 -> "ExportedType",
-                              0x04 -> "Field",
-                              0x10 -> "FieldLayout",
-                              0x0D -> "FieldMarshal",
-                              0x1D -> "FieldRVA",
-                              0x26 -> "File",
-                              0x2A -> "GenericParam",
-                              0x2C -> "GenericParamConstraint",
-                              0x1C -> "ImplMap",
-                              0x09 -> "InterfaceImpl",
-                              0x28 -> "ManifestResource",
-                              0x0A -> "MemberRef",
-                              0x06 -> "MethodDef",
-                              0x19 -> "MethodImpl",
-                              0x18 -> "MethodSematics",
-                              0x2B -> "MethodSpec",
-                              0x00 -> "Module",
-                              0x1A -> "ModuleRef",
-                              0x29 -> "NestedClass",
-                              0x08 -> "Param",
-                              0x17 -> "Property",
-                              0x15 -> "PropertyMap",
-                              0x11 -> "StandAloneSig",
-                              0x02 -> "TypeDef",
-                              0x01 -> "TypeRef",
-                              0x1B -> "TypeSpec"
-                            ).toSeq.sortBy(_._1):_*)
+                       private val tables: Map[Int, CLRTable]) {
 
   private def getIntegerValueOfField(key : OptimizedStreamKey): Int = entries.get(key).get.getValue.toInt
   private def getLongValueOfField(key : OptimizedStreamKey): Long = entries.get(key).get.getValue
@@ -119,6 +79,8 @@ class OptimizedStream(
   def getTableNamesToSizesMap(): Map[String,Int] = (getTableNames() zip tableSizes).toMap
 
   def getInfo: String = "#~ Stream" + NL + (entries.values.mkString(NL))
+
+  def getTablesInfo(): String = tables.values.mkString(NL)
 }
 
 object OptimizedStream {
@@ -146,12 +108,123 @@ object OptimizedStream {
     val tableSizesOffset = offset + 24
     val tableSizes = readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset, nrOfTables)
     val moduleTableOffset = tableSizesOffset + (nrOfTables * rowNrSize)
-    val moduleTable = loadModuleTable(moduleTableOffset, mmbytes, stringsHeap, guidHeap)
-    new OptimizedStream(entries, tableSizes, moduleTable)
+
+    val tables : Map[Int, CLRTable] =
+      if(!guidHeap.isDefined | !stringsHeap.isDefined) { Map() } //do not attempt to load tables for empty heaps
+      else {
+        readTables(moduleTableOffset, mmbytes, stringsHeap, guidHeap, tableSizes, bitvector)
+      }
+    // TODO Generic table loading based on types and sizes and only if available in table sizes list
+    //val moduleTableOffset = tableSizesOffset + (nrOfTables * rowNrSize)
+    //val moduleTable = loadModuleTable(moduleTableOffset, mmbytes, stringsHeap, guidHeap)
+    // type ref table has numerous rows!
+    // val typeRefOffset = moduleTableOffset + moduleTable.getSize()
+    // val typeRefTable = loadTypeRefTable(typeRefOffset, mmbytes, stringsHeap)
+
+    new OptimizedStream(entries, tableSizes, tables)
   }
 
-  private def loadModuleTable(moduleTableOffset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): ModuleTable = {
-    ModuleTable(moduleTableOffset, mmbytes, stringsHeap, guidHeap)
+  /**
+   * get a list of all valid tables
+   * @return list of all valid tables in the stream according to VALID bitmask
+   */
+  private def getValidTableIndices(bitvector : Long): List[Int] = {
+    tableIdxMap.keys.filter(key => (bitvector & math.pow(2,key).toLong) != 0).toList.sorted
+  }
+
+  private def getTableIdxToSizesMap(bitvector: Long, tableSizes: List[Int]): Map[Int,Int] = (getValidTableIndices(bitvector) zip tableSizes).toMap
+
+  private def isInt(s: String): Boolean = {
+    try {
+      s.toInt
+      return true
+    } catch {
+      case e: Exception => return false
+    }
+  }
+
+  /**
+   * Convert the .NET specific specification to one that can be read by IOUtils.
+   * Most important part is conversion of Index types to actual sizes and offsets. This is dependent on the sample.
+   *
+   * @param specification
+   * @return converted specification
+   */
+  private def convertSpecification(specification: util.List[Array[String]], guidSize : Int, stringSize : Int) : java.util.List[Array[String]] = {
+
+    def convertSize(sizeStr: String): Int = sizeStr match {
+        case "String" => stringSize
+        case "Guid" => guidSize
+        case "Blob" => 2 // TODO implement
+        case "Coded" => 2 // TODO implement, this one will be more complicated
+        case s : String => s.toInt // If there is an exception here, a case type is missing above
+      }
+
+    var currOffset = 0
+    // converting loop
+    (for (row <- specification.asScala) yield {
+      val offset2convert = row(2) // must convert
+      val size2convert = row(3) //must convert
+      val size = convertSize(size2convert)
+      // convert offset here
+      if (isInt(offset2convert)) {
+        currOffset = offset2convert.toInt // always overrides calculated offset
+      }
+      val offset = currOffset
+      // update offset to the next iteration with size
+      currOffset += size
+      Array(row(0), row(1), offset.toString, size.toString)
+    }).asJava
+  }
+
+  //private def readTables(tablesOffset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap],
+  //                       guidHeap : Option[GuidHeap], tableSizes: List[Int], bitvector: Long): Map[Int,CLRTable] = Map()
+
+
+  private def readTables(tablesOffset : Long,
+                         mmbytes: MemoryMappedPE,
+                         stringsHeap : Option[StringsHeap],
+                         guidHeap : Option[GuidHeap],
+                         tableSizes: List[Int],
+                         bitvector: Long) : Map[Int,CLRTable] = {
+    // using a standard specformat for all metadata tables
+    val specFormat = CLRTable.getSpecificationFormat()
+    val validIndices = getValidTableIndices(bitvector)
+
+    var currTableOffset = tablesOffset
+
+    // for each valid table index, if condition makes sure only already implemented tables are read
+    // TODO make sure the order of the indices is correctly accessed
+    val tables = for(idx <- validIndices if CLRTable.getImplementedCLRIndices.contains(idx)) yield {
+      // read generic specification saved in CLRTable object
+      val specification = readArray(CLRTable.getSpecificationNameForIndex(idx))
+      // convert this specification by replacing the offset and size entries
+      val convertedSpec = convertSpecification(specification, guidHeap.get.getIndexSize, stringsHeap.get.getIndexSize())
+      val rows : Int = getTableIdxToSizesMap(bitvector,tableSizes)(idx)
+      // calculate the size of table entry and whole table using the specification array, row number and NIndex sizes
+      val entrySize: Long = convertedSpec.asScala.last(OFFSET_INDEX).toInt + convertedSpec.asScala.last(SIZE_INDEX).toInt
+      val tableSize: Long = entrySize * rows
+      // determine the current table offset
+      val tableStart : Long = currTableOffset
+      currTableOffset += tableSize
+      // for each row in tableSizes obtain new offset and read StandardFields
+      val tableEntries = for(row <- 0 until rows) yield {
+        val rowOffset : Long = row * entrySize // this offset is relativ to tableStart which is where headerbytes were sliced
+        // obtain StandardFields via IOUtil
+        // now you can read headerbytes from mmbytes
+        val headerbytes = mmbytes.slice(tableStart + rowOffset, tableStart + tableSize)
+        // TODO set physical offset or the phys entries will be wrong!
+        val physHeaderOffset = 0
+        val entries = IOUtil.readHeaderEntriesForSpec(classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, physHeaderOffset)
+        // this is a somewhat bad hack because I could not use generic types for headerkeys
+        val cleanedupEntries = entries.asScala.toMap.filter(_._2.getDescription != "this field was not set")
+        new CLRTableEntry(cleanedupEntries)
+      }
+      val tableName = CLRTable.getTableNameForIndex(idx)
+      (idx, new CLRTable(tableEntries.toList, tableName))
+      // yield tuple of idx and CLRTable, so you can convert to map later
+    }
+    tables.toMap
   }
 
   private def readTableSizes(mmbytes: MemoryMappedPE, tableSizesOffset : Long, nrOfTables: Int ): List[Int] = {
@@ -159,4 +232,45 @@ object OptimizedStream {
         yield mmbytes.getBytesIntValue(tableSizesOffset + (i * rowNrSize), rowNrSize)).toList
   }
 
+  // TODO anomaly: bits above 0x2c are set
+  val tableIdxMap = ListMap(Map(
+    0x20 -> "Assembly",
+    0x22 -> "AssemblyOS",
+    0x21 -> "AssemblyProcessor",
+    0x23 -> "AssemblyRef",
+    0x24 -> "AssemblyRefProcessor",
+    0x25 -> "AssemblyRefOS",
+    0x0F -> "ClassLayout",
+    0x0B -> "Constant",
+    0x0C -> "CustomAttribute",
+    0x0E -> "DeclSecurity",
+    0x12 -> "EventMap",
+    0x14 -> "Event",
+    0x27 -> "ExportedType",
+    0x04 -> "Field",
+    0x10 -> "FieldLayout",
+    0x0D -> "FieldMarshal",
+    0x1D -> "FieldRVA",
+    0x26 -> "File",
+    0x2A -> "GenericParam",
+    0x2C -> "GenericParamConstraint",
+    0x1C -> "ImplMap",
+    0x09 -> "InterfaceImpl",
+    0x28 -> "ManifestResource",
+    0x0A -> "MemberRef",
+    0x06 -> "MethodDef",
+    0x19 -> "MethodImpl",
+    0x18 -> "MethodSematics",
+    0x2B -> "MethodSpec",
+    0x00 -> "Module",
+    0x1A -> "ModuleRef",
+    0x29 -> "NestedClass",
+    0x08 -> "Param",
+    0x17 -> "Property",
+    0x15 -> "PropertyMap",
+    0x11 -> "StandAloneSig",
+    0x02 -> "TypeDef",
+    0x01 -> "TypeRef",
+    0x1B -> "TypeSpec"
+  ).toSeq.sortBy(_._1):_*)
 }

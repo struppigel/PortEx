@@ -28,6 +28,7 @@ import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeade
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
 import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
+import com.github.katjahahn.tools.ReportCreator.{pad, title}
 import com.github.katjahahn.tools.anomalies.{Anomaly, AnomalySubType, PEAnomalyScanner, PEStructureKey, ResourceAnomaly, SectionAnomaly, StructureAnomaly}
 import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
 
@@ -242,17 +243,11 @@ class ReportCreator(private val data: PEData) {
           "GUID heap size: " + optStream.getGUIDHeapSize + " bytes" + NL +
           "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL +
           "Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
-        return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions + moduleReport(optStream)
+        val clrTables = optStream.getTablesInfo()
+        return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions + clrTables
       }
     }
     ""
-  }
-
-  private def moduleReport(optStream : OptimizedStream) : String = {
-    val mt = optStream.getModuleTable()
-    title("Module Table (0x00)") + NL + "Generation: " + mt.getGeneration() + NL +
-      "Name: " + mt.getName() + NL + "MVID: " + mt.getMvid() + NL +
-        "EncId: " + mt.getEncId() + NL + "EncBaseid: " + mt.getEncBaseId() + NL + NL
   }
 
   def standardFieldsReport(titleStr: String, colWidth : Int, padLength : Int, entries : Iterable[StandardField]) : String = {
@@ -783,14 +778,6 @@ class ReportCreator(private val data: PEData) {
       padding + sectionValues + NL
   }
 
-  private def title(str: String): String = str + NL + pad("", str.length, "*") + NL
-
-  private def pad(string: String, length: Int, padStr: String): String = {
-    val padding = (for (_ <- string.length until length by padStr.length)
-      yield padStr).mkString
-    string + padding
-  }
-
   private def hexString(value: Long): String =
     "0x" + java.lang.Long.toHexString(value)
 }
@@ -802,5 +789,13 @@ object ReportCreator {
 
   def newInstance(file: File): ReportCreator =
     apply(file)
+
+  def title(str: String): String = str + NL + pad("", str.length, "*") + NL
+
+  def pad(string: String, length: Int, padStr: String): String = {
+    val padding = (for (_ <- string.length until length by padStr.length)
+      yield padStr).mkString
+    string + padding
+  }
 
 }
