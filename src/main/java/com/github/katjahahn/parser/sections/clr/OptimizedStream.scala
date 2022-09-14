@@ -17,7 +17,7 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.{HeaderKey, IOUtil, MemoryMappedPE, StandardField}
+import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, StandardField}
 import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.sections.clr.OptimizedStream.tableIdxMap
 import com.github.katjahahn.parser.sections.clr.CLRTable._
@@ -218,10 +218,10 @@ object OptimizedStream {
         val entries = IOUtil.readHeaderEntriesForSpec(classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, physHeaderOffset)
         // this is a somewhat bad hack because I could not use generic types for headerkeys
         val cleanedupEntries = entries.asScala.toMap.filter(_._2.getDescription != "this field was not set")
-        new CLRTableEntry(cleanedupEntries)
+        new CLRTableEntry(idx, row + 1, cleanedupEntries, guidHeap, stringsHeap)
       }
       val tableName = CLRTable.getTableNameForIndex(idx)
-      (idx, new CLRTable(tableEntries.toList, tableName))
+      (idx, new CLRTable(tableEntries.toList, idx))
       // yield tuple of idx and CLRTable, so you can convert to map later
     }
     tables.toMap

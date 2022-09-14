@@ -40,7 +40,7 @@ class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(ind
 class StringIndex(index : Int, val stringsHeap : Option[StringsHeap]) extends NIndex(index) {
 
   override def toString(): String = {
-    if (stringsHeap.isDefined) stringsHeap.get.get(index) else "idx 0x" + index.toHexString
+    if (stringsHeap.isDefined && index != 0) stringsHeap.get.get(index) else index + " (0x" + index.toHexString + ")"
   }
 
   def getValue(): Optional[String] = if(stringsHeap.isDefined) {

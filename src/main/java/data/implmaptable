@@ -1,0 +1,4 @@
+IMPLMAP_MAPPINGFLAGS;Mapping flags;0;2
+IMPLMAP_MEMBERFORWARDED;Member forwarded;;Coded
+IMPLMAP_IMPORTNAME;Import name;;String
+IMPLMAP_IMPORTSCOPE;Import scope;;Coded
