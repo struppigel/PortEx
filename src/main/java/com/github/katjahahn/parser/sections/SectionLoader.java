@@ -158,7 +158,7 @@ public class SectionLoader {
      */
     public PESection loadSectionFrom(SectionHeader header) {
         long size = getReadSize(header);
-        long offset = header.getAlignedPointerToRaw();
+        long offset = header.getAlignedPointerToRaw(data.getOptionalHeader().isLowAlignmentMode());
         return new PESection(size, offset, header, file);
     }
 
@@ -205,18 +205,19 @@ public class SectionLoader {
         long pointerToRaw = header.get(POINTER_TO_RAW_DATA);
         long virtSize = header.get(VIRTUAL_SIZE);
         long sizeOfRaw = header.get(SIZE_OF_RAW_DATA);
-        long alignedPointerToRaw = header.getAlignedPointerToRaw();
+        Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
+        long alignedPointerToRaw = header.getAlignedPointerToRaw(lowAlign);
         // see Peter Ferrie's answer in:
         // https://reverseengineering.stackexchange.com/questions/4324/reliable-algorithm-to-extract-overlay-of-a-pe
         long readSize = fileAligned(pointerToRaw + sizeOfRaw)
                 - alignedPointerToRaw;
-        readSize = Math.min(readSize, header.getAlignedSizeOfRaw());
+        readSize = Math.min(readSize, header.getAlignedSizeOfRaw(lowAlign));
         // see https://code.google.com/p/corkami/wiki/PE#section_table:
         // "if bigger than virtual size, then virtual size is taken. "
         // and:
         // "a section can have a null VirtualSize: in this case, only the SizeOfRawData is taken into consideration. "
         if (virtSize != 0) {
-            readSize = Math.min(readSize, header.getAlignedVirtualSize());
+            readSize = Math.min(readSize, header.getAlignedVirtualSize(lowAlign));
         }
         readSize = fileSizeAdjusted(alignedPointerToRaw, readSize);
         // must not happen
@@ -231,9 +232,10 @@ public class SectionLoader {
     
     public long getActualVirtSize(SectionHeader header) {
         Preconditions.checkNotNull(header);
-        long virtSize = header.getAlignedVirtualSize();
+        Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
+        long virtSize = header.getAlignedVirtualSize(lowAlign);
         if(virtSize == 0) {
-        	return header.getAlignedSizeOfRaw();
+        	return header.getAlignedSizeOfRaw(lowAlign);
         } 
         return virtSize;
     }
@@ -400,14 +402,16 @@ public class SectionLoader {
     }
 
     private PhysicalLocation getPhysicalSectionLocation(SectionHeader header) {
+        Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
         long size = getReadSize(header);
-        long address = header.getAlignedPointerToRaw();
+        long address = header.getAlignedPointerToRaw(lowAlign);
         return new PhysicalLocation(address, size);
     }
 
     private VirtualLocation getVirtualSectionLocation(SectionHeader header) {
+        Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
         long vSize = getActualVirtSize(header);
-        long vAddress = header.getAlignedVirtualAddress();
+        long vAddress = header.getAlignedVirtualAddress(lowAlign);
         return new VirtualLocation(vAddress, vSize);
     }
 
@@ -890,8 +894,9 @@ public class SectionLoader {
         // sidenote: the readsize should never be > 0 if the section starts
         // outside the file
         // but we make sure that everything is alright
+        Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
         return getReadSize(header) > 0
-                && header.getAlignedPointerToRaw() < file.length();
+                && header.getAlignedPointerToRaw(lowAlign) < file.length();
     }
 
     // TODO more general method? Like contains RVA?
@@ -906,10 +911,11 @@ public class SectionLoader {
     public boolean containsEntryPoint(SectionHeader header) {
         long ep = data.getOptionalHeader().get(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);
-        long vStart = header.getAlignedVirtualAddress();
-        long vSize = header.getAlignedVirtualSize();
+        Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
+        long vStart = header.getAlignedVirtualAddress(lowAlign);
+        long vSize = header.getAlignedVirtualSize(lowAlign);
         if (vSize == 0) {
-            vSize = header.getAlignedSizeOfRaw();
+            vSize = header.getAlignedSizeOfRaw(lowAlign);
         }
         long vEnd = vSize + vStart;
         return ep >= vStart && ep < vEnd;

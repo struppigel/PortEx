@@ -51,11 +51,12 @@ class PEFileDumper(val pedata: PEData, val outFolder: File) {
   def dumpSections(): Unit = {
     println("Dumping sections ...")
     val secTable = pedata.getSectionTable
+    val lowAlign = pedata.getOptionalHeader.isLowAlignmentMode
     val nrOfSections = secTable.getNumberOfSections
     for(nr <- 1 to nrOfSections) {
       val header = secTable.getSectionHeader(nr)
-      val from = header.getAlignedPointerToRaw
-      val size = header.getAlignedSizeOfRaw
+      val from = header.getAlignedPointerToRaw(lowAlign)
+      val size = header.getAlignedSizeOfRaw(lowAlign)
       val loc = adjustLocation(new PhysicalLocation(from, size))
       val outFile = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + header.getName + ".section").toFile)
       println("Writing section to " + outFile.getAbsolutePath)

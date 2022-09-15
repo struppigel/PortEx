@@ -84,7 +84,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
     if (rsrcHeader.isPresent) {
 
       def isWithinEData(loc: Location): Boolean = {
-        val start = rsrcHeader.get().getAlignedPointerToRaw
+        val start = rsrcHeader.get().getAlignedPointerToRaw(data.getOptionalHeader.isLowAlignmentMode)
         val end = start + loader.getReadSize(rsrcHeader.get)
         val locEnd = loc.from + loc.size
         //ignores falty locations (indicated by -1 or larger than file size)

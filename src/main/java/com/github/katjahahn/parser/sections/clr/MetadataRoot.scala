@@ -87,8 +87,9 @@ object MetadataRoot {
     // load remaining header entries that are dependent on version length
     val flagsNStreamsEntries = loadFlagsAndStreams(mmbytes, metadataVA, formatMeta, versionLength)
     // construct complete metadataRootEntries, avoid overwriting with 0 entries for missing data
-    val metaRootEntries = metaRootEntriesPart ++
+    val metaRootEntries = (metaRootEntriesPart ++
       Map(FLAGS -> flagsNStreamsEntries(FLAGS), STREAMS -> flagsNStreamsEntries(STREAMS))
+      ).filter(e => e._2.getDescription != "this field was not set")
 
     throwIfBadMagic(metaRootEntries(SIGNATURE).getValue)
 

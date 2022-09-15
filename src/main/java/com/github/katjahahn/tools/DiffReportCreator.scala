@@ -48,7 +48,7 @@ import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.optheader.DataDirEntry
 
 /**
- * @author katja
+ * @author Karsten Hahn
  */
 class DiffReportCreator(private val headers: List[PEData]) {
 
@@ -119,7 +119,8 @@ class DiffReportCreator(private val headers: List[PEData]) {
       val va = if(m1.getVirtualAddress == m2.getVirtualAddress) m1.getVirtualAddress.toInt else -1
       val dirSize = if(m1.getDirectorySize == m2.getDirectorySize) m1.getDirectorySize.toInt else -1
       val offset = if(m1.getTableEntryOffset == m2.getTableEntryOffset) m1.getTableEntryOffset else -1L
-      new DataDirEntry(m1.getKey, va, dirSize, offset)
+      // TODO low alignment mode set to false for all
+      new DataDirEntry(m1.getKey, va, dirSize, offset, false)
     }
     
     if (optHeaders.isEmpty) Nil
@@ -252,6 +253,7 @@ class DiffReportCreator(private val headers: List[PEData]) {
   def secTableReport(): String = {
     val tables = headers.map(_.getSectionTable)
     val build = new StringBuilder()
+    val lowAlign = false // FIXME not sure what to do here with comparing files of different alignments
     build.append(title("Section Table"))
     val min = tables.minBy(_.getNumberOfSections).getNumberOfSections
     val max = tables.maxBy(_.getNumberOfSections).getNumberOfSections
@@ -266,15 +268,15 @@ class DiffReportCreator(private val headers: List[PEData]) {
       build.append(sectionEntryLine(sections, "Pointer To Raw Data",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RAW_DATA))))
       build.append(sectionEntryLine(sections, "-> aligned (act. start)",
-        (s: SectionHeader) => if (s.get(POINTER_TO_RAW_DATA) != s.getAlignedPointerToRaw())
-          hexString(s.getAlignedPointerToRaw) else ""))
+        (s: SectionHeader) => if (s.get(POINTER_TO_RAW_DATA) != s.getAlignedPointerToRaw(lowAlign))
+          hexString(s.getAlignedPointerToRaw(lowAlign)) else ""))
       build.append(sectionEntryLine(sections, "Size Of Raw Data",
         (s: SectionHeader) => hexString(s.get(SIZE_OF_RAW_DATA))))
       build.append(sectionEntryLine(sections, "Virtual Address",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_ADDRESS))))
       build.append(sectionEntryLine(sections, "-> aligned",
-        (s: SectionHeader) => if (s.get(VIRTUAL_ADDRESS) != s.getAlignedVirtualAddress)
-          hexString(s.getAlignedVirtualAddress) else ""))
+        (s: SectionHeader) => if (s.get(VIRTUAL_ADDRESS) != s.getAlignedVirtualAddress(lowAlign))
+          hexString(s.getAlignedVirtualAddress(lowAlign)) else ""))
       build.append(sectionEntryLine(sections, "Virtual Size",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_SIZE))))
       build.append(sectionEntryLine(sections, "Pointer To Relocations",

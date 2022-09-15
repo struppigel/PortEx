@@ -40,7 +40,7 @@ import com.github.katjahahn.parser.PhysicalLocation
 /**
  * Scans the Optional Header for anomalies.
  *
- * @author Katja Hahn
+ * @author Karsten Hahn
  */
 trait OptionalHeaderScanning extends AnomalyScanner {
 
@@ -168,14 +168,17 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    * @return anomaly list
    */
   private def checkEntryPoint(opt: OptionalHeader): List[Anomaly] = {
-    def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
-      1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
     def isVirtual(ep: Long): Boolean = {
-      val sectionHeaders = data.getSectionTable().getSectionHeaders().asScala
+      val maybeSec = new SectionLoader(data).maybeGetSectionHeaderByRVA(ep)
+      !maybeSec.isPresent
+      /*
+      val secTable = data.getSectionTable()
+      val sectionHeaders = secTable.getSectionHeaders().asScala
       val addresses = sectionHeaders.map(_.get(SectionHeaderKey.VIRTUAL_ADDRESS)).filter(_ != 0)
       if (addresses.size > 0)
         ep < addresses.min
       else false
+      */
     }
     val anomalyList = ListBuffer[Anomaly]()
     val ep = opt.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
@@ -189,10 +192,11 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val description = s"Optional Header: address of entry point (${hexString(ep)}) is smaller than size of headers (${hexString(sizeOfHeaders)})"
       anomalyList += FieldAnomaly(entry, description, TOO_SMALL_EP)
     }
-    if (isVirtual(ep)) { //TODO add more virtual entry point anomalies
-      val description = s"Optional Header: virtual entry point (${hexString(ep)}): starts in virtual space before any section"
+    if (isVirtual(ep)) {
+      val description = s"Optional Header: virtual entry point (${hexString(ep)}), it does not point to a section."
       anomalyList += FieldAnomaly(entry, description, VIRTUAL_EP)
     }
+
     anomalyList.toList
   }
 
@@ -204,12 +208,10 @@ trait OptionalHeaderScanning extends AnomalyScanner {
    */
   private def checkLowAlignment(opt: OptionalHeader): List[Anomaly] = {
     //see: https://code.google.com/p/corkami/wiki/PE#SectionAlignment_/_FileAlignment
-    def isLowAlignment(secAlign: Long, fileAlign: Long): Boolean =
-      1 <= fileAlign && fileAlign == secAlign && secAlign <= 0x800
     val anomalyList = ListBuffer[Anomaly]()
     val sectionAlignment = opt.get(WindowsEntryKey.SECTION_ALIGNMENT)
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
-    if (isLowAlignment(sectionAlignment, fileAlignment)) {
+    if (opt.isLowAlignmentMode) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.FILE_ALIGNMENT)
       val description = s"Optional Header: Low alignment mode, section alignment = ${hexString(sectionAlignment)}, file alignment = ${hexString(fileAlignment)}"
       anomalyList += FieldAnomaly(entry, description, LOW_ALIGNMENT_MODE)
@@ -231,12 +233,12 @@ trait OptionalHeaderScanning extends AnomalyScanner {
     val fileAlignment = opt.get(WindowsEntryKey.FILE_ALIGNMENT)
     if (sectionAlignment != 0 && imageSize % sectionAlignment != 0) {
       val entry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_IMAGE)
-      val description = s"Optional Header: Size of Image (${imageSize}) must be a multiple of Section Alignment (${hexString(sectionAlignment)})"
+      val description = s"Optional Header: Size of Image (${hexString(imageSize)}) must be a multiple of Section Alignment (${hexString(sectionAlignment)})"
       anomalyList += FieldAnomaly(entry, description, NOT_SEC_ALIGNED_SIZE_OF_IMAGE)
     }
     val headerSizeEntry = opt.getWindowsFieldEntry(WindowsEntryKey.SIZE_OF_HEADERS)
     if (fileAlignment != 0 && headerSize % fileAlignment != 0) {
-      val description = s"Optional Header: Size of Headers (${headerSize}) must be a multiple of File Alignment (${hexString(fileAlignment)})"
+      val description = s"Optional Header: Size of Headers (${hexString(headerSize)}) must be a multiple of File Alignment (${hexString(fileAlignment)})"
       anomalyList += FieldAnomaly(headerSizeEntry, description, NOT_FILEALIGNED_SIZE_OF_HEADERS)
     } //TODO headerSize >= MSDOS + PEHeader + Section Headers size
     if (headerSize < headerSizeMin) {
@@ -244,7 +246,7 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       anomalyList += FieldAnomaly(headerSizeEntry, description, TOO_SMALL_SIZE_OF_HEADERS)
     }
     if (headerSize != roundedUpHeaderSize) {
-      val description = s"Optional Header: Size of Headers should be ${roundedUpHeaderSize}, but is ${hexString(headerSize)}"
+      val description = s"Optional Header: Size of Headers should be ${hexString(roundedUpHeaderSize)}, but is ${hexString(headerSize)}"
       anomalyList += FieldAnomaly(headerSizeEntry, description, NON_DEFAULT_SIZE_OF_HEADERS)
     }
     anomalyList.toList

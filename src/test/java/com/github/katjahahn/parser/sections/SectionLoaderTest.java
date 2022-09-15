@@ -67,9 +67,10 @@ public class SectionLoaderTest {
             if(datum.getFile().getName().equals("baed21297974b6adf3298585baa78691")) continue;
             if(datum.getFile().getName().equals("Lab05-01")) continue;
             if(datum.getFile().getName().equals("Lab03-01")) continue;
+            Boolean lowAlign = datum.getOptionalHeader().isLowAlignmentMode();
             for (SectionHeader entry : table.getSectionHeaders()) {
-                long start = entry.getAlignedVirtualAddress();
-                long size = entry.getAlignedVirtualSize();
+                long start = entry.getAlignedVirtualAddress(lowAlign);
+                long size = entry.getAlignedVirtualSize(lowAlign);
                 SectionHeader actual = loader.maybeGetSectionHeaderByRVA(start)
                         .get();
                 assertEquals(actual, entry);

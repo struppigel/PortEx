@@ -33,6 +33,10 @@ class OptimizedStream(
 
   private def getIntegerValueOfField(key : OptimizedStreamKey): Int = entries.get(key).get.getValue.toInt
   private def getLongValueOfField(key : OptimizedStreamKey): Long = entries.get(key).get.getValue
+
+  def getCLRTable(clrTableType : CLRTableType): Option[CLRTable] = {
+    tables.get(clrTableType.getIndex)
+  }
   /**
    * Heap size in bytes based on heap size bit mask
    * @return heap size of #String heap in bytes
@@ -114,13 +118,6 @@ object OptimizedStream {
       else {
         readTables(moduleTableOffset, mmbytes, stringsHeap, guidHeap, tableSizes, bitvector)
       }
-    // TODO Generic table loading based on types and sizes and only if available in table sizes list
-    //val moduleTableOffset = tableSizesOffset + (nrOfTables * rowNrSize)
-    //val moduleTable = loadModuleTable(moduleTableOffset, mmbytes, stringsHeap, guidHeap)
-    // type ref table has numerous rows!
-    // val typeRefOffset = moduleTableOffset + moduleTable.getSize()
-    // val typeRefTable = loadTypeRefTable(typeRefOffset, mmbytes, stringsHeap)
-
     new OptimizedStream(entries, tableSizes, tables)
   }
 
@@ -156,7 +153,7 @@ object OptimizedStream {
         case "String" => stringSize
         case "Guid" => guidSize
         case "Blob" => 2 // TODO implement
-        case "Coded" => 2 // TODO implement, this one will be more complicated
+        case "Coded" => 2 // TODO implement
         case s : String => s.toInt // If there is an exception here, a case type is missing above
       }
 
@@ -233,6 +230,7 @@ object OptimizedStream {
   }
 
   // TODO anomaly: bits above 0x2c are set
+  // TODO use CLRTable values instead, this is essentially a duplicate
   val tableIdxMap = ListMap(Map(
     0x20 -> "Assembly",
     0x22 -> "AssemblyOS",

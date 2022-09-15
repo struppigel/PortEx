@@ -293,7 +293,7 @@ public class TestreportsReader {
             DataDirectoryKey key = getDataDirKeyForName(name);
             if (key != null) {
                 logger.debug("Read Data Dir entry: " + name + " va: " + virtualAddress + " size: " + size);
-                return new DataDirEntry(key, virtualAddress, size, -1);
+                return new DataDirEntry(key, virtualAddress, size, -1, false);
             } else {
                 logger.warn("null data dir key returned for: " + name
                             + " and " + line);

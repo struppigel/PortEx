@@ -87,7 +87,7 @@ case class FieldAnomaly(
   require(subtype.getSuperType != AnomalyType.STRUCTURE,
     subtype + " must not have anomaly type STRUCTURE!")
 
-  override def locations = List(new PhysicalLocation(field.getOffset(),
+  override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(field.getOffset(),
     field.getSize())).asJava
   override def key = field.getKey
 }
@@ -100,7 +100,7 @@ case class DataDirAnomaly(
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
 
-  override def locations = List(new PhysicalLocation(dataDirEntry.getTableEntryOffset,
+  override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(dataDirEntry.getTableEntryOffset,
     dataDirEntry.getTableEntrySize)).asJava
   override val key = dataDirEntry.getKey
 }
@@ -108,9 +108,10 @@ case class DataDirAnomaly(
 case class SectionAnomaly(val header: SectionHeader,
   override val description: String,
   override val subtype: AnomalySubType,
-  readSize: Long) extends Anomaly {
+  readSize: Long, lowAlign : Boolean) extends Anomaly {
   
-  override def locations = List(new PhysicalLocation(header.getAlignedPointerToRaw(), readSize)).asJava
+  override def locations: java.util.List[PhysicalLocation] =
+    List(new PhysicalLocation(header.getAlignedPointerToRaw(lowAlign), readSize)).asJava
   override def key = PEStructureKey.SECTION 
 }
 
@@ -118,7 +119,7 @@ case class SectionNameAnomaly(val header: SectionHeader,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
 
-  override def locations = List(new PhysicalLocation(header.getNameOffset,
+  override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(header.getNameOffset,
     header.getNameSize)).asJava
   override def key = SectionHeaderKey.NAME
 }
@@ -127,7 +128,7 @@ case class ResourceAnomaly(val resource: Resource,
                            override val description: String,
                            override val subtype: AnomalySubType) extends Anomaly {
   
-  override def locations = List(resource.rawBytesLocation).asJava
+  override def locations: java.util.List[PhysicalLocation] = List(resource.rawBytesLocation).asJava
   override def key = PEStructureKey.RESOURCE_SECTION //TODO correct key?
 }
 
@@ -136,14 +137,14 @@ case class ImportAnomaly(val imports: List[ImportDLL],
   override val subtype: AnomalySubType,
   override val key: FieldOrStructureKey) extends Anomaly {
 
-  override def locations = imports.flatMap(i => i.getLocations().asScala).asJava
+  override def locations: java.util.List[PhysicalLocation] = imports.flatMap(i => i.getLocations().asScala).asJava
 }
 
 case class RichHeaderAnomaly(private val rich : RichHeader,
                              override val description: String,
                              override val subtype: AnomalySubType) extends Anomaly {
   override def key = PEStructureKey.RICH_HEADER
-  override def locations = List(rich.getPhysicalLocation()).asJava
+  override def locations: java.util.List[PhysicalLocation] = List(rich.getPhysicalLocation()).asJava
 }
 
 case class ClrStreamAnomaly(private val metadataRoot : MetadataRoot,
@@ -151,7 +152,7 @@ case class ClrStreamAnomaly(private val metadataRoot : MetadataRoot,
                             override val description: String,
                             override val subtype: AnomalySubType) extends Anomaly {
   override def key = PEStructureKey.CLR_SECTION
-  override def locations = {
+  override def locations: java.util.List[PhysicalLocation] = {
     val bsjb = metadataRoot.getBSJBOffset()
     val streamOffset = streamHeader.offset
     val size = streamHeader.size

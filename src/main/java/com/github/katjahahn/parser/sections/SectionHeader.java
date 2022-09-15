@@ -94,7 +94,10 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned PointerToRawData
      */
-    public long getAlignedPointerToRaw() {
+    public long getAlignedPointerToRaw(Boolean isLowAlignmentMode) {
+        if(isLowAlignmentMode){
+            return get(POINTER_TO_RAW_DATA);
+        }
         long result = get(POINTER_TO_RAW_DATA) & ~0x1ff;
         assert result % 512 == 0;
         return result;
@@ -105,8 +108,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned SizeOfRawData
      */
-    public long getAlignedSizeOfRaw() {
+    public long getAlignedSizeOfRaw(Boolean isLowAlignmentMode) {
         long sizeOfRaw = get(SIZE_OF_RAW_DATA);
+        if(isLowAlignmentMode) return sizeOfRaw;
         if (sizeOfRaw == (sizeOfRaw & ~0xfff)) {
             return sizeOfRaw;
         }
@@ -120,8 +124,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned VirtualSize
      */
-    public long getAlignedVirtualSize() {
+    public long getAlignedVirtualSize(Boolean isLowAlignmentMode) {
         long virtSize = get(VIRTUAL_SIZE);
+        if(isLowAlignmentMode) return virtSize;
         if (virtSize == (virtSize & ~0xfff)) {
             return virtSize;
         }
@@ -135,8 +140,9 @@ public class SectionHeader extends Header<SectionHeaderKey> {
      * 
      * @return aligned VirtualAddress
      */
-    public long getAlignedVirtualAddress() {
+    public long getAlignedVirtualAddress(Boolean isLowAlignmentMode) {
         long virtAddr = get(VIRTUAL_ADDRESS);
+        if(isLowAlignmentMode) return virtAddr;
         if (virtAddr == (virtAddr & ~0xfff)) {
             return virtAddr;
         }

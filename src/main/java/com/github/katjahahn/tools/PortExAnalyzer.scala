@@ -42,9 +42,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.9.11
+  private val version = """version: 0.10.0
     |author: Karsten Philipp Boris Hahn
-    |last update: 30. August 2022""".stripMargin
+    |last update: 15. September 2022""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -232,10 +232,10 @@ object PortExAnalyzer {
           val loc = rich.get().getPhysicalLocation()
           printIffBetween(offset, loc.from, loc.from + loc.size, "Rich Header")
         }
-
+        val lowAlign = data.getOptionalHeader.isLowAlignmentMode
         // Sections
         for (header <- table.getSectionHeaders.asScala) {
-          val sectionOffset = header.getAlignedPointerToRaw
+          val sectionOffset = header.getAlignedPointerToRaw(lowAlign)
           val sectionSize = loader.getReadSize(header)
           val sectionEnd = sectionOffset + sectionSize
           printIffBetween(offset, sectionOffset, sectionEnd, "Section" + header.getNumber) 

@@ -31,7 +31,7 @@ import com.google.common.base.Optional;
 /**
  * Represents an entry of the data directory table. It is used like a struct.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public class DataDirEntry {
@@ -64,6 +64,8 @@ public class DataDirEntry {
      */
     private final long tableEntrySize = 8;
 
+    private final boolean isLowAlignmentMode;
+
     /**
      * Creates a data dir entry with the fieldName, which is used to retrieve
      * the corresponding {@link DataDirectoryKey}, and the virtualAddress and
@@ -82,7 +84,7 @@ public class DataDirEntry {
      *             if fieldName doesn't match a valid key
      */
     public DataDirEntry(String fieldName, long virtualAddress,
-            long directorySize, long tableEntryOffset) {
+            long directorySize, long tableEntryOffset, Boolean lowAlignmentMode) {
         for (DataDirectoryKey key : DataDirectoryKey.values()) {
             if (key.toString().equals(fieldName)) {
                 this.key = key;
@@ -92,27 +94,28 @@ public class DataDirEntry {
         this.virtualAddress = virtualAddress;
         this.directorySize = directorySize;
         this.tableEntryOffset = tableEntryOffset;
+        this.isLowAlignmentMode = lowAlignmentMode;
     }
 
     /**
      * Creates a data dir entry based on key, virtualAddress and size
-     * 
-     * @param key
+     *  @param key
      *            the key of the entry
      * @param virtualAddress
      *            the virtual address of the entry
      * @param directorySize
-     *            the size of the entry
+ *            the size of the entry
      * @param tableEntryOffset
-     *            Physical offset of the entry in the data directory table
+     * @param isLowAlignmentMode
      */
     public DataDirEntry(DataDirectoryKey key, int virtualAddress,
-            int directorySize, long tableEntryOffset) {
+                        int directorySize, long tableEntryOffset, boolean isLowAlignmentMode) {
         checkArgument(key != null, "key must not be null");
         this.key = key;
         this.virtualAddress = virtualAddress;
         this.directorySize = directorySize;
         this.tableEntryOffset = tableEntryOffset;
+        this.isLowAlignmentMode = isLowAlignmentMode;
     }
 
     /**
@@ -127,8 +130,8 @@ public class DataDirEntry {
         checkArgument(table != null, "section table must not be null");
         Optional<SectionHeader> section = maybeGetSectionTableEntry(table);
         if (section.isPresent()) {
-            long sectionRVA = section.get().getAlignedVirtualAddress();
-            long sectionOffset = section.get().getAlignedPointerToRaw();
+            long sectionRVA = section.get().getAlignedVirtualAddress(isLowAlignmentMode);
+            long sectionOffset = section.get().getAlignedPointerToRaw(isLowAlignmentMode);
             return (virtualAddress - sectionRVA) + sectionOffset;
         }
         return virtualAddress; // TODO should be smaller than file length!
@@ -169,14 +172,14 @@ public class DataDirEntry {
         List<SectionHeader> sections = table.getSectionHeaders();
         // loop through all section headers to check if entry is within section
         for (SectionHeader header : sections) {
-            long vSize = header.getAlignedVirtualSize();
+            long vSize = header.getAlignedVirtualSize(isLowAlignmentMode);
             // corkami: "a section can have a null VirtualSize: in this case,
             // only the SizeOfRawData is taken into consideration. "
             // see: https://code.google.com/p/corkami/wiki/PE#section_table
             if (vSize == 0) {
-                vSize = header.getAlignedSizeOfRaw();
+                vSize = header.getAlignedSizeOfRaw(isLowAlignmentMode);
             }
-            long vAddress = header.getAlignedVirtualAddress();
+            long vAddress = header.getAlignedVirtualAddress(isLowAlignmentMode);
             logger.debug("check if rva is within " + vAddress + " and "
                     + (vAddress + vSize));
             // return header if data entry va points into it

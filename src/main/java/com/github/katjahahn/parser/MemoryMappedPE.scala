@@ -366,11 +366,12 @@ object MemoryMappedPE {
   private def getHeaderMappings(secLoader: SectionLoader,
     data: PEData): List[Mapping] = {
     val table = data.getSectionTable
+    val lowAlign = data.getOptionalHeader.isLowAlignmentMode
     if (table.getNumberOfSections() > 0) {
       // size of headers is also size of header mapping
       val sizeOfHeaders = data.getOptionalHeader.get(WindowsEntryKey.SIZE_OF_HEADERS)
       // virtual end of header mapping marked by VA of first section
-      val vEnd = table.getSectionHeader(1).getAlignedVirtualAddress() - 1
+      val vEnd = table.getSectionHeader(1).getAlignedVirtualAddress(lowAlign) - 1
       // virtual start of headers
       val vStart = vEnd - sizeOfHeaders
       /* create mapping with ranges */
@@ -395,15 +396,16 @@ object MemoryMappedPE {
     data: PEData): ListBuffer[Mapping] = {
     val table = data.getSectionTable
     val mappings = ListBuffer[Mapping]()
+    val lowAlign = data.getOptionalHeader.isLowAlignmentMode
     // get all valid section headers
     for (header <- table.getSectionHeaders().asScala if secLoader.isValidSection(header)) {
       val readSize = secLoader.getReadSize(header)
       /* calculate physical range */
-      val pStart = header.getAlignedPointerToRaw()
+      val pStart = header.getAlignedPointerToRaw(lowAlign)
       val pEnd = pStart + readSize
       val physRange = new PhysRange(pStart, pEnd)
       /* calculate virtual range */
-      val vStart = header.getAlignedVirtualAddress()
+      val vStart = header.getAlignedVirtualAddress(lowAlign)
       val vEnd = vStart + readSize
       val virtRange = new VirtRange(vStart, vEnd)
       logger.debug("section mapping (v --> p): " + virtRange + " --> " + physRange) //TODO remove

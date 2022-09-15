@@ -340,7 +340,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 				long tableEntryOffset = offset + getOffset();
 				if (address != 0) {
 					DataDirEntry entry = new DataDirEntry(specs[description],
-							address, size, tableEntryOffset);
+							address, size, tableEntryOffset, isLowAlignmentMode());
 					dataDirectory.put(entry.getKey(), entry);
 				}
 			}

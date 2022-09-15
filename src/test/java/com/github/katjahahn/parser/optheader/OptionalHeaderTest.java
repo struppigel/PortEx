@@ -65,13 +65,13 @@ public class OptionalHeaderTest {
             Collection<DataDirEntry> peDataEntries = opt.getDataDirectory()
                     .values();
             List<DataDirEntry> expectedDataEntries = new LinkedList<DataDirEntry>();
-            expectedDataEntries.add(new DataDirEntry("import table", 0x4fda4, 0x8c, 0x4e3a4));
-            expectedDataEntries.add(new DataDirEntry("resource table", 0x53000, 0x588, 0x4fc00));
-            expectedDataEntries.add(new DataDirEntry("certificate table", 0x52800, 0x2388, 0x50800));
-            expectedDataEntries.add(new DataDirEntry("base relocation table", 0x54000, 0x2524, 0x50200));
-            expectedDataEntries.add(new DataDirEntry("debug", 0x4ed40, 0x54,0x4d340));
-            expectedDataEntries.add(new DataDirEntry("load config table", 0x4ed98, 0x40, 0x4d398));
-            expectedDataEntries.add(new DataDirEntry("IAT", 0x41000, 0x220, 0x3f600));
+            expectedDataEntries.add(new DataDirEntry("import table", 0x4fda4, 0x8c, 0x4e3a4, false));
+            expectedDataEntries.add(new DataDirEntry("resource table", 0x53000, 0x588, 0x4fc00, false));
+            expectedDataEntries.add(new DataDirEntry("certificate table", 0x52800, 0x2388, 0x50800, false));
+            expectedDataEntries.add(new DataDirEntry("base relocation table", 0x54000, 0x2524, 0x50200, false));
+            expectedDataEntries.add(new DataDirEntry("debug", 0x4ed40, 0x54,0x4d340, false));
+            expectedDataEntries.add(new DataDirEntry("load config table", 0x4ed98, 0x40, 0x4d398, false));
+            expectedDataEntries.add(new DataDirEntry("IAT", 0x41000, 0x220, 0x3f600, false));
 
             assertEquals(peDataEntries.size(), expectedDataEntries.size());
             for (DataDirEntry expected : expectedDataEntries) {

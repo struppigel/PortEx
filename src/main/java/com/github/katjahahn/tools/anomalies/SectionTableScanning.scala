@@ -286,14 +286,16 @@ trait SectionTableScanning extends AnomalyScanner {
 
   private def physicalSectionRange(section: SectionHeader): SectionRange = {
     val loader = new SectionLoader(data)
-    val start = section.getAlignedPointerToRaw
+    val lowAlign = data.getOptionalHeader.isLowAlignmentMode
+    val start = section.getAlignedPointerToRaw(lowAlign)
     val end = loader.getReadSize(section) + start
     (start, end)
   }
 
   private def virtualSectionRange(section: SectionHeader): SectionRange = {
-    val start = section.getAlignedVirtualAddress
-    val end = section.getAlignedVirtualSize + start
+    val lowAlign = data.getOptionalHeader.isLowAlignmentMode
+    val start = section.getAlignedVirtualAddress(lowAlign)
+    val end = section.getAlignedVirtualSize(lowAlign) + start
     (start, end)
   }
 
@@ -362,7 +364,7 @@ trait SectionTableScanning extends AnomalyScanner {
       val sectionName = section.getName
       val entry = section.getField(SectionHeaderKey.SIZE_OF_RAW_DATA)
       val value = entry.getValue
-      val alignedPointerToRaw = section.getAlignedPointerToRaw
+      val alignedPointerToRaw = section.getAlignedPointerToRaw(data.getOptionalHeader.isLowAlignmentMode)
       if (value + alignedPointerToRaw > data.getFile.length()) {
         val description = s"Section Header ${section.getNumber} with name $sectionName: ${entry.getKey} + aligned pointer to raw data is larger (${value + alignedPointerToRaw}) than permitted by file length (${data.getFile.length()})"
         anomalyList += FieldAnomaly(entry, description, TOO_LARGE_SIZE_OF_RAW)
@@ -420,21 +422,21 @@ trait SectionTableScanning extends AnomalyScanner {
         val locations = List(range1, range2).map(r => new PhysicalLocation(r._1, r._2 - r._1))
         //ignore empty sections for shuffle analysis, these get their own anomaly
         if (range1._1 > range2._1 && notEmpty(range1) && notEmpty(range2)) {
-          val description = s"Physically shuffled sections: section ${section.getNumber} has range ${range1._1}--${range1._2}, section ${sec.getNumber} has range ${range2._1}--${range2._2}"
+          val description = s"Physically shuffled sections: section ${section.getNumber} has range 0x${range1._1.toHexString}--0x${range1._2.toHexString}, section ${sec.getNumber} has range 0x${range2._1.toHexString}--0x${range2._2.toHexString}"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, PHYSICALLY_SHUFFLED_SEC, locations)
         }
         if (range1 == range2) {
-          val description = s"Section ${section.getNumber} with name $sectionName (range: ${range1._1}--${range1._2}) has same physical location as section ${sec.getNumber} with name ${sec.getName}"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: 0x${range1._1.toHexString}--0x${range1._2.toHexString}) has same physical location as section ${sec.getNumber} with name ${sec.getName}"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, PHYSICALLY_DUPLICATED_SEC, locations)
         } else if (overlaps(range2, range1)) {
-          val description = s"Section ${section.getNumber} with name $sectionName (range: ${range1._1}--${range1._2}) physically overlaps with section ${sec.getName} with number ${sec.getNumber} (range: ${range2._1}--${range2._2})"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: 0x${range1._1.toHexString}--0x${range1._2.toHexString}) physically overlaps with section ${sec.getName} with number ${sec.getNumber} (range: 0x${range2._1.toHexString}--0x${range2._2.toHexString})"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, PHYSICALLY_OVERLAPPING_SEC, locations)
         }
         if (vrange1 == vrange2) {
-          val description = s"Section ${section.getNumber} with name $sectionName (range: ${vrange1._1}--${vrange1._2}) has same virtual location as section ${sec.getName} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: 0x${vrange1._1.toHexString}--0x${vrange1._2.toHexString}) has same virtual location as section ${sec.getName} with number ${sec.getNumber} (range: 0x${vrange2._1.toHexString}--0x${vrange2._2.toHexString})"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, VIRTUALLY_DUPLICATED_SEC, locations)
         } else if (overlaps(vrange1, vrange2)) {
-          val description = s"Section ${section.getNumber} with name $sectionName (range: ${vrange1._1}--${vrange1._2}) virtually overlaps with section ${sec.getName} with number ${sec.getNumber} (range: ${vrange2._1}--${vrange2._2})"
+          val description = s"Section ${section.getNumber} with name $sectionName (range: 0x${vrange1._1.toHexString}--0x${vrange1._2.toHexString}) virtually overlaps with section ${sec.getName} with number ${sec.getNumber} (range: 0x${vrange2._1.toHexString}--0x${vrange2._2.toHexString})"
           anomalyList += StructureAnomaly(PEStructureKey.SECTION, description, VIRTUALLY_OVERLAPPING_SEC, locations)
         }
       }

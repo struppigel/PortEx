@@ -126,7 +126,7 @@ public class Hasher {
             throws IOException {
         SectionTable table = data.getSectionTable();
         SectionHeader header = table.getSectionHeader(sectionNumber);
-        long start = header.getAlignedPointerToRaw();
+        long start = header.getAlignedPointerToRaw(data.getOptionalHeader().isLowAlignmentMode());
         long end = new SectionLoader(data).getReadSize(header) + start;
         if (end <= start) {
             logger.warn("The physical section size must be greater than zero!");

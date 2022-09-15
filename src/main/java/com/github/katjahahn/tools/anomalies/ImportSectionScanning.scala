@@ -114,7 +114,7 @@ trait ImportSectionScanning extends AnomalyScanner {
     if (idataHeader.isPresent) {
 
       def isWithinIData(loc: Location): Boolean = {
-        val start = idataHeader.get().getAlignedPointerToRaw
+        val start = idataHeader.get().getAlignedPointerToRaw(data.getOptionalHeader.isLowAlignmentMode)
         val end = start + loader.getReadSize(idataHeader.get)
         val locEnd = loc.from + loc.size
         //ignores faulty locations (indicated by -1 or larger than file size)

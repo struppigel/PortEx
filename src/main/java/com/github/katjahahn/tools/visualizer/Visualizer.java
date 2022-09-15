@@ -607,8 +607,9 @@ public class Visualizer {
 		logger.info("x pixels: " + getXPixels());
 		logger.info("y pixels: " + getYPixels());
 		logger.info("bytesPerPixel: " + bytesPerPixel());
+		Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
 		for (SectionHeader header : table.getSectionHeaders()) {
-			long sectionOffset = header.getAlignedPointerToRaw();
+			long sectionOffset = header.getAlignedPointerToRaw(lowAlign);
 			logger.info("drawing section to: " + sectionOffset);
 			long sectionSize = new SectionLoader(data).getReadSize(header);
 			logger.info("drawing section size: " + sectionSize);

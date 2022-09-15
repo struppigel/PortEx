@@ -84,8 +84,9 @@ public class Overlay {
 //            if (headers.size() == 0) { // offset for sectionless PE's
 //                offset = file.length();
 //            }
+            Boolean lowAlign = data.getOptionalHeader().isLowAlignmentMode();
             for (SectionHeader section : headers) {
-                long alignedPointerToRaw = section.getAlignedPointerToRaw();
+                long alignedPointerToRaw = section.getAlignedPointerToRaw(lowAlign);
                 long readSize = loader.getReadSize(section);
                 // ignore invalid sections
                 // corkami: "if a section starts at [unaligned] offset 0, it's invalid."

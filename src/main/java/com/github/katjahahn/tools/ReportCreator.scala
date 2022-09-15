@@ -23,7 +23,7 @@ import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey.FLAGS
-import com.github.katjahahn.parser.sections.clr.{ComImageFlag, OptimizedStream}
+import com.github.katjahahn.parser.sections.clr.{CLRTable, CLRTableType, ComImageFlag, OptimizedStream}
 import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
@@ -230,6 +230,8 @@ class ReportCreator(private val data: PEData) {
   }
 
   def optimizedNetStreamReport(): String = {
+
+
     val loader = new SectionLoader(data)
     val maybeCLR = loader.maybeLoadCLRSection()
     if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
@@ -241,9 +243,25 @@ class ReportCreator(private val data: PEData) {
         val padLength = "minor version of table schemata: ".length
         val additions = NL + "Blob heap size: " + optStream.getBlobHeapSize + " bytes" + NL +
           "GUID heap size: " + optStream.getGUIDHeapSize + " bytes" + NL +
-          "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL +
-          "Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
-        val clrTables = optStream.getTablesInfo()
+          "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL
+          //"Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
+
+        def compileInfo(typeList : List[CLRTableType]): String =
+          if (typeList.isEmpty) "" else {
+            val tbl = optStream.getCLRTable(typeList.head)
+            if(tbl.isDefined) tbl.get.toString + NL + compileInfo(typeList.tail)
+            else compileInfo(typeList.tail)
+          }
+
+        // Tables to display
+        val clrTables = compileInfo(
+          List( CLRTableType.MODULE,
+                CLRTableType.ASSEMBLY,
+                CLRTableType.FILE,
+                CLRTableType.MANIFESTRESOURCE,
+                CLRTableType.MODULEREF,
+                CLRTableType.EXPORTEDTYPE
+          ))
         return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions + clrTables
       }
     }
@@ -715,10 +733,14 @@ class ReportCreator(private val data: PEData) {
 
   def secTableReport(): String = {
     val table = data.getSectionTable
+    val lowAlign = data.getOptionalHeader.isLowAlignmentMode
     val allSections = table.getSectionHeaders.asScala
     val loader = new SectionLoader(data)
     val build = new StringBuilder()
     build.append(title("Section Table"))
+    if (lowAlign){
+      build.append("File is in low alignment mode!" + NL)
+    }
     for (secs <- allSections.grouped(maxSec).toList) {
       val sections = secs.toList
       val tableHeader = sectionEntryLine(sections, "", (s: SectionHeader) => s.getNumber + ". " + filteredString(s.getName))
@@ -733,25 +755,27 @@ class ReportCreator(private val data: PEData) {
       build.append(sectionEntryLine(sections, "Pointer To Raw Data",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RAW_DATA))))
       build.append(sectionEntryLine(sections, "-> aligned (act. start)",
-        (s: SectionHeader) => if (s.get(POINTER_TO_RAW_DATA) != s.getAlignedPointerToRaw)
-          hexString(s.getAlignedPointerToRaw) else ""))
+        (s: SectionHeader) => if (s.get(POINTER_TO_RAW_DATA) != s.getAlignedPointerToRaw(lowAlign))
+          hexString(s.getAlignedPointerToRaw(lowAlign)) else ""))
       build.append(sectionEntryLine(sections, "Size Of Raw Data",
         (s: SectionHeader) => hexString(s.get(SIZE_OF_RAW_DATA))))
-      build.append(sectionEntryLine(sections, "-> actual read size",
+      build.append(sectionEntryLine(sections, "-> Actual Read Size",
         (s: SectionHeader) => if (s.get(SIZE_OF_RAW_DATA) != loader.getReadSize(s))
           hexString(loader.getReadSize(s)) else ""))
-      build.append(sectionEntryLine(sections, "Physical End",
-        (s: SectionHeader) => hexString(loader.getReadSize(s) + s.getAlignedPointerToRaw)))
+      build.append(sectionEntryLine(sections, "-> Physical End",
+        (s: SectionHeader) => hexString(loader.getReadSize(s) + s.getAlignedPointerToRaw(lowAlign))))
       build.append(sectionEntryLine(sections, "Virtual Address",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_ADDRESS))))
       build.append(sectionEntryLine(sections, "-> aligned",
-        (s: SectionHeader) => if (s.get(VIRTUAL_ADDRESS) != s.getAlignedVirtualAddress)
-          hexString(s.getAlignedVirtualAddress) else ""))
+        (s: SectionHeader) => if (s.get(VIRTUAL_ADDRESS) != s.getAlignedVirtualAddress(lowAlign))
+          hexString(s.getAlignedVirtualAddress(lowAlign)) else ""))
       build.append(sectionEntryLine(sections, "Virtual Size",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_SIZE))))
-      build.append(sectionEntryLine(sections, "-> actual virtual size", (s: SectionHeader) =>
+      build.append(sectionEntryLine(sections, "-> Actual Virtual Size", (s: SectionHeader) =>
         if (s.get(VIRTUAL_SIZE) != loader.getActualVirtSize(s))
           hexString(loader.getActualVirtSize(s)) else ""))
+      build.append(sectionEntryLine(sections, "-> Virtual End",
+        (s: SectionHeader) => hexString(s.getAlignedVirtualAddress(lowAlign) + loader.getActualVirtSize(s) )))
       build.append(sectionEntryLine(sections, "Pointer To Relocations",
         (s: SectionHeader) => hexString(s.get(POINTER_TO_RELOCATIONS))))
       build.append(sectionEntryLine(sections, "Number Of Relocations",

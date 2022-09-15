@@ -43,7 +43,7 @@ trait ExportSectionScanning extends AnomalyScanner {
     if (edataHeader.isPresent) {
 
       def isWithinEData(loc: Location): Boolean = {
-        val start = edataHeader.get().getAlignedPointerToRaw
+        val start = edataHeader.get().getAlignedPointerToRaw(data.getOptionalHeader.isLowAlignmentMode)
         val end = start + loader.getReadSize(edataHeader.get)
         val locEnd = loc.from + loc.size
         //ignores faulty locations (indicated by -1 or larger than file size)
