@@ -69,8 +69,12 @@ class CLRTableEntry (val idx : Int,
 
   def getCLRFields(): java.util.Map[CLRTableKey, CLRField] = clrFields.asJava
 
+  def get(key : CLRTableKey): Option[CLRField] = clrFields.get(key)
+
   override def toString: String = {
-    "Row: " + row + NL + clrFields.values.mkString(NL) + NL
+    if(clrFields.size <= 6) {
+      s"${row}. ${clrFields.values.mkString(", ")}"
+    } else "Row: " + row + NL + clrFields.values.mkString(NL)
   }
 }
 
@@ -116,8 +120,16 @@ object CLRTable {
           case 0x0100 => "Retargetable"
           case 0x4000 => "DisableJITcompileOptimizer"
           case 0x8000 => "EnableJITcompileTracking"
-          case _ => "unknown Assembly flag"
+          case 0x0000 => "not set"
+          case _ => "unknown flag"
         })
+      case CLRTableKey.MANIFESTRESOURCE_FLAGS => Some(flag match {
+          case 0x0007 => "VisibilityMask"
+          case 0x0001 => "Public"
+          case 0x0002 => "Private"
+          case 0x0000 => "not set"
+          case _ => "unknown flag"
+      })
       case _ => None
     }
 

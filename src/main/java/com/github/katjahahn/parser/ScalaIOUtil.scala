@@ -91,7 +91,7 @@ object ScalaIOUtil {
    */
   def filteredString(string: String): String = {
     val controlCode: Char => Boolean = (c: Char) => c <= 32 || c == 127
-    val extendedCode: Char => Boolean = (c: Char) => c <= 32 || c > 127
+    val extendedCode: Char => Boolean = (c: Char) => c > 127
     string.filterNot(controlCode).filterNot(extendedCode)
   }
 

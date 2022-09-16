@@ -29,10 +29,16 @@ class NIndex(val index : Int) {
 class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(index) {
 
   override def toString(): String = {
-    if (guidHeap.isDefined && index != 0) guidHeap.get.get(index).toString else "0x" + index.toHexString + " (index)"
+    if (isValid && index != 0)
+      guidHeap.get.get(index).toString
+    else "0x" + index.toHexString + " (invalid index)"
   }
 
-  def getValue(): Optional[UUID] = if(guidHeap.isDefined) {
+  def isValid() : Boolean = guidHeap.isDefined &&
+    guidHeap.get.getSizeInBytes() > index &&
+    index >= 0 // TODO > or >= ??
+
+  def getValue(): Optional[UUID] = if(isValid) {
     Optional.of(guidHeap.get.get(index))
   } else Optional.empty()
 }
@@ -40,10 +46,16 @@ class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(ind
 class StringIndex(index : Int, val stringsHeap : Option[StringsHeap]) extends NIndex(index) {
 
   override def toString(): String = {
-    if (stringsHeap.isDefined && index != 0) stringsHeap.get.get(index) else index + " (0x" + index.toHexString + ")"
+    if (isValid && index != 0)
+      stringsHeap.get.get(index)
+    else index + " (0x" + index.toHexString + ")"
   }
 
-  def getValue(): Optional[String] = if(stringsHeap.isDefined) {
+  def isValid() : Boolean = stringsHeap.isDefined &&
+    stringsHeap.get.getSizeInBytes() > index &&
+    index >= 0 // TODO > or >= ??
+
+  def getValue(): Optional[String] = if(isValid) {
     Optional.of(stringsHeap.get.get(index))
   } else Optional.empty()
 }

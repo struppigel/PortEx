@@ -32,6 +32,9 @@ class GuidHeap(private val indexSize : Int,
 
   def getIndexSize() : Int = indexSize
 
+  def getSizeInBytes() : Long = size
+
+  // TODO is the index really pointing to the bytes offset or is the the number of the GUIDs?
   def get(index : Long) : UUID = {
     assert(index > 0)
     assert(index < size)

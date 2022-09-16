@@ -23,7 +23,7 @@ import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey.FLAGS
-import com.github.katjahahn.parser.sections.clr.{CLRTable, CLRTableType, ComImageFlag, OptimizedStream}
+import com.github.katjahahn.parser.sections.clr.{CLRTable, CLRTableKey, CLRTableType, ComImageFlag, OptimizedStream}
 import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
@@ -231,7 +231,6 @@ class ReportCreator(private val data: PEData) {
 
   def optimizedNetStreamReport(): String = {
 
-
     val loader = new SectionLoader(data)
     val maybeCLR = loader.maybeLoadCLRSection()
     if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
@@ -249,9 +248,20 @@ class ReportCreator(private val data: PEData) {
         def compileInfo(typeList : List[CLRTableType]): String =
           if (typeList.isEmpty) "" else {
             val tbl = optStream.getCLRTable(typeList.head)
-            if(tbl.isDefined) tbl.get.toString + NL + compileInfo(typeList.tail)
+            if(tbl.isDefined) tbl.get.toString + NL + NL + compileInfo(typeList.tail)
             else compileInfo(typeList.tail)
           }
+
+        val typerefTbl = title("TypeRef") + (if(optStream.getCLRTable(CLRTableType.TYPEREF).isDefined) {
+          val typerefs = optStream.getCLRTable(CLRTableType.TYPEREF).get
+          val descriptions = typerefs.getEntries().map(e => {
+            val namespace = e.get(CLRTableKey.TYPEREF_TYPE_NAMESPACE).get
+            val typename = e.get(CLRTableKey.TYPEREF_TYPE_NAME).get
+            if (namespace.getValue == 0) { typename.getDescription }
+            else namespace.getDescription + "." + typename.getDescription
+          })
+          descriptions.mkString(NL)
+        }) + NL
 
         // Tables to display
         val clrTables = compileInfo(
@@ -260,8 +270,8 @@ class ReportCreator(private val data: PEData) {
                 CLRTableType.FILE,
                 CLRTableType.MANIFESTRESOURCE,
                 CLRTableType.MODULEREF,
-                CLRTableType.EXPORTEDTYPE
-          ))
+                CLRTableType.EXPORTEDTYPE,
+          )) + typerefTbl + NL
         return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions + clrTables
       }
     }

@@ -17,7 +17,7 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.{MemoryMappedPE, ScalaIOUtil}
 
 /**
  * #Strings stream/heap
@@ -40,12 +40,16 @@ class StringsHeap(private val indexSize : Int,
   def get(index : Long): String = {
     assert(index > 0)
     assert(index < size)
-    new String(mmbytes.slice(offset + index, maxStrOffset).takeWhile(_ != 0), "UTF-8")
+    ScalaIOUtil.filteredString(
+      new String(mmbytes.slice(offset + index, maxStrOffset).takeWhile(_ != 0), "UTF-8"))
   }
 
-  def getArray() : Array[String] = new String(bytes, "UTF-8").split("\0")
+  def getArray() : Array[String] =
+    ScalaIOUtil.filteredString(new String(bytes, "UTF-8")).split("\0")
 
   def getIndexSize() : Int = indexSize
+
+  def getSizeInBytes() : Long = size
 }
 
 object StringsHeap {
