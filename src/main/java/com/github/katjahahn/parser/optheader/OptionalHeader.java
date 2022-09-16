@@ -489,6 +489,84 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 	}
 
 	/**
+	 * Description for the major and minor linker version in the Optional Header
+	 * @return textual description for linker version or "Unknown linker version" if not known.
+	 */
+	public String getLinkerVersionDescription() {
+		int major = (int) get(StandardFieldEntryKey.MAJOR_LINKER_VERSION);
+		int minor = (int) get(StandardFieldEntryKey.MINOR_LINKER_VERSION);
+		String description = "";
+		switch (major) {
+			case 1:
+				description = "800";
+				break;
+			case 2:
+				description = "900";
+				break;
+			case 4:
+				if(minor == 0) description = "1000";
+				if(minor == 2) description = "1020";
+				break;
+			case 5:
+				description = "(1100) Visual Studio 5.0";
+				break;
+			case 6:
+				description = "(1200) Visual Studio 6.0";
+				break;
+			case 7:
+				if(minor == 0) description = "(1300) Visual Studio 2002 7.0";
+				if(minor == 1) description = "(1310) Visual Studio 2003 7.1";
+				break;
+			case 8:
+				description = "(1400) Visual Studio 2005 8.0";
+				break;
+			case 9:
+				description = "(1500) Visual Studio 2008 9.0";
+				break;
+			case 10:
+				description = "(1600) Visual Studio 2010 10.0";
+				break;
+			case 11:
+				description = "(1700) Visual Studio 2012 11.0";
+				break;
+			case 12:
+				description = "(1800) Visual Studio 2013 12.0";
+				break;
+			case 14:
+				if(minor == 0) description = "(1900) Visual Studio 2015 14.0";
+
+				if(minor == 1) description = "(1910) Visual Studio 2017 15.0-15.2";
+				if(minor == 11) description = "(1911) Visual Studio 2017 15.3";
+				if(minor == 12) description = "(1912) Visual Studio 2017 15.5";
+				if(minor == 13) description = "(1913) Visual Studio 2017 15.6";
+				if(minor == 14) description = "(1914) Visual Studio 2017 15.7";
+				if(minor == 15) description = "(1915) Visual Studio 2017 15.8";
+				if(minor == 16) description = "(1916) Visual Studio 2017 15.9";
+
+				if(minor == 20) description = "(1920) Visual Studio 2019 16.0";
+				if(minor == 21) description = "(1921) Visual Studio 2019 16.1";
+				if(minor == 22) description = "(1922) Visual Studio 2019 16.2";
+				if(minor == 23) description = "(1923) Visual Studio 2019 16.3";
+				if(minor == 24) description = "(1924) Visual Studio 2019 16.4";
+				if(minor == 25) description = "(1925) Visual Studio 2019 16.5";
+				if(minor == 26) description = "(1926) Visual Studio 2019 16.6";
+				if(minor == 27) description = "(1927) Visual Studio 2019 16.7";
+				if(minor == 28) description = "(1928) Visual Studio 2019 16.8-16.9";
+				if(minor == 29) description = "(1929) Visual Studio 2019 16.10-16.11";
+
+				if(minor == 30) description = "(1930) Visual Studio 2022 17.0";
+				if(minor == 31) description = "(1931) Visual Studio 2022 17.1";
+				if(minor == 32) description = "(1932) Visual Studio 2022 17.2";
+				if(minor == 33) description = "(1933) Visual Studio 2022 17.3";
+				if(minor == 34) description = "(1934) Visual Studio 2022 17.4";
+				break;
+			default:
+				description = "Unknown linker version";
+		}
+		return description;
+	}
+
+	/**
 	 * Returns the magic number.
 	 * 
 	 * @return the magic number

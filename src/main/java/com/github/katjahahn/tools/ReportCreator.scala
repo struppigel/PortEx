@@ -679,12 +679,15 @@ class ReportCreator(private val data: PEData) {
         "Checksum is invalid. Actual checksum is " + hexString(actualChecksum)
     }
 
+    val linkerversion = opt.getLinkerVersionDescription
+
     buf.append(title("Optional Header"))
     buf.append(NL + "Magic Number: " + opt.getMagicNumber.getDescription)
     buf.append(NL + checksumDescription)
     buf.append(NL + entryPointDescription)
     buf.append(NL + dllCharacteristics)
-    buf.append(NL + subsystem + NL)
+    buf.append(NL + subsystem)
+    buf.append(NL + "Linker version:      " + linkerversion + NL)
     val standardHeader = pad("standard field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     val windowsHeader = pad("windows field", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     val tableLine = pad("", standardHeader.length, "-") + NL

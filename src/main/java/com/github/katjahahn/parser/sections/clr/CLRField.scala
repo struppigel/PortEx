@@ -13,7 +13,12 @@ abstract class CLRField(){
 trait NIndexable { def getNIndex(): NIndex }
 
 case class CLRLongField(sfield : StandardField) extends CLRField {
-  override def toString: String = sfield.toString()
+  override def toString: String = sfield.toString
+}
+
+case class CLRFlagField(sfield : StandardField, description : String) extends CLRField {
+  override def toString: String = sfield.getDescription + ": " + description +
+    " (0x" + sfield.getValue.toHexString + ")"
 }
 
 case class CLRStringField(strIdx : StringIndex, sfield : StandardField) extends CLRField with NIndexable {

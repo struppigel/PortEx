@@ -19,7 +19,7 @@ package com.github.katjahahn.parser.sections.clr
 
 import com.github.katjahahn.parser.IOUtil.{SpecificationFormat, readArray, _}
 import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.sections.clr.CLRTable.{KEY_INDEX, SIZE_INDEX, getTableMetaForIndex, readSpecificationFromFile}
+import com.github.katjahahn.parser.sections.clr.CLRTable.{KEY_INDEX, SIZE_INDEX, getDescriptionForTableFlag, getTableMetaForIndex, isKnownCLRFlag, readSpecificationFromFile}
 import com.github.katjahahn.tools.ReportCreator
 
 import scala.collection.JavaConverters._
@@ -47,9 +47,9 @@ class CLRTableEntry (val idx : Int,
   private val clrFields = convertToCLRFields(entriesMap)
 
   private def convertToCLRFields(convertee: Map[CLRTableKey, StandardField]): Map[CLRTableKey, CLRField] =
-   convertee map { case (key, sfield) => (key, convertToCLRField(sfield)) }
+   convertee map { case (key, sfield) => (key, convertToCLRField(sfield, key)) }
 
-  private def convertToCLRField(sfield : StandardField): CLRField = {
+  private def convertToCLRField(sfield : StandardField, clrKey : CLRTableKey): CLRField = {
     // find out type of CLRField using the specification in Meta and the key
     val key = sfield.getKey
     val spec = readSpecificationFromFile(idx)
@@ -59,7 +59,11 @@ class CLRTableEntry (val idx : Int,
     fieldTypeStr match {
       case "String" => CLRStringField(new StringIndex(index, stringsHeap), sfield)
       case "Guid" => CLRGuidField(new GuidIndex(index, guidHeap), sfield)
-      case _ => CLRLongField(sfield)
+      case _ =>
+        if(isKnownCLRFlag(clrKey)) {
+          val flagDescription = getDescriptionForTableFlag(sfield.getValue, clrKey).getOrElse("")
+          CLRFlagField(sfield, flagDescription) // known flag types become flag fields, so that their description is proper
+        } else CLRLongField(sfield) // treat unknown flags and anything else as simple standard long fields
     }
   }
 
@@ -78,6 +82,44 @@ object CLRTable {
   val DESCR_INDEX = 1
   val OFFSET_INDEX = 2
   val SIZE_INDEX = 3
+
+  def getTableMetaForIndex(idx : Int): CLRTableMeta = tableMetas.find(_.index == idx).get
+
+  def readSpecificationFromFile(idx : Int): List[Array[String]] = readArray(CLRTable.getSpecificationNameForIndex(idx)).asScala.toList
+
+  def getSpecificationFormat() : SpecificationFormat = new SpecificationFormat(KEY_INDEX,DESCR_INDEX,OFFSET_INDEX,SIZE_INDEX)
+
+  def getImplementedCLRIndices : List[Int] = tableMetas.map(_.index)
+
+  def getSpecificationNameForIndex(idx : Int) : String = tableMetas.find(_.index == idx).get.specName
+
+  def getTableNameForIndex(idx : Int) : String = tableMetas.find(_.index == idx).get.name
+
+  def isKnownCLRFlag(key : CLRTableKey) : Boolean = getDescriptionForTableFlag(0L, key).isDefined
+
+  /**
+   * Returns either textual description for a flag value or None if it is not a known flag type
+   * @param flag the long value of the flag entry
+   * @param key the CLRTableKey for the flag, basically the flag type
+   * @return textual description for the flag value
+   */
+  def getDescriptionForTableFlag(flag : Long, key : CLRTableKey): Option[String] =
+    key match {
+      case CLRTableKey.ASSEMBLY_HASHALGID => Some(flag match {
+          case 0x0000 => "None"
+          case 0x8003 => "Reserved (MD5)"
+          case 0x8004 => "SHA1"
+          case _ => "unknown HashId"
+        })
+      case CLRTableKey.ASSEMBLY_FLAGS => Some(flag match {
+          case 0x0001 => "PublicKey"
+          case 0x0100 => "Retargetable"
+          case 0x4000 => "DisableJITcompileOptimizer"
+          case 0x8000 => "EnableJITcompileTracking"
+          case _ => "unknown Assembly flag"
+        })
+      case _ => None
+    }
 
   private val tableMetas = List(
     CLRTableMeta(0x00, "Module", "moduletable"),
@@ -120,16 +162,5 @@ object CLRTable {
     CLRTableMeta(0x2C, "GenericParamConstraint", "genericparamconstrainttable")
   )
 
-  def getTableMetaForIndex(idx : Int): CLRTableMeta = tableMetas.find(_.index == idx).get
-
-  def readSpecificationFromFile(idx : Int): List[Array[String]] = readArray(CLRTable.getSpecificationNameForIndex(idx)).asScala.toList
-
-  def getSpecificationFormat() : SpecificationFormat = new SpecificationFormat(KEY_INDEX,DESCR_INDEX,OFFSET_INDEX,SIZE_INDEX)
-
-  def getImplementedCLRIndices : List[Int] = tableMetas.map(_.index)
-
-  def getSpecificationNameForIndex(idx : Int) : String = tableMetas.find(_.index == idx).get.specName
-
-  def getTableNameForIndex(idx : Int) : String = tableMetas.find(_.index == idx).get.name
 
 }
