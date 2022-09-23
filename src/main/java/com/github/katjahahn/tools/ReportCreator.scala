@@ -23,7 +23,7 @@ import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey.FLAGS
-import com.github.katjahahn.parser.sections.clr.{CLRTable, CLRTableKey, CLRTableType, ComImageFlag, OptimizedStream}
+import com.github.katjahahn.parser.sections.clr.{CLRCodedIndexField, CLRTable, CLRTableEntry, CLRTableKey, CLRTableType, ComImageFlag, OptimizedStream}
 import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
@@ -229,8 +229,68 @@ class ReportCreator(private val data: PEData) {
     buf.toString()
   }
 
-  def optimizedNetStreamReport(): String = {
+  /**
+   * Connects the resolution scope to the entry it is pointing to.
+   * Instead of row number and table name, the description contains the name of the entry
+   * @param e
+   * @param optStream
+   * @return
+   */
+  private def getStringForResolutionScope(e: CLRTableEntry, optStream : OptimizedStream): String = {
+    val resolutionscope : CLRCodedIndexField = e.get(CLRTableKey.TYPEREF_RESOLUTION_SCOPE).get.asInstanceOf[CLRCodedIndexField]
+    val tbl = resolutionscope.getReferencedTable()
 
+    def getDescriptionForType(t: CLRTableType, k : CLRTableKey, desc : String): String = {
+      val o = optStream.getCLRTable(t).get
+      val rowNr = resolutionscope.getReferencedRow()
+      if(o.getEntries.size >= rowNr && rowNr > 0) {
+        val clrTblRow = o.getEntries()(rowNr - 1)
+        val clrField = clrTblRow.get(k).get
+        desc + " " + clrField.getDescription
+      }
+      else s"<invalid index into ${t}>"
+    }
+    tbl match {
+      case CLRTableType.ASSEMBLYREF => getDescriptionForType(CLRTableType.ASSEMBLYREF, CLRTableKey.ASSEMBLYREF_NAME, "assemblyref")
+      case CLRTableType.MODULE => getDescriptionForType(CLRTableType.MODULE, CLRTableKey.MODULE_NAME, "module")
+      case CLRTableType.MODULEREF => getDescriptionForType(CLRTableType.MODULEREF, CLRTableKey.MODULEREF_NAME, "moduleref")
+      case CLRTableType.TYPEREF => getDescriptionForType(CLRTableType.TYPEREF, CLRTableKey.TYPEREF_TYPE_NAME, "typeref")
+      case _ => "<unknown resolution scope>"
+    }
+  }
+
+  /**
+   * Summary of imported/referenced types of .NET assemblies.
+   * Resolves the resolution scope as short textual representation of the entry it points to.
+   * Sorting of types by resolution scope.
+   * @param optStream
+   * @return
+   */
+  def typeRefTableReport(optStream : OptimizedStream): String = {
+    title("TypeRef") + (if(optStream.getCLRTable(CLRTableType.TYPEREF).isDefined) {
+      val typerefs = optStream.getCLRTable(CLRTableType.TYPEREF).get
+      val sortedTypeRefs = typerefs.getEntries().map(e => (getStringForResolutionScope(e, optStream), e)).sortBy(_._1)
+
+      def entryDescription(e : CLRTableEntry): String = {
+        val namespace = e.get(CLRTableKey.TYPEREF_TYPE_NAMESPACE).get
+        val typename = e.get(CLRTableKey.TYPEREF_TYPE_NAME).get
+        if (namespace.getValue == 0) { typename.getDescription }
+        else namespace.getDescription + "." + typename.getDescription
+      }
+      var currScope = ""
+      val descriptions = for( (scope, e) <- sortedTypeRefs) yield {
+        val preStr = if(scope != currScope) {currScope = scope; "From " +  scope + ":" + NL} else ""
+        preStr + "\t* " + entryDescription(e)
+      }
+      descriptions.mkString(NL)
+    }) + NL
+  }
+
+  /**
+   * Summary of #~ contents
+   * @return
+   */
+  def optimizedNetStreamReport(): String = {
     val loader = new SectionLoader(data)
     val maybeCLR = loader.maybeLoadCLRSection()
     if(maybeCLR.isPresent && !maybeCLR.get().isEmpty) {
@@ -252,17 +312,6 @@ class ReportCreator(private val data: PEData) {
             else compileInfo(typeList.tail)
           }
 
-        val typerefTbl = title("TypeRef") + (if(optStream.getCLRTable(CLRTableType.TYPEREF).isDefined) {
-          val typerefs = optStream.getCLRTable(CLRTableType.TYPEREF).get
-          val descriptions = typerefs.getEntries().map(e => {
-            val namespace = e.get(CLRTableKey.TYPEREF_TYPE_NAMESPACE).get
-            val typename = e.get(CLRTableKey.TYPEREF_TYPE_NAME).get
-            if (namespace.getValue == 0) { typename.getDescription }
-            else namespace.getDescription + "." + typename.getDescription
-          })
-          descriptions.mkString(NL)
-        }) + NL
-
         // Tables to display
         val clrTables = compileInfo(
           List( CLRTableType.MODULE,
@@ -270,8 +319,11 @@ class ReportCreator(private val data: PEData) {
                 CLRTableType.FILE,
                 CLRTableType.MANIFESTRESOURCE,
                 CLRTableType.MODULEREF,
+                //CLRTableType.TYPEREF,
                 CLRTableType.EXPORTEDTYPE,
-          )) + typerefTbl + NL
+          )) + typeRefTableReport(optStream) + NL
+
+        //val clrTables = compileInfo(List(CLRTableType.CUSTOMATTRIBUTE))
         return standardFieldsReport("#~ Stream", 15, padLength, entries) + additions + clrTables
       }
     }
@@ -827,7 +879,7 @@ object ReportCreator {
   def newInstance(file: File): ReportCreator =
     apply(file)
 
-  def title(str: String): String = str + NL + pad("", str.length, "*") + NL
+  def title(str: String, padStr : String = "*"): String = str + NL + pad("", str.length, padStr) + NL
 
   def pad(string: String, length: Int, padStr: String): String = {
     val padding = (for (_ <- string.length until length by padStr.length)

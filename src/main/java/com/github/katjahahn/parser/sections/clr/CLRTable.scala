@@ -59,6 +59,9 @@ class CLRTableEntry (val idx : Int,
     fieldTypeStr match {
       case "String" => CLRStringField(new StringIndex(index, stringsHeap), sfield)
       case "Guid" => CLRGuidField(new GuidIndex(index, guidHeap), sfield)
+      case "Coded" => if(clrKey == CLRTableKey.TYPEREF_RESOLUTION_SCOPE) {
+          CLRCodedIndexField(new CodedTokenIndex(index,  TagType.RESOLUTION_SCOPE), sfield)
+        } else CLRLongField(sfield)
       case _ =>
         if(isKnownCLRFlag(clrKey)) {
           val flagDescription = getDescriptionForTableFlag(sfield.getValue, clrKey).getOrElse("")

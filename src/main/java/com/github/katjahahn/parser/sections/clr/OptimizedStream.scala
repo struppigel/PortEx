@@ -25,6 +25,7 @@ import com.github.katjahahn.parser.sections.clr.CLRTable._
 import java.util
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
+import scala.math.{exp, pow}
 
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
@@ -134,9 +135,9 @@ object OptimizedStream {
   private def isInt(s: String): Boolean = {
     try {
       s.toInt
-      return true
+      true
     } catch {
-      case e: Exception => return false
+      case e: Exception => false
     }
   }
 
@@ -147,22 +148,41 @@ object OptimizedStream {
    * @param specification
    * @return converted specification
    */
-  private def convertSpecification(specification: util.List[Array[String]], guidSize : Int, stringSize : Int) : java.util.List[Array[String]] = {
+  private def convertSpecification(specification: util.List[Array[String]], guidSize : Int, stringSize : Int, tableSizes: Map[Int, Int]) : java.util.List[Array[String]] = {
 
-    def convertSize(sizeStr: String): Int = sizeStr match {
+    def maxRowsInCodedTables(keyStr : String) : Long = {
+      val key = CLRTableKey.valueOf(keyStr)
+      val maybeTagType = TagType.getTagTypeForCLRTableKey(key)
+      if(maybeTagType.isPresent) {
+        val tagType = maybeTagType.get
+        val tables = tagType.getAllTables
+        tables.map(tbl => if(tbl != null && tableSizes.contains(tbl.getIndex)) {
+          tableSizes(tbl.getIndex())
+        } else 0 ).max
+      } else 0 // TODO Single coded TagType?
+    }
+
+    def tagSize(keyStr : String) : Int = {
+      val key = CLRTableKey.valueOf(keyStr)
+      val maybeTagType = TagType.getTagTypeForCLRTableKey(key)
+      if(maybeTagType.isPresent) maybeTagType.get.getSize else 0
+    }
+
+    def convertSize(sizeStr: String, keyStr : String): Int = sizeStr match {
         case "String" => stringSize
         case "Guid" => guidSize
         case "Blob" => 2 // TODO implement
-        case "Coded" => 2 // TODO implement
-        case s : String => s.toInt // If there is an exception here, a case type is missing above
+        // coded tokens are 2 bytes if tag and all table rows fit inside, 4 bytes otherwise
+        case "Coded" => if( maxRowsInCodedTables(keyStr) < pow(2,16 - tagSize(keyStr)) ) 2 else 4
+        case i : String => i.toInt // If there is an exception here, a case type is missing above
       }
 
     var currOffset = 0
     // converting loop
     (for (row <- specification.asScala) yield {
-      val offset2convert = row(2) // must convert
-      val size2convert = row(3) //must convert
-      val size = convertSize(size2convert)
+      val offset2convert = row(OFFSET_INDEX) // must convert
+      val size2convert = row(SIZE_INDEX) //must convert
+      val size = convertSize(size2convert, row(KEY_INDEX))
       // convert offset here
       if (isInt(offset2convert)) {
         currOffset = offset2convert.toInt // always overrides calculated offset
@@ -170,7 +190,7 @@ object OptimizedStream {
       val offset = currOffset
       // update offset to the next iteration with size
       currOffset += size
-      Array(row(0), row(1), offset.toString, size.toString)
+      Array(row(KEY_INDEX), row(DESCR_INDEX), offset.toString, size.toString)
     }).asJava
   }
 
@@ -196,7 +216,7 @@ object OptimizedStream {
       // read generic specification saved in CLRTable object
       val specification = readArray(CLRTable.getSpecificationNameForIndex(idx))
       // convert this specification by replacing the offset and size entries
-      val convertedSpec = convertSpecification(specification, guidHeap.get.getIndexSize, stringsHeap.get.getIndexSize())
+      val convertedSpec = convertSpecification(specification, guidHeap.get.getIndexSize, stringsHeap.get.getIndexSize(), getTableIdxToSizesMap(bitvector,tableSizes))
       val rows : Int = getTableIdxToSizesMap(bitvector,tableSizes)(idx)
       // calculate the size of table entry and whole table using the specification array, row number and NIndex sizes
       val entrySize: Long = convertedSpec.asScala.last(OFFSET_INDEX).toInt + convertedSpec.asScala.last(SIZE_INDEX).toInt
