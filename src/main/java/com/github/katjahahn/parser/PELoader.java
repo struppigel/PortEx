@@ -138,54 +138,6 @@ public final class PELoader {
         return size;
     }
 
-    // TODO is this necessary? look it up
-    private COFFFileHeader reloadCOFFFileHeader(PESignature pesig,
-            MemoryMappedPE mmBytes, PEData data) throws IOException {
-        // coff header starts right after the PE signature
-        long offset = pesig.getOffset() + PESignature.PE_SIG.length;
-        /* read bytes, size is fixed anyway */
-        long sizeOfHeaders = data.getOptionalHeader().get(
-                WindowsEntryKey.SIZE_OF_HEADERS);
-        logger.debug("SizeOfHeaders: " + sizeOfHeaders);
-        // virtual end of header mapping marked by VA of first section
-        long vEnd = data.getSectionTable().getSectionHeader(1)
-                .getAlignedVirtualAddress() - 1;
-        // virtual start of headers TODO test
-        long vStart = vEnd - sizeOfHeaders;
-        long sliceStart = vStart + PESignature.PE_SIG.length;
-        logger.debug("reading coff at start: " + sliceStart);
-        byte[] headerbytes = mmBytes.slice(sliceStart, sliceStart
-                + COFFFileHeader.HEADER_SIZE);
-        // construct header
-        return COFFFileHeader.newInstance(headerbytes, offset);
-    }
-
-    // FIXME
-    private OptionalHeader reloadOptionalHeader(PESignature pesig,
-            MemoryMappedPE mmBytes, PEData data) throws IOException {
-        logger.info("reloading optional header");
-        // offset right after the eCOFF File Header
-        long offset = pesig.getOffset() + PESignature.PE_SIG.length
-                + COFFFileHeader.HEADER_SIZE;
-        logger.info("Optional Header offset: " + offset);
-        int size = getOptHeaderSize(offset);
-        // read bytes and construct header
-        long sizeOfHeaders = data.getOptionalHeader().get(
-                WindowsEntryKey.SIZE_OF_HEADERS);
-        // virtual end of header mapping marked by VA of first section
-        long vEnd = data.getSectionTable().getSectionHeader(1)
-                .getAlignedVirtualAddress() - 1;
-        // virtual start of headers TODO test
-        long vStart = vEnd - sizeOfHeaders;
-        long sliceStart = vStart + COFFFileHeader.HEADER_SIZE
-                + PESignature.PE_SIG.length;
-        logger.debug("reading opt at start: " + sliceStart);
-        byte[] headerbytes = mmBytes.slice(sliceStart, sliceStart + size);
-        logger.debug("array size: " + headerbytes.length);
-        logger.debug(ByteArrayUtil.byteToHex(headerbytes));
-        return OptionalHeader.newInstance(headerbytes, offset);
-    }
-
     /**
      * Loads the MSDOS header.
      * 
@@ -310,11 +262,11 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\redline");
+        File file = new File("C:\\Malware\\workspace\\dcrat");
         PEData data = PELoader.loadPE(file);
 
         ReportCreator reporter = ReportCreator.apply(file);
-        System.out.println(reporter.clrReport());
+        reporter.printReport();
        //  VisualizerBuilder builder = new VisualizerBuilder();
         // Visualizer vi = builder.build();
          //final BufferedImage entropyImage = vi.createEntropyImage(file);
