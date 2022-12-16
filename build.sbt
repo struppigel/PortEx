@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "3.0.3"
+version := "3.0.4"
 
 scalaVersion := "2.12.13"
 

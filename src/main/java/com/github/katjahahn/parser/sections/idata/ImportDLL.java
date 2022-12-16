@@ -23,8 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PhysicalLocation;
 import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Represents all imports from a single DLL.
@@ -34,6 +37,8 @@ import com.google.common.base.Optional;
  */
 public class ImportDLL {
 
+	private static final Logger logger = LogManager.getLogger(ImportDLL.class
+			.getName());
 	/**
 	 * The name of the DLL
 	 */
@@ -165,6 +170,22 @@ public class ImportDLL {
 	 */
 	public List<Import> getAllImports() {
 		return new ArrayList<>(allImports);
+	}
+
+	/**
+	 * Retreive SymbolDescription for the named import by searching the name.
+	 * @param importName
+	 * @return None if not available, otherwise Some SymbolDescription
+	 */
+	public static Optional<SymbolDescription> getSymbolDescriptionForName(String importName) {
+		List<SymbolDescription> symbolDescriptions = new ArrayList<>();
+		try {
+			symbolDescriptions = IOUtil.readSymbolDescriptions();
+		} catch (IOException e) {
+			logger.error(e);
+			e.printStackTrace();
+		}
+		return findSymbolByName(symbolDescriptions, importName);
 	}
 
 	private static Optional<SymbolDescription> findSymbolByName(
