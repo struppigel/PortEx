@@ -108,9 +108,19 @@ $ sbt eclipse
 
 Import the project to Eclipse via the *Import Wizard*.
 
-### Author and Contact
-Karsten Hahn (previously Katja Hahn)  
-E-Mail: portx (at) gmx (dot) de
+## Donations
+
+I develop PortEx and PortexAnalyzer as a hobby in my freetime. If you like it, please consider buying me a coffee: https://ko-fi.com/struppigel
+
+## Author
+
+Karsten Hahn 
+
+Twitter: [@Struppigel](https://twitter.com/struppigel)
+
+Mastodon: [struppigel@infosec.exchange](https://infosec.exchange/@struppigel)
+
+Youtube: [MalwareAnalysisForHedgehogs](https://www.youtube.com/c/MalwareAnalysisForHedgehogs)
 
 ### License
 [Apache License, Version 2.0](https://github.com/katjahahn/PortEx/blob/master/LICENSE)
