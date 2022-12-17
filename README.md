@@ -1,14 +1,14 @@
 PortEx ![build status](https://travis-ci.org/katjahahn/PortEx.svg?branch=master)
 ======
 
-### Welcome to PortEx
+## Welcome to PortEx
 
 PortEx is a Java library for static malware analysis of Portable Executable files. Its focus is on PE malformation robustness, and anomaly detection. 
 PortEx is written in Java and Scala, and targeted at Java applications.  
 
 ![visualizer example](http://i.imgur.com/7NBze4O.png)
 
-### Features
+## Features
 
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading PE structures: Imports, Resources, Exports, Debug Directory, Relocations, Delay Load Imports, Bound Imports
@@ -31,9 +31,9 @@ For more information have a look at [PortEx Wiki](https://github.com/katjahahn/P
 
 PortExAnalyzer is a command line tool that runs the library PortEx under the hood. If you are looking for a readily compiled command line PE scanner to analyse files with it, download it from here [PortexAnalyzer.jar](https://github.com/katjahahn/PortEx/raw/master/progs/PortexAnalyzer.jar)
 
-### Using PortEx
+## Using PortEx
 
-#### Including PortEx to a Maven Project
+### Including PortEx to a Maven Project
 
 You can include PortEx to your project by adding the following Maven dependency:
 
@@ -57,7 +57,7 @@ To use a local build, add the library as follows:
 </dependency> 
 ```
 
-#### Including PortEx to an SBT project
+### Including PortEx to an SBT project
 
 Add the dependency as follows in your build.sbt
 
@@ -65,13 +65,13 @@ Add the dependency as follows in your build.sbt
 libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "3.0.3"
 ```
 
-### Building PortEx
+## Building PortEx
 
-#### Requirements
+### Requirements
 
 PortEx is build with [sbt](http://www.scala-sbt.org)  
 
-#### Compile and Build With sbt
+### Compile and Build With sbt
 
 To simply compile the project invoke:
 
@@ -91,7 +91,7 @@ To compile a fat jar that can be used as command line tool, type:
 $ sbt assembly
 ```
 
-#### Create Eclipse Project
+### Create Eclipse Project
 
 You can create an eclipse project by using the sbteclipse plugin.
 Add the following line to *project/plugins.sbt*:
@@ -122,5 +122,5 @@ Mastodon: [struppigel@infosec.exchange](https://infosec.exchange/@struppigel)
 
 Youtube: [MalwareAnalysisForHedgehogs](https://www.youtube.com/c/MalwareAnalysisForHedgehogs)
 
-### License
+## License
 [Apache License, Version 2.0](https://github.com/katjahahn/PortEx/blob/master/LICENSE)
