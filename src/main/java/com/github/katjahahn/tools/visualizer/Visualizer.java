@@ -23,8 +23,8 @@ import static com.github.katjahahn.parser.optheader.DataDirectoryKey.IMPORT_TABL
 import static com.github.katjahahn.parser.optheader.DataDirectoryKey.RESOURCE_TABLE;
 import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
+import com.github.katjahahn.parser.*;
 import com.github.katjahahn.parser.sections.clr.StreamHeader;
-import com.github.katjahahn.parser.sections.clr.StringsHeap;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -47,10 +47,6 @@ import com.github.katjahahn.parser.sections.clr.CLRSection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.katjahahn.parser.Location;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.PhysicalLocation;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
@@ -155,7 +151,11 @@ public class Visualizer {
 
 	public BufferedImage createBytePlot(File file) throws IOException {
 		resetAvailabilityFlags();
-		this.data = new PEData(null, null, null, null, null, file, null);
+		if(!isPEFile(file)) {
+			this.data = new PEData(null, null, null, null, null, file, null);
+		} else {
+			this.data = PELoader.loadPE(file);
+		}
 		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final long minLength = withMinLength(0);
@@ -169,6 +169,17 @@ public class Visualizer {
 		}
 		drawVisOverlay(false);
 		return image;
+	}
+
+	private boolean isPEFile(File file) {
+		try {
+			PELoader.loadPE(file);
+			return true;
+		} catch (FileFormatException e) {
+			return false;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Color getBytePlotColor(byte b) {
@@ -227,7 +238,11 @@ public class Visualizer {
 	 */
 	public BufferedImage createEntropyImage(File file) throws IOException {
 		resetAvailabilityFlags();
-		this.data = new PEData(null, null, null, null, null, file, null);
+		if(!isPEFile(file)) {
+			this.data = new PEData(null, null, null, null, null, file, null);
+		} else {
+			this.data = PELoader.loadPE(file);
+		}
 		this.fileSize = data.getFile().length();
 		image = new BufferedImage(fileWidth, height, IMAGE_TYPE);
 		final int MIN_WINDOW_SIZE = 100;
