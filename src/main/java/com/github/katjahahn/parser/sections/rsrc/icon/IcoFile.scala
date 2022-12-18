@@ -19,12 +19,11 @@
 package com.github.katjahahn.parser.sections.rsrc.icon
 
 import com.github.katjahahn.parser.PhysicalLocation
-import java.io.File
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileOutputStream, InputStream, OutputStream, RandomAccessFile}
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.{ using, hex }
+import com.github.katjahahn.parser.ScalaIOUtil.{hex, using}
 import com.github.katjahahn.parser.ByteArrayUtil
-import java.io.RandomAccessFile
-import java.io.FileOutputStream
 
 /**
  * Represents a Windows ICO file.
@@ -49,10 +48,44 @@ class IcoFile(
   }
 
   /**
+   * Retrieve input stream containing the bytes of the ICO data
+   *
+   * @return input stream with ICO data
+   */
+  def getInputStream(): InputStream = {
+    using(new RandomAccessFile(peFile, "r")) { raf =>
+      val os = new ByteArrayOutputStream();
+      using(os) { out =>
+        writeHeader(out)
+        val headerSize = 6L + iconDir.idEntries.size * 16L
+        writeRawData(headerSize, out, raf)
+        return new ByteArrayInputStream(os.toByteArray());
+      }
+    }
+  }
+
+  /**
+   * Retrieve byte array of ICO data
+   *
+   * @return byte array with ICO data
+   */
+  def getBytes(): Array[Byte] = {
+    using(new RandomAccessFile(peFile, "r")) { raf =>
+      val os = new ByteArrayOutputStream();
+      using(os) { out =>
+        writeHeader(out)
+        val headerSize = 6L + iconDir.idEntries.size * 16L
+        writeRawData(headerSize, out, raf)
+        return os.toByteArray();
+      }
+    }
+  }
+
+  /**
    * Writes the ICO header
    * @param out the output stream
    */
-  private def writeHeader(out: FileOutputStream): Unit = {
+  private def writeHeader(out: OutputStream): Unit = {
     out.write(ByteArrayUtil.intToWord(iconDir.idReserved))
     out.write(ByteArrayUtil.intToWord(iconDir.idType))
     out.write(ByteArrayUtil.intToWord(iconDir.idCount))
@@ -75,7 +108,7 @@ class IcoFile(
    * @param out the output stream
    * @param raf the input stream to read the raw data from
    */
-  private def writeRawData(headerSize: Long, out: FileOutputStream, raf: RandomAccessFile): Unit = {
+  private def writeRawData(headerSize: Long, out: OutputStream, raf: RandomAccessFile): Unit = {
     val idEntries = iconDir.idEntries.sortBy { _.dwImageOffset }
     var offset = headerSize
     for (entry <- idEntries) {
