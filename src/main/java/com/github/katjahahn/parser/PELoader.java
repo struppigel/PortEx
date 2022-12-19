@@ -262,11 +262,18 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Malware\\workspace\\dcrat");
+        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\osx_vb_netcore.dll");
         PEData data = PELoader.loadPE(file);
-
+        show(createImage(data));
+        /*Visualizer visualizer = new VisualizerBuilder()
+                .setHeight(800)
+                .setFileWidth(150)
+                .build();
+        BufferedImage peImage = visualizer.createImage(file);
+        BufferedImage legendImage = visualizer.createLegendImage(true, true, true);
+        show(legendImage);
         ReportCreator reporter = ReportCreator.apply(file);
-        reporter.printReport();
+        reporter.printReport();*/
        //  VisualizerBuilder builder = new VisualizerBuilder();
         // Visualizer vi = builder.build();
          //final BufferedImage entropyImage = vi.createEntropyImage(file);
@@ -274,6 +281,32 @@ public final class PELoader {
         // final BufferedImage appendedImage = ImageUtil.appendImages(
         // entropyImage, structureImage);
         // show(appendedImage);
+    }
+
+    private static BufferedImage createImage(PEData peData) {
+        if(peData == null) return null;
+        File file = peData.getFile();
+        Visualizer visualizer = new VisualizerBuilder()
+                .setHeight(500)
+                .setFileWidth(180)
+                .build();
+        BufferedImage peImage = null;
+        try {
+            peImage = visualizer.createImage(file);
+
+            BufferedImage entropyImg = visualizer.createEntropyImage(file);
+            peImage = ImageUtil.appendImages(entropyImg, peImage);
+
+            BufferedImage bytePlot = visualizer.createBytePlot(file);
+            peImage = ImageUtil.appendImages(bytePlot, peImage);
+
+
+            BufferedImage legendImage = visualizer.createLegendImage(true, true, true);
+            peImage = ImageUtil.appendImages(peImage, legendImage);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return peImage;
     }
 
     private static void show(final BufferedImage image) {

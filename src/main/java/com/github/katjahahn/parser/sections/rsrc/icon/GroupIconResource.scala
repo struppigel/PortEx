@@ -111,6 +111,9 @@ object GroupIconResource {
    * Parses the resource bytes of the given RT_GROUP_ICON and the related RT_ICON
    * resources to create a GroupIconResource instance.
    *
+   * @param grpResource the resource which is the group icon resource
+   * @param resources all the resources of the file
+   * @param file the file itself
    * @return GroupIconResource based on the given resource of the type RT_GROUP_ICON
    */
   def apply(grpResource: Resource, resources: List[Resource],
@@ -211,7 +214,7 @@ object GroupIconResource {
           logger.warn("file: " + file.getAbsolutePath())
           None
       }
-    }).toList.flatten.toMap
+    }).flatten.toMap
   }
 
 }

@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
@@ -28,7 +30,8 @@ import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 
 public class PELoaderTest {
-
+    private static final Logger logger = LogManager.getLogger(PELoaderTest.class
+            .getName());
     private static List<TestData> testData;
     private static final Map<String, PEData> peData = new HashMap<>();
 
@@ -36,9 +39,11 @@ public class PELoaderTest {
     public static void loadPE() throws IOException {
         File[] testfiles = TestreportsReader.getTestiles();
         for (File file : testfiles) {
+            logger.info("testfile " + file.getAbsolutePath());
             peData.put(file.getName(), PELoader.loadPE(file));
         }
         testData = TestreportsReader.readTestDataList();
+        logger.info("Testdata size: " + testData.size());
     }
 
     public static List<TestData> getTestData() throws IOException {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.katjahahn.parser.optheader.OptionalHeaderTest;
+import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
@@ -22,51 +23,6 @@ public class RobustnessTest {
 
     public static final String PROBLEMFILES_DIR = TestreportsReader.RESOURCE_DIR
             + "/corkami/";
-    
-    public static void main(String... args) {
-        testAll();
-    }
-
-    public static void testAll() { //not a unit test, too costly
-        File folder = new File(TestreportsReader.RESOURCE_DIR
-                + "/badfiles/");
-        List<String> fails = new ArrayList<>();
-        int failed = 0;
-        int counter = 0;
-        for (File file : folder.listFiles()) {
-            try {
-                if(file.isDirectory()) {
-                    System.err.println(file.getName());
-                    continue;
-                }
-                counter++;
-                if(counter % 100 == 0) {
-                    System.out.println("Files read: " + counter);
-                    System.out.println("Fails: " + failed);
-                }
-                PEData data = PELoader.loadPE(file);
-//                new ReportCreator(data).headerReports();
-                SectionLoader loader = new SectionLoader(data);
-                
-                loader.maybeLoadDebugSection();
-                loader.maybeLoadDelayLoadSection();
-//                loader.maybeLoadExceptionSection();
-                loader.maybeLoadExportSection();
-                loader.maybeLoadImportSection();
-                loader.maybeLoadResourceSection();
-                loader.maybeLoadRelocSection();
-            } catch (Exception e) {
-                String message = file.getName() + " " + e.getMessage();
-                System.err.println(message);
-                fails.add(message);
-                failed++;
-            }
-        }
-        System.out.println("Files that failed: " + failed);
-        for(String message : fails) {
-            System.out.println(message);
-        }
-    }
 
     @Test
     public void loadTinyPE() throws IOException {
@@ -92,12 +48,16 @@ public class RobustnessTest {
             logger.debug("loading problem file: " + file.getAbsolutePath());
             PEData data = PELoader.loadPE(file);
             SectionLoader loader = new SectionLoader(data);
+            loader.maybeLoadBoundImportSection();
+            loader.maybeLoadCLRSection();
             loader.maybeLoadDebugSection();
+            loader.maybeLoadDelayLoadSection();
             loader.maybeLoadExceptionSection();
             loader.maybeLoadExportSection();
-            loader.maybeLoadBoundImportSection();
             loader.maybeLoadImportSection();
             loader.maybeLoadResourceSection();
+            data.maybeGetRichHeader();
+            IconParser.extractIcons(data);
         }
     }
 

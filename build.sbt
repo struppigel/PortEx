@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "PortEx"
 
-version := "3.0.4"
+version := "4.0.0"
 
 scalaVersion := "2.12.13"
 
@@ -13,15 +13,15 @@ javacOptions in JavaDoc += "-Xdoclint:none"
 
 sources in (JavaDoc, doc) ~= (_ filterNot (f => f.getName.contains("$") || f.getName.contains("Util") || f.getName.contains("ResourceDataEntry") || f.getName.contains("DirectoryEntry") || f.getName.contains("Scanning")))
 
-libraryDependencies += "org.testng" % "testng" % "6.8.8" % "test"
+libraryDependencies += "org.testng" % "testng" % "6.14.3" % "test"
 
-libraryDependencies += "com.google.guava" % "guava" % "31.0.1-jre"
+libraryDependencies += "com.google.guava" % "guava" % "31.1-jre"
 
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.16.0"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.19.0"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.16.0"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
 
 // Import default settings. This changes `publishTo` settings to use the Sonatype repository and add several commands for publishing.
 sonatypeSettings

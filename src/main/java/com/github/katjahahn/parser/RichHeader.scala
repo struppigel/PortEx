@@ -196,7 +196,7 @@ object RichHeader {
     val dataBlocks = for (i <- wordLen until decodedRich.length by wordLen) yield decodedRich.slice(i, i + wordLen)
     // remove padding of 0 byte words TODO adjust to 16 byte alignment
     val dbNoPad = dataBlocks.dropWhile(_.sameElements(Array[Byte](0, 0, 0, 0)))
-    val compids = for (i <- dbNoPad.indices by 2) yield
+    val compids = for (i <- dbNoPad.indices by 2 if dbNoPad.size > i+1) yield
       (ByteArrayUtil.bytesToInt(dbNoPad(i).slice(0, 4)), // bytes 0-3 compid
         ByteArrayUtil.bytesToInt(dbNoPad(i + 1))) // bytes 4-7 count
     for ((compid, count) <- compids) {

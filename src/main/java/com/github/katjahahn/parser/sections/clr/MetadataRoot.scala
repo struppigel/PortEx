@@ -22,8 +22,9 @@ import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
 import com.github.katjahahn.parser._
 import com.github.katjahahn.parser.sections.clr.MetadataRoot.{alignToFourBytes, versionOffset}
+import org.apache.logging.log4j.LogManager
 
-import java.io.RandomAccessFile
+import java.io.{IOException, RandomAccessFile}
 import java.nio.charset.StandardCharsets
 import java.util.Optional
 import scala.annotation.tailrec
@@ -70,6 +71,8 @@ class MetadataRoot (
 }
 
 object MetadataRoot {
+  private val logger = LogManager.getLogger(classOf[MetadataRoot].getName)
+
   private val metaRootSpec = "clrmetarootspec"
   private val metaRootSpec2 = "clrmetarootspec2"
   private val versionOffset = 16
@@ -151,7 +154,12 @@ object MetadataRoot {
 
   private def loadVersionString(metadataFileOffset: Long, data: PEData): String = {
     ScalaIOUtil.using(new RandomAccessFile(data.getFile, "r")) { raf =>
-      IOUtil.readNullTerminatedUTF8String(metadataFileOffset + versionOffset, raf)
+      try {
+        IOUtil.readNullTerminatedUTF8String(metadataFileOffset + versionOffset, raf)
+      } catch {
+        case e : IOException => logger.warn("Could not read .NET version string!") // TODO anomaly
+                                return "<not readable>"
+      }
     }
   }
 

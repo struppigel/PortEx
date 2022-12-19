@@ -140,22 +140,6 @@ public class Hasher {
         return new Hasher(data);
     }
 
-    public static void main(String... args) throws IOException, NoSuchAlgorithmException {
-        File file = new File("/home/deque/portextestfiles/WinRar.exe");
-        PEData data = PELoader.loadPE(file);
-        Hasher hasher = new Hasher(data);
-        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-        byte[] hash = hasher.fileHash(sha256);
-        System.out.println("SHA-256: " + ByteArrayUtil.byteToHex(hash, ""));
-        System.out.println();
-        int sections = data.getSectionTable().getNumberOfSections();
-        for (int i = 1; i <= sections; i++) {
-            hash = hasher.sectionHash(i, sha256);
-            System.out.println("SHA256 section " + i + ": "
-                    + ByteArrayUtil.byteToHex(hash, ""));
-        }
-    }
-
     /**
      * Returns the hash value of the file for the specified messageDigest.
      * 

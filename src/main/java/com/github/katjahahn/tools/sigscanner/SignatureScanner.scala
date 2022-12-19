@@ -252,8 +252,12 @@ object SignatureScanner {
     _loadSignatures(defaultSigs, true)
   }
 
-  def loadOverlaySigs(): List[Signature] = {
+  def _loadOverlaySigs(): List[Signature] = {
     _loadSignatures(overlaySigs, true)
+  }
+
+  def loadOverlaySigs(): java.util.List[Signature] = {
+    _loadOverlaySigs().asJava
   }
 
   /**

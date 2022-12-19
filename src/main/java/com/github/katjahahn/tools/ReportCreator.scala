@@ -495,7 +495,7 @@ class ReportCreator(private val data: PEData) {
       val resources = rsrc.getResources().asScala
       for (resource <- resources) {
         val offset = resource.rawBytesLocation.from
-        val fileTypes = FileTypeScanner(data.getFile).scanAt(offset)
+        val fileTypes = FileTypeScanner(data.getFile)._scanAt(offset)
         val longTypes = fileTypes.
           map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
         buf.append(resource)
@@ -597,7 +597,7 @@ class ReportCreator(private val data: PEData) {
       val chi = ChiSquared.calculate(data.getFile, overlay.getOffset, overlay.getSize)
       val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
-      val overlaySigs = SignatureScanner.loadOverlaySigs()
+      val overlaySigs = SignatureScanner._loadOverlaySigs()
       val sigresults = new SignatureScanner(overlaySigs).scanAt(data.getFile, overlayOffset)
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
       title("Overlay") + NL + "Offset: " +

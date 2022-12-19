@@ -459,7 +459,7 @@ object PortExAnalyzer {
     def bytesMatched(sig: Signature): Int =
       sig.signature.count(cond(_) { case Some(_) => true })
 
-    val results = FileTypeScanner(file).scanAt(0)
+    val results = FileTypeScanner(file)._scanAt(0)
     if (results.isEmpty) println("No matching file-type signatures found")
     else if (results.size == 1)
       println("The file could be of the following type: ")
@@ -484,7 +484,7 @@ object PortExAnalyzer {
     using(new FileWriter(outFile, true)) { fw =>
       fw.write("The given file is no PE file!" + NL +
         "Try '--repair' option if you think it is a broken PE." + NL)
-      val results = FileTypeScanner(file).scanAt(0)
+      val results = FileTypeScanner(file)._scanAt(0)
       if (results.isEmpty) fw.write("No matching file-type signatures found" + NL)
       else if (results.size == 1)
         fw.write("The file could be of the following type: " + NL)

@@ -1,6 +1,5 @@
 package com.github.katjahahn.parser;
 
-import static org.testng.Assert.*;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -9,12 +8,12 @@ import java.util.Random;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.parser.ByteArrayUtil;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Random based testclass
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  *
  */
 public class ByteArrayUtilTest {
