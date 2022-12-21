@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.github.katjahahn.parser.sections.rsrc.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -516,6 +517,18 @@ public final class IOUtil {
 			}
 			return list;
 		}
+	}
+
+	/**
+	 * Load the raw bytes of the resource in the given PE
+	 * @param resource
+	 * @param pedata
+	 * @return byte array with raw resource bytes
+	 * @throws IOException
+	 */
+	public static byte[] loadBytesOfResource(Resource resource, PEData pedata) throws IOException {
+		return IOUtil.loadBytesSafely(resource.rawBytesLocation().from(), (int) resource.rawBytesLocation().size(),
+				new RandomAccessFile(pedata.getFile(), "r"));
 	}
 
 	/**

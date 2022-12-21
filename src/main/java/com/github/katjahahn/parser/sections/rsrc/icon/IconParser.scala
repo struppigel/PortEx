@@ -37,6 +37,15 @@ object IconParser {
   private final val RT_GROUP_ICON = 14 //TODO remove data file, use enums
 
   /**
+   * Extract IcoFiles of the provided resources for this PE.
+   * @param resources the resources to extract icons from
+   * @param pedata
+   * @return
+   */
+  def extractIcons(resources: java.util.List[Resource], pedata: PEData): java.util.List[IcoFile] =
+    extractGroupIcons(resources: java.util.List[Resource], pedata.getFile).asScala.map(_.toIcoFile()).asJava
+
+  /**
    * Extract all IcoFiles for this PE
    * @param pedata
    * @return
