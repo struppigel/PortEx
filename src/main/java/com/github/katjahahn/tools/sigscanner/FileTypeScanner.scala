@@ -18,22 +18,23 @@
 
 package com.github.katjahahn.tools.sigscanner
 
+import com.github.katjahahn.parser.IOUtil
+import com.github.katjahahn.tools.sigscanner.SignatureScanner.{ScanResult, SignatureMatch}
+
 import java.io.File
 import scala.collection.JavaConverters._
-import SignatureScanner.ScanResult
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.IOUtil
 
 class FileTypeScanner(sigscanner: SignatureScanner, file: File) {
 
   def _scanAt(offset: Long): List[ScanResult] =
     sigscanner._scanAt(file, offset)
 
-  def scanAt(offset: Long): java.util.List[ScanResult] =
-    _scanAt(offset).asJava
+  def scanAt(offset: Long): java.util.List[SignatureMatch] =
+    sigscanner.scanAt(file, offset)
 
   def scanAtReport(offset: Long): java.util.List[String] =
-    sigscanner.scanAt(file, offset)
+    sigscanner.scanAtToString(file, offset)
 
 }
 

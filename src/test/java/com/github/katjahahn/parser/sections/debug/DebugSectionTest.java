@@ -1,16 +1,18 @@
 package com.github.katjahahn.parser.sections.debug;
-import static com.github.katjahahn.parser.sections.debug.DebugDirectoryKey.*;
-import static org.testng.Assert.*;
-
-import java.io.IOException;
-import java.util.Map;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.sections.SectionLoader;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.github.katjahahn.parser.sections.debug.DebugDirectoryKey.*;
+import static org.testng.Assert.assertEquals;
 
 public class DebugSectionTest {
 
@@ -24,7 +26,9 @@ public class DebugSectionTest {
     @Test
     public void basicWorkingTest() throws IOException {
         PEData datum = pedata.get("strings.exe");
-        DebugSection debug = new SectionLoader(datum).loadDebugSection();
+        DebugSection debugSec = new SectionLoader(datum).loadDebugSection();
+        List<DebugDirectoryEntry> filteredEntries = debugSec.getEntries().stream().filter(d -> d.getDebugType() == DebugType.CODEVIEW).collect(Collectors.toList());
+        DebugDirectoryEntry debug = filteredEntries.get(0);
         assertEquals((long) debug.get(MAJOR_VERSION), 0L);
         assertEquals((long) debug.get(MINOR_VERSION), 0L);
         assertEquals((long) debug.get(ADDR_OF_RAW_DATA), 323836L);

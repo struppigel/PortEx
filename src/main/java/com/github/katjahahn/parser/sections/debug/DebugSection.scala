@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,17 @@
  */
 package com.github.katjahahn.parser.sections.debug
 
-import DebugSection._
-import com.github.katjahahn.parser.IOUtil._
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.ByteArrayUtil._
-import DebugSection._
-import java.io.File
-import DebugDirectoryKey._
-import java.util.Date
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.MemoryMappedPE
-import org.apache.logging.log4j.LogManager
+import com.github.katjahahn.parser._
+import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+import org.apache.logging.log4j.LogManager
+
+import java.util.Optional
+import scala.collection.JavaConverters._
 
 /**
- * @author Katja Hahn
+ * @author Karsten Hahn
  *
  * Represents the debug section of the PE.
  * @param directoryTable the debug directory
@@ -47,31 +35,33 @@ import com.github.katjahahn.parser.PhysicalLocation
  * @param offset the file offset to the debug directory
  */
 class DebugSection private (
-  private val directoryTable: DebugDirectory,
-  private val typeDescription: String,
-  private val debugType: DebugType,
+  private val entries: List[DebugDirectoryEntry],
   val offset: Long,
-  private val maybeCodeView: Option[CodeviewInfo]) extends SpecialSection {
+  val size: Long) extends SpecialSection {
+
+  def getEntries(): java.util.List[DebugDirectoryEntry] = entries.asJava
 
   override def getOffset(): Long = offset
 
-  def getSize(): Long = debugDirEntrySize
+  def getSize(): Long = size
 
-  def getCodeView(): CodeviewInfo =
-    if (maybeCodeView.isDefined) maybeCodeView.get
-    else throw new IllegalStateException("Code View structure not valid")
-
-  def getDirectoryTable(): java.util.Map[DebugDirectoryKey, StandardField] =
-    directoryTable.asJava
+  def getCodeView(): Optional[CodeviewInfo] = {
+    val entry = entries.find(_.getDebugType() == DebugType.CODEVIEW)
+    if(entry.isDefined) {
+      return Optional.of(entry.get.getCodeView())
+    }
+    Optional.empty();
+  }
 
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
-    if (maybeCodeView.isDefined) {
-      return (getCodeView().getPhysicalLocations().asScala.toList :+ new PhysicalLocation(offset, getSize)).asJava
+    if (!entries.isEmpty) {
+      val preEntries = entries.map(_.getPhysicalLocations().asScala.toList).flatten
+      return (preEntries :+ new PhysicalLocation(offset, getSize)).asJava
     }
     return (new PhysicalLocation(offset, getSize) :: Nil).asJava
   }
 
-  override def isEmpty: Boolean = directoryTable.isEmpty
+  override def isEmpty: Boolean = entries.isEmpty
 
   override def getInfo(): String =
     s"""|-------------
@@ -79,40 +69,8 @@ class DebugSection private (
         |-------------
         |
         |${
-      directoryTable.values.map(s => s.getKey() match {
-        case TYPE            => "Type: " + typeDescription
-        case TIME_DATE_STAMP => "Time date stamp: " + getTimeDateStamp().toString
-        case _               => s.toString
-      }).mkString(NL)}
-        |${if (maybeCodeView.isDefined) maybeCodeView.get.getInfo else ""}
+      entries.map(_.getInfo()).mkString(IOUtil.NL)}
         |""".stripMargin
-
-  /**
-   * Returns a date object of the time date stamp in the debug section.
-   *
-   * @return date of the time date stamp
-   */
-  def getTimeDateStamp(): Date = new Date(get(TIME_DATE_STAMP) * 1000)
-
-  /**
-   * Returns a long value of the given key or null if the value doesn't exist.
-   *
-   * @param key the header key
-   * @return long value for the given key of null if it doesn't exist.
-   */
-  def get(key: DebugDirectoryKey): java.lang.Long =
-    if (directoryTable.contains(key))
-      directoryTable(key).getValue else null
-
-  /**
-   * Returns a string of the type description
-   *
-   * @return type description string
-   */
-  def getTypeDescription(): String = typeDescription
-
-  def getDebugType(): DebugType = debugType
-
 }
 
 object DebugSection {
@@ -131,8 +89,10 @@ object DebugSection {
    * @param loadInfo the load information
    * @return debugsection instance
    */
-  def newInstance(li: LoadInfo): DebugSection =
-    apply(li.memoryMapped, li.fileOffset, li.va, li.data)
+  def newInstance(li: LoadInfo): DebugSection = {
+    val size = li.data.getOptionalHeader.getDataDirectory.get(DataDirectoryKey.DEBUG).getDirectorySize
+    apply(li.memoryMapped, li.fileOffset, li.va, li.data, size)
+  }
 
   /**
    * Loads the debug section and returns it.
@@ -144,22 +104,12 @@ object DebugSection {
   def load(data: PEData): DebugSection =
     new SectionLoader(data).loadDebugSection()
 
-  def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): DebugSection = {
-    val format = new SpecificationFormat(0, 1, 2, 3)
-    val debugbytes = mmbytes.slice(virtualAddress, virtualAddress + debugDirEntrySize)
-    val entries = IOUtil.readHeaderEntries(classOf[DebugDirectoryKey],
-      format, debugspec, debugbytes, offset).asScala.toMap
-    val debugTypeValue = entries(DebugDirectoryKey.TYPE).getValue
-    try {
-      val debugType = DebugType.getForValue(debugTypeValue)
-      val ptrToRawData = entries(POINTER_TO_RAW_DATA).getValue
-      val codeview = CodeviewInfo(ptrToRawData, data.getFile)
-      new DebugSection(entries, debugType.getDescription, debugType, offset, codeview)
-    } catch {
-      case e: IllegalArgumentException =>
-        logger.warn("no debug type description found!")
-        val description = s"${entries(DebugDirectoryKey.TYPE).getValue} no description available"
-        new DebugSection(entries, description, DebugType.UNKNOWN, offset, None)
-    }
+  def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData, size: Long): DebugSection = {
+    val endOfDebug = virtualAddress + size
+    val entries = (for(dirVA <- virtualAddress until endOfDebug by debugDirEntrySize) yield
+      DebugDirectoryEntry(mmbytes, offset + (dirVA - virtualAddress), dirVA, data)
+    ).toList
+
+    new DebugSection(entries, offset, size)
   }
 }

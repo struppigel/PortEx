@@ -15,14 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.msdos.MSDOSLoadModule;
@@ -30,6 +22,7 @@ import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.parser.sections.debug.CodeviewInfo;
+import com.github.katjahahn.parser.sections.debug.DebugDirectoryEntry;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.debug.DebugType;
 import com.github.katjahahn.parser.sections.edata.ExportEntry;
@@ -45,6 +38,13 @@ import com.github.katjahahn.tools.ReportCreator;
 import com.google.common.annotations.Beta;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Container that collects and holds the main information of a PE file.
@@ -235,8 +235,8 @@ public class PEData {
             com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
             if (sec.isPresent()) {
                 DebugSection d = sec.get();
-                if (d.getDebugType() == DebugType.CODEVIEW) {
-                    CodeviewInfo c = d.getCodeView();
+                if (d.getCodeView().isPresent()) {
+                    CodeviewInfo c = d.getCodeView().get();
                     this.codeviewInfo = c;
                     return Optional.of(codeviewInfo);
                 }
@@ -246,6 +246,28 @@ public class PEData {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    /**
+     * If this returns true, the timestamps in the headers are invalid because it is a reproducible build.
+     *
+     * @return true if REPRO debug directory entry exists
+     */
+    public boolean hasReproInvalidTimeStamps() {
+        try {
+            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
+            if (sec.isPresent()) {
+                DebugSection d = sec.get();
+                for (DebugDirectoryEntry entry : d.getEntries()) {
+                    if (entry.getDebugType() == DebugType.REPRO) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e);
+        }
+        return false;
     }
 
     /**
