@@ -1,23 +1,21 @@
 package com.github.katjahahn;
 
-import static org.testng.Assert.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.optheader.OptionalHeaderTest;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.idata.ImportDLL;
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScannerTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.idata.ImportDLL;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScannerTest;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 public class RobustnessTest {
 

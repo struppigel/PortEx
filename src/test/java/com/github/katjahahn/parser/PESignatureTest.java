@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static org.testng.Assert.*;
+import com.github.katjahahn.TestreportsReader.TestData;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,10 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.TestreportsReader.TestData;
+import static org.testng.Assert.*;
 
 public class PESignatureTest {
 

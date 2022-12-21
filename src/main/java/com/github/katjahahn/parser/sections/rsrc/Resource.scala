@@ -17,9 +17,9 @@
  */
 package com.github.katjahahn.parser.sections.rsrc
 
-import java.awt.image.BufferedImage
-import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.PhysicalLocation
+
+import scala.collection.JavaConverters._
 
 /**
  * Holds the information about a resource, which is the information provided

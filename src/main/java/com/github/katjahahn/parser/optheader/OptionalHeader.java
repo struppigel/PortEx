@@ -15,31 +15,25 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.optheader;
 
-import static com.github.katjahahn.parser.ByteArrayUtil.getBytesLongValueSafely;
-import static com.github.katjahahn.parser.IOUtil.NL;
-import static com.github.katjahahn.parser.optheader.StandardFieldEntryKey.BASE_OF_DATA;
-import static com.github.katjahahn.parser.optheader.StandardFieldEntryKey.MAGIC_NUMBER;
-import static com.github.katjahahn.parser.optheader.WindowsEntryKey.DLL_CHARACTERISTICS;
-import static com.github.katjahahn.parser.optheader.WindowsEntryKey.FILE_ALIGNMENT;
-import static com.github.katjahahn.parser.optheader.WindowsEntryKey.IMAGE_BASE;
-import static com.github.katjahahn.parser.optheader.WindowsEntryKey.NUMBER_OF_RVA_AND_SIZES;
-import static com.github.katjahahn.parser.optheader.WindowsEntryKey.SECTION_ALIGNMENT;
-import static com.github.katjahahn.parser.optheader.WindowsEntryKey.SUBSYSTEM;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.katjahahn.parser.Header;
 import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
 import com.github.katjahahn.parser.StandardField;
 import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.github.katjahahn.parser.ByteArrayUtil.getBytesLongValueSafely;
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.github.katjahahn.parser.optheader.StandardFieldEntryKey.BASE_OF_DATA;
+import static com.github.katjahahn.parser.optheader.StandardFieldEntryKey.MAGIC_NUMBER;
+import static com.github.katjahahn.parser.optheader.WindowsEntryKey.*;
 
 /**
  * Represents the optional header of the PE file.

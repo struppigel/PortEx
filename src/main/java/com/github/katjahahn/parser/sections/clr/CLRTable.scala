@@ -17,9 +17,9 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.IOUtil.{SpecificationFormat, readArray, _}
+import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.sections.clr.CLRTable.{KEY_INDEX, SIZE_INDEX, getDescriptionForTableFlag, getTableMetaForIndex, isKnownCLRFlag, readSpecificationFromFile}
+import com.github.katjahahn.parser.sections.clr.CLRTable._
 import com.github.katjahahn.tools.ReportCreator
 
 import scala.collection.JavaConverters._

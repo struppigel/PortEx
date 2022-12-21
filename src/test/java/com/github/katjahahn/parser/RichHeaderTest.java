@@ -1,7 +1,6 @@
 package com.github.katjahahn.parser;
 
 import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.parser.sections.debug.CodeviewInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;

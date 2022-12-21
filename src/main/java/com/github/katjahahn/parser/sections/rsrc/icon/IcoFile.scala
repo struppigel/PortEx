@@ -18,12 +18,10 @@
 
 package com.github.katjahahn.parser.sections.rsrc.icon
 
-import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.{ByteArrayUtil, PhysicalLocation}
+import com.github.katjahahn.parser.ScalaIOUtil.using
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileOutputStream, InputStream, OutputStream, RandomAccessFile}
-import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.{hex, using}
-import com.github.katjahahn.parser.ByteArrayUtil
+import java.io._
 
 /**
  * Represents a Windows ICO file.

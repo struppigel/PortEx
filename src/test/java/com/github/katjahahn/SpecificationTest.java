@@ -15,18 +15,6 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
-import static org.testng.Assert.*;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.github.katjahahn.parser.HeaderKey;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey;
@@ -40,6 +28,18 @@ import com.github.katjahahn.parser.sections.edata.ExportDirectoryKey;
 import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey;
 import com.github.katjahahn.parser.sections.rsrc.ResourceDataEntryKey;
 import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the specification files and their enums for coherence.

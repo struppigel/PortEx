@@ -19,17 +19,13 @@
 package com.github.katjahahn.parser.sections.rsrc.icon
 
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.{ using, hex }
-import com.github.katjahahn.parser.ByteArrayUtil
-import com.github.katjahahn.parser.PhysicalLocation
-import java.io.File
-import com.github.katjahahn.parser.sections.rsrc.Resource
-import java.io.RandomAccessFile
-import GroupIconResource.NID
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.sections.rsrc.Level
-import com.github.katjahahn.parser.sections.rsrc.ID
+import com.github.katjahahn.parser.{ByteArrayUtil, PhysicalLocation}
+import com.github.katjahahn.parser.ScalaIOUtil.{hex, using}
+import com.github.katjahahn.parser.sections.rsrc.{ID, Level, Resource}
+import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource.NID
 import org.apache.logging.log4j.LogManager
+
+import java.io.{File, RandomAccessFile}
 
 /**
  * Parsing and converting group icon resources to an IcoFile.

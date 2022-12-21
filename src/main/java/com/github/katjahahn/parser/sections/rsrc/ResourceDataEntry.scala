@@ -16,16 +16,11 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.parser.sections.rsrc
-import ResourceDataEntry._
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.ByteArrayUtil._
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.Header
+import com.github.katjahahn.parser._
+import com.github.katjahahn.parser.sections.rsrc.ResourceDataEntry._
+
+import scala.collection.JavaConverters._
 
 /**
  * Represents a data entry of a resource.

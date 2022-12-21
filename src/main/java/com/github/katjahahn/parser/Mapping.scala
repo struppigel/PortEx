@@ -17,10 +17,10 @@
  */
 package com.github.katjahahn.parser
 
-import java.io.RandomAccessFile
-import scala.collection.mutable.ListBuffer
+import com.github.katjahahn.parser.Mapping._
 import com.github.katjahahn.parser.ScalaIOUtil._
-import Mapping._
+
+import java.io.RandomAccessFile
 
 /**
  * Maps all addresses of a virtual range to all addresses of the physical range.

@@ -1,11 +1,11 @@
 package com.github.katjahahn.parser.coffheader;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class FileCharacteristicTest {
     @Test

@@ -18,10 +18,10 @@
 
 package com.github.katjahahn.parser.sections.rsrc.version
 
-import java.io.RandomAccessFile
-import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.{ using, hex }
 import com.github.katjahahn.parser.ByteArrayUtil
+import com.github.katjahahn.parser.IOUtil._
+
+import java.io.RandomAccessFile
 
 class VarFileInfo(
   val wLength: Int,

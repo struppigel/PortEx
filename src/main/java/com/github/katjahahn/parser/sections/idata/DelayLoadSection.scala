@@ -17,19 +17,14 @@
  */
 package com.github.katjahahn.parser.sections.idata
 
-import com.github.katjahahn.parser.sections.SpecialSection
+import com.github.katjahahn.parser.{Location, PhysicalLocation}
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.IOUtil
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.StandardField
-import DelayLoadSection._
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.sections.SpecialSection
+import com.github.katjahahn.parser.sections.idata.DelayLoadSection._
 import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.PhysicalLocation
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 class DelayLoadSection(
     private val delayLoadTable: DelayLoadTable, 

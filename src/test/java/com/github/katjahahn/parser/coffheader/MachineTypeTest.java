@@ -1,10 +1,11 @@
 package com.github.katjahahn.parser.coffheader;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 public class MachineTypeTest {
     

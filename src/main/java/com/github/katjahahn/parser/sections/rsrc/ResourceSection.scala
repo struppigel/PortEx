@@ -17,17 +17,13 @@
  */
 package com.github.katjahahn.parser.sections.rsrc
 
-import scala.collection.JavaConverters._
-import java.io.File
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.{Location, MemoryMappedPE, PELoader, PhysicalLocation}
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.Location
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+
+import java.io.File
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Holds the root resource directory table and provides access to the resources.

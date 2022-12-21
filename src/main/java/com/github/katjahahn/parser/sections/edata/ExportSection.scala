@@ -17,24 +17,16 @@
  */
 package com.github.katjahahn.parser.sections.edata
 
-import com.github.katjahahn.parser.IOUtil.{ NL }
-import scala.collection.JavaConverters._
-import java.io.File
-import ExportDirectoryKey._
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.IOUtil.NL
+import com.github.katjahahn.parser.{FileFormatException, Location, MemoryMappedPE, PhysicalLocation}
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.FileFormatException
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+import com.github.katjahahn.parser.sections.edata.ExportDirectoryKey._
 import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.tools.visualizer.Visualizer
+
+import java.io.File
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 /**

@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
 
-import java.awt.image.BufferedImage;
-
 import com.google.common.base.Preconditions;
+
+import java.awt.image.BufferedImage;
 
 /**
  * Utility methods for buffered images.

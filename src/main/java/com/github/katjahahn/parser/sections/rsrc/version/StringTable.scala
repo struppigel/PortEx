@@ -18,14 +18,12 @@
 
 package com.github.katjahahn.parser.sections.rsrc.version
 
-import java.io.RandomAccessFile
-import com.github.katjahahn.parser.ByteArrayUtil
+import com.github.katjahahn.parser.{ByteArrayUtil, FileFormatException}
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.hex
-import com.github.katjahahn.parser.ScalaIOUtil.using
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.FileFormatException
 import org.apache.logging.log4j.LogManager
+
+import java.io.RandomAccessFile
+import scala.collection.mutable.ListBuffer
 
 class StringTable(
   val wLength: Int,

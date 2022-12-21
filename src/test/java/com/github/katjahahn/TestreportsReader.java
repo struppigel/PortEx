@@ -1,21 +1,5 @@
 package com.github.katjahahn;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.PhysicalLocation;
 import com.github.katjahahn.parser.StandardField;
@@ -33,6 +17,17 @@ import com.github.katjahahn.parser.sections.idata.ImportDLL;
 import com.github.katjahahn.parser.sections.idata.NameImport;
 import com.github.katjahahn.parser.sections.idata.OrdinalImport;
 import com.github.katjahahn.parser.sections.rsrc.ResourceDataEntry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class TestreportsReader {
 

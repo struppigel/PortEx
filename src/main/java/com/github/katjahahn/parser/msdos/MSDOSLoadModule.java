@@ -15,14 +15,15 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.msdos;
 
-import static com.github.katjahahn.parser.IOUtil.*;
-import static com.github.katjahahn.parser.msdos.MSDOSHeaderKey.*;
+import com.github.katjahahn.parser.PEModule;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import com.github.katjahahn.parser.PEModule;
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.github.katjahahn.parser.msdos.MSDOSHeaderKey.FILE_PAGES;
+import static com.github.katjahahn.parser.msdos.MSDOSHeaderKey.LAST_PAGE_SIZE;
 
 /**
  * Responsible for dumping the MSDOS load module. 

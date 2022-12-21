@@ -18,13 +18,9 @@
 
 package com.github.katjahahn.parser.sections.reloc
 
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.FileFormatException
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.ScalaIOUtil.hex
 import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.PELoader
 
 class BaseRelocBlock(
   val fileOffset: Long,

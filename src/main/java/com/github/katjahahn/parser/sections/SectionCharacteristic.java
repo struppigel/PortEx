@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import java.util.List;
-
 import com.github.katjahahn.parser.Characteristic;
 import com.github.katjahahn.parser.FlagUtil;
+
+import java.util.List;
 
 /**
  * Represents the attributes of a section.

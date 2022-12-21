@@ -17,18 +17,14 @@
  */
 package com.github.katjahahn.parser
 
-import java.io.RandomAccessFile
-import java.nio.file.Files
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionTable
 import com.github.katjahahn.parser.MemoryMappedPE._
 import com.github.katjahahn.parser.ScalaIOUtil._
-import java.io.File
-import org.apache.logging.log4j.LogManager
 import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.sections.SectionLoader
+import org.apache.logging.log4j.LogManager
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * Represents the PE file content as it is mapped to memory.

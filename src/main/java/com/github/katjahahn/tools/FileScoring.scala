@@ -17,18 +17,13 @@
  */
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.tools.anomalies.Anomaly
+import com.github.katjahahn.parser.{FileFormatException, IOUtil, PELoader, PESignature}
+import com.github.katjahahn.tools.FileScoring._
+import com.github.katjahahn.tools.anomalies.{Anomaly, AnomalySubType, PEAnomalyScanner}
+
 import java.io.File
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner
+import scala.Function.tupled
 import scala.collection.JavaConverters._
-import com.github.katjahahn.tools.anomalies.AnomalySubType
-import Function.tupled
-import com.github.katjahahn.parser.IOUtil
-import scala.None
-import com.github.katjahahn.parser.PESignature
-import com.github.katjahahn.parser.FileFormatException
-import FileScoring._
 
 /**
  * Provides file scoring based on statistical information about PE files.

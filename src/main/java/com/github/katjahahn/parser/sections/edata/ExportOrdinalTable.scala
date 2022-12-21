@@ -17,12 +17,10 @@
  */
 package com.github.katjahahn.parser.sections.edata
 
-import com.github.katjahahn.parser.ByteArrayUtil._
+import com.github.katjahahn.parser.{FileFormatException, MemoryMappedPE}
+import com.github.katjahahn.parser.sections.edata.ExportOrdinalTable.entrySize
+
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.IOUtil.{ NL }
-import com.github.katjahahn.parser.MemoryMappedPE
-import ExportOrdinalTable.entrySize
-import com.github.katjahahn.parser.FileFormatException
 
 class ExportOrdinalTable (
   val ordinals: List[Int],

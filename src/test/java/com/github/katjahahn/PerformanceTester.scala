@@ -1,10 +1,9 @@
 package com.github.katjahahn
 
-import org.testng.internal.TestResult
-import java.io.File
+import com.github.katjahahn.parser.{Mapping, PELoader}
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.Mapping
+
+import java.io.File
 
 object PerformanceTester {
 

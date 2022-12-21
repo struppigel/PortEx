@@ -1,14 +1,12 @@
 package com.github.katjahahn.tools.anomalies
 
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.IOUtil._
+import com.github.katjahahn.parser.{Location, PhysicalLocation}
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.sections.edata.ExportSection
-import com.github.katjahahn.parser.PhysicalLocation
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 trait ExportSectionScanning extends AnomalyScanner {
 

@@ -15,20 +15,18 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.msdos;
 
-import static org.testng.Assert.*;
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.msdos.MSDOSHeader;
-import com.github.katjahahn.parser.msdos.MSDOSLoadModule;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class MSDOSLoadModuleTest {
 

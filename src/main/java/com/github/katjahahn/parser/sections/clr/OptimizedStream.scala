@@ -17,15 +17,15 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, StandardField}
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.sections.clr.OptimizedStream.tableIdxMap
 import com.github.katjahahn.parser.sections.clr.CLRTable._
+import com.github.katjahahn.parser.sections.clr.OptimizedStream.tableIdxMap
+import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, StandardField}
 
 import java.util
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-import scala.math.{exp, pow}
+import scala.math.pow
 
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],

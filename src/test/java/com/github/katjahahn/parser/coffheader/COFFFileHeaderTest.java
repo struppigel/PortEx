@@ -15,26 +15,19 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.coffheader;
 
-import static org.testng.Assert.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.github.katjahahn.TestreportsReader;
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoader;
 import com.github.katjahahn.parser.PELoaderTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
+
+import static org.testng.Assert.*;
 
 public class COFFFileHeaderTest {
 

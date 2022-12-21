@@ -15,42 +15,18 @@
  ******************************************************************************/
 package com.github.katjahahn;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import com.github.katjahahn.parser.ByteArrayUtil;
-import com.github.katjahahn.parser.FileFormatException;
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.Location;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.StandardField;
+import com.github.katjahahn.parser.*;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.coffheader.FileCharacteristic;
 import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.debug.DebugDirectoryEntry;
 import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
+import com.github.katjahahn.parser.sections.debug.DebugType;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
-import com.github.katjahahn.parser.sections.idata.DirectoryEntry;
-import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey;
-import com.github.katjahahn.parser.sections.idata.ImportDLL;
-import com.github.katjahahn.parser.sections.idata.ImportSection;
-import com.github.katjahahn.parser.sections.idata.NameImport;
-import com.github.katjahahn.parser.sections.idata.OrdinalImport;
-import com.github.katjahahn.parser.sections.rsrc.DataEntry;
-import com.github.katjahahn.parser.sections.rsrc.Resource;
-import com.github.katjahahn.parser.sections.rsrc.ResourceDirectory;
-import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry;
-import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey;
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
-import com.github.katjahahn.parser.sections.rsrc.SubDirEntry;
+import com.github.katjahahn.parser.sections.idata.*;
+import com.github.katjahahn.parser.sections.rsrc.*;
 import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource;
 import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
@@ -67,6 +43,16 @@ import com.github.katjahahn.tools.visualizer.ColorableItem;
 import com.github.katjahahn.tools.visualizer.ImageUtil;
 import com.github.katjahahn.tools.visualizer.Visualizer;
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * These are the code examples for the PortEx Wiki.
@@ -270,11 +256,13 @@ public class WikiExampleCodes {
         // Get specific values
         PEData data = PELoader.loadPE(file);
         SectionLoader loader = new SectionLoader(data);
-        DebugSection debug = loader.loadDebugSection();
-        Long address = debug.get(DebugDirectoryKey.ADDR_OF_RAW_DATA);
-        Long size = debug.get(DebugDirectoryKey.SIZE_OF_DATA);
-        String type = debug.getTypeDescription();
-        Date stamp = debug.getTimeDateStamp();
+        DebugSection debugSection = loader.loadDebugSection();
+        Stream<DebugDirectoryEntry> debugStream = debugSection.getEntries().stream();
+        DebugDirectoryEntry codeViewEntry = debugStream.filter(d -> d.getDebugType() == DebugType.CODEVIEW).findFirst().get();
+        Long address = codeViewEntry.get(DebugDirectoryKey.ADDR_OF_RAW_DATA);
+        Long size = codeViewEntry.get(DebugDirectoryKey.SIZE_OF_DATA);
+        String type = codeViewEntry.getTypeDescription();
+        Date stamp = codeViewEntry.getTimeDateStamp();
     }
 
     @SuppressWarnings("unused")
@@ -300,7 +288,7 @@ public class WikiExampleCodes {
         SignatureScanner scanner = SignatureScanner.newInstance();
         boolean epOnly = true;
         File file = new File("peid.exe");
-        List<String> results = scanner.scanAll(file, epOnly);
+        List<String> results = scanner.scanAllToString(file, epOnly);
         for (String signature : results) {
             System.out.println(signature);
         }

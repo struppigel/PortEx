@@ -17,9 +17,9 @@
  */
 package com.github.katjahahn.parser.sections.edata
 
-import com.github.katjahahn.parser.ByteArrayUtil._
-import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.MemoryMappedPE
+
+import scala.collection.mutable.ListBuffer
 /**
  * The export address table contains all relative virtual addresses in the order
  * they are found in the export section.

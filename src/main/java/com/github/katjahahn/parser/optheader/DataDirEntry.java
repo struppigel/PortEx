@@ -15,18 +15,18 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.optheader;
 
-import static com.github.katjahahn.parser.IOUtil.*;
-import static com.google.common.base.Preconditions.*;
-
-import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.katjahahn.parser.VirtualLocation;
 import com.github.katjahahn.parser.sections.SectionHeader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Represents an entry of the data directory table. It is used like a struct.

@@ -17,28 +17,21 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
-import com.github.katjahahn.parser.IOUtil
-import java.io.File
-import java.io.RandomAccessFile
-import java.nio.charset.CodingErrorAction
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.Map
-import scala.io.Codec
-import scala.util.control.Breaks._
-import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.FileFormatException
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.ScalaIOUtil.{ bytes2hex, using }
+import com.github.katjahahn.parser._
+import com.github.katjahahn.parser.ScalaIOUtil.{bytes2hex, using}
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey._
 import com.github.katjahahn.parser.sections.SectionLoader
-import Signature._
-import SignatureScanner._
-import com.github.katjahahn.tools.ReportCreator
-import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.parser.PESignature
-import com.github.katjahahn.tools.Overlay
-import com.github.katjahahn.parser.ScalaIOUtil
+import com.github.katjahahn.tools.{Overlay, ReportCreator}
+import com.github.katjahahn.tools.sigscanner.SignatureScanner._
+import org.apache.logging.log4j.LogManager
+
+import java.io.{File, RandomAccessFile}
+import java.nio.charset.CodingErrorAction
+import scala.Function.tupled
+import scala.collection.JavaConverters._
+import scala.collection.mutable.{ListBuffer, Map}
+import scala.io.Codec
+import scala.util.control.Breaks._
 
 /**
  * Scans PE files for compiler and packer signatures.
@@ -103,12 +96,23 @@ class SignatureScanner(signatures: List[Signature]) {
    * @param file the file to be scanned
    * @param offset the file offset to be matched
    *
+   * @return list of scanresults with all matches found at the specified position
+   */
+  def scanAt(file: File, offset: Long): java.util.List[SignatureMatch] = {
+    val matches = _scanAt(file, offset)
+    (matches map tupled {(sig,addr) => new SignatureMatch(sig, addr)}).asJava
+  }
+
+  /**
+   * @param file the file to be scanned
+   * @param offset the file offset to be matched
+   *
    * @return list of strings with all matches found
    */
-  def scanAt(file: File, offset: Long): java.util.List[String] = {
+  def scanAtToString(file: File, offset: Long): java.util.List[String] = {
     val matches = _scanAt(file, offset)
     (for ((m, addr) <- matches)
-      yield (m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr) + 
+      yield (m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr) +
         IOUtil.NL + "pattern: " + m.signatureString)).asJava
   }
 
@@ -124,12 +128,22 @@ class SignatureScanner(signatures: List[Signature]) {
 
   /**
    * @param file the file to be scanned
+   * @return list of scanresults with all matches found
+   */
+  def scanAll(file: File, epOnly: Boolean = true): java.util.List[SignatureMatch] = {
+    var matches = _findAllEPMatches(file)
+    if (!epOnly) matches = matches ::: _findAllEPFalseMatches(file)
+    (matches map tupled {(sig,addr) => new SignatureMatch(sig, addr)}).asJava
+  }
+
+  /**
+   * @param file the file to be scanned
    * @return list of strings with all matches found
    */
-  def scanAll(file: File, epOnly: Boolean = true): java.util.List[String] = { //use from Java
+  def scanAllToString(file: File, epOnly: Boolean = true): java.util.List[String] = { //use from Java
     val matches = _scanAll(file, epOnly)
     (for ((m, addr) <- matches)
-      yield (m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr) + 
+      yield (m.name + " bytes matched: " + m.bytesMatched + " at address: " + ScalaIOUtil.hex(addr) +
         IOUtil.NL + "pattern: " + m.signatureString)).asJava
   }
 
@@ -211,6 +225,11 @@ object SignatureScanner {
    * a scan result is a signature and the address where it was found
    */
   type ScanResult = (Signature, Address)
+
+  /**
+   * Same as a scan result but for Java usage
+   */
+  class SignatureMatch(val signature: Signature, val address: Address)
 
   private val defaultSigs = IOUtil.SPEC_DIR + "userdb.txt"
   private val overlaySigs = IOUtil.SPEC_DIR + "overlaysignatures"
@@ -398,7 +417,7 @@ object SignatureScanner {
           new SignatureScanner(_loadSignatures(signatures.get.getAbsolutePath))
         else SignatureScanner()
       }
-      val list = scanner.scanAll(pefile, eponly).asScala
+      val list = scanner.scanAllToString(pefile, eponly).asScala
       if (list.length == 0) println("no signature found")
       else list.foreach(println)
     } catch {

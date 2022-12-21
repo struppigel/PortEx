@@ -18,16 +18,10 @@
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.ScalaIOUtil.using
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+
+import java.io._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.PELoader
-import java.io.RandomAccessFile
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.Reader
 
 /**
  * @author Katja Hahn

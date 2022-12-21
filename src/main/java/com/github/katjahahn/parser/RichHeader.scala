@@ -16,12 +16,11 @@
 package com.github.katjahahn.parser
 
 import com.github.katjahahn.parser.RichHeader.{buildMap, knownXORKeys, prodIdMap, richMagic}
-
-import scala.collection.JavaConverters._
 import com.google.common.primitives.Bytes
-import org.apache.logging.log4j.{LogManager, Logger}
+import org.apache.logging.log4j.LogManager
 
 import java.math.BigInteger
+import scala.collection.JavaConverters._
 
 /**
  * Reads the Rich Header if it exists

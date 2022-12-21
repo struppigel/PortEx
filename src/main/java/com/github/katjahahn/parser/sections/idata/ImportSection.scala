@@ -22,8 +22,8 @@ import com.github.katjahahn.parser._
 import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber._
 import com.github.katjahahn.parser.optheader.{OptionalHeader, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
 import com.github.katjahahn.parser.sections.idata.DirectoryEntryKey._
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
 import org.apache.logging.log4j.LogManager
 
 import java.io.File

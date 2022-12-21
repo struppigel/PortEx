@@ -17,16 +17,14 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.IOUtil.{SpecificationFormat, _}
+import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser._
-import com.github.katjahahn.parser.sections.clr.CLIHeaderKey._
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.sections.SpecialSection
+import com.github.katjahahn.parser.sections.clr.CLIHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLRSection.cliHeaderSize
-import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
-import com.github.katjahahn.tools.ReportCreator
 import org.apache.logging.log4j.LogManager
 
-import java.io.File
 import java.util
 import scala.collection.JavaConverters._
 

@@ -1,12 +1,12 @@
 package com.github.katjahahn.parser.sections.debug
 
-import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.using
-import java.io.RandomAccessFile
-import java.io.File
 import com.github.katjahahn.parser.ByteArrayUtil._
-import CodeviewInfo._
+import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.ScalaIOUtil.using
+import com.github.katjahahn.parser.sections.debug.CodeviewInfo._
+
+import java.io.{File, RandomAccessFile}
 import scala.collection.JavaConverters._
 
 class CodeviewInfo(val age: Long,

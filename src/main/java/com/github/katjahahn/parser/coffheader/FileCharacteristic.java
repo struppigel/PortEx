@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.coffheader;
 
-import java.util.List;
-
 import com.github.katjahahn.parser.Characteristic;
 import com.github.katjahahn.parser.FlagUtil;
+
+import java.util.List;
 
 /**
  * Represents the flags that indicate the attributes of the file.

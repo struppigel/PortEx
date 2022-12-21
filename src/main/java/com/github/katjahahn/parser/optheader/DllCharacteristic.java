@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.optheader;
 
-import java.util.List;
-
 import com.github.katjahahn.parser.Characteristic;
 import com.github.katjahahn.parser.FlagUtil;
+
+import java.util.List;
 
 /**
  * Represents the flags for the DLL Characteristic field of the optional header.

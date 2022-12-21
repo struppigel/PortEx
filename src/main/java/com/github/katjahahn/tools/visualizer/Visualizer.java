@@ -15,19 +15,27 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.BASE_RELOCATION_TABLE;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DEBUG;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.DELAY_IMPORT_DESCRIPTOR;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.EXPORT_TABLE;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.IMPORT_TABLE;
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.RESOURCE_TABLE;
-import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
-
 import com.github.katjahahn.parser.*;
+import com.github.katjahahn.parser.coffheader.COFFFileHeader;
+import com.github.katjahahn.parser.optheader.DataDirectoryKey;
+import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.parser.sections.*;
+import com.github.katjahahn.parser.sections.clr.CLRSection;
 import com.github.katjahahn.parser.sections.clr.StreamHeader;
+import com.github.katjahahn.parser.sections.rsrc.Resource;
+import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
+import com.github.katjahahn.tools.Overlay;
+import com.github.katjahahn.tools.ShannonEntropy;
+import com.github.katjahahn.tools.anomalies.Anomaly;
+import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
+import com.github.katjahahn.tools.visualizer.VisualizerBuilder.VisualizerSettings;
+import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -37,32 +45,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-
-import com.github.katjahahn.parser.sections.clr.CLRSection;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.katjahahn.parser.coffheader.COFFFileHeader;
-import com.github.katjahahn.parser.optheader.DataDirectoryKey;
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
-import com.github.katjahahn.parser.sections.SectionHeader;
-import com.github.katjahahn.parser.sections.SectionHeaderKey;
-import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.SpecialSection;
-import com.github.katjahahn.parser.sections.rsrc.Resource;
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
-import com.github.katjahahn.tools.Overlay;
-import com.github.katjahahn.tools.ShannonEntropy;
-import com.github.katjahahn.tools.anomalies.Anomaly;
-import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
-import com.github.katjahahn.tools.visualizer.VisualizerBuilder.VisualizerSettings;
-import com.google.common.base.Optional;
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 /**
  * Creates an image that represents the structure of a PE file on disk.

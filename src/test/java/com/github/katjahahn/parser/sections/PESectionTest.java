@@ -1,12 +1,12 @@
 package com.github.katjahahn.parser.sections;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 public class PESectionTest {
 

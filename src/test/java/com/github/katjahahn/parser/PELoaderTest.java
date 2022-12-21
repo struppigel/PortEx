@@ -15,19 +15,18 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.TestreportsReader.TestData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.TestreportsReader.TestData;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PELoaderTest {
     private static final Logger logger = LogManager.getLogger(PELoaderTest.class

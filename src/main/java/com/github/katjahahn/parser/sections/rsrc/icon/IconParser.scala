@@ -19,15 +19,12 @@
 package com.github.katjahahn.parser.sections.rsrc.icon
 
 import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.parser.sections.rsrc.Resource
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.sections.rsrc.{ID, Level, Resource}
 
 import java.io.File
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.rsrc.Level
-import com.github.katjahahn.parser.sections.rsrc.ID
-
 import java.util.Optional
+import scala.collection.JavaConverters._
 
 object IconParser {
 

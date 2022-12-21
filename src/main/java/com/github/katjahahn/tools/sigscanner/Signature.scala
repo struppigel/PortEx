@@ -15,11 +15,11 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.sigscanner
 
-import Signature._
-import scala.Array.canBuildFrom
 import com.github.katjahahn.parser.ScalaIOUtil._
-import scala.PartialFunction._
 import org.apache.logging.log4j.LogManager
+
+import scala.Array.canBuildFrom
+import scala.PartialFunction._
 
 /**
  * @author Katja Hahn

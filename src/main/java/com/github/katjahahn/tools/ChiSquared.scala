@@ -1,12 +1,12 @@
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.parser.{PEData, PELoader}
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.{PEData, PELoader}
 import com.github.katjahahn.tools.ChiSquared.calculate
 
-import scala.collection.JavaConverters.mapAsJavaMapConverter
 import java.io.{File, RandomAccessFile}
+import scala.collection.JavaConverters.mapAsJavaMapConverter
 import scala.language.postfixOps
 
 /**

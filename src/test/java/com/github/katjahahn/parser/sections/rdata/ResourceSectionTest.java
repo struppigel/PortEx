@@ -1,6 +1,15 @@
 package com.github.katjahahn.parser.sections.rdata;
 
-import static org.testng.Assert.*;
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.TestreportsReader.TestData;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PELoaderTest;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.rsrc.Resource;
+import com.github.katjahahn.tools.ReportCreator;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,23 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.TestreportsReader.TestData;
-import com.github.katjahahn.parser.FileFormatException;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.PELoaderTest;
-import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.rsrc.IDOrName;
-import com.github.katjahahn.parser.sections.rsrc.Level;
-import com.github.katjahahn.parser.sections.rsrc.Name;
-import com.github.katjahahn.parser.sections.rsrc.Resource;
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
-import com.github.katjahahn.tools.ReportCreator;
-import com.google.common.base.Optional;
+import static org.testng.Assert.assertEquals;
 
 public class ResourceSectionTest {
 

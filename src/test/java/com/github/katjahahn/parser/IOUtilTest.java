@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class IOUtilTest {
 

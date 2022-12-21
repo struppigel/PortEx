@@ -1,14 +1,13 @@
 package com.github.katjahahn.tools
 
-import java.io.File
-import java.nio.file.Paths
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.{IOUtil, PEData, PhysicalLocation}
 import com.github.katjahahn.parser.ScalaIOUtil.nonExistingFileFor
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
-import com.github.katjahahn.parser.IOUtil
+
+import java.io.File
+import java.nio.file.Paths
+import scala.collection.JavaConverters._
 
 /**
  * Dumping of several PE file structures and embedded files.

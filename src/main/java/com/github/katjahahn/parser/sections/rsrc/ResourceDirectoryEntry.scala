@@ -17,19 +17,14 @@
  */
 package com.github.katjahahn.parser.sections.rsrc
 
-import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.ByteArrayUtil._
-import ResourceDirectoryEntry._
-import java.io.File
-import java.io.RandomAccessFile
-import scala.collection.mutable.ListBuffer
-import scala.math.min
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.FileFormatException
+import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, PhysicalLocation}
+import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry._
 import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.ScalaIOUtil
+
+import java.io.File
+import scala.collection.JavaConverters._
+import scala.math.min
 
 /**
  * The entry of a {@link ResourceDirectory}

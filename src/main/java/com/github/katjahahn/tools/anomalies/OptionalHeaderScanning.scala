@@ -16,26 +16,15 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.tools.anomalies
-import AnomalySubType._
-import scala.collection.mutable.ListBuffer
-import java.util.Map
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.optheader.Subsystem
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
-import com.github.katjahahn.parser.PESignature
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import com.github.katjahahn.parser.sections.SectionTable
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.coffheader.COFFFileHeader
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
-import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import com.github.katjahahn.parser.optheader.DllCharacteristic
-import com.github.katjahahn.parser.coffheader.FileCharacteristic
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionCharacteristic
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.coffheader.FileCharacteristic
+import com.github.katjahahn.parser.optheader._
+import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionLoader}
+import com.github.katjahahn.tools.anomalies.AnomalySubType._
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * Scans the Optional Header for anomalies.

@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import com.github.katjahahn.parser.IOUtil;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * Holds header, size, offset and bytes of a PESection.

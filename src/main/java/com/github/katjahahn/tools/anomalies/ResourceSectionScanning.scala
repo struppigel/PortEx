@@ -1,17 +1,12 @@
 package com.github.katjahahn.tools.anomalies
 
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.IOUtil._
+import com.github.katjahahn.parser.{Location, ScalaIOUtil}
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection
-import com.github.katjahahn.parser.sections.rsrc.Name
+import com.github.katjahahn.parser.sections.rsrc.{Name, ResourceDirectoryEntry, ResourceSection}
+
 import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryEntry
-import com.github.katjahahn.parser.ScalaIOUtil
+import scala.collection.mutable.ListBuffer
 
 trait ResourceSectionScanning extends AnomalyScanner {
   abstract override def scanReport(): String =

@@ -16,15 +16,15 @@
 
 package com.github.katjahahn.tools.visualizer;
 
-import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
+import com.github.katjahahn.parser.PhysicalLocation;
+import com.google.common.base.Preconditions;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.github.katjahahn.parser.PhysicalLocation;
-import com.google.common.base.Preconditions;
+import static com.github.katjahahn.tools.visualizer.ColorableItem.*;
 
 /**
  * Builds a visualizer based on properties like the height of the image.

@@ -17,35 +17,18 @@
  */
 package com.github.katjahahn.tools
 
+import com.github.katjahahn.parser.IOUtil.NL
+import com.github.katjahahn.parser.{ByteArrayUtil, PEData, PELoader, StandardField}
+import com.github.katjahahn.parser.coffheader.{COFFFileHeader, COFFHeaderKey}
+import com.github.katjahahn.parser.msdos.{MSDOSHeader, MSDOSHeaderKey}
+import com.github.katjahahn.parser.optheader.{DataDirEntry, OptionalHeader, OptionalHeaderKey}
+import com.github.katjahahn.parser.sections.SectionHeaderKey._
+import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionHeaderKey, SectionTable}
+
 import java.io.File
-import scala.PartialFunction._
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.ByteArrayUtil
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.PEData
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.ScalaIOUtil.bytes2hex
-import com.github.katjahahn.parser.ScalaIOUtil.using
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.sections.SectionCharacteristic
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.sections.SectionHeaderKey._
-import com.github.katjahahn.parser.sections.SectionHeaderKey
-import com.github.katjahahn.parser.sections.SectionTable
-import com.github.katjahahn.parser.sections.rsrc.Resource
-import com.github.katjahahn.parser.msdos.MSDOSHeader
-import com.github.katjahahn.parser.msdos.MSDOSHeaderKey
-import com.github.katjahahn.parser.coffheader.COFFHeaderKey
-import com.github.katjahahn.parser.coffheader.COFFFileHeader
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
-import com.github.katjahahn.parser.optheader.OptionalHeaderKey
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.optheader.DataDirEntry
 
 /**
  * @author Karsten Hahn

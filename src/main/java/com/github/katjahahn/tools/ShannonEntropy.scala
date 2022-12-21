@@ -17,16 +17,13 @@
  */
 package com.github.katjahahn.tools
 
-import java.io.File
-import scala.collection.JavaConverters.mapAsJavaMapConverter
+import com.github.katjahahn.parser.{PEData, PELoader}
 import com.github.katjahahn.parser.ScalaIOUtil.using
-import com.github.katjahahn.parser.PEData
 import com.github.katjahahn.parser.sections.SectionLoader
-import ShannonEntropy._
+import com.github.katjahahn.tools.ShannonEntropy._
 
-import java.io.RandomAccessFile
-import com.github.katjahahn.parser.PELoader
-
+import java.io.{File, RandomAccessFile}
+import scala.collection.JavaConverters.mapAsJavaMapConverter
 import scala.language.postfixOps
 
 /**

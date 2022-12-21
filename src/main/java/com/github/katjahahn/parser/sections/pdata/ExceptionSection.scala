@@ -18,21 +18,17 @@
 
 package com.github.katjahahn.parser.sections.pdata
 
-import com.github.katjahahn.parser.sections.pdata.ExceptionSection._
-
-import scala.collection.JavaConverters._
-import Function.tupled
-import scala.collection.mutable.ListBuffer
-import java.io.File
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.{FileFormatException, IOUtil, MemoryMappedPE, PELoader, PhysicalLocation, StandardField}
-import com.github.katjahahn.parser.sections.SpecialSection
+import com.github.katjahahn.parser.IOUtil.{NL, SpecificationFormat}
 import com.github.katjahahn.parser.coffheader.MachineType
 import com.github.katjahahn.parser.coffheader.MachineType._
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.IOUtil.NL
 import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.sections.{SectionLoader, SpecialSection}
+import com.github.katjahahn.parser.sections.pdata.ExceptionSection._
+import com.github.katjahahn.parser._
+
+import java.io.File
+import scala.collection.JavaConverters._
 
 //TODO getInfo shows empty values, separate different formats, test different formats
 class ExceptionSection private(

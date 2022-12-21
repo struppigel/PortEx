@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
-import java.util.List;
-
 import com.github.katjahahn.parser.PhysicalLocation;
+
+import java.util.List;
 
 /**
  * Represents a concrete import of a symbol, either via name or via ordinal.

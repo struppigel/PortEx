@@ -17,18 +17,15 @@
  */
 package com.github.katjahahn.parser.sections.rsrc.version
 
-import java.io.File
-import java.io.RandomAccessFile
-import com.github.katjahahn.parser.ByteArrayUtil
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.ScalaIOUtil.hex
+import com.github.katjahahn.parser.{ByteArrayUtil, PhysicalLocation}
 import com.github.katjahahn.parser.ScalaIOUtil.using
-import com.github.katjahahn.parser.sections.rsrc.Resource
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
-import com.google.common.base.Optional
 import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.sections.rsrc.Resource
+import com.google.common.base.Optional
+
+import java.io.{File, RandomAccessFile}
+import scala.collection.JavaConverters._
 
 class VsVersionInfo(
   val wLength: Int,

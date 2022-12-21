@@ -34,16 +34,10 @@
  */
 package com.github.katjahahn.parser.sections.idata
 
+import com.github.katjahahn.parser.IOUtil.{NL, SpecificationFormat}
+import com.github.katjahahn.parser.{HeaderKey, IOUtil, PhysicalLocation, StandardField}
+
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.ByteArrayUtil._
-import com.github.katjahahn.parser.IOUtil.{ NL }
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.HeaderKey
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Represents a directory table entry. Contains all lookup table entries that

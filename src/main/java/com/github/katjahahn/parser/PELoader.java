@@ -15,36 +15,27 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import static com.github.katjahahn.parser.IOUtil.loadBytes;
-import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
-import static com.google.common.base.Preconditions.checkState;
-
-import java.awt.AWTException;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-
+import com.github.katjahahn.parser.coffheader.COFFFileHeader;
+import com.github.katjahahn.parser.msdos.MSDOSHeader;
+import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.visualizer.ImageUtil;
 import com.github.katjahahn.tools.visualizer.Visualizer;
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.katjahahn.parser.coffheader.COFFFileHeader;
-import com.github.katjahahn.parser.msdos.MSDOSHeader;
-import com.github.katjahahn.parser.optheader.OptionalHeader;
-import com.github.katjahahn.parser.optheader.WindowsEntryKey;
-import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.SectionTable;
-import com.github.katjahahn.parser.sections.edata.ExportSection;
-import com.github.katjahahn.tools.PEAutoRepair;
-import com.github.katjahahn.tools.ReportCreator;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import static com.github.katjahahn.parser.IOUtil.loadBytes;
+import static com.github.katjahahn.parser.IOUtil.loadBytesSafely;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every
@@ -262,25 +253,9 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\osx_vb_netcore.dll");
+        File file = new File("C:\\Windows\\Microsoft.NET\\Framework64\\sbscmp10.dll");
         PEData data = PELoader.loadPE(file);
-        show(createImage(data));
-        /*Visualizer visualizer = new VisualizerBuilder()
-                .setHeight(800)
-                .setFileWidth(150)
-                .build();
-        BufferedImage peImage = visualizer.createImage(file);
-        BufferedImage legendImage = visualizer.createLegendImage(true, true, true);
-        show(legendImage);
-        ReportCreator reporter = ReportCreator.apply(file);
-        reporter.printReport();*/
-       //  VisualizerBuilder builder = new VisualizerBuilder();
-        // Visualizer vi = builder.build();
-         //final BufferedImage entropyImage = vi.createEntropyImage(file);
-         //final BufferedImage structureImage = vi.createImage(file);
-        // final BufferedImage appendedImage = ImageUtil.appendImages(
-        // entropyImage, structureImage);
-        // show(appendedImage);
+        System.out.println(new ReportCreator(data).debugReport());
     }
 
     private static BufferedImage createImage(PEData peData) {

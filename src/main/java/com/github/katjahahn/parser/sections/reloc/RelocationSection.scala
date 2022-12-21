@@ -18,18 +18,16 @@
 
 package com.github.katjahahn.parser.sections.reloc
 
-import com.github.katjahahn.parser.ScalaIOUtil.hex
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
-import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
-import com.github.katjahahn.parser.optheader.DataDirectoryKey
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.Location
-import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.ScalaIOUtil.hex
+import com.github.katjahahn.parser.optheader.DataDirectoryKey
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.sections.SpecialSection
 import org.apache.logging.log4j.LogManager
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 class RelocationSection(
   private val blocks: List[BaseRelocBlock],

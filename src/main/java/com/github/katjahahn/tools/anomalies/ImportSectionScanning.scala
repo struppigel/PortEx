@@ -1,15 +1,13 @@
 package com.github.katjahahn.tools.anomalies
 
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.idata.ImportSection
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.optheader.DataDirectoryKey
 import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.sections.idata.ImportDLL
+import com.github.katjahahn.parser.sections.SectionLoader
+import com.github.katjahahn.parser.sections.idata.{ImportDLL, ImportSection}
+
+import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
+import scala.collection.mutable.ListBuffer
 
 trait ImportSectionScanning extends AnomalyScanner {
 

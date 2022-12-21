@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser;
 
-import java.util.Arrays;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Arrays;
 
 /**
  * Utilities to convert from and to byte arrays.

@@ -17,14 +17,12 @@
  */
 package com.github.katjahahn.parser.sections.idata
 
-import scala.collection.JavaConverters._
-import LookupTableEntry._
-import java.lang.Long.toHexString
+import com.github.katjahahn.parser.{MemoryMappedPE, PhysicalLocation}
+import com.github.katjahahn.parser.sections.idata.LookupTableEntry._
 import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.ByteArrayUtil._
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.PhysicalLocation
+
+import java.lang.Long.toHexString
+import scala.collection.JavaConverters._
 
 /**
  * Represents a lookup table entry. Every lookup table entry is either an

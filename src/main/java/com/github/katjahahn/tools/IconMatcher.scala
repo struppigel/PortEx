@@ -18,14 +18,13 @@
 
 package com.github.katjahahn.tools
 
-import java.io.File
-import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.ByteArrayUtil
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
+
+import java.io.{BufferedReader, File, FileReader}
 import java.security.MessageDigest
-import java.io.BufferedReader
-import java.io.FileReader
-import com.github.katjahahn.parser.ByteArrayUtil
+import scala.collection.JavaConverters._
 
 object IconMatcher { //TODO use trie
 

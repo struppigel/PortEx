@@ -1,14 +1,11 @@
 package com.github.katjahahn.tools
 
-import java.io.File
-import java.io.RandomAccessFile
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import com.github.katjahahn.parser.{IOUtil, PELoader, PESignature}
 import com.github.katjahahn.parser.ScalaIOUtil.using
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.PESignature
 import com.github.katjahahn.parser.msdos.MSDOSHeader
-import com.github.katjahahn.parser.PELoader
+
+import java.io.{File, RandomAccessFile}
+import java.nio.file.{Files, StandardCopyOption}
 /**
  * Automatic repair for PE files or files that should be PE files.
  */

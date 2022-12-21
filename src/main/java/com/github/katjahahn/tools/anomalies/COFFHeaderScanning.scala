@@ -16,17 +16,15 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.tools.anomalies
-import AnomalySubType._
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.IOUtil.NL
+import com.github.katjahahn.parser.{PESignature, PhysicalLocation}
+import com.github.katjahahn.parser.coffheader.{COFFFileHeader, COFFHeaderKey}
 import com.github.katjahahn.tools.Overlay
-import com.github.katjahahn.parser.IOUtil.{ NL }
-import com.github.katjahahn.parser.coffheader.COFFFileHeader
-import com.github.katjahahn.parser.coffheader.COFFHeaderKey
-import com.github.katjahahn.parser.PESignature
-import com.github.katjahahn.parser.PhysicalLocation
-import java.util.Date
-import java.util.Calendar
+import com.github.katjahahn.tools.anomalies.AnomalySubType._
+
+import java.util.{Calendar, Date}
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * Scans the COFF File Header for anomalies.

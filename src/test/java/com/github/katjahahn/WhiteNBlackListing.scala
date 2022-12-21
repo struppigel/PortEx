@@ -1,14 +1,13 @@
 package com.github.katjahahn
 
-import java.io.File
-import scala.collection.JavaConverters._
+import com.github.katjahahn.parser.ByteArrayUtil
+import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
 import com.github.katjahahn.tools.Hasher
+
+import java.io.{BufferedWriter, File, FileWriter}
 import java.security.MessageDigest
-import com.github.katjahahn.parser.ScalaIOUtil.using
-import java.io.BufferedWriter
-import java.io.FileWriter
-import com.github.katjahahn.parser.ByteArrayUtil
+import scala.collection.JavaConverters._
 
 object WhiteNBlackListing {
 

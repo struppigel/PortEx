@@ -17,20 +17,19 @@
  */
 package com.github.katjahahn.tools;
 
-import static org.testng.Assert.*;
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.parser.ByteArrayUtil;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.parser.ByteArrayUtil;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
+import static org.testng.Assert.assertEquals;
 
 public class HasherTest {
 

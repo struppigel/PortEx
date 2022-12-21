@@ -17,14 +17,10 @@
  */
 package com.github.katjahahn.parser.sections.edata
 
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.IOUtil.{ NL, readMap }
+import com.github.katjahahn.parser.IOUtil.{NL, SpecificationFormat}
+import com.github.katjahahn.parser.{HeaderKey, IOUtil, StandardField}
+
 import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.ByteArrayUtil._
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.HeaderKey
-import com.github.katjahahn.parser.IOUtil
 
 /**
  * Represents the directory table of the export section and provides access to the

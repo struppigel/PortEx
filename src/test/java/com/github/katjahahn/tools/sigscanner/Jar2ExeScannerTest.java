@@ -15,16 +15,15 @@
  ******************************************************************************/
 package com.github.katjahahn.tools.sigscanner;
 
-import static org.testng.Assert.*;
-
-import java.io.File;
-import java.util.List;
-
+import com.github.katjahahn.TestreportsReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
-import com.github.katjahahn.TestreportsReader;
+import java.io.File;
+import java.util.List;
+
+import static org.testng.Assert.assertTrue;
 
 public class Jar2ExeScannerTest {
 

@@ -15,25 +15,22 @@
  ******************************************************************************/
 package com.github.katjahahn.tools;
 
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.RichHeader;
+import com.github.katjahahn.parser.sections.SectionHeader;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import com.github.katjahahn.parser.sections.SectionTable;
+import com.google.common.base.Preconditions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.Optional;
-
-import com.github.katjahahn.parser.RichHeader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.katjahahn.parser.ByteArrayUtil;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.sections.SectionHeader;
-import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.SectionTable;
-import com.google.common.base.Preconditions;
 
 /**
  * Creates hash values of PE files and sections.

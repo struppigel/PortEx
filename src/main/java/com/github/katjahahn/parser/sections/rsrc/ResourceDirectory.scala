@@ -17,18 +17,15 @@
  */
 package com.github.katjahahn.parser.sections.rsrc
 
+import com.github.katjahahn.parser.IOUtil.SpecificationFormat
+import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, PhysicalLocation, StandardField}
+import com.github.katjahahn.parser.sections.rsrc.ResourceDirectory._
+import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey._
+import org.apache.logging.log4j.LogManager
+
 import java.io.File
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.sections.rsrc.ResourceDirectoryKey._
-import ResourceDirectory._
-import com.github.katjahahn.parser.PhysicalLocation
 
 /**
  * Header and the entries which point to either data or other resource directory

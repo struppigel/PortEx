@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import java.util.List;
-
 import com.github.katjahahn.parser.PEModule;
 import com.github.katjahahn.parser.PhysicalLocation;
+
+import java.util.List;
 
 /**
  * Represents a special section, whose format is described in the PECOFF

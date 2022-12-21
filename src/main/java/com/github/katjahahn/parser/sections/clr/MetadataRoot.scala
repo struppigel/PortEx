@@ -18,10 +18,10 @@
 
 package com.github.katjahahn.parser.sections.clr
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
 import com.github.katjahahn.parser._
+import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.clr.MetadataRoot.{alignToFourBytes, versionOffset}
+import com.github.katjahahn.parser.sections.clr.MetadataRootKey._
 import org.apache.logging.log4j.LogManager
 
 import java.io.{IOException, RandomAccessFile}

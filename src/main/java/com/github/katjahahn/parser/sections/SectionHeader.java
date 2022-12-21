@@ -15,21 +15,18 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import static com.github.katjahahn.parser.IOUtil.NL;
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.POINTER_TO_RAW_DATA;
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.SIZE_OF_RAW_DATA;
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.VIRTUAL_ADDRESS;
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.VIRTUAL_SIZE;
+import com.github.katjahahn.parser.Header;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.ScalaIOUtil;
+import com.github.katjahahn.parser.StandardField;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.katjahahn.parser.Header;
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.ScalaIOUtil;
-import com.github.katjahahn.parser.StandardField;
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 
 /**
  * Represents an entry of the {@link SectionTable}.

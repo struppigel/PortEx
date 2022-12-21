@@ -18,13 +18,11 @@
 
 package com.github.katjahahn.tools
 
-import java.io.File
-import com.github.katjahahn.parser.PELoader
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
-import java.nio.channels.FileChannel
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import com.github.katjahahn.parser.PEData
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
+
+import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.channels.FileChannel
 
 object ChecksumVerifier {
   

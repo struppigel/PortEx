@@ -15,7 +15,13 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.msdos;
 
-import static com.github.katjahahn.parser.IOUtil.NL;
+import com.github.katjahahn.parser.Header;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
+import com.github.katjahahn.parser.StandardField;
+import com.google.common.base.Preconditions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,14 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.katjahahn.parser.Header;
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
-import com.github.katjahahn.parser.StandardField;
-import com.google.common.base.Preconditions;
+import static com.github.katjahahn.parser.IOUtil.NL;
 
 /**
  * Fetches values from the MSDOS header of the PE.

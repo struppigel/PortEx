@@ -17,7 +17,6 @@
  */
 package com.github.katjahahn.parser.sections.clr;
 
-import com.github.katjahahn.parser.optheader.OptionalHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

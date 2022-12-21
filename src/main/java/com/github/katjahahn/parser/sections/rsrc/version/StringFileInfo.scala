@@ -18,11 +18,10 @@
 
 package com.github.katjahahn.parser.sections.rsrc.version
 
-import java.io.RandomAccessFile
 import com.github.katjahahn.parser.ByteArrayUtil
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.ScalaIOUtil.hex
-import com.github.katjahahn.parser.ScalaIOUtil.using
+
+import java.io.RandomAccessFile
 import scala.collection.mutable.ListBuffer
 
 class StringFileInfo(

@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.coffheader;
 
-import static com.github.katjahahn.parser.IOUtil.*;
-import static com.github.katjahahn.parser.coffheader.COFFHeaderKey.*;
-import static com.google.common.base.Preconditions.*;
+import com.github.katjahahn.parser.Header;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
+import com.github.katjahahn.parser.StandardField;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Date;
@@ -25,13 +28,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.katjahahn.parser.Header;
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
-import com.github.katjahahn.parser.StandardField;
+import static com.github.katjahahn.parser.IOUtil.NL;
+import static com.github.katjahahn.parser.coffheader.COFFHeaderKey.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Represents the COFF File Header.

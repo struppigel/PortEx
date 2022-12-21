@@ -50,13 +50,37 @@ public enum DebugType implements Characteristic {
      */
     BORLAND(9, "Borland (reserved)", true, false),
     /**
-     * Reserved
+     * Reserved 10
      */
     RESERVED10(10, "Reserved 10", true, false),
     /**
      * CLSID (reserved)
      */
-    CLSID(11, "CLSID (reserved)", true, false);
+    CLSID(11, "CLSID (reserved)", true, false),
+    /**
+     * CLSID (reserved)
+     */
+    VC_FEATURE(12, "VC Feature", false, false),
+    /**
+     * POGO
+     */
+    POGO(13,"POGO", false, false),
+    /**
+     * ILTCG
+     */
+    ILTCG(14,"ILTCG", false, false),
+    /**
+     * MPX
+     */
+    MPX(15,"MPX", false, false),
+    /**
+     * Repro, PE determinism or reproducibility
+     */
+    REPRO(16,"Repro, PE determinism or reproducibility", false, false),
+    /**
+     * Extended DLL characteristics bits
+     */
+    EX_DLLCHARACTERISTICS(20,"Extended DLL characteristics bits", false, false);
 
     private final String description;
     private final long value;

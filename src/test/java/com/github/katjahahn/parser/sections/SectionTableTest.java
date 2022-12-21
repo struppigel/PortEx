@@ -1,7 +1,15 @@
 package com.github.katjahahn.parser.sections;
 
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
-import static org.testng.Assert.*;
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.TestreportsReader.TestData;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoader;
+import com.github.katjahahn.parser.PELoaderTest;
+import com.github.katjahahn.parser.StandardField;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,14 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.parser.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.TestreportsReader.TestData;
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
+import static org.testng.Assert.*;
 
 public class SectionTableTest {
 

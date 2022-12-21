@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.rsrc
 
-import Level._
+import com.github.katjahahn.parser.sections.rsrc.Level._
 
 /**
  * Represents the level of a {@link ResourceDirectory}).

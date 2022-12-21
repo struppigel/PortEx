@@ -1,18 +1,17 @@
 package com.github.katjahahn.parser.sections.reloc;
 
-import static org.testng.Assert.*;
+import com.github.katjahahn.parser.PEData;
+import com.github.katjahahn.parser.PELoaderTest;
+import com.github.katjahahn.parser.sections.SectionLoader;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoaderTest;
-import com.github.katjahahn.parser.sections.SectionLoader;
+import static org.testng.Assert.assertEquals;
 
 public class RelocationSectionTest {
 

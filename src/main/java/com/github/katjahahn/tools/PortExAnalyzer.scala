@@ -18,12 +18,12 @@
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.{MemoryMappedPE, PELoader, PESignature, PhysicalLocation}
 import com.github.katjahahn.parser.ScalaIOUtil.using
 import com.github.katjahahn.parser.coffheader.COFFFileHeader
 import com.github.katjahahn.parser.optheader.DataDirectoryKey._
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey
 import com.github.katjahahn.parser.sections.{SectionHeaderKey, SectionLoader}
+import com.github.katjahahn.parser.{MemoryMappedPE, PELoader, PESignature, PhysicalLocation}
 import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Signature}
 import com.github.katjahahn.tools.visualizer.{ColorableItem, ImageUtil, VisualizerBuilder}
 

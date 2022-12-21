@@ -17,12 +17,12 @@
  */
 package com.github.katjahahn.tools.anomalies
 
-import scala.collection.mutable.ListBuffer
 import com.github.katjahahn.parser.IOUtil._
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.Location
 import com.github.katjahahn.parser.PhysicalLocation
 import com.github.katjahahn.parser.msdos.MSDOSHeaderKey
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * Scans the MSDOS Header for anomalies

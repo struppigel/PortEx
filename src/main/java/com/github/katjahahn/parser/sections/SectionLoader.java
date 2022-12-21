@@ -15,27 +15,12 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import com.github.katjahahn.parser.sections.clr.CLRSection;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.katjahahn.parser.FileFormatException;
-import com.github.katjahahn.parser.Location;
-import com.github.katjahahn.parser.MemoryMappedPE;
-import com.github.katjahahn.parser.PEData;
-import com.github.katjahahn.parser.PELoader;
-import com.github.katjahahn.parser.PhysicalLocation;
-import com.github.katjahahn.parser.VirtualLocation;
+import com.github.katjahahn.parser.*;
 import com.github.katjahahn.parser.optheader.DataDirEntry;
 import com.github.katjahahn.parser.optheader.DataDirectoryKey;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.optheader.StandardFieldEntryKey;
+import com.github.katjahahn.parser.sections.clr.CLRSection;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.BoundImportSection;
@@ -47,6 +32,14 @@ import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import static com.github.katjahahn.parser.sections.SectionHeaderKey.*;
 
 /**
  * Responsible for computing section related values that are necessary for

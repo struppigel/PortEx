@@ -17,23 +17,17 @@
  */
 package com.github.katjahahn.parser.sections.idata
 
+import com.github.katjahahn.parser.IOUtil.{NL, SpecificationFormat}
+import com.github.katjahahn.parser.{IOUtil, MemoryMappedPE, PhysicalLocation, StandardField}
+import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber._
+import com.github.katjahahn.parser.optheader.WindowsEntryKey
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.sections.idata.DelayLoadDirectoryEntry._
+import com.github.katjahahn.parser.sections.idata.DelayLoadDirectoryKey._
+import org.apache.logging.log4j.LogManager
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber._
-import com.github.katjahahn.parser.ByteArrayUtil._
-import com.github.katjahahn.parser.IOUtil.{ NL, SpecificationFormat }
-import com.github.katjahahn.parser.StandardField
-import com.github.katjahahn.parser.HeaderKey
-import com.github.katjahahn.parser.IOUtil
-import com.github.katjahahn.parser.MemoryMappedPE
-import com.github.katjahahn.parser.optheader.OptionalHeader
-import org.apache.logging.log4j.LogManager
-import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
-import com.github.katjahahn.parser.sections.idata.DelayLoadDirectoryKey._
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.Location
-import com.github.katjahahn.parser.sections.idata.DelayLoadDirectoryEntry._
-import com.github.katjahahn.parser.optheader.WindowsEntryKey
 
 class DelayLoadDirectoryEntry private (
   private val entries: Map[DelayLoadDirectoryKey, StandardField],

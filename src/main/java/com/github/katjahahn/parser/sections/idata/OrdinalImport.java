@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections.idata;
 
+import com.github.katjahahn.parser.PhysicalLocation;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.katjahahn.parser.PhysicalLocation;
 
 /**
  * Represents an import by ordinal.

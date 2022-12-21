@@ -18,13 +18,12 @@
 
 package com.github.katjahahn.parser.sections.idata
 
-import com.github.katjahahn.parser.sections.SpecialSection
-import com.github.katjahahn.parser.PhysicalLocation
-import com.github.katjahahn.parser.Location
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.IOUtil.SpecificationFormat
-import com.github.katjahahn.parser.IOUtil
+import com.github.katjahahn.parser.PhysicalLocation
+import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
+import com.github.katjahahn.parser.sections.SpecialSection
+
+import scala.collection.JavaConverters._
 
 class BoundImportSection private (
     private val offset: Long) extends SpecialSection {

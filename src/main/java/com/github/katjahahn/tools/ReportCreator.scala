@@ -18,18 +18,18 @@
 package com.github.katjahahn.tools
 
 import com.github.katjahahn.parser.IOUtil.NL
-import com.github.katjahahn.parser.{ByteArrayUtil, IOUtil, PEData, PELoader, PhysicalLocation, StandardField}
 import com.github.katjahahn.parser.coffheader.COFFHeaderKey
 import com.github.katjahahn.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.katjahahn.parser.sections.SectionHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey.FLAGS
-import com.github.katjahahn.parser.sections.clr.{CLRCodedIndexField, CLRTable, CLRTableEntry, CLRTableKey, CLRTableType, ComImageFlag, OptimizedStream}
-import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
+import com.github.katjahahn.parser.sections.clr._
 import com.github.katjahahn.parser.sections.debug.DebugType
 import com.github.katjahahn.parser.sections.rsrc.Resource
 import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
+import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
+import com.github.katjahahn.parser._
 import com.github.katjahahn.tools.ReportCreator.{pad, title}
-import com.github.katjahahn.tools.anomalies.{Anomaly, AnomalySubType, PEAnomalyScanner, PEStructureKey, ResourceAnomaly, SectionAnomaly, StructureAnomaly}
+import com.github.katjahahn.tools.anomalies.{Anomaly, PEAnomalyScanner}
 import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
 
 import java.io.{File, RandomAccessFile}
@@ -361,30 +361,35 @@ class ReportCreator(private val data: PEData) {
     val loader = new SectionLoader(data)
     val maybeDebug = loader.maybeLoadDebugSection()
     if (maybeDebug.isPresent && !maybeDebug.get.isEmpty) {
-      val debug = maybeDebug.get
+      val debugSec = maybeDebug.get
+      val debugEntries = debugSec.getEntries().asScala.toList
       val buf = new StringBuffer()
-      val colWidth = 17
-      val padLength = "Address of Raw Data ".length
-      buf.append(title("Debug Information") + NL)
-      buf.append("Time Date Stamp: " + debug.getTimeDateStamp + NL)
-      buf.append("Type: " + debug.getTypeDescription + NL + NL)
-      val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
-      buf.append(tableHeader + NL)
-      buf.append(pad("", tableHeader.length, "-") + NL)
-      val entries = debug.getDirectoryTable().values().asScala.toList.sortBy(e => e.getOffset)
-      for (entry <- entries) {
-        buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
-          pad(hexString(entry.getOffset), colWidth, " ") + NL)
-      }
-      if (debug.getDebugType() == DebugType.CODEVIEW) {
-        try {
-          buf.append(debug.getCodeView().getInfo())
-        } catch {
-          case _ : IllegalStateException =>
-            buf.append("-invalid codeview structure-")
+      var entryNum = 0
+      for(debug <- debugEntries) {
+        entryNum += 1
+        val colWidth = 17
+        val padLength = "Address of Raw Data ".length
+        buf.append(title("Debug Directory Entry " + entryNum)  + NL)
+        buf.append("Time Date Stamp: " + debug.getTimeDateStamp + NL)
+        buf.append("Type: " + debug.getTypeDescription + NL + NL)
+        val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
+        buf.append(tableHeader + NL)
+        buf.append(pad("", tableHeader.length, "-") + NL)
+        val entries = debug.getDirectoryTable().values().asScala.toList.sortBy(e => e.getOffset)
+        for (entry <- entries) {
+          buf.append(pad(entry.getDescription, padLength, " ") + pad(hexString(entry.getValue), colWidth, " ") +
+            pad(hexString(entry.getOffset), colWidth, " ") + NL)
         }
+        if (debug.getDebugType() == DebugType.CODEVIEW) {
+          try {
+            buf.append(debug.getCodeView().getInfo())
+          } catch {
+            case _: IllegalStateException =>
+              buf.append("-invalid codeview structure-")
+          }
+        }
+        buf.append(NL)
       }
-      buf.append(NL)
       buf.toString
     } else ""
   }
@@ -598,7 +603,7 @@ class ReportCreator(private val data: PEData) {
       val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
       val overlaySigs = SignatureScanner._loadOverlaySigs()
-      val sigresults = new SignatureScanner(overlaySigs).scanAt(data.getFile, overlayOffset)
+      val sigresults = new SignatureScanner(overlaySigs).scanAtToString(data.getFile, overlayOffset)
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
       title("Overlay") + NL + "Offset: " +
         hexString(overlayOffset) + NL + "Size: " +
@@ -609,7 +614,7 @@ class ReportCreator(private val data: PEData) {
   }
 
   def peidReport(): String = {
-    val signatures = SignatureScanner.newInstance().scanAll(data.getFile)
+    val signatures = SignatureScanner.newInstance().scanAllToString(data.getFile)
     if (signatures.isEmpty) ""
     else title("PEID Signatures") + NL + signatures.asScala.mkString(NL) + NL + NL
   }

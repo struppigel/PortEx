@@ -17,9 +17,9 @@
  */
 package com.github.katjahahn.tools
 
-import com.github.katjahahn.parser.{FileFormatException, PEData, PELoader}
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.idata.{ImportDLL, NameImport, OrdinalImport}
+import com.github.katjahahn.parser.{FileFormatException, PEData, PELoader}
 
 import java.io.File
 import java.security.MessageDigest

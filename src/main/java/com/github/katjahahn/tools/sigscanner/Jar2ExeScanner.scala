@@ -17,22 +17,16 @@
  */
 package com.github.katjahahn.tools.sigscanner
 
-import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.IOUtil
 import com.github.katjahahn.parser.ScalaIOUtil.using
-import java.io.EOFException
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.RandomAccessFile
+import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner._
+import com.github.katjahahn.tools.sigscanner.SignatureScanner.{Address, ScanResult}
+
+import java.io.{File, FileOutputStream, RandomAccessFile}
 import java.nio.channels.Channels
 import java.util.zip.ZipInputStream
 import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable.ListBuffer
-import SignatureScanner.Address
-import SignatureScanner.ScanResult
-import scala.io.Codec
-import java.nio.charset.CodingErrorAction
-import Jar2ExeScanner._
 
 /**
  * A scanner for Wrappers of Jar to Exe converters. The class provides methods for

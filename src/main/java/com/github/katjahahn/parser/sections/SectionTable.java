@@ -15,7 +15,14 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.sections;
 
-import static com.github.katjahahn.parser.IOUtil.*;
+import com.github.katjahahn.parser.IOUtil;
+import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
+import com.github.katjahahn.parser.MemoryMappedPE;
+import com.github.katjahahn.parser.PEModule;
+import com.github.katjahahn.parser.StandardField;
+import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,15 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.katjahahn.parser.IOUtil;
-import com.github.katjahahn.parser.IOUtil.SpecificationFormat;
-import com.github.katjahahn.parser.MemoryMappedPE;
-import com.github.katjahahn.parser.PEModule;
-import com.github.katjahahn.parser.StandardField;
-import com.google.common.base.Optional;
+import static com.github.katjahahn.parser.IOUtil.NL;
 
 /**
  * Represents the section table of a PE.

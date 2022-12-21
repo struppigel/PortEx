@@ -15,24 +15,23 @@
  ******************************************************************************/
 package com.github.katjahahn.parser.optheader;
 
-import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
-import static org.testng.Assert.*;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.github.katjahahn.TestreportsReader.TestData;
 import com.github.katjahahn.parser.PEData;
 import com.github.katjahahn.parser.PELoaderTest;
 import com.github.katjahahn.parser.StandardField;
 import com.github.katjahahn.parser.optheader.OptionalHeader.MagicNumber;
 import com.google.common.base.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.github.katjahahn.parser.optheader.DataDirectoryKey.*;
+import static org.testng.Assert.*;
 
 public class OptionalHeaderTest {
 

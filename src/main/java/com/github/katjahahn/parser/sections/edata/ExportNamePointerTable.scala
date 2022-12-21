@@ -17,13 +17,12 @@
  */
 package com.github.katjahahn.parser.sections.edata
 
-import com.github.katjahahn.parser.ByteArrayUtil._
-import scala.collection.mutable.ListBuffer
-import com.github.katjahahn.parser.IOUtil.{ NL }
-import java.io.File
-import ExportNamePointerTable._
+import com.github.katjahahn.parser.IOUtil.NL
 import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.sections.edata.ExportNamePointerTable._
 import org.apache.logging.log4j.LogManager
+
+import scala.collection.mutable.ListBuffer
 
 class ExportNamePointerTable private (val pointerNameList: List[(Address, String)],
   val fileOffset: Long) {

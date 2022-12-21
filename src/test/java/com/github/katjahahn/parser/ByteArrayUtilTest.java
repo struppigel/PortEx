@@ -1,12 +1,12 @@
 package com.github.katjahahn.parser;
 
 
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 

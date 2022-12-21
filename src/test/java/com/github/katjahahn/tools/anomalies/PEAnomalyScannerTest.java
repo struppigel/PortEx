@@ -1,6 +1,13 @@
 package com.github.katjahahn.tools.anomalies;
 
-import static org.testng.Assert.*;
+import com.github.katjahahn.TestreportsReader;
+import com.github.katjahahn.parser.HeaderKey;
+import com.github.katjahahn.parser.optheader.WindowsEntryKey;
+import com.github.katjahahn.parser.sections.SectionHeaderKey;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,15 +15,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.github.katjahahn.TestreportsReader;
-import com.github.katjahahn.parser.HeaderKey;
-import com.github.katjahahn.parser.optheader.WindowsEntryKey;
-import com.github.katjahahn.parser.sections.SectionHeaderKey;
+import static org.testng.Assert.assertTrue;
 
 public class PEAnomalyScannerTest {
     
