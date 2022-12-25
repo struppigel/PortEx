@@ -17,15 +17,14 @@
  */
 package com.github.katjahahn.tools.anomalies
 
-import scala.collection.JavaConverters._
-import com.github.katjahahn.parser.{Location, PhysicalLocation, RichHeader, StandardField}
 import com.github.katjahahn.parser.optheader.DataDirEntry
-import com.github.katjahahn.parser.sections.SectionHeader
-import com.github.katjahahn.parser.sections.SectionHeaderKey
+import com.github.katjahahn.parser.sections.{SectionHeader, SectionHeaderKey}
+import com.github.katjahahn.parser.sections.clr.{MetadataRoot, StreamHeader}
 import com.github.katjahahn.parser.sections.idata.ImportDLL
-import com.github.katjahahn.parser.sections.clr.{MetadataRoot, MetadataRootKey, StreamHeader}
-import com.github.katjahahn.parser.sections.rsrc.Level
 import com.github.katjahahn.parser.sections.rsrc.Resource
+import com.github.katjahahn.parser.{PhysicalLocation, RichHeader, StandardField}
+
+import scala.collection.JavaConverters._
 
 /**
  * PE file anomaly or malformation.
@@ -102,7 +101,7 @@ case class DataDirAnomaly(
 
   override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(dataDirEntry.getTableEntryOffset,
     dataDirEntry.getTableEntrySize)).asJava
-  override val key = dataDirEntry.getKey
+    override val key = dataDirEntry.getKey
 }
 
 case class SectionAnomaly(val header: SectionHeader,

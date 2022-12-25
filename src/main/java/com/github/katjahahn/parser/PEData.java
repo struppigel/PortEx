@@ -29,8 +29,7 @@ import com.github.katjahahn.parser.sections.edata.ExportEntry;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportDLL;
 import com.github.katjahahn.parser.sections.idata.ImportSection;
-import com.github.katjahahn.parser.sections.rsrc.Resource;
-import com.github.katjahahn.parser.sections.rsrc.ResourceSection;
+import com.github.katjahahn.parser.sections.rsrc.*;
 import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
 import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo;
@@ -42,9 +41,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Container that collects and holds the main information of a PE file.
@@ -194,6 +192,8 @@ public class PEData {
     private CodeviewInfo codeviewInfo;
     private List<IcoFile> icons;
 
+    private HashMap<Long, String> stringTable;
+
     private static int MAX_MANIFEST_SIZE_DEFAULT = 0x5000;
     private int maxManifestSize = MAX_MANIFEST_SIZE_DEFAULT;
 
@@ -323,6 +323,49 @@ public class PEData {
         }
         this.icons = IconParser.extractIcons(loadResources(), this);
         return icons;
+    }
+
+    /**
+     * Loads the string table (RT_STRING resources) if not already loaded.
+     * @return map of string ID and the actual string
+     */
+    public Map<Long, String> loadStringTable() {
+        if(stringTable != null) {return stringTable;}
+        stringTable = new HashMap<>();
+        int SIZE_LEN = 2;
+        List<Resource> strTables = loadResources().stream().filter(res -> res.getType().equals("RT_STRING")).collect(Collectors.toList());
+        for (Resource res : strTables) {
+            long strId = 0;
+            try {
+                byte[] bytes = IOUtil.loadBytesOfResource(res, this);
+                int currOffset = 0;
+                do {
+                    long id = 0;
+                    if(res.getLevelIDs().get(Level.nameLevel()) instanceof ID) {
+                        long resId = ((ID) res.getLevelIDs().get(Level.nameLevel())).id();
+                        id = ((resId - 1) * 16) + strId;
+                    }
+                    int length = (int) ByteArrayUtil.getBytesLongValueSafely(bytes, currOffset, SIZE_LEN);
+                    currOffset += SIZE_LEN;
+                    strId++;
+                    if (length == 0) {
+                        continue;
+                    }
+                    int sizeInBytes = length * 2;
+                    if (currOffset + sizeInBytes >= bytes.length) {
+                        break;
+                    }
+                    byte[] stringBytes = Arrays.copyOfRange(bytes, currOffset, currOffset + sizeInBytes);
+                    currOffset += sizeInBytes;
+                    String str = new String(stringBytes, StandardCharsets.UTF_16LE);
+                    stringTable.put(id, str);
+                } while (currOffset < bytes.length - SIZE_LEN);
+
+            } catch (IOException e) {
+                logger.error("Problem while reading resource bytes: " + e);
+            }
+        }
+        return stringTable;
     }
 
     /**
