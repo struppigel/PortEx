@@ -53,6 +53,7 @@ object ExportNamePointerTable {
   type Address = Long
   val entryLength = 4
   val maxNameEntries = 10000 //add max val TODO anomaly
+  val maxNameLength = 0x200 // TODO anomaly
 
   def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int,
     virtualAddress: Long, fileOffset: Long): ExportNamePointerTable = {
@@ -71,16 +72,18 @@ object ExportNamePointerTable {
 
   private def getName(mmBytes: MemoryMappedPE, address: Long): String = {
     val end = mmBytes.indexOf('\0'.toByte, address)
+    val size = end - address
     // check size
-    val nameBytes = if ((end - address) != (end - address).toInt) {
+    if (size > maxNameLength) {
       // TODO this is a full fledged anomaly! add detection for it.
       // example file: VirusShare_a90da79e98213703fc3342b281a95094
-      logger.warn("No end of export name found, reading 10 chars instead")
-      mmBytes.slice(address, address + 10)
+      logger.warn("No end of export name found or export name too big")
+      ""
     } else {
-      mmBytes.slice(address, end)
+      val nameBytes = mmBytes.slice(address, end)
+      new String(nameBytes)
     }
-    new String(nameBytes)
+
   }
 
 }
