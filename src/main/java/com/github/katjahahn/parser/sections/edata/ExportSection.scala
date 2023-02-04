@@ -119,7 +119,7 @@ class ExportSection private (
   def getOrdinals(): java.util.List[Int] = ordinalTable.ordinals.asJava
 
   /**
-   * Returns the name for a given ordinal.
+   * Returns the ordinal for a given name.
    *
    * This maps a given name of the name pointer table to the ordinal in the
    * ordinal table.
@@ -314,13 +314,9 @@ object ExportSection {
     // create name entries
     val nameEntries: List[ExportEntry] = (namesLimited map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
-      if (isValidRVAAndCountInvalid(rva, sectionLoader, file, rvas)) {
-        val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
-        Some(new ExportNameEntry(rva, name, ordinal, getForwarder(rva)))
-      } else {
-        None
-      }
-        
+      isValidRVAAndCountInvalid(rva, sectionLoader, file, rvas) // only for count
+      val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)
+      Some(new ExportNameEntry(rva, name, ordinal, getForwarder(rva)))
     }).flatten
     
     val addresses = exportAddressTable.addresses

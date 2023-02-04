@@ -105,6 +105,8 @@ object DebugSection {
     new SectionLoader(data).loadDebugSection()
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData, size: Long): DebugSection = {
+    val maybeOffset = (new SectionLoader(data)).maybeGetFileOffset(virtualAddress)
+    if(!maybeOffset.isPresent()) throw new FileFormatException("Debug Directory not in section") //TODO anomaly?
     val endOfDebug = virtualAddress + size
     val entries = (for(dirVA <- virtualAddress until endOfDebug by debugDirEntrySize) yield
       DebugDirectoryEntry(mmbytes, offset + (dirVA - virtualAddress), dirVA, data)

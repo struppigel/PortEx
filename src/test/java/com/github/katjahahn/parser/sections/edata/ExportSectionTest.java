@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import static org.testng.Assert.*;
 
@@ -45,6 +46,7 @@ public class ExportSectionTest {
         List<ExportEntry> exportEntries = edata.getExportEntries();
         for (ExportEntry export : exportEntries) {
             assertTrue(export.forwarded());
+            assertEquals(export.maybeGetForwarder().get(), "msvcrt.printf");
         }
 
         File nonforwarder = new File(TestreportsReader.RESOURCE_DIR
@@ -56,6 +58,72 @@ public class ExportSectionTest {
             assertFalse(export.forwarded());
         }
 
+    }
+
+    @Test
+    public void virtualAndNegativeExportTest() throws IOException {
+        File forwarder = new File(TestreportsReader.RESOURCE_DIR
+                + "/corkami/ownexports2.exe");
+        PEData data = PELoader.loadPE(forwarder);
+        ExportSection edata = new SectionLoader(data).loadExportSection();
+        List<ExportEntry> exportEntries = edata.getExportEntries();
+        assertEquals(exportEntries.size(), 2);
+        assertHasExportByName(exportEntries, "offset -1");
+        assertHasExportByName(exportEntries, "virtual");
+        assertEquals(edata.getSymbolRVAForName("offset -1"), 0xFFFFFFFFL);
+        assertEquals(edata.getSymbolRVAForName("virtual"), 0xFF8L);
+    }
+
+    private void assertHasExportByName(List<ExportEntry> exportEntries, String exportName) {
+        Stream<ExportEntry> result = exportEntries.stream().filter(e -> e instanceof ExportNameEntry && ((ExportNameEntry) e).name().equals(exportName));
+        assertTrue(result.count() > 0);
+    }
+
+    @Test
+    public void forwarderLoopTest() throws IOException {
+        File file = new File(TestreportsReader.RESOURCE_DIR
+                + "/corkami/dllfwloop.dll");
+        PEData data = PELoader.loadPE(file);
+        ExportSection edata = new SectionLoader(data).loadExportSection();
+        List<ExportEntry> exportEntries = edata.getExportEntries();
+        assertEquals(exportEntries.size(), 6);
+        assertEquals(edata.getOrdinalForName("ExitProcess"),0);
+        assertEquals(edata.getOrdinalForName("LoopHere"),1);
+        assertEquals(edata.getOrdinalForName("LoopOnceAgain"),2);
+        assertEquals(edata.getOrdinalForName("GroundHogDay"),3);
+        assertEquals(edata.getOrdinalForName("Ying"),4);
+        assertEquals(edata.getOrdinalForName("Yang"),5);
+        assertOrdinalHasForwarder(exportEntries, 0, "dllfwloop.LoopHere");
+        assertOrdinalHasForwarder(exportEntries, 1, "dllfwloop.LoopOnceAgain");
+        assertOrdinalHasForwarder(exportEntries, 2, "msvcrt.printf");
+        assertOrdinalHasForwarder(exportEntries, 3, "dllfwloop.GroundHogDay");
+        assertOrdinalHasForwarder(exportEntries, 4, "dllfwloop.Yang");
+        assertOrdinalHasForwarder(exportEntries, 5, "dllfwloop.Ying");
+    }
+    private void assertOrdinalHasForwarder(List<ExportEntry> exportEntries, int ordinal, String forwarder) {
+        for(ExportEntry e : exportEntries) {
+            if(e.ordinal() == ordinal) {
+                assertHasForwarder(e, forwarder);
+                break;
+            }
+        }
+    }
+
+    private void assertHasForwarder(ExportEntry entry, String forwarder) {
+        if(entry.maybeGetForwarder().isPresent()){
+            assertEquals(entry.maybeGetForwarder().get(), forwarder);
+        }
+    }
+
+    @Test
+    public void emptyExportName() throws IOException {
+        File file = new File(TestreportsReader.RESOURCE_DIR
+                + "/corkami/dllemptyexp.dll");
+        PEData data = PELoader.loadPE(file);
+        List<ExportEntry> list = data.loadExports();
+        assertEquals(list.size(), 1);
+        ExportNameEntry entry = (ExportNameEntry) list.get(0);
+        assertEquals(entry.name(), "");
     }
 
     @Test
