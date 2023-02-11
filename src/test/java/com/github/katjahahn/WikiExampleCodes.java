@@ -20,19 +20,17 @@ import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.coffheader.FileCharacteristic;
 import com.github.katjahahn.parser.coffheader.MachineType;
 import com.github.katjahahn.parser.sections.SectionLoader;
-import com.github.katjahahn.parser.sections.debug.DebugDirectoryEntry;
-import com.github.katjahahn.parser.sections.debug.DebugDirectoryKey;
-import com.github.katjahahn.parser.sections.debug.DebugSection;
-import com.github.katjahahn.parser.sections.debug.DebugType;
+import com.github.katjahahn.parser.sections.debug.*;
+import com.github.katjahahn.parser.sections.edata.ExportEntry;
+import com.github.katjahahn.parser.sections.edata.ExportNameEntry;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.*;
 import com.github.katjahahn.parser.sections.rsrc.*;
 import com.github.katjahahn.parser.sections.rsrc.icon.GroupIconResource;
 import com.github.katjahahn.parser.sections.rsrc.icon.IcoFile;
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser;
-import com.github.katjahahn.tools.ImpHash;
-import com.github.katjahahn.tools.Overlay;
-import com.github.katjahahn.tools.ReportCreator;
+import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo;
+import com.github.katjahahn.tools.*;
 import com.github.katjahahn.tools.anomalies.Anomaly;
 import com.github.katjahahn.tools.anomalies.PEAnomalyScanner;
 import com.github.katjahahn.tools.sigscanner.Jar2ExeScanner;
@@ -44,14 +42,18 @@ import com.github.katjahahn.tools.visualizer.ImageUtil;
 import com.github.katjahahn.tools.visualizer.Visualizer;
 import com.github.katjahahn.tools.visualizer.VisualizerBuilder;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -69,6 +71,52 @@ public class WikiExampleCodes {
         resourceSection();
     }
 
+    public static void versionInfo() throws IOException {
+        File file = new File("WinRar.exe");
+        List<VersionInfo> info = VersionInfo.parseFromResources(file);
+        for(VersionInfo i : info) {
+            Map<String, String> strings = i.getVersionStrings();
+            for (Map.Entry<String,String> entry : strings.entrySet()) {
+                System.out.print(entry.getKey() + ": ");
+                System.out.println(entry.getValue());
+            }
+        }
+
+        // Alternative way
+        PEData data = PELoader.loadPE(file);
+        Optional<VersionInfo> versionInfoOpt = data.loadVersionInfo();
+        if(versionInfoOpt.isPresent()) {
+            Map<String, String> strings = versionInfoOpt.get().getVersionStrings();
+        }
+    }
+
+    public static void entropy() throws IOException {
+        PEData data = PELoader.loadPE(new File("myfile.exe"));
+        int nrOfSections = data.getCOFFFileHeader().getNumberOfSections();
+        ShannonEntropy entropy = new ShannonEntropy(data);
+        for(int i = 1; i < nrOfSections; i++) {
+            double sectionEntropy = entropy.forSection(i);
+            System.out.println("Entropy for Section " + i + ": " + sectionEntropy);
+        }
+    }
+
+    public static void entropy2(){
+        ShannonEntropy entropy = ShannonEntropy.newInstance(new File("myfile.exe"));
+        System.out.println(entropy.forFile());
+    }
+
+    public static void chiSquared() throws IOException {
+        PEData data = PELoader.loadPE(new File("myfile.exe"));
+        ChiSquared chi2 = new ChiSquared(data);
+        double fileChi = chi2.forFile();
+        System.out.println("Chi2 for file " + fileChi);
+        int nrOfSections = data.getCOFFFileHeader().getNumberOfSections();
+        for(int i = 1; i < nrOfSections; i++) {
+            double sectionChi2 = chi2.forSection(i);
+            System.out.println("Section " + i + " has chi2: " + sectionChi2);
+        }
+    }
+
     public static void imphash() {
         File file = new File("WinRar.exe");
         // Get hash as byte array
@@ -84,10 +132,19 @@ public class WikiExampleCodes {
         Visualizer visualizer = new VisualizerBuilder().build();
         visualizer.writeImage(peFile, new File("image.png"));
         // use parameters
-        visualizer = new VisualizerBuilder().setPixelated(true).setHeight(800)
-                .setFileWidth(600).setLegendWidth(300).setPixelSize(10)
-                .setAdditionalGap(3).setBytesPerPixel(10, peFile.length())
-                .setColor(ColorableItem.SECTION_TABLE, Color.BLUE).build();
+        visualizer = new VisualizerBuilder()
+                .setPixelated(true)
+                .setHeight(800)
+                .setFileWidth(600)
+                .setLegendWidth(300)
+                .setPixelSize(10)
+                .setAdditionalGap(3)
+                .setBytesPerPixel(10, peFile.length())
+                .setColor(ColorableItem.SECTION_TABLE, Color.BLUE)
+                .build();
+
+        // change bytes per square pixel
+        new VisualizerBuilder().setBytesPerPixel(10, peFile.length()).build();
         // create an entropy image
         BufferedImage entropyImage = visualizer.createEntropyImage(peFile);
         // create appended entropy & structure image
@@ -95,6 +152,11 @@ public class WikiExampleCodes {
         BufferedImage rightImage = visualizer.createImage(peFile);
         BufferedImage appendedImage = ImageUtil.appendImages(leftImage,
                 rightImage);
+        // create byteplot
+        BufferedImage bytePlot = visualizer.createBytePlot(peFile);
+        BufferedImage legendImage = visualizer.createLegendImage(true, false, false);
+        BufferedImage appendedImage2 = ImageUtil.appendImages(bytePlot, legendImage);
+        ImageIO.write(appendedImage2, "png", new File("outfile.png"));
     }
 
     public static void fileAnomalies() {
@@ -153,8 +215,10 @@ public class WikiExampleCodes {
         File file = new File("/home/katja/samples/VirMC.exe");
         PEData data = PELoader.loadPE(file);
         ResourceSection rsrc = new SectionLoader(data).loadResourceSection();
+        // Alternative loading
+        List<Resource> resources = data.loadResources();
         // Fetching resources
-        List<Resource> resources = rsrc.getResources();
+        List<Resource> resources2 = rsrc.getResources();
         for (Resource r : resources) {
             System.out.println(r);
         }
@@ -182,6 +246,13 @@ public class WikiExampleCodes {
         	System.out.println("ico file " + dest.getName() + " written");
         }
         
+        // Alternative extraction of icons and obtaining them as byte array or stream
+        List<IcoFile> icons = data.loadIcons();
+        for(IcoFile i : icons) {
+            byte[] iconBytes = i.getBytes();
+            InputStream iconStream = i.getInputStream();
+        }
+        
         // Access to structures of the resource tree
         ResourceDirectory tree = rsrc.getResourceTree();
         // Resource directory table header
@@ -206,11 +277,16 @@ public class WikiExampleCodes {
         PEData data = PELoader.loadPE(file);
         ReportCreator reporter = new ReportCreator(data);
         System.out.println(reporter.importsReport());
-        // Loading the import section
+
+        // Loading imports since 4.0.0
+        List<ImportDLL> importList = data.loadImports();
+
+        // Loading the imports before 4.0.0
         SectionLoader loader = new SectionLoader(data);
         ImportSection idata = loader.loadImportSection();
-        // List of imports
         List<ImportDLL> imports = idata.getImports();
+
+        // printing import information
         for (ImportDLL dll : imports) {
             System.out.println("Imports from " + dll.getName());
             for (NameImport nameImport : dll.getNameImports()) {
@@ -224,6 +300,7 @@ public class WikiExampleCodes {
             }
             System.out.println();
         }
+
         // Access to ImportSection structures
         List<DirectoryEntry> dirTable = idata.getDirectory();
         for (DirectoryEntry tableEntry : dirTable) {
@@ -245,6 +322,14 @@ public class WikiExampleCodes {
         // Loading the export section
         PEData data = PELoader.loadPE(file);
         ExportSection edata = new SectionLoader(data).loadExportSection();
+        // since 4.0.0 there is a convenience function to get a list of all exports:
+        PEData pedata = PELoader.loadPE(file);
+        List<ExportEntry> exports = pedata.loadExports();
+        for(ExportEntry export : exports) {
+            int ordinal = export.ordinal();
+            long rva = export.symbolRVA();
+            String name = ((ExportNameEntry) export).name();
+        }
     }
 
     @SuppressWarnings("unused")
@@ -253,7 +338,8 @@ public class WikiExampleCodes {
         // Print Information
         String report = ReportCreator.newInstance(file).debugReport();
         System.out.println(report);
-        // Get specific values
+
+        // Get specific debug directory values of a specific type (here Codeview)
         PEData data = PELoader.loadPE(file);
         SectionLoader loader = new SectionLoader(data);
         DebugSection debugSection = loader.loadDebugSection();
@@ -263,6 +349,15 @@ public class WikiExampleCodes {
         Long size = codeViewEntry.get(DebugDirectoryKey.SIZE_OF_DATA);
         String type = codeViewEntry.getTypeDescription();
         Date stamp = codeViewEntry.getTimeDateStamp();
+
+        // Read Codeview info
+        CodeviewInfo codeView = data.loadCodeViewInfo().get();
+        byte[] guid = codeView.guid();
+        String path = codeView.filePath();
+        long age = codeView.age();
+
+        // Load PDB path
+        String debugPath = data.loadPDBPath();
     }
 
     @SuppressWarnings("unused")
@@ -281,6 +376,12 @@ public class WikiExampleCodes {
         // Overlay dumping 2
         File outFile = new File("dump.out");
         overlay.dumpTo(outFile);
+
+        // scan overlay signatures
+        long overlayOffset = offset;
+        List<Signature> overlaySigs = SignatureScanner.loadOverlaySigs();
+        List<String> sigresults = new SignatureScanner(overlaySigs).scanAtToString(file, overlayOffset);
+        sigresults.forEach(System.out::println);
     }
 
     public static void signatureScanning() {

@@ -388,6 +388,7 @@ public class PEData {
 
     /**
      * Loads the VersionInfo resource. Reads the PE file to do so unless already loaded.
+     * If several VersionInfo resources are present, only the first one is used.
      *
      * @return version info
      */

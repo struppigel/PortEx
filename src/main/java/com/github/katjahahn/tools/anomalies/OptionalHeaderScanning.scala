@@ -367,13 +367,17 @@ trait OptionalHeaderScanning extends AnomalyScanner {
       val description = "Optional Header: The image base is 0, thus relocated to 0x10000"
       anomalyList += FieldAnomaly(entry, description, ZERO_IMAGE_BASE)
     }
-    if (isDLL() && imageBase != 0x10000000L) {
-      val description = "Optional Header: The default image base for a DLL is 0x10000000, but actual value is " + hexString(imageBase)
-      anomalyList += FieldAnomaly(entry, description, NON_DEFAULT_IMAGE_BASE)
-    } else if (isWinCE() && imageBase != 0x00010000L) {
-      val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is " + hexString(imageBase)
-      anomalyList += FieldAnomaly(entry, description, NON_DEFAULT_IMAGE_BASE)
-    } else if (imageBase != 0x00400000L) { //TODO
+    if (isDLL()) {
+      if(imageBase != 0x10000000L){
+        val description = "Optional Header: The default image base for a DLL is 0x10000000, but actual value is " + hexString(imageBase)
+        anomalyList += FieldAnomaly(entry, description, NON_DEFAULT_IMAGE_BASE)
+      }
+    } else if (isWinCE()) {
+      if( imageBase != 0x00010000L) {
+        val description = "Optional Header: The default image base for Win CE EXE is 0x00010000, but actual value is " + hexString(imageBase)
+        anomalyList += FieldAnomaly(entry, description, NON_DEFAULT_IMAGE_BASE)
+      }
+    } else if (imageBase != 0x00400000L) {
       val description = "Optional Header: The default image base is 0x00400000, but actual value is " + hexString(imageBase)
       anomalyList += FieldAnomaly(entry, description, NON_DEFAULT_IMAGE_BASE)
     }
