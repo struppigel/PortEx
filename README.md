@@ -15,17 +15,18 @@ PortEx is written in Java and Scala, and targeted at Java applications.
 * Dumping of sections, resources, overlay, embedded ZIP, JAR or .class files
 * Scanning for file format anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values.
 * Visualize PE file structure, local entropies and byteplot of the file with variable colors and sizes
-* Calculate Shannon Entropy for files and sections
+* Calculate Shannon Entropy and Chi Squared for files and sections
 * Calculate ImpHash and Rich and RichPV hash values for files and sections
-* Scan for PEiD signatures or your own signature database
+* Parse RichHeader and verify checksum
+* Calculate and verify Optional Header checksum
+* Scan for PEiD signatures, internal file type signatures or your own signature database
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Extract Unicode and ASCII strings contained in the file
-* Overlay detection and dumping
 * Extraction and conversion of .ICO files from icons in the resource section
 * Extraction of version information and manifest from the file
 * Reading .NET metadata and streams (Alpha)
 
-For more information have a look at [PortEx Wiki](https://github.com/katjahahn/PortEx/wiki) and the [Documentation](http://katjahahn.github.io/PortEx/javadocs/)
+For more information have a look at [PortEx Wiki](https://github.com/struppigel/PortEx/wiki) and the [Documentation](http://struppigel.github.io/PortEx/javadocs/)
 
 ## PortexAnalyzer CLI and GUI
 
@@ -43,7 +44,7 @@ You can include PortEx to your project by adding the following Maven dependency:
 <dependency>
    <groupId>com.github.katjahahn</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>3.0.3</version>
+   <version>4.0.0</version>
 </dependency> 
 ```
 
@@ -53,9 +54,9 @@ To use a local build, add the library as follows:
 <dependency>
    <groupId>com.github.katjahahn</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>3.0.3</version>
+   <version>4.0.0</version>
    <scope>system</scope>
-   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-3.0.3.jar</systemPath>
+   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-4.0.0.jar</systemPath>
 </dependency> 
 ```
 
@@ -64,7 +65,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "3.0.3"
+libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "4.0.1"
 ```
 
 ## Building PortEx
