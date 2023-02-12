@@ -2,8 +2,13 @@ arbeit
 /peimages
 /ignore
 /portexstats
+/portextestfiles
+/.idea
+portextestfiles
+.idea
 *.sh
 *.py
+*.dll
 Virus.Tirtas
 codecover
 fileanomalies
@@ -26,3 +31,10 @@ project
 *~
 .settings
 .project
+/.idea/.gitignore
+/portextestfiles/testfiles/6fdfdffeb4b1be2d0036bac49cb0d590
+/portextestfiles/testfiles/adodb.dll
+/portextestfiles/corkami/aslr.dll
+/portextestfiles/testfiles/baed21297974b6adf3298585baa78691
+/portextestfiles/BinaryCorpus_v2_oldCorkami/corkami/ca.crt
+/portextestfiles/BinaryCorpus_v2_oldCorkami/helloworld/non-PE/com-openwatcom.com
