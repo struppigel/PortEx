@@ -1,5 +1,9 @@
 com.github.katjahahn
 com.github.katjahahn.parser
+com.github.katjahahn.parser.coffheader
+com.github.katjahahn.parser.msdos
+com.github.katjahahn.parser.optheader
+com.github.katjahahn.parser.sections
 com.github.katjahahn.parser.sections.clr
 com.github.katjahahn.parser.sections.debug
 com.github.katjahahn.parser.sections.edata
@@ -12,3 +16,4 @@ com.github.katjahahn.parser.sections.rsrc.version
 com.github.katjahahn.tools
 com.github.katjahahn.tools.anomalies
 com.github.katjahahn.tools.sigscanner
+com.github.katjahahn.tools.visualizer
