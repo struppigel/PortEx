@@ -145,6 +145,7 @@ trait SectionTableScanning extends AnomalyScanner {
       //Other
       "VProtect" -> "Vprotect Packer",
       ".winapi" -> "API Override tool",
+      "__wibu00" -> "Wibu CodeMeter", "__wibu01" -> "Wibu CodeMeter",
       "WinLicen" -> "WinLicense (Themida) Protector",
       "_winzip_" -> "WinZip Self-Extractor",
       //WWPACK
