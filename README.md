@@ -1,4 +1,4 @@
-PortEx ![build status](https://travis-ci.org/katjahahn/PortEx.svg?branch=master)
+PortEx 
 ======
 
 ## Welcome to PortEx
