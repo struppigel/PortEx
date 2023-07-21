@@ -29,6 +29,6 @@ public class DllCharacteristicTest {
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).getDescription(),
                 "Image is NX compatible.");
-        assertEquals(list.get(0), DllCharacteristic.IMAGE_DLL_CHARACTERISTICS_NX_COMPAT);
+        assertEquals(list.get(0), DllCharacteristic.IMAGE_DLLCHARACTERISTICS_NX_COMPAT);
     }
 }

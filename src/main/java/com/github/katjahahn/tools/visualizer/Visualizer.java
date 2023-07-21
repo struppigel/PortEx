@@ -745,8 +745,13 @@ public class Visualizer {
 				drawLegendEntry(number++, header.getName(), sectionColor);
 				sectionColor = variate(sectionColor);
 			}
+
 			for (DataDirectoryKey special : specials) {
-				if (specialsAvailability.get(special)) {
+				SectionLoader loader = new SectionLoader(data);
+				Optional<? extends SpecialSection> section = loader
+						.maybeLoadSpecialSection(special);
+				if (section.isPresent()) {
+					specialsAvailability.put(special, true);
 					drawLegendEntry(number++, getSpecialsDescription(special),
 							getSpecialsColor(special), true);
 				}

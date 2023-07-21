@@ -255,7 +255,8 @@ public final class PELoader {
 
         File file = new File("C:\\Windows\\Microsoft.NET\\Framework64\\sbscmp10.dll");
         PEData data = PELoader.loadPE(file);
-        System.out.println(new ReportCreator(data).debugReport());
+        new ReportCreator(data).printReport();
+        show(createImage(data));
     }
 
     private static BufferedImage createImage(PEData peData) {

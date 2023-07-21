@@ -44,19 +44,27 @@ public enum DllCharacteristic implements Characteristic {
      */
     RESERVED_8("Reserved, must be zero.", 0x8, true, false),
     /**
+     * Reserved, must be zero. Value 0x8
+     */
+    UNDOCUMENTED_10("Undocumented - 0x10", 0x10, true, false),
+    /**
+     * Image can handle a high entropy 64- bit virtual address space
+     */
+    IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA("Image can handle a high entropy 64- bit virtual address space", 0x20),
+    /**
      * DLL can be relocated at load time.
      */
-    IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE(
+    IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE(
             "DLL can be relocated at load time.", 0x40),
     /**
      * Code Integrity checks are enforced.
      */
-    IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY(
+    IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY(
             "Code Integrity checks are enforced.", 0x80),
     /**
      * Image is NX compatible.
      */
-    IMAGE_DLL_CHARACTERISTICS_NX_COMPAT("Image is NX compatible.", 0x100),
+    IMAGE_DLLCHARACTERISTICS_NX_COMPAT("Image is NX compatible.", 0x100),
     /**
      * Isolation aware, but do not isolate the image.
      */
@@ -81,6 +89,10 @@ public enum DllCharacteristic implements Characteristic {
      * A WDM driver.
      */
     IMAGE_DLLCHARACTERISTICS_WDM_DRIVER("A WDM driver.", 0x2000),
+    /**
+     * Image supports control flow guard
+     */
+    IMAGE_DLLCHARACTERISTICS_GUARD_CF("Image supports Control Flow Guard", 0x4000),
     /**
      * Terminal Server aware.
      */

@@ -388,6 +388,9 @@ class ReportCreator(private val data: PEData) {
               buf.append("-invalid codeview structure-")
           }
         }
+        if (debug.getDebugType() == DebugType.REPRO) {
+          buf.append(debug.getRepro().getInfo())
+        }
         buf.append(NL)
       }
       buf.toString
