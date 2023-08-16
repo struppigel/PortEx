@@ -5,7 +5,7 @@ import com.github.katjahahn.parser.ScalaIOUtil.nonExistingFileFor
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.rsrc.icon.IconParser
 
-import java.io.File
+import java.io.{File, IOException}
 import java.nio.file.Paths
 import scala.collection.JavaConverters._
 
@@ -14,14 +14,19 @@ import scala.collection.JavaConverters._
  */
 class PEFileDumper(val pedata: PEData, val outFolder: File) {
 
-  def dumpOverlay(): Unit = {
+  def dumpOverlay(): Boolean = {
+    var success = false
     println("Dumping overlay ...")
     val overlay = new Overlay(pedata)
     if (overlay.exists()) {
       val outFile = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, "overlay").toFile)
       overlay.dumpTo(outFile)
+      success = true
       println("Overlay successfully dumped to " + outFile.getAbsolutePath)
-    } else println("No overlay found")
+    } else {
+      println("No overlay found")
+    }
+    success
   }
 
   def dumpResources(): Unit = {

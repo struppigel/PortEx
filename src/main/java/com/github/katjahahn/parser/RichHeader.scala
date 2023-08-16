@@ -105,16 +105,17 @@ class RichHeader( private val decodedRich : Array[Byte],
     val wordLen = 4
     // skip DanS and padding bytes, we start by slicing into blocks of 4 bytes already removing DanS as first block
     val dataBlocks = for(i <- wordLen until decodedRich.length by wordLen) yield decodedRich.slice(i, i + wordLen)
-    // remove padding of 0 byte words TODO adjust to 16 byte alignment
+    // remove padding of 0 byte words
     val paddingRemoved = dataBlocks.dropWhile(_.sameElements(Array[Byte](0,0,0,0)))
+    val finalBlocks = if (paddingRemoved.length % 2 != 0) paddingRemoved :+ Array[Byte](0,0,0,0) else paddingRemoved
     logger.debug("Removed padding and DanS size " + (decodedRich.length - (paddingRemoved.length * 4)))
     // each entry is 8 bytes, where the first 2 bytes are the pid, the next 2 bytes the pv and the last 4 bytes the pc
     // note that paddingRemoved consists of blocks with 4 bytes, whereas one entry is 8 bytes
-    val result = for(i <- paddingRemoved.indices by 2) yield
+    val result = for(i <- finalBlocks.indices by 2) yield
       RichEntry(
-        build = ByteArrayUtil.bytesToInt(paddingRemoved(i).slice(0, 2)), // bytes 0-1 == Pid
-        prodId = ByteArrayUtil.bytesToInt(paddingRemoved(i).slice(2, 4)),  // bytes 2-3 == Pv
-        count = ByteArrayUtil.bytesToInt(paddingRemoved(i + 1))           // bytes 4-7 == Pc
+        build = ByteArrayUtil.bytesToInt(finalBlocks(i).slice(0, 2)), // bytes 0-1 == Pid
+        prodId = ByteArrayUtil.bytesToInt(finalBlocks(i).slice(2, 4)),  // bytes 2-3 == Pv
+        count = ByteArrayUtil.bytesToInt(finalBlocks(i + 1))           // bytes 4-7 == Pc
       )
     result.toList
   }
