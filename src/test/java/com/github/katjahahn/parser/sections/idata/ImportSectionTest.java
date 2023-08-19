@@ -84,7 +84,7 @@ public class ImportSectionTest {
         long imageBase = datum.getOptionalHeader().get(
                 WindowsEntryKey.IMAGE_BASE);
         for (ImportDLL dll : expected) {
-            ImportDLL newDLL = new ImportDLL(dll.getName());
+            ImportDLL newDLL = new ImportDLL(dll.getName(), dll.getTimeDateStamp());
             for (NameImport nameImport : dll.getNameImports()) {
                 long rva = nameImport.getRVA() - imageBase;
                 NameImport newImport = new NameImport(rva, 0L, nameImport.getName(),

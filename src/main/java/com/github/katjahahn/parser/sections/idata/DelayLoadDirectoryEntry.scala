@@ -67,7 +67,8 @@ class DelayLoadDirectoryEntry private (
   def toImportDLL(): ImportDLL = {
     val nameImports = lookupTableEntries collect { case i: NameEntry => i.toImport.asInstanceOf[NameImport] }
     val ordImports = lookupTableEntries collect { case i: OrdinalEntry => i.toImport.asInstanceOf[OrdinalImport] }
-    new ImportDLL(name, nameImports.asJava, ordImports.asJava)
+    val timedateStamp = entries.get(DelayLoadDirectoryKey.TIME_STAMP).get.getValue
+    new ImportDLL(name, nameImports.asJava, ordImports.asJava, timedateStamp)
   }
 
 }

@@ -368,7 +368,22 @@ public class PEData {
         return stringTable;
     }
 
-    /**
+    public boolean isReproBuild() {
+        SectionLoader loader = new SectionLoader(this);
+        try {
+            com.google.common.base.Optional<DebugSection> maybeDebug = null;
+            maybeDebug = loader.maybeLoadDebugSection();
+
+            if (maybeDebug.isPresent() && !maybeDebug.get().isEmpty()) {
+                return maybeDebug.get().isReproBuild();
+            }
+        } catch (IOException e) {
+            logger.error(e);
+        }
+        return false;
+    }
+
+        /**
      * Check if PE file has any imports. Will load imports if not done already.
      *
      * @return true iff at least one import is there.

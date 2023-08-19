@@ -370,7 +370,8 @@ class ReportCreator(private val data: PEData) {
         val colWidth = 17
         val padLength = "Address of Raw Data ".length
         buf.append(title("Debug Directory Entry " + entryNum)  + NL)
-        buf.append("Time Date Stamp: " + debug.getTimeDateStamp + NL)
+        val timestampString = if(debugSec.isReproBuild()) "invalid - reproducibility build" else debug.getTimeDateStamp
+        buf.append("Time Date Stamp: " + timestampString + NL)
         buf.append("Type: " + debug.getTypeDescription + NL + NL)
         val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
         buf.append(tableHeader + NL)
@@ -702,8 +703,9 @@ class ReportCreator(private val data: PEData) {
     val padLength = "pointer to symbol table (deprecated) ".length
     buf.append(title("COFF File Header") + NL)
     val padLength1 = "time date stamp  ".length
+    val timestampString = if(data.isReproBuild()) "invalid - reproducibility build" else coff.getTimeDate.toLocaleString
     buf.append(pad("time date stamp", padLength1, " ") +
-      pad(coff.getTimeDate.toLocaleString, colWidth, " ") + NL)
+      pad(timestampString, colWidth, " ") + NL)
     buf.append(pad("machine type", padLength1, " ") +
       pad(coff.getMachineType.getDescription, colWidth, " ") + NL)
     buf.append(pad("characteristics", padLength1, " ") + "* " +
@@ -728,7 +730,7 @@ class ReportCreator(private val data: PEData) {
     val buf = new StringBuffer()
     val colWidth = 17
     val padLength = "pointer to symbol table (deprecated) ".length
-    val subsystem = "Subsystem:           " + opt.getSubsystem.getDescription
+    val subsystem = "subsystem:           " + opt.getSubsystem.getDescription
     val dllCharacteristics = {
       if (opt.getDllCharacteristics.isEmpty) "No DLL Characteristics"
       else "DLL Characteristics  * " +
@@ -738,7 +740,7 @@ class ReportCreator(private val data: PEData) {
       val entryPoint = opt.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
       val maybeHeader = secLoader.maybeGetSectionHeaderByRVA(entryPoint)
       if (maybeHeader.isPresent)
-        "Entry Point is in section " + maybeHeader.get.getNumber + " with name " + maybeHeader.get.getName
+        "entry point is in section " + maybeHeader.get.getNumber + " with name " + maybeHeader.get.getName
       else "entry point is not in a section"
     }
 

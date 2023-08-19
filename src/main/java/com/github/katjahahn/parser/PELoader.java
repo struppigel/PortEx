@@ -253,7 +253,7 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Windows\\Microsoft.NET\\Framework64\\sbscmp10.dll");
+        File file = new File("C:\\Users\\strup\\Downloads\\poco.dll");
         PEData data = PELoader.loadPE(file);
         new ReportCreator(data).printReport();
         show(createImage(data));

@@ -18,14 +18,12 @@ package com.github.katjahahn.parser.sections.idata;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.PhysicalLocation;
 import com.google.common.base.Optional;
+import com.sun.xml.internal.ws.resources.UtilMessages;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents all imports from a single DLL.
@@ -57,6 +55,8 @@ public class ImportDLL {
 	 */
 	private final List<Import> allImports;
 
+	private final long timedateStamp;
+
 	/**
 	 * Creates an ImportDLL instance
 	 * 
@@ -68,11 +68,12 @@ public class ImportDLL {
 	 *            the imports by ordinal
 	 */
 	public ImportDLL(String name, List<NameImport> nameImports,
-			List<OrdinalImport> ordinalImports, List<Import> allImports) {
+			List<OrdinalImport> ordinalImports, List<Import> allImports, long timedateStamp) {
 		this.name = name;
 		this.nameImports = new ArrayList<>(nameImports);
 		this.ordinalImports = new ArrayList<>(ordinalImports);
 		this.allImports = new ArrayList<>(allImports);
+		this.timedateStamp = timedateStamp;
 	}
 
 	/**
@@ -86,8 +87,8 @@ public class ImportDLL {
 	 *            the imports by ordinal
 	 */
 	public ImportDLL(String name, List<NameImport> nameImports,
-					 List<OrdinalImport> ordinalImports) {
-		this(name, nameImports, ordinalImports, new ArrayList<>());
+					 List<OrdinalImport> ordinalImports, long timedateStamp) {
+		this(name, nameImports, ordinalImports, new ArrayList<>(), timedateStamp);
 	}
 
 	public List<PhysicalLocation> getLocations() {
@@ -101,17 +102,22 @@ public class ImportDLL {
 		return locs;
 	}
 
+	public long getTimeDateStamp() {
+		return timedateStamp;
+	}
+
 	/**
 	 * Creates an empty ImportDLL instance (without symbol imports)
 	 * 
 	 * @param name
 	 *            the DLL's name
 	 */
-	public ImportDLL(String name) {
+	public ImportDLL(String name, long timedateStamp) {
 		this.name = name;
 		this.nameImports = new ArrayList<>();
 		this.ordinalImports = new ArrayList<>();
 		this.allImports = new ArrayList<>();
+		this.timedateStamp = timedateStamp;
 	}
 
 	/**
@@ -217,7 +223,12 @@ public class ImportDLL {
 		for(int i = 0; i < name.length(); i++){
 			buffer.append("-");
 		}
-		buffer.append(IOUtil.NL);
+		String timedateStampString = "0x" + Long.toHexString(timedateStamp);
+		if(timedateStamp != 0) {
+			timedateStampString += " " + (new Date(timedateStamp * 1000)).toLocaleString();
+		}
+		buffer.append(IOUtil.NL + "Time date stamp: " + timedateStampString + IOUtil.NL + IOUtil.NL);
+
 		for (NameImport nameImport : nameImports) {
 			if (symbolDescriptions != null) {
 				Optional<SymbolDescription> symbol = findSymbolByName(

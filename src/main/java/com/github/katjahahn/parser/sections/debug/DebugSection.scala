@@ -53,6 +53,8 @@ class DebugSection private (
     Optional.empty();
   }
 
+  def isReproBuild() : Boolean = !entries.filter(_.getDebugType() == DebugType.REPRO ).isEmpty
+
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
     if (!entries.isEmpty) {
       val preEntries = entries.map(_.getPhysicalLocations().asScala.toList).flatten

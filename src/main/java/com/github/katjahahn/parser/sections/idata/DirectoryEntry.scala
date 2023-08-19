@@ -91,7 +91,8 @@ class DirectoryEntry (
     val nameImports = lookupTableEntries collect { case i: NameEntry => i.toImport.asInstanceOf[NameImport] }
     val ordImports = lookupTableEntries collect { case i: OrdinalEntry => i.toImport.asInstanceOf[OrdinalImport] }
     val allImports = lookupTableEntries.map(_.toImport)
-    new ImportDLL(name, nameImports.asJava, ordImports.asJava, allImports.asJava)
+    val timedateStamp = entries.get(DirectoryEntryKey.TIME_DATE_STAMP).get.getValue
+    new ImportDLL(name, nameImports.asJava, ordImports.asJava, allImports.asJava, timedateStamp)
   }
 
   def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryEntryKey])

@@ -64,7 +64,7 @@ public class TestreportsReader {
                 if (dll != null) {
                     list.add(dll);
                 }
-                dll = new ImportDLL(entry[0]);
+                dll = new ImportDLL(entry[0], 0);
             } else if (entry.length == 4) { // ImportDLL entry
                 if (dll == null) {
                     logger.error("parsing error for line: " + entry[0] + ";"
