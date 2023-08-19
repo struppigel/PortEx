@@ -18,7 +18,6 @@ package com.github.katjahahn.parser.sections.idata;
 import com.github.katjahahn.parser.IOUtil;
 import com.github.katjahahn.parser.PhysicalLocation;
 import com.google.common.base.Optional;
-import com.sun.xml.internal.ws.resources.UtilMessages;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

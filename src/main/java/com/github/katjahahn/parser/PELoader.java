@@ -18,6 +18,7 @@ package com.github.katjahahn.parser;
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
 import com.github.katjahahn.parser.msdos.MSDOSHeader;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
+import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
 import com.github.katjahahn.tools.ReportCreator;
 import com.github.katjahahn.tools.visualizer.ImageUtil;
@@ -253,10 +254,11 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Users\\strup\\Downloads\\poco.dll");
+        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\pidgin.exe");
         PEData data = PELoader.loadPE(file);
+        //System.out.println((new SectionLoader(data)).loadImportSection().getInfo());
         new ReportCreator(data).printReport();
-        show(createImage(data));
+        //show(createImage(data));
     }
 
     private static BufferedImage createImage(PEData peData) {
