@@ -30,34 +30,76 @@ trait ImportSectionScanning extends AnomalyScanner {
   private def checkProcessInjectionImports(idata: ImportSection): List[Anomaly] = {
     val imports = idata.getImports.asScala
     val anomalyList = ListBuffer[Anomaly]()
-    val injectionMap = HashMap( //TODO complete this list, test this list!
-      "Process32First" -> "is used to obtain handle to victim process",
-      "Process32Next" -> "is used to obtain handle to victim process",
-      "CreateToolhelp32snapshot" -> "is used to obtain handle to victim process",
+    val injectionMap = HashMap(
+      // Misc
+      "RtlDecompressBuffer" -> "might decode data for injection",
+      "UnmapViewOfSection" -> "may be used to carve out a process for process hollowing",
+      "MapViewOfSection" -> "may add a section to put the unpacked data inside",
+      "LoadLibrary" -> "maps module into the address space of the calling process or dynamically resolves imports",
+      "GetProcAddress" -> "dynamically resolves imports",
+      "SetWindowsHook" -> "injects DLL into process by hooking a Windows message",
+      "WriteProcessMemory" -> "writes to memory",
+      "QueryInformationProcess" -> "may get image base offset address from PEB",
+
+      // Run or get victim process
+      "CreateProcess" -> "creates a process (check if SUSPENDED flag is used)",
+      "OpenProcess" -> "opens a process (check if PROCESS_ALL_ACCESS is set)",
+      "WinExec" -> "runs the specified application",
+      "Process32First" -> "used to iterate processes",
+      "Process32Next" -> "used to iterate processes",
+      "CreateToolhelp32Snapshot" -> "used to iterate processes",
+
+      // Thread hijacking, threads in general
+      "Thread32First" -> "thread hijacking, obtains thread ID of target process",
+      "Thread32Next" -> "thread hijacking, obtains thread ID of target process",
+      "SuspendThread" -> "may suspend a thread as preparation to write to memory",
+      "ResumeThread" -> "may resume thread after injection",
+      "GetThreadContext" -> "may be used to extract the EIP/RIP of the thread",
+      "SetThreadContext" -> "may be used to change EIP/RIP to continue execution in injected code",
       "CreateRemoteThread" -> "is used to open and execute a thread in the victim process",
       "CreateThread" -> "is used to open and execute a thread in the victim process",
       "RtlCreateUserThread" -> "is used to open and execute a thread in the victim process",
-      "UnmapViewOfSection" -> "may be used to carve out a process for process hollowing",
-      "LoadLibrary" -> "maps module into the address space of the calling process",
+
+      // Fibers
+      "ConvertThreadToFiber" -> "can be used to execute shellcode via fibers",
+      "CreateFiber" -> "can be used to execute shellcode via fibers",
+      "SwitchToFiber" -> "can be used to execute shellcode via fibers",
+
+      // Thread pool
+      "CreateThreadpoolWait" -> "can be used to execute shellcode",
+      "SetThreadpoolWait" -> "can be used to execute shellcode",
+
+      // Resources
+      "FindResource" -> "used to find and load data from resources",
+      "LoadResource" -> "used to find and load data from resources",
+      "SizeofResource" -> "used to find and load data from resources",
+
+      // Atom Bombing
       "GlobalAddAtom" -> "used for AtomBombing injection",
       "GlobalGetAtomName" -> "used for AtomBombing injection",
       "QueueUserApc" -> "adds APC object to queue",
       "QueueApcThread" -> "adds APC object to queue",
-      "CreateProcess" -> "creates a process (check if SUSPENDED flag is used)",
-      "OpenProcess" -> "opens a process (check if PROCESS_ALL_ACCESS is set)",
+
+      // Memory Allocations
       "VirtualAlloc" -> "allocates memory",
       "AllocateVirtualMemory" -> "allocates memory",
-      "MapViewOfSection" -> "allocates memory",
-      "ProtectVirtualMemory" -> "may set PAGE_EXECUTE flag for memory region",
-      "VirtualProtect" -> "may set PAGE_EXECUTE flag for memory region",
-      "WriteProcessMemory" -> "writes to memory",
-      "Thread32First" -> "obtains thread ID of target process",
-      "Thread32Next" -> "obtains thread ID of target process",
-      "SetWindowsHook" -> "injects DLL into process by hooking a Windows message",
-      "SuspendThread" -> "may suspend a thread as preparation to write to memory",
-      "ResumeThread" -> "may resume thread after injection",
-      "GetThreadContext" -> "may be used to extract the EIP of the thread",
-      "SetThreadContext" -> "may be used to change EIP to continue execution in injected code"
+      "ProtectVirtualMemory" -> "may set PAGE_EXECUTE for memory region",
+      "VirtualProtect" -> "may set PAGE_EXECUTE for memory region",
+
+      // Process Doppelgänging
+      "CreateTransaction" -> "might be used for Process Doppelgänging",
+      "CommitTransaction" -> "might be used for Process Doppelgänging",
+      "RollbackTransaction" -> "might be used for Process Doppelgänging",
+      "CreateFileTransacted" -> "might be used for Process Doppelgänging",
+      "MoveFileTransacted" -> "might be used for Process Doppelgänging",
+      "DeleteFileTransacted" -> "might be used for Process Doppelgänging",
+      "CreateDirectoryTransacted" -> "might be used for Process Doppelgänging",
+      "RemoveDirectoryTransacted" -> "might be used for Process Doppelgänging",
+
+      // .NET injection, https://blog.xpnsec.com/hiding-your-dotnet-etw/
+      "CLRCreateInstance" -> "might be used to unpack/inject managed code",
+      "ExecuteInDefaultAppDomain" -> "might be used to unpack/inject managed code",
+
     )
     for(imp <- imports) {
       val nameImps = imp.getNameImports().asScala
@@ -77,7 +119,7 @@ trait ImportSectionScanning extends AnomalyScanner {
           stripped
         }
         if(injectionMap.contains(strippedName)) {
-          val description = "Import function typical for code injection: " + name + " " + injectionMap(strippedName)
+          val description = "Import function typical for injection/unpacking: " + name + " " + injectionMap(strippedName)
           anomalyList += ImportAnomaly(List(imp), description, 
               AnomalySubType.PROCESS_INJECTION_IMPORT, PEStructureKey.IMPORT_SECTION)
         }
