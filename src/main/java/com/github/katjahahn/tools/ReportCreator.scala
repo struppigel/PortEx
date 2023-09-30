@@ -241,7 +241,9 @@ class ReportCreator(private val data: PEData) {
     val tbl = resolutionscope.getReferencedTable()
 
     def getDescriptionForType(t: CLRTableType, k : CLRTableKey, desc : String): String = {
-      val o = optStream.getCLRTable(t).get
+      val maybeTbl = optStream.getCLRTable(t)
+      if(!maybeTbl.isDefined) return "<no table for type: " + t.name + ", index: " + t.getIndex + ">" // TODO add Anomaly!
+      val o = maybeTbl.get
       val rowNr = resolutionscope.getReferencedRow()
       if(o.getEntries.size >= rowNr && rowNr > 0) {
         val clrTblRow = o.getEntries()(rowNr - 1)
@@ -319,7 +321,8 @@ class ReportCreator(private val data: PEData) {
                 CLRTableType.FILE,
                 CLRTableType.MANIFESTRESOURCE,
                 CLRTableType.MODULEREF,
-                //CLRTableType.TYPEREF,
+                CLRTableType.CUSTOMATTRIBUTE,
+                //CLRTableType.TYPEREF, --> is displayed differently
                 CLRTableType.EXPORTEDTYPE,
           )) + typeRefTableReport(optStream) + NL
 

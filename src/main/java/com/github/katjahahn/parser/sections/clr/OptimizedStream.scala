@@ -104,7 +104,7 @@ object OptimizedStream {
     if(bitvector == 0) 0
     else 1 + nrOfSetBits(bitvector & (bitvector - 1))
 
-  def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): OptimizedStream = {
+  def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap], blobHeap : Option[BlobHeap]): OptimizedStream = {
     val tempBytes = mmbytes.slice(offset, offset + size)
     val entries = readHeaderEntries(classOf[OptimizedStreamKey],
       format, spec, tempBytes, 0).asScala.toMap
@@ -117,7 +117,7 @@ object OptimizedStream {
     val tables : Map[Int, CLRTable] =
       if(!guidHeap.isDefined | !stringsHeap.isDefined) { Map() } //do not attempt to load tables for empty heaps
       else {
-        readTables(moduleTableOffset, mmbytes, stringsHeap, guidHeap, tableSizes, bitvector)
+        readTables(moduleTableOffset, mmbytes, stringsHeap, guidHeap, blobHeap, tableSizes, bitvector)
       }
     new OptimizedStream(entries, tableSizes, tables)
   }
@@ -148,7 +148,7 @@ object OptimizedStream {
    * @param specification
    * @return converted specification
    */
-  private def convertSpecification(specification: util.List[Array[String]], guidSize : Int, stringSize : Int, tableSizes: Map[Int, Int]) : java.util.List[Array[String]] = {
+  private def convertSpecification(specification: util.List[Array[String]], guidSize : Int, stringSize : Int, blobSize : Int, tableSizes: Map[Int, Int]) : java.util.List[Array[String]] = {
 
     def maxRowsInCodedTables(keyStr : String) : Long = {
       val key = CLRTableKey.valueOf(keyStr)
@@ -171,7 +171,7 @@ object OptimizedStream {
     def convertSize(sizeStr: String, keyStr : String): Int = sizeStr match {
         case "String" => stringSize
         case "Guid" => guidSize
-        case "Blob" => 2 // TODO implement
+        case "Blob" => blobSize
         // coded tokens are 2 bytes if tag and all table rows fit inside, 4 bytes otherwise
         case "Coded" => if( maxRowsInCodedTables(keyStr) < pow(2,16 - tagSize(keyStr)) ) 2 else 4
         case i : String => i.toInt // If there is an exception here, a case type is missing above
@@ -202,6 +202,7 @@ object OptimizedStream {
                          mmbytes: MemoryMappedPE,
                          stringsHeap : Option[StringsHeap],
                          guidHeap : Option[GuidHeap],
+                         blobHeap : Option[BlobHeap],
                          tableSizes: List[Int],
                          bitvector: Long) : Map[Int,CLRTable] = {
     // using a standard specformat for all metadata tables
@@ -209,14 +210,13 @@ object OptimizedStream {
     val validIndices = getValidTableIndices(bitvector)
 
     var currTableOffset = tablesOffset
-
     // for each valid table index, if condition makes sure only already implemented tables are read
     // TODO make sure the order of the indices is correctly accessed
     val tables = for(idx <- validIndices if CLRTable.getImplementedCLRIndices.contains(idx)) yield {
       // read generic specification saved in CLRTable object
       val specification = readArray(CLRTable.getSpecificationNameForIndex(idx))
       // convert this specification by replacing the offset and size entries
-      val convertedSpec = convertSpecification(specification, guidHeap.get.getIndexSize, stringsHeap.get.getIndexSize(), getTableIdxToSizesMap(bitvector,tableSizes))
+      val convertedSpec = convertSpecification(specification, guidHeap.get.getIndexSize, stringsHeap.get.getIndexSize, blobHeap.get.getIndexSize, getTableIdxToSizesMap(bitvector,tableSizes))
       val rows : Int = getTableIdxToSizesMap(bitvector,tableSizes)(idx)
       // calculate the size of table entry and whole table using the specification array, row number and NIndex sizes
       val entrySize: Long = convertedSpec.asScala.last(OFFSET_INDEX).toInt + convertedSpec.asScala.last(SIZE_INDEX).toInt
@@ -235,7 +235,8 @@ object OptimizedStream {
         val entries = IOUtil.readHeaderEntriesForSpec(classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, physHeaderOffset)
         // this is a somewhat bad hack because I could not use generic types for headerkeys
         val cleanedupEntries = entries.asScala.toMap.filter(_._2.getDescription != "this field was not set")
-        new CLRTableEntry(idx, row + 1, cleanedupEntries, guidHeap, stringsHeap)
+        val tblentry = new CLRTableEntry(idx, row + 1, cleanedupEntries, guidHeap, stringsHeap, blobHeap)
+        tblentry
       }
       val tableName = CLRTable.getTableNameForIndex(idx)
       (idx, new CLRTable(tableEntries.toList, idx))

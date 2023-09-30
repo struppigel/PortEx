@@ -18,6 +18,7 @@ package com.github.katjahahn.parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Array;
 import java.util.Arrays;
 
 /**
@@ -77,6 +78,30 @@ public class ByteArrayUtil {
         assert bytes != null && bytes.length >= length + offset;
         byte[] value = Arrays.copyOfRange(bytes, offset, offset + length);
         return bytesToInt(value);
+    }
+
+    /**
+     * Creates a byte array string representation similar to Python's strings.
+     * Bytes are converted to ascii strings unless they are non-visible characters. In such case the byte value is
+     * shown as hex value prefixed with "\x"
+     * Example: \x00HelloWorld\x00
+     * @param bytes
+     * @return
+     */
+    public static String bytesToAsciiHexMix(byte[] bytes) {
+        String result = "";
+        for(byte b : bytes) {
+            if(b == 0x5c) { // this character --> \
+                result += "\\\\"; // add another escape --> \\
+            } else if((b <= 32 || b == 127) || (b > 127)) { // check if is visible ascii
+                byte[] arr = {b};
+                result += "\\x" + byteToHex(arr);
+            } else {
+                // see https://stackoverflow.com/questions/17912640/byte-and-char-conversion-in-java
+                result += (char) (b & 0xFF);
+            }
+        }
+        return result;
     }
 
     /**

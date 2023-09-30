@@ -69,6 +69,18 @@ case class CLRStringField(strIdx : StringIndex, sfield : StandardField) extends 
 }
 
 /**
+ * Field contains an index into #Blob
+ * @param blobAddr
+ * @param sfield
+ */
+case class CLRBlobField(blobIdx : BlobIndex, sfield : StandardField) extends CLRField(sfield) with NIndexable {
+  override def getNIndex: NIndex = blobIdx
+  override def getDescription: String = blobIdx.toString()
+  override def toString: String = sfield.getDescription + ": " + blobIdx.toString()
+}
+
+
+/**
  * Field contains an index into #GUID
  * @param guidIdx
  * @param sfield

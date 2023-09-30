@@ -42,7 +42,8 @@ class CLRTableEntry (val idx : Int,
                      val row: Int,
                      private val entriesMap : Map[CLRTableKey, StandardField],
                      private val guidHeap : Option[GuidHeap],
-                     private val stringsHeap : Option[StringsHeap]) {
+                     private val stringsHeap : Option[StringsHeap],
+                     private val blobHeap : Option[BlobHeap]) {
 
   private val clrFields = convertToCLRFields(entriesMap)
 
@@ -59,6 +60,7 @@ class CLRTableEntry (val idx : Int,
     fieldTypeStr match {
       case "String" => CLRStringField(new StringIndex(index, stringsHeap), sfield)
       case "Guid" => CLRGuidField(new GuidIndex(index, guidHeap), sfield)
+      case "Blob" => CLRBlobField(new BlobIndex(index, blobHeap), sfield)
       case "Coded" => if(clrKey == CLRTableKey.TYPEREF_RESOLUTION_SCOPE) {
           CLRCodedIndexField(new CodedTokenIndex(index,  TagType.RESOLUTION_SCOPE), sfield)
         } else CLRLongField(sfield)

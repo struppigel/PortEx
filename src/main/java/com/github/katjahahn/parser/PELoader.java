@@ -254,11 +254,12 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\pidgin.exe");
+        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\NetFrameworkConsole.exe");
         PEData data = PELoader.loadPE(file);
         //System.out.println((new SectionLoader(data)).loadImportSection().getInfo());
-        new ReportCreator(data).printReport();
-        //show(createImage(data));
+        ReportCreator reporter = new ReportCreator(data);
+       reporter.printReport();
+        System.out.println("done");
     }
 
     private static BufferedImage createImage(PEData peData) {

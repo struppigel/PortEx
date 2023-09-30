@@ -37,11 +37,13 @@ class MetadataRoot (
                      val streamHeaders : List[StreamHeader],
                      private val optimizedStream: Option[OptimizedStream],
                      private val guidHeap: Option[GuidHeap],
-                     private val stringsHeap: Option[StringsHeap]){
+                     private val stringsHeap: Option[StringsHeap],
+                     private val blobHeap : Option[BlobHeap]) {
 
   def maybeGetOptimizedStream : Optional[OptimizedStream] = optionToOptional(optimizedStream)
   def maybeGetGuidHeap : Optional[GuidHeap] = optionToOptional(guidHeap)
   def maybeGetStringsHeap : Optional[StringsHeap] = optionToOptional(stringsHeap)
+  def maybeGetBlobHeap : Optional[BlobHeap] = optionToOptional(blobHeap)
   def getStreamHeaders : java.util.List[StreamHeader] = streamHeaders.asJava
   def getPhysicalLocations(): List[PhysicalLocation] = {
     // version length + padding
@@ -100,7 +102,7 @@ object MetadataRoot {
     val streamHeadersVA =  metadataVA + versionOffset + versionLength + 4 // 4 = size of flags + streams
     val streamHeaders = readStreamHeaders(metaRootEntries(STREAMS).getValue, streamHeadersVA, mmbytes)
     // load opt stream temporarily for reading heap sizes
-    val optTemp = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, None, None)
+    val optTemp = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, None, None, None)
     if( optTemp.isDefined) {
       val strIndexSize = optTemp.get.getStringHeapSize
       val blobIndexSize = optTemp.get.getBlobHeapSize
@@ -108,18 +110,19 @@ object MetadataRoot {
       // load streams if present
       val stringsHeap = maybeLoadStringHeap(streamHeaders, metadataVA, mmbytes, strIndexSize)
       val guidHeap = maybeLoadGuidHeap(streamHeaders, metadataVA, mmbytes, guidIndexSize)
-      val optimizedStream = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, stringsHeap, guidHeap)
+      val blobHeap = maybeLoadBlobHeap(streamHeaders, metadataVA, mmbytes, blobIndexSize)
+      val optimizedStream = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, stringsHeap, guidHeap, blobHeap)
       // create MetadataRoot with optimized stream
-      return new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream, guidHeap, stringsHeap)
+      return new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream, guidHeap, stringsHeap, blobHeap)
     }
     // No optimized stream found, create MetadataRoot without it
-    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, None, None, None)
+    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, None, None, None, None)
   }
 
   private def maybeLoadOptimizedStream( streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE,
-                                        stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap]): Option[OptimizedStream] = {
+                                        stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap], blobHeap : Option[BlobHeap]): Option[OptimizedStream] = {
     streamHeaders.find(_.name == "#~") match {
-      case Some(header) => Some(OptimizedStream(header.size, metadataVA + header.offset, mmbytes, stringsHeap, guidHeap))
+      case Some(header) => Some(OptimizedStream(header.size, metadataVA + header.offset, mmbytes, stringsHeap, guidHeap, blobHeap))
       case None => None
     }
   }
@@ -134,6 +137,13 @@ object MetadataRoot {
   private def maybeLoadGuidHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[GuidHeap] = {
     streamHeaders.find(_.name == "#GUID") match {
       case Some(header) => Some(GuidHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
+      case None => None
+    }
+  }
+
+  private def maybeLoadBlobHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[BlobHeap] = {
+    streamHeaders.find(_.name == "#Blob") match {
+      case Some(header) => Some(BlobHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
       case None => None
     }
   }

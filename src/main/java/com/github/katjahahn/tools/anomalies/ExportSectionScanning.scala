@@ -13,6 +13,8 @@ trait ExportSectionScanning extends AnomalyScanner {
   abstract override def scanReport(): String =
     "Applied Export Scanning" + NL + super.scanReport
 
+  // TODO GC_VersionInfo export is suspicious! https://www.ired.team/offensive-security/code-injection-process-injection/injecting-dll-via-custom-.net-garbage-collector-environment-variable-complus_gcname
+
   abstract override def scan(): List[Anomaly] = {
     val maybeEdata = new SectionLoader(data).maybeLoadExportSection()
     if (maybeEdata.isPresent()) {

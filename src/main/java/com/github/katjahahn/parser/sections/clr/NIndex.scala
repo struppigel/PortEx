@@ -17,6 +17,8 @@
  */
 package com.github.katjahahn.parser.sections.clr
 
+import com.github.katjahahn.parser.{ByteArrayUtil, ScalaIOUtil}
+
 import java.util.{Optional, UUID}
 
 class NIndex(val index : Int) {
@@ -43,7 +45,10 @@ class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(ind
   override def toString(): String = {
     if (isValid && index != 0)
       guidHeap.get.get(index).toString
-    else "0x" + index.toHexString + " (invalid index)"
+    else if (index == 0)
+      "0x" + index.toHexString
+    else
+      "0x" + index.toHexString + " (invalid index)"
   }
 
   def isValid() : Boolean = guidHeap.isDefined &&
@@ -52,6 +57,33 @@ class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(ind
 
   def getValue(): Optional[UUID] = if(isValid) {
     Optional.of(guidHeap.get.get(index))
+  } else Optional.empty()
+}
+
+class BlobIndex(index : Int, val blobHeap : Option[BlobHeap]) extends NIndex(index) {
+
+  override def toString(): String = {
+    val displayableContentLength = 0x50
+    if (isValid && index != 0) {
+      val content = blobHeap.get.get(index)
+      if (content.length <= displayableContentLength)
+        ByteArrayUtil.bytesToAsciiHexMix(content)
+      else {
+        ByteArrayUtil.bytesToAsciiHexMix(content.slice(0,displayableContentLength)) + "... (" +content.size+ " bytes)"
+      }
+    }
+    else if (index == 0)
+      "0x" + index.toHexString
+    else
+      "0x" + index.toHexString + " (invalid index)"
+  }
+
+  def isValid() : Boolean = blobHeap.isDefined &&
+    blobHeap.get.getSizeInBytes() > index &&
+    index >= 0
+
+  def getValue(): Optional[Array[Byte]] = if(isValid) {
+    Optional.of(blobHeap.get.get(index))
   } else Optional.empty()
 }
 
