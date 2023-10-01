@@ -31,6 +31,13 @@ class CLRTable (private val entries : List[CLRTableEntry],
 
   def getTableName(): String = name
   def getEntries(): List[CLRTableEntry] = entries
+  def getEntryByRow(row : Int) : Option[CLRTableEntry] = entries.find(_.row == row)
+
+  /**
+   * Set optimized stream instance after loading it to improve toString results
+   * @param optStream
+   */
+  def setOptimizedStream(optStream : OptimizedStream): Unit = {entries.foreach(_.setOptimizedStream(optStream))}
 
   override def toString: String = {
     ReportCreator.title(name) + NL +
@@ -46,6 +53,24 @@ class CLRTableEntry (val idx : Int,
                      private val blobHeap : Option[BlobHeap]) {
 
   private val clrFields = convertToCLRFields(entriesMap)
+  private var optimizedStream : Option[OptimizedStream] = None
+
+  /**
+   * Set optimized stream instance after loading it to improve toString results
+   * @param optStream
+   */
+  def setOptimizedStream(optStream : OptimizedStream) {
+    this.optimizedStream = Some(optStream)
+    clrFields.values.foreach(_.setOptimizedStream(optStream))
+  }
+
+  private def tableToTagType : Map[CLRTableKey, TagType] = { Map(
+    CLRTableKey.TYPEREF_RESOLUTION_SCOPE -> TagType.RESOLUTION_SCOPE,
+    CLRTableKey.CUSTOMATTRIBUTE_TYPE -> TagType.CUSTOM_ATTRIBUTE_TYPE,
+    CLRTableKey.CUSTOMATTRIBUTE_PARENT -> TagType.HAS_CUSTOM_ATTRIBUTE,
+    CLRTableKey.MEMBERREF_CLASS -> TagType.MEMBERREF_PARENT,
+    CLRTableKey.TYPEDEF_EXTENDS -> TagType.TYPEDEF_OR_REF)
+  }
 
   private def convertToCLRFields(convertee: Map[CLRTableKey, StandardField]): Map[CLRTableKey, CLRField] =
    convertee map { case (key, sfield) => (key, convertToCLRField(sfield, key)) }
@@ -57,13 +82,15 @@ class CLRTableEntry (val idx : Int,
     val specRow = spec.find(_(KEY_INDEX) == key.toString).get
     val fieldTypeStr = specRow(SIZE_INDEX)
     val index = sfield.getValue.toInt
+    assert(clrKey != null)
+    assert(tableToTagType != null)
     fieldTypeStr match {
       case "String" => CLRStringField(new StringIndex(index, stringsHeap), sfield)
       case "Guid" => CLRGuidField(new GuidIndex(index, guidHeap), sfield)
       case "Blob" => CLRBlobField(new BlobIndex(index, blobHeap), sfield)
-      case "Coded" => if(clrKey == CLRTableKey.TYPEREF_RESOLUTION_SCOPE) {
-          CLRCodedIndexField(new CodedTokenIndex(index,  TagType.RESOLUTION_SCOPE), sfield)
-        } else CLRLongField(sfield)
+      case "Coded" => if (tableToTagType.contains(clrKey)) {
+        CLRCodedIndexField(new CodedTokenIndex(index, tableToTagType(clrKey) ), sfield)
+      } else CLRLongField(sfield)
       case _ =>
         if(isKnownCLRFlag(clrKey)) {
           val flagDescription = getDescriptionForTableFlag(sfield.getValue, clrKey).getOrElse("")
@@ -80,6 +107,60 @@ class CLRTableEntry (val idx : Int,
     if(clrFields.size <= 6) {
       s"${row}. ${clrFields.values.mkString(", ")}"
     } else "Row: " + row + NL + clrFields.values.mkString(NL)
+  }
+
+  // classes that recursively need to be searched for name fields for short description
+  private def getReferenceClass(): Option[CLRField] = {
+    val l = List( CLRTableKey.MEMBERREF_CLASS)
+    val found = clrFields.find(f => l.contains(f._1))
+    if(found.isDefined) Some(found.get._2) else None
+  }
+
+  // name fields usable for short descriptions
+  private def getNameField(): Option[CLRField] = {
+    val l = List(CLRTableKey.MODULE_NAME,
+      CLRTableKey.TYPEREF_TYPE_NAME,
+      //CLRTableKey.TYPEREF_TYPE_NAMESPACE,
+      CLRTableKey.TYPEDEF_TYPE_NAME,
+      //CLRTableKey.TYPEDEF_TYPE_NAMESPACE,
+      CLRTableKey.FIELD_NAME,
+      CLRTableKey.METHOD_NAME,
+      CLRTableKey.PARAM_NAME,
+      CLRTableKey.MEMBERREF_NAME,
+      CLRTableKey.PROPERTY_NAME,
+      CLRTableKey.MODULEREF_NAME,
+      CLRTableKey.IMPLMAP_IMPORTNAME,
+      CLRTableKey.ASSEMBLY_NAME,
+      CLRTableKey.ASSEMBLYREF_NAME,
+      CLRTableKey.MANIFESTRESOURCE_NAME,
+      CLRTableKey.GENERICPARAM_NAME,
+      CLRTableKey.FILE_NAME,
+      CLRTableKey.EVENT_NAME,
+      CLRTableKey.EXPORTEDTYPE_TYPENAME
+    )
+    val found = clrFields.find(f => l.contains(f._1))
+    if(found.isDefined) Some(found.get._2) else None
+  }
+
+  /**
+   * Generate a description that just displays the name entry or recursive name entries of the referenced type.
+   * @return
+   */
+  def getShortDescription: String = {
+    val nameField = getNameField()
+    if(nameField.isDefined) {
+      val refClass = getReferenceClass()
+      if(refClass.isDefined) {
+        if(optimizedStream.isDefined && refClass.get.isInstanceOf[CLRCodedIndexField] && refClass.get.asInstanceOf[CLRCodedIndexField].getReferencedTableType().isDefined) {
+          val tblType = refClass.get.asInstanceOf[CLRCodedIndexField].getReferencedTableType().get
+          val clrTable = optimizedStream.get.getCLRTable(tblType)
+          if (!clrTable.isDefined) throw new IllegalStateException("clrTable for type " + tblType + " must be defined!")
+          val entry = clrTable.get.getEntryByRow(row)
+          s"${entry.get.getShortDescription}.${nameField.get.getDescription}"
+        } else s"${refClass.get.getDescription}.${nameField.get.getDescription}"
+      } else s"${nameField.get.getDescription}"
+     }
+     else s"Row: ${row} in ${getTableNameForIndex(idx)}"
   }
 }
 

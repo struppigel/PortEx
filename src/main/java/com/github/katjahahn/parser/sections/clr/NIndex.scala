@@ -29,15 +29,32 @@ class NIndex(val index : Int) {
 
 class CodedTokenIndex(codedToken : Long, tagType : TagType) extends NIndex((codedToken >> tagType.getSize).toInt) {
 
-  def getCodedToken() : Long = codedToken
+  private var optStream : Option[OptimizedStream] = None
 
-  def getReferencedTable(): CLRTableType = {
+  // must be set after loading the optimized stream, at which point all CodedTokenIndices are already created
+  // set this to make the toStrings method show more relevant data
+  def setOptStream(optimizedStream : OptimizedStream) {
+    this.optStream = Some(optimizedStream) }
+
+  def getCodedToken: Long = codedToken
+
+  def getReferencedTableType(): Optional[CLRTableType] = {
     val tag = codedToken & ((1L << tagType.getSize) - 1)
     tagType.getTableForTag(tag.toInt)
   }
 
-  override def toString(): String =
-    s"0x${codedToken.toHexString} -> row ${getIndex()} in ${getReferencedTable().name()}"
+  override def toString(): String = {
+    if(optStream.isDefined && getReferencedTableType().isPresent && optStream.get.getCLRTable(getReferencedTableType().get).isDefined) {
+      val referencedTable = optStream.get.getCLRTable(getReferencedTableType().get).get
+      val maybeEntry = referencedTable.getEntryByRow(getIndex())
+      if(maybeEntry.isDefined) {
+        return s"${maybeEntry.get.getShortDescription}"
+      }
+    }
+    if(getReferencedTableType().isPresent)
+      s"0x${codedToken.toHexString} -> row ${getIndex()} in ${getReferencedTableType().get.name}"
+    else s"0x${codedToken.toHexString} -> row ${getIndex()} into nonexisting table"
+  }
 }
 
 class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(index) {

@@ -254,7 +254,7 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\NetFrameworkConsole.exe");
+        File file = new File("C:\\Users\\strup\\Downloads\\Binaries\\HelloWorld.exe");
         PEData data = PELoader.loadPE(file);
         //System.out.println((new SectionLoader(data)).loadImportSection().getInfo());
         ReportCreator reporter = new ReportCreator(data);

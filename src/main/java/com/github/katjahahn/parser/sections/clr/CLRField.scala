@@ -29,6 +29,7 @@ abstract class CLRField(sfield : StandardField){
   def getDescription: String = toString
   def getValue: Long = sfield.getValue
   def getName: String = sfield.getDescription
+  def setOptimizedStream(optStream : OptimizedStream): Unit = {/*do nothing*/}
 }
 
 /**
@@ -98,6 +99,17 @@ case class CLRGuidField(guidIdx : GuidIndex, sfield : StandardField) extends CLR
  * @param sfield
  */
 case class CLRCodedIndexField(codedTokenIndex: CodedTokenIndex, sfield : StandardField) extends CLRField(sfield) with NIndexable {
+
+  /**
+   * Provide optimized stream to make the toStrings method show better data
+   * This cannot be done at creation of the object because the optimized stream is not loaded at this point.
+   *
+   * @param optStream
+   */
+  override def setOptimizedStream(optStream : OptimizedStream): Unit = {
+    codedTokenIndex.setOptStream(optStream)
+  }
+
   /**
    * The name of the field and the coded token value
    * @return
@@ -109,7 +121,7 @@ case class CLRCodedIndexField(codedTokenIndex: CodedTokenIndex, sfield : Standar
    * In contrast to the toString method it does not contain the name of the field.
    * @return description of coded token value
    */
-  override def getDescription: String = codedTokenIndex.toString()
+  override def getDescription: String = "Coded token::" + codedTokenIndex.toString()
 
   /**
    * The coded token, in unaltered form
@@ -134,5 +146,8 @@ case class CLRCodedIndexField(codedTokenIndex: CodedTokenIndex, sfield : Standar
    * Every coded token references a row in a table. This returns the table as a CLRTableType.
    * @return the table this field is pointing into
    */
-  def getReferencedTable(): CLRTableType = codedTokenIndex.getReferencedTable()
+  def getReferencedTableType(): Option[CLRTableType] = {
+    if(codedTokenIndex.getReferencedTableType().isPresent) Some(codedTokenIndex.getReferencedTableType().get)
+    else None
+  }
 }

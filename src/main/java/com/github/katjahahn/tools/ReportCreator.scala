@@ -238,7 +238,6 @@ class ReportCreator(private val data: PEData) {
    */
   private def getStringForResolutionScope(e: CLRTableEntry, optStream : OptimizedStream): String = {
     val resolutionscope : CLRCodedIndexField = e.get(CLRTableKey.TYPEREF_RESOLUTION_SCOPE).get.asInstanceOf[CLRCodedIndexField]
-    val tbl = resolutionscope.getReferencedTable()
 
     def getDescriptionForType(t: CLRTableType, k : CLRTableKey, desc : String): String = {
       val maybeTbl = optStream.getCLRTable(t)
@@ -252,13 +251,16 @@ class ReportCreator(private val data: PEData) {
       }
       else s"<invalid index into ${t}>"
     }
-    tbl match {
-      case CLRTableType.ASSEMBLYREF => getDescriptionForType(CLRTableType.ASSEMBLYREF, CLRTableKey.ASSEMBLYREF_NAME, "assemblyref")
-      case CLRTableType.MODULE => getDescriptionForType(CLRTableType.MODULE, CLRTableKey.MODULE_NAME, "module")
-      case CLRTableType.MODULEREF => getDescriptionForType(CLRTableType.MODULEREF, CLRTableKey.MODULEREF_NAME, "moduleref")
-      case CLRTableType.TYPEREF => getDescriptionForType(CLRTableType.TYPEREF, CLRTableKey.TYPEREF_TYPE_NAME, "typeref")
-      case _ => "<unknown resolution scope>"
-    }
+    val refTbl = resolutionscope.getReferencedTableType()
+    if(refTbl.isDefined)
+      refTbl.get match {
+        case CLRTableType.ASSEMBLYREF => getDescriptionForType(CLRTableType.ASSEMBLYREF, CLRTableKey.ASSEMBLYREF_NAME, "assemblyref")
+        case CLRTableType.MODULE => getDescriptionForType(CLRTableType.MODULE, CLRTableKey.MODULE_NAME, "module")
+        case CLRTableType.MODULEREF => getDescriptionForType(CLRTableType.MODULEREF, CLRTableKey.MODULEREF_NAME, "moduleref")
+        case CLRTableType.TYPEREF => getDescriptionForType(CLRTableType.TYPEREF, CLRTableKey.TYPEREF_TYPE_NAME, "typeref")
+        case _ => "<unknown resolution scope>"
+      }
+    else "<referenced table does not exist>"
   }
 
   /**
@@ -307,11 +309,19 @@ class ReportCreator(private val data: PEData) {
           "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL
           //"Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
 
+        // improve toString output by setting optStream for all tables
+        for(tblType <- CLRTableType.values() ){
+          val tbl = optStream.getCLRTable(tblType)
+          if(tbl.isDefined) tbl.get.setOptimizedStream(optStream)
+        }
+
         def compileInfo(typeList : List[CLRTableType]): String =
           if (typeList.isEmpty) "" else {
             val tbl = optStream.getCLRTable(typeList.head)
-            if(tbl.isDefined) tbl.get.toString + NL + NL + compileInfo(typeList.tail)
-            else compileInfo(typeList.tail)
+
+            if(tbl.isDefined) {
+              tbl.get.toString + NL + NL + compileInfo(typeList.tail)
+            } else compileInfo(typeList.tail)
           }
 
         // Tables to display
@@ -322,8 +332,7 @@ class ReportCreator(private val data: PEData) {
                 CLRTableType.MANIFESTRESOURCE,
                 CLRTableType.MODULEREF,
                 CLRTableType.CUSTOMATTRIBUTE,
-                //CLRTableType.TYPEREF, --> is displayed differently
-                CLRTableType.EXPORTEDTYPE,
+                CLRTableType.EXPORTEDTYPE
           )) + typeRefTableReport(optStream) + NL
 
         //val clrTables = compileInfo(List(CLRTableType.CUSTOMATTRIBUTE))

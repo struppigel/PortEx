@@ -70,8 +70,12 @@ public enum TagType {
         return size;
     }
 
-    public CLRTableType getTableForTag(int tag) {
-        return tables[tag];
+    public Optional<CLRTableType> getTableForTag(int tag) {
+        try {
+            return Optional.ofNullable(tables[tag]);
+        } catch (ArrayIndexOutOfBoundsException e){
+            return Optional.empty();
+        }
     }
 
     public CLRTableType[] getAllTables() {
