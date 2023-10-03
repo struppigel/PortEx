@@ -210,6 +210,31 @@ public class ByteArrayUtil {
     }
 
     /**
+     * Converts a byte array to an short. The bytes are considered unsigned and
+     * little endian (first byte is the least significant).
+     * <p>
+     * Presumes the array bytes to be not null and its length smaller than or
+     * equal to 4
+     *
+     * @param bytes
+     *            the little endian byte array that shall be converted to Short
+     * @return short value
+     */
+    public static int bytesToShort(byte[] bytes) {
+        assert bytes != null && bytes.length <= 2;
+        final int BYTE_SIZE = 8;
+        int value = 0;
+        for (int i = 0; i < bytes.length; i++) {
+            // shift byte i times, so it gets the correct significance
+            int shift = BYTE_SIZE * i;
+            // (b & 0xff) treats b as unsigned byte
+            // calculate the value to add by performing the shift
+            value += (bytes[i] & 0xff) << shift;
+        }
+        return value;
+    }
+
+    /**
      * Converts a byte array to an int. The bytes are considered unsigned and
      * little endian (first byte is the least significant).
      * <p>
@@ -274,4 +299,5 @@ public class ByteArrayUtil {
         ret[3] = (byte) ((a >> 24) & 0xFF);
         return ret;
     }
+
 }

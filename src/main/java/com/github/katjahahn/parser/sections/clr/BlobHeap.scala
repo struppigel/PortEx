@@ -43,12 +43,12 @@ class BlobHeap(private val indexSize : Int,
    * @return string at index
    */
   def get(index : Long): Array[Byte] = {
-    assert(index >= 0)
-    assert(index < size)
+    require(index >= 0)
+    require(index < size)
     // see II.24.2.4, page 272 in specification
     val (blobSize : Long, blobDataStart : Long) = {
       val sizeByte = mmbytes.get(offset + index).toLong
-      if((Integer.parseInt("11000000",2) & sizeByte) == 0) { //smallest blob size value possible
+      if((Integer.parseInt("10000000",2) & sizeByte) == 0) { //smallest blob size
         (sizeByte, 1L + offset + index)
       } else if ((Integer.parseInt("11000000",2) & sizeByte) == 128) { //medium blob size
         //(bbbbbb << 8 + x)

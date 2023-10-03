@@ -32,7 +32,7 @@ import scala.collection.mutable.ListBuffer
  * The bytes are read from file only on request, making it possible to map large files.
  * Only maps section bytes for now. No file headers.
  *
- * @author Katja Hahn
+ * @author Karsten Hahn
  *
  * @param mappings A list of section mappings, in ascending order of virtual addresses
  * @param data the PEData instance of the file

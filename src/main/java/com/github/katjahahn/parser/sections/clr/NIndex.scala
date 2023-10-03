@@ -60,17 +60,16 @@ class CodedTokenIndex(codedToken : Long, tagType : TagType) extends NIndex((code
 class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(index) {
 
   override def toString(): String = {
-    if (isValid && index != 0)
+    if (isValid)
       guidHeap.get.get(index).toString
     else if (index == 0)
-      "0x" + index.toHexString
+      "0x" + index.toHexString + " (not set)"
     else
       "0x" + index.toHexString + " (invalid index)"
   }
 
   def isValid() : Boolean = guidHeap.isDefined &&
-    guidHeap.get.getSizeInBytes() > index &&
-    index >= 0 // TODO > or >= ??
+    guidHeap.get.getNumberOfGuids() >= index && index > 0
 
   def getValue(): Optional[UUID] = if(isValid) {
     Optional.of(guidHeap.get.get(index))
@@ -85,9 +84,8 @@ class BlobIndex(index : Int, val blobHeap : Option[BlobHeap]) extends NIndex(ind
       val content = blobHeap.get.get(index)
       if (content.length <= displayableContentLength)
         ByteArrayUtil.bytesToAsciiHexMix(content)
-      else {
+      else
         ByteArrayUtil.bytesToAsciiHexMix(content.slice(0,displayableContentLength)) + "... (" +content.size+ " bytes)"
-      }
     }
     else if (index == 0)
       "0x" + index.toHexString

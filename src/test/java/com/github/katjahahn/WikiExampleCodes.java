@@ -62,7 +62,7 @@ import java.util.stream.Stream;
  * If code changes have to be applied here, the Wiki for PortEx has to be
  * updated too.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * 
  */
 public class WikiExampleCodes {

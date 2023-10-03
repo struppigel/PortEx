@@ -16,8 +16,11 @@
  * ****************************************************************************
  */
 package com.github.katjahahn.parser
-
+import java.nio.ByteBuffer
+import java.util.UUID
 import java.io.File
+import java.math.BigInteger
+import java.nio.ByteOrder
 
 /**
  * Utilities for Scala specific IO and small conversions related to IO.
@@ -93,6 +96,24 @@ object ScalaIOUtil {
     val controlCode: Char => Boolean = (c: Char) => c <= 32 || c == 127
     val extendedCode: Char => Boolean = (c: Char) => c > 127
     string.filterNot(controlCode).filterNot(extendedCode)
+  }
+
+  /**
+   * Converts given byte array of 16 bytes to UUID.
+   * Result is this format: 22BD2433-09CA-4F27-B62A-BE3CB68DE75E
+   * Given these bytes:     3324bd22 ca09 274f b62a be3cb68de75e
+   * That means the format is: LE-Integer, LE-Short, LE-Short, BE-Long
+   *
+   * @param bytes
+   * @return UUID for given byte array
+   */
+  def convertBytesToUUID(bytes: Array[Byte]): UUID = {
+    assert(bytes.length == 16)
+    var high = ByteArrayUtil.bytesToInt(bytes.slice(0,4)).toLong << 32L
+    high = high + (ByteArrayUtil.bytesToShort(bytes.slice(4,6)).toLong << 16L)
+    high = high + ByteArrayUtil.bytesToShort(bytes.slice(6,8)).toLong
+    val low = new BigInteger(bytes.slice(8,16)).longValue
+    new UUID(high, low);
   }
 
 }

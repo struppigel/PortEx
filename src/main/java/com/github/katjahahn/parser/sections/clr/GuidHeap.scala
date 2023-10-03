@@ -18,7 +18,7 @@
 
 package com.github.katjahahn.parser.sections.clr
 
-import com.github.katjahahn.parser.MemoryMappedPE
+import com.github.katjahahn.parser.{MemoryMappedPE, ScalaIOUtil}
 
 import java.util.UUID
 
@@ -29,16 +29,55 @@ class GuidHeap(private val indexSize : Int,
 
   private lazy val bytes = mmbytes.slice(offset, offset + size)
   val uuidSize = 16
+  val nrOfGuids = (size.toDouble / uuidSize.toDouble).floor.toInt
 
+  /**
+   * returns the VA of the GUID heap
+   * @return va - offset of heap start
+   */
+  def getOffset() : Long = offset
+
+  /**
+   * Array containing all bytes of the GUID heap
+   * @return heap dump array
+   */
+  def getHeapDump() : Array[Byte] = bytes
+
+  /**
+   * How many bytes are used to save an index, usually this value is 2 unless the guid heap is very large.
+   * @return
+   */
   def getIndexSize() : Int = indexSize
 
+  /**
+   * The size of the GUID heap in bytes
+   * @return
+   */
   def getSizeInBytes() : Long = size
 
-  // TODO is the index really pointing to the bytes offset or is the the number of the GUIDs?
+  /**
+   * The number of GUIDs saved in the GUID heap
+   * @return
+   */
+  def getNumberOfGuids() : Int = nrOfGuids
+
+  /**
+   * The GUID at the given offset. The offset is relative to the start of the GUID heap
+   * @param guidOffset
+   * @return
+   */
+  def getGUIDAtHeapOffset(guidOffset : Long) : UUID = {
+    require(guidOffset >= 0 && guidOffset <= (size-uuidSize))
+    val guidStartVA = getOffset + guidOffset
+    val uuidBytes = mmbytes.slice(guidStartVA, guidStartVA + uuidSize)
+    ScalaIOUtil.convertBytesToUUID(uuidBytes)
+  }
+
+  def indexToHeapOffset(index : Long) : Long = (index - 1) * uuidSize
+
   def get(index : Long) : UUID = {
-    assert(index > 0)
-    assert(index < size)
-    UUID.nameUUIDFromBytes(mmbytes.slice(offset + index, offset + index + uuidSize))
+    require(index > 0 && index <= nrOfGuids)
+    getGUIDAtHeapOffset(indexToHeapOffset(index))
   }
 
 }

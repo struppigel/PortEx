@@ -152,10 +152,12 @@ class CLRTableEntry (val idx : Int,
       val refClass = getReferenceClass()
       if(refClass.isDefined) {
         if(optimizedStream.isDefined && refClass.get.isInstanceOf[CLRCodedIndexField] && refClass.get.asInstanceOf[CLRCodedIndexField].getReferencedTableType().isDefined) {
-          val tblType = refClass.get.asInstanceOf[CLRCodedIndexField].getReferencedTableType().get
+          val codedIndexField = refClass.get.asInstanceOf[CLRCodedIndexField]
+          val tblType = codedIndexField.getReferencedTableType().get
+          val nextRow = codedIndexField.codedTokenIndex.getIndex()
           val clrTable = optimizedStream.get.getCLRTable(tblType)
           if (!clrTable.isDefined) throw new IllegalStateException("clrTable for type " + tblType + " must be defined!")
-          val entry = clrTable.get.getEntryByRow(row)
+          val entry = clrTable.get.getEntryByRow(nextRow)
           s"${entry.get.getShortDescription}.${nameField.get.getDescription}"
         } else s"${refClass.get.getDescription}.${nameField.get.getDescription}"
       } else s"${nameField.get.getDescription}"
@@ -259,6 +261,4 @@ object CLRTable {
     CLRTableMeta(0x2B, "MethodSpec", "methodspectable"),
     CLRTableMeta(0x2C, "GenericParamConstraint", "genericparamconstrainttable")
   )
-
-
 }
