@@ -37,18 +37,35 @@ import scala.collection.mutable.ListBuffer
 trait SectionTableScanning extends AnomalyScanner {
   
   private val packerNames = HashMap(
+      "?g_Encry" -> "Microsoft Warbird Payload, related to software licensing (DRM)",
+      ".00cfg" -> "Control Flow Guard section",
+      ".arch" -> "Alpha-architecture section",
+      ".a64xrm" -> "CHPEv2 section in a Compiled Hybrid Portable Executable, related to ARM",
        //Aspack
       ".aspack" -> "Aspack packer", ".adata" -> "Aspack/Armadillo packer",
       "ASPack" -> "Aspack packer", ".ASPack" -> "Aspack packer",
       ".asspck" -> "Aspack packer",
       //common
-      ".arch" -> "Alpha-architecture section",
-      ".bindat" -> "Binary data, e.g., by downware installers",
+      ".bindat" -> "Binary data, e.g., by downware installers based on LUA",
+      ".bootdat" -> "palette entries, added by Visual Studio",
+      ".buildid" -> "gcc/cygwin; may contain debug information",
+      ".CLR_UEF" -> ".CLR Unhandled Exception Handler section",
+      ".code" -> "Code section",
       ".cormeta" -> "CLR Metadata section",
-      ".complua" -> "LUA compiler",
+      ".complua" -> "LUA compiled",
+      ".eh_fram" -> "Exception Handler Frame section",
+      ".export" -> "Alternative export data section",
       ".fasm" -> "Flat Assembler", ".flat" -> "Flat Assembler",
+      // Visual Studio 14.0
+      ".gfids" -> "Visual Studio 14.0", ".giats" -> "Visual Studio 14.0", ".gljmp" -> "Visual Studio 14.0",
+      // ARM v7
+      ".glue_7t" -> "ARM v7 core glue function thumb mode", ".glue7" -> "ARM v7 core glue functions 32-bit ARM mode",
+      // common
+      ".hexpthk" -> "Hybrid Executable Push Thunk section in a Compiled Hybrid Portable Executable (CHPE), related to ARM",
+      ".idata" -> "Initialized Data Section Borland",
       ".idlsym" -> "IDL Attributes (registered SEH)",
       ".impdata" -> "Alternative import section",
+      ".itext" -> "Code Section Borland",
       ".orpc" -> "Code section inside rpcrt4.dll",
       ".rodata" -> "Read-only data section",
       ".script" -> "Section containing script",
@@ -84,6 +101,7 @@ trait SectionTableScanning extends AnomalyScanner {
       ".mackt" -> "ImpRec-created section, this file was patched/cracked",
       ".MaskPE" -> "MaskPE Packer",
       "MEW" -> "MEW packer",
+      "minATL" -> "ARM section, possibly Active Template Library related",
       //Firseria
       ".mnbvcx1" -> "Firseria PUP downloader", ".mnbvcx2" -> "Firseria PUP downloader",
       //MPRESS
@@ -144,12 +162,16 @@ trait SectionTableScanning extends AnomalyScanner {
       ".vmp0" -> "VMProtect packer",".vmp1" -> "VMProtect packer",".vmp2" -> "VMProtect packer",
       //Other
       "VProtect" -> "Vprotect Packer",
+      "__wibu00" -> "Wibu CodeMeter",
       ".winapi" -> "API Override tool",
       "__wibu00" -> "Wibu CodeMeter", "__wibu01" -> "Wibu CodeMeter",
       "WinLicen" -> "WinLicense (Themida) Protector",
       "_winzip_" -> "WinZip Self-Extractor",
+      ".wixburn" -> "Wix section, see github.com/wixtoolset/wix3",
       //WWPACK
       ".WWPACK" -> "WWPACK Packer", ".WWP32" -> "WWPACK Packer",
+      // Other
+      ".wpp_sf" -> "WPP Windows software trace PreProcessor",
       //y0da
       ".yP" -> "Y0da Protector", ".y0da" -> "Y0da Protector"
   )

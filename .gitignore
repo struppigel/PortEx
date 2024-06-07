@@ -66,3 +66,5 @@ arbeit/.svn
 arbeit/appendix
 arbeit/dia1
 /.apt_generated
+/.cache-main
+/.cache-tests
