@@ -62,7 +62,6 @@ trait SectionTableScanning extends AnomalyScanner {
       ".glue_7t" -> "ARM v7 core glue function thumb mode", ".glue7" -> "ARM v7 core glue functions 32-bit ARM mode",
       // common
       ".hexpthk" -> "Hybrid Executable Push Thunk section in a Compiled Hybrid Portable Executable (CHPE), related to ARM",
-      ".idata" -> "Initialized Data Section Borland",
       ".idlsym" -> "IDL Attributes (registered SEH)",
       ".impdata" -> "Alternative import section",
       ".itext" -> "Code Section Borland",
