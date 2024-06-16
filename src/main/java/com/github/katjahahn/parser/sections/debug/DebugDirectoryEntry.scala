@@ -41,7 +41,8 @@ class DebugDirectoryEntry private (
                              private val debugType: DebugType,
                              val offset: Long,
                              private val maybeCodeView: Option[CodeviewInfo],
-                             private val maybeRepro: Option[ReproInfo]) {
+                             private val maybeRepro: Option[ReproInfo],
+                             private val maybeExDll: Option[ExtendedDLLCharacteristics]) {
 
   def getOffset(): Long = offset
 
@@ -54,6 +55,10 @@ class DebugDirectoryEntry private (
   def getRepro(): ReproInfo =
     if (maybeRepro.isDefined) maybeRepro.get
   else throw new IllegalStateException("Repro info does not exist")
+
+  def getExtendedDLLCharacteristics(): ExtendedDLLCharacteristics =
+    if (maybeExDll.isDefined) maybeExDll.get
+    else throw new IllegalStateException("Extended DLL characteristics do not exist")
 
   def getReproHash(): Array[Byte] =
     if(maybeRepro.isDefined) maybeRepro.get.reproHash
@@ -84,7 +89,7 @@ class DebugDirectoryEntry private (
         case TIME_DATE_STAMP => "Time date stamp: " + getTimeDateStamp().toString
         case _               => s.toString
       }).mkString(NL)}
-        |${if (maybeCodeView.isDefined) maybeCodeView.get.getInfo else ""}${if (maybeRepro.isDefined) maybeRepro.get.getInfo else ""}
+        |${if (maybeCodeView.isDefined) maybeCodeView.get.getInfo else ""}${if (maybeRepro.isDefined) maybeRepro.get.getInfo else ""}${if (maybeExDll.isDefined) maybeExDll.get.getInfo else ""}
         |""".stripMargin
 
   /**
@@ -145,13 +150,14 @@ object DebugDirectoryEntry {
       val debugType = DebugType.getForValue(debugTypeValue)
       val ptrToRawData = entries(POINTER_TO_RAW_DATA).getValue
       val codeview = CodeviewInfo(ptrToRawData, data.getFile)
+      val exDllChar = if(debugType == DebugType.EX_DLLCHARACTERISTICS ) ExtendedDLLCharacteristics(ptrToRawData, data) else None
       val repro = if(debugType == DebugType.REPRO ) Some(ReproInfo(ptrToRawData, data)) else None
-      new DebugDirectoryEntry(entries, debugType.getDescription, debugType, offset, codeview, repro)
+      new DebugDirectoryEntry(entries, debugType.getDescription, debugType, offset, codeview, repro, exDllChar)
     } catch {
       case e: IllegalArgumentException =>
         logger.warn("no debug type description found!")
         val description = s"${entries(DebugDirectoryKey.TYPE).getValue} no description available"
-        new DebugDirectoryEntry(entries, description, DebugType.UNKNOWN, offset, None, None)
+        new DebugDirectoryEntry(entries, description, DebugType.UNKNOWN, offset, None, None, None)
     }
   }
 }

@@ -73,8 +73,6 @@ object CodeviewInfo {
 
   def apply(ptrToRaw: Long, pefile: File): Option[CodeviewInfo] = {
     using(new RandomAccessFile(pefile, "r")) { raf =>
-      val age = 0
-      val filePath = ""
       //check signature
       val signature = new String(loadBytes(ptrToRaw, signatureSize, raf))
       if (signature.equals("RSDS")) {

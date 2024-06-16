@@ -404,6 +404,9 @@ class ReportCreator(private val data: PEData) {
         if (debug.getDebugType() == DebugType.REPRO) {
           buf.append(debug.getRepro().getInfo())
         }
+        if (debug.getDebugType() == DebugType.EX_DLLCHARACTERISTICS) {
+          buf.append(debug.getExtendedDLLCharacteristics().getInfo())
+        }
         buf.append(NL)
       }
       buf.toString
@@ -849,7 +852,7 @@ class ReportCreator(private val data: PEData) {
       build.append(sectionEntryLine(sections, "-> Actual Read Size",
         (s: SectionHeader) => if (s.get(SIZE_OF_RAW_DATA) != loader.getReadSize(s))
           hexString(loader.getReadSize(s)) else ""))
-      build.append(sectionEntryLine(sections, "-> Physical End",
+      build.append(sectionEntryLine(sections, "-> Raw End",
         (s: SectionHeader) => hexString(loader.getReadSize(s) + s.getAlignedPointerToRaw(lowAlign))))
       build.append(sectionEntryLine(sections, "Virtual Address",
         (s: SectionHeader) => hexString(s.get(VIRTUAL_ADDRESS))))

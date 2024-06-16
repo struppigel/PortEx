@@ -55,6 +55,8 @@ class DebugSection private (
 
   def isReproBuild() : Boolean = !entries.filter(_.getDebugType() == DebugType.REPRO ).isEmpty
 
+  def hasExtendedDllCharacteristics() : Boolean = !entries.filter(_.getDebugType() == DebugType.EX_DLLCHARACTERISTICS ).isEmpty
+
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
     if (!entries.isEmpty) {
       val preEntries = entries.map(_.getPhysicalLocations().asScala.toList).flatten
