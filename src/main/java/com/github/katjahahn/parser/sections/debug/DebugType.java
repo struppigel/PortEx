@@ -12,7 +12,7 @@ public enum DebugType implements Characteristic {
     /**
      * Unknown value
      */
-    UNKNOWN(0, "Unknown value"),
+    UNKNOWN(0, "An unknown value that is ignored by all tools."),
     /**
      * COFF debug information
      */
@@ -77,6 +77,16 @@ public enum DebugType implements Characteristic {
      * Repro, PE determinism or reproducibility
      */
     REPRO(16,"Repro, PE determinism or reproducibility", false, false),
+
+    /**
+     * Debugging information is embedded in the PE file at location specified by PointerToRawData.
+     */
+    UNDEFINED_DEBUG_INFO(17, "Debugging information is embedded in the PE file at location specified by PointerToRawData. ", false ,false),
+
+    /**
+     * Stores crypto hash for the content of the symbol file used to build the PE/COFF file.
+     */
+    CRYPTOHASH(19, "Stores crypto hash for the content of the symbol file used to build the PE/COFF file.", false ,false),
     /**
      * Extended DLL characteristics bits
      */
