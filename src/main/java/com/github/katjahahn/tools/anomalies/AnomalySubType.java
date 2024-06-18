@@ -469,7 +469,14 @@ public enum AnomalySubType {
     /**
      * Usage of unreadable characters for strings in the #Strings heap. Typical obfuscation method.
      */
-    UNREADABLE_CHARS_IN_STRINGS_HEAP(NON_DEFAULT)
+    UNREADABLE_CHARS_IN_STRINGS_HEAP(NON_DEFAULT),
+
+    /**************************** Overlay ******************************/
+
+    /**
+     * Overlay has a file type that warrants further analysis
+     */
+    OVERLAY_FILETYPE_HINT(RE_HINT)
     ;
 
     private final AnomalyType superType;

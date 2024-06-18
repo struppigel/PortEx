@@ -74,14 +74,18 @@ trait ResourceSectionScanning extends AnomalyScanner {
     for (resource <- resources) {
       val offset = resource.rawBytesLocation.from
       val fileTypes = FileTypeScanner(data.getFile)._scanAt(offset)
-      val resourceIsArchive = (fileTypes filter (_._1.name.toLowerCase() contains "archive") ).nonEmpty
-      val resourceIsExecutable = (fileTypes filter (_._1.name.toLowerCase() contains "executable") ).nonEmpty
+      val archiveResourceSigs = fileTypes filter (_._1.name.toLowerCase() contains "archive")
+      val resourceIsArchive = archiveResourceSigs.nonEmpty
+      val executableResourceSigs = fileTypes filter (_._1.name.toLowerCase() contains "executable")
+      val resourceIsExecutable = executableResourceSigs.nonEmpty
       if(resourceIsArchive) {
-        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an archive, dump the resource and try to unpack it."
+        val anySigName = archiveResourceSigs.head._1.name
+        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an archive (${anySigName}), dump the resource and try to unpack it."
         anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILETYPE_HINT)
       }
       if(resourceIsExecutable) {
-        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an executable, dump the resource and analyse the file"
+        val anySigName = executableResourceSigs.head._1.name
+        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an executable (${anySigName}), dump the resource and analyse the file"
         anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILETYPE_HINT)
       }
     }

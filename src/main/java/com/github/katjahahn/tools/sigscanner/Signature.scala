@@ -42,7 +42,8 @@ class Signature(val name: String, val epOnly: Boolean,
   override def toString(): String =
     s"""|name: $name
     	|signature: $signatureString
-	    |ep_only: $epOnly """.stripMargin
+	    |ep_only: $epOnly
+      |until offset: $untilOffset """.stripMargin
 
 }
 

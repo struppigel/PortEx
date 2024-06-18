@@ -89,7 +89,7 @@ object PEAnomalyScanner {
   def newInstance(data: PEData): PEAnomalyScanner =
     new PEAnomalyScanner(data) with COFFHeaderScanning with OptionalHeaderScanning with SectionTableScanning with
       MSDOSHeaderScanning with RichHeaderScanning with ImportSectionScanning with ExportSectionScanning with
-      ResourceSectionScanning with ClrScanning
+      ResourceSectionScanning with ClrScanning with OverlayScanning
 
   def apply(file: File): PEAnomalyScanner = newInstance(file)
 

@@ -38,6 +38,7 @@ dBASE III file,03,DB3
 Quicken price history,03 00 00 00,QPH
 Approach index file,03 00 00 00 41 50 50 52,ADX
 dBASE IV file,04,DB4
+ZLIB archive, 78 DA
 INFO2 Windows recycle bin_1,04 00 00 00,(none)
 INFO2 Windows recycle bin_2,05 00 00 00,(none)
 Generic drawing programs,07,DRW
@@ -49,6 +50,7 @@ ZSOFT Paintbrush file_2,0A 03 01 01,PCX
 ZSOFT Paintbrush file_3,0A 05 01 01,PCX
 MultiBit Bitcoin wallet file,0A 16 6F 72 67 2E 62 69 74 63 6F 69 6E 2E 70 72,WALLET
 Monochrome Picture TIFF bitmap,0C ED,MP
+Google Chrome extension archive, 43 72 32 34,CRX
 DeskMate Document,0D 44 4F 43,DOC
 Nero CD compilation,0E 4E 65 72 6F 49 53 4F,NRI
 DeskMate Worksheet,0E 57 4B 53,WKS

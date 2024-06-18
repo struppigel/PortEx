@@ -23,6 +23,7 @@ import com.github.katjahahn.parser.sections.clr.{MetadataRoot, StreamHeader}
 import com.github.katjahahn.parser.sections.idata.ImportDLL
 import com.github.katjahahn.parser.sections.rsrc.Resource
 import com.github.katjahahn.parser.{PhysicalLocation, RichHeader, StandardField}
+import com.github.katjahahn.tools.Overlay
 
 import scala.collection.JavaConverters._
 
@@ -157,4 +158,12 @@ case class ClrStreamAnomaly(private val metadataRoot : MetadataRoot,
     val size = streamHeader.size
     List(new PhysicalLocation(bsjb + streamOffset, size)).asJava
   }
+}
+
+case class OverlayAnomaly(val overlay: Overlay,
+                           override val description: String,
+                           override val subtype: AnomalySubType) extends Anomaly {
+
+  override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(overlay.getOffset, overlay.getSize)).asJava
+  override def key = PEStructureKey.OVERLAY
 }
