@@ -47,22 +47,26 @@ class Resource(
    * Returns the type of the resource as string
    */
   def getType(): String = levelIDs(Level.typeLevel) match {
-    case Name(rva, name) => name
+    case Name(_, name) => name
     case id: ID => id.idString
   }
 
+  def getName(): String = levelIDs(Level.nameLevel) match {
+    case Name(_, name) => name
+    case id: ID => id.idString
+  }
   /**
    * Creates a resource instance
    *
    * @param resourceBytes the bytes that make up the data of the resource
    */
   def this(rawBytesLocation: PhysicalLocation) = this(rawBytesLocation, Map.empty)
-  
+
   /**
    * {@inheritDoc}
    */
   override def toString(): String =
-    "offset: 0x" + java.lang.Long.toHexString(rawBytesLocation.from) + 
+    "offset: 0x" + java.lang.Long.toHexString(rawBytesLocation.from) +
     ", size: 0x" + java.lang.Long.toHexString(rawBytesLocation.size) + ", " +
     levelIDs.mkString(", ")
 
@@ -76,14 +80,14 @@ class Resource(
       case _ => false
     }
   }
-  
+
   private def levelIDsAreEqual(m1: Map[Level, IDOrName], m2: Map[Level, IDOrName]): Boolean = {
     val diff = (m1.keySet -- m2.keySet) ++ (m2.keySet -- m1.keySet)
-    if(!diff.isEmpty) false 
+    if(!diff.isEmpty) false
     else {
       for(k <- m1.keySet){
         if(!m1(k).equals(m2(k))) return false
-      }  
+      }
       true
     }
   }

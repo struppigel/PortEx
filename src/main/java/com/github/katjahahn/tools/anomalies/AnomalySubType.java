@@ -438,11 +438,10 @@ public enum AnomalySubType {
     INVALID_EXPORTS(STRUCTURE),
 
     /**************************** Resource Section ******************************/
-
     /**
-     * Name of a named resource entry is weird
+     * Resource filetype provides information how to reverse engineer the file
      */
-    RESOURCE_NAME(NON_DEFAULT),
+    RESOURCE_FILETYPE_HINT(RE_HINT),
     /**
      * Resource tree has a loop
      */
@@ -451,6 +450,16 @@ public enum AnomalySubType {
      * Invalid resource location
      */
     RESOURCE_LOCATION_INVALID(WRONG),
+    /**
+     * Name of a named resource entry is interesting
+     */
+    RESOURCE_NAME(NON_DEFAULT),
+
+    /**
+     * Named resource entry provides information on how to reverse engineer the file
+     */
+    RESOURCE_NAME_HINT(RE_HINT),
+
 
     /**************************** CLR Section ******************************/
     /**

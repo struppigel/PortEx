@@ -4,6 +4,7 @@ import com.github.katjahahn.parser.IOUtil._
 import com.github.katjahahn.parser.{Location, ScalaIOUtil}
 import com.github.katjahahn.parser.sections.SectionLoader
 import com.github.katjahahn.parser.sections.rsrc.{Name, ResourceDirectoryEntry, ResourceSection}
+import com.github.katjahahn.tools.sigscanner.FileTypeScanner
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -21,6 +22,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
       anomalyList ++= checkResourceLoop(rsrc)
       anomalyList ++= checkResourceNames(rsrc)
       anomalyList ++= checkInvalidResourceLocations(rsrc, data.getFile.length())
+      anomalyList ++= checkResourceFileTypes(rsrc)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
   }
@@ -40,6 +42,9 @@ trait ResourceSectionScanning extends AnomalyScanner {
   }
 
   private def checkResourceNames(rsrc: ResourceSection): List[Anomaly] = {
+
+    val resourceNameHints = Map(">AUTOHOTKEY SCRIPT<" -> "The executable is an AutoHotKey wrapper. Extract the resource and check the script.")
+
     val anomalyList = ListBuffer[Anomaly]()
     val resources = rsrc.getResources.asScala    
     for (resource <- resources) {
@@ -52,8 +57,32 @@ trait ResourceSectionScanning extends AnomalyScanner {
               val description = s"Resource name in resource ${ScalaIOUtil.hex(offset)} at level ${lvl} has maximum length (${max})";
               anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_NAME)
             }
+            if (resourceNameHints isDefinedAt name) {
+              val description = s"Resource named ${name} in resource ${ScalaIOUtil.hex(offset)}: ${resourceNameHints(name)}"
+              anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_NAME_HINT)
+            }
           case _ => //nothing
         }
+      }
+    }
+    anomalyList.toList
+  }
+
+  private def checkResourceFileTypes(rsrc: ResourceSection): List[Anomaly] = {
+    val anomalyList = ListBuffer[Anomaly]()
+    val resources = rsrc.getResources.asScala
+    for (resource <- resources) {
+      val offset = resource.rawBytesLocation.from
+      val fileTypes = FileTypeScanner(data.getFile)._scanAt(offset)
+      val resourceIsArchive = (fileTypes filter (_._1.name.toLowerCase() contains "archive") ).nonEmpty
+      val resourceIsExecutable = (fileTypes filter (_._1.name.toLowerCase() contains "executable") ).nonEmpty
+      if(resourceIsArchive) {
+        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an archive, dump the resource and try to unpack it."
+        anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILETYPE_HINT)
+      }
+      if(resourceIsExecutable) {
+        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an executable, dump the resource and analyse the file"
+        anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILETYPE_HINT)
       }
     }
     anomalyList.toList
