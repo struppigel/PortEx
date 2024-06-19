@@ -1,11 +1,12 @@
 package com.github.katjahahn.tools.anomalies
 
 import com.github.katjahahn.parser.IOUtil._
-import com.github.katjahahn.parser.{Location, ScalaIOUtil}
+import com.github.katjahahn.parser.{IOUtil, Location, PEData, ScalaIOUtil}
 import com.github.katjahahn.parser.sections.SectionLoader
-import com.github.katjahahn.parser.sections.rsrc.{Name, ResourceDirectoryEntry, ResourceSection}
-import com.github.katjahahn.tools.sigscanner.FileTypeScanner
+import com.github.katjahahn.parser.sections.rsrc.{Name, Resource, ResourceDirectoryEntry, ResourceSection}
+import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, SignatureScanner}
 
+import java.io.RandomAccessFile
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -23,6 +24,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
       anomalyList ++= checkResourceNames(rsrc)
       anomalyList ++= checkInvalidResourceLocations(rsrc, data.getFile.length())
       anomalyList ++= checkResourceFileTypes(rsrc)
+      anomalyList ++= checkResourceContents(rsrc, data)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
   }
@@ -41,6 +43,33 @@ trait ResourceSectionScanning extends AnomalyScanner {
       AnomalySubType.RESOURCE_LOCATION_INVALID)).toList
   }
 
+  private def checkResourceContents(rsrc: ResourceSection, pedata : PEData): List[Anomaly] = {
+    val resources = rsrc.getResources().asScala
+    val anomalyList = ListBuffer[Anomaly]()
+
+    // TODO this scans the signatures again (if the preconditions are true), you might want to avoid that
+    def peHasSignature(sigSubstring : String): Boolean =
+      SignatureScanner.newInstance()
+        ._scanAll(pedata.getFile, epOnly = false)
+          .exists(sig => sig._1.name.toLowerCase() contains sigSubstring.toLowerCase())
+
+    def isPattern(bytesPattern: List[Byte], res : Resource): Boolean = {
+      val bytes = IOUtil.loadBytesSafely(res.rawBytesLocation.from, res.rawBytesLocation.size.toInt,
+        new RandomAccessFile(data.getFile, "r"))
+      bytes sameElements bytesPattern
+    }
+
+    val filteredResource = resources.filter(res =>
+      res.rawBytesLocation.size == 6 &&
+        isPattern(List(1,1,0,0,0,0),res) && peHasSignature("PureBasic")
+    )
+    if( filteredResource.nonEmpty ) {
+      val description = s"This might be a Script-to-Exe wrapped file, check the resources for a compressed or plain script."
+      anomalyList += ResourceAnomaly(filteredResource.head, description, AnomalySubType.RESOURCE_CONTENT_HINT)
+    }
+    anomalyList.toList
+  }
+
   private def checkResourceNames(rsrc: ResourceSection): List[Anomaly] = {
 
     val resourceNameHints = Map(">AUTOHOTKEY SCRIPT<" -> "The executable is an AutoHotKey wrapper. Extract the resource and check the script.")
@@ -54,7 +83,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
             val max = ResourceDirectoryEntry.maxNameLength
             val offset = resource.rawBytesLocation.from
             if (name.length >= max) {
-              val description = s"Resource name in resource ${ScalaIOUtil.hex(offset)} at level ${lvl} has maximum length (${max})";
+              val description = s"Resource name in resource ${name} ${ScalaIOUtil.hex(offset)} at level ${lvl} has maximum length (${max})";
               anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_NAME)
             }
             if (resourceNameHints isDefinedAt name) {

@@ -29,7 +29,7 @@ import com.github.katjahahn.parser.sections.rsrc.version.VersionInfo
 import com.github.katjahahn.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
 import com.github.katjahahn.parser._
 import com.github.katjahahn.tools.ReportCreator.{pad, title}
-import com.github.katjahahn.tools.anomalies.{Anomaly, PEAnomalyScanner}
+import com.github.katjahahn.tools.anomalies.{Anomaly, AnomalyType, PEAnomalyScanner}
 import com.github.katjahahn.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
 
 import java.io.{File, RandomAccessFile}
@@ -55,6 +55,9 @@ class ReportCreator(private val data: PEData) {
   private var checksumDescription = ""
 
   private var showAll = false
+
+  // created here to not scan for them several times
+  private val anomalies : List[Anomaly] = PEAnomalyScanner.newInstance(data).getAnomalies.asScala.toList
 
   /**
    * If all is set to true, every report will be created, even unstable and
@@ -95,6 +98,7 @@ class ReportCreator(private val data: PEData) {
    */
   def printReport(): Unit = {
     print(reportTitle)
+    print(reversingHintsReport())
     print(headerReports())
     print(specialSectionReports())
     print(additionalReports())
@@ -639,12 +643,21 @@ class ReportCreator(private val data: PEData) {
   }
 
   def anomalyReport(): String = {
-    val anomalies = PEAnomalyScanner.newInstance(data).getAnomalies.asScala.toList
-    val descriptions = anomaliesToDescriptions(anomalies)
+    val anomalies_filtered = anomalies.filter(a => a.getType() != AnomalyType.RE_HINT)
+    val descriptions = anomaliesToDescriptions(anomalies_filtered)
     if (descriptions.isEmpty) ""
     else title("Anomalies") + NL +
-      "Total anomalies: " + anomalies.size + NL + NL +
+      "Total anomalies: " + anomalies_filtered.size + NL + NL +
       (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
+      ("* " + descriptions.mkString(NL + "* ")) + NL + NL
+  }
+
+  def reversingHintsReport(): String = {
+    val rehints = anomalies.filter(a => a.getType() == AnomalyType.RE_HINT)
+    val descriptions = anomaliesToDescriptions(rehints)
+    if (descriptions.isEmpty) ""
+    else title("Reverse Engineering Hints") + NL +
+      "Total hints: " + rehints.size + NL + NL +
       ("* " + descriptions.mkString(NL + "* ")) + NL + NL
   }
 

@@ -439,6 +439,10 @@ public enum AnomalySubType {
 
     /**************************** Resource Section ******************************/
     /**
+     * Resource content provides information on how to reverse engineer the file
+     */
+    RESOURCE_CONTENT_HINT(RE_HINT),
+    /**
      * Resource filetype provides information how to reverse engineer the file
      */
     RESOURCE_FILETYPE_HINT(RE_HINT),
@@ -454,7 +458,6 @@ public enum AnomalySubType {
      * Name of a named resource entry is interesting
      */
     RESOURCE_NAME(NON_DEFAULT),
-
     /**
      * Named resource entry provides information on how to reverse engineer the file
      */
