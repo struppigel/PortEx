@@ -50,7 +50,6 @@ trait SectionTableScanning extends AnomalyScanner {
       ".bootdat" -> "palette entries, added by Visual Studio",
       ".buildid" -> "gcc/cygwin; may contain debug information",
       ".CLR_UEF" -> ".CLR Unhandled Exception Handler section",
-      ".code" -> "Code section",
       ".cormeta" -> "CLR Metadata section",
       ".complua" -> "LUA compiled",
       ".eh_fram" -> "Exception Handler Frame section",
@@ -134,6 +133,8 @@ trait SectionTableScanning extends AnomalyScanner {
       "ProCrypt" -> "ProCrypt Packer",
       ".RLPack" -> "RLPack Packer", //second section
       ".rmnet" -> "Ramnit virus marker",
+      // NET Reactor
+      ".reacto" -> ".NET Reactor",
       //RPCrypt
       "RCryptor" -> "RPCrypt Packer", ".RPCrypt" -> "RPCrypt Packer",
       //Other

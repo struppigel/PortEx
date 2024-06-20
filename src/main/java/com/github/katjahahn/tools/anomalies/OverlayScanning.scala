@@ -44,6 +44,7 @@ trait OverlayScanning extends AnomalyScanner {
     addAnomalyIfFilter("archive", "Overlay contains an archive {signame}, dump the overlay and try to unpack it")
     addAnomalyIfFilter("executable", "Overlay contains an executable {signame}, dump the overlay and analyse the file")
     addAnomalyForAnyFilter(List("sfx", "self-extract"), "Overlay contains a self-extracting archive {signame}, try to extract the files or run the file and collect them")
+    addAnomalyIfFilter("NSIS", "Overlay indicates that the file is a Nullsoft installer, extract the install script and contained files")
     anomalyList.toList
   }
 

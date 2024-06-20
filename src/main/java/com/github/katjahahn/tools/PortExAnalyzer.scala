@@ -42,9 +42,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.12.11
+  private val version = """version: 0.12.12
     |author: Karsten Philipp Boris Hahn
-    |last update: 83. June 2024""".stripMargin
+    |last update: 19. June 2024""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -509,6 +509,8 @@ object PortExAnalyzer {
     using(new FileWriter(file, true)) { fw =>
       println("Creating report file...")
       fw.write(reporter.reportTitle)
+      println("Writing reversing hints...")
+      fw.write(reporter.reversingHintsReport())
       println("Writing header reports...")
       fw.write(reporter.headerReports())
       println("Writing section reports...")

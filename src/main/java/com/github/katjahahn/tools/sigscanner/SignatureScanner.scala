@@ -234,9 +234,9 @@ object SignatureScanner {
   private val defaultSigs = IOUtil.SPEC_DIR + "userdb.txt"
   private val overlaySigs = IOUtil.SPEC_DIR + "overlaysignatures"
 
-  private val version = """version: 0.1
-    |author: Katja Hahn
-    |last update: 5.Feb 2014""".stripMargin
+  private val version = """version: 0.2
+    |author: Karsten Hahn
+    |last update: 20.Feb 2024""".stripMargin
 
   private val title = "peiscan v0.1"
 
@@ -321,6 +321,7 @@ object SignatureScanner {
     var sig: Option[String] = None
     var addOffset = 0L
     var untilOffset = 0L
+    var isDotNet: Option[Boolean] = None
     breakable {
       while (it.hasNext) {
         val line = it.next()
@@ -335,11 +336,13 @@ object SignatureScanner {
           addOffset = java.lang.Long.decode("0x" + line.split("=")(1).replace(" ","").trim()) //TODO test
         } else if (line.startsWith("until_offset") && line.split("=").length > 1) {
           untilOffset = java.lang.Long.decode("0x" + line.split("=")(1).replace(" ","").trim()) //TODO test
+        } else if (line.startsWith("is_dot_net") && line.split("=").length > 1) {
+          isDotNet = Some(line.split("=")(1).trim == "true")
         }
       }
     }
     if (sig.isDefined) {
-      (Some(Signature(nameLine, ep, sig.get, addOffset.toInt, untilOffset)), nextNameLine)
+      (Some(Signature(nameLine, ep, sig.get, addOffset.toInt, untilOffset, isDotNet)), nextNameLine)
     } else (None, nextNameLine)
   }
 
@@ -356,23 +359,6 @@ object SignatureScanner {
     val (sig, addr) = result
     val signature = bytes2hex(sig.signature, " ")
     new MatchedSignature(addr, signature, sig.name, sig.epOnly)
-  }
-
-  def main(args: Array[String]): Unit = {
-    val folder = new File("/home/katja/samples")
-    for (file <- folder.listFiles()) {
-      if (!file.isDirectory() && new PESignature(file).exists()) {
-        val data = PELoader.loadPE(file)
-        val reporter = new ReportCreator(data)
-        if (new Overlay(data).exists) {
-          println(file.getName)
-          println("******************************")
-          println(reporter.overlayReport())
-          //println(reporter.jar2ExeReport())
-          println(reporter.peidReport())
-        }
-      }
-    }
   }
 
   private def invokeCLI(args: Array[String]): Unit = {
