@@ -465,6 +465,17 @@ public enum AnomalySubType {
 
 
     /**************************** CLR Section ******************************/
+
+    /**
+     * Version string in Metadata root is broken
+     * TODO check if AnomalyType NON_DEFAULT is correct
+     */
+    METADATA_ROOT_VERSION_STRING_BROKEN(NON_DEFAULT),
+    /**
+     * Name of the stream is not zero terminated
+     * TODO check if AnomalyType NON_DEFAULT is correct
+     */
+    NON_ZERO_TERMINATED_STREAM_NAME(NON_DEFAULT),
     /**
      * Several streams with the same name exist
      */

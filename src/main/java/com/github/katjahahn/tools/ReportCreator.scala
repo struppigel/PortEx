@@ -194,13 +194,14 @@ class ReportCreator(private val data: PEData) {
       val metadataRoot = maybeCLR.get().metadataRoot
       val entries = metadataRoot.metadataEntries.values
       val colWidth = 15
-      val title = ".NET Metadata Root"
-      buf.append(standardFieldsReport(title, colWidth, colWidth, entries))
-
+      val metaRootTitle = ".NET Metadata Root"
+      buf.append(title(metaRootTitle))
+      buf.append(NL + "Version: " + metadataRoot.versionString + NL + NL)
+      buf.append(standardFieldsReport(null, colWidth, colWidth, entries))
       val streamTblHeader = pad("Stream name", colWidth, " ") + pad("size", colWidth, " ") + pad("offset to BSJB", colWidth + 2, " ") + pad("actual offset", colWidth, " ")
       buf.append(NL + NL + streamTblHeader + NL)
       buf.append(pad("", streamTblHeader.length, "-") + NL)
-      val bsjb = metadataRoot.getBSJBOffset()
+      val bsjb = metadataRoot.getBSJBOffset
       for (streamHeader <- metadataRoot.streamHeaders){
         buf.append(pad(streamHeader.name, colWidth, " ") +
           pad(hexString(streamHeader.size), colWidth, " ") +
@@ -348,8 +349,7 @@ class ReportCreator(private val data: PEData) {
 
   def standardFieldsReport(titleStr: String, colWidth : Int, padLength : Int, entries : Iterable[StandardField]) : String = {
     val buf = new StringBuffer()
-    buf.append(title(titleStr) + NL)
-
+    if (titleStr != null) buf.append(title(titleStr) + NL)
     val tableHeader = pad("description", padLength, " ") + pad("value", colWidth, " ") + pad("file offset", colWidth, " ")
     buf.append(tableHeader + NL)
     buf.append(pad("", tableHeader.length, "-") + NL)

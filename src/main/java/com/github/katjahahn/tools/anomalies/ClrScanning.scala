@@ -36,6 +36,7 @@ trait ClrScanning extends AnomalyScanner {
     if (clr.isPresent) {
       anomalyList ++= checkStreamHeaders(clr.get)
       anomalyList ++= checkStringsHeap(clr.get)
+      anomalyList ++= checkVersionStringNotReadable(clr.get)
     }
     super.scan ::: anomalyList.toList
   }
@@ -50,13 +51,30 @@ trait ClrScanning extends AnomalyScanner {
     val names = metadataRoot.streamHeaders.map(_.name)
     // check stream names for duplicates
     val duplicates = names.diff(names.distinct).distinct
-    val anomalies = for(name <- duplicates) yield
-      new ClrStreamAnomaly(metadataRoot,
+    val dupAnomalies = for(name <- duplicates) yield
+      ClrStreamAnomaly(metadataRoot,
         metadataRoot.streamHeaders.find(_.name == name).get,
         "There are several streams named '" + name + "', there should only be one",
         AnomalySubType.DUPLICATED_STREAMS)
-    anomalies
+    // check for non-zero terminated streams
+    val nonTermsAnomalies = {
+      for (header <- metadataRoot.nonZeroTerminatedHeaders) yield
+        ClrStreamAnomaly(metadataRoot,
+          header, s"The name of the stream header ${header.name} is not zero terminated",
+          AnomalySubType.NON_ZERO_TERMINATED_STREAM_NAME
+        )
+    }
+    dupAnomalies ::: nonTermsAnomalies
   }
+
+  private def checkVersionStringNotReadable(clr: CLRSection): List[Anomaly] =
+    if(clr.getMetadataRoot.versionStringNotReadable) {
+      List(
+        new ClrMetadaRootAnomaly(clr.getMetadataRoot,
+          "Version string in Metadata Root is not readable",
+          AnomalySubType.METADATA_ROOT_VERSION_STRING_BROKEN
+        ))
+    } else List[Anomaly]()
 
   /**
    * Anomalies in the #Strings heap

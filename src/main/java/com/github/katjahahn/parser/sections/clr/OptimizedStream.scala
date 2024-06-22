@@ -115,7 +115,7 @@ object OptimizedStream {
     val moduleTableOffset = tableSizesOffset + (nrOfTables * rowNrSize)
 
     val tables : Map[Int, CLRTable] =
-      if(!guidHeap.isDefined | !stringsHeap.isDefined) { Map() } //do not attempt to load tables for empty heaps
+      if(!guidHeap.isDefined | !stringsHeap.isDefined | !blobHeap.isDefined ) { Map() } //do not attempt to load tables for empty heaps
       else {
         readTables(moduleTableOffset, mmbytes, stringsHeap, guidHeap, blobHeap, tableSizes, bitvector)
       }

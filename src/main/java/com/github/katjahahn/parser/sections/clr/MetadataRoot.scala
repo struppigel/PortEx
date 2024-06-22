@@ -38,8 +38,11 @@ class MetadataRoot (
                      private val optimizedStream: Option[OptimizedStream],
                      private val guidHeap: Option[GuidHeap],
                      private val stringsHeap: Option[StringsHeap],
-                     private val blobHeap : Option[BlobHeap]) {
+                     private val blobHeap : Option[BlobHeap],
+                     val nonZeroTerminatedHeaders: List[StreamHeader]) {
 
+  // for anomaly checks
+  def versionStringNotReadable : Boolean = versionString == MetadataRoot.NOT_READABLE_STRING
   // Getters for Java access
   def getMetaDataEntries : java.util.Map[MetadataRootKey, StandardField] = metadataEntries.asJava
   def getVersionString : String = versionString
@@ -79,7 +82,7 @@ class MetadataRoot (
 
 object MetadataRoot {
   private val logger = LogManager.getLogger(classOf[MetadataRoot].getName)
-
+  val NOT_READABLE_STRING = "<not readable>"
   private val metaRootSpec = "clrmetarootspec"
   private val metaRootSpec2 = "clrmetarootspec2"
   private val versionOffset = 16
@@ -105,7 +108,7 @@ object MetadataRoot {
 
     // load stream headers in metadata root
     val streamHeadersVA =  metadataVA + versionOffset + versionLength + 4 // 4 = size of flags + streams
-    val streamHeaders = readStreamHeaders(metaRootEntries(STREAMS).getValue, streamHeadersVA, mmbytes)
+    val (streamHeaders, nonZeroTerminatedHeaders) = readStreamHeaders(metaRootEntries(STREAMS).getValue, streamHeadersVA, mmbytes)
     // load opt stream temporarily for reading heap sizes
     val optTemp = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, None, None, None)
     if( optTemp.isDefined) {
@@ -118,10 +121,10 @@ object MetadataRoot {
       val blobHeap = maybeLoadBlobHeap(streamHeaders, metadataVA, mmbytes, blobIndexSize)
       val optimizedStream = maybeLoadOptimizedStream(streamHeaders, metadataVA, mmbytes, stringsHeap, guidHeap, blobHeap)
       // create MetadataRoot with optimized stream
-      return new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream, guidHeap, stringsHeap, blobHeap)
+      return new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, optimizedStream, guidHeap, stringsHeap, blobHeap, nonZeroTerminatedHeaders)
     }
     // No optimized stream found, create MetadataRoot without it
-    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, None, None, None, None)
+    new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, None, None, None, None, nonZeroTerminatedHeaders)
   }
 
   private def maybeLoadOptimizedStream( streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE,
@@ -170,10 +173,14 @@ object MetadataRoot {
   private def loadVersionString(metadataFileOffset: Long, data: PEData): String = {
     ScalaIOUtil.using(new RandomAccessFile(data.getFile, "r")) { raf =>
       try {
-        IOUtil.readNullTerminatedUTF8String(metadataFileOffset + versionOffset, raf)
+        val version = IOUtil.readNullTerminatedUTF8String(metadataFileOffset + versionOffset, raf)
+        if (version == null || version.isEmpty) {
+          logger.warn("Could not read .NET version string!")
+          NOT_READABLE_STRING
+        } else version
       } catch {
-        case _: IOException => logger.warn("Could not read .NET version string!") // TODO anomaly
-                                return "<not readable>"
+        case _: IOException => logger.warn("Could not read .NET version string!")
+                               return NOT_READABLE_STRING
       }
     }
   }
@@ -185,8 +192,15 @@ object MetadataRoot {
     }
   }
 
-  private def readStreamHeaders(nr: Long, startOffset: Long, mmbytes: MemoryMappedPE): List[StreamHeader] = {
-    if(nr <= 0) List()
+  /**
+   * Reads nr amount of stream headers from the startOffset in the given mmbytes
+   * @param nr the number of stream headers to load
+   * @param startOffset the offset into mmbytes
+   * @param mmbytes the memory mapped PE object
+   * @return tuple of list of all loaded stream headers and list of stream headers with non-zero term anomaly
+   */
+  private def readStreamHeaders(nr: Long, startOffset: Long, mmbytes: MemoryMappedPE): (List[StreamHeader], List[StreamHeader]) = {
+    if(nr <= 0) (List(),List())
     else {
       val va = startOffset
       val offset = mmbytes.getBytesLongValue(va, 4)
@@ -194,11 +208,16 @@ object MetadataRoot {
       val nameOffset = va + 8
       val nameLen = Math.min(mmbytes.indexWhere(_ == 0, nameOffset) - nameOffset, 32L) + 1 //minimum 32 characters, includes zero term
       val namePaddedLen = alignToFourBytes(nameLen)
-      // TODO anomaly if not zero terminated header?
-      val name_zero = new String(mmbytes.slice(nameOffset, nameOffset + nameLen), StandardCharsets.UTF_8)
-      // remove zero term
-      val name = name_zero.substring(0,name_zero.length - 1)
-      new StreamHeader(offset, size, name) :: readStreamHeaders(nr - 1, nameOffset + namePaddedLen, mmbytes)
+      // create name without zero term
+      val name = new String(mmbytes.slice(nameOffset, nameOffset + nameLen - 1), StandardCharsets.UTF_8)
+      val result : StreamHeader =  new StreamHeader(offset, size, name)
+      // check for zero term anomaly
+      val hasZeroTerm = mmbytes.get(nameOffset + nameLen - 1) == 0.toByte
+      val nonZeroTerminatedHeaders = if(!hasZeroTerm) List(result) else List[StreamHeader]()
+      // recursive call
+      val (nextHeaders, nextNonZeroTerminatedHeaders) = readStreamHeaders(nr - 1, nameOffset + namePaddedLen, mmbytes)
+      // prepending results from recursive call
+      (result :: nextHeaders, nonZeroTerminatedHeaders ::: nextNonZeroTerminatedHeaders)
     }
   }
 

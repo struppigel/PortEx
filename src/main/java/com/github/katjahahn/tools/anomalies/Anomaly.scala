@@ -32,7 +32,7 @@ import scala.collection.JavaConverters._
  */
 abstract class Anomaly() {
 
-  override def toString(): String = description
+  override def toString: String = description()
 
   /**
    * The description of the anomaly
@@ -147,13 +147,20 @@ case class RichHeaderAnomaly(private val rich : RichHeader,
   override def locations: java.util.List[PhysicalLocation] = List(rich.getPhysicalLocation()).asJava
 }
 
+case class ClrMetadaRootAnomaly(private val metadataRoot : MetadataRoot,
+                            override val description: String,
+                            override val subtype: AnomalySubType) extends Anomaly {
+  override def key = PEStructureKey.CLR_SECTION
+  override def locations: java.util.List[PhysicalLocation] = metadataRoot.getPhysicalLocations.asJava
+}
+
 case class ClrStreamAnomaly(private val metadataRoot : MetadataRoot,
                             private val streamHeader : StreamHeader,
                             override val description: String,
                             override val subtype: AnomalySubType) extends Anomaly {
   override def key = PEStructureKey.CLR_SECTION
   override def locations: java.util.List[PhysicalLocation] = {
-    val bsjb = metadataRoot.getBSJBOffset()
+    val bsjb = metadataRoot.getBSJBOffset
     val streamOffset = streamHeader.offset
     val size = streamHeader.size
     List(new PhysicalLocation(bsjb + streamOffset, size)).asJava
