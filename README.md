@@ -30,7 +30,7 @@ For more information have a look at [PortEx Wiki](https://github.com/struppigel/
 
 ## PortexAnalyzer CLI and GUI
 
-PortexAnalyzer CLI is a command line tool that runs the library PortEx under the hood. If you are looking for a readily compiled command line PE scanner to analyse files with it, download it from here [PortexAnalyzer.jar](https://github.com/katjahahn/PortEx/raw/master/progs/PortexAnalyzer.jar)
+PortexAnalyzer CLI is a command line tool that runs the library PortEx under the hood. If you are looking for a readily compiled command line PE scanner to analyse files with it, download it from here [PortexAnalyzer.jar](https://github.com/struppigel/PortEx/raw/master/progs/PortexAnalyzer.jar)
 
 The GUI version is available here: [PortexAnalyzerGUI](https://github.com/struppigel/PortexAnalyzerGUI)
 
