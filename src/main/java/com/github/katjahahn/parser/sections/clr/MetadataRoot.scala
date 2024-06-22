@@ -40,17 +40,25 @@ class MetadataRoot (
                      private val stringsHeap: Option[StringsHeap],
                      private val blobHeap : Option[BlobHeap]) {
 
+  // Getters for Java access
+  def getMetaDataEntries : java.util.Map[MetadataRootKey, StandardField] = metadataEntries.asJava
+  def getVersionString : String = versionString
+  def getOffset : Long = offset
+  def getStreamHeaders : java.util.List[StreamHeader] = streamHeaders.asJava
+  // the maybe stream getters, also for Java
   def maybeGetOptimizedStream : Optional[OptimizedStream] = optionToOptional(optimizedStream)
   def maybeGetGuidHeap : Optional[GuidHeap] = optionToOptional(guidHeap)
   def maybeGetStringsHeap : Optional[StringsHeap] = optionToOptional(stringsHeap)
   def maybeGetBlobHeap : Optional[BlobHeap] = optionToOptional(blobHeap)
-  def getStreamHeaders : java.util.List[StreamHeader] = streamHeaders.asJava
-  def getPhysicalLocations(): List[PhysicalLocation] = {
+  def maybeGetStreamHeaderByName(name : String): java.util.Optional[StreamHeader] =
+    optionToOptional(streamHeaders.find(_.name == name))
+
+  def getPhysicalLocations: List[PhysicalLocation] = {
     // version length + padding
-    val versionLength = alignToFourBytes(metadataEntries.get(MetadataRootKey.LENGTH).get.getValue)
+    val versionLength = alignToFourBytes(metadataEntries(MetadataRootKey.LENGTH).getValue)
     // total size of metadata root
     val sizeOfFlagsNStreams = 4
-    val streamHeaderSizes = streamHeaders.map(_.getHeaderSize()).sum
+    val streamHeaderSizes = streamHeaders.map(_.getHeaderSize).sum
     val size = versionOffset + versionLength + sizeOfFlagsNStreams + streamHeaderSizes
     List(new PhysicalLocation(offset, size))
   }
@@ -62,10 +70,7 @@ class MetadataRoot (
     }
   }
 
-  def getBSJBOffset(): Long = metadataEntries(MetadataRootKey.SIGNATURE).getOffset
-
-  def maybeGetStreamHeaderByName(name : String): java.util.Optional[StreamHeader] =
-    optionToOptional(streamHeaders.find(_.name == name))
+  def getBSJBOffset: Long = metadataEntries(MetadataRootKey.SIGNATURE).getOffset
 
   def getInfo: String = "Metadata Root:" + NL + "-------------" + NL + metadataEntries.values.mkString(NL) + NL +
     "version: " + versionString + NL + NL +
@@ -167,7 +172,7 @@ object MetadataRoot {
       try {
         IOUtil.readNullTerminatedUTF8String(metadataFileOffset + versionOffset, raf)
       } catch {
-        case e : IOException => logger.warn("Could not read .NET version string!") // TODO anomaly
+        case _: IOException => logger.warn("Could not read .NET version string!") // TODO anomaly
                                 return "<not readable>"
       }
     }
@@ -218,5 +223,5 @@ class StreamHeader(val offset: Long, val size : Long, val name: String) {
    * Size of the header
    * @return size of header in bytes
    */
-  def getHeaderSize(): Long = (8 + alignToFourBytes(name.length))
+  def getHeaderSize: Long = 8 + alignToFourBytes(name.length)
 }

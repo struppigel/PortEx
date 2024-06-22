@@ -23,7 +23,6 @@ import com.github.katjahahn.parser.sections.SectionLoader.LoadInfo
 import com.github.katjahahn.parser.sections.SpecialSection
 import com.github.katjahahn.parser.sections.clr.CLIHeaderKey._
 import com.github.katjahahn.parser.sections.clr.CLRSection.cliHeaderSize
-import org.apache.logging.log4j.LogManager
 
 import java.util
 import scala.collection.JavaConverters._
@@ -32,6 +31,9 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
                  val metadataRoot: MetadataRoot,
                  private val fileOffset: Long) extends SpecialSection {
 
+  def getCliHeaderEntries: util.Map[CLIHeaderKey, StandardField] = cliHeader.asJava
+
+  def getMetadataRoot: MetadataRoot = metadataRoot
   /**
    * Returns whether the special section has no entries.
    *
@@ -45,7 +47,7 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
    * @return list of locations
    */
   override def getPhysicalLocations: util.List[PhysicalLocation] =
-    (new PhysicalLocation(fileOffset, cliHeaderSize) :: metadataRoot.getPhysicalLocations()).asJava
+    (new PhysicalLocation(fileOffset, cliHeaderSize) :: metadataRoot.getPhysicalLocations).asJava
 
   /**
    * Returns the file offset for the beginning of the module.
@@ -76,7 +78,6 @@ class CLRSection(val cliHeader: Map[CLIHeaderKey, StandardField],
 
 object CLRSection {
   val cliHeaderSpec = "cliheaderspec"
-  val logger = LogManager.getLogger(CLRSection.getClass.getName)
   val cliHeaderSize = 0x48 //always this value acc. to specification
 
   def apply(mmbytes: MemoryMappedPE, offset: Long, virtualAddress: Long, data: PEData): CLRSection = {

@@ -189,7 +189,6 @@ object Mapping {
 
   /**
    * Turn chunk usage on or off.
-   * TODO remove non-chunk usage entirely after testing this throughoughly
    * @Beta
    */
   var useChunks = true
@@ -197,8 +196,6 @@ object Mapping {
   /**
    * The default size of a chunk.
    * This turned out to be a good value after some performance tests.
-   *
-   * TODO make this a val after performance tests are done
    * @Beta
    */
   var defaultChunkSize = 8192
@@ -213,9 +210,10 @@ object Mapping {
    * @param data the PEData object
    */
   private class Chunk(val physStart: Long, val size: Int, private val data: PEData) {
-    lazy val bytes = {
+
+    lazy val bytes: Array[Byte] = {
       using(new RandomAccessFile(data.getFile, "r")) { raf =>
-        val fileSize = data.getFile().length()
+        val fileSize = data.getFile.length()
         val length = {
           if (physStart + size < fileSize) size
           else (fileSize - physStart).toInt
@@ -229,6 +227,7 @@ object Mapping {
       }
     }
   }
+
 }
 
 /**
@@ -255,7 +254,7 @@ abstract class Range(val start: Long, val end: Long) {
   def contains(value: Long): Boolean =
     start <= value && end >= value
     
-  override def toString(): String = "Range(" + start + ", " + end + ")"
+  override def toString: String = "Range(" + start + ", " + end + ")"
 }
 
 /**

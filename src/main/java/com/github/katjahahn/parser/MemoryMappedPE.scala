@@ -197,7 +197,7 @@ class MemoryMappedPE(
       // read bytes
       val mappedBytes = mapping(start, (end - start).toInt)
       // write bytes into result-array
-      for (i <- 0 until mappedBytes.length) {
+      for (i <- mappedBytes.indices) {
         // calculate index to write the byte to
         val index = (start - from).toInt + i
         bytes(index) = mappedBytes(i)
@@ -214,7 +214,7 @@ class MemoryMappedPE(
    * @param range the virtual range
    */
   private def mappingsInRange(range: VirtRange): List[Mapping] = {
-    val (from, until) = range.unpack
+    val (from, until) = range.unpack()
     mappings.filter(m => m.virtRange.end >= from && m.virtRange.start <= until)
   }
 
@@ -251,12 +251,12 @@ class MemoryMappedPE(
   /**
    * Returns the index of the first byte that has the value.
    *
-   * @param value value of the byte searched for
+   * @param elem value of the byte searched for
    * @param from offset to start searching from
    * @return index of the first byte that has the value
    */
   def indexOf(elem: Byte, from: Long): Long =
-    indexWhere(((b: Byte) => b == elem), from)
+    indexWhere((b: Byte) => b == elem, from)
 
   /**ByteArrayUtil methods**/
 
@@ -305,7 +305,7 @@ class MemoryMappedPE(
  */
 object MemoryMappedPE {
 
-  private val logger = LogManager.getLogger(MemoryMappedPE.getClass().getName())
+  private val logger = LogManager.getLogger(MemoryMappedPE.getClass.getName)
 
   /**
    * Creates a representation of the PE content as it is mapped into memory
@@ -340,7 +340,7 @@ object MemoryMappedPE {
     val optHeader = data.getOptionalHeader
     /* in low alignment mode all virtual addresses equal their physical counterparts
        thus, the whole file is mapped as is */
-    if (optHeader.isLowAlignmentMode()) {
+    if (optHeader.isLowAlignmentMode) {
       val filesize = data.getFile.length
       List(new Mapping(new VirtRange(0, filesize), new PhysRange(0, filesize), data))
     } else {
@@ -348,7 +348,7 @@ object MemoryMappedPE {
       val mappings = getHeaderMappings(secLoader, data) ++ getSectionMappings(secLoader, data)
       // sort mappings to be in ascending order for their virtual start
       val sorted = mappings.sortBy(m => m.virtRange.start)
-      sorted.toList
+      sorted
     }
   }
 
@@ -363,7 +363,7 @@ object MemoryMappedPE {
     data: PEData): List[Mapping] = {
     val table = data.getSectionTable
     val lowAlign = data.getOptionalHeader.isLowAlignmentMode
-    if (table.getNumberOfSections() > 0) {
+    if (table.getNumberOfSections > 0) {
       // size of headers is also size of header mapping
       val sizeOfHeaders = data.getOptionalHeader.get(WindowsEntryKey.SIZE_OF_HEADERS)
       // virtual end of header mapping marked by VA of first section
@@ -372,13 +372,13 @@ object MemoryMappedPE {
       val vStart = vEnd - sizeOfHeaders
       /* create mapping with ranges */
       val virtRange = new VirtRange(vStart, vEnd)
-      val pStart = data.getPESignature().getOffset()
+      val pStart = data.getPESignature.getOffset
       logger.debug("pesig offset: " + pStart)
       val pEnd = pStart + sizeOfHeaders
       val physRange = new PhysRange(pStart, pEnd)
-      logger.debug("header mapping (v --> p): " + virtRange + " --> " + physRange) //TODO remove
+      logger.debug("header mapping (v --> p): " + virtRange + " --> " + physRange)
       List(new Mapping(virtRange, physRange, data))
-    } else Nil //TODO add mapping
+    } else Nil // not needed
   }
 
   /**
@@ -394,7 +394,7 @@ object MemoryMappedPE {
     val mappings = ListBuffer[Mapping]()
     val lowAlign = data.getOptionalHeader.isLowAlignmentMode
     // get all valid section headers
-    for (header <- table.getSectionHeaders().asScala if secLoader.isValidSection(header)) {
+    for (header <- table.getSectionHeaders.asScala if secLoader.isValidSection(header)) {
       val readSize = secLoader.getReadSize(header)
       /* calculate physical range */
       val pStart = header.getAlignedPointerToRaw(lowAlign)

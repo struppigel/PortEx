@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.github.katjahahn.parser;
 
 import com.github.katjahahn.parser.coffheader.COFFFileHeader;
@@ -21,10 +22,9 @@ import com.github.katjahahn.parser.msdos.MSDOSLoadModule;
 import com.github.katjahahn.parser.optheader.OptionalHeader;
 import com.github.katjahahn.parser.sections.SectionLoader;
 import com.github.katjahahn.parser.sections.SectionTable;
+import com.github.katjahahn.parser.sections.clr.CLRSection;
 import com.github.katjahahn.parser.sections.debug.CodeviewInfo;
-import com.github.katjahahn.parser.sections.debug.DebugDirectoryEntry;
 import com.github.katjahahn.parser.sections.debug.DebugSection;
-import com.github.katjahahn.parser.sections.debug.DebugType;
 import com.github.katjahahn.parser.sections.edata.ExportEntry;
 import com.github.katjahahn.parser.sections.edata.ExportSection;
 import com.github.katjahahn.parser.sections.idata.ImportDLL;
@@ -192,35 +192,61 @@ public class PEData {
     private CodeviewInfo codeviewInfo;
     private List<IcoFile> icons;
 
+    private CLRSection clrSection;
+
     private HashMap<Long, String> stringTable;
 
-    private static int MAX_MANIFEST_SIZE_DEFAULT = 0x5000;
+    private static final int MAX_MANIFEST_SIZE_DEFAULT = 0x5000;
     private int maxManifestSize = MAX_MANIFEST_SIZE_DEFAULT;
 
     /**
      * Trigger loading all extra data. Subsequent calls to loadXXX will not need to read and parse the PE file again.
      */
     public void loadAll() {
-        loadExports();
-        loadImports();
-        loadVersionInfo();
+        // alphabethically sorted
+        loadClrSection();
         loadCodeViewInfo();
-        loadResources();
+        loadExports();
         loadIcons();
+        loadImports();
+        loadManifests();
+        loadPDBPath();
+        loadResources();
+        loadStringTable();
+        loadVersionInfo();
     }
 
     /**
-     * Loads the codeview structure and returns the PDB path of it. Reads the PE file to do so unless already loaded.
-     * This is included because it is an important IoC for malware. For more detailed info about the CodeviewInfo, use loadCodeviewInfo() or load the debug section.
-     *
-     * @return String containing the PDB path or empty string if not there
+     * Tries to load Clr section if not already loaded and returns it as Optional if successful
+     * @return empty Optional if no CLR section could be loaded, Optional of CLRSection instance otherwise
      */
-    public String loadPDBPath() {
-        if (loadCodeViewInfo().isPresent()) {
-            return loadCodeViewInfo().get().filePath();
+    public Optional<CLRSection> loadClrSection() {
+        if(clrSection != null) {
+            return Optional.of(clrSection);
         }
-        return "";
+
+        SectionLoader loader = new SectionLoader(this);
+        try {
+            com.google.common.base.Optional<CLRSection> maybeClr = loader.maybeLoadCLRSection();
+            if (maybeClr.isPresent() && !maybeClr.get().isEmpty()) {
+                this.clrSection = maybeClr.get();
+                return Optional.of(clrSection);
+            }
+        } catch (IOException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
+
+    /**
+     * Checks if the file is a .NET executable by trying to load .NET metadata
+     * @return true iff file is a .NET file
+     */
+    public boolean isDotNet() {
+        return loadClrSection().isPresent();
+    }
+
 
     /**
      * Loads the CodeviewInfo object of the debug info structure. Reads the PE file to do so unless already loaded.
@@ -236,8 +262,7 @@ public class PEData {
             if (sec.isPresent()) {
                 DebugSection d = sec.get();
                 if (d.getCodeView().isPresent()) {
-                    CodeviewInfo c = d.getCodeView().get();
-                    this.codeviewInfo = c;
+                    this.codeviewInfo = d.getCodeView().get();
                     return Optional.of(codeviewInfo);
                 }
             }
@@ -249,25 +274,16 @@ public class PEData {
     }
 
     /**
-     * If this returns true, the timestamps in the headers are invalid because it is a reproducible build.
+     * Loads the codeview structure and returns the PDB path of it. Reads the PE file to do so unless already loaded.
+     * This is included because it is an important IoC for malware. For more detailed info about the CodeviewInfo, use loadCodeviewInfo() or load the debug section.
      *
-     * @return true if REPRO debug directory entry exists
+     * @return String containing the PDB path or empty string if not there
      */
-    public boolean hasReproInvalidTimeStamps() {
-        try {
-            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
-            if (sec.isPresent()) {
-                DebugSection d = sec.get();
-                for (DebugDirectoryEntry entry : d.getEntries()) {
-                    if (entry.getDebugType() == DebugType.REPRO) {
-                        return true;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
+    public String loadPDBPath() {
+        if (loadCodeViewInfo().isPresent()) {
+            return loadCodeViewInfo().get().filePath();
         }
-        return false;
+        return "";
     }
 
     /**
@@ -309,7 +325,7 @@ public class PEData {
      * @return true iff at least one group icon found
      */
     public boolean hasGroupIcon() {
-        return loadResources().stream().anyMatch(r -> IconParser.isGroupIcon(r));
+        return loadResources().stream().anyMatch(IconParser::isGroupIcon);
     }
 
     /**
@@ -326,11 +342,118 @@ public class PEData {
     }
 
     /**
+     * Obtain a list of imports DLL objects without having to deal with exceptions. Reads the PE file to do so unless already loaded.
+     * The import DLL objects contain the referenced symbols.
+     *
+     * @return list of import DLLs
+     */
+    public List<ImportDLL> loadImports() {
+        if (imports != null) {
+            return imports;
+        }
+        SectionLoader loader = new SectionLoader(this);
+        try {
+            com.google.common.base.Optional<ImportSection> maybeImports = loader.maybeLoadImportSection();
+            if (maybeImports.isPresent() && !maybeImports.get().isEmpty()) {
+                ImportSection importSection = maybeImports.get();
+                this.imports = importSection.getImports();
+                return imports;
+            }
+        } catch (IOException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Check if PE file has any imports. Will load imports if not done already.
+     *
+     * @return true iff at least one import is there.
+     */
+    public boolean hasImports() {
+        return loadImports().size() > 0;
+    }
+
+    /**
+     * Loads the manifests if available. Returns empty list if not there. Always reads the PE file to do so.
+     * Uses the maximum manifest size that was set via setMaxManifestSize(int maxManifestSize) or loadManifest(int maxManifestSize).
+     * The default maximum size is {@value #MAX_MANIFEST_SIZE_DEFAULT}
+     *
+     * @return manifest info as a string list
+     */
+    public List<String> loadManifests() {
+        return loadManifests(maxManifestSize);
+    }
+
+    /**
+     * Loads the manifest resources as strings if available. Returns empty list if not there. Always reads the PE file to do so.
+     * This will additionally set the manifest size, so that subsequent calls to loadManifest() use the new size.
+     *
+     * @param maxManifestSize the maximum size in bytes that the manifest is allowed to have
+     * @return all manifest files below maxManifestSize as UTF-8 string in a list
+     */
+    public List<String> loadManifests(int maxManifestSize) {
+        this.maxManifestSize = maxManifestSize;
+        List<String> manifests = new ArrayList<>();
+        try {
+            for (Resource r : loadResources()) {
+                if (isLegitManifest(r, maxManifestSize)) {
+                    manifests.add(loadResourceAsString(r));
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        return manifests;
+    }
+
+    /**
+     * If this returns true, the timestamps in the headers are invalid because it is a reproducible build.
+     *
+     * @return true if REPRO debug directory entry exists
+     */
+    public boolean isReproBuild() {
+        try {
+            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
+            if (sec.isPresent() && !sec.get().isEmpty()) {
+                return sec.get().isReproBuild();
+            }
+        } catch (IOException e) {
+            logger.error(e);
+        }
+        return false;
+    }
+
+    /**
+     * Obtain a list of resources without having to deal with exceptions. Reads the PE file to do so unless already loaded.
+     *
+     * @return List of resources. Empty list if resources do not exist or could not be read
+     */
+    public List<Resource> loadResources() {
+        if (resources != null) {
+            return resources;
+        }
+        try {
+            com.google.common.base.Optional<ResourceSection> res = new SectionLoader(this).maybeLoadResourceSection();
+            if (res.isPresent() && !res.get().isEmpty()) {
+                this.resources = res.get().getResources();
+                return resources;
+            }
+        } catch (IOException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
      * Loads the string table (RT_STRING resources) if not already loaded.
      * @return map of string ID and the actual string
      */
     public Map<Long, String> loadStringTable() {
-        if(stringTable != null) {return stringTable;}
+        if(stringTable != null) { return stringTable; }
         stringTable = new HashMap<>();
         int SIZE_LEN = 2;
         List<Resource> strTables = loadResources().stream().filter(res -> res.getType().equals("RT_STRING")).collect(Collectors.toList());
@@ -368,30 +491,6 @@ public class PEData {
         return stringTable;
     }
 
-    public boolean isReproBuild() {
-        SectionLoader loader = new SectionLoader(this);
-        try {
-            com.google.common.base.Optional<DebugSection> maybeDebug = null;
-            maybeDebug = loader.maybeLoadDebugSection();
-
-            if (maybeDebug.isPresent() && !maybeDebug.get().isEmpty()) {
-                return maybeDebug.get().isReproBuild();
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-        return false;
-    }
-
-        /**
-     * Check if PE file has any imports. Will load imports if not done already.
-     *
-     * @return true iff at least one import is there.
-     */
-    public boolean hasImports() {
-        return loadImports().size() > 0;
-    }
-
     /**
      * Check if PE file has Version Info. Will load version info if not done already.
      *
@@ -424,46 +523,19 @@ public class PEData {
     /**
      * Set maximum size in bytes for loading the manifest data.
      *
-     * @param maxManifestSize
+     * @param maxManifestSize the maximum size of the manifest
+     *
      */
     public void setMaxManifestSize(int maxManifestSize) {
         this.maxManifestSize = maxManifestSize;
     }
 
     /**
-     * Loads the manifests if available. Returns empty list if not there. Always reads the PE file to do so.
-     * Uses the maximum manifest size that was set via setMaxManifestSize(int maxManifestSize) or loadManifest(int maxManifestSize).
-     * The default maximum size is {@value #MAX_MANIFEST_SIZE_DEFAULT}
-     *
-     * @return manifest info as a string list
+     * Checks if the given resource is a manifest and if the manifest size is bigger than zero and smaller than the manifestSize threshold
+     * @param resource the resource that is supposed to be a manifest
+     * @param manifestSize the maximum size of the manifest
+     * @return true iff resource is manifest and manifest has data and manifest text is smaller than manifestSize
      */
-    public List<String> loadManifests() {
-        return loadManifests(maxManifestSize);
-    }
-
-    /**
-     * Loads the manifest resources as strings if available. Returns empty list if not there. Always reads the PE file to do so.
-     * This will additionally set the manifest size, so that subsequent calls to loadManifest() use the new size.
-     *
-     * @param maxManifestSize the maximum size in bytes that the manifest is allowed to have
-     * @return all manifest files below maxManifestSize as UTF-8 string in a list
-     */
-    public List<String> loadManifests(int maxManifestSize) {
-        this.maxManifestSize = maxManifestSize;
-        List<String> manifests = new ArrayList<>();
-        try {
-            for (Resource r : loadResources()) {
-                if (isLegitManifest(r, maxManifestSize)) {
-                    manifests.add(loadResourceAsString(r));
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
-            e.printStackTrace();
-        }
-        return manifests;
-    }
-
     private boolean isLegitManifest(Resource resource, int manifestSize) {
         long offset = resource.rawBytesLocation().from();
         long size = resource.rawBytesLocation().size();
@@ -479,58 +551,11 @@ public class PEData {
      *
      * @param r resource to read as string
      * @return string with the resource content
-     * @throws IOException
+     * @throws IOException if loading the resources failed
      */
     // Note: this is not public because it does not belong in the PEData object.
     private String loadResourceAsString(Resource r) throws IOException {
         return bytesToUTF8(IOUtil.loadBytesOfResource(r, this));
-    }
-
-    /**
-     * Obtain a list of resources without having to deal with exceptions. Reads the PE file to do so unless already loaded.
-     *
-     * @return List of resources. Empty list if resources do not exist or could not be read
-     */
-    public List<Resource> loadResources() {
-        if (resources != null) {
-            return resources;
-        }
-        try {
-            com.google.common.base.Optional<ResourceSection> res = new SectionLoader(this).maybeLoadResourceSection();
-            if (res.isPresent() && !res.get().isEmpty()) {
-                this.resources = res.get().getResources();
-                return resources;
-            }
-        } catch (IOException e) {
-            logger.error(e);
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Obtain a list of imports DLL objects without having to deal with exceptions. Reads the PE file to do so unless already loaded.
-     * The import DLL objects contain the referenced symbols.
-     *
-     * @return list of import DLLs
-     */
-    public List<ImportDLL> loadImports() {
-        if (imports != null) {
-            return imports;
-        }
-        SectionLoader loader = new SectionLoader(this);
-        try {
-            com.google.common.base.Optional<ImportSection> maybeImports = loader.maybeLoadImportSection();
-            if (maybeImports.isPresent() && !maybeImports.get().isEmpty()) {
-                ImportSection importSection = maybeImports.get();
-                this.imports = importSection.getImports();
-                return imports;
-            }
-        } catch (IOException e) {
-            logger.error(e);
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
     }
 
 }
