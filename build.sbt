@@ -2,7 +2,7 @@
 
 name := "PortEx"
 
-version := "4.0.8"
+version := "5.0.0"
 
 scalaVersion := "2.12.13"
 
@@ -27,7 +27,7 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
 sonatypeSettings
 
 // Your project organization (package name)
-organization := "com.github.katjahahn"
+organization := "com.github.struppigel"
 
 pomIncludeRepository := { _ => false }
 
@@ -39,8 +39,8 @@ publishTo := {
 
 scmInfo := Some(
   ScmInfo(
-    url("https://github.com/katjahahn/PortEx.git"),
-    "scm:git@github.com:katjahahn/PortEx.git"
+    url("https://github.com/struppigel/PortEx.git"),
+    "scm:git@github.com:struppigel/PortEx.git"
   )
 )
 
@@ -49,7 +49,7 @@ developers := List(
     id    = "struppigel",
     name  = "Karsten Hahn",
     email = "struppigel@googlemail.com",
-    url   = url("https://github.com/katjahahn/PortEx")
+    url   = url("https://github.com/struppigel/PortEx")
   )
 )
 
@@ -57,6 +57,6 @@ licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2
 
 description := "Java library to parse Portable Executable files"
 
-homepage := Some(url("https://github.com/katjahahn/PortEx"))
+homepage := Some(url("https://github.com/struppigel/PortEx"))
 
 publishMavenStyle := true

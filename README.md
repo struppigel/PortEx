@@ -42,7 +42,7 @@ You can include PortEx to your project by adding the following Maven dependency:
 
 ```
 <dependency>
-   <groupId>com.github.katjahahn</groupId>
+   <groupId>com.github.struppigel</groupId>
    <artifactId>portex_2.12</artifactId>
    <version>4.0.7</version>
 </dependency> 
@@ -52,7 +52,7 @@ To use a local build, add the library as follows:
 
 ```
 <dependency>
-   <groupId>com.github.katjahahn</groupId>
+   <groupId>com.github.struppigel</groupId>
    <artifactId>portex_2.12</artifactId>
    <version>4.0.7</version>
    <scope>system</scope>
@@ -65,7 +65,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "4.0.7"
+libraryDependencies += "com.github.struppigel" % "portex_2.12" % "4.0.7"
 ```
 
 ## Building PortEx
