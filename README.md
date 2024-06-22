@@ -42,9 +42,9 @@ You can include PortEx to your project by adding the following Maven dependency:
 
 ```
 <dependency>
-   <groupId>com.github.struppigel</groupId>
+   <groupId>com.github.katjahahn</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>4.0.7</version>
+   <version>4.0.8</version>
 </dependency> 
 ```
 
@@ -52,11 +52,11 @@ To use a local build, add the library as follows:
 
 ```
 <dependency>
-   <groupId>com.github.struppigel</groupId>
+   <groupId>com.github.katjahahn</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>4.0.7</version>
+   <version>4.0.8</version>
    <scope>system</scope>
-   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-4.0.7.jar</systemPath>
+   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-4.0.8.jar</systemPath>
 </dependency> 
 ```
 
@@ -65,7 +65,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "com.github.struppigel" % "portex_2.12" % "4.0.7"
+libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "4.0.8"
 ```
 
 ## Building PortEx
