@@ -46,10 +46,8 @@ public class ClrScanningTest {
     @Test
     public void nonZeroTerminatedStreamHeaderNameAnomaly() throws IOException {
         PEData pe = pedata.get("NetCoreConsole_BrokenStreamName.dll");
-        CLRSection clr = (new SectionLoader(pe)).maybeLoadCLRSection().get();
         assertHasAnomalyOfType(pe, NON_ZERO_TERMINATED_STREAM_NAME);
         PEData peNormal = pedata.get("HelloWorld.exe");
-        new ReportCreator(pe).printReport();
         assertHasNotAnomalyOfType(peNormal, NON_ZERO_TERMINATED_STREAM_NAME);
     }
 

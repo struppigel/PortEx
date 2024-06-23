@@ -24,8 +24,6 @@ lazy val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
 
 lazy val root = project.in(file(".")).configs(JavaDoc).settings(javadocSettings: _*)
 
-Global / excludeLintKeys ++= Set()
-
 libraryDependencies += "org.testng" % "testng" % "6.14.3" % "test"
 
 libraryDependencies += "com.google.guava" % "guava" % "31.1-jre"
