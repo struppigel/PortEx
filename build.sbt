@@ -1,17 +1,30 @@
-
-
 name := "PortEx"
 
-version := "5.0.0"
+version := "5.0.0-SNAPSHOT"
 
 scalaVersion := "2.12.13"
 
-javadocSettings
+assembly / assemblyJarName := "PortexAnalyzer.jar"
 
-//add this if you have problems with invalid javadocs in Java 8
-javacOptions in JavaDoc += "-Xdoclint:none"
+assembly / mainClass := Some("com.github.struppigel.tools.PortExAnalyzer")
 
-sources in (JavaDoc, doc) ~= (_ filterNot (f => f.getName.contains("$") || f.getName.contains("Util") || f.getName.contains("ResourceDataEntry") || f.getName.contains("DirectoryEntry") || f.getName.contains("Scanning")))
+lazy val JavaDoc = config("genjavadoc") extend Compile
+
+lazy val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
+  addCompilerPlugin("com.typesafe.genjavadoc" %% "genjavadoc-plugin" % "0.18" cross CrossVersion.full),
+  scalacOptions += s"-P:genjavadoc:out=${target.value}/java",
+  Compile / packageDoc := (JavaDoc / packageDoc).value,
+  JavaDoc / sources :=
+    (target.value / "java" ** "*.java").get ++
+      (Compile / sources).value.filter(_.getName.endsWith(".java")),
+  JavaDoc / javacOptions := Seq("-Xdoclint:none"),
+  JavaDoc / packageDoc / artifactName := ((sv, mod, art) =>
+    "" + mod.name + "_" + sv.binary + "-" + mod.revision + "-javadoc.jar")
+)
+
+lazy val root = project.in(file(".")).configs(JavaDoc).settings(javadocSettings: _*)
+
+Global / excludeLintKeys ++= Set()
 
 libraryDependencies += "org.testng" % "testng" % "6.14.3" % "test"
 
@@ -23,19 +36,10 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.19.0"
 
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
 
-// Import default settings. This changes `publishTo` settings to use the Sonatype repository and add several commands for publishing.
-sonatypeSettings
-
 // Your project organization (package name)
 organization := "com.github.struppigel"
 
 pomIncludeRepository := { _ => false }
-
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
 
 scmInfo := Some(
   ScmInfo(
@@ -59,4 +63,21 @@ description := "Java library to parse Portable Executable files"
 
 homepage := Some(url("https://github.com/struppigel/PortEx"))
 
+githubOwner := "struppigel"
+
+githubRepository := "PortEx"
+
+publishTo := Some("GitHub struppigel Apache Maven Packages" at "https://maven.pkg.github.com/struppigel/PortEx")
+
+versionScheme := Some("early-semver") // meaning: major.minor.patch version scheme
+
 publishMavenStyle := true
+
+credentials += Credentials(
+  "GitHub Package Registry",
+  "maven.pkg.github.com",
+  "struppigel",
+  System.getenv("GITHUB_TOKEN")
+)
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
