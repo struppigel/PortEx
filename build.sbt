@@ -11,7 +11,7 @@ assembly / mainClass := Some("com.github.struppigel.tools.PortExAnalyzer")
 lazy val JavaDoc = config("genjavadoc") extend Compile
 
 lazy val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
-  addCompilerPlugin("com.typesafe.genjavadoc" %% "genjavadoc-plugin" % "0.18" cross CrossVersion.full),
+  addCompilerPlugin("com.typesafe.genjavadoc" %% "genjavadoc-plugin" % "0.18_2.13.10" cross CrossVersion.full),
   scalacOptions += s"-P:genjavadoc:out=${target.value}/java",
   Compile / packageDoc := (JavaDoc / packageDoc).value,
   JavaDoc / sources :=
@@ -32,9 +32,9 @@ libraryDependencies += "com.google.guava" % "guava" % "31.1-jre"
 
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.19.0"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.23.1"
 
 // Your project organization (package name)
 organization := "com.github.struppigel"
