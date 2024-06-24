@@ -68,3 +68,4 @@ arbeit/dia1
 /.apt_generated
 /.cache-main
 /.cache-tests
+/.bsp/sbt.json
