@@ -34,7 +34,7 @@ import scala.PartialFunction._
  * @param isDotNet Some if a .NET condition is applied
  */
 class Signature(val name: String, val epOnly: Boolean, 
-    val signature: Array[Option[Byte]], val untilOffset: Long, val isDotNet: Option[Boolean]) {
+    val signature: Array[Option[Byte]]) {
   
   def bytesMatched(): Int =
       signature.count(cond(_) { case Some(s) => true })
@@ -44,8 +44,7 @@ class Signature(val name: String, val epOnly: Boolean,
   override def toString(): String =
     s"""|name: $name
     	|signature: $signatureString
-	    |ep_only: $epOnly
-      |until offset: $untilOffset """.stripMargin
+	    |ep_only: $epOnly""".stripMargin
 
 }
 
@@ -90,7 +89,7 @@ object Signature {
     // convert hex string to byte array
     val sigbytes = hex2bytes(convertedSig)
     // create signature
-    new Signature(name, ep, sigbytes, untilOffset, isDotNet)
+    new Signature(name, ep, sigbytes)
   }
 
   /**

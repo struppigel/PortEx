@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Phillip Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,17 @@ import static com.github.struppigel.tools.anomalies.AnomalyType.*;
  * The subtype is a specific description for the anomaly. This avoids having to
  * search for parts of the description string to find certain anomalies.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  */
 public enum AnomalySubType {
+
+    /**************************** Misc ******************************/
+
+    /**
+     * involves multiple structures in the PE file, purpose is to deliver
+     * reverse engineering hints, with less focus on how and where this was determined.
+     */
+    COMPLEX_RE_HINT(RE_HINT),
 
     /**************************** MSDOS Header ******************************/
 

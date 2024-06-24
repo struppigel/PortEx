@@ -75,7 +75,7 @@ trait ClrScanning extends AnomalyScanner {
           "Version string in Metadata Root is not readable",
           AnomalySubType.METADATA_ROOT_VERSION_STRING_BROKEN
         ))
-    } else List[Anomaly]()
+    } else Nil
 
   /**
    * Anomalies in the #Strings heap

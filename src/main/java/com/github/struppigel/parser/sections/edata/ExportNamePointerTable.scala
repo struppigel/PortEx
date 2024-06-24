@@ -52,7 +52,7 @@ object ExportNamePointerTable {
 
   type Address = Long
   val entryLength = 4
-  val maxNameEntries = 10000 //add max val TODO anomaly
+  val maxNameEntries = 500 //add max val TODO anomaly
   val maxNameLength = 0x200 // TODO anomaly
 
   def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int,

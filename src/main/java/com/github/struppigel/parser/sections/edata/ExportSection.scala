@@ -190,17 +190,16 @@ object ExportSection {
 
   private val logger = LogManager.getLogger(ExportSection.getClass().getName())
 
-  val maxNameEntries = 5000
-  val maxOrdEntries = 5000
+  val maxOrdEntries = 500 // TODO not consistent because maxOrdEntries is in ExportOrdinalTable
+  val exportDirSize = 40
   private var invalidExportCount = 0
 
   @throws(classOf[FileFormatException])
   def apply(li: LoadInfo): ExportSection = {
-    //TODO slice only headerbytes for ExportDir
     invalidExportCount = 0
     val mmBytes = li.memoryMapped
     val offset = li.fileOffset
-    val exportBytes = mmBytes.slice(li.va, mmBytes.length + li.va)
+    val exportBytes = mmBytes.slice(li.va, li.va + exportDirSize)
     val edataTable = ExportDirectory(exportBytes, offset)
     val exportAddressTable = loadExportAddressTable(edataTable, mmBytes, li.va, offset)
     val namePointerTable = loadNamePointerTable(edataTable, mmBytes, li.va, offset)
@@ -224,7 +223,7 @@ object ExportSection {
     mmBytes: MemoryMappedPE, virtualAddress: Long, edataOffset: Long): ExportOrdinalTable = {
     val base = edataTable(ORDINAL_BASE)
     val rva = edataTable(ORDINAL_TABLE_RVA)
-    val entries = edataTable(NR_OF_NAME_POINTERS)
+    val entries = Math.min(edataTable(NR_OF_NAME_POINTERS), maxOrdEntries)
     val ordTableFileOffset = edataOffset + rva - virtualAddress
     if(ordTableFileOffset <= 0 || entries < 0) {
       // create empty ExportOrdinalTable
@@ -309,11 +308,9 @@ object ExportSection {
 
     val rvas = ListBuffer[Long]()
     val names = namePointerTable.pointerNameList.map(_._2)
-    
-    // limit name entries to read to maximum
-    val namesLimited = if (names.length > maxNameEntries) names.take(maxNameEntries) else names
+
     // create name entries
-    val nameEntries: List[ExportEntry] = (namesLimited map { name =>
+    val nameEntries: List[ExportEntry] = (names map { name =>
       val rva = getSymbolRVAForName(name, exportAddressTable, ordinalTable, namePointerTable)
       isValidRVAAndCountInvalid(rva, sectionLoader, file, rvas) // only for count
       val ordinal = getOrdinalForName(name, ordinalTable, namePointerTable)

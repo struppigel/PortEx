@@ -147,9 +147,9 @@ object SignatureTree {
     val bytes = List(Some(1.toByte), None, Some(3.toByte), Some(4.toByte))
     val bytes2 = List(1, 2, 3).map(x => Some(x.toByte))
     val bytes3 = List(6, 7, 8).map(x => Some(x.toByte))
-    val sig = new Signature("first", false, bytes.toArray, 0L, None)
-    val sig2 = new Signature("second", false, bytes2.toArray, 0L, None)
-    val sig3 = new Signature("third", true, bytes3.toArray, 0L, None)
+    val sig = new Signature("first", false, bytes.toArray)
+    val sig2 = new Signature("second", false, bytes2.toArray)
+    val sig3 = new Signature("third", true, bytes3.toArray)
     tree + sig
     tree + sig2
     tree + sig3

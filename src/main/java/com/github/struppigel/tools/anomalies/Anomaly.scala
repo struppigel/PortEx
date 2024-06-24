@@ -174,3 +174,11 @@ case class OverlayAnomaly(val overlay: Overlay,
   override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(overlay.getOffset, overlay.getSize)).asJava
   override def key = PEStructureKey.OVERLAY
 }
+
+case class ComplexReHintAnomaly(override val description: String) extends Anomaly {
+
+  // we probably don't need the scan locations here
+  override def locations: java.util.List[PhysicalLocation] = Nil.asJava
+  override def key = PEStructureKey.MULTIPLE_STRUCTURES
+  override def subtype = AnomalySubType.COMPLEX_RE_HINT
+}

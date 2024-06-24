@@ -52,6 +52,7 @@ trait SectionTableScanning extends AnomalyScanner {
       ".CLR_UEF" -> ".CLR Unhandled Exception Handler section",
       ".cormeta" -> "CLR Metadata section",
       ".complua" -> "LUA compiled",
+      "CPADinfo" -> "Crashpad info",
       ".eh_fram" -> "Exception Handler Frame section",
       ".export" -> "Alternative export data section",
       ".fasm" -> "Flat Assembler", ".flat" -> "Flat Assembler",
