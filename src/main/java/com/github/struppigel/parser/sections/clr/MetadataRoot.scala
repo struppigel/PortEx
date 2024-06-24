@@ -168,7 +168,10 @@ object MetadataRoot {
   private def loadFlagsAndStreams(mmbytes: MemoryMappedPE, metadataVA: Long, formatMeta: SpecificationFormat, versionLength: Long) = {
     val flagsVA = metadataVA + versionOffset + versionLength
     val tempBytes = mmbytes.slice(flagsVA, flagsVA + 4)
-    val flagsAndStreamsOffset = mmbytes._virtToPhysAddresses(flagsVA).head
+    val flagsAndStreamsOffset = {
+      val addresses = mmbytes._virtToPhysAddresses(flagsVA)
+      if(addresses.isEmpty) 1 else addresses.head
+    }
     IOUtil.readHeaderEntries(classOf[MetadataRootKey],
       formatMeta, metaRootSpec2, tempBytes, flagsAndStreamsOffset).asScala
   }
