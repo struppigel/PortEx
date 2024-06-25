@@ -5,13 +5,12 @@ import com.github.struppigel.parser.PELoaderTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static com.github.struppigel.tools.anomalies.AnomalySubType.*;
-import static org.testng.Assert.*;
+import static com.github.struppigel.tools.anomalies.PEAnomalyScannerTest.assertHasAnomalyOfType;
+import static com.github.struppigel.tools.anomalies.PEAnomalyScannerTest.assertHasNotAnomalyOfType;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ClrScanningTest {
 
@@ -20,24 +19,6 @@ public class ClrScanningTest {
     @BeforeClass
     public void prepare() throws IOException {
         pedata = PELoaderTest.getPEData();
-    }
-
-    private void assertHasAnomalyOfType(PEData pe, AnomalySubType atype) {
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe.getFile());
-        List<Anomaly> anomalies = scanner.getAnomalies();
-        List<Anomaly> found = anomalies.stream()
-                .filter(a -> a.subtype() == atype)
-                .collect(Collectors.toList());
-        assertTrue(found.size() > 0);
-    }
-
-    private void assertHasNotAnomalyOfType(PEData pe, AnomalySubType atype) {
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe.getFile());
-        List<Anomaly> anomalies = scanner.getAnomalies();
-        List<Anomaly> found = anomalies.stream()
-                .filter(a -> a.subtype() == atype)
-                .collect(Collectors.toList());
-        assertTrue(found.isEmpty());
     }
 
     @Test

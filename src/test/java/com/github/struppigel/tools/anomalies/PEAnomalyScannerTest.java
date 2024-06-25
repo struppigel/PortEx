@@ -2,6 +2,7 @@ package com.github.struppigel.tools.anomalies;
 
 import com.github.struppigel.TestreportsReader;
 import com.github.struppigel.parser.HeaderKey;
+import com.github.struppigel.parser.PEData;
 import com.github.struppigel.parser.optheader.WindowsEntryKey;
 import com.github.struppigel.parser.sections.SectionHeaderKey;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertTrue;
 
@@ -168,6 +170,24 @@ public class PEAnomalyScannerTest {
     public void imageBaseConstraints() {
         String description = "image base is 0";
         performTest(zeroImageBase, AnomalyType.NON_DEFAULT, description);
+    }
+
+    public static void assertHasAnomalyOfType(PEData pe, AnomalySubType atype) {
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe.getFile());
+        List<Anomaly> anomalies = scanner.getAnomalies();
+        List<Anomaly> found = anomalies.stream()
+                .filter(a -> a.subtype() == atype)
+                .collect(Collectors.toList());
+        assertTrue(found.size() > 0);
+    }
+
+    public static void assertHasNotAnomalyOfType(PEData pe, AnomalySubType atype) {
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe.getFile());
+        List<Anomaly> anomalies = scanner.getAnomalies();
+        List<Anomaly> found = anomalies.stream()
+                .filter(a -> a.subtype() == atype)
+                .collect(Collectors.toList());
+        assertTrue(found.isEmpty());
     }
 
 }
