@@ -50,7 +50,7 @@ class SignatureScanner(signatures: List[Signature]) {
   def this(signatures: java.util.List[Signature]) = this(signatures.asScala.toList)
 
   private val longestSigSequence: Int = signatures.foldLeft(0)(
-    (i, s) => if (s.signature.length > i) s.signature.length else i)
+    (i, s) => if (s.pattern.length > i) s.pattern.length else i)
 
   private lazy val epOnlyFalseSigs: SignatureTree =
     createSignatureTree(signatures.filter(_.epOnly == false))
@@ -356,7 +356,7 @@ object SignatureScanner {
 
   def toMatchedSignature(result: ScanResult): MatchedSignature = {
     val (sig, addr) = result
-    val signature = bytes2hex(sig.signature, " ")
+    val signature = bytes2hex(sig.pattern, " ")
     new MatchedSignature(addr, signature, sig.name, sig.epOnly)
   }
 

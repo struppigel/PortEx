@@ -654,12 +654,22 @@ class ReportCreator(private val data: PEData) {
 
   def reversingHintsReport(): String = {
     val rehints = anomalies.filter(a => a.getType() == AnomalyType.RE_HINT)
-    val descriptions = anomaliesToDescriptions(rehints)
+    val descriptions = reHintsToDescriptions(rehints)
     if (descriptions.isEmpty) ""
     else title("Reverse Engineering Hints") + NL +
-      "Total hints: " + rehints.size + NL + NL +
-      ("* " + descriptions.mkString(NL + "* ")) + NL + NL
+      "Total hints: " + descriptions.size + NL + NL +
+      descriptions.mkString(NL) + NL + NL
   }
+
+  def reHintsToDescriptions(hints: List[Anomaly]): List[String] = {
+    val subtypeToAnomaly = hints.groupBy(_.subtype())
+    subtypeToAnomaly.map{
+      case (subtype, anoms) =>
+      subtype.getDescription.get + NL +
+        anoms.foldRight("")( (rh,acc) => s"${acc}${NL}\t* ${rh.description()}") + NL
+    }.toList
+  }
+
 
   /**
    * Retrieve descriptions of anomaly list, consolidate anomaly subtypes that occur very often.

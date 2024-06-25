@@ -34,7 +34,7 @@ abstract class SignatureTree {
    * @return tree with new signature
    */
   def +(sig: Signature): SignatureTree = {
-    insert(sig, sig.signature.toList)
+    insert(sig, sig.pattern.toList)
     this
   }
 

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.github.struppigel.tools.anomalies;
 
+import java.util.Optional;
+
 import static com.github.struppigel.tools.anomalies.AnomalyType.*;
 
 /**
@@ -27,13 +29,37 @@ import static com.github.struppigel.tools.anomalies.AnomalyType.*;
  */
 public enum AnomalySubType {
 
-    /**************************** Complex RE Hints ******************************/
+    /**************************** RE Hints ******************************/
 
     /**
-     * involves multiple structures in the PE file, purpose is to deliver
+     * Often involves multiple structures in the PE file, purpose is to deliver
      * reverse engineering hints, with less focus on how and where this was determined.
      */
-    ELECTRON_PACKAGE_RE_HINT(RE_HINT),
+
+    AHK_RE_HINT(RE_HINT, "The executable is an AutoHotKey wrapper. Extract the resource and check the script."),
+
+    ARCHIVE_RE_HINT(RE_HINT, "This file has an embedded archive, extract the contents with an unarchiver"),
+
+    AUTOIT_RE_HINT(RE_HINT, "The file is an AutoIt script executable, use AutoIt-Ripper to unpack the script"),
+
+    ELECTRON_PACKAGE_RE_HINT(RE_HINT, "This is an Electron Package executable. Look for *.asar archive in resources folder. This might be a separate file."),
+
+    EMBEDDED_EXE_RE_HINT(RE_HINT, "This file contains an embedded executable, extract and analyse it"),
+
+    FAKE_VMP_RE_HINT(RE_HINT, "This might be protected with an older version of VMProtect, but many have fake VMProtect section names. So check if this is really the case."),
+
+    INSTALLER_RE_HINT(RE_HINT, "This file is an installer, extract the install script and contained files, try 7zip or run the file and look into TEMP"),
+
+    NULLSOFT_RE_HINT(RE_HINT, "This file is a Nullsoft installer, download 7zip v15.02 to extract the install script and contained files"),
+
+    PYINSTALLER_RE_HINT(RE_HINT, "This file is a PyInstaller executable. Use pyinstxtractor to extract the python bytecode, then apply a decompiler to the main .pyc"),
+
+    SCRIPT_TO_EXE_WRAPPED_RE_HINT(RE_HINT, "This might be a Script-to-Exe wrapped file, check the resources for a compressed or plain script."),
+
+    SFX_RE_HINT(RE_HINT, "This file is a self-extracting-archive. Try to extract the files with 7zip or run the file and collect them from TEMP"),
+
+    UPX_PACKER_RE_HINT(RE_HINT, "This file seems to be packed with UPX, unpack it with upx.exe -d <sample>"),
+
 
     /**************************** MSDOS Header ******************************/
 
@@ -278,7 +304,7 @@ public enum AnomalySubType {
     /**************************** Section Table ******************************/
 
     /**
-     * Section table is in virtual space //TODO add to thesis
+     * Section table is in virtual space
      */
     VIRTUAL_SECTION_TABLE(STRUCTURE),
     /**
@@ -321,7 +347,7 @@ public enum AnomalySubType {
     DEPRECATED_SEC_CHARACTERISTICS(DEPRECATED),
     /**
      * Section characteristics are either missing or superfluous. (Based on
-     * conventions given by section name, see PECOFF spec) //TODO add to thesis
+     * conventions given by section name, see PECOFF spec)
      */
     UNUSUAL_SEC_CHARACTERISTICS(NON_DEFAULT),
     /**
@@ -446,14 +472,7 @@ public enum AnomalySubType {
     INVALID_EXPORTS(STRUCTURE),
 
     /**************************** Resource Section ******************************/
-    /**
-     * Resource content provides information on how to reverse engineer the file
-     */
-    RESOURCE_CONTENT_HINT(RE_HINT),
-    /**
-     * Resource filetype provides information how to reverse engineer the file
-     */
-    RESOURCE_FILETYPE_HINT(RE_HINT),
+
     /**
      * Resource tree has a loop
      */
@@ -466,10 +485,6 @@ public enum AnomalySubType {
      * Name of a named resource entry is interesting
      */
     RESOURCE_NAME(NON_DEFAULT),
-    /**
-     * Named resource entry provides information on how to reverse engineer the file
-     */
-    RESOURCE_NAME_HINT(RE_HINT),
 
 
     /**************************** CLR Section ******************************/
@@ -491,21 +506,35 @@ public enum AnomalySubType {
     /**
      * Usage of unreadable characters for strings in the #Strings heap. Typical obfuscation method.
      */
-    UNREADABLE_CHARS_IN_STRINGS_HEAP(NON_DEFAULT),
-
-    /**************************** Overlay ******************************/
-
-    /**
-     * Overlay has a file type that warrants further analysis
-     */
-    OVERLAY_FILETYPE_HINT(RE_HINT)
+    UNREADABLE_CHARS_IN_STRINGS_HEAP(NON_DEFAULT)
     ;
 
     private final AnomalyType superType;
+    private final Optional<String> description;
 
-    private AnomalySubType(AnomalyType superType) {
+    AnomalySubType(AnomalyType superType) {
+        this.description = Optional.empty();
         this.superType = superType;
+
+        if(superType.equals(RE_HINT)) {
+            assert(this.description.isPresent());
+        }
     }
+
+    AnomalySubType(AnomalyType superType, String description) {
+        this.description = Optional.ofNullable(description);
+        this.superType = superType;
+
+        if(superType.equals(RE_HINT)) {
+            assert(this.description.isPresent());
+        }
+    }
+
+    /**
+     * Must be present for RE_HINTS, unfortunately I cannot create Subclass of Enum
+     * @return
+     */
+    public Optional<String> getDescription() { return description; }
 
     public AnomalyType getSuperType() {
         return superType;

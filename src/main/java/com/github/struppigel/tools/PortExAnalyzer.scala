@@ -457,7 +457,7 @@ object PortExAnalyzer {
 
   private def printFileTypeReport(file: File): Unit = {
     def bytesMatched(sig: Signature): Int =
-      sig.signature.count(cond(_) { case Some(_) => true })
+      sig.pattern.count(cond(_) { case Some(_) => true })
 
     val results = FileTypeScanner(file)._scanAt(0)
     if (results.isEmpty) println("No matching file-type signatures found")
@@ -479,7 +479,7 @@ object PortExAnalyzer {
     }
 
     def bytesMatched(sig: Signature): Int =
-      sig.signature.count(cond(_) { case Some(_) => true })
+      sig.pattern.count(cond(_) { case Some(_) => true })
 
     using(new FileWriter(outFile, true)) { fw =>
       fw.write("The given file is no PE file!" + NL +

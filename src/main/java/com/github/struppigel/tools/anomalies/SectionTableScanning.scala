@@ -177,6 +177,16 @@ trait SectionTableScanning extends AnomalyScanner {
       ".yP" -> "Y0da Protector", ".y0da" -> "Y0da Protector"
   )
 
+  private val sectionNamesToReHints = HashMap(
+    ".ndata" -> NULLSOFT_RE_HINT,
+    // UPX
+    "UPX0" -> UPX_PACKER_RE_HINT, "UPX1" -> UPX_PACKER_RE_HINT, "UPX2" -> UPX_PACKER_RE_HINT,
+    "UPX!" -> UPX_PACKER_RE_HINT, ".UPX0" -> UPX_PACKER_RE_HINT, ".UPX1" -> UPX_PACKER_RE_HINT,
+    ".UPX2" -> UPX_PACKER_RE_HINT,
+  //VMP
+  ".vmp0" -> FAKE_VMP_RE_HINT
+  )
+
   type SectionRange = (Long, Long)
 
   abstract override def scanReport(): String =
@@ -193,10 +203,21 @@ trait SectionTableScanning extends AnomalyScanner {
     anomalyList ++= checkExtendedReloc
     anomalyList ++= checkTooLargeSizes
     anomalyList ++= checkSectionNames
+    anomalyList ++= checkSectionNamesReHints
     anomalyList ++= checkOverlappingOrShuffledSections
     anomalyList ++= checkSectionCharacteristics
     anomalyList ++= sectionTableInOverlay
     super.scan ::: anomalyList.toList
+  }
+
+  private def checkSectionNamesReHints(): List[Anomaly] = {
+    val sections = data.getSectionTable.getSectionHeaders.asScala
+    sections.filter(h => sectionNamesToReHints.contains(h.getName))
+      .map(h => {
+        val description = s"Section name ${h.getName}"
+        SectionNameAnomaly(h, description, sectionNamesToReHints(h.getName))
+      })
+      .toList
   }
 
   private def checkVirtualSecTable(): List[Anomaly] = {

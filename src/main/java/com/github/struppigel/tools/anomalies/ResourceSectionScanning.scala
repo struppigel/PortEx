@@ -64,31 +64,33 @@ trait ResourceSectionScanning extends AnomalyScanner {
         isPattern(List(1,1,0,0,0,0),res) && peHasSignature("PureBasic")
     )
     if( filteredResource.nonEmpty ) {
-      val description = s"This might be a Script-to-Exe wrapped file, check the resources for a compressed or plain script."
-      anomalyList += ResourceAnomaly(filteredResource.head, description, AnomalySubType.RESOURCE_CONTENT_HINT)
+      val name = filteredResource.head.getName()
+      val offset = filteredResource.head.rawBytesLocation
+      val description = s"Signature is PureBasic and Resource {$name} at {$offset} has bytes 0x01 0x01 0x00 0x00 0x00 0x00"
+      anomalyList += ResourceAnomaly(filteredResource.head, description, AnomalySubType.SCRIPT_TO_EXE_WRAPPED_RE_HINT)
     }
     anomalyList.toList
   }
 
   private def checkResourceNames(rsrc: ResourceSection): List[Anomaly] = {
 
-    val resourceNameHints = Map(">AUTOHOTKEY SCRIPT<" -> "The executable is an AutoHotKey wrapper. Extract the resource and check the script.")
+    val resourceNameReHints = Map(">AUTOHOTKEY SCRIPT<" -> AnomalySubType.AHK_RE_HINT, "SCRIPT" -> AnomalySubType.AUTOIT_RE_HINT)
 
     val anomalyList = ListBuffer[Anomaly]()
     val resources = rsrc.getResources.asScala    
     for (resource <- resources) {
       for ((lvl, id) <- resource.levelIDs) {
         id match {
-          case Name(rva, name) =>
+          case Name(_, name) =>
             val max = ResourceDirectoryEntry.maxNameLength
             val offset = resource.rawBytesLocation.from
             if (name.length >= max) {
               val description = s"Resource name in resource ${name} ${ScalaIOUtil.hex(offset)} at level ${lvl} has maximum length (${max})";
               anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_NAME)
             }
-            if (resourceNameHints isDefinedAt name) {
-              val description = s"Resource named ${name} in resource ${ScalaIOUtil.hex(offset)}: ${resourceNameHints(name)}"
-              anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_NAME_HINT)
+            if (resourceNameReHints isDefinedAt name) {
+              val description = s"Resource named ${name} in resource ${ScalaIOUtil.hex(offset)}"
+              anomalyList += ResourceAnomaly(resource, description, resourceNameReHints(name))
             }
           case _ => //nothing
         }
@@ -109,13 +111,13 @@ trait ResourceSectionScanning extends AnomalyScanner {
       val resourceIsExecutable = executableResourceSigs.nonEmpty
       if(resourceIsArchive) {
         val anySigName = archiveResourceSigs.head._1.name
-        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an archive (${anySigName}), dump the resource and try to unpack it."
-        anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILETYPE_HINT)
+        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an archive (${anySigName})"
+        anomalyList += ResourceAnomaly(resource, description, AnomalySubType.ARCHIVE_RE_HINT)
       }
       if(resourceIsExecutable) {
         val anySigName = executableResourceSigs.head._1.name
-        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an executable (${anySigName}), dump the resource and analyse the file"
-        anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILETYPE_HINT)
+        val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an executable (${anySigName})"
+        anomalyList += ResourceAnomaly(resource, description, AnomalySubType.EMBEDDED_EXE_RE_HINT)
       }
     }
     anomalyList.toList
