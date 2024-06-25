@@ -39,7 +39,7 @@ trait ComplexReHintScanning extends AnomalyScanner {
     val headers = data.getSectionTable.getSectionHeaders.asScala
     if(headers.exists(_.getName == "CPADinfo")) {
       if (data.loadPDBPath() == "electron.exe.pdb"){
-        val description = "This is an Electron Package executable. Look for .asar archive in resources. This might be a separate file."
+        val description = "This is an Electron Package executable. Look for *.asar archive in resources folder. This might be a separate file."
         return List(ComplexReHintAnomaly(description, AnomalySubType.ELECTRON_PACKAGE_RE_HINT))
       }
     }
