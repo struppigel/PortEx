@@ -178,9 +178,9 @@ public class Hasher {
             int readbytes;
             long byteSum = from;
             raf.seek(from);
-            while ((readbytes = raf.read(buffer)) != -1 && byteSum <= until) {
+            while ((readbytes = raf.read(buffer)) != -1 && byteSum < until) {
                 byteSum += readbytes;
-                if (byteSum > until) {
+                if (byteSum >= until) {
                     readbytes -= (byteSum - until);
                 }
                 digest.update(buffer, 0, readbytes);

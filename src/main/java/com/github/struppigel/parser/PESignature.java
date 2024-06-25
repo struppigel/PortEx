@@ -23,11 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import static com.github.struppigel.parser.ByteArrayUtil.bytesToInt;
-import static com.github.struppigel.parser.ByteArrayUtil.longToDWord;
-import static com.github.struppigel.parser.IOUtil.NL;
-import static com.github.struppigel.parser.IOUtil.loadBytesSafely;
-
 /**
  * Reads the offset of the PE signature and the signature itself.
  * <p>

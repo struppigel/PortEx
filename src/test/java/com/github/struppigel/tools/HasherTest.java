@@ -17,14 +17,12 @@
  */
 package com.github.struppigel.tools;
 
-import com.github.struppigel.TestreportsReader;
 import com.github.struppigel.parser.ByteArrayUtil;
 import com.github.struppigel.parser.PEData;
-import com.github.struppigel.parser.PELoader;
+import com.github.struppigel.parser.PELoaderTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -33,57 +31,61 @@ import static org.testng.Assert.assertEquals;
 
 public class HasherTest {
 
-    private PEData winrar;
+    private PEData pe;
     private MessageDigest md5;
     private MessageDigest sha256;
 
     @BeforeClass
     public void prepare() throws IOException, NoSuchAlgorithmException {
-        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
-                + TestreportsReader.TEST_FILE_DIR + "/WinRar.exe"));
-        this.winrar = data;
+        this.pe = PELoaderTest.getPEData().get("Lab05-01");
         md5 = MessageDigest.getInstance("MD5");
         sha256 = MessageDigest.getInstance("SHA-256");
     }
 
     @Test
     public void fileHashes() throws IOException, NoSuchAlgorithmException {
-        Hasher hasher = new Hasher(winrar);
+        Hasher hasher = new Hasher(pe);
         byte[] hash = hasher.fileHash(md5);
         assertEquals(ByteArrayUtil.byteToHex(hash, ""),
-                "54e97d9059e3ba4e4dee6f0433fec960");
-        assertEquals(Hasher.fileHash(winrar.getFile(), md5), hash);
+                        "1a9fd80174aafecd9a52fd908cb82637");
+        assertEquals(Hasher.fileHash(pe.getFile(), md5), hash);
         hash = hasher.fileHash(sha256);
         assertEquals(ByteArrayUtil.byteToHex(hash, ""),
-                "df7509783db57a7ed2b2c794cea04a08f1ca7c289999730c4b914237eeb3b072");
-        assertEquals(Hasher.fileHash(winrar.getFile(), sha256), hash);
+                "EB1079BDD96BC9CC19C38B76342113A09666AAD47518FF1A7536EEBFF8AADB4A".toLowerCase());
+        assertEquals(Hasher.fileHash(pe.getFile(), sha256), hash);
     }
-
+    @Test
     public void sectionMD5Hashes() throws IOException {
-        String[] actualHashes = { "496ecf611b45abe56f64ab3ab495faf3",
-                "23f563d2bed9b8916cb8f7b69b0902de",
-                "ad1f7c6cd9b9a20390018781b70fb1a3",
-                "03b360092b3b19a3cf43f2c213c54d5c" };
-        Hasher hasher = new Hasher(winrar);
+        String[] actualHashes = {
+               "04d66370327b841e3f2847eaa07578ec",
+               "8b0748079adebffd152ac8f9534b56fb",
+               "877a17afa5144027130318eae2fac53d",
+               "cefd56e5d8f3c55036f62f7570640e11",
+               "3d4a5136ca116a919b2688c93f988e59",
+               "1f25452db8a1049987b390b802a1919c" };
+        Hasher hasher = new Hasher(pe);
         byte[] hash;
-        int sections = winrar.getSectionTable().getNumberOfSections();
+        int sections = pe.getSectionTable().getNumberOfSections();
         for (int i = 1; i <= sections; i++) {
             hash = hasher.sectionHash(i, md5);
-            assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i]);
+            assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i-1].toLowerCase());
         }
     }
-    
+    @Test
     public void sectionSHA256Hashes() throws IOException {
-        String[] actualHashes = { "000048859a45a60fbca06ff292250bbc0e7249f85dad368288b573e2dcdd34be",
-                "6023c1b0fd34a9e2bf0e1cadc7fe762db6f2986f0094dd92bfa68f5d4dac68c5",
-                "078455084d1ff6b9b2b44a940987bf79253307191de75a3a2b3cf64ef863864b",
-                "57f13d22be498f7f77bd87afedc8732a550a0c7957ac3e641ef32a3dc2b0ea7e" };
-        Hasher hasher = new Hasher(winrar);
+        String[] actualHashes = {
+                "46926593C1038385F419706E109CDD23D67383ED55318F8B0E0D90CAB38A3F4C",
+                "97E0A32C3C843981908360F105AEF652F8990EBCFA7362377B12B7BE29371081",
+                "74C32CA9D904BECB4AC6EB6965AB4B7915ABB61C231D2124F73FABB16C817AD1",
+                "9E4D583F3AE38998B750037A6826537D6B1FCFDC2596A3BBB6A040D76536A63D",
+                "C007F66B09B62B82DABED2E2AAC9D3ABA17A5FEA730E7AB5D4C85A3EE93CD49C",
+                "34f3fff6ed7211ba16f2a8abe2295da2873be92cabea731246665941e6afc64e"};
+        Hasher hasher = new Hasher(pe);
         byte[] hash;
-        int sections = winrar.getSectionTable().getNumberOfSections();
+        int sections = pe.getSectionTable().getNumberOfSections();
         for (int i = 1; i <= sections; i++) {
             hash = hasher.sectionHash(i, sha256);
-            assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i]);
+            assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i-1].toLowerCase());
         }
     }
 }

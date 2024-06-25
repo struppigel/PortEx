@@ -31,7 +31,7 @@ object ChecksumVerifier {
     val computedChecksum = computeChecksum(peData)
     checksum == computedChecksum
   }
-  
+
   def computeChecksum(peData: PEData): Long = {
     val file = peData.getFile
     val ch = FileChannel.open(file.toPath)
@@ -39,25 +39,43 @@ object ChecksumVerifier {
     ch.position(0)
     var sum = 0L
     val top = Math.pow(2, 32).toLong
-    val overlay = new Overlay(file)
-    val length = (if (overlay.exists) overlay.getOffset else ch.size)
+    val length = file.length()
     val byteArray: Array[Byte] = Array.fill(length.toInt)(0.toByte)
-    var buffer = ByteBuffer.wrap(byteArray)
+    val buffer = ByteBuffer.wrap(byteArray)
     buffer.order(ByteOrder.LITTLE_ENDIAN)
 
     ch.read(buffer)
+
+    // overwrite checksum with zeroes
     buffer.putInt(checksumOffset.toInt, 0x0000)
 
+    // start calculation
     buffer.position(0)
     while (buffer.hasRemaining() && buffer.remaining() >= 4) {
       sum += buffer.getInt() & 0xffffffffL
       if (sum > top) {
-        sum = (sum & 0xffffffffL) + (sum >> 32)
+        sum = (sum & 0xffffffffL) + (sum >>> 32)
       }
+
     }
-    sum = (sum & 0xffff) + (sum >> 16)
-    sum = sum + (sum >> 16)
-    sum = sum & 0xffff
+    // calculation on padded remainder
+    val remainingBytes: Array[Byte] = Array.fill(4)(0.toByte)
+    var i = 0
+    while (buffer.hasRemaining()) {
+      remainingBytes(i) = buffer.get()
+      i += 1
+    }
+    sum += ByteBuffer.wrap(remainingBytes).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xffffffffL
+    if (sum > top) {
+      sum = (sum & 0xffffffffL) + (sum >>> 32)
+    }
+    // fold
+    var high = sum >>> 16
+    sum &= 0xFFFF
+    sum += high
+    high = sum >>> 16
+    sum += high
+    sum &= 0xFFFF
     sum += length
     sum
   }

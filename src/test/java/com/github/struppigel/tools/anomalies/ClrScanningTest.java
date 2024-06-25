@@ -2,9 +2,6 @@ package com.github.struppigel.tools.anomalies;
 
 import com.github.struppigel.parser.PEData;
 import com.github.struppigel.parser.PELoaderTest;
-import com.github.struppigel.parser.sections.SectionLoader;
-import com.github.struppigel.parser.sections.clr.CLRSection;
-import com.github.struppigel.tools.ReportCreator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static com.github.struppigel.tools.anomalies.AnomalySubType.*;
