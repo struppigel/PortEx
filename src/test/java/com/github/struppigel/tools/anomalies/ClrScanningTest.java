@@ -5,8 +5,8 @@ import com.github.struppigel.parser.PELoaderTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static com.github.struppigel.tools.anomalies.AnomalySubType.*;
-import static com.github.struppigel.tools.anomalies.PEAnomalyScannerTest.assertHasAnomalyOfType;
-import static com.github.struppigel.tools.anomalies.PEAnomalyScannerTest.assertHasNotAnomalyOfType;
+import static com.github.struppigel.tools.anomalies.PEAnomalyScannerTest.assertHasAnomalySubType;
+import static com.github.struppigel.tools.anomalies.PEAnomalyScannerTest.assertHasNotAnomalySubType;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,18 +22,18 @@ public class ClrScanningTest {
     }
 
     @Test
-    public void nonZeroTerminatedStreamHeaderNameAnomaly() throws IOException {
+    public void nonZeroTerminatedStreamHeaderNameAnomaly() {
         PEData pe = pedata.get("NetCoreConsole_BrokenStreamName.dll");
-        assertHasAnomalyOfType(pe, NON_ZERO_TERMINATED_STREAM_NAME);
+        assertHasAnomalySubType(pe, NON_ZERO_TERMINATED_STREAM_NAME);
         PEData peNormal = pedata.get("HelloWorld.exe");
-        assertHasNotAnomalyOfType(peNormal, NON_ZERO_TERMINATED_STREAM_NAME);
+        assertHasNotAnomalySubType(peNormal, NON_ZERO_TERMINATED_STREAM_NAME);
     }
 
     @Test
     public void versionStringMetaDataRootNotReadable() {
         PEData pe = pedata.get("HelloWorld_BrokenMetaRootVersionString.exe");
-        assertHasAnomalyOfType(pe, METADATA_ROOT_VERSION_STRING_BROKEN);
+        assertHasAnomalySubType(pe, METADATA_ROOT_VERSION_STRING_BROKEN);
         PEData peNormal = pedata.get("HelloWorld.exe");
-        assertHasNotAnomalyOfType(peNormal, METADATA_ROOT_VERSION_STRING_BROKEN);
+        assertHasNotAnomalySubType(peNormal, METADATA_ROOT_VERSION_STRING_BROKEN);
     }
 }

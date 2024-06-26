@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertTrue;
@@ -34,6 +36,8 @@ public class PEAnomalyScannerTest {
     private List<Anomaly> sectionlessAnomalies;
     private List<Anomaly> dupe;
     private List<Anomaly> zeroImageBase;
+
+    private static Map<String, List<Anomaly>> fileToAnomalies = new HashMap<>();
 
     @BeforeClass
     public void prepare() {
@@ -62,7 +66,7 @@ public class PEAnomalyScannerTest {
                 "Collapsed Optional Header");
     }
 
-    private void performTest(List<Anomaly> anomalies, HeaderKey key,
+    private static void performTest(List<Anomaly> anomalies, HeaderKey key,
             String... descriptions) {
         for (String description : descriptions) {
             boolean containsDescription = false;
@@ -76,7 +80,7 @@ public class PEAnomalyScannerTest {
         }
     }
 
-    private List<Anomaly> filterByKey(HeaderKey key, List<Anomaly> anomalies) {
+    private static List<Anomaly> filterByKey(HeaderKey key, List<Anomaly> anomalies) {
         List<Anomaly> list = new ArrayList<>();
         for (Anomaly anomaly : anomalies) {
             FieldOrStructureKey aKey = anomaly.key();
@@ -89,7 +93,7 @@ public class PEAnomalyScannerTest {
         return list;
     }
 
-    private void performTest(List<Anomaly> anomalies, AnomalyType type,
+    private static void performTest(List<Anomaly> anomalies, AnomalyType type,
             String description) {
         boolean containsType = false;
         for (Anomaly anomaly : anomalies) {
@@ -172,18 +176,41 @@ public class PEAnomalyScannerTest {
         performTest(zeroImageBase, AnomalyType.NON_DEFAULT, description);
     }
 
-    public static void assertHasAnomalyOfType(PEData pe, AnomalySubType atype) {
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe.getFile());
-        List<Anomaly> anomalies = scanner.getAnomalies();
+    public static List<Anomaly> getAnomaliesOfTestFile(PEData pe) {
+        String filename = pe.getFile().getName();
+        if(fileToAnomalies.containsKey(filename)) {
+            return fileToAnomalies.get(filename);
+        }
+        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe);
+        return scanner.getAnomalies();
+    }
+
+    public static void assertHasAnomalySubTypeWithDescription(PEData pe, AnomalySubType atype, String description) {
+        List<Anomaly> anomalies = getAnomaliesOfTestFile(pe);
+        List<Anomaly> found = anomalies.stream()
+                .filter(a -> a.subtype() == atype && a.description().contains(description))
+                .collect(Collectors.toList());
+        assertTrue(found.size() > 0);
+    }
+
+    public static void assertHasAnomalyType(PEData pe, AnomalyType atype) {
+        List<Anomaly> anomalies = getAnomaliesOfTestFile(pe);
+        List<Anomaly> found = anomalies.stream()
+                .filter(a -> a.getType() == atype)
+                .collect(Collectors.toList());
+        assertTrue(found.size() > 0);
+    }
+
+    public static void assertHasAnomalySubType(PEData pe, AnomalySubType atype) {
+        List<Anomaly> anomalies = getAnomaliesOfTestFile(pe);
         List<Anomaly> found = anomalies.stream()
                 .filter(a -> a.subtype() == atype)
                 .collect(Collectors.toList());
         assertTrue(found.size() > 0);
     }
 
-    public static void assertHasNotAnomalyOfType(PEData pe, AnomalySubType atype) {
-        PEAnomalyScanner scanner = PEAnomalyScanner.newInstance(pe.getFile());
-        List<Anomaly> anomalies = scanner.getAnomalies();
+    public static void assertHasNotAnomalySubType(PEData pe, AnomalySubType atype) {
+        List<Anomaly> anomalies = getAnomaliesOfTestFile(pe);
         List<Anomaly> found = anomalies.stream()
                 .filter(a -> a.subtype() == atype)
                 .collect(Collectors.toList());
