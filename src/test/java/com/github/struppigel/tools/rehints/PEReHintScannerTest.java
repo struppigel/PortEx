@@ -90,10 +90,10 @@ public class PEReHintScannerTest  {
         assertHasNotReHint("upx.exe", ReHintType.ARCHIVE_RE_HINT);
     }
 
+
     // TODO find test samples for
     //  NSIS, Script-to-Exe-Wrapped
     //  installer, SFX, embedded_exe
-    //  fake vmp
 
     private void assertHasReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);

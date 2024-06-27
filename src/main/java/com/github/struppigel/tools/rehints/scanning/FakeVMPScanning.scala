@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * **************************************************************************** */
+package com.github.struppigel.tools.rehints.scanning
 
 import com.github.struppigel.tools.rehints.ReHintScannerUtils.{constructReHintIfAnySectionName, optionToList}
 import com.github.struppigel.tools.rehints.{ReHint, ReHintScanner, ReHintType}
