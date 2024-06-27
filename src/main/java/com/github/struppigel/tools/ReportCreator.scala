@@ -30,6 +30,7 @@ import com.github.struppigel.parser.sections.debug.DebugType
 import com.github.struppigel.parser.sections.rsrc.Resource
 import com.github.struppigel.parser.sections.rsrc.version.VersionInfo
 import com.github.struppigel.tools.anomalies.{Anomaly, AnomalyType, PEAnomalyScanner}
+import com.github.struppigel.tools.rehints.{PEReHintScanner, ReHint}
 import com.github.struppigel.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
 
 import java.io.{File, RandomAccessFile}
@@ -643,17 +644,17 @@ class ReportCreator(private val data: PEData) {
   }
 
   def anomalyReport(): String = {
-    val anomalies_filtered = anomalies.filter(a => a.getType() != AnomalyType.RE_HINT)
-    val descriptions = anomaliesToDescriptions(anomalies_filtered)
+    val descriptions = anomaliesToDescriptions(anomalies)
     if (descriptions.isEmpty) ""
     else title("Anomalies") + NL +
-      "Total anomalies: " + anomalies_filtered.size + NL + NL +
+      "Total anomalies: " + anomalies.size + NL + NL +
       (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
       ("* " + descriptions.mkString(NL + "* ")) + NL + NL
   }
 
   def reversingHintsReport(): String = {
-    val rehints = anomalies.filter(a => a.getType() == AnomalyType.RE_HINT)
+    val scanner = PEReHintScanner(data, anomalies.asJava)
+    val rehints : List[ReHint] = scanner.scan
     val descriptions = reHintsToDescriptions(rehints)
     if (descriptions.isEmpty) ""
     else title("Reverse Engineering Hints") + NL +
@@ -661,15 +662,21 @@ class ReportCreator(private val data: PEData) {
       descriptions.mkString(NL) + NL + NL
   }
 
-  def reHintsToDescriptions(hints: List[Anomaly]): List[String] = {
-    val subtypeToAnomaly = hints.groupBy(_.subtype())
-    subtypeToAnomaly.map{
-      case (subtype, anoms) =>
-      subtype.getDescription.get + NL +
-        anoms.foldRight("")( (rh,acc) => s"${acc}${NL}\t* ${rh.description()}") + NL
+  /**
+   * Turns list of ReHints into a list descriptionsm consolidating several hints of the same type into one.
+   *
+   * @param hints
+   * @return
+   */
+  private def reHintsToDescriptions(hints: List[ReHint]): List[String] = {
+    val reTypeToHint = hints.groupBy(_.reType)
+    val sep = NL + "\t* "
+    reTypeToHint.map{
+      case (retype, hints) =>
+      retype.getDescription + NL +
+        hints.foldRight(sep)( (rh,acc) => acc + rh.reasons().asScala.mkString(sep) + NL)
     }.toList
   }
-
 
   /**
    * Retrieve descriptions of anomaly list, consolidate anomaly subtypes that occur very often.

@@ -23,31 +23,13 @@ trait OverlayScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val overlaySigs = SignatureScanner._loadOverlaySigs()
     val sigResults = new SignatureScanner(overlaySigs)._scanAt(data.getFile, overlay.getOffset)
-
-    // adds one anomaly to the list if the filter string is found in the signature names
-    def addAnomalyIfFilter(filterString : String, anomalySubType: AnomalySubType): Boolean = {
-      val sigs = sigResults filter (_._1.name.toLowerCase() contains filterString.toLowerCase())
-      if (sigs.nonEmpty) {
-        val sigName = sigs.head._1.name
-        val description = "Overlay signature " + sigName
-        anomalyList += OverlayAnomaly(overlay, description, anomalySubType)
-        if(sigName contains "zlib archive") {
-          anomalyList ++= checkPyInstaller()
-        }
-        return true
-      }
-      false
+    for(sig <- sigResults) {
+      val sigName = sig._1.name
+      val description = "Overlay has signature " + sigName
+      val overlayAnomaly = OverlayAnomaly(overlay, description, AnomalySubType.OVERLAY_HAS_SIGNATURE)
+      anomalyList += overlayAnomaly
+      if (sigName contains "zlib archive") anomalyList ++= checkPyInstaller()
     }
-
-    // adds one anomaly to the list if any filter string is found in the signature names
-    def addAnomalyForAnyFilter(filterStringList : List[String], anomalySubType: AnomalySubType): Unit = {
-      filterStringList.takeWhile(addAnomalyIfFilter(_, anomalySubType))
-    }
-    addAnomalyIfFilter("installer", AnomalySubType.INSTALLER_RE_HINT )
-    addAnomalyIfFilter("archive", AnomalySubType.ARCHIVE_RE_HINT)
-    addAnomalyIfFilter("executable", AnomalySubType.EMBEDDED_EXE_RE_HINT)
-    addAnomalyForAnyFilter(List("sfx", "self-extract"), AnomalySubType.SFX_RE_HINT)
-    addAnomalyIfFilter("NSIS", AnomalySubType.NULLSOFT_RE_HINT)
     anomalyList.toList
   }
 
@@ -64,7 +46,7 @@ trait OverlayScanning extends AnomalyScanner {
       for(i <- offset until end) {
         val results = new SignatureScanner(List(signature)).scanAt(data.getFile, i)
         if (!results.isEmpty) {
-          return List(ComplexReHintAnomaly("zlib signature in overlay and 'PyInstaller archive' string in .rdata", AnomalySubType.PYINSTALLER_RE_HINT))
+          return List(GenericReHintAnomaly("'PyInstaller archive' string in .rdata"))
         }
       }
     }

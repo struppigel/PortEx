@@ -47,9 +47,5 @@ public enum AnomalyType {
 	 * Represents unusual location, order, number or size of PE structures, e.g.
 	 * collapsed, overlapping, moved to overlay
 	 */
-	STRUCTURE,
-	/**
-	 * This anomaly provides information on how to reverse engineer the file.
-	 */
-	RE_HINT;
+	STRUCTURE;
 }

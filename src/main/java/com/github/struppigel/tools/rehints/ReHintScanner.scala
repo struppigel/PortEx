@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Karsten Philipp Boris Hahn
+ * Copyright 2024 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.github.struppigel.tools.anomalies
+package com.github.struppigel.tools.rehints
 
 import com.github.struppigel.parser.PEData
+import com.github.struppigel.tools.anomalies.Anomaly
 
 /**
- * Looks for certain anomalies in the given data parameter
+ * Looks for reversing hints in the given data parameter
  */
-abstract class AnomalyScanner(val data: PEData) {
-  
+abstract class ReHintScanner(val data: PEData, val anomalies: java.util.List[Anomaly]) {
+
   /**
-   * Returns a report of the anomaly scan
-   * 
+   * Returns a report of the rehint scan
+   *
    * @return a scan report
    */
   def scanReport(): String
 
   /**
-   * Scans for anomalies and returns a list of anomalies found.
-   * 
-   * @return anomaly list
+   * Scans for anomalies and returns a list of rehints found.
+   *
+   * @return list of reversing hints
    */
-  def scan(): List[Anomaly]
-  
+  def scan(): List[ReHint]
+
 }
