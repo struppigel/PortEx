@@ -97,8 +97,6 @@ public class PEReHintScannerTest  {
 
     private void assertHasReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);
-        for(ReHint rehint : rehints) System.out.println(rehint.reType());
-
         List<ReHint> rehintsFiltered = rehints.stream()
                 .filter(rh -> rh.reType() == rhType)
                 .collect(Collectors.toList());
