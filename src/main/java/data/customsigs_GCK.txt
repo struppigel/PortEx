@@ -230,10 +230,6 @@ OLE object library,4D 5A,OLB
 Screen saver,4D 5A,SCR
 VisualBASIC application,4D 5A,VBX
 Windows virtual device drivers,4D 5A,VXD|386
-Acrobat plug-in,4D 5A 90 00 03 00 00 00,API
-DirectShow filter,4D 5A 90 00 03 00 00 00,AX
-Audition graphic filter,4D 5A 90 00 03 00 00 00,FLT
-ZoneAlam data file,4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF,ZAP
 MS C++ debugging symbols file,4D 69 63 72 6F 73 6F 66 74 20 43 2F 43 2B 2B 20,PDB
 Visual Studio .NET file,4D 69 63 72 6F 73 6F 66 74 20 56 69 73 75 61 6C,SLN
 VMapSource GPS Waypoint Database,4D 73 52 63 66,GDB

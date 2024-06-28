@@ -18,6 +18,7 @@ package com.github.struppigel.tools.rehints;
 
 import com.github.struppigel.parser.PEData;
 import com.github.struppigel.parser.PELoaderTest;
+import com.github.struppigel.tools.ReportCreator;
 import com.github.struppigel.tools.anomalies.PEAnomalyScanner;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -90,10 +91,33 @@ public class PEReHintScannerTest  {
         assertHasNotReHint("upx.exe", ReHintType.ARCHIVE_RE_HINT);
     }
 
+    @Test
+    public void sfxTest() {
+        assertHasReHint("7zipsfx", ReHintType.INSTALLER_RE_HINT);
+        assertHasNotReHint("upx.exe", ReHintType.INSTALLER_RE_HINT);
+    }
 
-    // TODO find test samples for
-    //  NSIS, Script-to-Exe-Wrapped
-    //  installer, SFX, embedded_exe
+    @Test
+    public void nsisTest() {
+        new ReportCreator(pedata.get("nsis")).printReport();
+        assertHasReHint("nsis", ReHintType.NULLSOFT_RE_HINT);
+        assertHasNotReHint("upx.exe", ReHintType.NULLSOFT_RE_HINT);
+    }
+
+    @Test
+    public void script2exeTest() {
+        ReHintType rtype = ReHintType.SCRIPT_TO_EXE_WRAPPED_RE_HINT;
+        assertHasReHint("batch2exe", rtype);
+        assertHasNotReHint("upx.exe", rtype);
+    }
+
+    @Test
+    public void embeddedExeTest() throws IOException {
+        ReHintType rtype = ReHintType.EMBEDDED_EXE_RE_HINT;
+        assertHasReHint("embedded_exe_resources", rtype);
+        assertHasReHint("embedded_exe_overlay", rtype);
+        assertHasNotReHint("upx.exe", rtype);
+    }
 
     private void assertHasReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);

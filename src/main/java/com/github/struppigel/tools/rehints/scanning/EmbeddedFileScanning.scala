@@ -53,7 +53,7 @@ trait EmbeddedFileScanning extends ReHintScanner {
 
     def addReHintIfFilter(filterString: String, hintType: ReHintType): Boolean = {
       val filtered = anomalies.asScala.filter(a =>
-        a.subtype() == AnomalySubType.OVERLAY_HAS_SIGNATURE && a.description().contains(filterString))
+        a.subtype() == AnomalySubType.OVERLAY_HAS_SIGNATURE && a.description().toLowerCase().contains(filterString.toLowerCase()))
       if(filtered.isEmpty) false
       else {
         rhList += StandardReHint(filtered.asJava, hintType)
@@ -69,7 +69,6 @@ trait EmbeddedFileScanning extends ReHintScanner {
     addReHintIfFilter("archive", ReHintType.ARCHIVE_RE_HINT)
     addReHintIfFilter("executable", ReHintType.EMBEDDED_EXE_RE_HINT)
     addReHintForAnyFilter(List("sfx", "self-extract"), ReHintType.SFX_RE_HINT)
-    addReHintIfFilter("NSIS", ReHintType.NULLSOFT_RE_HINT)
     rhList.toList
   }
 }

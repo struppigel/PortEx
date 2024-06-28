@@ -35,8 +35,8 @@ trait WrapperScanning extends ReHintScanner {
   }
 
   private def _scan(): List[ReHint] = {
-    val precondition = anomalies.asScala.filter(a => a.description().contains("PureBasic") && a.subtype() == AnomalySubType.RESOURCE_HAS_SIGNATURE)
-    val condition = anomalies.asScala.filter(a => a.description().contains("Script-to-Exe converter") && a.subtype() == AnomalySubType.RE_HINT)
+    val precondition = anomalies.asScala.filter(a => a.description().toLowerCase().contains("purebasic") && a.subtype() == AnomalySubType.RE_HINT)
+    val condition = anomalies.asScala.filter(a => a.description().toLowerCase().contains("script-to-exe converter") && a.subtype() == AnomalySubType.RESOURCE_HAS_SIGNATURE)
     if(precondition.nonEmpty && condition.nonEmpty){
       val anoms = precondition.head :: condition.head :: Nil
       List(StandardReHint(anoms.asJava, ReHintType.SCRIPT_TO_EXE_WRAPPED_RE_HINT))

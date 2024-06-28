@@ -16,10 +16,12 @@
 package com.github.struppigel.tools.rehints.scanning
 
 import com.github.struppigel.tools.rehints.ReHintScannerUtils.{constructReHintIfAnySectionName, optionToList}
-import com.github.struppigel.tools.rehints.{ReHint, ReHintScanner, ReHintType}
+import com.github.struppigel.tools.rehints.{ReHint, ReHintScanner, ReHintType, StandardReHint}
 
 import scala.collection.mutable.ListBuffer
 import com.github.struppigel.parser.IOUtil.NL
+import com.github.struppigel.tools.anomalies.AnomalySubType
+
 import scala.collection.JavaConverters._
 
 trait NullsoftScanning extends ReHintScanner {
@@ -30,12 +32,25 @@ trait NullsoftScanning extends ReHintScanner {
   abstract override def scan(): List[ReHint] = {
     val reList = ListBuffer[ReHint]()
     reList ++= checkSectionNames()
+    reList ++= checkOverlayFileTypes()
     super.scan ::: reList.toList
   }
 
   private def checkSectionNames(): List[ReHint] = {
     val sectionNames = List(".ndata")
-    optionToList(constructReHintIfAnySectionName(sectionNames, data, ReHintType.UPX_PACKER_RE_HINT))
+    optionToList(constructReHintIfAnySectionName(sectionNames, data, ReHintType.NULLSOFT_RE_HINT))
+  }
+
+  private def checkOverlayFileTypes(): List[ReHint] = {
+    val rhList = ListBuffer[ReHint]()
+
+    def addReHintIfFilter(filterString: String, hintType: ReHintType): Unit = {
+      val filtered = anomalies.asScala.filter(a =>
+        a.subtype() == AnomalySubType.OVERLAY_HAS_SIGNATURE && a.description().toLowerCase().contains(filterString.toLowerCase()))
+      if(!filtered.isEmpty) rhList += StandardReHint(filtered.asJava, hintType)
+    }
+    addReHintIfFilter("NSIS", ReHintType.NULLSOFT_RE_HINT)
+    rhList.toList
   }
 
 

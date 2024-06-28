@@ -22,7 +22,7 @@ trait OverlayScanning extends AnomalyScanner {
   private def overlaySignatureScan(overlay: Overlay): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val overlaySigs = SignatureScanner._loadOverlaySigs()
-    val sigResults = new SignatureScanner(overlaySigs)._scanAt(data.getFile, overlay.getOffset)
+    val sigResults = new SignatureScanner(overlaySigs)._scanAt(data.getFile, overlay.getOffset) ::: FileTypeScanner(data.getFile)._scanAt(overlay.getOffset)
     for(sig <- sigResults) {
       val sigName = sig._1.name
       val description = "Overlay has signature " + sigName

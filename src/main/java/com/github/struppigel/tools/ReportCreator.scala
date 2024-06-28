@@ -627,8 +627,10 @@ class ReportCreator(private val data: PEData) {
       val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
       val overlaySigs = SignatureScanner._loadOverlaySigs()
-      val sigresults = new SignatureScanner(overlaySigs).scanAtToString(data.getFile, overlayOffset)
-      val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.asScala.mkString(NL) }
+      val filetypeResults = FileTypeScanner(data.getFile).scanAtReport(overlayOffset).asScala.toList
+      val overlaysigResults = new SignatureScanner(overlaySigs).scanAtToString(data.getFile, overlayOffset).asScala.toList
+      val sigresults = filetypeResults ::: overlaysigResults
+      val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.mkString(NL) }
       title("Overlay") + NL + "Offset: " +
         hexString(overlayOffset) + NL + "Size: " +
         hexString(overlay.getSize) + NL + ("Chi squared: %1.2f" format chi) + NL +
@@ -674,7 +676,7 @@ class ReportCreator(private val data: PEData) {
     reTypeToHint.map{
       case (retype, hints) =>
       retype.getDescription + NL +
-        hints.foldRight(sep)( (rh,acc) => acc + rh.reasons().asScala.mkString(sep) + NL)
+        hints.foldRight("")( (rh,acc) => acc + sep + rh.reasons().asScala.mkString(sep))
     }.toList
   }
 

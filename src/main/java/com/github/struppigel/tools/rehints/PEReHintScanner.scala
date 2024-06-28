@@ -18,7 +18,7 @@ package com.github.struppigel.tools.rehints
 import com.github.struppigel.parser.IOUtil._
 import com.github.struppigel.parser.{PEData, PELoader}
 import com.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
-import com.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, NullsoftScanning, PyInstallerScanning, UpxScanning}
+import com.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, NullsoftScanning, PyInstallerScanning, UpxScanning, WrapperScanning}
 
 import java.io.File
 import scala.collection.JavaConverters._
@@ -28,7 +28,8 @@ import scala.collection.JavaConverters._
  *
  * @author Karsten Hahn
  */
-class PEReHintScanner(data: PEData, anomalies: java.util.List[Anomaly]) extends ReHintScanner(data, anomalies) {
+class PEReHintScanner(data: PEData, anomalies: java.util.List[Anomaly]) extends ReHintScanner(data, anomalies)
+{
 
   /**
    * Scans the PE and returns a report of the rehints found.
@@ -87,8 +88,16 @@ object PEReHintScanner {
    * @return a PEReHintScanner instance with the traits applied from the boolean values
    */
   def newInstance(data: PEData, anomalies: java.util.List[Anomaly]): PEReHintScanner =
-    new PEReHintScanner(data, anomalies) with UpxScanning with NullsoftScanning with ElectronScanning
-      with EmbeddedFileScanning with AHKScanning with AutoItScanning with PyInstallerScanning with FakeVMPScanning
+    new PEReHintScanner(data, anomalies)
+      with AHKScanning
+      with AutoItScanning
+      with ElectronScanning
+      with EmbeddedFileScanning
+      with FakeVMPScanning
+      with NullsoftScanning
+      with PyInstallerScanning
+      with UpxScanning
+      with WrapperScanning
 
   def apply(data: PEData, anomalies: java.util.List[Anomaly]): PEReHintScanner = newInstance(data, anomalies)
 
@@ -96,7 +105,7 @@ object PEReHintScanner {
     val folder = new File("C:\\Users\\strup\\Repos\\PortEx\\portextestfiles\\testfiles\\")
     var counter = 0
     val list = List("electron.exe",
-      "pyinstaller", "upx.exe", "autoit", "ahk")
+      "pyinstaller", "upx.exe", "autoit", "ahk", "batch2exe")
     for (file <- folder.listFiles() if list.contains(file.getName())) {
       try {
         val scanner = PEReHintScanner.newInstance(file)
