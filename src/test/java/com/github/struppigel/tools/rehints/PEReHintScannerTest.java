@@ -56,27 +56,15 @@ public class PEReHintScannerTest  {
     }
 
     @Test
+    public void archiveTest() {
+        assertHasReHint("pyinstaller", ReHintType.ARCHIVE_RE_HINT);
+        assertHasNotReHint("upx.exe", ReHintType.ARCHIVE_RE_HINT);
+    }
+
+    @Test
     public void autoitTest() {
         assertHasReHint("autoit", ReHintType.AUTOIT_RE_HINT);
         assertHasNotReHint("pyinstaller", ReHintType.AUTOIT_RE_HINT);
-    }
-
-    @Test
-    public void pyinstallerTest() {
-        assertHasReHint("pyinstaller", ReHintType.PYINSTALLER_RE_HINT);
-        assertHasNotReHint("ahk", ReHintType.PYINSTALLER_RE_HINT);
-    }
-
-    @Test
-    public void fakeVMPTest() {
-        assertHasReHint("upx_vmp", ReHintType.FAKE_VMP_RE_HINT);
-        assertHasNotReHint("upx.exe", ReHintType.FAKE_VMP_RE_HINT);
-    }
-
-    @Test
-    public void upxTest() {
-        assertHasReHint("upx.exe", ReHintType.UPX_PACKER_RE_HINT);
-        assertHasNotReHint("ahk", ReHintType.UPX_PACKER_RE_HINT);
     }
 
     @Test
@@ -86,22 +74,37 @@ public class PEReHintScannerTest  {
     }
 
     @Test
-    public void archiveTest() {
-        assertHasReHint("pyinstaller", ReHintType.ARCHIVE_RE_HINT);
-        assertHasNotReHint("upx.exe", ReHintType.ARCHIVE_RE_HINT);
+    public void embeddedExeTest() throws IOException {
+        ReHintType rtype = ReHintType.EMBEDDED_EXE_RE_HINT;
+        assertHasReHint("embedded_exe_resources", rtype);
+        assertHasReHint("embedded_exe_overlay", rtype);
+        assertHasNotReHint("upx.exe", rtype);
     }
 
     @Test
-    public void sfxTest() {
-        assertHasReHint("7zipsfx", ReHintType.INSTALLER_RE_HINT);
-        assertHasNotReHint("upx.exe", ReHintType.INSTALLER_RE_HINT);
+    public void fakeVMPTest() {
+        assertHasReHint("upx_vmp", ReHintType.FAKE_VMP_RE_HINT);
+        assertHasNotReHint("upx.exe", ReHintType.FAKE_VMP_RE_HINT);
+    }
+
+    @Test
+    public void innoTest() {
+        ReHintType rtype = ReHintType.INNO_SETUP_RE_HINT;
+        assertHasReHint("innosetup", rtype);
+        assertHasReHint("inno_with_stub", rtype);
+        assertHasNotReHint("nsis", rtype);
     }
 
     @Test
     public void nsisTest() {
-        new ReportCreator(pedata.get("nsis")).printReport();
         assertHasReHint("nsis", ReHintType.NULLSOFT_RE_HINT);
         assertHasNotReHint("upx.exe", ReHintType.NULLSOFT_RE_HINT);
+    }
+
+    @Test
+    public void pyinstallerTest() {
+        assertHasReHint("pyinstaller", ReHintType.PYINSTALLER_RE_HINT);
+        assertHasNotReHint("ahk", ReHintType.PYINSTALLER_RE_HINT);
     }
 
     @Test
@@ -112,11 +115,15 @@ public class PEReHintScannerTest  {
     }
 
     @Test
-    public void embeddedExeTest() throws IOException {
-        ReHintType rtype = ReHintType.EMBEDDED_EXE_RE_HINT;
-        assertHasReHint("embedded_exe_resources", rtype);
-        assertHasReHint("embedded_exe_overlay", rtype);
-        assertHasNotReHint("upx.exe", rtype);
+    public void sfxTest() {
+        assertHasReHint("7zipsfx", ReHintType.INSTALLER_RE_HINT);
+        assertHasNotReHint("upx.exe", ReHintType.INSTALLER_RE_HINT);
+    }
+
+    @Test
+    public void upxTest() {
+        assertHasReHint("upx.exe", ReHintType.UPX_PACKER_RE_HINT);
+        assertHasNotReHint("ahk", ReHintType.UPX_PACKER_RE_HINT);
     }
 
     private void assertHasReHint(String testfile, ReHintType rhType){

@@ -676,7 +676,7 @@ class ReportCreator(private val data: PEData) {
     reTypeToHint.map{
       case (retype, hints) =>
       retype.getDescription + NL +
-        hints.foldRight("")( (rh,acc) => acc + sep + rh.reasons().asScala.mkString(sep))
+        hints.foldRight("")( (rh,acc) => acc + sep + rh.reasons().asScala.mkString(sep)) + NL
     }.toList
   }
 

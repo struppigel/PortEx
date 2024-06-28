@@ -35,6 +35,8 @@ public enum ReHintType {
 
     FAKE_VMP_RE_HINT("This might be protected with an older version of VMProtect, but many have fake VMProtect section names. So check if this is really the case."),
 
+    INNO_SETUP_RE_HINT("This file is an Inno Setup Installer, use innounp -x -m to extract files and InnoSetup Decompiler for the CompiledCode.bin"),
+
     INSTALLER_RE_HINT("This file is an installer, extract the install script and contained files, try 7zip or run the file and look into TEMP"),
 
     NULLSOFT_RE_HINT("This file is a Nullsoft installer, download 7zip v15.02 to extract the install script and contained files"),

@@ -20,6 +20,7 @@ package com.github.struppigel.tools.anomalies
 import com.github.struppigel.parser.IOUtil._
 import com.github.struppigel.parser.PhysicalLocation
 import com.github.struppigel.parser.msdos.MSDOSHeaderKey
+import com.github.struppigel.tools.sigscanner.{Signature, SignatureScanner}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -40,6 +41,7 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     anomalyList ++= checkCollapsedHeader()
     anomalyList ++= checkLargeELfanew()
+    anomalyList ++= checkSignatures()
     super.scan ::: anomalyList.toList
   }
   
@@ -70,6 +72,16 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
       val description = "Collapsed MSDOS Header, PE Signature offset is at 0x" + java.lang.Long.toHexString(e_lfanew)
       List(StructureAnomaly(PEStructureKey.MSDOS_HEADER, description, 
           AnomalySubType.COLLAPSED_MSDOS_HEADER, locations))
+    } else Nil
+  }
+
+  private def checkSignatures(): List[Anomaly] = {
+    val pattern = List[Byte](0x49, 0x6E, 0x55, 0x6E).map(Some(_))
+    val sig = new Signature(name="InnoSetup", epOnly = false, pattern.toArray)
+    val scanner = new SignatureScanner(List(sig))
+    val results = scanner._scanAt(data.getFile, 0x30)
+    if(results.nonEmpty) {
+      List(GenericReHintAnomaly("MSDOS Header has Inno Setup signature 'InUn' at offset 0x30"))
     } else Nil
   }
   

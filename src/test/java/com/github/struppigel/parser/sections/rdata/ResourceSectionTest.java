@@ -77,7 +77,6 @@ public class ResourceSectionTest {
         PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
                 + TestreportsReader.TEST_FILE_DIR + "/WinRar.exe"));
         SectionLoader loader = new SectionLoader(data);
-        System.out.println(new ReportCreator(data).resourcesReport());
         List<Resource> resources = loader.loadResourceSection().getResources();
         assertEquals(actResources.length, resources.size());
         for (int i = 0; i < actResources.length; i++) {

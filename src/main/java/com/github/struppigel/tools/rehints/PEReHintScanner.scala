@@ -18,7 +18,7 @@ package com.github.struppigel.tools.rehints
 import com.github.struppigel.parser.IOUtil._
 import com.github.struppigel.parser.{PEData, PELoader}
 import com.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
-import com.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, NullsoftScanning, PyInstallerScanning, UpxScanning, WrapperScanning}
+import com.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, InnoSetupScanning, NullsoftScanning, PyInstallerScanning, UpxScanning, WrapperScanning}
 
 import java.io.File
 import scala.collection.JavaConverters._
@@ -94,6 +94,7 @@ object PEReHintScanner {
       with ElectronScanning
       with EmbeddedFileScanning
       with FakeVMPScanning
+      with InnoSetupScanning
       with NullsoftScanning
       with PyInstallerScanning
       with UpxScanning
