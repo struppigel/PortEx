@@ -4,7 +4,7 @@ import com.github.struppigel.parser.IOUtil._
 import com.github.struppigel.parser.sections.SectionLoader
 import com.github.struppigel.parser.sections.rsrc.{Name, Resource, ResourceDirectoryEntry, ResourceSection}
 import com.github.struppigel.parser.{IOUtil, Location, PEData, ScalaIOUtil}
-import com.github.struppigel.tools.sigscanner.{FileTypeScanner, SignatureScanner}
+import com.github.struppigel.tools.rehints.ReHintScannerUtils.peHasSignature
 
 import java.io.RandomAccessFile
 import scala.collection.JavaConverters._
@@ -47,29 +47,23 @@ trait ResourceSectionScanning extends AnomalyScanner {
     val resources = rsrc.getResources().asScala
     val anomalyList = ListBuffer[Anomaly]()
 
-    // TODO this scans the signatures again (if the preconditions are true), you might want to avoid that
-    def peHasSignature(sigSubstring : String): Boolean =
-      SignatureScanner.newInstance()
-        ._scanAll(pedata.getFile, epOnly = false)
-          .exists(sig => sig._1.name.toLowerCase() contains sigSubstring.toLowerCase())
-
     def isPattern(bytesPattern: List[Byte], res : Resource): Boolean = {
       val bytes = IOUtil.loadBytesSafely(res.rawBytesLocation.from, res.rawBytesLocation.size.toInt,
         new RandomAccessFile(data.getFile, "r"))
       bytes sameElements bytesPattern
     }
-
-    val filteredResource = resources.filter(res =>
-      res.rawBytesLocation.size == 6 &&
-        isPattern(List(1,1,0,0,0,0),res) && peHasSignature("PureBasic")
-    )
-    if( filteredResource.nonEmpty ) {
-      val name = filteredResource.head.getName()
-      val offset = filteredResource.head.rawBytesLocation
-      val description = s"Resource {$name} at {$offset} has size 6 and bytes 0x01 0x01 0x00 0x00 0x00 0x00 which is a sign of a Script-to-Exe converter"
-      anomalyList += ResourceAnomaly(filteredResource.head, description, AnomalySubType.RESOURCE_HAS_SIGNATURE)
-      // TODO maybe create anomalies for all signatures that you ever find, but in a different class
-      anomalyList += GenericReHintAnomaly("Signature for PureBasic matches at entry point")
+    // scan for script-to-exe wrapper if signature PureBasic exists
+    if(peHasSignature(pedata, "PureBasic")) {
+      val filteredResource = resources.filter(res =>
+        res.rawBytesLocation.size == 6 && isPattern(List(1,1,0,0,0,0), res)
+      )
+      if( filteredResource.nonEmpty ) {
+        val name = filteredResource.head.getName()
+        val offset = "0x" + (filteredResource.head.rawBytesLocation.from).toHexString
+        val description = s"Resource $name at $offset has size 6 and bytes 0x01 0x01 0x00 0x00 0x00 0x00 which is a sign of a Script-to-Exe converter"
+        anomalyList += ResourceAnomaly(filteredResource.head, description, AnomalySubType.RESOURCE_HAS_SIGNATURE)
+        anomalyList += GenericReHintAnomaly("Signature for PureBasic matches at entry point")
+      }
     }
     anomalyList.toList
   }
@@ -99,18 +93,18 @@ trait ResourceSectionScanning extends AnomalyScanner {
     val resources = rsrc.getResources.asScala
     for (resource <- resources) {
       val offset = resource.rawBytesLocation.from
-      val fileTypes = FileTypeScanner(data.getFile)._scanAt(offset)
-      val archiveResourceSigs = fileTypes filter (_._1.name.toLowerCase() contains "archive")
+      val fileTypes = data.getResourceSignatures.asScala.filter(_.getAddress == offset)
+      val archiveResourceSigs = fileTypes filter (_.getName.toLowerCase() contains "archive")
       val resourceIsArchive = archiveResourceSigs.nonEmpty
-      val executableResourceSigs = fileTypes filter (_._1.name.toLowerCase() contains "executable")
+      val executableResourceSigs = fileTypes filter (_.getName.toLowerCase() contains "executable")
       val resourceIsExecutable = executableResourceSigs.nonEmpty
       if(resourceIsArchive) {
-        val anySigName = archiveResourceSigs.head._1.name
+        val anySigName = archiveResourceSigs.head.getName
         val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an archive (${anySigName})"
         anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILE_TYPE)
       }
       if(resourceIsExecutable) {
-        val anySigName = executableResourceSigs.head._1.name
+        val anySigName = executableResourceSigs.head.getName
         val description = s"Resource named ${resource.getName()} in resource ${ScalaIOUtil.hex(offset)} is an executable (${anySigName})"
         anomalyList += ResourceAnomaly(resource, description, AnomalySubType.RESOURCE_FILE_TYPE)
       }

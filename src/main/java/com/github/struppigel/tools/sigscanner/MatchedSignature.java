@@ -15,26 +15,33 @@
  ******************************************************************************/
 package com.github.struppigel.tools.sigscanner;
 
+import com.github.struppigel.parser.IOUtil;
+import com.github.struppigel.parser.ScalaIOUtil;
+
 public class MatchedSignature {
 	
 	private long address;
-	private String signature;
+	private String pattern;
 	private String name;
 	private boolean epOnly;
 
-	public MatchedSignature(long address, String signature, String name, boolean epOnly) {
+    private int matchedBytes;
+
+	public MatchedSignature(long address, String pattern, String name, boolean epOnly, int matchedBytes) {
 		this.address = address;
 		this.name = name;
-		this.signature = signature;
+		this.pattern = pattern;
 		this.epOnly = epOnly;
+        this.matchedBytes = matchedBytes;
 	}
 
+    public int getMatchedBytes() { return matchedBytes; }
     public long getAddress() {
         return address;
     }
 
-    public String getSignature() {
-        return signature;
+    public String getPattern() {
+        return pattern;
     }
 
     public String getName() {
@@ -43,5 +50,11 @@ public class MatchedSignature {
 
     public boolean isEpOnly() {
         return epOnly;
+    }
+
+    @Override
+    public String toString() {
+       return name + " bytes matched: " + matchedBytes + " at address: " + ScalaIOUtil.hex(address) +
+                IOUtil.NL + "pattern: " + pattern;
     }
 }

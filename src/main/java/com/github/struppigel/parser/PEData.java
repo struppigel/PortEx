@@ -37,6 +37,8 @@ import com.github.struppigel.parser.sections.rsrc.icon.IcoFile;
 import com.github.struppigel.parser.sections.rsrc.icon.IconParser;
 import com.github.struppigel.parser.sections.rsrc.version.VersionInfo;
 import com.github.struppigel.tools.ReportCreator;
+import com.github.struppigel.tools.sigscanner.MatchedSignature;
+import com.github.struppigel.tools.sigscanner.SignatureScannerManager;
 import com.google.common.annotations.Beta;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -194,6 +196,8 @@ public class PEData {
     private VersionInfo versionInfo;
     private CodeviewInfo codeviewInfo;
     private List<IcoFile> icons;
+
+    private SignatureScannerManager sigmgr = new SignatureScannerManager(this);
 
     private CLRSection clrSection;
 
@@ -449,6 +453,51 @@ public class PEData {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of all matched signatures.
+     *
+     * @return
+     */
+    public List<MatchedSignature> getSignatures() {
+       return sigmgr.getAllSignatures();
+    }
+
+    /**
+     * Returns a list of all matched signatures in the overlay
+     *
+     * @return
+     */
+    public List<MatchedSignature> getOverlaySignatures() {
+        return sigmgr.getOverlaySignatures();
+    }
+
+    /**
+     * Returns a list of all matched signatures in the resources
+     *
+     * @return
+     */
+    public List<MatchedSignature> getResourceSignatures() {
+        return sigmgr.getResourceSignatures();
+    }
+
+    /**
+     * Returns a list of all matched signatures by PEID
+     *
+     * @return
+     */
+    public List<MatchedSignature> getPEIDSignatures() {
+        return sigmgr.getPEIDSignatures();
+    }
+
+    /**
+     * Returns a list of all matched signatures in the MSDOS header or stub
+     *
+     * @return
+     */
+    public List<MatchedSignature> getMSDOSSignatures() {
+        return sigmgr.getMSDOSSignatures();
     }
 
     /**

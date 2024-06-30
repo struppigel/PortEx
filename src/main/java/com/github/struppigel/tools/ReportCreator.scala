@@ -21,7 +21,7 @@ import com.github.struppigel.parser.IOUtil.NL
 import com.github.struppigel.parser.sections.SectionHeaderKey._
 import com.github.struppigel.parser.sections.clr.CLIHeaderKey.FLAGS
 import ReportCreator.{pad, title}
-import com.github.struppigel.parser.{ByteArrayUtil, IOUtil, PEData, PELoader, StandardField}
+import com.github.struppigel.parser.{ByteArrayUtil, PEData, PELoader, StandardField}
 import com.github.struppigel.parser.coffheader.COFFHeaderKey
 import com.github.struppigel.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
 import com.github.struppigel.parser.sections.clr.{CLRCodedIndexField, CLRTableEntry, CLRTableKey, CLRTableType, ComImageFlag, OptimizedStream}
@@ -29,9 +29,9 @@ import com.github.struppigel.parser.sections.{SectionCharacteristic, SectionHead
 import com.github.struppigel.parser.sections.debug.DebugType
 import com.github.struppigel.parser.sections.rsrc.Resource
 import com.github.struppigel.parser.sections.rsrc.version.VersionInfo
-import com.github.struppigel.tools.anomalies.{Anomaly, AnomalyType, PEAnomalyScanner}
+import com.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
 import com.github.struppigel.tools.rehints.{PEReHintScanner, ReHint}
-import com.github.struppigel.tools.sigscanner.{FileTypeScanner, Jar2ExeScanner, SignatureScanner}
+import com.github.struppigel.tools.sigscanner.Jar2ExeScanner
 
 import java.io.{File, RandomAccessFile}
 import java.security.MessageDigest
@@ -517,6 +517,7 @@ class ReportCreator(private val data: PEData) {
   def resourcesReport(): String = {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
+    val sigs = data.getResourceSignatures
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
       val buf = new StringBuffer()
@@ -524,9 +525,9 @@ class ReportCreator(private val data: PEData) {
       val resources = rsrc.getResources().asScala
       for (resource <- resources) {
         val offset = resource.rawBytesLocation.from
-        val fileTypes = FileTypeScanner(data.getFile)._scanAt(offset)
+        val fileTypes = sigs.asScala.filter(_.getAddress == offset).toList
         val longTypes = fileTypes.
-          map(t => t._1.name + " (" + t._1.bytesMatched + " bytes)")
+          map(t => t.getName + " (" + t.getMatchedBytes + " bytes)")
         buf.append(resource)
         if (longTypes.nonEmpty) {
           buf.append(", signatures: " + longTypes.mkString(", "))
@@ -534,52 +535,21 @@ class ReportCreator(private val data: PEData) {
         buf.append(NL)
       }
       buf.append(NL)
-      buf.append(manifestReport(resources.toList))
+      buf.append(manifestReport())
       buf.append(versionReport(resources.toList))
       buf.toString
     } else ""
   }
 
-  private def manifestReport(resources: List[Resource]): String = {
-
-    val MAX_MANIFEST_SIZE = 0x2000
-
-    def bytesToUTF8(bytes: Array[Byte]): String = new java.lang.String(bytes, "UTF8").trim()
-
-    def readBytes(resource: Resource): Array[Byte] =
-      IOUtil.loadBytesSafely(resource.rawBytesLocation.from, resource.rawBytesLocation.size.toInt,
-        new RandomAccessFile(data.getFile, "r"))
-
-    def getResourceString(resource: Resource): String = bytesToUTF8(readBytes(resource))
-
-    def isLegitManifest(resource: Resource): Boolean = {
-      val offset = resource.rawBytesLocation.from
-      val size = resource.rawBytesLocation.size.toInt
-      offset > 0 && size > 0 && size < MAX_MANIFEST_SIZE
-    }
-
-    val buf = new StringBuffer()
-    val manifestResources = resources.filter { _.getType == "RT_MANIFEST" }
-    manifestResources.foreach { resource =>
-      if (isLegitManifest(resource)) {
-        buf.append(title("Manifest"))
-        val versionInfo = getResourceString(resource)
-        buf.append(NL + versionInfo + NL)
-      } else {
-        buf.append(title("Manifest"))
-        buf.append(NL + "-broken manifest-" + NL)
-      }
-    }
-    buf.toString + NL
-  }
-
   def manifestReport(): String = {
+    val MAX_MANIFEST_SIZE = 0x2000
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
-      val rsrc = maybeRSRC.get
-      val resources = rsrc.getResources().asScala
-      manifestReport(resources.toList)
+      val buf = new StringBuffer()
+      val manifests = data.loadManifests(MAX_MANIFEST_SIZE)
+      buf.append(manifests.asScala.mkString(NL))
+      buf.toString + NL
     } else ""
   }
 
@@ -626,10 +596,7 @@ class ReportCreator(private val data: PEData) {
       val chi = ChiSquared.calculate(data.getFile, overlay.getOffset, overlay.getSize)
       val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
-      val overlaySigs = SignatureScanner._loadOverlaySigs()
-      val filetypeResults = FileTypeScanner(data.getFile).scanAtReport(overlayOffset).asScala.toList
-      val overlaysigResults = new SignatureScanner(overlaySigs).scanAtToString(data.getFile, overlayOffset).asScala.toList
-      val sigresults = filetypeResults ::: overlaysigResults
+      val sigresults = data.getOverlaySignatures.asScala
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.mkString(NL) }
       title("Overlay") + NL + "Offset: " +
         hexString(overlayOffset) + NL + "Size: " +
@@ -640,7 +607,7 @@ class ReportCreator(private val data: PEData) {
   }
 
   def peidReport(): String = {
-    val signatures = SignatureScanner.newInstance().scanAllToString(data.getFile)
+    val signatures = data.getPEIDSignatures
     if (signatures.isEmpty) ""
     else title("PEID Signatures") + NL + signatures.asScala.mkString(NL) + NL + NL
   }

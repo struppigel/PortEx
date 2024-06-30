@@ -357,7 +357,7 @@ object SignatureScanner {
   def toMatchedSignature(result: ScanResult): MatchedSignature = {
     val (sig, addr) = result
     val signature = bytes2hex(sig.pattern, " ")
-    new MatchedSignature(addr, signature, sig.name, sig.epOnly)
+    new MatchedSignature(addr, signature, sig.name, sig.epOnly, sig.bytesMatched())
   }
 
   private def invokeCLI(args: Array[String]): Unit = {

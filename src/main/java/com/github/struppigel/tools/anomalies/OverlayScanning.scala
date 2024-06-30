@@ -3,6 +3,7 @@ package com.github.struppigel.tools.anomalies
 import scala.collection.mutable.ListBuffer
 import com.github.struppigel.parser.IOUtil._
 import com.github.struppigel.tools.Overlay
+import scala.collection.JavaConverters._
 import com.github.struppigel.tools.sigscanner.{FileTypeScanner, Signature, SignatureScanner}
 
 trait OverlayScanning extends AnomalyScanner {
@@ -21,10 +22,9 @@ trait OverlayScanning extends AnomalyScanner {
 
   private def overlaySignatureScan(overlay: Overlay): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val overlaySigs = SignatureScanner._loadOverlaySigs()
-    val sigResults = new SignatureScanner(overlaySigs)._scanAt(data.getFile, overlay.getOffset) ::: FileTypeScanner(data.getFile)._scanAt(overlay.getOffset)
+    val sigResults = data.getOverlaySignatures.asScala
     for(sig <- sigResults) {
-      val sigName = sig._1.name
+      val sigName = sig.getName
       val description = "Overlay has signature " + sigName
       val overlayAnomaly = OverlayAnomaly(overlay, description, AnomalySubType.OVERLAY_HAS_SIGNATURE)
       anomalyList += overlayAnomaly

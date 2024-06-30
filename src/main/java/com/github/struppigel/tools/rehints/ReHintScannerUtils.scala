@@ -36,6 +36,10 @@ object ReHintScannerUtils {
     else Some(StandardReHint(anoms.asJava, rhType))
   }
 
+  def peHasSignature(pedata: PEData, sigSubstring : String): Boolean = {
+    pedata.getSignatures.asScala.exists(sig => sig.getName.toLowerCase() contains sigSubstring.toLowerCase())
+  }
+
   def constructReHintIfAnyResourceName(names: List[String], data: PEData, rhType: ReHintType): Option[ReHint] = {
     val resources = data.loadResources().asScala.filter(res => names contains res.getName())
     val anoms : List[Anomaly] = resources.map {res =>

@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * Scans the MSDOS Header for anomalies
  *
- * @author Katja Hahn
+ * @author Karsten Hahn
  */
 trait MSDOSHeaderScanning extends AnomalyScanner {
 
@@ -76,11 +76,8 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
   }
 
   private def checkSignatures(): List[Anomaly] = {
-    val pattern = List[Byte](0x49, 0x6E, 0x55, 0x6E).map(Some(_))
-    val sig = new Signature(name="InnoSetup", epOnly = false, pattern.toArray)
-    val scanner = new SignatureScanner(List(sig))
-    val results = scanner._scanAt(data.getFile, 0x30)
-    if(results.nonEmpty) {
+    val results = data.getMSDOSSignatures.asScala
+    if(results.nonEmpty && results.exists(_.getName.toLowerCase() == "innosetup")) {
       List(GenericReHintAnomaly("MSDOS Header has Inno Setup signature 'InUn' at offset 0x30"))
     } else Nil
   }

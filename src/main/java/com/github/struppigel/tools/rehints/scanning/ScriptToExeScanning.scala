@@ -23,7 +23,7 @@ import com.github.struppigel.tools.anomalies.AnomalySubType
 
 import scala.collection.JavaConverters._
 
-trait WrapperScanning extends ReHintScanner {
+trait ScriptToExeScanning extends ReHintScanner {
 
   abstract override def scanReport(): String =
     "Applied WrapperScanning" + NL + super.scanReport

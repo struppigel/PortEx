@@ -418,7 +418,7 @@ public class WikiExampleCodes {
             System.out.println("name: " + sig.getName());
             System.out.println("address: " + sig.getAddress());
             System.out.println("epOnly: " + sig.isEpOnly());
-            System.out.println("signature: " + sig.getSignature());
+            System.out.println("signature: " + sig.getPattern());
             System.out.println();
         }
     }

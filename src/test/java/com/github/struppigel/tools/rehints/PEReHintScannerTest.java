@@ -135,6 +135,10 @@ public class PEReHintScannerTest  {
         assertTrue(!rehintsFiltered.isEmpty());
     }
 
+    private void printReHintsReport(String testfile) {
+        System.out.println(new ReportCreator(pedata.get(testfile)).reversingHintsReport());
+    }
+
     private void assertHasNotReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);
         List<ReHint> rehintsFiltered = rehints.stream()
