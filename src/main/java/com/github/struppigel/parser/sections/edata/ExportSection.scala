@@ -73,6 +73,12 @@ class ExportSection private (
   }
 
   /**
+   * @return location of the ordinal table
+   */
+  def getOrdinalTablePhysicalLocation(): java.util.List[PhysicalLocation] =
+    List(new PhysicalLocation(ordinalTable.fileOffset, ordinalTable.size)).asJava
+
+  /**
    * @return all physical export locations including tables and ASCII strings with export names
    */
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
@@ -190,7 +196,7 @@ object ExportSection {
 
   private val logger = LogManager.getLogger(ExportSection.getClass().getName())
 
-  val maxOrdEntries = 500 // TODO not consistent because maxOrdEntries is in ExportOrdinalTable
+  val maxEntries = 1000
   val exportDirSize = 40
   private var invalidExportCount = 0
 
@@ -223,7 +229,7 @@ object ExportSection {
     mmBytes: MemoryMappedPE, virtualAddress: Long, edataOffset: Long): ExportOrdinalTable = {
     val base = edataTable(ORDINAL_BASE)
     val rva = edataTable(ORDINAL_TABLE_RVA)
-    val entries = Math.min(edataTable(NR_OF_NAME_POINTERS), maxOrdEntries)
+    val entries = Math.min(edataTable(NR_OF_NAME_POINTERS), maxEntries)
     val ordTableFileOffset = edataOffset + rva - virtualAddress
     if(ordTableFileOffset <= 0 || entries < 0) {
       // create empty ExportOrdinalTable
@@ -246,7 +252,7 @@ object ExportSection {
     val nameTableRVA = edataTable(NAME_POINTER_RVA)
     val namePointers = edataTable(NR_OF_NAME_POINTERS).toInt
     val nameTableFileOffset = edataOffset + nameTableRVA - virtualAddress
-    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress, nameTableFileOffset)
+    ExportNamePointerTable(mmBytes, nameTableRVA, namePointers, virtualAddress, nameTableFileOffset, maxEntries)
   }
 
   /**
@@ -319,9 +325,8 @@ object ExportSection {
     
     val addresses = exportAddressTable.addresses
     val ordinalBase = edataTable.get(ExportDirectoryKey.ORDINAL_BASE)
-    
-    //TODO this is rather an address maximum
-    val ordMax = Math.min(addresses.length, maxOrdEntries)
+
+    val ordMax = Math.min(addresses.length, maxEntries)
     // create ordinal entries
     val ordEntries = (for (
       i <- 0 until ordMax;

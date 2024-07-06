@@ -52,11 +52,10 @@ object ExportNamePointerTable {
 
   type Address = Long
   val entryLength = 4
-  val maxNameEntries = 500 //add max val TODO anomaly
   val maxNameLength = 0x200 // TODO anomaly
 
   def apply(mmBytes: MemoryMappedPE, rva: Long, entries: Int,
-    virtualAddress: Long, fileOffset: Long): ExportNamePointerTable = {
+    virtualAddress: Long, fileOffset: Long, maxNameEntries: Int): ExportNamePointerTable = {
     val initialOffset = (rva - virtualAddress).toInt
     val addresses = new ListBuffer[(Address, String)]
     val end = initialOffset + entries * entryLength

@@ -18,6 +18,7 @@ package com.github.struppigel.parser;
 import com.github.struppigel.parser.coffheader.COFFFileHeader;
 import com.github.struppigel.parser.msdos.MSDOSHeader;
 import com.github.struppigel.parser.optheader.OptionalHeader;
+import com.github.struppigel.parser.sections.SectionLoader;
 import com.github.struppigel.parser.sections.SectionTable;
 import com.github.struppigel.tools.ReportCreator;
 import com.github.struppigel.tools.visualizer.ImageUtil;
@@ -251,11 +252,11 @@ public final class PELoader {
      */
     public static void main(String[] args) throws IOException, AWTException {
 
-        File file = new File("C:\\Users\\strup\\Repos\\PortEx\\portextestfiles\\testfiles\\upx.exe");
+        File file = new File("C:\\Users\\strup\\Downloads\\sqlite-netFx46-binary-bundle-x64-2015-1.0.118.0\\System.Data.SQLite.dll");
         PEData data = PELoader.loadPE(file);
-        //System.out.println((new SectionLoader(data)).loadImportSection().getInfo());
+        System.out.println((new SectionLoader(data)).loadExportSection().getExportEntries().size());
         ReportCreator reporter = new ReportCreator(data);
-       reporter.printReport();
+        reporter.printReport();
         System.out.println("done");
     }
 

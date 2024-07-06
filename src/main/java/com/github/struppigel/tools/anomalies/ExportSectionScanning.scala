@@ -22,15 +22,24 @@ trait ExportSectionScanning extends AnomalyScanner {
       val anomalyList = ListBuffer[Anomaly]()
       anomalyList ++= checkFractionatedExports(edata)
       anomalyList ++= checkInvalidExports(edata)
+      anomalyList ++= checkMaximumEntries(edata)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
+  }
+
+  private def checkMaximumEntries(edata: ExportSection): List[Anomaly] = {
+    if(edata.getExportEntries().size() == ExportSection.maxEntries) {
+      val description = "Too many exports, maximum of " + ExportSection.maxEntries + " entries reached"
+      val locs = edata.getOrdinalTablePhysicalLocation.asScala.toList
+      List(StructureAnomaly(PEStructureKey.EXPORT_SECTION, description, AnomalySubType.MAX_EXPORTS, locs))
+    } else Nil
   }
 
   private def checkInvalidExports(edata: ExportSection): List[Anomaly] = {
     if(edata.invalidExportCount > 0) {
       val description = "Invalid exports found: " + edata.invalidExportCount
       val locs = List[PhysicalLocation]() //TODO get locations
-      List(new StructureAnomaly(PEStructureKey.EXPORT_SECTION, description,
+      List(StructureAnomaly(PEStructureKey.EXPORT_SECTION, description,
           AnomalySubType.INVALID_EXPORTS, locs))
     } else Nil
   }
@@ -47,7 +56,6 @@ trait ExportSectionScanning extends AnomalyScanner {
         val end = start + loader.getReadSize(edataHeader.get)
         val locEnd = loc.from + loc.size
         //ignores faulty locations (indicated by -1 or larger than file size)
-        //FIXME find the cause of -1 entries!
         (loc.from >= data.getFile.length) || (loc.from == -1) || (loc.from >= start && locEnd <= end)
       }
       val fractions = locs.filter(!isWithinEData(_)).toList

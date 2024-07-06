@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2024 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.google.common.base.Optional
  * Is created by the export section instance and used for easy access to the
  * export information without knowing the details of the internal structure.
  *
- * @author Katja Hahn
+ * @author Karsten Hahn
  *
  * Creates an instance of an export entry with ordinal
  * and relative virtual address

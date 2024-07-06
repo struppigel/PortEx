@@ -442,6 +442,11 @@ public enum AnomalySubType {
      */
     INVALID_EXPORTS(STRUCTURE),
 
+    /**
+     * The number of export entries exceeds the internal maximum
+     */
+    MAX_EXPORTS(STRUCTURE),
+
     /**************************** Resource Section ******************************/
 
     /**

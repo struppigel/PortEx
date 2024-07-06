@@ -41,7 +41,7 @@ class ExportOrdinalTable (
 
 object ExportOrdinalTable {
   
-  val entrySize = 2 //in Byte
+  val entrySize = 2 // in Byte
 
   def apply(mmBytes: MemoryMappedPE, base: Int, rva: Long, entries: Int,
     virtualAddress: Long, fileOffset: Long): ExportOrdinalTable = {
