@@ -51,7 +51,7 @@ public class PEReHintScannerTest  {
 
     @Test
     public void ahkTest() {
-        assertHasReHint("ahk", ReHintType.AHK_RE_HINT);
+        assertHasReHintWithTypeAndReason("ahk", ReHintType.AHK_RE_HINT, "Resource named >AUTOHOTKEY SCRIPT< in resource 0xaade0");
         assertHasNotReHint("pyinstaller", ReHintType.AHK_RE_HINT);
     }
 
@@ -85,21 +85,22 @@ public class PEReHintScannerTest  {
 
     @Test
     public void fakeVMPTest() {
-        assertHasReHint("upx_vmp", ReHintType.FAKE_VMP_RE_HINT);
+        assertHasReHintWithTypeAndReason("upx_vmp", ReHintType.FAKE_VMP_RE_HINT, "Section name .vmp0");
         assertHasNotReHint("upx.exe", ReHintType.FAKE_VMP_RE_HINT);
     }
 
     @Test
     public void innoTest() {
         ReHintType rtype = ReHintType.INNO_SETUP_RE_HINT;
-        assertHasReHint("innosetup", rtype);
-        assertHasReHint("inno_with_stub", rtype);
+        assertHasReHintWithTypeAndReason("innosetup", rtype, "MSDOS Header has Inno Setup signature 'InUn' at offset 0x30");
+        assertHasReHintWithTypeAndReason("inno_with_stub", rtype, "Overlay has signature [Inno Setup Installer with Stub]");
         assertHasNotReHint("nsis", rtype);
     }
 
     @Test
     public void nsisTest() {
-        assertHasReHint("nsis", ReHintType.NULLSOFT_RE_HINT);
+        assertHasReHintWithTypeAndReason("nsis", ReHintType.NULLSOFT_RE_HINT, "Overlay has signature [NSIS]");
+        assertHasReHintWithTypeAndReason("nsis", ReHintType.NULLSOFT_RE_HINT, "Section name .ndata");
         assertHasNotReHint("upx.exe", ReHintType.NULLSOFT_RE_HINT);
     }
 
@@ -113,19 +114,21 @@ public class PEReHintScannerTest  {
     @Test
     public void script2exeTest() {
         ReHintType rtype = ReHintType.SCRIPT_TO_EXE_WRAPPED_RE_HINT;
-        assertHasReHint("batch2exe", rtype);
+        assertHasReHintWithTypeAndReason("batch2exe", rtype, "Signature for PureBasic matches at entry point");
+        assertHasReHintWithTypeAndReason("batch2exe", rtype, "Resource B17E574496F7821F47CE650786DFFB at 0x11748 has size 6 and bytes 0x01 0x01 0x00 0x00 0x00 0x00 which is a sign of a Script-to-Exe converter");
         assertHasNotReHint("upx.exe", rtype);
     }
 
     @Test
     public void sfxTest() {
-        assertHasReHint("7zipsfx", ReHintType.INSTALLER_RE_HINT);
+        assertHasReHintWithTypeAndReason("7zipsfx", ReHintType.INSTALLER_RE_HINT, "Overlay has signature [7-zip Installer]");
         assertHasNotReHint("upx.exe", ReHintType.INSTALLER_RE_HINT);
     }
 
     @Test
     public void upxTest() {
-        assertHasReHint("upx.exe", ReHintType.UPX_PACKER_RE_HINT);
+        assertHasReHintWithTypeAndReason("upx.exe", ReHintType.UPX_PACKER_RE_HINT, "Section name UPX0");
+        assertHasReHintWithTypeAndReason("upx.exe", ReHintType.UPX_PACKER_RE_HINT, "Section name UPX1");
         assertHasNotReHint("ahk", ReHintType.UPX_PACKER_RE_HINT);
     }
 
@@ -138,14 +141,14 @@ public class PEReHintScannerTest  {
         assertTrue(!rehintsFiltered.isEmpty());
     }
 
-    private void assertHasReHintWithTypeAndReason(String testfile, ReHintType rhType, String content){
+    private void assertHasReHintWithTypeAndReason(String testfile, ReHintType rhType, String reason){
         List<ReHint> rehints = getHintsFor(testfile);
         List<ReHint> rehintsFiltered = rehints.stream()
                 .filter(rh -> rh.reType() == rhType)
                 .collect(Collectors.toList());
         assertTrue(!rehintsFiltered.isEmpty());
         List<ReHint> rehintsContentFiltered = rehintsFiltered.stream()
-                .filter(h -> !h.reasons().stream().filter(r -> r.contains(content)).collect(Collectors.toList()).isEmpty())
+                .filter(h -> !h.reasons().stream().filter(r -> r.contains(reason)).collect(Collectors.toList()).isEmpty())
                 .collect(Collectors.toList());
         assertTrue(!rehintsContentFiltered.isEmpty());
     }
