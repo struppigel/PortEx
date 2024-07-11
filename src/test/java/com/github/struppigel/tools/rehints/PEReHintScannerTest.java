@@ -57,26 +57,28 @@ public class PEReHintScannerTest  {
 
     @Test
     public void archiveTest() {
-        assertHasReHint("pyinstaller", ReHintType.ARCHIVE_RE_HINT);
+        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.ARCHIVE_RE_HINT, "Overlay has signature [zlib archive]");
         assertHasNotReHint("upx.exe", ReHintType.ARCHIVE_RE_HINT);
     }
 
     @Test
     public void autoitTest() {
-        assertHasReHint("autoit", ReHintType.AUTOIT_RE_HINT);
+        assertHasReHintWithTypeAndReason("autoit", ReHintType.AUTOIT_RE_HINT, "Resource named SCRIPT in resource 0x118068");
         assertHasNotReHint("pyinstaller", ReHintType.AUTOIT_RE_HINT);
     }
 
     @Test
     public void electronTest() {
-        assertHasReHint("electron.exe", ReHintType.ELECTRON_PACKAGE_RE_HINT);
+        assertHasReHintWithTypeAndReason("electron.exe", ReHintType.ELECTRON_PACKAGE_RE_HINT, "Section name 'CPADinfo'");
+        assertHasReHintWithTypeAndReason("electron.exe", ReHintType.ELECTRON_PACKAGE_RE_HINT, "PDB path is 'electron.exe.pdb'");
         assertHasNotReHint("pyinstaller", ReHintType.ELECTRON_PACKAGE_RE_HINT);
     }
 
     @Test
     public void embeddedExeTest() throws IOException {
         ReHintType rtype = ReHintType.EMBEDDED_EXE_RE_HINT;
-        assertHasReHint("embedded_exe_resources", rtype);
+        String reason = "Resource named ID: 1 in resource 0xd74 is an executable (MS-DOS or Portable Executable)";
+        assertHasReHintWithTypeAndReason("embedded_exe_resources", rtype, reason);
         assertHasReHint("embedded_exe_overlay", rtype);
         assertHasNotReHint("upx.exe", rtype);
     }
@@ -103,7 +105,8 @@ public class PEReHintScannerTest  {
 
     @Test
     public void pyinstallerTest() {
-        assertHasReHint("pyinstaller", ReHintType.PYINSTALLER_RE_HINT);
+        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.PYINSTALLER_RE_HINT, "Overlay has signature [zlib archive]");
+        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.PYINSTALLER_RE_HINT, "'PyInstaller archive' string in .rdata");
         assertHasNotReHint("ahk", ReHintType.PYINSTALLER_RE_HINT);
     }
 
@@ -133,6 +136,18 @@ public class PEReHintScannerTest  {
                 .collect(Collectors.toList());
 
         assertTrue(!rehintsFiltered.isEmpty());
+    }
+
+    private void assertHasReHintWithTypeAndReason(String testfile, ReHintType rhType, String content){
+        List<ReHint> rehints = getHintsFor(testfile);
+        List<ReHint> rehintsFiltered = rehints.stream()
+                .filter(rh -> rh.reType() == rhType)
+                .collect(Collectors.toList());
+        assertTrue(!rehintsFiltered.isEmpty());
+        List<ReHint> rehintsContentFiltered = rehintsFiltered.stream()
+                .filter(h -> !h.reasons().stream().filter(r -> r.contains(content)).collect(Collectors.toList()).isEmpty())
+                .collect(Collectors.toList());
+        assertTrue(!rehintsContentFiltered.isEmpty());
     }
 
     private void printReHintsReport(String testfile) {

@@ -46,15 +46,10 @@ class Resource(
   /**
    * Returns the type of the resource as string
    */
-  def getType(): String = levelIDs(Level.typeLevel) match {
-    case Name(_, name) => name
-    case id: ID => id.idString
-  }
+  def getType(): String = levelIDs(Level.typeLevel).toString
 
-  def getName(): String = levelIDs(Level.nameLevel) match {
-    case Name(_, name) => name
-    case id: ID => id.idString
-  }
+  def getName(): String = levelIDs(Level.nameLevel).toString
+
   /**
    * Creates a resource instance
    *
