@@ -33,7 +33,7 @@ import com.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
 import com.github.struppigel.tools.rehints.{PEReHintScanner, ReHint}
 import com.github.struppigel.tools.sigscanner.Jar2ExeScanner
 
-import java.io.{File, RandomAccessFile}
+import java.io.File
 import java.security.MessageDigest
 import scala.collection.JavaConverters._
 
@@ -251,7 +251,7 @@ class ReportCreator(private val data: PEData) {
       val o = maybeTbl.get
       val rowNr = resolutionscope.getReferencedRow()
       if(o.getEntries.size >= rowNr && rowNr > 0) {
-        val clrTblRow = o.getEntries()(rowNr - 1)
+        val clrTblRow = o.entries(rowNr - 1)
         val clrField = clrTblRow.get(k).get
         desc + " " + clrField.getDescription
       }
@@ -279,7 +279,7 @@ class ReportCreator(private val data: PEData) {
   def typeRefTableReport(optStream : OptimizedStream): String = {
     title("TypeRef") + (if(optStream.getCLRTable(CLRTableType.TYPEREF).isDefined) {
       val typerefs = optStream.getCLRTable(CLRTableType.TYPEREF).get
-      val sortedTypeRefs = typerefs.getEntries().map(e => (getStringForResolutionScope(e, optStream), e)).sortBy(_._1)
+      val sortedTypeRefs = typerefs.entries.map(e => (getStringForResolutionScope(e, optStream), e)).sortBy(_._1)
 
       def entryDescription(e : CLRTableEntry): String = {
         val namespace = e.get(CLRTableKey.TYPEREF_TYPE_NAMESPACE).get
@@ -314,12 +314,6 @@ class ReportCreator(private val data: PEData) {
           "GUID heap size: " + optStream.getGUIDHeapSize + " bytes" + NL +
           "String heap size: " + optStream.getStringHeapSize + " bytes" + NL + NL
           //"Tables and rows: " + NL + optStream.getTableNamesToSizesMap().mkString(NL) + NL + NL
-
-        // improve toString output by setting optStream for all tables
-        for(tblType <- CLRTableType.values() ){
-          val tbl = optStream.getCLRTable(tblType)
-          if(tbl.isDefined) tbl.get.setOptimizedStream(optStream)
-        }
 
         def compileInfo(typeList : List[CLRTableType]): String =
           if (typeList.isEmpty) "" else {

@@ -22,9 +22,8 @@ import com.github.struppigel.parser.msdos.MSDOSLoadModule;
 import com.github.struppigel.parser.optheader.OptionalHeader;
 import com.github.struppigel.parser.sections.SectionLoader;
 import com.github.struppigel.parser.sections.SectionTable;
-import com.github.struppigel.parser.sections.clr.CLRSection;
-import com.github.struppigel.parser.sections.debug.CodeviewInfo;
-import com.github.struppigel.parser.sections.debug.DebugSection;
+import com.github.struppigel.parser.sections.clr.*;
+import com.github.struppigel.parser.sections.debug.*;
 import com.github.struppigel.parser.sections.edata.ExportEntry;
 import com.github.struppigel.parser.sections.edata.ExportSection;
 import com.github.struppigel.parser.sections.idata.ImportDLL;
@@ -194,17 +193,22 @@ public class PEData {
     private List<Resource> resources;
     private List<ImportDLL> imports;
     private VersionInfo versionInfo;
-    private CodeviewInfo codeviewInfo;
+    private Optional<CodeviewInfo> codeviewInfo;
+    private Optional<ExtendedDLLCharacteristics> extendedDLLCharacteristics;
     private List<IcoFile> icons;
 
     private SignatureScannerManager sigmgr = new SignatureScannerManager(this);
 
-    private CLRSection clrSection;
+    private Optional<CLRSection> clrSection;
 
     private HashMap<Long, String> stringTable;
 
     private static final int MAX_MANIFEST_SIZE_DEFAULT = 0x5000;
     private int maxManifestSize = MAX_MANIFEST_SIZE_DEFAULT;
+
+    private Map<String, List<List<Object>>> clrTableNameToTableRows;
+
+    private Map<String, List<String>> clrTableNameToHeaderTitles;
 
     /**
      * Trigger loading all extra data. Subsequent calls to loadXXX will not need to read and parse the PE file again.
@@ -229,21 +233,95 @@ public class PEData {
      */
     public Optional<CLRSection> loadClrSection() {
         if(clrSection != null) {
-            return Optional.of(clrSection);
+            return clrSection;
         }
 
         SectionLoader loader = new SectionLoader(this);
         try {
             com.google.common.base.Optional<CLRSection> maybeClr = loader.maybeLoadCLRSection();
             if (maybeClr.isPresent() && !maybeClr.get().isEmpty()) {
-                this.clrSection = maybeClr.get();
-                return Optional.of(clrSection);
+                this.clrSection = Optional.of(maybeClr.get());
+                return clrSection;
             }
         } catch (IOException e) {
             logger.error(e);
             e.printStackTrace();
         }
-        return Optional.empty();
+        clrSection = Optional.empty();
+        return clrSection;
+    }
+
+    /**
+     * Loads the CLR tables in form of a Map. The keys are the table names. The values are the rows.
+     * Each cell in the table is an object.
+     * @return map with {table name -> table rows}
+     */
+    public Map<String, List<List<Object>>> loadCLRTables() {
+        if(clrTableNameToTableRows == null) {
+            loadCLRTableData();
+        }
+        return clrTableNameToTableRows;
+    }
+
+    /**
+     * For all available CLR tables, load the table name -> header titles map
+     * @return map with {table name -> table header titles}
+     */
+    public Map<String, List<String>> loadCLRTableHeaders() {
+        if(clrTableNameToHeaderTitles == null) {
+            loadCLRTableData();
+        }
+        return clrTableNameToHeaderTitles;
+    }
+
+    /**
+     * Loads CLR header titles and columns in one step
+     */
+    private void loadCLRTableData() {
+        Optional<CLRSection> clr = loadClrSection();
+        // must be initialized here so that we know whether these were loaded at all
+        this.clrTableNameToHeaderTitles = new HashMap<>();
+        this.clrTableNameToTableRows = new HashMap<>();
+
+        if(!clr.isPresent() || clr.get().isEmpty()) { // make sure it is a working .NET file
+            return;
+        }
+        Optional<OptimizedStream> optStream = clr.get().getMetadataRoot().maybeGetOptimizedStream();
+
+        if(!optStream.isPresent()) { // make sure there is an optimized stream
+            return;
+        }
+
+        // load tables and fill map data
+        List<CLRTable> tables = optStream.get().getCLRTables();
+        for(CLRTable table : tables) {
+            if(table.getEntries().size() > 0) {
+                CLRTableEntry entry = table.getEntries().get(0);
+                List<CLRField> fields = entry.getCLRFields().values().stream().collect(Collectors.toList());
+                List<String> tableHeaders = fields.stream().map(f -> f.getName()).collect(Collectors.toList());
+                // add row number and raw offset as additional columns
+                tableHeaders.add(0, "Row"); // add to beginning
+                tableHeaders.add("File offset"); // add to end
+                // construct the table to headers map
+                clrTableNameToHeaderTitles.put(constructCLRTableName(table), tableHeaders);
+                // construct the rows
+                List<List<Object>> rows = table.getEntries().stream()
+                        .map(e -> {
+                            List<Object> list = e.getCLRFields().values().stream()
+                                    .map(f -> f.getValueAsObject())
+                                    .collect(Collectors.toList());
+                            list.add(e.rawOffset()); // set offset
+                            list.add(0,e.row()); // set row number
+                            return list;
+                        }).collect(Collectors.toList());
+                clrTableNameToTableRows.put(constructCLRTableName(table), rows);
+            }
+        }
+    }
+
+    private String constructCLRTableName(CLRTable table) {
+        //"%0#2x" --> format as lowercase hex with prepended '0x' and minimum width 4 (includes '0x')
+        return String.format("%0#4x %s", table.getIndex(), table.getTableName());
     }
 
     /**
@@ -262,21 +340,22 @@ public class PEData {
      */
     public Optional<CodeviewInfo> loadCodeViewInfo() {
         if (codeviewInfo != null) {
-            return Optional.of(codeviewInfo);
+            return codeviewInfo;
         }
         try {
             com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
             if (sec.isPresent()) {
                 DebugSection d = sec.get();
                 if (d.getCodeView().isPresent()) {
-                    this.codeviewInfo = d.getCodeView().get();
-                    return Optional.of(codeviewInfo);
+                    this.codeviewInfo = d.getCodeView();
+                    return codeviewInfo;
                 }
             }
         } catch (IOException e) {
             logger.error(e);
             e.printStackTrace();
         }
+        this.codeviewInfo = Optional.empty();
         return Optional.empty();
     }
 
@@ -324,6 +403,24 @@ public class PEData {
      */
     public boolean hasExports() {
         return loadExports().size() > 0;
+    }
+
+    public Optional<ExtendedDLLCharacteristics> loadExtendedDllCharacteristics() {
+        if(extendedDLLCharacteristics != null) {
+            return extendedDLLCharacteristics;
+        }
+        try {
+            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
+            if (sec.isPresent()) {
+                extendedDLLCharacteristics = sec.get().getExtendedDllCharacteristics();
+                return extendedDLLCharacteristics;
+            }
+        } catch (IOException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        extendedDLLCharacteristics = Optional.empty();
+        return Optional.empty();
     }
 
     /**
@@ -609,5 +706,6 @@ public class PEData {
     private String loadResourceAsString(Resource r) throws IOException {
         return bytesToUTF8(IOUtil.loadBytesOfResource(r, this));
     }
+
 
 }

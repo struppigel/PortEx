@@ -19,17 +19,27 @@ package com.github.struppigel.parser.sections.clr
 
 import com.github.struppigel.parser.StandardField
 
+import java.lang.Long.toHexString
 import java.util.UUID
 
 /**
  * Field types for table entries in MSIL optimized stream
  */
-abstract class CLRField(sfield : StandardField){
-  override def toString: String = sfield.toString
+abstract class CLRField(sfield : StandardField) {
+  override def toString: String = sfield.getDescription + ": 0x" + toHexString(sfield.getValue)
+
+  /**
+   * Returns the value as an Object, using sometimes descriptive Strings and sometimes actual Long values
+   * depending on the content.
+   * @return
+   */
+  def getValueAsObject(): Object = sfield.getValue.asInstanceOf[Object]
   def getDescription: String = toString
   def getValue: Long = sfield.getValue
   def getName: String = sfield.getDescription
+  def getOffset: Long = sfield.getOffset
   def setOptimizedStream(optStream : OptimizedStream): Unit = {/*do nothing*/}
+  def toStandardField(): StandardField = new StandardField(sfield.getKey, this.getDescription, this.getValue, this.getOffset, sfield.getSize)
 }
 
 /**
@@ -55,6 +65,7 @@ case class CLRFlagField(sfield : StandardField, valueDescription : String) exten
   override def toString: String = sfield.getDescription + ": " + valueDescription +
     " (0x" + sfield.getValue.toHexString + ")"
   override def getDescription: String = valueDescription
+  override def getValueAsObject(): Object = valueDescription.asInstanceOf[Object]
 }
 
 /**
@@ -67,6 +78,7 @@ case class CLRStringField(strIdx : StringIndex, sfield : StandardField) extends 
   override def toString: String = sfield.getDescription + ": " + strIdx.toString()
   def getString: String = strIdx.getValue().get
   override def getDescription: String = strIdx.toString()
+  override def getValueAsObject(): Object = strIdx.toString().asInstanceOf[Object]
 }
 
 /**
@@ -78,6 +90,7 @@ case class CLRBlobField(blobIdx : BlobIndex, sfield : StandardField) extends CLR
   override def getNIndex: NIndex = blobIdx
   override def getDescription: String = blobIdx.toString()
   override def toString: String = sfield.getDescription + ": " + blobIdx.toString()
+  override def getValueAsObject(): Object = blobIdx.toString().asInstanceOf[Object]
 }
 
 
@@ -91,6 +104,7 @@ case class CLRGuidField(guidIdx : GuidIndex, sfield : StandardField) extends CLR
   override def toString: String = sfield.getDescription + ": " + guidIdx.toString()
   def getGuid: UUID = guidIdx.getValue().get
   override def getDescription: String = guidIdx.toString()
+  override def getValueAsObject(): Object = guidIdx.toString().asInstanceOf[Object]
 }
 
 /**
@@ -150,4 +164,6 @@ case class CLRCodedIndexField(codedTokenIndex: CodedTokenIndex, sfield : Standar
     if(codedTokenIndex.getReferencedTableType().isPresent) Some(codedTokenIndex.getReferencedTableType().get)
     else None
   }
+
+  override def getValueAsObject(): Object = codedTokenIndex.toStringShort().asInstanceOf[Object]
 }

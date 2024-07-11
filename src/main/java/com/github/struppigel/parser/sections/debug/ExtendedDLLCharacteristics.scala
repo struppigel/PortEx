@@ -8,6 +8,8 @@ import com.github.struppigel.parser.PEData
 import java.io.RandomAccessFile
 
 class ExtendedDLLCharacteristics(cetCompat : Boolean, forwardCfiCompat : Boolean) {
+  def getCETCompat(): Boolean = cetCompat
+  def getForwardCFICompat(): Boolean = forwardCfiCompat
   def getInfo() : String = NL +
     "Extended DLL Characteristics:" + NL +
     "-----------------------------" + NL +

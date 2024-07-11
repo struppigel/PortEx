@@ -55,6 +55,19 @@ class CodedTokenIndex(codedToken : Long, tagType : TagType) extends NIndex((code
       s"0x${codedToken.toHexString} -> row ${getIndex()} in ${getReferencedTableType().get.name}"
     else s"0x${codedToken.toHexString} -> row ${getIndex()} into nonexisting table"
   }
+
+  def toStringShort(): String = {
+    if(optStream.isDefined && getReferencedTableType().isPresent && optStream.get.getCLRTable(getReferencedTableType().get).isDefined) {
+      val referencedTable = optStream.get.getCLRTable(getReferencedTableType().get).get
+      val maybeEntry = referencedTable.getEntryByRow(getIndex())
+      if(maybeEntry.isDefined) {
+        return s"${maybeEntry.get.getShortDescription}"
+      }
+    }
+    if(getReferencedTableType().isPresent)
+      s"row ${getIndex()} in ${getReferencedTableType().get.name}"
+    else s"row ${getIndex()} into nonexisting table"
+  }
 }
 
 class GuidIndex(index : Int, val guidHeap : Option[GuidHeap]) extends NIndex(index) {

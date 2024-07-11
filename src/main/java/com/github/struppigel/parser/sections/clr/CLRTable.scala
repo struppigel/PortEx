@@ -25,17 +25,20 @@ import com.github.struppigel.tools.ReportCreator
 
 import scala.collection.JavaConverters._
 
-class CLRTable (private val entries : List[CLRTableEntry],
-                private val idx: Int) {
+class CLRTable (val entries : List[CLRTableEntry],
+                private val idx: Int,
+                private val rawOffset: Long) {
 
   private val name = getTableMetaForIndex(idx).name
 
+  def getIndex(): Int = idx
+  def getRawOffset(): Long = rawOffset
   def getTableName(): String = name
-  def getEntries(): List[CLRTableEntry] = entries
+  def getEntries(): java.util.List[CLRTableEntry] = entries.asJava
   def getEntryByRow(row : Int) : Option[CLRTableEntry] = entries.find(_.row == row)
 
   /**
-   * Set optimized stream instance after loading it to improve toString results
+   * Set optimized stream instance after loading it to improve toString results.
    * @param optStream
    */
   def setOptimizedStream(optStream : OptimizedStream): Unit = {entries.foreach(_.setOptimizedStream(optStream))}
@@ -47,6 +50,7 @@ class CLRTable (private val entries : List[CLRTableEntry],
 }
 
 class CLRTableEntry (val idx : Int,
+                     val rawOffset: Long,
                      val row: Int,
                      private val entriesMap : Map[CLRTableKey, StandardField],
                      private val guidHeap : Option[GuidHeap],
@@ -101,6 +105,8 @@ class CLRTableEntry (val idx : Int,
   }
 
   def getCLRFields(): java.util.Map[CLRTableKey, CLRField] = clrFields.asJava
+
+  def getCLRFieldsAsStandardFields(): java.util.List[StandardField] = clrFields.values.map(_.toStandardField()).toList.asJava
 
   def get(key : CLRTableKey): Option[CLRField] = clrFields.get(key)
 

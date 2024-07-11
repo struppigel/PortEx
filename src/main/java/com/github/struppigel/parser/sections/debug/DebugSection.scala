@@ -57,6 +57,14 @@ class DebugSection private (
 
   def hasExtendedDllCharacteristics() : Boolean = !entries.filter(_.getDebugType() == DebugType.EX_DLLCHARACTERISTICS ).isEmpty
 
+  def getExtendedDllCharacteristics() : Optional[ExtendedDLLCharacteristics] = {
+    val entry = entries.find(_.getDebugType() == DebugType.EX_DLLCHARACTERISTICS)
+    if(entry.isDefined) {
+      return Optional.of(entry.get.getExtendedDLLCharacteristics())
+    }
+    Optional.empty();
+  }
+
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
     if (!entries.isEmpty) {
       val preEntries = entries.map(_.getPhysicalLocations().asScala.toList).flatten

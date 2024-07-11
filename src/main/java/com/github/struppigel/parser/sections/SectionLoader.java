@@ -19,6 +19,8 @@ import com.github.struppigel.parser.optheader.DataDirectoryKey;
 import com.github.struppigel.parser.optheader.OptionalHeader;
 import com.github.struppigel.parser.optheader.StandardFieldEntryKey;
 import com.github.struppigel.parser.sections.clr.CLRSection;
+import com.github.struppigel.parser.sections.clr.CLRTable;
+import com.github.struppigel.parser.sections.clr.OptimizedStream;
 import com.github.struppigel.parser.sections.debug.DebugSection;
 import com.github.struppigel.parser.sections.edata.ExportSection;
 import com.github.struppigel.parser.sections.idata.BoundImportSection;
@@ -37,8 +39,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import static com.github.struppigel.parser.sections.SectionHeaderKey.*;
 
 /**
  * Responsible for computing section related values that are necessary for
@@ -537,7 +537,16 @@ public class SectionLoader {
      * @throws IOException if unable to read the file
      */
     public Optional<CLRSection> maybeLoadCLRSection() throws IOException {
-        return (Optional<CLRSection>) maybeLoadSpecialSection(DataDirectoryKey.CLR_RUNTIME_HEADER);
+        Optional<CLRSection> maybeClr = (Optional<CLRSection>) maybeLoadSpecialSection(DataDirectoryKey.CLR_RUNTIME_HEADER);
+        // set optimized stream for each CLR Table for better output
+        if(maybeClr.isPresent() && !maybeClr.get().isEmpty()) {
+            java.util.Optional<OptimizedStream> optStream = maybeClr.get().getMetadataRoot().maybeGetOptimizedStream();
+            if(optStream.isPresent()) {
+                List<CLRTable> tables = optStream.get().getCLRTables();
+                tables.forEach(t -> t.setOptimizedStream(optStream.get()));
+            }
+        }
+        return maybeClr;
     }
 
     /**

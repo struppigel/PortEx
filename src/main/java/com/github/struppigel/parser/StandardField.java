@@ -123,7 +123,8 @@ public class StandardField {
         if (value == null) {
             return description;
         }
-        return description + ": " + value + " (0x" + Long.toHexString(value)
-                + ")";
+        return description + ": " + Long.toHexString(value)
+                + ", value offset: 0x" + Long.toHexString(getOffset())
+                + ", value size: 0x" + Long.toHexString(getSize());
     }
 }

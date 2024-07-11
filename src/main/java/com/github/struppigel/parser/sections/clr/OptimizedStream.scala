@@ -30,45 +30,56 @@ import scala.math.pow
 class OptimizedStream(
                        val entries : Map[OptimizedStreamKey, StandardField],
                        val tableSizes : List[Int],
+                       private val rawOffset : Long,
                        private val tables: Map[Int, CLRTable]) {
 
   private def getIntegerValueOfField(key : OptimizedStreamKey): Int = entries.get(key).get.getValue.toInt
   private def getLongValueOfField(key : OptimizedStreamKey): Long = entries.get(key).get.getValue
 
-  def getCLRTable(clrTableType : CLRTableType): Option[CLRTable] = {
-    tables.get(clrTableType.getIndex)
-  }
+  def getRawOffset(): Long = rawOffset
+
+  /**
+   * Get entries as Java list
+    * @return
+   */
+  def getEntriesList(): java.util.List[StandardField] = entries.values.toList.asJava
+
+  /**
+   * Get the table specified by the clrTableType.
+   * @param clrTableType
+   * @return None if not available, Some(table) if available
+   */
+  def getCLRTable(clrTableType : CLRTableType): Option[CLRTable] = tables.get(clrTableType.getIndex)
+
+  /**
+   * Get all CLR tables
+   * @return all tables
+   */
+  def getCLRTables(): java.util.List[CLRTable] = tables.values.toList.asJava
+
   /**
    * Heap size in bytes based on heap size bit mask
    * @return heap size of #String heap in bytes
    */
-  def getStringHeapSize: Int = {
-    if ((getIntegerValueOfField(OptimizedStreamKey.HEAP_SIZES) & 0x1) != 0) 4 else 2
-  }
+  def getStringHeapSize: Int = if ((getIntegerValueOfField(OptimizedStreamKey.HEAP_SIZES) & 0x1) != 0) 4 else 2
 
   /**
    * Heap size in bytes based on heap size bit mask
    * @return heap size of #GUID heap in bytes
    */
-  def getGUIDHeapSize: Int = {
-    if ((getIntegerValueOfField(OptimizedStreamKey.HEAP_SIZES) & 0x2) != 0) 4 else 2
-  }
+  def getGUIDHeapSize: Int = if ((getIntegerValueOfField(OptimizedStreamKey.HEAP_SIZES) & 0x2) != 0) 4 else 2
 
   /**
    * Heap size in bytes based on heap size bit mask
    * @return heap size of #Blob heap in bytes
    */
-  def getBlobHeapSize: Int = {
-    if ((getIntegerValueOfField(OptimizedStreamKey.HEAP_SIZES) & 0x4) != 0) 4 else 2
-  }
+  def getBlobHeapSize: Int = if ((getIntegerValueOfField(OptimizedStreamKey.HEAP_SIZES) & 0x4) != 0) 4 else 2
 
   /**
    * get a list of all valid tables
    * @return list of all valid tables in the stream according to VALID bitmask
    */
-  def getTableNames(): List[String] = {
-    getTableIndices().sorted.map(tableIdxMap(_))
-  }
+  def getTableNames(): List[String] = getTableIndices().sorted.map(tableIdxMap(_))
 
   /**
    * get a list of all valid tables
@@ -106,8 +117,9 @@ object OptimizedStream {
 
   def apply(size: Long, offset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap], blobHeap : Option[BlobHeap]): OptimizedStream = {
     val tempBytes = mmbytes.slice(offset, offset + size)
+    val rawOffset = mmbytes._virtToPhysAddresses(offset).head
     val entries = readHeaderEntries(classOf[OptimizedStreamKey],
-      format, spec, tempBytes, 0).asScala.toMap
+      format, spec, tempBytes, rawOffset).asScala.toMap
     val bitvector = entries.get(OptimizedStreamKey.VALID).get.getValue
     val nrOfTables = nrOfSetBits(bitvector)
     val tableSizesOffset = offset + 24
@@ -119,7 +131,7 @@ object OptimizedStream {
       else {
         readTables(moduleTableOffset, mmbytes, stringsHeap, guidHeap, blobHeap, tableSizes, bitvector)
       }
-    new OptimizedStream(entries, tableSizes, tables)
+    new OptimizedStream(entries, tableSizes, rawOffset, tables)
   }
 
   /**
@@ -194,10 +206,6 @@ object OptimizedStream {
     }).asJava
   }
 
-  //private def readTables(tablesOffset : Long, mmbytes: MemoryMappedPE, stringsHeap : Option[StringsHeap],
-  //                       guidHeap : Option[GuidHeap], tableSizes: List[Int], bitvector: Long): Map[Int,CLRTable] = Map()
-
-
   private def readTables(tablesOffset : Long,
                          mmbytes: MemoryMappedPE,
                          stringsHeap : Option[StringsHeap],
@@ -223,23 +231,23 @@ object OptimizedStream {
       val tableSize: Long = entrySize * rows
       // determine the current table offset
       val tableStart : Long = currTableOffset
+      val rawTableStart: Long = mmbytes._virtToPhysAddresses(tableStart).head
       currTableOffset += tableSize
       // for each row in tableSizes obtain new offset and read StandardFields
       val tableEntries = for(row <- 0 until rows) yield {
         val rowOffset : Long = row * entrySize // this offset is relativ to tableStart which is where headerbytes were sliced
+        val rawRowOffset: Long = mmbytes._virtToPhysAddresses(tableStart + rowOffset).head
         // obtain StandardFields via IOUtil
         // now you can read headerbytes from mmbytes
         val headerbytes = mmbytes.slice(tableStart + rowOffset, tableStart + tableSize)
-        // TODO set physical offset or the phys entries will be wrong!
-        val physHeaderOffset = 0
-        val entries = IOUtil.readHeaderEntriesForSpec(classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, physHeaderOffset)
+        val entries = IOUtil.readHeaderEntriesForSpec(classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, rawTableStart)
         // this is a somewhat bad hack because I could not use generic types for headerkeys
         val cleanedupEntries = entries.asScala.toMap.filter(_._2.getDescription != "this field was not set")
-        val tblentry = new CLRTableEntry(idx, row + 1, cleanedupEntries, guidHeap, stringsHeap, blobHeap)
+        val tblentry = new CLRTableEntry(idx, rawRowOffset, row + 1, cleanedupEntries, guidHeap, stringsHeap, blobHeap)
         tblentry
       }
       val tableName = CLRTable.getTableNameForIndex(idx)
-      (idx, new CLRTable(tableEntries.toList, idx))
+      (idx, new CLRTable(tableEntries.toList, idx, rawTableStart))
       // yield tuple of idx and CLRTable, so you can convert to map later
     }
     tables.toMap

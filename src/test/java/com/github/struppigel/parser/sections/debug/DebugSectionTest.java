@@ -9,10 +9,11 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.github.struppigel.parser.sections.debug.DebugDirectoryKey.*;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 public class DebugSectionTest {
 
@@ -37,5 +38,17 @@ public class DebugSectionTest {
         assertEquals((long) debug.get(CHARACTERISTICS), 0L);
         assertEquals(debug.getTypeDescription(), "Visual C++ debug information");
         assertEquals(debug.getDebugType(), DebugType.CODEVIEW);
+    }
+    @Test
+    public void extendedDllCharacteristicsTest() {
+        // has extended DLL characteristics
+        PEData datum = pedata.get("TestCetCompatAndEhCont.exe");
+        Optional<ExtendedDLLCharacteristics> exDll = datum.loadExtendedDllCharacteristics();
+        assertTrue(exDll.isPresent());
+        assertTrue(exDll.get().getCETCompat());
+        assertFalse(exDll.get().getForwardCFICompat());
+        // has no extended DLL characteristics
+        PEData noExDll = pedata.get("upx.exe");
+        assertFalse(noExDll.loadExtendedDllCharacteristics().isPresent());
     }
 }
