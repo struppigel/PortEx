@@ -75,7 +75,7 @@ public class PEReHintScannerTest  {
     }
 
     @Test
-    public void embeddedExeTest() throws IOException {
+    public void embeddedExeTest() {
         ReHintType rtype = ReHintType.EMBEDDED_EXE_RE_HINT;
         String reason = "Resource named ID: 1 in resource 0xd74 is an executable (MS-DOS or Portable Executable)";
         assertHasReHintWithTypeAndReason("embedded_exe_resources", rtype, reason);

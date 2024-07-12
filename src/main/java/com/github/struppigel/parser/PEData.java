@@ -26,6 +26,7 @@ import com.github.struppigel.parser.sections.clr.*;
 import com.github.struppigel.parser.sections.debug.*;
 import com.github.struppigel.parser.sections.edata.ExportEntry;
 import com.github.struppigel.parser.sections.edata.ExportSection;
+import com.github.struppigel.parser.sections.idata.DelayLoadSection;
 import com.github.struppigel.parser.sections.idata.ImportDLL;
 import com.github.struppigel.parser.sections.idata.ImportSection;
 import com.github.struppigel.parser.sections.rsrc.ID;
@@ -192,6 +193,7 @@ public class PEData {
     private List<ExportEntry> exports;
     private List<Resource> resources;
     private List<ImportDLL> imports;
+    private List<ImportDLL> delayLoadImports;
     private VersionInfo versionInfo;
     private Optional<CodeviewInfo> codeviewInfo;
     private Optional<ExtendedDLLCharacteristics> extendedDLLCharacteristics;
@@ -360,6 +362,32 @@ public class PEData {
     }
 
     /**
+     * Obtain a list of imports DLL objects without having to deal with exceptions. Reads the PE file to do so unless already loaded.
+     * The import DLL objects contain the referenced symbols.
+     *
+     * @return list of delay load import DLLs
+     */
+    public List<ImportDLL> loadDelayLoadImports() {
+        if (delayLoadImports != null) {
+            return delayLoadImports;
+        }
+        SectionLoader loader = new SectionLoader(this);
+        try {
+            com.google.common.base.Optional<DelayLoadSection> maybeDelayLoadImports = loader.maybeLoadDelayLoadSection();
+            if (maybeDelayLoadImports.isPresent() && !maybeDelayLoadImports.get().isEmpty()) {
+                DelayLoadSection delayLoadSection = maybeDelayLoadImports.get();
+                this.delayLoadImports = delayLoadSection.getImports();
+                return delayLoadImports;
+            }
+        } catch (IOException e) {
+            logger.error(e);
+            e.printStackTrace();
+        }
+        this.delayLoadImports = new ArrayList<>();
+        return new ArrayList<>();
+    }
+
+    /**
      * Loads the codeview structure and returns the PDB path of it. Reads the PE file to do so unless already loaded.
      * This is included because it is an important IoC for malware. For more detailed info about the CodeviewInfo, use loadCodeviewInfo() or load the debug section.
      *
@@ -467,6 +495,7 @@ public class PEData {
             logger.error(e);
             e.printStackTrace();
         }
+        this.imports = new ArrayList<>();
         return new ArrayList<>();
     }
 

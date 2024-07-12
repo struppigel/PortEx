@@ -23,7 +23,7 @@ trait ResourceSectionScanning extends AnomalyScanner {
       anomalyList ++= checkResourceLoop(rsrc)
       anomalyList ++= checkResourceNames(rsrc)
       anomalyList ++= checkInvalidResourceLocations(rsrc, data.getFile.length())
-      anomalyList ++= checkResourceFileTypes(rsrc)
+      anomalyList ++= checkResourceFileTypes()
       anomalyList ++= checkResourceContents(rsrc, data)
       super.scan ::: anomalyList.toList
     } else super.scan ::: Nil
@@ -88,9 +88,9 @@ trait ResourceSectionScanning extends AnomalyScanner {
     anomalyList.toList
   }
 
-  private def checkResourceFileTypes(rsrc: ResourceSection): List[Anomaly] = {
+  private def checkResourceFileTypes(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val resources = rsrc.getResources.asScala
+    val resources = data.loadResources().asScala
     for (resource <- resources) {
       val offset = resource.rawBytesLocation.from
       val fileTypes = data.getResourceSignatures.asScala.filter(_.getAddress == offset)

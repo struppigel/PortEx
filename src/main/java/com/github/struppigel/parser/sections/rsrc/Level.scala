@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import Level._
  * Represents the level of a {@link ResourceDirectory}).
  * Windows usually has three levels, that are type, name and language.
  * 
- * @author Katja Hahn
+ * @author Karsten Hahn
  * Creates an instance of the level with levelNr
  * @param levelNr the number of the level
  */

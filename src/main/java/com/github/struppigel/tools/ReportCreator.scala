@@ -433,18 +433,9 @@ class ReportCreator(private val data: PEData) {
    * @return description of PE imports
    */
   def importsReport(): String = {
-    val loader = new SectionLoader(data)
-    val maybeImports = loader.maybeLoadImportSection()
-    if (maybeImports.isPresent && !maybeImports.get.isEmpty) {
-      val idata = maybeImports.get
-      val buf = new StringBuffer()
-      buf.append(title("Imports") + NL)
-      val imports = idata.getImports.asScala
-      for (importDll <- imports) {
-        buf.append(importDll + NL)
-      }
-      buf.toString
-    } else ""
+    val imports = data.loadImports().asScala
+    if (imports.isEmpty) return ""
+    title("Imports") + NL + imports.mkString(NL)
   }
 
   /**
@@ -471,18 +462,9 @@ class ReportCreator(private val data: PEData) {
    * @return description of delay load imports
    */
   def delayImportsReport(): String = {
-    val loader = new SectionLoader(data)
-    val maybeImports = loader.maybeLoadDelayLoadSection()
-    if (maybeImports.isPresent && !maybeImports.get.isEmpty) {
-      val delayLoad = maybeImports.get
-      val buf = new StringBuffer()
-      buf.append(title("Delay-Load Imports") + NL)
-      val imports = delayLoad.getImports().asScala
-      for (importDll <- imports) {
-        buf.append(importDll + NL)
-      }
-      buf.toString
-    } else ""
+    val imports = data.loadDelayLoadImports().asScala
+    if (imports.isEmpty) return ""
+    title("Delay-Load Imports") + NL + imports.mkString(NL)
   }
 
   /**
@@ -490,18 +472,9 @@ class ReportCreator(private val data: PEData) {
    * @return description of exports
    */
   def exportsReport(): String = {
-    val loader = new SectionLoader(data)
-    val maybeExports = loader.maybeLoadExportSection()
-    if (maybeExports.isPresent && !maybeExports.get.isEmpty) {
-      val edata = maybeExports.get
-      val buf = new StringBuffer()
-      buf.append(title("Exports") + NL)
-      val exports = edata.getExportEntries().asScala
-      for (export <- exports) {
-        buf.append(export + NL)
-      }
-      buf.toString + NL
-    } else ""
+    val exports = data.loadExports().asScala
+    if(exports.isEmpty) return ""
+    title("Exports") + NL + exports.mkString(NL)
   }
 
   /**

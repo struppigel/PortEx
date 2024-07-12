@@ -88,7 +88,7 @@ public class PEDataTest {
     @Test
     public void loadManifests(){
         PEData wmic = pedata.get("WMIX.exe");
-
+        System.out.println(wmic.loadManifests());
         assertEquals(wmic.loadManifests().size(), 2);
         assertEquals(wmic.loadManifests(1333).size(), 2);
         assertEquals(wmic.loadManifests(1332).size(), 1);
