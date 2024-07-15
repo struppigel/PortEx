@@ -56,27 +56,64 @@ object BoundImportDescriptor {
     val boundDescriptorSize = 8
 
     def apply(loadInfo: LoadInfo, nr: Int): BoundImportDescriptor = {
-      // prepare values
-      val format = new SpecificationFormat(0, 1, 2, 3)
-      val mmbytes = loadInfo.memoryMapped
-      val entryFileOffset = loadInfo.fileOffset + nr * boundDescriptorSize
-      val readAddress = loadInfo.va + nr * boundDescriptorSize
+      val desc = loadDescriptor(loadInfo, nr)
+      // read addresses as file offsets instead if it cannot be read
+      // that is because older files use offsets instead of RVAs
+      if(desc.isEmpty()) loadDescriptor(loadInfo, nr, true)
+      else desc
+    }
+
+
+  private def loadDescriptor(loadInfo : LoadInfo, nr : Int, useRaw : Boolean = false): BoundImportDescriptor = {
+    // prepare values
+    val format = new SpecificationFormat(0, 1, 2, 3)
+    val mmbytes = loadInfo.memoryMapped
+    val entryFileOffset = loadInfo.fileOffset + nr * boundDescriptorSize
+    try {
+      val readAddress = calculateReadAddress(loadInfo, nr, useRaw)
       val boundBytes = mmbytes.slice(readAddress, readAddress + boundDescriptorSize)
       // load descriptor entries
       val entries = IOUtil.readHeaderEntries(classOf[BoundImportDescriptorKey],
         format, boundImportSpec, boundBytes, entryFileOffset).asScala.toMap
+
       // load name of bound DLL
-      val nameRVA = loadInfo.va + entries.get(BoundImportDescriptorKey.OFFSET_MODULE_NAME).get.getValue
-      val name = getASCIIName(nameRVA, mmbytes)
-
+      val nameRVA = calculateNameRVA(loadInfo, useRaw, entries)
+      val name = getASCIIName(nameRVA, mmbytes, useRaw)
+      logger.debug(s" entry file offset 0x${toHexString(entryFileOffset)}, entry size: ${entries.size}, read address: 0x${toHexString(readAddress)}, name address 0x${toHexString(nameRVA)}")
       new BoundImportDescriptor(entries, nr, entryFileOffset, name)
+    } catch {
+      case e: IllegalArgumentException => logger.error(e.getMessage()); emptyDescriptor()
     }
+  }
 
-  private def getASCIIName(nameRVA: Long,
-                           mmbytes: MemoryMappedPE): String = {
-    val offset = nameRVA
-    val nullindex = mmbytes.indexWhere(_ == 0, offset)
-    new String(mmbytes.slice(offset, nullindex))
+  private def emptyDescriptor(): BoundImportDescriptor = new BoundImportDescriptor(Map.empty, 0, 0, "")
+
+  private def calculateReadAddress(loadInfo : LoadInfo, nr : Int, useRaw : Boolean): Long =
+    if (useRaw) {
+      val addr = loadInfo.fileOffset + nr * boundDescriptorSize
+      val addresses = loadInfo.memoryMapped._physToVirtAddresses(addr)
+      if(addresses.isEmpty) throw new IllegalArgumentException(s"Read address ${addr} invalid")
+      addresses.head
+    }
+    else loadInfo.va + nr * boundDescriptorSize
+
+  private def calculateNameRVA(loadInfo: LoadInfo, useRaw : Boolean, entries : Map[BoundImportDescriptorKey, StandardField]): Long =
+    if(useRaw) {
+      val addr = loadInfo.fileOffset + entries.get(BoundImportDescriptorKey.OFFSET_MODULE_NAME).get.getValue
+      val addresses = loadInfo.memoryMapped._physToVirtAddresses(addr)
+      if(addresses.isEmpty) throw new IllegalArgumentException(s"Name address ${addr} invalid")
+      logger.debug("raw name addr 0x" + toHexString(addr) + " virt addr 0x" + toHexString(addresses.head) + " size " + addresses.size)
+      addresses.head
+    }
+    else loadInfo.va + entries.get(BoundImportDescriptorKey.OFFSET_MODULE_NAME).get.getValue
+
+
+  private def getASCIIName(nameAddress: Long,
+                           mmbytes: MemoryMappedPE, useRaw : Boolean ): String = {
+    val voffset = nameAddress
+    val nullindex = mmbytes.indexWhere(_ == 0, voffset)
+    if(nullindex <= 0) throw new IllegalArgumentException(s"Cannot read name at address ${nameAddress} because there is none")
+    new String(mmbytes.slice(voffset, nullindex))
   }
 
 }

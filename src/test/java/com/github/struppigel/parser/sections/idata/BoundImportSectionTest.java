@@ -39,17 +39,36 @@ public class BoundImportSectionTest {
             .getLogger(SectionLoaderTest.class.getName());
 
     @Test
-    public void basicWorkingTest() throws IOException {
-     File file = new File("portextestfiles/corkami/dllbound-ld.exe");
-     PEData data = PELoader.loadPE(file);
-     BoundImportSection section = new SectionLoader(data).loadBoundImportSection();
-     List<BoundImportDescriptor> descriptors = section.getEntries();
-     assertEquals(descriptors.size(), 1);
-     BoundImportDescriptor bi = descriptors.get(0);
-     assertEquals(bi.get(BoundImportDescriptorKey.NR_OF_MODULE_FORWARDER_REFS), 0);
-     assertEquals(bi.get(BoundImportDescriptorKey.OFFSET_MODULE_NAME), 0x10);
-     assertEquals(bi.get(BoundImportDescriptorKey.TIME_DATE_STAMP), 0x31415925);
-     assertEquals(bi.getName(), "dllbound.dll");
-     assertEquals(bi.getPhysicalLocation().from(), 0x280);
+    public void readBoundImportsAsRVAs() throws IOException {
+        // this file is according to specification
+        File file = new File("portextestfiles/corkami/dllbound-ld.exe");
+        PEData data = PELoader.loadPE(file);
+        BoundImportSection section = new SectionLoader(data).loadBoundImportSection();
+        List<BoundImportDescriptor> descriptors = section.getEntries();
+        assertEquals(descriptors.size(), 1);
+        BoundImportDescriptor bi = descriptors.get(0);
+        assertEquals(bi.get(BoundImportDescriptorKey.NR_OF_MODULE_FORWARDER_REFS), 0);
+        assertEquals(bi.get(BoundImportDescriptorKey.OFFSET_MODULE_NAME), 0x10);
+        assertEquals(bi.get(BoundImportDescriptorKey.TIME_DATE_STAMP), 0x31415925);
+        assertEquals(bi.getName(), "dllbound.dll");
+        assertEquals(bi.getPhysicalLocation().from(), 0x280);
     }
+
+    @Test
+    public void readBoundImportsAsFileOffsets() throws IOException {
+        // this is an older file where bound imports use raw offsets instead of RVAs
+        File file = new File("portextestfiles/BinaryCorpus_v2_oldCorkami/yoda/VB_boundimport.EXE");
+        PEData data = PELoader.loadPE(file);
+        BoundImportSection section = new SectionLoader(data).loadBoundImportSection();
+        List<BoundImportDescriptor> descriptors = section.getEntries();
+        System.out.println(section.getInfo());
+        assertEquals(descriptors.size(), 1);
+        BoundImportDescriptor bi = descriptors.get(0);
+        assertEquals(bi.get(BoundImportDescriptorKey.NR_OF_MODULE_FORWARDER_REFS), 0);
+        assertEquals(bi.get(BoundImportDescriptorKey.OFFSET_MODULE_NAME), 0x10);
+        assertEquals(bi.get(BoundImportDescriptorKey.TIME_DATE_STAMP), 0x355c5ec3);
+        assertEquals(bi.getName(), "MSVBVM60.DLL");
+        assertEquals(bi.getPhysicalLocation().from(), 0x218);
+    }
+
 }
