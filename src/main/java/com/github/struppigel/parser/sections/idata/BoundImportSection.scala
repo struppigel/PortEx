@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2016 Katja Hahn
+ * Copyright 2024 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@
 
 package com.github.struppigel.parser.sections.idata
 
-import com.github.struppigel.parser.IOUtil.SpecificationFormat
 import com.github.struppigel.parser.sections.SectionLoader.LoadInfo
-import com.github.struppigel.parser.PhysicalLocation
-import com.github.struppigel.parser.sections.SectionLoader.LoadInfo
+import com.github.struppigel.parser.{IOUtil, PhysicalLocation}
 import com.github.struppigel.parser.sections.SpecialSection
+import org.apache.logging.log4j.LogManager
 
 import scala.collection.JavaConverters._
 
 class BoundImportSection private (
+    private val entries: List[BoundImportDescriptor],
     private val offset: Long) extends SpecialSection {
-  
-  def getImports(): java.util.List[ImportDLL] = null //TODO implement
+
+  def getEntries(): java.util.List[BoundImportDescriptor] = entries.asJava
 
   /**
    * {@inheritDoc}
@@ -45,31 +45,43 @@ class BoundImportSection private (
    *
    * @return a list with all locations the import information has been written to.
    */
-  def getPhysicalLocations(): java.util.List[PhysicalLocation] = {
-    List.empty[PhysicalLocation].asJava
-  }
+  def getPhysicalLocations(): java.util.List[PhysicalLocation] =
+    entries.map(b => b.getPhysicalLocation()).asJava
 
   /**
-   * Returns a decription of all entries in the import section.
+   * Returns a decription of all entries in the bound import section.
    *
-   * @return a description of all entries in the import section
+   * @return a description of all entries in the bound import section
    */
   override def getInfo(): String =
     s"""|--------------
         |Bound Imports
         |--------------
         |
-        |-todo-""".stripMargin
+        |${entries.mkString(IOUtil.NL)}""".stripMargin
 
 }
 
 object BoundImportSection {
 
+  private val MAX_ENTRIES = 10000
+  private final val logger = LogManager.getLogger(BoundImportSection.getClass().getName())
+
   def apply(loadInfo: LoadInfo): BoundImportSection = {
-     val format = new SpecificationFormat(0, 1, 2, 3)
-     null
+
+    val entries = readEntries(loadInfo)
+    val rawOffset = loadInfo.fileOffset
+    new BoundImportSection(entries, rawOffset)
     }
-  
+
+  private def readEntries(loadInfo: LoadInfo, number: Int = 0): List[BoundImportDescriptor] = {
+    val descriptor = BoundImportDescriptor(loadInfo, number)
+    if(descriptor.isEmpty()) Nil
+    else if (number == MAX_ENTRIES) { logger.warn("maximum number of BoundImportDescriptors reached") ; Nil }
+    else descriptor :: readEntries(loadInfo, number + 1)
+  }
+
+
   /**
    * The instance of this class is usually created by the section loader.
    *

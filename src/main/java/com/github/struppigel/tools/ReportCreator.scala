@@ -446,14 +446,8 @@ class ReportCreator(private val data: PEData) {
     val loader = new SectionLoader(data)
     val maybeImports = loader.maybeLoadBoundImportSection()
     if (maybeImports.isPresent && !maybeImports.get.isEmpty) {
-      val boundImports = maybeImports.get
-      val buf = new StringBuffer()
-      buf.append(title("Bound Imports") + NL)
-      val imports = boundImports.getImports().asScala
-      for (importDll <- imports) {
-        buf.append(importDll + NL)
-      }
-      buf.toString
+      val boundSec = maybeImports.get()
+      boundSec.getInfo()
     } else ""
   }
 
