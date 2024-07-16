@@ -23,10 +23,10 @@ import com.github.struppigel.parser.sections.SectionLoader.LoadInfo
 import DelayLoadDirectoryEntry._
 import DelayLoadDirectoryKey._
 import com.github.struppigel.parser.optheader.WindowsEntryKey
-import com.github.struppigel.parser.sections.SectionLoader.LoadInfo
 import com.github.struppigel.parser.{IOUtil, MemoryMappedPE, PhysicalLocation, StandardField}
 import org.apache.logging.log4j.LogManager
 
+import java.lang.Long.toHexString
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -89,33 +89,78 @@ object DelayLoadDirectoryEntry {
     val delayLoadBytes = mmbytes.slice(readAddress, readAddress + delayDirSize)
     val entries = IOUtil.readHeaderEntries(classOf[DelayLoadDirectoryKey],
       format, delayLoadSpec, delayLoadBytes, entryFileOffset).asScala.toMap
-    val nameRVA = entries(NAME).getValue.toInt
-    val name = getASCIIName(nameRVA, va, mmbytes)
+
+    val name = getNameByAddressTesting(loadInfo, entries)
+    logger.debug(s"va: 0x${toHexString(va)}, read addr: 0x${toHexString(readAddress)}, entries: ${entries.size}, name: $name, entry file offset: 0x${toHexString(entryFileOffset)}")
+
     try {
-      val lookupTableEntries = readLookupTableEntries(entries, loadInfo)
-      return new DelayLoadDirectoryEntry(entries, entryFileOffset, name, lookupTableEntries)
+      val lookupTableEntries = readLookupTableEntries(entries, loadInfo, false)
+      if(lookupTableEntries.isEmpty) return new DelayLoadDirectoryEntry(entries, entryFileOffset, name, readLookupTableEntries(entries, loadInfo, true))
+      else return new DelayLoadDirectoryEntry(entries, entryFileOffset, name, lookupTableEntries)
     } catch {
-      case e: FailureEntryException => logger.error(
+      case e: FailureEntryException => logger.warn(
         "Invalid LookupTableEntry found, parsing aborted, " + e.getMessage())
     }
     // No lookup table entries read
-    return new DelayLoadDirectoryEntry(entries, entryFileOffset, name, Nil)
+    new DelayLoadDirectoryEntry(entries, entryFileOffset, name, Nil)
+  }
+
+  // entries are sometimes VAs and sometimes RVAs, we determine the name by testing which one works
+  private def getNameByAddressTesting(loadInfo: LoadInfo, entries: Map[DelayLoadDirectoryKey, StandardField]): String = {
+    try {
+      // use RVA first because that is according to specification
+      val nameRVA = calculateRVA(loadInfo, false, entries, NAME)
+      logger.debug(s"name rva: 0x" + toHexString(nameRVA))
+      val name = getASCIIName(nameRVA, loadInfo.memoryMapped)
+      logger.debug("name " + name)
+      if(!name.isEmpty) return name
+    } catch {
+      case e: IllegalArgumentException => logger.info(e.getMessage())
+    }
+    try {
+      // RVA did not work, so use VA
+      val nameVA = calculateRVA(loadInfo, true, entries, NAME)
+      logger.debug(s"name va: 0x" + toHexString(nameVA))
+      return getASCIIName(nameVA, loadInfo.memoryMapped)
+    } catch {
+      case e: IllegalArgumentException => logger.warn(e.getMessage())
+    }
+    // return empty string if nothing works
+    ""
+  }
+
+  private def getImageBase(loadInfo : LoadInfo) : Long =
+    loadInfo.data.getOptionalHeader.get(WindowsEntryKey.IMAGE_BASE)
+
+  private def calculateRVA(loadInfo: LoadInfo, useVA : Boolean, entries : Map[DelayLoadDirectoryKey, StandardField], key: DelayLoadDirectoryKey): Long = {
+    val value = entries(key).getValue
+    val base = getImageBase(loadInfo)
+    if(useVA && base <= value) value - base
+    else value
+  }
+
+  private def getASCIIName(nameAddress: Long,
+                           mmbytes: MemoryMappedPE ): String = {
+    val voffset = nameAddress
+    val nullindex = mmbytes.indexWhere(_ == 0, voffset)
+    if(nullindex <= 0) throw new IllegalArgumentException(s"Cannot read name at address 0x${toHexString(nameAddress)} because there is none")
+    new String(mmbytes.slice(voffset, nullindex))
   }
 
   private def readLookupTableEntries(entries: Map[DelayLoadDirectoryKey, StandardField],
-    loadInfo: LoadInfo): List[LookupTableEntry] = {
+    loadInfo: LoadInfo, useVAs : Boolean): List[LookupTableEntry] = {
     val virtualAddress = loadInfo.va
     val mmbytes = loadInfo.memoryMapped
     val magicNumber = loadInfo.data.getOptionalHeader.getMagicNumber()
     val fileOffset = loadInfo.fileOffset
     var entry: LookupTableEntry = null
-    var iRVA = entries(DELAY_IMPORT_NAME_TABLE).getValue
+    val iRVA = calculateRVA(loadInfo, useVAs, entries, DELAY_IMPORT_NAME_TABLE)
     var offset = iRVA - virtualAddress
     var relOffset = iRVA
-    var iVA = iRVA + loadInfo.data.getOptionalHeader.get(WindowsEntryKey.IMAGE_BASE)
+    val iVA = iRVA + loadInfo.data.getOptionalHeader.get(WindowsEntryKey.IMAGE_BASE)
     val lookupTableEntries = ListBuffer[LookupTableEntry]()
-    logger.debug("offset: " + offset + " rva: " + iRVA + " byteslength: " +
-      mmbytes.length() + " virtualAddress " + virtualAddress)
+    logger.debug("offset: 0x" + toHexString(offset) + " rva: 0x" + toHexString(iRVA) + " byteslength: " +
+      mmbytes.length() + " virtualAddress 0x" + toHexString(loadInfo.va))
     val EntrySize = magicNumber match {
       case PE32 => 4
       case PE32_PLUS => 8
@@ -123,25 +168,19 @@ object DelayLoadDirectoryEntry {
       case UNKNOWN => throw new IllegalArgumentException("Unknown magic number, can not parse delay-load imports")
     }
     do {
-      //TODO get fileoffset for entry from mmbytes instead of this to avoid
-      //fractionated section issues ?
+      //TODO get fileoffset for entry from mmbytes instead of this to avoid fractionated section issues ?
       val entryFileOffset = fileOffset + offset
       //val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work
       //FIXME dummy
       val dummy = new DirectoryEntry(null, 0)
-      entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize,
+      entry = LookupTableEntry(loadInfo, mmbytes, offset.toInt, EntrySize,
         virtualAddress, relOffset, iVA, dummy, entryFileOffset)
       if (!entry.isInstanceOf[NullEntry]) lookupTableEntries += entry
+
       offset += EntrySize
       relOffset += EntrySize
     } while (!entry.isInstanceOf[NullEntry])
     lookupTableEntries.toList
   }
 
-  private def getASCIIName(nameRVA: Int, virtualAddress: Long,
-    mmbytes: MemoryMappedPE): String = {
-    val offset = nameRVA
-    val nullindex = mmbytes.indexWhere(_ == 0, offset)
-    new String(mmbytes.slice(offset, nullindex))
-  }
 }

@@ -105,9 +105,9 @@ object ImportSection {
   private var relOffsetMax = 0L
 
   def apply(li: LoadInfo): ImportSection =
-    apply(li.memoryMapped, li.va, li.data.getOptionalHeader, li.data.getFile.length(), li.fileOffset)
+    apply(li : LoadInfo, li.memoryMapped, li.va, li.data.getOptionalHeader, li.data.getFile.length(), li.fileOffset)
 
-  def apply(mmbytes: MemoryMappedPE, virtualAddress: Long,
+  def apply(loadInfo: LoadInfo, mmbytes: MemoryMappedPE, virtualAddress: Long,
     optHeader: OptionalHeader, fileSize: Long, fileOffset: Long): ImportSection = {
     logger.debug("reading directory entries for root table ...")
     // read directory table (as a list of entries)
@@ -116,7 +116,7 @@ object ImportSection {
     logger.debug("reading lookup table entries ...")
     try {
       // read all lookup table entries
-      readLookupTableEntries(directoryTable, virtualAddress, optHeader, mmbytes, 
+      readLookupTableEntries(loadInfo, directoryTable, virtualAddress, optHeader, mmbytes,
           fileSize, fileOffset)
     } catch {
       case e: FailureEntryException => logger.warn(
@@ -139,7 +139,7 @@ object ImportSection {
    * @param fileSize the length of the file in bytes
    * @param fileOffset file offset to the directory table
    */
-  private def readLookupTableEntries(directoryTable: List[DirectoryEntry],
+  private def readLookupTableEntries(loadInfo: LoadInfo, directoryTable: List[DirectoryEntry],
     virtualAddress: Long, optHeader: OptionalHeader, mmbytes: MemoryMappedPE,
     fileSize: Long, fileOffset: Long): Unit = {
     //set a maximum of entries to avoid problems with, e.g., manyimportsW7.exe
@@ -170,7 +170,7 @@ object ImportSection {
         //fractionated section issues ?
         val entryFileOffset = fileOffset + offset 
 //        val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work
-        entry = LookupTableEntry(mmbytes, offset.toInt, EntrySize, 
+        entry = LookupTableEntry(loadInfo, mmbytes, offset.toInt, EntrySize,
             virtualAddress, relOffset, iVA, dirEntry, entryFileOffset)
         if (!entry.isInstanceOf[NullEntry]) {
           dirEntry.addLookupTableEntry(entry)

@@ -61,7 +61,6 @@ public class BoundImportSectionTest {
         PEData data = PELoader.loadPE(file);
         BoundImportSection section = new SectionLoader(data).loadBoundImportSection();
         List<BoundImportDescriptor> descriptors = section.getEntries();
-        System.out.println(section.getInfo());
         assertEquals(descriptors.size(), 1);
         BoundImportDescriptor bi = descriptors.get(0);
         assertEquals(bi.get(BoundImportDescriptorKey.NR_OF_MODULE_FORWARDER_REFS), 0);

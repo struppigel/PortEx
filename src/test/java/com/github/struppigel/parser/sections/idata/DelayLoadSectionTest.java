@@ -17,12 +17,8 @@ import static org.testng.Assert.assertEquals;
 public class DelayLoadSectionTest {
 
     @Test
-    public void basicWorkingTest() throws IOException {
+    public void standardDelayLoad() throws IOException {
         File file = new File("portextestfiles/corkami/delay_imports.exe");
-
-        // FIXME check why this file has problems
-        // File file = new File("portextestfiles/BinaryCorpus_v2_oldCorkami/yoda/DelayImport (User.dll).exe");
-        // new File("portextestfiles/corkami/delayimports.exe"));
 
         PEData data = PELoader.loadPE(file);
         DelayLoadSection section = new SectionLoader(data).loadDelayLoadSection();
@@ -45,11 +41,55 @@ public class DelayLoadSectionTest {
         assertEquals(nameImport.getName(), "MessageBoxA");
 
         logger.debug("namerva " + nameImport.getNameRVA());
-        assertEquals(nameImport.getNameRVA(), 8356);
+        assertEquals(nameImport.getNameRVA(), 8356); // 0x20A4
 
         logger.debug("rva " + nameImport.getRVA());
-        assertEquals(nameImport.getRVA(), 8348);
+        assertEquals(nameImport.getRVA(), 8348); // 0x209C
 
+    }
+
+    @Test
+    public void hasVAsInsteadOfRVAs() throws IOException {
+        File file = new File("portextestfiles/BinaryCorpus_v2_oldCorkami/yoda/DelayImport (User.dll).exe");
+
+        PEData data = PELoader.loadPE(file);
+        DelayLoadSection section = new SectionLoader(data).loadDelayLoadSection();
+
+        List<ImportDLL> list = section.getImports();
+        assertEquals(list.size(), 1);
+        ImportDLL dll = list.get(0);
+        assertEquals(dll.getName(), "USER32.dll");
+
+        List<NameImport> imports = dll.getNameImports();
+        assertEquals(imports.size(), 1);
+
+        NameImport nameImport = imports.get(0);
+        assertEquals(nameImport.getHint(), 0);
+        assertEquals(nameImport.getName(), "MessageBoxA");
+        assertEquals(nameImport.getNameRVA(), 4852);
+        assertEquals(nameImport.getRVA(), 4844);
+    }
+
+    public void hasMixedVAsAndRVAs() throws IOException {
+        File file = new File("portextestfiles/corkami/delayimports.exe");
+
+        PEData data = PELoader.loadPE(file);
+        DelayLoadSection section = new SectionLoader(data).loadDelayLoadSection();
+        System.out.println(section.getInfo());
+
+        List<ImportDLL> list = section.getImports();
+        assertEquals(list.size(), 1);
+        ImportDLL dll = list.get(0);
+        assertEquals(dll.getName(), "MSVCRT.DLL");
+
+        List<NameImport> imports = dll.getNameImports();
+        assertEquals(imports.size(), 1);
+
+        NameImport nameImport = imports.get(0);
+        assertEquals(nameImport.getHint(), 0);
+        assertEquals(nameImport.getName(), "printf");
+        assertEquals(nameImport.getNameRVA(), 4852);
+        assertEquals(nameImport.getRVA(), 4844);
     }
 
     private static Logger logger = LogManager.getLogger(OptionalHeaderTest.class.getName());

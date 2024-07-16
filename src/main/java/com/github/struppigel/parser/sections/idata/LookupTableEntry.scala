@@ -18,6 +18,8 @@
 package com.github.struppigel.parser.sections.idata
 
 import LookupTableEntry._
+import com.github.struppigel.parser.optheader.WindowsEntryKey
+import com.github.struppigel.parser.sections.SectionLoader.LoadInfo
 import com.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
 import org.apache.logging.log4j.LogManager
 
@@ -131,18 +133,23 @@ object LookupTableEntry {
    * @param fileOffset the file offset to the lookup table entry to create
    * @return lookup table entry
    */
-  def apply(mmbytes: MemoryMappedPE, entryRVA: Int, entrySize: Int,
+  def apply(loadInfo : LoadInfo, mmbytes: MemoryMappedPE, entryRVA: Int, entrySize: Int,
     virtualAddress: Long, iltRVA: Long, iltVA: Long, dirEntry: DirectoryEntry, fileOffset: Long): LookupTableEntry = {
     val ordFlagMask = if (entrySize == 4) 0x80000000L else 0x8000000000000000L
     try {
       val value = mmbytes.getBytesLongValue(entryRVA + virtualAddress, entrySize)
-      if (value == 0) {
+      if (value == 0)
         NullEntry(entrySize, fileOffset)
-      } else if ((value & ordFlagMask) != 0) {
+      else if ((value & ordFlagMask) != 0)
         createOrdEntry(value, iltRVA, iltVA, dirEntry, entrySize, fileOffset)
-      } else {
-        createNameEntry(value, mmbytes, virtualAddress, iltRVA, iltVA, dirEntry, entrySize, fileOffset)
-      }
+      else
+        try
+          // go by specification and read the entry as RVA
+          createNameEntry(loadInfo, value, mmbytes, iltRVA, iltVA, dirEntry, entrySize, fileOffset)
+        catch {
+              // error occured, try address as VA
+          case _ : FailureEntryException => createNameEntry(loadInfo, value, mmbytes, iltRVA, iltVA, dirEntry, entrySize, fileOffset, true)
+        }
     } catch {
       case e: Exception =>
         val message = "invalid lookup table entry at ilt rva " + iltRVA + ", reason: " + e.getMessage()
@@ -151,20 +158,21 @@ object LookupTableEntry {
     }
   }
 
-  private def createNameEntry(value: Long, mmbytes: MemoryMappedPE,
-    virtualAddress: Long, rva: Long, va: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long): LookupTableEntry = {
+  private def calculateRVA(loadInfo: LoadInfo, value : Long, useVA : Boolean): Long =
+    if(useVA) value - loadInfo.data.getOptionalHeader.get(WindowsEntryKey.IMAGE_BASE)
+    else value
+
+
+  private def createNameEntry(loadInfo: LoadInfo, value: Long, mmbytes: MemoryMappedPE,
+    rva: Long, va: Long, dirEntry: DirectoryEntry, entrySize: Int, offset: Long, useVA : Boolean = false): LookupTableEntry = {
     val addrMask = 0xFFFFFFFFL
-    val nameRVA = (addrMask & value)
-    logger.debug("rva: " + nameRVA)
-    val address = nameRVA
-    logger.debug("virtual addr: " + virtualAddress)
-    logger.debug("address: " + address)
-    logger.debug("idata length: " + mmbytes.length)
-    if (address + 2 > mmbytes.length) {
-      throw new FailureEntryException("NameRVA invalid, value: " + address)
+    val nameRVA = calculateRVA(loadInfo, addrMask & value, useVA)
+    logger.debug(s"Name Entry creation -- nameRVA: 0x${toHexString(nameRVA)} va: 0x${toHexString(va)}, rva: 0x${toHexString(rva)}")
+    if (nameRVA + 2 > mmbytes.length) {
+      throw new FailureEntryException("NameRVA invalid, value: 0x" + toHexString(nameRVA))
     }
-    val hint = mmbytes.getBytesIntValue(address, 2)
-    val name = getASCII(address + 2, mmbytes)
+    val hint = mmbytes.getBytesIntValue(nameRVA, 2)
+    val name = getASCII(nameRVA + 2, mmbytes)
     val hintOffset = mmbytes.virtToPhysAddress(nameRVA)
     val hintNameEntry = new HintNameEntry(hint, name, hintOffset)
     NameEntry(nameRVA, hintNameEntry, rva, va, dirEntry, entrySize, offset: Long)
