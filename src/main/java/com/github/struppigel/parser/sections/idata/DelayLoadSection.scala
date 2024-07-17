@@ -82,7 +82,7 @@ object DelayLoadSection {
      * @return true iff the given entry is not the last empty entry or null entry
      */
     def isEmpty(entry: DelayLoadDirectoryEntry): Boolean =
-      entry(DelayLoadDirectoryKey.MODULE_HANDLE) == 0 || entry.lookupTableEntriesSize == 0
+      entry.lookupTableEntriesSize == 0
       
     val entry = DelayLoadDirectoryEntry(loadInfo, nr)
     logger.debug("lookup table entry size " + entry.lookupTableEntriesSize)

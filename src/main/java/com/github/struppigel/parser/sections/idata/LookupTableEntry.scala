@@ -173,6 +173,7 @@ object LookupTableEntry {
     }
     val hint = mmbytes.getBytesIntValue(nameRVA, 2)
     val name = getASCII(nameRVA + 2, mmbytes)
+    logger.debug(s"lookup entry name: ${name}")
     val hintOffset = mmbytes.virtToPhysAddress(nameRVA)
     val hintNameEntry = new HintNameEntry(hint, name, hintOffset)
     NameEntry(nameRVA, hintNameEntry, rva, va, dirEntry, entrySize, offset: Long)

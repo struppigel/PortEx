@@ -70,7 +70,8 @@ public class DelayLoadSectionTest {
         assertEquals(nameImport.getRVA(), 4844);
     }
 
-    public void hasMixedVAsAndRVAs() throws IOException {
+    @Test
+    public void hasMixedVAsAndRVAs() throws IOException { //TODO
         File file = new File("portextestfiles/corkami/delayimports.exe");
 
         PEData data = PELoader.loadPE(file);
@@ -80,7 +81,7 @@ public class DelayLoadSectionTest {
         List<ImportDLL> list = section.getImports();
         assertEquals(list.size(), 1);
         ImportDLL dll = list.get(0);
-        assertEquals(dll.getName(), "MSVCRT.DLL");
+        assertEquals(dll.getName(), "msvcrt.dll");
 
         List<NameImport> imports = dll.getNameImports();
         assertEquals(imports.size(), 1);
@@ -88,8 +89,8 @@ public class DelayLoadSectionTest {
         NameImport nameImport = imports.get(0);
         assertEquals(nameImport.getHint(), 0);
         assertEquals(nameImport.getName(), "printf");
-        assertEquals(nameImport.getNameRVA(), 4852);
-        assertEquals(nameImport.getRVA(), 4844);
+        assertEquals(nameImport.getNameRVA(), 4304);
+        assertEquals(nameImport.getRVA(), 4288);
     }
 
     private static Logger logger = LogManager.getLogger(OptionalHeaderTest.class.getName());
