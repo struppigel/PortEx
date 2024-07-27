@@ -28,7 +28,7 @@ import scala.collection.JavaConverters._
 trait ProcessInjectionScanning extends ReHintScanner {
 
   abstract override def scanReport(): String =
-  "Applied FakeVMPScanning" + NL + super.scanReport
+  "Applied ProcessInjectionScanning" + NL + super.scanReport
 
   abstract override def scan(): List[ReHint] = {
     val reList = ListBuffer[ReHint]()
