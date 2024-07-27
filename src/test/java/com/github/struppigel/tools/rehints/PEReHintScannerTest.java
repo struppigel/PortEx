@@ -131,6 +131,11 @@ public class PEReHintScannerTest  {
         assertHasReHintWithTypeAndReason("upx.exe", ReHintType.UPX_PACKER_RE_HINT, "Section name UPX1");
         assertHasNotReHint("ahk", ReHintType.UPX_PACKER_RE_HINT);
     }
+    @Test
+    public void threadNameCallingInjection(){
+        assertHasReHintWithTypeAndReason("GetThreadDescription", ReHintType.THREAD_NAME_CALLING_INJECTION_HINT, "GetThreadDescription can be used to inject shellcode");
+        assertHasReHintWithTypeAndReason("GetThreadDescription", ReHintType.THREAD_NAME_CALLING_INJECTION_HINT, "SetThreadDescription can be used to inject shellcode");
+    }
 
     private void assertHasReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);

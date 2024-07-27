@@ -47,6 +47,8 @@ public enum ReHintType {
 
     SFX_RE_HINT("This file is a self-extracting-archive. Try to extract the files with 7zip or run the file and collect them from TEMP"),
 
+    THREAD_NAME_CALLING_INJECTION_HINT("The sample has imports which can be abused for Thread Name-Calling injection. Check if ETHREAD->ThreadName contains shellcode"),
+
     UPX_PACKER_RE_HINT("This file seems to be packed with UPX, unpack it with upx.exe -d <sample>");
 
     private final String description;

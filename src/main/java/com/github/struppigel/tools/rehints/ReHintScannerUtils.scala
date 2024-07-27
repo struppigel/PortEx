@@ -23,6 +23,18 @@ import scala.collection.JavaConverters._
 
 object ReHintScannerUtils {
 
+  def hasAnomaly(anomalies: java.util.List[Anomaly], filterString: String, anomalySubType: AnomalySubType): Boolean =
+    !filterAnomalies(anomalies, filterString, anomalySubType).isEmpty
+
+  def filterAnomalies(anomalies: java.util.List[Anomaly], filterStrings: List[String], anomalySubType: AnomalySubType): List[Anomaly] =
+    filterStrings.flatMap(filter => filterAnomalies(anomalies, filter, anomalySubType))
+
+
+  def filterAnomalies(anomalies: java.util.List[Anomaly], filterString: String, anomalySubType: AnomalySubType): List[Anomaly] =
+    anomalies.asScala.filter(a =>
+      a.subtype() == anomalySubType &&
+        a.description().toLowerCase().contains(filterString.toLowerCase())).toList
+
   def constructReHintIfAnySectionName(names: List[String], data: PEData, rhType: ReHintType): Option[ReHint] = {
     val sections = data.getSectionTable.getSectionHeaders.asScala
     val anoms : List[Anomaly] = sections.filter(h => names.contains(h.getName))

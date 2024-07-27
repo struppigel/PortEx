@@ -69,6 +69,10 @@ trait ImportSectionScanning extends AnomalyScanner {
       "CreateThreadpoolWait" -> "can be used to execute shellcode",
       "SetThreadpoolWait" -> "can be used to execute shellcode",
 
+      // Thread description
+      "GetThreadDescription" -> "can be used to inject shellcode",
+      "SetThreadDescription" -> "can be used to inject shellcode",
+
       // Resources
       "FindResource" -> "used to find and load data from resources",
       "LoadResource" -> "used to find and load data from resources",
