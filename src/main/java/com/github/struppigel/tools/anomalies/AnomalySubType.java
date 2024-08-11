@@ -431,9 +431,9 @@ public enum AnomalySubType {
     VIRTUAL_IMPORTS(STRUCTURE), //TODO implement virtual exports, relocs, etc
     
     /**
-     * Import is typical for process injection
+     * Import is typical for process injection or unpacking stubs
      */
-    PROCESS_INJECTION_IMPORT(NON_DEFAULT),
+    PROCESS_INJECTION_OR_UNPACKING_IMPORT(NON_DEFAULT),
     
     /**************************** Export Section ******************************/
     

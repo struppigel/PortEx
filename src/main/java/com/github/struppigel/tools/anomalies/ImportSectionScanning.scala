@@ -32,8 +32,10 @@ trait ImportSectionScanning extends AnomalyScanner {
     val anomalyList = ListBuffer[Anomaly]()
     val injectionMap = HashMap(
       // Misc
-      "RtlDecompressBuffer" -> "might decode data for injection",
-      "UnmapViewOfSection" -> "may be used to carve out a process for process hollowing",
+      "RtlDecompressBuffer" -> "might decode data for injection or unpacking",
+      "CryptStringToBinary" -> "might decode data for injection or unpacking",
+      "CryptEncrypt" -> "might decode data for injection or unpacking",
+      "UnmapViewOfSection" -> "may be used to carve out a process",
       "MapViewOfSection" -> "may add a section to put the unpacked data inside",
       "LoadLibrary" -> "maps module into the address space of the calling process or dynamically resolves imports",
       "GetProcAddress" -> "dynamically resolves imports",
@@ -101,8 +103,8 @@ trait ImportSectionScanning extends AnomalyScanner {
       "RemoveDirectoryTransacted" -> "might be used for Process Doppelgänging",
 
       // .NET injection, https://blog.xpnsec.com/hiding-your-dotnet-etw/
-      "CLRCreateInstance" -> "might be used to unpack/inject managed code",
-      "ExecuteInDefaultAppDomain" -> "might be used to unpack/inject managed code",
+      "CLRCreateInstance" -> "might be used to unpack managed code",
+      "ExecuteInDefaultAppDomain" -> "might be used to unpack managed code",
 
     )
     for(imp <- imports) {
@@ -125,7 +127,7 @@ trait ImportSectionScanning extends AnomalyScanner {
         if(injectionMap.contains(strippedName)) {
           val description = "Import function typical for injection/unpacking: " + name + " " + injectionMap(strippedName)
           anomalyList += ImportAnomaly(List(imp), description, 
-              AnomalySubType.PROCESS_INJECTION_IMPORT, PEStructureKey.IMPORT_SECTION)
+              AnomalySubType.PROCESS_INJECTION_OR_UNPACKING_IMPORT, PEStructureKey.IMPORT_SECTION)
         }
       }
     }

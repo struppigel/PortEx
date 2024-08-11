@@ -137,6 +137,12 @@ public class PEReHintScannerTest  {
         assertHasReHintWithTypeAndReason("GetThreadDescription", ReHintType.THREAD_NAME_CALLING_INJECTION_HINT, "SetThreadDescription can be used to inject shellcode");
     }
 
+    @Test
+    public void processDoppelGaenging() {
+        assertHasReHintWithTypeAndReason("proc_doppel32.exe", ReHintType.PROCESS_DOPPELGAENGING_INJECTION_HINT, "Process Doppelgänging");
+        assertHasReHintWithTypeAndReason("proc_doppel64.exe", ReHintType.PROCESS_DOPPELGAENGING_INJECTION_HINT, "Process Doppelgänging");
+    }
+
     private void assertHasReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);
         List<ReHint> rehintsFiltered = rehints.stream()

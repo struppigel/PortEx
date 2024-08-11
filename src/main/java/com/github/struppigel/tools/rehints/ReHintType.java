@@ -20,7 +20,7 @@ public enum ReHintType {
 
     /**
      * Often involves multiple structures in the PE file, purpose is to deliver
-     * reverse engineering hints, with less focus on how and where this was determined.
+     * reverse engineering hints based on the occurance of anomalies.
      */
 
     AHK_RE_HINT("The executable is an AutoHotKey wrapper. Extract the resource and check the script."),
@@ -28,6 +28,8 @@ public enum ReHintType {
     ARCHIVE_RE_HINT("This file has an embedded archive, extract the contents with an unarchiver"),
 
     AUTOIT_RE_HINT("The file is an AutoIt script executable, use AutoIt-Ripper to unpack the script"),
+
+    NATIVE_DOT_NET_UNPACKING_RE_HINT("This sample might unpack managed code (.NET). Dump the assembly with MegaDumper."),
 
     ELECTRON_PACKAGE_RE_HINT("This is an Electron Package executable. Look for *.asar archive in resources folder. This might be a separate file."),
 
@@ -40,6 +42,8 @@ public enum ReHintType {
     INSTALLER_RE_HINT("This file is an installer, extract the install script and contained files, try 7zip or run the file and look into TEMP"),
 
     NULLSOFT_RE_HINT("This file is a Nullsoft installer, download 7zip v15.02 to extract the install script and contained files"),
+
+    PROCESS_DOPPELGAENGING_INJECTION_HINT("The sample has imports which can be abused for Process Doppelgänging"),
 
     PYINSTALLER_RE_HINT("This file is a PyInstaller executable. Use pyinstxtractor to extract the python bytecode, then apply a decompiler to the main .pyc"),
 
