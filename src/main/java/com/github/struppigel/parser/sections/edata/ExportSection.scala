@@ -196,7 +196,7 @@ object ExportSection {
 
   private val logger = LogManager.getLogger(ExportSection.getClass().getName())
 
-  val maxEntries = 1000
+  val maxEntries = 10000
   val exportDirSize = 40
   private var invalidExportCount = 0
 
