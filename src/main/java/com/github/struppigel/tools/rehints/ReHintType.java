@@ -29,7 +29,7 @@ public enum ReHintType {
 
     AUTOIT_RE_HINT("The file is an AutoIt script executable, use AutoIt-Ripper to unpack the script"),
 
-    NATIVE_DOT_NET_UNPACKING_RE_HINT("This sample might unpack managed code (.NET). Dump the assembly with MegaDumper."),
+    DOT_NET_CORE_APP_BUNDLE_HINT("The file is a .NET Core App Bundle, it carries the whole .NET Core execution environment in the overlay. Use ILSpy to extract files. The main code is in a DLL"),
 
     ELECTRON_PACKAGE_RE_HINT("This is an Electron Package executable. Look for *.asar archive in resources folder. This might be a separate file."),
 
@@ -40,6 +40,8 @@ public enum ReHintType {
     INNO_SETUP_RE_HINT("This file is an Inno Setup Installer, use innounp -x -m to extract files and InnoSetup Decompiler for the CompiledCode.bin"),
 
     INSTALLER_RE_HINT("This file is an installer, extract the install script and contained files, try 7zip or run the file and look into TEMP"),
+
+    NATIVE_DOT_NET_UNPACKING_RE_HINT("This sample might unpack managed code (.NET). Dump the assembly with MegaDumper."),
 
     NULLSOFT_RE_HINT("This file is a Nullsoft installer, download 7zip v15.02 to extract the install script and contained files"),
 

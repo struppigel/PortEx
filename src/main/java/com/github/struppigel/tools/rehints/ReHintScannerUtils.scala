@@ -16,7 +16,7 @@
 package com.github.struppigel.tools.rehints
 
 import com.github.struppigel.parser.{PEData, ScalaIOUtil}
-import com.github.struppigel.tools.anomalies.{Anomaly, AnomalySubType, ResourceAnomaly, SectionNameAnomaly}
+import com.github.struppigel.tools.anomalies.{Anomaly, AnomalySubType, GenericReHintAnomaly, ResourceAnomaly, SectionNameAnomaly}
 
 import scala.collection.JavaConverters._
 
@@ -34,6 +34,16 @@ object ReHintScannerUtils {
     anomalies.asScala.filter(a =>
       a.subtype() == anomalySubType &&
         a.description().toLowerCase().contains(filterString.toLowerCase())).toList
+
+  def constructReHintIfAnyPdbPath(pathes : List[String], data: PEData, reHintType: ReHintType): Option[ReHint] = {
+    val filtered = pathes.filter(data.loadPDBPath().contains(_))
+    if (filtered.isEmpty) Option.empty
+    else {
+      val anoms : List[Anomaly] = filtered.map(p => new GenericReHintAnomaly("PDB path contains '" + p + "'"))
+      val reHint = StandardReHint(anoms.asJava, reHintType)
+      Some(reHint)
+    }
+  }
 
   def constructReHintIfAnySectionName(names: List[String], data: PEData, rhType: ReHintType): Option[ReHint] = {
     val sections = data.getSectionTable.getSectionHeaders.asScala
