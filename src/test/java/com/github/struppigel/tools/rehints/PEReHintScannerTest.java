@@ -143,6 +143,11 @@ public class PEReHintScannerTest  {
         assertHasReHintWithTypeAndReason("proc_doppel64.exe", ReHintType.PROCESS_DOPPELGAENGING_INJECTION_HINT, "Process Doppelgänging");
     }
 
+    @Test
+    public void dotNetCoreAppBundle() {
+        assertHasReHintWithTypeAndReason("DotNetBundle.exe", ReHintType.DOT_NET_CORE_APP_BUNDLE_HINT, "apphost.pdb");
+    }
+
     private void assertHasReHint(String testfile, ReHintType rhType){
         List<ReHint> rehints = getHintsFor(testfile);
         List<ReHint> rehintsFiltered = rehints.stream()
