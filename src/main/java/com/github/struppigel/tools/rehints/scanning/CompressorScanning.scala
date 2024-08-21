@@ -15,27 +15,40 @@
  * **************************************************************************** */
 package com.github.struppigel.tools.rehints.scanning
 
-import com.github.struppigel.tools.rehints.ReHintScannerUtils.{constructReHintIfAnySectionName, optionToList}
-import com.github.struppigel.tools.rehints.{ReHint, ReHintScanner, ReHintType}
+import com.github.struppigel.tools.rehints.ReHintScannerUtils.{constructAnomaliesForAnySignature, constructReHintIfAnySectionName, filterAnomalies, optionToList}
+import com.github.struppigel.tools.rehints.{ReHint, ReHintScanner, ReHintType, StandardReHint}
 
 import scala.collection.mutable.ListBuffer
 import com.github.struppigel.parser.IOUtil.NL
+import com.github.struppigel.tools.anomalies.Anomaly
+
 import scala.collection.JavaConverters._
 
-trait UpxScanning extends ReHintScanner {
+trait CompressorScanning extends ReHintScanner {
 
   abstract override def scanReport(): String =
-    "Applied UpxScanning" + NL + super.scanReport
+    "Applied CompressorScanning" + NL + super.scanReport
 
   abstract override def scan(): List[ReHint] = {
     val reList = ListBuffer[ReHint]()
-    reList ++= checkSectionNames()
+    reList ++= checkUpx()
+    reList ++= checkSimpleCompressors()
     super.scan ::: reList.toList
   }
 
-  private def checkSectionNames(): List[ReHint] = {
+  private def checkUpx(): List[ReHint] = {
     val sectionNames = List("UPX0", "UPX1", "UPX2", "UPX!", ".UPX0", ".UPX1", ".UPX2")
     optionToList(constructReHintIfAnySectionName(sectionNames, data, ReHintType.UPX_PACKER_RE_HINT))
+  }
+
+  private def checkSimpleCompressors(): List[ReHint] = {
+    val descriptions = List("MPRESS Packer", "Wibu CodeMeter")
+    val anoms : List[Anomaly] = descriptions.flatMap(filterAnomalies(anomalies, _)) :::
+      constructAnomaliesForAnySignature(data, "MPRESS")
+    if(!anoms.isEmpty) {
+      StandardReHint(anoms.asJava, ReHintType.COMPRESSOR_PACKER_RE_HINT) :: Nil
+    }
+    else Nil
   }
 
 }
