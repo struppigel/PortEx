@@ -29,6 +29,8 @@ public enum ReHintType {
 
     AUTOIT_RE_HINT("The file is an AutoIt script executable, use AutoIt-Ripper to unpack the script"),
 
+    COMPRESSOR_PACKER_RE_HINT("This file has been packed by a simple compressor, step over the next pushad, set hardware breakpoint on ESP address on access, run until the breakpoint, then find a jump that hops the section. That is the OEP."),
+
     DOT_NET_CORE_APP_BUNDLE_HINT("The file is a .NET Core App Bundle, it carries the whole .NET Core execution environment in the overlay. Use ILSpy to extract files. The main code is in a DLL"),
 
     ELECTRON_PACKAGE_RE_HINT("This is an Electron Package executable. Look for *.asar archive in resources folder. This might be a separate file."),
@@ -52,6 +54,8 @@ public enum ReHintType {
     SCRIPT_TO_EXE_WRAPPED_RE_HINT("This might be a Script-to-Exe wrapped file, check the resources for a compressed or plain script."),
 
     SFX_RE_HINT("This file is a self-extracting-archive. Try to extract the files with 7zip or run the file and collect them from TEMP"),
+
+    SFX_7ZIP_OLEG_RE_HINT("This file is a modified 7zip module created by Oleg N. Scherbakov. It is either the module itself or a self-extracting archive. Try to extract contained files with 7zip or run the file and collect them from TEMP. Check for an install script starting at marker ;!@Install@!UTF-8!"),
 
     THREAD_NAME_CALLING_INJECTION_HINT("The sample has imports which can be abused for Thread Name-Calling injection. Check if ETHREAD->ThreadName contains shellcode"),
 

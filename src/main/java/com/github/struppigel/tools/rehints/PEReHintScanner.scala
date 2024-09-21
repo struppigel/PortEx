@@ -18,7 +18,7 @@ package com.github.struppigel.tools.rehints
 import com.github.struppigel.parser.IOUtil._
 import com.github.struppigel.parser.{PEData, PELoader}
 import com.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
-import com.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, DotNetCoreAppBundleScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, InnoSetupScanning, NullsoftScanning, ProcessInjectionScanning, PyInstallerScanning, ScriptToExeScanning, UpxScanning}
+import com.github.struppigel.tools.rehints.scanning._
 
 import java.io.File
 import scala.collection.JavaConverters._
@@ -91,6 +91,7 @@ object PEReHintScanner {
     new PEReHintScanner(data, anomalies)
       with AHKScanning
       with AutoItScanning
+      with CompressorScanning
       with DotNetCoreAppBundleScanning
       with ElectronScanning
       with EmbeddedFileScanning
@@ -100,7 +101,7 @@ object PEReHintScanner {
       with ProcessInjectionScanning
       with PyInstallerScanning
       with ScriptToExeScanning
-      with UpxScanning
+      with Sfx7zipScanning
 
   def apply(data: PEData, anomalies: java.util.List[Anomaly]): PEReHintScanner = newInstance(data, anomalies)
 

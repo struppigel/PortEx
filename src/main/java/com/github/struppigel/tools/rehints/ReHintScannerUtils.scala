@@ -29,6 +29,11 @@ object ReHintScannerUtils {
   def filterAnomalies(anomalies: java.util.List[Anomaly], filterStrings: List[String], anomalySubType: AnomalySubType): List[Anomaly] =
     filterStrings.flatMap(filter => filterAnomalies(anomalies, filter, anomalySubType))
 
+  def filterAnomalies(anomalies: java.util.List[Anomaly], filterStrings: List[String]): List[Anomaly] =
+    filterStrings.flatMap(filter => filterAnomalies(anomalies, filter))
+
+  def filterAnomalies(anomalies: java.util.List[Anomaly], filterString: String): List[Anomaly] =
+    anomalies.asScala.filter(a => a.description().toLowerCase().contains(filterString.toLowerCase())).toList
 
   def filterAnomalies(anomalies: java.util.List[Anomaly], filterString: String, anomalySubType: AnomalySubType): List[Anomaly] =
     anomalies.asScala.filter(a =>
@@ -58,9 +63,28 @@ object ReHintScannerUtils {
     else Some(StandardReHint(anoms.asJava, rhType))
   }
 
+  def constructAnomalyIfVersionInfoContains(versionKey : String, versionValue : String, data: PEData): List[Anomaly] = {
+    val versionInfo = data.loadVersionInfo()
+    if(versionInfo.isPresent && versionInfo.get().getVersionStrings().containsKey(versionKey)) {
+      val value = versionInfo.get().getVersionStrings().get(versionKey)
+      if (value.contains(versionValue)) {
+        val anoms: List[Anomaly] = GenericReHintAnomaly("Version Info contains '" + versionKey + "' with the value '" + versionValue + "'") :: Nil
+        anoms
+      } else Nil
+    }
+    else Nil
+  }
+
   def peHasSignature(pedata: PEData, sigSubstring : String): Boolean = {
     pedata.getSignatures.asScala.exists(sig => sig.getName.toLowerCase() contains sigSubstring.toLowerCase())
   }
+
+  def constructAnomaliesForAnySignature(pedata: PEData, sigSubstring: String): List[Anomaly] =
+    if(peHasSignature(pedata, sigSubstring)) {
+      val sigs = pedata.getSignatures.asScala.filter(sig => sig.getName contains sigSubstring)
+      sigs.map(sig => GenericReHintAnomaly("Matches signature " + sig.getName)).toList
+    }
+    else Nil
 
   def constructReHintIfAnyResourceName(names: List[String], data: PEData, rhType: ReHintType): Option[ReHint] = {
     val resources = data.loadResources().asScala.filter(res => names contains res.getName())

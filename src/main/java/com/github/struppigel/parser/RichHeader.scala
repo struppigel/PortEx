@@ -106,9 +106,9 @@ class RichHeader( private val decodedRich : Array[Byte],
     // skip DanS and padding bytes, we start by slicing into blocks of 4 bytes already removing DanS as first block
     val dataBlocks = for(i <- wordLen until decodedRich.length by wordLen) yield decodedRich.slice(i, i + wordLen)
     // remove padding of 0 byte words
-    val paddingRemoved = dataBlocks.dropWhile(_.sameElements(Array[Byte](0,0,0,0)))
-    val finalBlocks = if (paddingRemoved.length % 2 != 0) paddingRemoved :+ Array[Byte](0,0,0,0) else paddingRemoved
-    logger.debug("Removed padding and DanS size " + (decodedRich.length - (paddingRemoved.length * 4)))
+    val paddingRemoved = dataBlocks.dropWhile(_.sameElements(Array[Byte](0,0,0,0))).toList
+    // align to 16
+    val finalBlocks = if (paddingRemoved.length % 2 != 0) Array[Byte](0,0,0,0) :: paddingRemoved else paddingRemoved
     // each entry is 8 bytes, where the first 2 bytes are the pid, the next 2 bytes the pv and the last 4 bytes the pc
     // note that paddingRemoved consists of blocks with 4 bytes, whereas one entry is 8 bytes
     val result = for(i <- finalBlocks.indices by 2) yield
@@ -194,11 +194,13 @@ object RichHeader {
     var checksum = 0
     // skip DanS and padding bytes, we start by slicing into blocks of 4 bytes already removing DanS as first block
     val dataBlocks = for (i <- wordLen until decodedRich.length by wordLen) yield decodedRich.slice(i, i + wordLen)
-    // remove padding of 0 byte words TODO adjust to 16 byte alignment
-    val dbNoPad = dataBlocks.dropWhile(_.sameElements(Array[Byte](0, 0, 0, 0)))
-    val compids = for (i <- dbNoPad.indices by 2 if dbNoPad.size > i+1) yield
-      (ByteArrayUtil.bytesToInt(dbNoPad(i).slice(0, 4)), // bytes 0-3 compid
-        ByteArrayUtil.bytesToInt(dbNoPad(i + 1))) // bytes 4-7 count
+    // remove padding of 0 byte words
+    val dbNoPad = dataBlocks.dropWhile(_.sameElements(Array[Byte](0, 0, 0, 0))).toList
+    // adjust to 16 byte alignment
+    val dbFinalBlocks = if (dbNoPad.length % 2 != 0) Array[Byte](0,0,0,0) :: dbNoPad else dbNoPad
+    val compids = for (i <- dbFinalBlocks.indices by 2 if dbFinalBlocks.size > i+1) yield
+      (ByteArrayUtil.bytesToInt(dbFinalBlocks(i).slice(0, 4)), // bytes 0-3 compid
+        ByteArrayUtil.bytesToInt(dbFinalBlocks(i + 1))) // bytes 4-7 count
     for ((compid, count) <- compids) {
       //println("compid: 0x" + compid.toHexString + " count: " + count)
       checksum += (compid << count % 32 | compid >> (32 - (count % 32)))
