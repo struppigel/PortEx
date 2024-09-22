@@ -1,11 +1,28 @@
 package com.github.struppigel.tools.sigscanner.v2
-
+/*******************************************************************************
+ * Copyright 2024 Karsten Hahn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 import com.github.struppigel.tools.sigscanner.v2.PatternParser.PExpression
 
 import scala.math
 
 class Pattern(val pieces : List[PatternElement]) {
+
   override def toString(): String = pieces.mkString(" ")
+
+  def minMatchLength(): Int = pieces.map(_.minMatchLength).sum
 
   def matches(bytes : Array[Byte]) : Boolean = matches(bytes.toList)
 
@@ -25,12 +42,14 @@ class Pattern(val pieces : List[PatternElement]) {
 }
 
 abstract class PatternElement {
+  // matches the next byte(s)
   def matches(bytes: List[Byte]) : Boolean
   // return all remaining lists for all match options
   def matchRemains(bytes: List[Byte]) : List[List[Byte]]  =
     if(bytes.length > 1) List(bytes.tail)
     else Nil
-
+  // the required number of bytes that is necessary to match, usually it is 1
+  def minMatchLength(): Int = 1
 }
 
 // CA $$ $$ $$ $$ FE BA BE TODO: Implement
@@ -43,6 +62,7 @@ case class POption(left : PExpression, right : PExpression ) extends PatternElem
   override def matches(bytes: List[Byte]) : Boolean = new Pattern(left).matches(bytes) || new Pattern(right).matches(bytes)
   override def matchRemains(bytes: List[Byte]) : List[List[Byte]] =
     new Pattern(left).matchRemains(bytes) ::: new Pattern(right).matchRemains(bytes)
+  override def minMatchLength(): Int = math.min(left.map(_.minMatchLength()).min, right.map(_.minMatchLength()).min)
 }
 
 case class LeftWildcardPByte(byte : Byte) extends PatternElement {
@@ -74,6 +94,7 @@ case class LimitedRange(start : Int, end : Int) extends PatternElement {
     val limit = math.min(bytes.length, end)
     (for (i <- start to limit) yield bytes.drop(i)).toList // TODO check if to or until would be correct!
   }
+  override def minMatchLength(): Int = start
 }
 
 // CA [2-] FE BA BE
@@ -82,6 +103,7 @@ case class BoundlessRange(start : Int) extends PatternElement {
   override def matches(bytes: List[Byte]) : Boolean = bytes.length >= start
   override def matchRemains(bytes: List[Byte]) : List[List[Byte]] =
     (for (i <- start to bytes.length) yield bytes.drop(i)).toList
+  override def minMatchLength(): Int = start
 }
 
 // CA
