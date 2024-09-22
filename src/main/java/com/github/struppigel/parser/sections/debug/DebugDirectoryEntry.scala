@@ -48,6 +48,8 @@ class DebugDirectoryEntry private (
 
   def getSize(): Long = debugDirEntrySize
 
+  def hasCodeView(): Boolean = maybeCodeView.isDefined
+
   def getCodeView(): CodeviewInfo =
     if (maybeCodeView.isDefined) maybeCodeView.get
     else throw new IllegalStateException("Code View structure not valid")

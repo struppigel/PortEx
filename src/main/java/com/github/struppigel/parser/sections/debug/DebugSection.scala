@@ -48,7 +48,9 @@ class DebugSection private (
   def getCodeView(): Optional[CodeviewInfo] = {
     val entry = entries.find(_.getDebugType() == DebugType.CODEVIEW)
     if(entry.isDefined) {
-      return Optional.of(entry.get.getCodeView())
+      val s = entry.get
+      if( s.hasCodeView() )
+        return Optional.of(s.getCodeView())
     }
     Optional.empty();
   }
