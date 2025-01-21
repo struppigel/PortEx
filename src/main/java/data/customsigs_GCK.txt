@@ -9,6 +9,7 @@ Windows icon|printer spool file,00 00 01 00,ICO|SPL
 MPEG video file,00 00 01 B3,MPG
 DVD video file,00 00 01 BA,MPG|VOB
 Windows cursor,00 00 02 00,CUR
+Nuitka resource,4B 41 59,NUI
 QuattroPro spreadsheet,00 00 02 00,WB2
 Lotus 1-2-3 (v1),00 00 02 00 06 04 06 00,WK1
 Lotus 1-2-3 (v3),00 00 1A 00 00 10 04 00,WK3
