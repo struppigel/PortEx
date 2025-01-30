@@ -47,8 +47,13 @@ class DebugSection private (
 
   def getCodeView(): Optional[CodeviewInfo] = {
     val entry = entries.find(_.getDebugType() == DebugType.CODEVIEW)
-    if(entry.isDefined) {
-      return Optional.of(entry.get.getCodeView())
+    try{
+      if(entry.isDefined) {
+        return Optional.of(entry.get.getCodeView())
+      }
+    } catch {
+      // invalid code view entry, see 32c2dd0d8fc213a87feaaa84b82e3965c7a673c95e52fd2e28919bd2d5a4cff2
+      case _: IllegalStateException => return Optional.empty()
     }
     Optional.empty();
   }
