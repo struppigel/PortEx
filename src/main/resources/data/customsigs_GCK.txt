@@ -34,6 +34,7 @@ Silicon Graphics RGB Bitmap,01 DA 01 01 00 03,RGB
 Micrografx vector graphic file,01 FF 02 04 03 02,DRW
 Digital Speech Standard file,02 64 73 73,DSS
 MapInfo Native Data Format,03,DAT
+Nuitka resource,4B 41 59,NUI
 dBASE III file,03,DB3
 Quicken price history,03 00 00 00,QPH
 Approach index file,03 00 00 00 41 50 50 52,ADX

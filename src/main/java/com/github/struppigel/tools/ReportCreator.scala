@@ -469,7 +469,7 @@ class ReportCreator(private val data: PEData) {
   def exportsReport(): String = {
     val exports = data.loadExports().asScala
     if(exports.isEmpty) return ""
-    title("Exports") + NL + exports.mkString(NL)
+    NL + title("Exports") + NL + exports.mkString(NL) + NL
   }
 
   /**
@@ -483,7 +483,7 @@ class ReportCreator(private val data: PEData) {
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
       val buf = new StringBuffer()
-      buf.append(title("Resources") + NL)
+      buf.append(NL + title("Resources") + NL)
       val resources = rsrc.getResources().asScala
       for (resource <- resources) {
         val offset = resource.rawBytesLocation.from
