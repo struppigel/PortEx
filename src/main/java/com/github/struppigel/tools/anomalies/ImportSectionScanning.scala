@@ -16,7 +16,7 @@ trait ImportSectionScanning extends AnomalyScanner {
 
   abstract override def scan(): List[Anomaly] = {
     val maybeIdata = new SectionLoader(data).maybeLoadImportSection()
-    if (maybeIdata.isPresent()) {
+    if (maybeIdata.isPresent) {
       val idata = maybeIdata.get
       val anomalyList = ListBuffer[Anomaly]()
       anomalyList ++= checkFractionatedImports(idata)
@@ -50,6 +50,16 @@ trait ImportSectionScanning extends AnomalyScanner {
       "Process32First" -> "used to iterate processes",
       "Process32Next" -> "used to iterate processes",
       "CreateToolhelp32Snapshot" -> "used to iterate processes",
+
+      // Execution via callback functions
+      // https://osandamalith.com/2021/04/01/executing-shellcode-via-callbacks/
+      "CallWindowProc" -> "can execute shellcode via callback function",
+      "EnumFonts" -> "can execute shellcode via callback function",
+      "EnumFontFamilies" -> "can execute shellcode via callback function",
+      "EnumDisplayMonitors" -> "can execute shellcode via callback function",
+      "LineDDA" -> "can execute shellcode via callback function",
+      "GrayString" -> "can execute shellcode via callback function",
+      "EnumResourceTypes" -> "can execute shellcode via callback function",
 
       // Thread hijacking, threads in general
       "Thread32First" -> "thread hijacking, obtains thread ID of target process",
@@ -108,9 +118,9 @@ trait ImportSectionScanning extends AnomalyScanner {
 
     )
     for(imp <- imports) {
-      val nameImps = imp.getNameImports().asScala
-      for(nameImp <- nameImps) {
-        val name = nameImp.getName
+      val pinvokes = data.getPInvokes.asScala
+      val names = imp.getNameImports.asScala.map(_.getName) ++ pinvokes
+      for(name <- names) {
         val strippedName = {
           var stripped = name
           if(name.endsWith("A") || name.endsWith("W")) {
@@ -137,14 +147,14 @@ trait ImportSectionScanning extends AnomalyScanner {
   private def checkVirtualImports(idata: ImportSection): List[Anomaly] = {
     val fileSize = data.getFile.length
     def isVirtual(imp: ImportDLL): Boolean = {
-      val locs = imp.getLocations().asScala
+      val locs = imp.getLocations.asScala
       locs.exists(loc => loc.from + loc.size > fileSize)
     }
     val imports = idata.getImports.asScala
     val anomalyList = ListBuffer[Anomaly]()
     for(imp <- imports) {
       if(isVirtual(imp)) {
-        val description = s"Import DLL has virtual imports: ${imp.getName()}"
+        val description = s"Import DLL has virtual imports: ${imp.getName}"
         anomalyList += ImportAnomaly(List(imp), description,
           AnomalySubType.VIRTUAL_IMPORTS, PEStructureKey.IMPORT_SECTION)
       }
@@ -168,7 +178,7 @@ trait ImportSectionScanning extends AnomalyScanner {
         (loc.from >= data.getFile.length) || (loc.from == -1) || (loc.from >= start && locEnd <= end)
       }
       val fractions = locs.filter(!isWithinIData(_)).toList
-      if (!fractions.isEmpty) {
+      if (fractions.nonEmpty) {
         val affectedImports = idata.getImports.asScala.filter(i =>
           i.getLocations.asScala.exists(!isWithinIData(_))).toList
         val description = s"Imports are fractionated! Affected import DLLs: ${affectedImports.map(_.getName()).mkString(", ")}"
@@ -183,10 +193,10 @@ trait ImportSectionScanning extends AnomalyScanner {
   //TODO test
   private def checkKernel32Imports(idata: ImportSection): List[Anomaly] = {
     val imports = idata.getImports.asScala.filter(i =>
-      i.getName().equalsIgnoreCase("kernel32.dll") &&
-        i.getOrdinalImports().size() > 0).toList
+      i.getName.equalsIgnoreCase("kernel32.dll") &&
+        i.getOrdinalImports.size() > 0).toList
     val anomalyList = ListBuffer[Anomaly]()
-    if (!imports.isEmpty) {
+    if (imports.nonEmpty) {
       val description = "Imports from Kernel32.dll by ordinal, namely: " + imports.mkString(", ")
       anomalyList += new ImportAnomaly(imports, description, AnomalySubType.KERNEL32_BY_ORDINAL_IMPORTS,
         PEStructureKey.IMPORT_DLL)

@@ -332,7 +332,8 @@ class ReportCreator(private val data: PEData) {
                 CLRTableType.MANIFESTRESOURCE,
                 CLRTableType.MODULEREF,
                 CLRTableType.CUSTOMATTRIBUTE,
-                CLRTableType.EXPORTEDTYPE
+                CLRTableType.EXPORTEDTYPE,
+                CLRTableType.IMPLMAP
           )) + typeRefTableReport(optStream) + NL
 
         //val clrTables = compileInfo(List(CLRTableType.CUSTOMATTRIBUTE))

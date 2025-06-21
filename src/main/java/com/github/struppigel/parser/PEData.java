@@ -334,6 +334,45 @@ public class PEData {
         return loadClrSection().isPresent();
     }
 
+    /**
+     * Loads CLR section and collects the list of CLRTables
+     * @return list of CLRTables or empty list if not a .NET file
+     */
+    public List<CLRTable> getCLRTables() {
+        if(isDotNet() && clrSection.isPresent()) {
+            Optional<OptimizedStream> optStream = clrSection.get().getMetadataRoot().maybeGetOptimizedStream();
+            if(optStream.isPresent()) {
+                return optStream.get().getCLRTables();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Get the CLR Table that belongs to the table type
+     * @param tableType the type of the table
+     * @return Optional of the CLRTable for the specified table type
+     */
+    public Optional<CLRTable> getCLRTableForType(CLRTableType tableType) {
+        return getCLRTables().stream()
+                .filter(t -> t.getIndex() == tableType.getIndex())
+                .findAny();
+    }
+
+    /**
+     * Returns all pinvoke imports
+     * @return list of pinvoke imports
+     */
+    public List<String> getPInvokes() {
+        Optional<CLRTable> table = getCLRTableForType(CLRTableType.IMPLMAP);
+        return table.map(clrTable -> clrTable.getEntries().stream()
+                // only consider entries with an import name
+                .filter(e -> e.get(CLRTableKey.IMPLMAP_IMPORTNAME).isDefined())
+                // convert those entries to their description string
+                .map(e -> e.get(CLRTableKey.IMPLMAP_IMPORTNAME).get().getDescription())
+                .collect(Collectors.toList()))
+                .orElseGet(ArrayList::new);
+    }
 
     /**
      * Loads the CodeviewInfo object of the debug info structure. Reads the PE file to do so unless already loaded.
