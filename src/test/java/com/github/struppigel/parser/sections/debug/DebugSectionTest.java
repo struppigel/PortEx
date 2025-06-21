@@ -51,4 +51,12 @@ public class DebugSectionTest {
         PEData noExDll = pedata.get("upx.exe");
         assertFalse(noExDll.loadExtendedDllCharacteristics().isPresent());
     }
+
+    @Test
+    public void invalidCodeView() {
+        // this file led to a crash
+        PEData pe = pedata.get("invalidCodeView");
+        Optional<CodeviewInfo> cv = pe.loadCodeViewInfo();
+        assertFalse(cv.isPresent());
+    }
 }
