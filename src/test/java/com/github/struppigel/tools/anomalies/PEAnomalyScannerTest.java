@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class PEAnomalyScannerTest {
@@ -190,7 +191,7 @@ public class PEAnomalyScannerTest {
         List<Anomaly> found = anomalies.stream()
                 .filter(a -> a.subtype() == atype && a.description().contains(description))
                 .collect(Collectors.toList());
-        assertTrue(found.size() > 0);
+        assertFalse(found.isEmpty());
     }
 
     public static void assertHasAnomalyType(PEData pe, AnomalyType atype) {
@@ -198,7 +199,7 @@ public class PEAnomalyScannerTest {
         List<Anomaly> found = anomalies.stream()
                 .filter(a -> a.getType() == atype)
                 .collect(Collectors.toList());
-        assertTrue(found.size() > 0);
+        assertFalse(found.isEmpty());
     }
 
     public static void assertHasAnomalySubType(PEData pe, AnomalySubType atype) {
@@ -206,7 +207,7 @@ public class PEAnomalyScannerTest {
         List<Anomaly> found = anomalies.stream()
                 .filter(a -> a.subtype() == atype)
                 .collect(Collectors.toList());
-        assertTrue(found.size() > 0);
+        assertFalse(found.isEmpty());
     }
 
     public static void assertHasNotAnomalySubType(PEData pe, AnomalySubType atype) {

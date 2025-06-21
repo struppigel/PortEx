@@ -1,12 +1,14 @@
 package com.github.struppigel.parser;
 
 import com.github.struppigel.parser.sections.clr.CLRSection;
+import com.github.struppigel.parser.sections.clr.CLRTable;
 import com.github.struppigel.parser.sections.debug.CodeviewInfo;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,6 +54,19 @@ public class PEDataTest {
         assertEquals(codeView.get().guid(), guid);
     }
 
+    @Test
+    public void loadCLRFields() {
+        List<CLRTable> tables = pedata.get("pinvoke").getCLRTables();
+        assertEquals(tables.size(), 22);
+    }
+
+    @Test
+    public void getPInvokes() {
+        List<String> pinvokes = pedata.get("pinvoke").getPInvokes();
+        assertEquals(pinvokes.size(), 2);
+        assertTrue(pinvokes.contains("CallWindowProcA"));
+        assertTrue(pinvokes.contains("VirtualProtect"));
+    }
 
     @Test
     public void loadExports(){
