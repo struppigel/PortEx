@@ -46,9 +46,9 @@ You can include PortEx to your project by adding the following Maven dependency:
 
 ```
 <dependency>
-   <groupId>com.github.katjahahn</groupId>
+   <groupId>io.github.struppigel</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>4.0.8</version>
+   <version>5.0.6</version>
 </dependency> 
 ```
 
@@ -56,11 +56,11 @@ To use a local build, add the library as follows:
 
 ```
 <dependency>
-   <groupId>com.github.katjahahn</groupId>
+   <groupId>io.github.struppigel</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>4.0.8</version>
+   <version>5.0.6</version>
    <scope>system</scope>
-   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-4.0.8.jar</systemPath>
+   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-5.0.6.jar</systemPath>
 </dependency> 
 ```
 
@@ -69,7 +69,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "com.github.katjahahn" % "portex_2.12" % "4.0.8"
+libraryDependencies += "io.github.struppigel" % "portex_2.12" % "5.0.6"
 ```
 
 ## Building PortEx
@@ -123,9 +123,11 @@ I develop PortEx and PortexAnalyzer as a hobby in my freetime. If you like it, p
 
 Karsten Hahn 
 
-Twitter: [@Struppigel](https://twitter.com/struppigel)
+Twitter/X: [@Struppigel](https://x.com/struppigel)
 
 Mastodon: [struppigel@infosec.exchange](https://infosec.exchange/@struppigel)
+
+Bluesky: [https://bsky.app/profile/struppigel.bsky.social](https://infosec.exchange/@struppigel)
 
 Youtube: [MalwareAnalysisForHedgehogs](https://www.youtube.com/c/MalwareAnalysisForHedgehogs)
 

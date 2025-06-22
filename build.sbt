@@ -1,12 +1,12 @@
 name := "PortEx"
 
-version := "5.0.6-SNAPSHOT"
+version := "5.0.7-SNAPSHOT"
 
 scalaVersion := "2.12.13"
 
 assembly / assemblyJarName := "PortexAnalyzer.jar"
 
-assembly / mainClass := Some("com.github.struppigel.tools.PortExAnalyzer")
+assembly / mainClass := Some("io.github.struppigel.tools.PortExAnalyzer")
 
 assembly / assemblyMergeStrategy := {
   case PathList("META-INF", "versions", "9", "module-info.class") =>
@@ -56,9 +56,19 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
 // libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.23.1"
 
 // Your project organization (package name)
-organization := "com.github.struppigel"
+organization := "io.github.struppigel"
 
 pomIncludeRepository := { _ => false }
+
+publishMavenStyle := true
+githubOwner := "struppigel"
+githubRepository := "PortEx"
+credentials += Credentials(
+  "Sonatype Package Registry",
+  "central.sonatype.com",
+  "struppigel",
+  System.getenv("GITHUB_TOKEN")
+)
 
 scmInfo := Some(
   ScmInfo(
@@ -76,27 +86,19 @@ developers := List(
   )
 )
 
-licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
-
 description := "Java library to parse Portable Executable files"
-
+licenses := List(
+  "Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")
+)
 homepage := Some(url("https://github.com/struppigel/PortEx"))
 
-githubOwner := "struppigel"
-
-githubRepository := "PortEx"
-
-publishTo := Some("GitHub struppigel Apache Maven Packages" at "https://maven.pkg.github.com/struppigel/PortEx")
+publishTo := {
+  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+  if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+  else localStaging.value
+}
 
 versionScheme := Some("early-semver") // meaning: major.minor.patch version scheme
 
-publishMavenStyle := true
-
-credentials += Credentials(
-  "GitHub Package Registry",
-  "maven.pkg.github.com",
-  "struppigel",
-  System.getenv("GITHUB_TOKEN")
-)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
