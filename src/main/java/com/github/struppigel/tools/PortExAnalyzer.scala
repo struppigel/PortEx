@@ -42,9 +42,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.12.12
-    |author: Karsten Philipp Boris Hahn
-    |last update: 19. June 2024""".stripMargin
+  private val version = """version: 0.12.13
+    |author: Karsten Hahn
+    |last update: 22. June 2025""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -52,10 +52,8 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
     | java -jar PortexAnalyzer.jar -l <offset1,offset2,offset3,...> <PEfile>
-    | java -jar PortexAnalyzer.jar --repair <PEfile>
     | java -jar PortexAnalyzer.jar --rawep <PEfile>
     | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
-    | java -jar PortexAnalyzer.jar --diff <filelist or folder>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>] [--visoverlay <textfile>]] [-i <folder>] <PEfile>
     |
@@ -67,10 +65,7 @@ object PortExAnalyzer {
     | -bps               bytes per square in the image
     | -l,--loc           show location for specified offset
     | --rawep            print file offset of entry point (decimal)
-    | --visoverlay       text file input with square pixels to mark on the visualization
-    | --repair           repair the PE file, use this if your file is not recognized as PE
-    | --dump             dump resources, overlay, sections, icons 
-    | --diff             compare several files and show common characteristics (alpha feature)
+    | --dump             dump resources, overlay, sections, icons
     | --pdiff            create a diff visualization
     | -i,--ico           extract icons from the resource section as .ico file
     """.stripMargin
