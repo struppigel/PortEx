@@ -36,7 +36,7 @@ public class RobustnessTest {
         List<ImportDLL> imports = new SectionLoader(data).loadImportSection()
                 .getImports();
         assertFalse(imports.isEmpty());
-        assertTrue(imports.get(0).getName().equals("\\\\66.93.68.6\\z"));
+        assertEquals(imports.get(0).getName(), "\\\\66.93.68.6\\z");
     }
 
     @Test

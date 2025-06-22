@@ -45,15 +45,15 @@ lazy val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
 
 lazy val root = project.in(file(".")).configs(JavaDoc).settings(javadocSettings: _*)
 
-libraryDependencies += "org.testng" % "testng" % "7.11.0" % "test"
+libraryDependencies += "org.testng" % "testng" % "6.14.3" % "test"
 
 libraryDependencies += "com.google.guava" % "guava" % "33.4.8-jre"
 
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2" % "provided"
 
-libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.25.0"
 
-// libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.23.1"
+// libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.25.0"
 
 // Your project organization (package name)
 organization := "io.github.struppigel"

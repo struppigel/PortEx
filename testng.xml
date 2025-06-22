@@ -4,7 +4,7 @@
  
 	<test name="order">
 		<packages>
-			<package name="com.github.struppigel.*" />
+			<package name="io.github.struppigel.*" />
 		</packages>
 	</test>
  
