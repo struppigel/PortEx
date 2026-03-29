@@ -63,12 +63,24 @@ pomIncludeRepository := { _ => false }
 publishMavenStyle := true
 githubOwner := "struppigel"
 githubRepository := "PortEx"
-credentials += Credentials(
-  "Sonatype Package Registry",
-  "central.sonatype.com",
-  "struppigel",
-  System.getenv("GITHUB_TOKEN")
-)
+
+// Strip the GitHub Packages resolver added by sbt-github-packages when no token is present,
+// so local builds work without credentials (GITHUB_TOKEN).
+resolvers := {
+  if (Option(System.getenv("GITHUB_TOKEN")).exists(_.nonEmpty))
+    resolvers.value
+  else
+    resolvers.value.filterNot(_.name.startsWith("GitHub Package Registry"))
+}
+
+credentials := Option(System.getenv("GITHUB_TOKEN")).filter(_.nonEmpty).map { token =>
+  Credentials(
+    "Sonatype Package Registry",
+    "central.sonatype.com",
+    "struppigel",
+    token
+  )
+}.toSeq
 
 scmInfo := Some(
   ScmInfo(
