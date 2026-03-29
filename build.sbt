@@ -2,7 +2,7 @@ name := "PortEx"
 
 version := "5.0.7-SNAPSHOT"
 
-scalaVersion := "2.12.13"
+scalaVersion := "2.12.20"
 
 assembly / assemblyJarName := "PortexAnalyzer.jar"
 
@@ -32,7 +32,7 @@ assembly / assemblyMergeStrategy := {
 lazy val JavaDoc = config("genjavadoc") extend Compile
 
 lazy val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
-  addCompilerPlugin("com.typesafe.genjavadoc" %% "genjavadoc-plugin" % "0.18_2.13.10" cross CrossVersion.full),
+  addCompilerPlugin("com.typesafe.genjavadoc" %% "genjavadoc-plugin" % "0.19" cross CrossVersion.full),
   scalacOptions += s"-P:genjavadoc:out=${target.value}/java",
   Compile / packageDoc := (JavaDoc / packageDoc).value,
   JavaDoc / sources :=
