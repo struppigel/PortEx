@@ -20,7 +20,7 @@ package io.github.struppigel.parser.sections.rsrc
 import io.github.struppigel.parser.IOUtil.SpecificationFormat
 import ResourceDirectory._
 import ResourceDirectoryKey._
-import io.github.struppigel.parser.{IOUtil, StandardField}
+import io.github.struppigel.parser.{IOUtil, Interruption, StandardField}
 import io.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
 import org.apache.logging.log4j.LogManager
 
@@ -286,6 +286,7 @@ object ResourceDirectory {
     val offsets: ListBuffer[Long] = scala.collection.mutable.ListBuffer.empty
     try {
       for (i <- 0 until limitedEntriesSum) {
+        Interruption.checkInterrupt()
         // calculate the offset for the entry
         val offset = resourceDirSize + i * entrySize + virtualAddress + rsrcDirRVA
         // the offset to the end of the entry

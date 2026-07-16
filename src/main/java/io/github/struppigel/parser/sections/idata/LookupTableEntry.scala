@@ -20,7 +20,7 @@ package io.github.struppigel.parser.sections.idata
 import LookupTableEntry._
 import io.github.struppigel.parser.optheader.WindowsEntryKey
 import io.github.struppigel.parser.sections.SectionLoader.LoadInfo
-import io.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
+import io.github.struppigel.parser.{AnalysisInterruptedException, MemoryMappedPE, PhysicalLocation}
 import org.apache.logging.log4j.LogManager
 
 import java.lang.Long.toHexString
@@ -151,6 +151,8 @@ object LookupTableEntry {
           case _ : FailureEntryException => createNameEntry(loadInfo, value, mmbytes, iltRVA, iltVA, dirEntry, entrySize, fileOffset, true)
         }
     } catch {
+      // interruption must abort the analysis, not be logged as a failed entry
+      case e: AnalysisInterruptedException => throw e
       case e: Exception =>
         val message = "invalid lookup table entry at ilt rva " + iltRVA + ", reason: " + e.getMessage()
         logger.warn(message)

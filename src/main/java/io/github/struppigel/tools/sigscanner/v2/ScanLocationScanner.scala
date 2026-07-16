@@ -16,7 +16,7 @@ package io.github.struppigel.tools.sigscanner.v2
  * limitations under the License.
  ******************************************************************************/
 import io.github.struppigel.parser.ScalaIOUtil.using
-import io.github.struppigel.parser.{IOUtil, PEData}
+import io.github.struppigel.parser.{IOUtil, Interruption, PEData}
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey.ADDR_OF_ENTRY_POINT
 import io.github.struppigel.parser.sections.SectionLoader
 import io.github.struppigel.tools.Overlay
@@ -51,7 +51,9 @@ abstract class SingleScanLocationScanner extends ScanLocationScanner {
     if(!locationExists(pe)) return Nil
     val bytes = getLocationBytes(pe)
     val absoluteOffset = getLocationStart(pe)
-    signatures.filter(_.matches(bytes)._1).map(s => (s, s.matches(bytes)._2 + absoluteOffset))
+    // one checkpoint per signature, since the pattern matcher may backtrack a lot
+    signatures.filter { s => Interruption.checkInterrupt(); s.matches(bytes)._1 }
+      .map(s => (s, s.matches(bytes)._2 + absoluteOffset))
   }
 }
 

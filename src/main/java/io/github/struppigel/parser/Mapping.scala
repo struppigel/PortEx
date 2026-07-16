@@ -159,6 +159,8 @@ class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val da
     val bytes = zeroBytes(size)
     // get every single byte via apply, TODO could be done more efficiently
     for (i <- 0 until size) {
+      // i & 0x1fff == i % 8192, i.e. check for cancellation once every 8 KB
+      if ((i & 0x1fff) == 0) Interruption.checkInterrupt()
       bytes(i) = apply(virtOffset + i)
     }
     bytes
