@@ -19,7 +19,7 @@ package io.github.struppigel.tools
 
 import io.github.struppigel.parser.ScalaIOUtil.using
 import ShannonEntropy._
-import io.github.struppigel.parser.{PEData, PELoader}
+import io.github.struppigel.parser.{Interruption, PEData, PELoader}
 import io.github.struppigel.parser.sections.SectionLoader
 
 import java.io.{File, RandomAccessFile}
@@ -158,13 +158,17 @@ object ShannonEntropy {
     // initialize total
     var total: Long = 0L
     // count each byte in the given array
-    bytes.toList.foreach { byte =>
+    var i = 0
+    while (i < bytes.length) {
+      // the array may cover a whole file or overlay, so allow cancellation
+      if ((i & 0x1fff) == 0) Interruption.checkInterrupt()
       // byte to int conversion
-      val index = byte & 0xff
+      val index = bytes(i) & 0xff
       // count byte, index denotes the read byte value
       byteCounts(index) += 1L
       // add byte to total
       total += 1L
+      i += 1
     }
     // return our tuple
     (byteCounts, total)
@@ -211,6 +215,8 @@ object ShannonEntropy {
         }
         // count bytes for each chunk
         .foreach { bytesRead =>
+          // one cancellation checkpoint per chunk read from file
+          Interruption.checkInterrupt()
           // take only the bytes that were actually read
           val bytes = chunk.toList.take(bytesRead)
           // count each byte that is within the specified range

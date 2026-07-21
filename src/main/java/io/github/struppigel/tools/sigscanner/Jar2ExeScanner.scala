@@ -20,10 +20,10 @@ package io.github.struppigel.tools.sigscanner
 import io.github.struppigel.parser.ScalaIOUtil.using
 import Jar2ExeScanner._
 import SignatureScanner.{Address, ScanResult}
-import io.github.struppigel.parser.IOUtil
+import io.github.struppigel.parser.{AnalysisInterruptedException, IOUtil}
 
 import java.io.{File, FileOutputStream, RandomAccessFile}
-import java.nio.channels.Channels
+import java.nio.channels.{Channels, ClosedByInterruptException}
 import java.util.zip.ZipInputStream
 import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable.ListBuffer
@@ -78,6 +78,10 @@ class Jar2ExeScanner(file: File) {
         e = zis.getNextEntry()
       }
     } catch {
+      // the zip is read through an interruptible channel: interruption of the
+      // analysis thread must abort the scan instead of being swallowed
+      case e: ClosedByInterruptException  => throw new AnalysisInterruptedException()
+      case e: AnalysisInterruptedException => throw e
       case e: IllegalArgumentException => return Nil
       case e: Exception                => //System.err.println(e.getMessage())
     } finally {

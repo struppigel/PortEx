@@ -20,6 +20,7 @@ import io.github.struppigel.parser.coffheader.COFFFileHeader;
 import io.github.struppigel.parser.optheader.DataDirectoryKey;
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey;
 import io.github.struppigel.parser.sections.*;
+import io.github.struppigel.parser.Interruption;
 import io.github.struppigel.parser.Location;
 import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.sections.clr.CLRSection;
@@ -148,6 +149,7 @@ public class Visualizer {
 		final long minLength = withMinLength(0);
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			for (long address = 0; address < fileSize; address += minLength) {
+				Interruption.checkInterrupt();
 				raf.seek(address);
 				byte b = raf.readByte();
 				Color color = getBytePlotColor(b);
@@ -240,6 +242,7 @@ public class Visualizer {
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 			// read until EOF with windowSized steps
 			for (long address = 0; address <= fileSize; address += minLength) {
+				Interruption.checkInterrupt();
 				// the start of the window (windowHalf to the left)
 				long start = (address - windowHalfSize < 0) ? 0 : address
 						- windowHalfSize;
