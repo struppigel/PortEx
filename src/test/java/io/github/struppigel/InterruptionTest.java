@@ -2,6 +2,9 @@ package io.github.struppigel;
 
 import io.github.struppigel.parser.AnalysisInterruptedException;
 import io.github.struppigel.parser.Interruption;
+import io.github.struppigel.parser.Mapping;
+import io.github.struppigel.parser.PhysRange;
+import io.github.struppigel.parser.VirtRange;
 import io.github.struppigel.tools.ChiSquared;
 import io.github.struppigel.tools.ShannonEntropy;
 import io.github.struppigel.tools.StringExtractor;
@@ -79,6 +82,12 @@ public class InterruptionTest {
     @Test
     public void checkInterruptThrowsAndPreservesFlag() {
         assertAbortsWhenInterrupted(() -> Interruption.checkInterrupt());
+    }
+
+    @Test
+    public void mappingConstructionAbortsWhenInterrupted() {
+        assertAbortsWhenInterrupted(() ->
+                new Mapping(new VirtRange(0, 8192), new PhysRange(0, 8192), null));
     }
 
     @Test

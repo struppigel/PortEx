@@ -74,9 +74,11 @@ object PortExAnalyzer {
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
 
   def main(args: Array[String]): Unit = {
-    invokeCLI(args)
+    val exitCode = invokeCLI(args)
+    if (exitCode != 0) sys.exit(exitCode)
   }
-  private def invokeCLI(args: Array[String]): Unit = {
+  private def invokeCLI(args: Array[String]): Int = {
+    var exitCode = 0
     println(title)
     val options = nextOption(scala.collection.mutable.Map(), args.toList)
     if (args.length == 0) {
@@ -96,6 +98,7 @@ object PortExAnalyzer {
           writeDiffReport(file)
         } else {
           System.err.println("file doesn't exist")
+          exitCode = 1
         }
       }
       if (options.contains('repair)) {
@@ -105,12 +108,13 @@ object PortExAnalyzer {
           PEAutoRepair.apply(inFile, outFile).repair()
         } else {
           System.err.println("file doesn't exist")
+          exitCode = 1
         }
       }
       if (options.contains('inputfile)) {
         try {
           val file = new File(options('inputfile))
-          if (file.exists) {
+          if (file.exists && file.isFile) {
             if (isPEFile(file)) {
               if (options.contains('location)){
                 val offsetStr = options('location)
@@ -149,6 +153,7 @@ object PortExAnalyzer {
                 }
               }
             } else {
+              exitCode = 1
               if (options.contains('output)) {
                 writeFileTypeReport(file, new File(options('output)))
               } else {
@@ -179,6 +184,9 @@ object PortExAnalyzer {
               println("picture successfully created and saved to " + imageFile.getAbsolutePath)
               println()
             }
+          } else if (file.exists) {
+            System.err.println("Input is not a regular file: " + file.getAbsolutePath)
+            exitCode = 1
           } else {
             if (options.contains('pdiffA) && options.contains('pdiffB)) {
               val pdiffAFile = new File(options('pdiffA))
@@ -192,13 +200,18 @@ object PortExAnalyzer {
               println()
             } else {
               System.err.println("file doesn't exist")
+              exitCode = 1
             }
           }
         } catch {
-          case e: Exception => System.err.println("Error: " + e.getMessage); e.printStackTrace();
+          case e: Exception =>
+            System.err.println("Error: " + e.getMessage)
+            e.printStackTrace()
+            exitCode = 1
         }
       }
     }
+    exitCode
   }
   
   private def printIffBetween(offset: Long, offsetA: Long, offsetB: Long, message: String): Unit = {

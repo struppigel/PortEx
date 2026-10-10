@@ -46,6 +46,7 @@ class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val da
     // set start as the physical start of the mapped space
     var start = physRange.start
     for (i <- 1 to nrOfChunks) yield {
+      Interruption.checkInterrupt()
       var size = {
         // set to default chunk size unless current chunk exceeds the physical 
         // end of mapped space
