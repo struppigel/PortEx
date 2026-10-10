@@ -25,6 +25,33 @@ class OptimizedStreamCoverageTest {
     assertEquals(narrow.getTableNames, List("Module"))
   }
 
+  @Test def tableSpecificationsDoNotShareMutableArraysBetweenReads(): Unit = {
+    val first = CLRTable.readSpecificationFromFile(0)
+    val second = CLRTable.readSpecificationFromFile(0)
+    val originalKey = first.head(CLRTable.KEY_INDEX)
+
+    assertEquals(second.head(CLRTable.KEY_INDEX), originalKey)
+    first.head(CLRTable.KEY_INDEX) = "mutated"
+
+    assertEquals(second.head(CLRTable.KEY_INDEX), originalKey)
+    assertEquals(CLRTable.readSpecificationFromFile(0).head(CLRTable.KEY_INDEX), originalKey)
+  }
+
+  @Test def tableRowLookupPreservesOneBasedAndSparseRowSemantics(): Unit = {
+    val first = new CLRTableEntry(0, 0L, 1, Map.empty, None, None, None)
+    val second = new CLRTableEntry(0, 0L, 2, Map.empty, None, None, None)
+    val contiguous = new CLRTable(List(first, second), 0, 0L)
+    assertEquals(contiguous.getEntryByRow(1), Some(first))
+    assertEquals(contiguous.getEntryByRow(2), Some(second))
+    assertEquals(contiguous.getEntryByRow(0), None)
+    assertEquals(contiguous.getEntryByRow(3), None)
+
+    val sparseEntry = new CLRTableEntry(0, 0L, 7, Map.empty, None, None, None)
+    val sparse = new CLRTable(List(sparseEntry), 0, 0L)
+    assertEquals(sparse.getEntryByRow(7), Some(sparseEntry))
+    assertEquals(sparse.getEntryByRow(1), None)
+  }
+
   private def stream(heapSizes: Int, validTables: Long, tableSizes: List[Int]): OptimizedStream = {
     val fields = Map(
       OptimizedStreamKey.HEAP_SIZES -> new StandardField(

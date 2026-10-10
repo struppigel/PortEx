@@ -55,6 +55,8 @@ public final class IOUtil {
 	 * The folder that contains the specification files
 	 */
 	public static final String SPEC_DIR = "/data/";
+	private static final Map<Class<?>, EnumMap<?, StandardField>> FULL_ENUM_MAP_TEMPLATES =
+			new java.util.concurrent.ConcurrentHashMap<>();
 
 	/**
 	 * Forbidden. This is a utility class.
@@ -230,12 +232,24 @@ public final class IOUtil {
 	public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntriesForSpec(
 			Class<T> clazz, SpecificationFormat specFormat,
 			List<String[]> specification, byte[] headerbytes, long headerOffset) {
+		return readHeaderEntriesForSpec(clazz, specFormat, specification, headerbytes, headerOffset, true);
+	}
+
+	/**
+	 * Reads the fields in the specification, optionally omitting enum keys that
+	 * are not present in the specification.
+	 */
+	public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> readHeaderEntriesForSpec(
+			Class<T> clazz, SpecificationFormat specFormat,
+			List<String[]> specification, byte[] headerbytes, long headerOffset,
+			boolean includeUnsetFields) {
 		assert clazz != null && specFormat != null && headerbytes != null;
 
 		/* initializers */
 		// init a full map with default fields. Fields that can be read are
 		// changed subsequently
-		Map<T, StandardField> data = initFullEnumMap(clazz);
+		Map<T, StandardField> data = includeUnsetFields
+				? initFullEnumMap(clazz) : new EnumMap<>(clazz);
 
 		// use the specification format to get the right indices
 		int descriptionIndex = specFormat.description;
@@ -322,14 +336,17 @@ public final class IOUtil {
 	 */
 	public static <T extends Enum<T> & HeaderKey> Map<T, StandardField> initFullEnumMap(
 			Class<T> clazz) {
-		Map<T, StandardField> map = new EnumMap<>(clazz);
-		// loop through all values of the Enum type and add a dummy field
-		for (T key : clazz.getEnumConstants()) {
-			// TODO init correct description string
-			StandardField dummy = new StandardField(key, "this field was not set", 0L, 0L, 0L);
-			map.put(key, dummy);
-		}
-		return map;
+		@SuppressWarnings("unchecked")
+		EnumMap<T, StandardField> template = (EnumMap<T, StandardField>)
+				FULL_ENUM_MAP_TEMPLATES.computeIfAbsent(clazz, ignored -> {
+					EnumMap<T, StandardField> map = new EnumMap<>(clazz);
+					// Default fields are immutable, so callers can safely clone this template.
+					for (T key : clazz.getEnumConstants()) {
+						map.put(key, new StandardField(key, "this field was not set", 0L, 0L, 0L));
+					}
+					return map;
+				});
+		return template.clone();
 	}
 
 	/**

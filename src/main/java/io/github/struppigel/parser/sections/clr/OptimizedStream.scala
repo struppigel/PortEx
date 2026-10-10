@@ -241,10 +241,10 @@ object OptimizedStream {
         // obtain StandardFields via IOUtil
         // now you can read headerbytes from mmbytes
         val headerbytes = mmbytes.slice(tableStart + rowOffset, tableStart + rowOffset + entrySize)
-        val entries = IOUtil.readHeaderEntriesForSpec(classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, rawTableStart)
-        // this is a somewhat bad hack because I could not use generic types for headerkeys
-        val cleanedupEntries = entries.asScala.toMap.filter(_._2.getDescription != "this field was not set")
-        val tblentry = new CLRTableEntry(idx, rawRowOffset, row + 1, cleanedupEntries, guidHeap, stringsHeap, blobHeap)
+        val entries = IOUtil.readHeaderEntriesForSpec(
+          classOf[CLRTableKey], specFormat, convertedSpec, headerbytes, rawTableStart, false)
+        val tblentry = new CLRTableEntry(idx, rawRowOffset, row + 1,
+          entries.asScala.toMap, guidHeap, stringsHeap, blobHeap)
         tblentry
       }
       val tableName = CLRTable.getTableNameForIndex(idx)

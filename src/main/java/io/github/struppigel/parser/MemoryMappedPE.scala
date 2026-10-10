@@ -187,6 +187,10 @@ class MemoryMappedPE(
     require((until - from) == (until - from).toInt)
     // fetch all mappings for that range
     val sliceMappings = mappingsInRange(new VirtRange(from, until))
+    if (sliceMappings.size == 1 && sliceMappings.head.virtRange.start <= from &&
+      sliceMappings.head.virtRange.end >= until) {
+      return sliceMappings.head(from, (until - from).toInt)
+    }
     // create zero filled array
     val bytes = zeroBytes((until - from).toInt)
     // fill byte array with actual values
@@ -197,11 +201,7 @@ class MemoryMappedPE(
       // read bytes
       val mappedBytes = mapping(start, (end - start).toInt)
       // write bytes into result-array
-      for (i <- mappedBytes.indices) {
-        // calculate index to write the byte to
-        val index = (start - from).toInt + i
-        bytes(index) = mappedBytes(i)
-      }
+      System.arraycopy(mappedBytes, 0, bytes, (start - from).toInt, mappedBytes.length)
     }
     bytes
   }

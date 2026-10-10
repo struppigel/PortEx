@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.testng.Assert.assertEquals;
@@ -224,6 +225,18 @@ public class CLRReadPathTest {
     }
 
     @Test
+    public void clrTableRowLookupReturnsRowsAtTheirOneBasedPositions() throws IOException {
+        PEData data = PELoader.loadPE(fixtureFile("HelloWorld.exe"));
+        for (CLRTable table : data.getCLRTables()) {
+            List<CLRTableEntry> entries = table.getEntries();
+            for (CLRTableEntry entry : entries) {
+                assertEquals(table.getEntryByRow(entry.row()).get(), entry);
+            }
+            assertFalse(table.getEntryByRow(entries.size() + 1).isDefined());
+        }
+    }
+
+    @Test
     public void chunkReadsMatchFileBytesAcrossBoundariesAndPartialTail() throws IOException {
         boolean originalUseChunks = Mapping$.MODULE$.useChunks();
         int originalChunkSize = Mapping$.MODULE$.defaultChunkSize();
@@ -241,6 +254,47 @@ public class CLRReadPathTest {
         } finally {
             Mapping$.MODULE$.defaultChunkSize_$eq(originalChunkSize);
             Mapping$.MODULE$.useChunks_$eq(originalUseChunks);
+        }
+    }
+
+    @Test
+    public void clrFieldIterationFollowsSpecificationAndPedataColumnsStayAligned() throws IOException {
+        PEData data = PELoader.loadPE(fixtureFile("HelloWorld.exe"));
+        Map<String, List<String>> headersByTable = data.loadCLRTableHeaders();
+        Map<String, List<List<Object>>> rowsByTable = data.loadCLRTables();
+
+        for (CLRTable table : data.getCLRTables()) {
+            List<CLRTableEntry> entries = table.getEntries();
+            if (entries.isEmpty()) continue;
+
+            CLRTableEntry firstEntry = entries.get(0);
+            List<CLRTableKey> expectedKeys = new ArrayList<>();
+            scala.collection.Iterator<?> specRows = CLRTable.readSpecificationFromFile(table.getIndex()).iterator();
+            while (specRows.hasNext()) {
+                String[] specRow = (String[]) specRows.next();
+                CLRTableKey key = CLRTableKey.valueOf(specRow[0]);
+                if (firstEntry.getCLRFields().containsKey(key)) expectedKeys.add(key);
+            }
+            assertEquals(new ArrayList<>(firstEntry.getCLRFields().keySet()), expectedKeys,
+                    table.getTableName() + " field order");
+
+            String tableLabel = String.format("%0#4x %s", table.getIndex(), table.getTableName());
+            List<String> expectedHeaders = new ArrayList<>();
+            expectedHeaders.add("Row");
+            for (CLRField field : firstEntry.getCLRFields().values()) expectedHeaders.add(field.getName());
+            expectedHeaders.add("File offset");
+            assertEquals(headersByTable.get(tableLabel), expectedHeaders, tableLabel + " headers");
+
+            List<List<Object>> tableRows = rowsByTable.get(tableLabel);
+            assertEquals(tableRows.size(), entries.size(), tableLabel + " row count");
+            for (int rowIndex = 0; rowIndex < entries.size(); rowIndex++) {
+                CLRTableEntry entry = entries.get(rowIndex);
+                List<Object> expectedValues = new ArrayList<>();
+                expectedValues.add(entry.row());
+                for (CLRField field : entry.getCLRFields().values()) expectedValues.add(field.getValueAsObject());
+                expectedValues.add(entry.rawOffset());
+                assertEquals(tableRows.get(rowIndex), expectedValues, tableLabel + " row " + entry.row());
+            }
         }
     }
 

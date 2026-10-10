@@ -9,6 +9,9 @@ assembly / assemblyJarName := "PortexAnalyzer.jar"
 assembly / mainClass := Some("io.github.struppigel.tools.PortExAnalyzer")
 
 assembly / assemblyMergeStrategy := {
+  case "module-info.class" =>
+    MergeStrategy.discard
+
   case PathList("META-INF", "versions", "9", "module-info.class") =>
     MergeStrategy.discard
 
@@ -53,7 +56,7 @@ libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2" % "provid
 
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.25.0"
 
-// libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.25.0"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.25.0"
 
 // Your project organization (package name)
 organization := "io.github.struppigel"

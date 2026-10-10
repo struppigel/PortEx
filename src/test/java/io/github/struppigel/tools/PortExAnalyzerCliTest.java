@@ -58,6 +58,7 @@ public class PortExAnalyzerCliTest {
     public void versionRequestReturnsSuccess() throws Exception {
         String output = assertExitCode(0, "--version");
         assertTrue(output.contains("version: 0.12.15"));
+        assertTrue(output.contains("last update: 10. October 2026"));
     }
 
     @Test

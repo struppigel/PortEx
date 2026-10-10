@@ -45,7 +45,7 @@ object PortExAnalyzer {
 
   private val version = """version: 0.12.15
     |author: Karsten Hahn
-    |last update: 22. June 2025""".stripMargin
+    |last update: 10. October 2026""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 

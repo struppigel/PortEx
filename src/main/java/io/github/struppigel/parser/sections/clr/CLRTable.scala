@@ -24,18 +24,26 @@ import io.github.struppigel.parser.StandardField
 import io.github.struppigel.tools.ReportCreator
 
 import scala.collection.JavaConverters._
+import scala.collection.concurrent.TrieMap
 
 class CLRTable (val entries : List[CLRTableEntry],
                 private val idx: Int,
                 private val rawOffset: Long) {
 
   private val name = getTableMetaForIndex(idx).name
+  private val entriesHaveSequentialRows = entries.zipWithIndex.forall { case (entry, index) =>
+    entry.row == index + 1
+  }
+  private lazy val entriesByPosition = entries.toVector
 
   def getIndex(): Int = idx
   def getRawOffset(): Long = rawOffset
   def getTableName(): String = name
   def getEntries(): java.util.List[CLRTableEntry] = entries.asJava
-  def getEntryByRow(row : Int) : Option[CLRTableEntry] = entries.find(_.row == row)
+  def getEntryByRow(row : Int) : Option[CLRTableEntry] =
+    if (entriesHaveSequentialRows) {
+      if (row > 0 && row <= entriesByPosition.length) Some(entriesByPosition(row - 1)) else None
+    } else entries.find(_.row == row)
 
   /**
    * Set optimized stream instance after loading it to improve toString results.
@@ -58,6 +66,16 @@ class CLRTableEntry (val idx : Int,
                      private val blobHeap : Option[BlobHeap]) {
 
   private val clrFields = convertToCLRFields(entriesMap)
+  private val clrFieldsInSchemaOrder: List[(CLRTableKey, CLRField)] =
+    cachedSpecification(idx).flatMap { specRow =>
+      val key = CLRTableKey.valueOf(specRow(KEY_INDEX))
+      clrFields.get(key).map(key -> _)
+    }
+  private val javaClrFields: java.util.Map[CLRTableKey, CLRField] = {
+    val fields = new java.util.LinkedHashMap[CLRTableKey, CLRField]()
+    clrFieldsInSchemaOrder.foreach { case (key, field) => fields.put(key, field) }
+    java.util.Collections.unmodifiableMap[CLRTableKey, CLRField](fields)
+  }
   private var optimizedStream : Option[OptimizedStream] = None
 
   /**
@@ -66,15 +84,7 @@ class CLRTableEntry (val idx : Int,
    */
   def setOptimizedStream(optStream : OptimizedStream) {
     this.optimizedStream = Some(optStream)
-    clrFields.values.foreach(_.setOptimizedStream(optStream))
-  }
-
-  private def tableToTagType : Map[CLRTableKey, TagType] = { Map(
-    CLRTableKey.TYPEREF_RESOLUTION_SCOPE -> TagType.RESOLUTION_SCOPE,
-    CLRTableKey.CUSTOMATTRIBUTE_TYPE -> TagType.CUSTOM_ATTRIBUTE_TYPE,
-    CLRTableKey.CUSTOMATTRIBUTE_PARENT -> TagType.HAS_CUSTOM_ATTRIBUTE,
-    CLRTableKey.MEMBERREF_CLASS -> TagType.MEMBERREF_PARENT,
-    CLRTableKey.TYPEDEF_EXTENDS -> TagType.TYPEDEF_OR_REF)
+    clrFieldsInSchemaOrder.foreach(_._2.setOptimizedStream(optStream))
   }
 
   private def convertToCLRFields(convertee: Map[CLRTableKey, StandardField]): Map[CLRTableKey, CLRField] =
@@ -83,19 +93,19 @@ class CLRTableEntry (val idx : Int,
   private def convertToCLRField(sfield : StandardField, clrKey : CLRTableKey): CLRField = {
     // find out type of CLRField using the specification in Meta and the key
     val key = sfield.getKey
-    val spec = readSpecificationFromFile(idx)
+    val spec = cachedSpecification(idx)
     val specRow = spec.find(_(KEY_INDEX) == key.toString).get
     val fieldTypeStr = specRow(SIZE_INDEX)
     val index = sfield.getValue.toInt
     assert(clrKey != null)
-    assert(tableToTagType != null)
     fieldTypeStr match {
       case "String" => CLRStringField(new StringIndex(index, stringsHeap), sfield)
       case "Guid" => CLRGuidField(new GuidIndex(index, guidHeap), sfield)
       case "Blob" => CLRBlobField(new BlobIndex(index, blobHeap), sfield)
-      case "Coded" => if (tableToTagType.contains(clrKey)) {
-        CLRCodedIndexField(new CodedTokenIndex(index, tableToTagType(clrKey) ), sfield)
-      } else CLRLongField(sfield)
+      case "Coded" => CLRTableEntry.tableToTagType.get(clrKey) match {
+        case Some(tagType) => CLRCodedIndexField(new CodedTokenIndex(index, tagType), sfield)
+        case None => CLRLongField(sfield)
+      }
       case _ =>
         if(isKnownCLRFlag(clrKey)) {
           val flagDescription = getDescriptionForTableFlag(sfield.getValue, clrKey).getOrElse("")
@@ -104,23 +114,23 @@ class CLRTableEntry (val idx : Int,
     }
   }
 
-  def getCLRFields(): java.util.Map[CLRTableKey, CLRField] = clrFields.asJava
+  def getCLRFields(): java.util.Map[CLRTableKey, CLRField] = javaClrFields
 
-  def getCLRFieldsAsStandardFields(): java.util.List[StandardField] = clrFields.values.map(_.toStandardField()).toList.asJava
+  def getCLRFieldsAsStandardFields(): java.util.List[StandardField] =
+    clrFieldsInSchemaOrder.map(_._2.toStandardField()).asJava
 
   def get(key : CLRTableKey): Option[CLRField] = clrFields.get(key)
 
   override def toString: String = {
     if(clrFields.size <= 6) {
-      s"${row}. ${clrFields.values.mkString(", ")}"
-    } else "Row: " + row + NL + clrFields.values.mkString(NL)
+      s"${row}. ${clrFieldsInSchemaOrder.map(_._2).mkString(", ")}"
+    } else "Row: " + row + NL + clrFieldsInSchemaOrder.map(_._2).mkString(NL)
   }
 
   // classes that recursively need to be searched for name fields for short description
   private def getReferenceClass(): Option[CLRField] = {
     val l = List( CLRTableKey.MEMBERREF_CLASS)
-    val found = clrFields.find(f => l.contains(f._1))
-    if(found.isDefined) Some(found.get._2) else None
+    clrFieldsInSchemaOrder.find(f => l.contains(f._1)).map(_._2)
   }
 
   // name fields usable for short descriptions
@@ -173,6 +183,16 @@ class CLRTableEntry (val idx : Int,
   }
 }
 
+object CLRTableEntry {
+  private val tableToTagType: Map[CLRTableKey, TagType] = Map(
+    CLRTableKey.TYPEREF_RESOLUTION_SCOPE -> TagType.RESOLUTION_SCOPE,
+    CLRTableKey.CUSTOMATTRIBUTE_TYPE -> TagType.CUSTOM_ATTRIBUTE_TYPE,
+    CLRTableKey.CUSTOMATTRIBUTE_PARENT -> TagType.HAS_CUSTOM_ATTRIBUTE,
+    CLRTableKey.MEMBERREF_CLASS -> TagType.MEMBERREF_PARENT,
+    CLRTableKey.TYPEDEF_EXTENDS -> TagType.TYPEDEF_OR_REF
+  )
+}
+
 case class CLRTableMeta(index : Int, name : String, specName : String)
 
 object CLRTable {
@@ -182,9 +202,17 @@ object CLRTable {
   val OFFSET_INDEX = 2
   val SIZE_INDEX = 3
 
+  private val specificationCache = TrieMap.empty[Int, List[Vector[String]]]
+
+  private[clr] def cachedSpecification(idx: Int): List[Vector[String]] =
+    specificationCache.getOrElseUpdate(idx, {
+      readArray(getSpecificationNameForIndex(idx)).asScala.iterator.map(_.toVector).toList
+    })
+
   def getTableMetaForIndex(idx : Int): CLRTableMeta = tableMetas.find(_.index == idx).get
 
-  def readSpecificationFromFile(idx : Int): List[Array[String]] = readArray(CLRTable.getSpecificationNameForIndex(idx)).asScala.toList
+  def readSpecificationFromFile(idx : Int): List[Array[String]] =
+    cachedSpecification(idx).map(_.toArray)
 
   def getSpecificationFormat() : SpecificationFormat = new SpecificationFormat(KEY_INDEX,DESCR_INDEX,OFFSET_INDEX,SIZE_INDEX)
 
