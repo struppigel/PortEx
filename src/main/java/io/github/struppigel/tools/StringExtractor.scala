@@ -17,6 +17,7 @@
  */
 package io.github.struppigel.tools
 
+import io.github.struppigel.parser.Interruption
 import io.github.struppigel.parser.ScalaIOUtil.using
 
 import java.io._
@@ -73,6 +74,7 @@ object StringExtractor {
       var byte: Int = is.read()
       // until EOF
       while (byte != -1 && strings.size < maxNumber) {
+        Interruption.checkInterrupt()
         // drop all bytes that are not ascii
         byte = dropWhile(is, !isASCIIPrintable(_))
         // check for EOF
@@ -102,6 +104,7 @@ object StringExtractor {
     val str = new StringBuffer()
     // read and save bytes as long as they fulfill f
     while (byte != -1 && f(byte)) {
+      Interruption.checkInterrupt()
       str.append(byte.toChar)
       byte = is.read()
     }
@@ -114,6 +117,7 @@ object StringExtractor {
     var byte: Int = is.read()
     // read bytes as long as they fulfill f
     while (byte != -1 && f(byte)) {
+      Interruption.checkInterrupt()
       byte = is.read()
     }
     // return last read value, which does not fulfill f
@@ -149,6 +153,7 @@ object StringExtractor {
       if (readInt != -1) codepoints += readInt
       var prev = 0
       while (readInt != -1 && strings.size < maxNumber) {
+        Interruption.checkInterrupt()
         if (readInt == 0) {
           maybeAppendToResults(codepoints)
           codepoints = ListBuffer.empty[Int]

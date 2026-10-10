@@ -21,7 +21,7 @@ import io.github.struppigel.parser.ScalaIOUtil.{bytes2hex, using}
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey._
 import SignatureScanner._
 import io.github.struppigel.parser.sections.SectionLoader
-import io.github.struppigel.parser.{FileFormatException, IOUtil, PELoader}
+import io.github.struppigel.parser.{FileFormatException, IOUtil, Interruption, PELoader}
 import io.github.struppigel.parser.ScalaIOUtil
 import org.apache.logging.log4j.LogManager
 
@@ -159,6 +159,7 @@ class SignatureScanner(signatures: List[Signature]) {
     using(new RandomAccessFile(file, "r")) { raf =>
       val results = ListBuffer[ScanResult]()
       for (addr <- 0L to file.length()) {
+        Interruption.checkInterrupt()
         val bytes = Array.fill(longestSigSequence + 1)(0.toByte)
         raf.seek(addr)
         val bytesRead = raf.read(bytes)

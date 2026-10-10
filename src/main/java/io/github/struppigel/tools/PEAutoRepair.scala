@@ -1,6 +1,6 @@
 package io.github.struppigel.tools
 
-import io.github.struppigel.parser.{IOUtil, PELoader, PESignature}
+import io.github.struppigel.parser.{AnalysisInterruptedException, IOUtil, PELoader, PESignature}
 import io.github.struppigel.parser.ScalaIOUtil.using
 import io.github.struppigel.parser.msdos.MSDOSHeader
 
@@ -56,7 +56,8 @@ class PEAutoRepair(private val inFile: File, private val outFile: File) {
     try {
        PELoader.loadPE(outFile)
     } catch {
-      case e: Exception => return false 
+      case e: AnalysisInterruptedException => throw e
+      case e: Exception => return false
     }
     true
   }

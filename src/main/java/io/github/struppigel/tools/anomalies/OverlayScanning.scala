@@ -2,6 +2,7 @@ package io.github.struppigel.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
 import io.github.struppigel.parser.IOUtil._
+import io.github.struppigel.parser.Interruption
 import io.github.struppigel.tools.Overlay
 import scala.collection.JavaConverters._
 import io.github.struppigel.tools.sigscanner.{FileTypeScanner, Signature, SignatureScanner}
@@ -43,8 +44,10 @@ trait OverlayScanning extends AnomalyScanner {
       val offset = rdata.getAlignedPointerToRaw(false)
       val size = Math.min(maxScanSize, rdata.getAlignedSizeOfRaw(false))
       val end = offset + Math.min(data.getFile.length(), size)
+      val scanner = new SignatureScanner(List(signature))
       for(i <- offset until end) {
-        val results = new SignatureScanner(List(signature)).scanAt(data.getFile, i)
+        Interruption.checkInterrupt()
+        val results = scanner.scanAt(data.getFile, i)
         if (!results.isEmpty) {
           return List(GenericReHintAnomaly("'PyInstaller archive' string in .rdata"))
         }

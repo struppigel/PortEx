@@ -22,7 +22,7 @@ import io.github.struppigel.parser.optheader.OptionalHeader.MagicNumber._
 import io.github.struppigel.parser.sections.SectionLoader.LoadInfo
 import DirectoryEntryKey._
 import io.github.struppigel.parser.optheader.{OptionalHeader, WindowsEntryKey}
-import io.github.struppigel.parser.{PEData, PELoader}
+import io.github.struppigel.parser.{Interruption, PEData, PELoader}
 import io.github.struppigel.parser.sections.{SectionLoader, SpecialSection}
 import io.github.struppigel.parser.{Location, MemoryMappedPE, PhysicalLocation}
 import org.apache.logging.log4j.LogManager
@@ -167,9 +167,10 @@ object ImportSection {
         case UNKNOWN => throw new IllegalArgumentException("Unknown magic number")
       }
       do {
+        Interruption.checkInterrupt()
         //TODO get fileoffset for entry from mmbytes instead of this to avoid
         //fractionated section issues ?
-        val entryFileOffset = fileOffset + offset 
+        val entryFileOffset = fileOffset + offset
 //        val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work
         entry = LookupTableEntry(loadInfo, mmbytes, offset.toInt, EntrySize,
             virtualAddress, relOffset, iVA, dirEntry, entryFileOffset)
@@ -195,6 +196,7 @@ object ImportSection {
     var i = 0
     val dirEntryMax = 10000
     do {
+      Interruption.checkInterrupt()
       logger.debug(s"reading ${i + 1}. entry")
       readDirEntry(i, mmbytes, virtualAddress, fileOffset) match {
         case Some(entry) =>

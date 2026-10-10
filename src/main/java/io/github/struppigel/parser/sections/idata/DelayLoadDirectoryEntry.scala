@@ -23,7 +23,7 @@ import io.github.struppigel.parser.sections.SectionLoader.LoadInfo
 import DelayLoadDirectoryEntry._
 import DelayLoadDirectoryKey._
 import io.github.struppigel.parser.optheader.WindowsEntryKey
-import io.github.struppigel.parser.{IOUtil, StandardField}
+import io.github.struppigel.parser.{IOUtil, Interruption, StandardField}
 import io.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
 import org.apache.logging.log4j.LogManager
 
@@ -169,6 +169,9 @@ object DelayLoadDirectoryEntry {
       case UNKNOWN => throw new IllegalArgumentException("Unknown magic number, can not parse delay-load imports")
     }
     do {
+      // this loop runs until a null entry is found, which a malformed file
+      // may never provide, so allow cancellation
+      Interruption.checkInterrupt()
       //TODO get fileoffset for entry from mmbytes instead of this to avoid fractionated section issues ?
       val entryFileOffset = fileOffset + offset
       //val entryFileOffset = mmbytes.getPhysforVir(iRVA) //doesn't work

@@ -228,6 +228,9 @@ class MemoryMappedPE(
    *         -1 if no byte satisfies the condition
    */
   def indexWhere(p: Byte => Boolean, from: Long): Long = {
+    // the searched range is the virtual space, which may be huge for
+    // malformed files, so allow cancellation once per chunk
+    Interruption.checkInterrupt()
     // no byte found, from exceeds MemoryMappedPE length, return -1
     if (from > length) -1
     else {
