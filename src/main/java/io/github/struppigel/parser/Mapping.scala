@@ -158,11 +158,22 @@ class Mapping(val virtRange: VirtRange, val physRange: PhysRange, private val da
    */
   private def readBytesFromChunk(virtOffset: Long, size: Int): Array[Byte] = {
     val bytes = zeroBytes(size)
-    // get every single byte via apply, TODO could be done more efficiently
-    for (i <- 0 until size) {
-      // i & 0x1fff == i % 8192, i.e. check for cancellation once every 8 KB
-      if ((i & 0x1fff) == 0) Interruption.checkInterrupt()
-      bytes(i) = apply(virtOffset + i)
+    var copied = 0
+    while (copied < size) {
+      // Keep cancellation responsive even when the configured chunk size exceeds 8 KB.
+      val offsetWithinCheckpoint = copied & 0x1fff
+      if (offsetWithinCheckpoint == 0) Interruption.checkInterrupt()
+
+      val currentVirtOffset = virtOffset + copied
+      val relOffset = currentVirtOffset - virtRange.start
+      val chunk = chunks((relOffset / defaultChunkSize).toInt)
+      val fileOffset = physRange.start + relOffset
+      assert(chunk.physStart <= fileOffset && chunk.physStart + chunk.size > fileOffset)
+      val byteIndex = (fileOffset - chunk.physStart).toInt
+      val bytesToCheckpoint = 8192 - offsetWithinCheckpoint
+      val copyLength = Math.min(Math.min(size - copied, chunk.size - byteIndex), bytesToCheckpoint)
+      System.arraycopy(chunk.bytes, byteIndex, bytes, copied, copyLength)
+      copied += copyLength
     }
     bytes
   }
