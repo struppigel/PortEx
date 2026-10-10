@@ -3,6 +3,7 @@ package io.github.struppigel.tools;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -55,7 +56,8 @@ public class PortExAnalyzerCliTest {
 
     @Test
     public void versionRequestReturnsSuccess() throws Exception {
-        assertExitCode(0, "--version");
+        String output = assertExitCode(0, "--version");
+        assertTrue(output.contains("version: 0.12.14"));
     }
 
     @Test
@@ -63,7 +65,7 @@ public class PortExAnalyzerCliTest {
         assertExitCode(1, "--unknown-option");
     }
 
-    private void assertExitCode(int expected, String... arguments) throws Exception {
+    private String assertExitCode(int expected, String... arguments) throws Exception {
         File outputFile = File.createTempFile("portex-cli-output", ".log");
         List<String> command = new ArrayList<>();
         String javaExecutable = System.getProperty("os.name").toLowerCase().contains("win")
@@ -85,6 +87,7 @@ public class PortExAnalyzerCliTest {
                 assertTrue(false, "PortExAnalyzer did not terminate");
             }
             assertEquals(process.exitValue(), expected);
+            return new String(Files.readAllBytes(outputFile.toPath()), StandardCharsets.UTF_8);
         } finally {
             Files.deleteIfExists(outputFile.toPath());
         }
