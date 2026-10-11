@@ -62,6 +62,11 @@ public class VisualizerBuilder {
 	 */
 	public static final boolean DEFAULT_PIXELATED = false;
 
+	/**
+	 * By default, images keep the look of former PortEx versions.
+	 */
+	public static final boolean DEFAULT_LEGACY_STYLE = true;
+
 	/* Default header colors */
 	private static final Color DEFAULT_MSDOS_COLOR = new Color(0, 0, 200);
 	private static final Color DEFAULT_RICH_COLOR = new Color(120,80,75);
@@ -100,8 +105,19 @@ public class VisualizerBuilder {
 	/* Entropy color */ //TODO implement
 	private static final Color DEFAULT_ENTROPY_COLOR = new Color(0, 0, 0);
 	
-	/* VisOverlay color */ 
+	/* VisOverlay color */
 	private static final Color DEFAULT_VISOVERLAY_COLOR = Color.magenta;
+
+	/* Structure map colors */
+	private static final Color DEFAULT_PE_SIGNATURE_COLOR = new Color(255, 120, 0);
+	private static final Color DEFAULT_MSDOS_STUB_COLOR = new Color(90, 90, 160);
+	private static final Color DEFAULT_BOUND_IMPORT_COLOR = new Color(200, 200, 120);
+	private static final Color DEFAULT_EXCEPTION_COLOR = new Color(160, 60, 60);
+	private static final Color DEFAULT_CERTIFICATE_COLOR = new Color(230, 190, 90);
+	private static final Color DEFAULT_TLS_COLOR = new Color(0, 160, 160);
+	private static final Color DEFAULT_LOAD_CONFIG_COLOR = new Color(140, 140, 40);
+	private static final Color DEFAULT_UNMAPPED_COLOR = new Color(48, 48, 48);
+	private static final Color DEFAULT_SIGNATURE_MATCH_COLOR = new Color(0, 230, 230);
 
 	private final VisualizerSettings settings = new VisualizerSettings();
 
@@ -120,6 +136,7 @@ public class VisualizerBuilder {
 		public int legendWidth = DEFAULT_LEGEND_WIDTH;
 		public Map<ColorableItem, Color> colorMap;
 		public List<PhysicalLocation> visOverlay;
+		public boolean legacyStyle = DEFAULT_LEGACY_STYLE;
 
 		public VisualizerSettings() {
 			initDefaultColorMap();
@@ -158,7 +175,26 @@ public class VisualizerBuilder {
 			colorMap.put(ColorableItem.ENTROPY, DEFAULT_ENTROPY_COLOR);
 			/* VisOverlay color */
 			colorMap.put(ColorableItem.VISOVERLAY, DEFAULT_VISOVERLAY_COLOR);
+			/* Structure map colors */
+			colorMap.put(ColorableItem.PE_SIGNATURE, DEFAULT_PE_SIGNATURE_COLOR);
+			colorMap.put(ColorableItem.MSDOS_STUB, DEFAULT_MSDOS_STUB_COLOR);
+			colorMap.put(ColorableItem.BOUND_IMPORT_SECTION, DEFAULT_BOUND_IMPORT_COLOR);
+			colorMap.put(ColorableItem.EXCEPTION_SECTION, DEFAULT_EXCEPTION_COLOR);
+			colorMap.put(ColorableItem.CERTIFICATE_TABLE, DEFAULT_CERTIFICATE_COLOR);
+			colorMap.put(ColorableItem.TLS_SECTION, DEFAULT_TLS_COLOR);
+			colorMap.put(ColorableItem.LOAD_CONFIG_SECTION, DEFAULT_LOAD_CONFIG_COLOR);
+			colorMap.put(ColorableItem.UNMAPPED, DEFAULT_UNMAPPED_COLOR);
+			colorMap.put(ColorableItem.SIGNATURE_MATCH, DEFAULT_SIGNATURE_MATCH_COLOR);
 		}
+	}
+
+	/**
+	 * Returns the default colors of all colorable items.
+	 *
+	 * @return a new, modifiable map of the default colors
+	 */
+	public static Map<ColorableItem, Color> getDefaultColors() {
+		return new EnumMap<>(new VisualizerSettings().colorMap);
 	}
 
 	/**
@@ -250,6 +286,24 @@ public class VisualizerBuilder {
 	public VisualizerBuilder setVisOverlay(List<PhysicalLocation> visOverlay) {
 		Preconditions.checkNotNull(visOverlay);
 		settings.visOverlay = visOverlay;
+		return this;
+	}
+
+	/**
+	 * Sets whether the images keep the look of former PortEx versions, which
+	 * is the default. With false, the images use the look of the interactive
+	 * visualization: each byte plot pixel shows the dominant byte class of its
+	 * bytes, the entropy is the mean of 256 byte windows, smaller structures
+	 * are drawn on top of larger ones and all known structures are colored,
+	 * e.g. the PE signature and the MSDOS stub. The image size and the
+	 * position of each structure stay the same.
+	 *
+	 * @param legacyStyle
+	 *            true to keep the look of former versions
+	 * @return this VisualizerBuilder
+	 */
+	public VisualizerBuilder setLegacyStyle(boolean legacyStyle) {
+		settings.legacyStyle = legacyStyle;
 		return this;
 	}
 

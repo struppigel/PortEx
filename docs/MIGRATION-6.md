@@ -22,6 +22,7 @@ signature format itself is described in [SIGNATURES.md](SIGNATURES.md).
 * [Reports and PortexAnalyzer output](#reports-and-portexanalyzer-output)
 * [Results that change](#results-that-change)
 * [Removed classes and methods](#removed-classes-and-methods)
+* [Visualizer and structure map](#visualizer-and-structure-map)
 * [Scala](#scala)
 
 ## Quick reference
@@ -379,6 +380,81 @@ with these intended differences:
 | `ScalaIOUtil.bytes2hex(Array[Option[Byte]], String)` | none |
 | `ReportCreator.peidReport()` | `ReportCreator.signatureReport()` |
 | the files `data/userdb.txt`, `data/overlaysignatures`, `data/javawrapperdb` and `data/customsigs_GCK.txt` in the jar | `data/signatures/*.sig`, or `DefaultSignatures` |
+
+## Visualizer and structure map
+
+PortEx 6 adds a structure map and a visualization engine. Code that uses
+`Visualizer` keeps working: its public methods are unchanged, and the images
+keep their size and, by default, their look.
+
+### Fixes in the default images
+
+* The legend no longer depends on the order of calls. Entry Point and Overlay
+  no longer disappear after `createEntropyImage` or `createBytePlot`.
+* Resource types of one file no longer appear in the legend of the next file.
+* `createLegendImage` before any other call shows the byte plot and entropy
+  part instead of throwing a `NullPointerException`.
+* Entropy images no longer color one pixel after the end of the file, and
+  empty files no longer throw an `ArithmeticException`.
+* Some structures are colored more exactly: the .NET metadata root includes
+  all stream headers, the Rich header includes its XOR key, and relocation
+  blocks of size 0 cover their 8 byte header.
+
+### New in the Visualizer
+
+* `PEData` overloads: `createImage(PEData)`, `createEntropyImage(PEData)`,
+  `createBytePlot(PEData)`, `createLegendImage(PEData, boolean, boolean, boolean)`
+  and `writeImage(PEData, File[, String])`. The visualizer keeps the structures
+  of the last file, so creating several images parses the file once.
+* `VisualizerBuilder.setLegacyStyle(false)` switches to the look of the
+  interactive visualization:
+  * each byte plot pixel shows the most frequent byte class of its bytes
+    instead of the first byte
+  * the entropy is the mean of the entropies of 256 byte windows instead of
+    the entropy of one 100 byte window
+  * smaller structures are drawn on top of larger ones instead of a fixed order
+  * the MSDOS stub, the PE signature, bound imports, TLS, load config,
+    exception and certificate tables and unmapped bytes are colored
+  * resource types have fixed colors that are the same for every file
+  * the legend lists only the structures of the file
+* New `ColorableItem` constants, appended so that the ordinals of the existing
+  ones stay the same: `PE_SIGNATURE`, `MSDOS_STUB`, `BOUND_IMPORT_SECTION`,
+  `EXCEPTION_SECTION`, `CERTIFICATE_TABLE`, `TLS_SECTION`,
+  `LOAD_CONFIG_SECTION`, `UNMAPPED` and `SIGNATURE_MATCH`.
+  `VisualizerBuilder.getDefaultColors()` returns all default colors.
+
+### New packages
+
+* `tools.layout`: `StructureMap` maps file offsets to the structures found
+  there, innermost first: headers and their fields, sections, imports per DLL,
+  exports, relocations, debug data, resources, .NET metadata, declared data
+  directories, overlay, unmapped bytes and markers for the entry point,
+  signature matches, anomalies and your own regions.
+* `tools.visualizer.engine`: `ByteStatistics` (entropy and byte classes of any
+  range after one pass over the file), `CachedByteSource`, and `ViewMapping`
+  and `Viewport` to convert between offsets, cells and pixels.
+* `tools.visualizer.render`: thread-safe renderers for byte plot, entropy,
+  structure, hex and ASCII tracks, `RegionColorScheme`, `LegendRenderer` and
+  `VisualizationRenderer` for composite images.
+
+```java
+PEData data = PELoader.loadPE(file);
+StructureMap map = StructureMap.of(data);
+for (FileRegion region : map.regionsAt(0x80)) {
+    System.out.println(region.getPath() + " " + region); // Headers > PE Signature [0x80,0x84)
+}
+```
+
+### PortexAnalyzer
+
+* `-l`, `--loc` and `--location` print all structures at an offset, innermost
+  first, with half-open ranges, e.g.
+  `0x80: PE Signature [0x80,0x84) < Headers [0x0,0x200)`. The labels of former
+  versions are printed in a line `0x80: hints: ...`. Invalid offsets set exit
+  code 1.
+* `--layout` prints all structures of the file with their ranges.
+* `-p <imagefile> --from <offset> --to <offset>` draws a range of the file;
+  ranges of up to 4 KB show hex bytes.
 
 ## Scala
 

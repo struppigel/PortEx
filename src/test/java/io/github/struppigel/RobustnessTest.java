@@ -7,6 +7,10 @@ import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.idata.ImportDLL;
 import io.github.struppigel.parser.sections.rsrc.icon.IconParser;
 import io.github.struppigel.tools.anomalies.PEAnomalyScannerTest;
+import io.github.struppigel.tools.layout.Detail;
+import io.github.struppigel.tools.layout.StructureMap;
+import io.github.struppigel.tools.layout.StructureMapBuilder;
+import io.github.struppigel.tools.layout.StructureMapTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
@@ -56,6 +60,18 @@ public class RobustnessTest {
             loader.maybeLoadResourceSection();
             data.maybeGetRichHeader();
             IconParser.extractIcons(data);
+        }
+    }
+
+    @Test
+    public void buildStructureMapsOfProblemfiles() throws IOException {
+        File folder = new File(PROBLEMFILES_DIR);
+        for (File file : folder.listFiles()) {
+            logger.debug("mapping problem file: " + file.getAbsolutePath());
+            PEData data = PELoader.loadPE(file);
+            // no anomalies: scanning some of these files takes minutes
+            StructureMap map = new StructureMapBuilder(data).withDetail(Detail.FINE).build();
+            StructureMapTest.assertClean(map, file.getName());
         }
     }
 

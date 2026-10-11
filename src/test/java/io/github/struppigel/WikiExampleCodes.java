@@ -51,10 +51,23 @@ import io.github.struppigel.tools.sigscanner.PEiDImporter;
 import io.github.struppigel.tools.sigscanner.SignatureDatabase;
 import io.github.struppigel.tools.sigscanner.SignatureMatch;
 import io.github.struppigel.tools.sigscanner.SignatureScanner;
+import io.github.struppigel.tools.layout.FileRegion;
+import io.github.struppigel.tools.layout.SignatureHit;
+import io.github.struppigel.tools.layout.StructureMap;
+import io.github.struppigel.tools.layout.StructureMapBuilder;
 import io.github.struppigel.tools.visualizer.ColorableItem;
 import io.github.struppigel.tools.visualizer.ImageUtil;
 import io.github.struppigel.tools.visualizer.Visualizer;
 import io.github.struppigel.tools.visualizer.VisualizerBuilder;
+import io.github.struppigel.tools.visualizer.engine.ByteStatistics;
+import io.github.struppigel.tools.visualizer.engine.CachedByteSource;
+import io.github.struppigel.tools.visualizer.engine.FileVisualization;
+import io.github.struppigel.tools.visualizer.engine.ProgressListener;
+import io.github.struppigel.tools.visualizer.engine.ViewMapping;
+import io.github.struppigel.tools.visualizer.render.RegionColorScheme;
+import io.github.struppigel.tools.visualizer.render.RenderStyle;
+import io.github.struppigel.tools.visualizer.render.Track;
+import io.github.struppigel.tools.visualizer.render.VisualizationRenderer;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -63,6 +76,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -170,6 +184,42 @@ public class WikiExampleCodes {
         BufferedImage legendImage = visualizer.createLegendImage(true, false, false);
         BufferedImage appendedImage2 = ImageUtil.appendImages(bytePlot, legendImage);
         ImageIO.write(appendedImage2, "png", new File("outfile.png"));
+
+        // parse once and create all images from the PEData, in the look of the interactive visualization
+        PEData data = PELoader.loadPE(peFile);
+        Visualizer newLook = new VisualizerBuilder().setLegacyStyle(false).build();
+        BufferedImage all = ImageUtil.appendImages(newLook.createBytePlot(data), newLook.createEntropyImage(data));
+        all = ImageUtil.appendImages(all, newLook.createImage(data));
+        all = ImageUtil.appendImages(all, newLook.createLegendImage(data, true, true, true));
+        ImageIO.write(all, "png", new File("all.png"));
+    }
+
+    @SuppressWarnings("unused")
+    public static void structureMap() throws IOException {
+        PEData data = PELoader.loadPE(new File("WinRar.exe"));
+        // which structures are at an offset, innermost first
+        StructureMap map = StructureMap.of(data);
+        for (FileRegion region : map.regionsAt(0x200)) {
+            System.out.println(region.getPath() + " " + region + " " + region.getAttributes());
+        }
+        // all structures as a tree
+        System.out.println(map.getReport());
+        // with anomalies and signature matches as markers
+        StructureMap marked = new StructureMapBuilder(data)
+                .withAnomalies(PEAnomalyScanner.newInstance(data).getAnomalies())
+                .withSignatureMatches(SignatureHit.fromMatches(data.getSignatureMatches()))
+                .build();
+        // render the structures of the first 0x400 bytes, one byte per cell
+        ByteStatistics stats = new ByteStatistics(data.getFile());
+        stats.compute(ProgressListener.NONE);
+        try (CachedByteSource source = new CachedByteSource(data.getFile())) {
+            FileVisualization vis = new FileVisualization(marked, stats, source, RegionColorScheme.of(marked));
+            ViewMapping mapping = new ViewMapping(data.getFile().length(), 0, 1, 16);
+            BufferedImage image = VisualizationRenderer.renderComposite(vis, mapping, 0, 64,
+                    Arrays.asList(Track.BYTEPLOT, Track.ENTROPY, Track.STRUCTURE, Track.HEX), 8, 14,
+                    RenderStyle.defaults(), true);
+            ImageIO.write(image, "png", new File("headers.png"));
+        }
     }
 
     public static void fileAnomalies() {

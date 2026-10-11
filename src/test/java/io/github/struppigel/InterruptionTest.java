@@ -3,11 +3,16 @@ package io.github.struppigel;
 import io.github.struppigel.parser.AnalysisInterruptedException;
 import io.github.struppigel.parser.Interruption;
 import io.github.struppigel.parser.Mapping;
+import io.github.struppigel.parser.PEData;
+import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PhysRange;
 import io.github.struppigel.parser.VirtRange;
 import io.github.struppigel.tools.ChiSquared;
 import io.github.struppigel.tools.ShannonEntropy;
 import io.github.struppigel.tools.StringExtractor;
+import io.github.struppigel.tools.layout.StructureMap;
+import io.github.struppigel.tools.visualizer.engine.ByteStatistics;
+import io.github.struppigel.tools.visualizer.engine.ProgressListener;
 import io.github.struppigel.tools.sigscanner.DefaultSignatures;
 import io.github.struppigel.tools.sigscanner.SignatureScanner;
 import org.testng.annotations.AfterClass;
@@ -18,6 +23,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -120,6 +126,52 @@ public class InterruptionTest {
         SignatureScanner scanner = DefaultSignatures.getJavaWrapperScanner();
         assertAbortsWhenInterrupted(() ->
                 scanner.scanFile(randomFile));
+    }
+
+    @Test
+    public void byteStatisticsAborts() {
+        ByteStatistics stats = new ByteStatistics(randomFile);
+        assertAbortsWhenInterrupted(() -> {
+            try {
+                stats.compute(ProgressListener.NONE);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+        assertFalse(stats.isComplete());
+    }
+
+    @Test
+    public void runningByteStatisticsStopOnInterrupt() throws InterruptedException {
+        AtomicReference<Throwable> thrown = new AtomicReference<>();
+        Thread worker = new Thread(() -> {
+            try {
+                // stop in the progress listener so that the interrupt arrives mid-scan
+                new ByteStatistics(randomFile).compute((done, total) -> {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            } catch (Throwable t) {
+                thrown.set(t);
+            }
+        });
+        worker.start();
+        Thread.sleep(100);
+        worker.interrupt();
+        worker.join(5000);
+        assertFalse(worker.isAlive(), "worker must stop after interrupt");
+        assertTrue(thrown.get() instanceof AnalysisInterruptedException,
+                "expected AnalysisInterruptedException but got: " + thrown.get());
+    }
+
+    @Test
+    public void structureMapBuildAborts() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR
+                + TestreportsReader.TEST_FILE_DIR + "/WinRar.exe"));
+        assertAbortsWhenInterrupted(() -> StructureMap.of(data));
     }
 
     @Test

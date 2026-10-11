@@ -55,6 +55,24 @@ class ResourceDirectory private (private val level: Level,
   def locations(): List[PhysicalLocation] = headerLoc :: entries.flatMap(e => e.locations)
 
   /**
+   * Returns the location of this directory table: the 16 byte header and the
+   * 8 byte entries that the header declares. The declared entries may be more
+   * than the parsed ones, see {@link #getEntries}.
+   *
+   * @return the location of the directory table
+   */
+  def getPhysicalLocation(): PhysicalLocation = {
+    def count(key: ResourceDirectoryKey): Long = header.get(key).map(_.getValue).getOrElse(0L)
+    val declared = count(NR_OF_NAME_ENTRIES) + count(NR_OF_ID_ENTRIES)
+    new PhysicalLocation(fileOffset, resourceDirSize + entrySize * declared)
+  }
+
+  /**
+   * @return the file offset of this directory table
+   */
+  def getFileOffset(): Long = fileOffset
+
+  /**
    * @return resource directory information string
    */
   def getInfo(): String =

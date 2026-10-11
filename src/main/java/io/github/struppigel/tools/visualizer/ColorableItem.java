@@ -41,7 +41,12 @@ public enum ColorableItem {
 	/* Entropy*/
 	ENTROPY("Entropy"),
 	/* VisOverlay */
-	VISOVERLAY("Read Chunks");
+	VISOVERLAY("Read Chunks"),
+	/* Structures of the structure map, appended to keep the ordinals stable */
+	PE_SIGNATURE("PE Signature"), MSDOS_STUB("MSDOS Stub"), BOUND_IMPORT_SECTION(
+			"Bound Imports"), EXCEPTION_SECTION("Exception Table"), CERTIFICATE_TABLE(
+			"Certificate Table"), TLS_SECTION("TLS Directory"), LOAD_CONFIG_SECTION(
+			"Load Config"), UNMAPPED("Unmapped"), SIGNATURE_MATCH("Signature Match");
 
 	private final String description;
 

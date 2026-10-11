@@ -19,11 +19,12 @@ package io.github.struppigel.tools
 
 import io.github.struppigel.parser.IOUtil.NL
 import io.github.struppigel.parser.ScalaIOUtil.using
-import io.github.struppigel.parser.optheader.DataDirectoryKey._
 import io.github.struppigel.parser.{PELoader, PESignature}
-import io.github.struppigel.parser.coffheader.COFFFileHeader
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey
-import io.github.struppigel.parser.sections.{SectionHeaderKey, SectionLoader}
+import io.github.struppigel.parser.sections.SectionLoader
+import io.github.struppigel.tools.layout.{FileRegion, RegionType, StructureMap}
+import io.github.struppigel.tools.visualizer.engine.{ByteStatistics, CachedByteSource, FileVisualization, ProgressListener, ViewMapping}
+import io.github.struppigel.tools.visualizer.render.{RegionColorScheme, RenderStyle, Track, VisualizationRenderer}
 import io.github.struppigel.tools.visualizer.{ColorableItem, ImageUtil, VisualizerBuilder}
 import io.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
 import io.github.struppigel.tools.sigscanner.FileTypeScanner
@@ -42,9 +43,9 @@ import scala.io.Source._
  */
 object PortExAnalyzer {
 
-  private val version = """version: 0.12.15
+  private val version = """version: 0.13.0
     |author: Karsten Hahn
-    |last update: 10. October 2026""".stripMargin
+    |last update: 11. October 2026""".stripMargin
 
   private val title = """PortEx Analyzer""" + NL
 
@@ -52,10 +53,12 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -v
     | java -jar PortexAnalyzer.jar -h
     | java -jar PortexAnalyzer.jar -l <offset1,offset2,offset3,...> <PEfile>
+    | java -jar PortexAnalyzer.jar --layout <PEfile>
     | java -jar PortexAnalyzer.jar --rawep <PEfile>
     | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>] [--visoverlay <textfile>]] [-i <folder>] <PEfile>
+    | java -jar PortexAnalyzer.jar -p <imagefile> --from <offset> --to <offset> [-bps <bytes>] <file>
     |
     | -h,--help          show help
     | -v,--version       show version
@@ -63,7 +66,9 @@ object PortExAnalyzer {
     | -o,--output        write report to output file
     | -p,--picture       write image representation of the PE to output file
     | -bps               bytes per square in the image
+    | --from, --to       picture of an offset range, hex bytes for up to 4 KB
     | -l,--loc           show location for specified offset
+    | --layout           show all structures with their file ranges
     | --rawep            print file offset of entry point (decimal)
     | --dump             dump resources, overlay, sections, icons
     | --pdiff            create a diff visualization
@@ -117,7 +122,10 @@ object PortExAnalyzer {
             if (isPEFile(file)) {
               if (options.contains('location)){
                 val offsetStr = options('location)
-                printLocationsFor(offsetStr, file)
+                if (!printLocationsFor(offsetStr, file)) exitCode = 1
+              }
+              else if (options.contains('layout)) {
+                print(StructureMap.of(PELoader.loadPE(file)).getReport)
               }
               else if (options.contains('rawep)) {
                 val pedata = PELoader.loadPE(file)
@@ -161,7 +169,20 @@ object PortExAnalyzer {
                 printFileTypeReport(file)
               }
             }
-            if (options.contains('picture)) {
+            if (options.contains('picture) && (options.contains('from) || options.contains('to))) {
+              println("creating visualization...")
+              val imageFile = new File(options('picture))
+              val from = options.get('from).map(parseOffset).getOrElse(Some(0L))
+              val to = options.get('to).map(parseOffset).getOrElse(Some(file.length))
+              if (from.isEmpty || to.isEmpty || to.get <= from.get || from.get >= file.length) {
+                System.err.println("Invalid offset range, --from must be before --to and within the file")
+                exitCode = 1
+              } else {
+                writeZoomedPicture(file, imageFile, from.get, to.get, options.get('bps).map(_.toLong))
+                println("picture successfully created and saved to " + imageFile.getAbsolutePath)
+                println()
+              }
+            } else if (options.contains('picture)) {
               println("creating visualization...")
               val imageFile = new File(options('picture))
               if (options.contains('bps)) {
@@ -213,91 +234,60 @@ object PortExAnalyzer {
     exitCode
   }
   
-  private def printIffBetween(offset: Long, offsetA: Long, offsetB: Long, message: String): Unit = {
-    if(offset >= offsetA && offset <= offsetB) {
-        println(offset + ": " + message)
-     }
-  }
-  
-  private def printLocationsFor(offsetsStr: String, file: File): Unit = {
-    try {
-      val data = PELoader.loadPE(file)
-      val offsets = offsetsStr.split(",")
-      for (offsetStr <- offsets) {
-        val offset = if(offsetStr.startsWith("0x")) parseLong(offsetStr.substring(2),16) else offsetStr.toLong
-        val table = data.getSectionTable
-        val loader = new SectionLoader(data)
-        // Headers
-        printIffBetween(offset, 0L, data.getMSDOSHeader.getHeaderSize, "MSDOS Header")
-        val optHeaderOffset = data.getOptionalHeader.getOffset
-        printIffBetween(offset, data.getPESignature.getOffset, data.getPESignature.getOffset + 4, "PE Signature")
-        printIffBetween(offset, optHeaderOffset, optHeaderOffset + data.getOptionalHeader.getSize, "Optional Header")
-        val coffHeaderOffset = data.getCOFFFileHeader.getOffset
-        printIffBetween(offset, coffHeaderOffset, coffHeaderOffset + COFFFileHeader.HEADER_SIZE, "COFF File Header")
-        printIffBetween(offset, table.getOffset, table.getOffset + table.getSize, "Section Table")
-        val rich = data.maybeGetRichHeader()
-        if(rich.isPresent) {
-          val loc = rich.get().getPhysicalLocation()
-          printIffBetween(offset, loc.from, loc.from + loc.size, "Rich Header")
-        }
-        val lowAlign = data.getOptionalHeader.isLowAlignmentMode
-        // Sections
-        for (header <- table.getSectionHeaders.asScala) {
-          val sectionOffset = header.getAlignedPointerToRaw(lowAlign)
-          val sectionSize = loader.getReadSize(header)
-          val sectionEnd = sectionOffset + sectionSize
-          printIffBetween(offset, sectionOffset, sectionEnd, "Section" + header.getNumber) 
-
-          if (header.getNumber == table.getNumberOfSections) {
-            printIffBetween(offset, sectionOffset, sectionEnd, "LastSection")
-          }
-        }
-        
-        val specials = List(RESOURCE_TABLE, IMPORT_TABLE, DELAY_IMPORT_DESCRIPTOR, EXPORT_TABLE, BASE_RELOCATION_TABLE, DEBUG, CLR_RUNTIME_HEADER)
-        
-        // Special Sections
-        for (specialKey <- specials) {
-          val section = loader.maybeLoadSpecialSection(specialKey)
-          if (section.isPresent) {
-            for (loc <- section.get().getPhysicalLocations.asScala) {
-              if (loc.from != -1) {
-                printIffBetween(offset, loc.from, loc.from + loc.size, specialKey.toString)
-              }  
-            }
-          }
-        }
-        
-        // Special resources
-        val rsrc = loader.maybeLoadResourceSection()
-        if(rsrc.isPresent) {
-          val resources = rsrc.get().getResources().asScala
-          for (resource <- resources) {
-            val resType = resource.getType()
-            val resLoc = resource.rawBytesLocation
-            printIffBetween(offset, resLoc.from, resLoc.from + resLoc.size, "ResourceType " + resType)
-          }
-        }
-        
-        // Entry point
-        val epRVA = data.getOptionalHeader.get(StandardFieldEntryKey.ADDR_OF_ENTRY_POINT)
-        val epSection = loader.maybeGetSectionHeaderByRVA(epRVA)
-        if (epSection.isPresent) {
-          val phystovirt = epSection.get().get(SectionHeaderKey.VIRTUAL_ADDRESS) - epSection.get().get(SectionHeaderKey.POINTER_TO_RAW_DATA)
-          val ep = epRVA - phystovirt
-          printIffBetween(offset, ep - 0x6000, ep + 0x6000, "Entry Point (+/-0x6000)")
-        }
-        
-        // Overlay
-        val overlay = new Overlay(data)
-        if (overlay.exists()) {
-          printIffBetween(offset, overlay.getOffset, file.length, "Overlay")
-          printIffBetween(offset, overlay.getOffset, overlay.getOffset + 0x10000, "OverlayStart")
-        }
+  /**
+   * Prints the structures at each offset, innermost first, e.g.
+   * {{{
+   * 0x80: PE Signature [0x80,0x84) < Headers [0x0,0x400)
+   * 0x80: hints: Entry Point (+/-0x6000)
+   * }}}
+   * The hints keep the labels of former versions for scripts.
+   *
+   * @return true if all offsets were valid
+   */
+  private def printLocationsFor(offsetsStr: String, file: File): Boolean = {
+    val data = PELoader.loadPE(file)
+    val map = StructureMap.of(data)
+    var valid = true
+    for (offsetStr <- offsetsStr.split(",").map(_.trim)) {
+      parseOffset(offsetStr) match {
+        case None =>
+          System.err.println("Invalid offset: " + offsetStr)
+          valid = false
+        case Some(offset) =>
+          val prefix = "0x" + java.lang.Long.toHexString(offset) + ": "
+          val regions = map.regionsAt(offset).asScala
+          if (offset >= map.getFileLength) println(prefix + "beyond the end of the file (0x" +
+            java.lang.Long.toHexString(map.getFileLength) + ")")
+          else if (regions.isEmpty) println(prefix + "no structure")
+          else println(prefix + regions.mkString(" < "))
+          val hints = locationHints(map, data.getSectionTable.getNumberOfSections, offset)
+          if (hints.nonEmpty) println(prefix + "hints: " + hints.mkString(", "))
       }
-    } catch {
-      case _: NumberFormatException => System.err.println("Invalid offset")
-      case e: Exception => System.err.println(e.getMessage); e.printStackTrace();
     }
+    valid
+  }
+
+  private def parseOffset(str: String): Option[Long] =
+    try {
+      val offset = if (str.toLowerCase.startsWith("0x")) parseLong(str.substring(2), 16) else str.toLong
+      if (offset < 0) None else Some(offset)
+    } catch {
+      case _: NumberFormatException => None
+    }
+
+  /** the coarse labels of former versions that hold for the offset */
+  private def locationHints(map: StructureMap, numberOfSections: Int, offset: Long): List[String] = {
+    def within(start: Long, end: Long): Boolean = offset >= start && offset < end
+    val lastSection = map.getRegions(RegionType.SECTION).asScala.filter { r =>
+      r.getAttributes.get(FileRegion.ATTR_SECTION_NUMBER) == numberOfSections.toString && within(r.getStart, r.getEnd)
+    }.map(_ => "LastSection")
+    val entryPoint = map.getRegions(RegionType.ENTRY_POINT).asScala.filter { r =>
+      within(r.getStart - 0x6000, r.getStart + 0x6000)
+    }.map(_ => "Entry Point (+/-0x6000)")
+    val overlayStart = map.getRegions(RegionType.OVERLAY).asScala.filter { r =>
+      within(r.getStart, r.getStart + 0x10000)
+    }.map(_ => "OverlayStart")
+    (lastSection ++ entryPoint ++ overlayStart).toList
   }
 
   private def dumpStuff(file: File, dumpOption: String): Unit = {
@@ -367,8 +357,8 @@ object PortExAnalyzer {
     val bytePlot = vi2.createDiffImage(bytePlotBig, bytePlotSmall)
     val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
     if (isPEFile(fileBig) && isPEFile(fileSmall)) {
-      val structureImageBig = vi.createImage(fileBig)
-      val structureImageSmall = vi.createImage(fileSmall)
+      val structureImageBig = vi.createImage(PELoader.loadPE(fileBig))
+      val structureImageSmall = vi.createImage(PELoader.loadPE(fileSmall))
       val structureImage = vi.createDiffImage(structureImageBig, structureImageSmall)
       val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
       val legendImage = vi.createLegendImage(true, true, true)
@@ -421,6 +411,37 @@ object PortExAnalyzer {
     } else None
   }
 
+  /**
+   * Writes byte plot, entropy and structure of an offset range with an offset
+   * ruler and a legend. Ranges of up to 4 KB get hex and ASCII tracks with
+   * one byte per cell, larger ones are fitted to about 1000 pixels height
+   * unless bytes per square are given.
+   */
+  private def writeZoomedPicture(file: File, imageFile: File, from: Long, to: Long, bps: Option[Long]): Unit = {
+    val length = file.length
+    val end = math.min(to, length)
+    val range = end - from
+    val hex = range <= 0x1000 && bps.forall(_ == 1)
+    val columns = if (hex) 16 else 64
+    val (cellWidth, cellHeight) = if (hex) (8, 14) else (4, 4)
+    val bytesPerCell = bps.getOrElse(
+      if (hex) 1L else ViewMapping.fitBytesPerCell(range, columns, 1000 / cellHeight, true))
+    val mapping = new ViewMapping(length, from, math.max(1L, bytesPerCell), columns)
+    val rows = ((range + mapping.getBytesPerRow - 1) / mapping.getBytesPerRow).toInt
+    val map = if (isPEFile(file)) StructureMap.of(PELoader.loadPE(file)) else StructureMap.empty(length)
+    val stats = new ByteStatistics(file)
+    // only cells of at least one block use the statistics of the whole file
+    if (mapping.getBytesPerCell >= stats.getBlockSize) stats.compute(ProgressListener.NONE)
+    val tracks = if (hex) List(Track.BYTEPLOT, Track.ENTROPY, Track.STRUCTURE, Track.HEX, Track.ASCII)
+    else List(Track.BYTEPLOT, Track.ENTROPY, Track.STRUCTURE)
+    using(new CachedByteSource(file)) { source =>
+      val vis = new FileVisualization(map, stats, source, RegionColorScheme.of(map))
+      val image = VisualizationRenderer.renderComposite(vis, mapping, 0, math.max(1, rows), tracks.asJava,
+        cellWidth, cellHeight, RenderStyle.defaults(), true)
+      ImageIO.write(image, "png", imageFile)
+    }
+  }
+
   private def writePicture(file: File, imageFile: File, bps: Option[Int] = None,
                            visFile: Option[File] = None): Unit = {
     val pixelSize = 4
@@ -446,17 +467,22 @@ object PortExAnalyzer {
     val vi2Builder = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel))
     if (visFile.isDefined) vi2Builder.setVisOverlay(readVisOverlay(visFile.get))
     val vi2 = vi2Builder.build()
-    val entropyImage = vi.createEntropyImage(file)
-    //more fine grained bytePlot image, thus another visualizer
-    val bytePlot = vi2.createBytePlot(file)
-    val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
     if (isPEFile(file)) {
-      val structureImage = vi.createImage(file)
+      // parse once for all images
+      val pe = PELoader.loadPE(file)
+      val entropyImage = vi.createEntropyImage(pe)
+      //more fine grained bytePlot image, thus another visualizer
+      val bytePlot = vi2.createBytePlot(pe)
+      val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
+      val structureImage = vi.createImage(pe)
       val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
       val legendImage = vi.createLegendImage(true, true, true)
       val appendedImage2 = ImageUtil.appendImages(appendedImage1, legendImage)
       ImageIO.write(appendedImage2, "png", imageFile)
     } else {
+      val entropyImage = vi.createEntropyImage(file)
+      val bytePlot = vi2.createBytePlot(file)
+      val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
       val legendImage = vi.createLegendImage(true, true, false)
       val appendedImage2 = ImageUtil.appendImages(appendedImage, legendImage)
       ImageIO.write(appendedImage2, "png", imageFile)
@@ -550,6 +576,14 @@ object PortExAnalyzer {
         nextOption(map += ('location -> value), tail)
       case "--location" :: value :: tail =>
         nextOption(map += ('location -> value), tail)
+      case "--loc" :: value :: tail =>
+        nextOption(map += ('location -> value), tail)
+      case "--layout" :: tail =>
+        nextOption(map += ('layout -> ""), tail)
+      case "--from" :: value :: tail =>
+        nextOption(map += ('from -> value), tail)
+      case "--to" :: value :: tail =>
+        nextOption(map += ('to -> value), tail)
       case "--rawep" :: tail =>
         nextOption(map += ('rawep -> ""), tail)
       case "--output" :: value :: tail =>
