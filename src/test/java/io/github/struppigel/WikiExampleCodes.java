@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,12 @@ import io.github.struppigel.tools.ReportCreator;
 import io.github.struppigel.tools.ShannonEntropy;
 import io.github.struppigel.tools.anomalies.Anomaly;
 import io.github.struppigel.tools.anomalies.PEAnomalyScanner;
+import io.github.struppigel.tools.sigscanner.FileTypeScanner;
 import io.github.struppigel.tools.sigscanner.Jar2ExeScanner;
-import io.github.struppigel.tools.sigscanner.MatchedSignature;
-import io.github.struppigel.tools.sigscanner.Signature;
+import io.github.struppigel.tools.sigscanner.LocationKind;
+import io.github.struppigel.tools.sigscanner.PEiDImporter;
+import io.github.struppigel.tools.sigscanner.SignatureDatabase;
+import io.github.struppigel.tools.sigscanner.SignatureMatch;
 import io.github.struppigel.tools.sigscanner.SignatureScanner;
 import io.github.struppigel.tools.visualizer.ColorableItem;
 import io.github.struppigel.tools.visualizer.ImageUtil;
@@ -388,25 +391,29 @@ public class WikiExampleCodes {
         overlay.dumpTo(outFile);
 
         // scan overlay signatures
-        long overlayOffset = offset;
-        List<Signature> overlaySigs = SignatureScanner.loadOverlaySigs();
-        List<String> sigresults = new SignatureScanner(overlaySigs).scanAtToString(file, overlayOffset);
-        sigresults.forEach(System.out::println);
+        PEData data = PELoader.loadPE(file);
+        List<SignatureMatch> overlaySignatures = data.getSignatureMatches(LocationKind.OVERLAY);
+        overlaySignatures.forEach(System.out::println);
     }
 
-    public static void signatureScanning() {
-        // Signature scanning
-        SignatureScanner scanner = SignatureScanner.newInstance();
-        boolean epOnly = true;
+    public static void signatureScanning() throws IOException {
+        // Signature scanning with the default signatures
         File file = new File("peid.exe");
-        List<String> results = scanner.scanAllToString(file, epOnly);
-        for (String signature : results) {
-            System.out.println(signature);
+        PEData data = PELoader.loadPE(file);
+        for (SignatureMatch match : data.getSignatureMatches()) {
+            System.out.println(match);
         }
-        // Use own database
-        List<Signature> signatures = SignatureScanner.loadSignatures(new File(
-                "testuserdb.txt"));
-        scanner = new SignatureScanner(signatures);
+        // only the entry point
+        List<SignatureMatch> epMatches = data.getSignatureMatches(LocationKind.ENTRY_POINT);
+        // Use own database, see docs/SIGNATURES.md for the format
+        SignatureDatabase db = SignatureDatabase.load(new File("mysignatures.sig"));
+        SignatureScanner scanner = new SignatureScanner(db);
+        List<SignatureMatch> matches = scanner.scan(data);
+        // Import a PEiD database
+        SignatureDatabase peid = PEiDImporter.load(new File("userdb.txt"));
+        matches = new SignatureScanner(peid).scan(data, LocationKind.ENTRY_POINT);
+        // File type of files that are no PE files
+        List<SignatureMatch> fileTypes = FileTypeScanner.scan(new File("unknown.bin"));
         // Java Wrapper scanning
         Jar2ExeScanner j2eScanner = new Jar2ExeScanner(new File(
                 "launch4jexe.exe"));
@@ -420,12 +427,12 @@ public class WikiExampleCodes {
         }
         // Detailed signature information
         j2eScanner = new Jar2ExeScanner(new File("launch4jexe.exe"));
-        List<MatchedSignature> result = j2eScanner.scan();
-        for (MatchedSignature sig : result) {
+        List<SignatureMatch> result = j2eScanner.scan();
+        for (SignatureMatch sig : result) {
             System.out.println("name: " + sig.getName());
-            System.out.println("address: " + sig.getAddress());
-            System.out.println("epOnly: " + sig.isEpOnly());
-            System.out.println("signature: " + sig.getPattern());
+            System.out.println("address: " + sig.getOffset());
+            System.out.println("location: " + sig.getLocationLabel());
+            System.out.println("pattern: " + sig.getClauseMatches().get(0).getClause().getPattern());
             System.out.println();
         }
     }

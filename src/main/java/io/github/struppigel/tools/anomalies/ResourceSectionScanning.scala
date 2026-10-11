@@ -6,6 +6,7 @@ import io.github.struppigel.parser.{IOUtil, PEData}
 import io.github.struppigel.parser.{Location, ScalaIOUtil}
 import io.github.struppigel.parser.sections.rsrc.{Name, Resource, ResourceDirectoryEntry, ResourceSection}
 import io.github.struppigel.tools.rehints.ReHintScannerUtils.peHasSignature
+import io.github.struppigel.tools.sigscanner.LocationKind
 
 import java.io.RandomAccessFile
 import scala.collection.JavaConverters._
@@ -92,9 +93,10 @@ trait ResourceSectionScanning extends AnomalyScanner {
   private def checkResourceFileTypes(): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
     val resources = data.loadResources().asScala
+    val resourceSignatures = data.getSignatureMatches(LocationKind.RESOURCE).asScala
     for (resource <- resources) {
       val offset = resource.rawBytesLocation.from
-      val fileTypes = data.getResourceSignatures.asScala.filter(_.getAddress == offset)
+      val fileTypes = resourceSignatures.filter(_.getRegionStart == offset)
       val archiveResourceSigs = fileTypes filter (_.getName.toLowerCase() contains "archive")
       val resourceIsArchive = archiveResourceSigs.nonEmpty
       val executableResourceSigs = fileTypes filter (_.getName.toLowerCase() contains "executable")

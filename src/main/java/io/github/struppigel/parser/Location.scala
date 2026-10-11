@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package io.github.struppigel.parser
  * A location is either physical (file offset and size) or virtual
  * (in-memory address and size).
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  */
 
 /**

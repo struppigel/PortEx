@@ -32,7 +32,7 @@ import io.github.struppigel.parser.sections.rsrc.Resource
 import io.github.struppigel.parser.sections.rsrc.version.VersionInfo
 import io.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
 import io.github.struppigel.tools.rehints.{PEReHintScanner, ReHint}
-import io.github.struppigel.tools.sigscanner.Jar2ExeScanner
+import io.github.struppigel.tools.sigscanner.{Jar2ExeScanner, LocationKind}
 
 import java.io.File
 import java.security.MessageDigest
@@ -87,12 +87,12 @@ class ReportCreator(private val data: PEData) {
     { if (showAll) relocReport() else "" }
 
   /**
-   * Generate reports for overlay, anomalies, PEID signatures, file and import hashes.
+   * Generate reports for overlay, anomalies, signatures, file and import hashes.
    * If showAll is true, also generate report for Jar2Exe scan and file scoring
    * @return additional reports
    */
   def additionalReports(): String = overlayReport +
-    anomalyReport + peidReport + hashReport +
+    anomalyReport + signatureReport + hashReport +
     { if (showAll) jar2ExeReport + maldetReport else "" }
 
   /**
@@ -480,7 +480,7 @@ class ReportCreator(private val data: PEData) {
   def resourcesReport(): String = {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
-    val sigs = data.getResourceSignatures
+    val sigs = data.getSignatureMatches(LocationKind.RESOURCE)
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
       val buf = new StringBuffer()
@@ -488,9 +488,9 @@ class ReportCreator(private val data: PEData) {
       val resources = rsrc.getResources().asScala
       for (resource <- resources) {
         val offset = resource.rawBytesLocation.from
-        val fileTypes = sigs.asScala.filter(_.getAddress == offset).toList
+        val fileTypes = sigs.asScala.filter(_.getRegionStart == offset).toList
         val longTypes = fileTypes.
-          map(t => t.getName + " (" + t.getMatchedBytes + " bytes)")
+          map(t => t.getName + " (" + t.getLength + " bytes)")
         buf.append(resource)
         if (longTypes.nonEmpty) {
           buf.append(", signatures: " + longTypes.mkString(", "))
@@ -559,7 +559,7 @@ class ReportCreator(private val data: PEData) {
       val chi = ChiSquared.calculate(data.getFile, overlay.getOffset, overlay.getSize)
       val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
-      val sigresults = data.getOverlaySignatures.asScala
+      val sigresults = data.getSignatureMatches(LocationKind.OVERLAY).asScala
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.mkString(NL) }
       title("Overlay") + NL + "Offset: " +
         hexString(overlayOffset) + NL + "Size: " +
@@ -569,10 +569,15 @@ class ReportCreator(private val data: PEData) {
     } else ""
   }
 
-  def peidReport(): String = {
-    val signatures = data.getPEIDSignatures
+  /**
+   * Generate report for signatures, except those in the overlay and in
+   * resources, which are part of the overlay and resource reports.
+   */
+  def signatureReport(): String = {
+    val signatures = data.getSignatureMatches().asScala.filterNot(m =>
+      m.getLocationKind == LocationKind.OVERLAY || m.getLocationKind == LocationKind.RESOURCE)
     if (signatures.isEmpty) ""
-    else title("PEID Signatures") + NL + signatures.asScala.mkString(NL) + NL + NL
+    else title("Signatures") + NL + signatures.mkString(NL) + NL + NL
   }
 
   def anomalyReport(): String = {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static io.github.struppigel.parser.msdos.MSDOSHeaderKey.LAST_PAGE_SIZE;
  * Responsible for dumping the MSDOS load module. 
  * This class might be removed in future versions.
  * @Beta
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public class MSDOSLoadModule implements PEModule {

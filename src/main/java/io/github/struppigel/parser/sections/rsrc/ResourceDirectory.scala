@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import scala.collection.mutable.ListBuffer
  * Each ResourceDirectory therefore is also a tree consisting of more
  * tables or resource data entries as leaves.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  * Creates an instance of the resource directory table with level,
  * header and entries.

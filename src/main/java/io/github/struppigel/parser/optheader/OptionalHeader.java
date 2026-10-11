@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static io.github.struppigel.parser.optheader.WindowsEntryKey.*;
 /**
  * Represents the optional header of the PE file.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public class OptionalHeader extends Header<OptionalHeaderKey> {
@@ -86,7 +86,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 	 * The magic number of the PE file, indicating whether it is a PE32, PE32+
 	 * or ROM file
 	 * 
-	 * @author Katja Hahn
+	 * @author Karsten Philipp Boris Hahn
 	 * 
 	 */
 	public static enum MagicNumber {

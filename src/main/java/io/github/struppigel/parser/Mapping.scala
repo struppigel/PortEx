@@ -28,7 +28,7 @@ import java.io.RandomAccessFile
  * Both ranges have to be of the same size.
  * The bytes are read from file only on request, making it possible to map large files.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  * @param virtRange the virtual address range
  * @param physRange the physical address range

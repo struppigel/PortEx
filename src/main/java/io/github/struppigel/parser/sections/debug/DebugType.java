@@ -5,7 +5,7 @@ import io.github.struppigel.parser.Characteristic;
 /**
  * Represents the type of debug information.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public enum DebugType implements Characteristic {

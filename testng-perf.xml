@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Performance">
+
+	<test name="performance">
+		<groups>
+			<run>
+				<include name="performance" />
+			</run>
+		</groups>
+		<packages>
+			<package name="io.github.struppigel.*" />
+		</packages>
+	</test>
+
+</suite>

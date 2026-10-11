@@ -78,15 +78,18 @@ object ReHintScannerUtils {
   }
 
   def peHasSignature(pedata: PEData, sigSubstring : String): Boolean = {
-    pedata.getSignatures.asScala.exists(sig => sig.getName.toLowerCase() contains sigSubstring.toLowerCase())
+    pedata.getSignatureMatches().asScala.exists(sig => sig.getName.toLowerCase() contains sigSubstring.toLowerCase())
   }
 
-  def constructAnomaliesForAnySignature(pedata: PEData, sigSubstring: String): List[Anomaly] =
-    if(peHasSignature(pedata, sigSubstring)) {
-      val sigs = pedata.getSignatures.asScala.filter(sig => sig.getName contains sigSubstring)
-      sigs.map(sig => GenericReHintAnomaly("Matches signature " + sig.getName)).toList
-    }
-    else Nil
+  /**
+   * Creates an anomaly for each signature whose name contains the substring.
+   * The comparison is case-sensitive, so that e.g. "MPRESS" does not match
+   * "WinRAR compressed archive".
+   */
+  def constructAnomaliesForAnySignature(pedata: PEData, sigSubstring: String): List[Anomaly] = {
+    val names = pedata.getSignatureMatches().asScala.map(_.getName).filter(_ contains sigSubstring).distinct
+    names.map(name => GenericReHintAnomaly("Matches signature " + name)).toList
+  }
 
   def constructReHintIfAnyResourceName(names: List[String], data: PEData, rhType: ReHintType): Option[ReHint] = {
     val resources = data.loadResources().asScala.filter(res => names contains res.getName())

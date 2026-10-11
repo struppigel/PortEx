@@ -2,10 +2,9 @@ package io.github.struppigel.tools.anomalies
 
 import scala.collection.mutable.ListBuffer
 import io.github.struppigel.parser.IOUtil._
-import io.github.struppigel.parser.Interruption
 import io.github.struppigel.tools.Overlay
 import scala.collection.JavaConverters._
-import io.github.struppigel.tools.sigscanner.{FileTypeScanner, Signature, SignatureScanner}
+import io.github.struppigel.tools.sigscanner.LocationKind
 
 trait OverlayScanning extends AnomalyScanner {
 
@@ -23,7 +22,7 @@ trait OverlayScanning extends AnomalyScanner {
 
   private def overlaySignatureScan(overlay: Overlay): List[Anomaly] = {
     val anomalyList = ListBuffer[Anomaly]()
-    val sigResults = data.getOverlaySignatures.asScala
+    val sigResults = data.getSignatureMatches(LocationKind.OVERLAY).asScala
     for(sig <- sigResults) {
       val sigName = sig.getName
       val description = "Overlay has signature " + sigName
@@ -35,25 +34,10 @@ trait OverlayScanning extends AnomalyScanner {
   }
 
   private def checkPyInstaller(): List[Anomaly] = {
-    val maxScanSize = 0x1500
-    val pattern : Array[Option[Byte]] = "PyInstaller archive".getBytes.map(Some(_))
-    val signature = new Signature("PyInstaller", false , pattern )
-    val maybeRdata = data.getSectionTable.getSectionHeaderByName(".rdata")
-    if(maybeRdata.isPresent) {
-      val rdata = maybeRdata.get()
-      val offset = rdata.getAlignedPointerToRaw(false)
-      val size = Math.min(maxScanSize, rdata.getAlignedSizeOfRaw(false))
-      val end = offset + Math.min(data.getFile.length(), size)
-      val scanner = new SignatureScanner(List(signature))
-      for(i <- offset until end) {
-        Interruption.checkInterrupt()
-        val results = scanner.scanAt(data.getFile, i)
-        if (!results.isEmpty) {
-          return List(GenericReHintAnomaly("'PyInstaller archive' string in .rdata"))
-        }
-      }
-    }
-    Nil
+    // the signature searches the first 0x1500 bytes of .rdata, see installers.sig
+    val found = data.getSignatureMatches(LocationKind.SECTION).asScala.exists(_.getName == "PyInstaller archive string")
+    if (found) List(GenericReHintAnomaly("'PyInstaller archive' string in .rdata"))
+    else Nil
   }
 
 }

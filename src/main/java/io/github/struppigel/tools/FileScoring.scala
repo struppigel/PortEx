@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import scala.collection.JavaConverters._
  * Provides file scoring based on statistical information about PE files.
  * Only anomaly statistics are used at present.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  */
 class FileScoring(
   private val anomalies: List[Anomaly],
@@ -142,7 +142,7 @@ object FileScoring {
   lazy val boosterScores = readBoosterScores()
 
   private val version = """version: 0.3
-    |author: Katja Hahn
+    |author: Karsten Philipp Boris Hahn
     |last update: 21.Jun 2014""".stripMargin
 
   private val title = """MalDet v0.3

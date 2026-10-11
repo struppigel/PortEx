@@ -26,14 +26,13 @@ import io.github.struppigel.parser.optheader.StandardFieldEntryKey
 import io.github.struppigel.parser.sections.{SectionHeaderKey, SectionLoader}
 import io.github.struppigel.tools.visualizer.{ColorableItem, ImageUtil, VisualizerBuilder}
 import io.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
-import io.github.struppigel.tools.sigscanner.{FileTypeScanner, Signature}
+import io.github.struppigel.tools.sigscanner.FileTypeScanner
 
 import java.awt.Color
 import java.io.{File, FileWriter, IOException}
 import java.lang.Long.parseLong
 import java.nio.file.{Files, Paths}
 import javax.imageio.ImageIO
-import scala.PartialFunction._
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.io.Source._
@@ -465,10 +464,7 @@ object PortExAnalyzer {
   }
 
   private def printFileTypeReport(file: File): Unit = {
-    def bytesMatched(sig: Signature): Int =
-      sig.pattern.count(cond(_) { case Some(_) => true })
-
-    val results = FileTypeScanner(file)._scanAt(0)
+    val results = FileTypeScanner._scan(file)
     if (results.isEmpty) println("No matching file-type signatures found")
     else if (results.size == 1)
       println("The file could be of the following type: ")
@@ -476,7 +472,7 @@ object PortExAnalyzer {
       println("The file could be of one of the following types: ")
     println()
     results.foreach(result =>
-      println(s"* ${result._1.name}, ${bytesMatched(result._1)} bytes matched"))
+      println(s"* ${result.getName}, ${result.getLength} bytes matched"))
   }
 
   private def writeFileTypeReport(file: File, outFile: File): Unit = {
@@ -487,13 +483,10 @@ object PortExAnalyzer {
       throw new IOException("Output file " + outFile.getAbsoluteFile + " already exists")
     }
 
-    def bytesMatched(sig: Signature): Int =
-      sig.pattern.count(cond(_) { case Some(_) => true })
-
     using(new FileWriter(outFile, true)) { fw =>
       fw.write("The given file is no PE file!" + NL +
         "Try '--repair' option if you think it is a broken PE." + NL)
-      val results = FileTypeScanner(file)._scanAt(0)
+      val results = FileTypeScanner._scan(file)
       if (results.isEmpty) fw.write("No matching file-type signatures found" + NL)
       else if (results.size == 1)
         fw.write("The file could be of the following type: " + NL)
@@ -501,7 +494,7 @@ object PortExAnalyzer {
         fw.write("The file could be of one of the following types: " + NL)
       fw.write(NL)
       results.foreach(result =>
-        fw.write(s"* ${result._1.name}, ${bytesMatched(result._1)} bytes matched" + NL))
+        fw.write(s"* ${result.getName}, ${result.getLength} bytes matched" + NL))
     }
   }
 

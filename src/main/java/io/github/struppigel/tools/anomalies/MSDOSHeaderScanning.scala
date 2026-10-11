@@ -20,7 +20,7 @@ package io.github.struppigel.tools.anomalies
 import io.github.struppigel.parser.IOUtil._
 import io.github.struppigel.parser.msdos.MSDOSHeaderKey
 import io.github.struppigel.parser.PhysicalLocation
-import io.github.struppigel.tools.sigscanner.{Signature, SignatureScanner}
+import io.github.struppigel.tools.sigscanner.LocationKind
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -76,7 +76,7 @@ trait MSDOSHeaderScanning extends AnomalyScanner {
   }
 
   private def checkSignatures(): List[Anomaly] = {
-    val results = data.getMSDOSSignatures.asScala
+    val results = data.getSignatureMatches(LocationKind.MSDOS_HEADER).asScala
     if(results.nonEmpty && results.exists(_.getName.toLowerCase() == "innosetup")) {
       List(GenericReHintAnomaly("MSDOS Header has Inno Setup signature 'InUn' at offset 0x30"))
     } else Nil

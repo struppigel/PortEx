@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import scala.language.postfixOps
  * }
  * </pre>
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  */
 class ShannonEntropy(private val data: PEData) {
 

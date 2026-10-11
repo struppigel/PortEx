@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2016 Katja Hahn
+ * Copyright 2016 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.github.struppigel.parser.HeaderKey;
  * <p>
  * Descriptions are taken from the PE/COFF specification.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public enum DelayLoadDirectoryKey implements HeaderKey {

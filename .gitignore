@@ -3,6 +3,11 @@
 /portextestfiles
 /lib
 /sbt
+# dotfiles and dot folders of tools, e.g. .claude and .idea, except the ones of the repository
+.*
+!.gitignore
+!.checkstyle
+!.travis.yml
 .idea
 .history
 .factorypath
@@ -10,13 +15,12 @@
 *.class
 *.sh
 *.py
+*.ps1
 UserDB.TXT
 userdb.jclausing.txt
 testuserdb.txt
 filenotes.txt
 *.png
-/build.ps1
-/test.ps1
 
 # tex files # 
 *.acn

@@ -41,8 +41,9 @@ import io.github.struppigel.parser.sections.rsrc.icon.IcoFile;
 import io.github.struppigel.parser.sections.rsrc.icon.IconParser;
 import io.github.struppigel.parser.sections.rsrc.version.VersionInfo;
 import io.github.struppigel.tools.ReportCreator;
-import io.github.struppigel.tools.sigscanner.MatchedSignature;
-import io.github.struppigel.tools.sigscanner.SignatureScannerManager;
+import io.github.struppigel.tools.sigscanner.LocationKind;
+import io.github.struppigel.tools.sigscanner.PESignatureMatches;
+import io.github.struppigel.tools.sigscanner.SignatureMatch;
 import com.google.common.annotations.Beta;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,7 +60,7 @@ import java.util.stream.Collectors;
  * It is constructed by the PELoader and returned to the caller as result from
  * scanning the PE File information.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  */
 public class PEData {
 
@@ -203,7 +204,7 @@ public class PEData {
     private Optional<ExtendedDLLCharacteristics> extendedDLLCharacteristics;
     private List<IcoFile> icons;
 
-    private SignatureScannerManager sigmgr = new SignatureScannerManager(this);
+    private final PESignatureMatches signatureMatches = new PESignatureMatches(this);
 
     private Optional<CLRSection> clrSection;
 
@@ -625,48 +626,26 @@ public class PEData {
     }
 
     /**
-     * Returns a list of all matched signatures.
+     * Returns the matches of the default signatures (packers, installers and
+     * file types) in all locations except {@link LocationKind#FILE}, see
+     * {@link LocationKind#peDefaults()}. Each location kind is scanned once.
      *
-     * @return
+     * @return matched signatures ordered by location kind, region and offset
      */
-    public List<MatchedSignature> getSignatures() {
-       return sigmgr.getAllSignatures();
+    public List<SignatureMatch> getSignatureMatches() {
+        return signatureMatches.getDefaultMatches();
     }
 
     /**
-     * Returns a list of all matched signatures in the overlay
+     * Returns the matches of the default signatures (packers, installers and
+     * file types) in the given location kinds. Each location kind is scanned
+     * once.
      *
-     * @return
+     * @param kinds the location kinds, e.g. LocationKind.OVERLAY
+     * @return matched signatures ordered by location kind, region and offset
      */
-    public List<MatchedSignature> getOverlaySignatures() {
-        return sigmgr.getOverlaySignatures();
-    }
-
-    /**
-     * Returns a list of all matched signatures in the resources
-     *
-     * @return
-     */
-    public List<MatchedSignature> getResourceSignatures() {
-        return sigmgr.getResourceSignatures();
-    }
-
-    /**
-     * Returns a list of all matched signatures by PEID
-     *
-     * @return
-     */
-    public List<MatchedSignature> getPEIDSignatures() {
-        return sigmgr.getPEIDSignatures();
-    }
-
-    /**
-     * Returns a list of all matched signatures in the MSDOS header or stub
-     *
-     * @return
-     */
-    public List<MatchedSignature> getMSDOSSignatures() {
-        return sigmgr.getMSDOSSignatures();
+    public List<SignatureMatch> getSignatureMatches(LocationKind... kinds) {
+        return signatureMatches.getMatches(kinds);
     }
 
     /**

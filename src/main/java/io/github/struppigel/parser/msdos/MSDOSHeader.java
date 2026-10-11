@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Fetches values from the MSDOS header of the PE.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public class MSDOSHeader extends Header<MSDOSHeaderKey> {

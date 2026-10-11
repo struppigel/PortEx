@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import io.github.struppigel.parser.HeaderKey;
 /**
  * Represents the key of an entry in the .edata section
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  */
 public enum ExceptionEntryKey implements HeaderKey {

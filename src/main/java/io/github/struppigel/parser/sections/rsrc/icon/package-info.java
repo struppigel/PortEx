@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 /**
  * Icon parsing functionality for resources. Conversion to ICO files.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  */
 package io.github.struppigel.parser.sections.rsrc.icon;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import static io.github.struppigel.tools.visualizer.ColorableItem.*;
 /**
  * Builds a visualizer based on properties like the height of the image.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public class VisualizerBuilder {
@@ -108,7 +108,7 @@ public class VisualizerBuilder {
 	/**
 	 * Data object to pass settings for the visualizer in one parameter.
 	 * 
-	 * @author Katja Hahn
+	 * @author Karsten Philipp Boris Hahn
 	 *
 	 */
 	static class VisualizerSettings {

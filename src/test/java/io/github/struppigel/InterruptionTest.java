@@ -8,6 +8,7 @@ import io.github.struppigel.parser.VirtRange;
 import io.github.struppigel.tools.ChiSquared;
 import io.github.struppigel.tools.ShannonEntropy;
 import io.github.struppigel.tools.StringExtractor;
+import io.github.struppigel.tools.sigscanner.DefaultSignatures;
 import io.github.struppigel.tools.sigscanner.SignatureScanner;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -116,9 +117,9 @@ public class InterruptionTest {
 
     @Test
     public void signatureFullFileScanAborts() {
-        SignatureScanner scanner = SignatureScanner.newInstance();
+        SignatureScanner scanner = DefaultSignatures.getJavaWrapperScanner();
         assertAbortsWhenInterrupted(() ->
-                scanner.findAllEPFalseMatches(randomFile));
+                scanner.scanFile(randomFile));
     }
 
     @Test
@@ -129,17 +130,19 @@ public class InterruptionTest {
 
     /**
      * Integration style test: interrupt a worker mid-scan and require it to
-     * stop within a bounded time. The full-file signature scan on 8 MB of
-     * random data takes far longer than the interrupt delay.
+     * stop within a bounded time. A full-file signature scan of 8 MB is faster
+     * than the interrupt delay, so the worker scans repeatedly.
      */
     @Test
     public void runningFullFileScanStopsPromptlyOnInterrupt()
             throws InterruptedException {
-        SignatureScanner scanner = SignatureScanner.newInstance();
+        SignatureScanner scanner = DefaultSignatures.getJavaWrapperScanner();
         AtomicReference<Throwable> thrown = new AtomicReference<>();
         Thread worker = new Thread(() -> {
             try {
-                scanner.findAllEPFalseMatches(randomFile);
+                while (true) {
+                    scanner.scanFile(randomFile);
+                }
             } catch (Throwable t) {
                 thrown.set(t);
             }

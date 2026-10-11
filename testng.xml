@@ -1,11 +1,17 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
- 
+
 <suite name="TestAll">
- 
+
 	<test name="order">
+		<groups>
+			<run>
+				<!-- performance comparisons run separately via testng-perf.xml -->
+				<exclude name="performance" />
+			</run>
+		</groups>
 		<packages>
 			<package name="io.github.struppigel.*" />
 		</packages>
 	</test>
- 
+
 </suite>

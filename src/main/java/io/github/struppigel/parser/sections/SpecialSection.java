@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Represents a special section, whose format is described in the PECOFF
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  */
 public interface SpecialSection extends PEModule {

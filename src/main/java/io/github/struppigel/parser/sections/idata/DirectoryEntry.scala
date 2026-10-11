@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import scala.collection.JavaConverters._
  * Represents a directory table entry. Contains all lookup table entries that
  * belong to it and allows to access them.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  * Instanciates a directory table entry with the map of entries that
  * represent the information belonging to the directory table entry. This map is

@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2016 Katja Hahn
+ * Copyright 2026 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,58 +15,24 @@
  * limitations under the License.
  * ****************************************************************************
  */
-
 package io.github.struppigel.tools.sigscanner
-
-import SignatureScanner.{ScanResult, SignatureMatch}
-import io.github.struppigel.parser.IOUtil
 
 import java.io.File
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 
-class FileTypeScanner(sigscanner: SignatureScanner, file: File) {
-
-  def _scanAt(offset: Long): List[ScanResult] =
-    sigscanner._scanAt(file, offset)
-
-  def scanAt(offset: Long): java.util.List[SignatureMatch] =
-    sigscanner.scanAt(file, offset)
-
-  def scanAtReport(offset: Long): java.util.List[String] =
-    sigscanner.scanAtToString(file, offset)
-
-}
-
+/**
+ * Determines the file type of files that are no PE files by the magic numbers
+ * of the default file type signatures.
+ */
 object FileTypeScanner {
 
-  private val signatureFile = "customsigs_GCK.txt"
+  /** file type signatures that match the file */
+  def scan(file: File): java.util.List[SignatureMatch] = _scan(file).asJava
 
-  def main(args: Array[String]): Unit = {
-    val file = new File("/home/katja/samples/test")
-    for (i <- Range(212000, file.length.toInt)) {
-      FileTypeScanner(file).scanAtReport(i).asScala.foreach(println)
-    }
-  }
+  def _scan(file: File): IndexedSeq[SignatureMatch] = DefaultSignatures.fileTypeScanner._scanFile(file)
 
-  def apply(file: File): FileTypeScanner = {
-    val signatures = loadSignatures().filter { s => s.bytesMatched() >= 3 || s.name == "MS-DOS or Portable Executable" }
-    val sigscanner = new SignatureScanner(signatures)
-    new FileTypeScanner(sigscanner, file)
-  }
+  /** file type signatures that match the bytes */
+  def scan(bytes: Array[Byte]): java.util.List[SignatureMatch] = _scan(bytes).asJava
 
-  private def loadSignatures(): List[Signature] = {
-    val sigs = ListBuffer[Signature]()
-    val sigArrays = IOUtil.readArray(signatureFile, ",").asScala
-    for (array <- sigArrays) {
-      val name = array(0)
-      val bytes = array(1)
-      //      if (bytes.length() > 8) {
-      sigs += Signature(name, false, bytes)
-      //      }
-    }
-    sigs.toList
-  }
-
+  def _scan(bytes: Array[Byte]): IndexedSeq[SignatureMatch] = DefaultSignatures.fileTypeScanner._scanBytes(bytes)
 }
-

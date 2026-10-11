@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
- * 
+ * Copyright 2014 Karsten Philipp Boris Hahn
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.List;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class Jar2ExeScannerTest {
@@ -31,16 +32,31 @@ public class Jar2ExeScannerTest {
     private static final Logger logger = LogManager
             .getLogger(Jar2ExeScannerTest.class.getName());
 
+    private final File launch4j = new File(
+            TestreportsReader.RESOURCE_DIR + "/testfiles/launch4jwrapped.exe");
+
     @Test
     public void scanResultTest() {
-        Jar2ExeScanner scanner = new Jar2ExeScanner(new File(
-                TestreportsReader.RESOURCE_DIR + "/testfiles/launch4jwrapped.exe"));
-        List<MatchedSignature> result = scanner.scan();
-        assertTrue(contains(result, "[Launch4j]"));
+        Jar2ExeScanner scanner = new Jar2ExeScanner(launch4j);
+        List<SignatureMatch> result = scanner.scan();
+        assertTrue(contains(result, "Launch4j"));
     }
 
-    private boolean contains(List<MatchedSignature> siglist, String name) {
-        for (MatchedSignature sig : siglist) {
+    @Test
+    public void reportUsesDescriptions() {
+        String report = new Jar2ExeScanner(launch4j).createReport();
+        assertTrue(report.contains("Launch4j signature"), report);
+        assertTrue(report.contains("ZIP/Jar offsets: "), report);
+    }
+
+    @Test
+    public void findsEmbeddedZip() {
+        Jar2ExeScanner scanner = new Jar2ExeScanner(launch4j);
+        assertFalse(scanner.getZipAddresses().isEmpty());
+    }
+
+    private boolean contains(List<SignatureMatch> siglist, String name) {
+        for (SignatureMatch sig : siglist) {
             if (sig.getName().equals(name))
                 return true;
         }

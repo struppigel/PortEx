@@ -57,7 +57,7 @@ public class PEReHintScannerTest  {
 
     @Test
     public void archiveTest() {
-        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.ARCHIVE_RE_HINT, "Overlay has signature [zlib archive]");
+        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.ARCHIVE_RE_HINT, "Overlay has signature zlib archive");
         assertHasNotReHint("upx.exe", ReHintType.ARCHIVE_RE_HINT);
     }
 
@@ -93,20 +93,20 @@ public class PEReHintScannerTest  {
     public void innoTest() {
         ReHintType rtype = ReHintType.INNO_SETUP_RE_HINT;
         assertHasReHintWithTypeAndReason("innosetup", rtype, "MSDOS Header has Inno Setup signature 'InUn' at offset 0x30");
-        assertHasReHintWithTypeAndReason("inno_with_stub", rtype, "Overlay has signature [Inno Setup Installer with Stub]");
+        assertHasReHintWithTypeAndReason("inno_with_stub", rtype, "Overlay has signature Inno Setup Installer with Stub");
         assertHasNotReHint("nsis", rtype);
     }
 
     @Test
     public void nsisTest() {
-        assertHasReHintWithTypeAndReason("nsis", ReHintType.NULLSOFT_RE_HINT, "Overlay has signature [NSIS]");
+        assertHasReHintWithTypeAndReason("nsis", ReHintType.NULLSOFT_RE_HINT, "Overlay has signature NSIS");
         assertHasReHintWithTypeAndReason("nsis", ReHintType.NULLSOFT_RE_HINT, "Section name .ndata");
         assertHasNotReHint("upx.exe", ReHintType.NULLSOFT_RE_HINT);
     }
 
     @Test
     public void pyinstallerTest() {
-        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.PYINSTALLER_RE_HINT, "Overlay has signature [zlib archive]");
+        assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.PYINSTALLER_RE_HINT, "Overlay has signature zlib archive");
         assertHasReHintWithTypeAndReason("pyinstaller", ReHintType.PYINSTALLER_RE_HINT, "'PyInstaller archive' string in .rdata");
         assertHasNotReHint("ahk", ReHintType.PYINSTALLER_RE_HINT);
     }
@@ -121,7 +121,7 @@ public class PEReHintScannerTest  {
 
     @Test
     public void sfxTest() {
-        assertHasReHintWithTypeAndReason("7zipsfx", ReHintType.INSTALLER_RE_HINT, "Overlay has signature [7-zip Installer]");
+        assertHasReHintWithTypeAndReason("7zipsfx", ReHintType.INSTALLER_RE_HINT, "Overlay has signature 7-zip Installer");
         assertHasNotReHint("upx.exe", ReHintType.INSTALLER_RE_HINT);
     }
 
@@ -131,6 +131,12 @@ public class PEReHintScannerTest  {
         assertHasReHintWithTypeAndReason("upx.exe", ReHintType.UPX_PACKER_RE_HINT, "Section name UPX1");
         assertHasNotReHint("ahk", ReHintType.UPX_PACKER_RE_HINT);
     }
+    @Test
+    public void compressedArchiveIsNoCompressor() {
+        // the signature "WinRAR compressed archive" must not match the MPRESS check
+        assertHasNotReHint("WinRar.exe", ReHintType.COMPRESSOR_PACKER_RE_HINT);
+    }
+
     @Test
     public void threadNameCallingInjection(){
         assertHasReHintWithTypeAndReason("GetThreadDescription", ReHintType.THREAD_NAME_CALLING_INJECTION_HINT, "GetThreadDescription can be used to inject shellcode");

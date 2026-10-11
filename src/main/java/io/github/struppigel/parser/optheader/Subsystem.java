@@ -7,7 +7,7 @@ import io.github.struppigel.parser.Characteristic;
  * <p>
  * Descriptions are from the PECOFF specification.
  * 
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  * 
  */
 public enum Subsystem implements Characteristic {

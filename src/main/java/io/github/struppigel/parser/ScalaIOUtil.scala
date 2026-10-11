@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,21 +42,6 @@ object ScalaIOUtil {
     }
   }
   
-  /**
-   * Converts an array of Option bytes to its hex string representation. None is
-   * converted to "??"
-   *
-   * @param bytes byte array to be converted
-   * @param sep the character(s) that separates to bytes in the string
-   * @return string that represents the byte values as hex numbers
-   */
-  def bytes2hex(bytes: Array[Option[Byte]], sep: String): String = {
-    bytes.foldLeft("")((s, b) => b match {
-      case None => s + sep + "??"
-      case _    => s + sep + "%02x".format(b.get)
-    })
-  }
-
   /**
    * Equivalent to try-with-resources statement in Java. Closes the resource
    * automatically in finally.

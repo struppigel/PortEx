@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import scala.collection.mutable.ListBuffer
  * Represents the import section, fetches information about the data directory
  * entries and their lookup table entries.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  */
 //TODO implement lookup for ordinal entries: https://code.google.com/p/pefile/source/detail?r=134
 class ImportSection private (

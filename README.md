@@ -19,14 +19,14 @@ PortEx is written in Java and Scala, and targeted at Java applications.
 * Calculate ImpHash and Rich and RichPV hash values for files and sections
 * Parse RichHeader and verify checksum
 * Calculate and verify Optional Header checksum
-* Scan for PEiD signatures, internal file type signatures or your own signature database
+* Scan for packer, installer and file type signatures or your own signature database, with patterns tied to locations like the entry point, overlay, resources, sections or .NET streams (see [Signatures](docs/SIGNATURES.md)), and import PEiD databases
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Extract Unicode and ASCII strings contained in the file
 * Extraction and conversion of .ICO files from icons in the resource section
 * Extraction of version information and manifest from the file
 * Reading .NET metadata and streams (Alpha)
 
-For more information have a look at [PortEx Wiki](https://github.com/struppigel/PortEx/wiki) and the [Documentation](http://struppigel.github.io/PortEx/javadocs/)
+For more information have a look at [PortEx Wiki](https://github.com/struppigel/PortEx/wiki) and the [Documentation](http://struppigel.github.io/PortEx/javadocs/). The signature format is described in [docs/SIGNATURES.md](docs/SIGNATURES.md). Upgrading from PortEx 5? See [docs/MIGRATION-6.md](docs/MIGRATION-6.md).
 
 ## PortexAnalyzer CLI and GUI
 

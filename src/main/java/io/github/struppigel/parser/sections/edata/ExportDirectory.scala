@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import scala.collection.JavaConverters._
  * <p>
  * The export directory table should be loaded by an {@link ExportSection} instance.
  *
- * @author Katja Hahn
+ * @author Karsten Philipp Boris Hahn
  *
  * Instanciates an export directory table.
  * @param entries the fields of the export directory

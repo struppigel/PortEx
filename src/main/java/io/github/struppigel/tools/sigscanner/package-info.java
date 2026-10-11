@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 Katja Hahn
+ * Copyright 2014 Karsten Philipp Boris Hahn
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,16 @@
  * limitations under the License.
  ******************************************************************************/
 /**
- * Signature scanning module. Includes packer, compiler and embedded files detection.
- * 
- * @author Katja Hahn
+ * Signature scanning module. Includes packer, compiler, installer and embedded
+ * files detection.
+ * <p>
+ * Signatures are byte patterns tied to scan locations of PE files, e.g. the
+ * entry point, the overlay or the resources, optionally combined with further
+ * patterns and declarative conditions. {@link io.github.struppigel.parser.PEData#getSignatureMatches()}
+ * scans with the bundled databases, {@link io.github.struppigel.tools.sigscanner.SignatureScanner}
+ * with your own. The database format is described in docs/SIGNATURES.md.
+ *
+ * @author Karsten Philipp Boris Hahn
  *
  */
 package io.github.struppigel.tools.sigscanner;

@@ -1,0 +1,7 @@
+# Intended differences between the signature scanner of PortEx 6 and the one of PortEx 5 on the test corpus.
+# Columns: change (missing or added), path (* for any), group, name, address (* for any)
+#
+# PortEx 5 ignored 'in_section = 1' of userdb.txt, PortEx 6 searches the section of the entry point
+added	testfiles/pinvoke	peid	NET Reactor 4.8-4.9	0x902d
+# the PyInstaller string search in .rdata was hard coded in PortEx 5 and is a signature now
+added	*	peid	PyInstaller archive string	*
