@@ -9,6 +9,10 @@ not use signatures, upgrading only needs the new version number. Otherwise,
 this guide shows the replacement for every removed class and method. The
 signature format itself is described in [SIGNATURES.md](SIGNATURES.md).
 
+PortEx 6 also parses and verifies Authenticode signatures, see
+[Authenticode signatures](#authenticode-signatures). This adds anomalies and a
+report section for signed files.
+
 * [Quick reference](#quick-reference)
 * [Dependency](#dependency)
 * [Signatures of a PEData](#signatures-of-a-pedata)
@@ -23,6 +27,7 @@ signature format itself is described in [SIGNATURES.md](SIGNATURES.md).
 * [Results that change](#results-that-change)
 * [Removed classes and methods](#removed-classes-and-methods)
 * [Visualizer and structure map](#visualizer-and-structure-map)
+* [Authenticode signatures](#authenticode-signatures)
 * [Scala](#scala)
 
 ## Quick reference
@@ -334,6 +339,11 @@ for (SignatureMatch match : scanner.scan()) {
   of `[Armadillo v4.x] bytes matched: 2 at address: 0x1a9f5` with a pattern
   line.
 * The file type report for files that are no PE files keeps its format.
+* The new section `Authenticode Signatures` (`ReportCreator.authenticodeReport()`,
+  part of `specialSectionReports()`) describes the certificate table, the
+  signatures, signers, timestamps, certificates and the integrity checks.
+* The data directory table shows the certificate table address as file offset,
+  marked with `*`, and the section that contains it physically.
 
 If you parse the output of PortexAnalyzer, adjust to the new line format and
 to names without brackets.
@@ -365,6 +375,22 @@ with these intended differences:
   results only grow by the signatures listed above. The location `file` is
   excluded, because every PE file would match the file type signature of PE
   files at offset 0; pass `LocationKind.FILE` explicitly if you want it.
+* **The certificate table address is a file offset.** For
+  `DataDirectoryKey.CERTIFICATE_TABLE`, `DataDirEntry.getFileOffset`,
+  `DataDirEntry.maybeGetSectionTableEntry`, `SectionLoader.maybeGetFileOffsetFor`,
+  `SectionLoader.maybeGetSectionHeader` and `SectionLoader.hasValidPointer` no
+  longer convert the address as an RVA. Before, they gave wrong results if the
+  offset was within the virtual range of a section.
+* **`INVALID_DATA_DIR` for the certificate table** is reported if the table
+  starts outside of the file, with a description that says that the signature
+  was probably stripped.
+* **More anomalies for signed files.** `PEAnomalyScanner` includes the new
+  `CertificateScanning`. Most signed files get at least `CERT_SHA1_DIGEST`
+  (deprecated) because of SHA-1 timestamps or certificates. See
+  [Authenticode signatures](#authenticode-signatures).
+* **Hashing of signed files.** `PEData.loadAll()` and the anomaly scanner now
+  verify the signatures of signed files, which reads the whole file once. Both
+  can be cancelled with `Thread.interrupt()`.
 
 ## Removed classes and methods
 
@@ -427,7 +453,8 @@ keep their size and, by default, their look.
 
 * `tools.layout`: `StructureMap` maps file offsets to the structures found
   there, innermost first: headers and their fields, sections, imports per DLL,
-  exports, relocations, debug data, resources, .NET metadata, declared data
+  exports, relocations, debug data, resources, .NET metadata, the certificate
+  table with its entries, signatures and certificates, declared data
   directories, overlay, unmapped bytes and markers for the entry point,
   signature matches, anomalies and your own regions.
 * `tools.visualizer.engine`: `ByteStatistics` (entropy and byte classes of any
@@ -455,6 +482,88 @@ for (FileRegion region : map.regionsAt(0x80)) {
 * `--layout` prints all structures of the file with their ranges.
 * `-p <imagefile> --from <offset> --to <offset>` draws a range of the file;
   ranges of up to 4 KB show hex bytes.
+
+## Authenticode signatures
+
+The new package `parser.sections.cert` parses the attribute certificate table
+(data directory entry 4): the WIN_CERTIFICATE entries, the PKCS#7 signatures,
+the embedded X.509 certificates, signers, legacy countersignatures, RFC 3161
+timestamps, nested signatures and page hashes. It needs no extra dependency;
+X.509 certificates are additionally offered as `java.security.cert.X509Certificate`.
+
+```java
+PEData data = PELoader.loadPE(file);
+Optional<CertificateTable> table = data.loadCertificateTable();
+for (AuthenticodeSignature signature : data.loadAuthenticodeSignatures()) {
+    Optional<AuthenticodeCertificate> signer = signature.getSigner()
+            .flatMap(SignerInfo::getSignerCertificate);
+    System.out.println(signature.getLabel() + " by "
+            + signer.map(AuthenticodeCertificate::getSubjectName).orElse("unknown"));
+}
+Optional<AuthenticodeVerification> verification = data.loadAuthenticodeVerification();
+```
+
+`SectionLoader.maybeLoadCertificateTable()`, `CertificateTable.load(PEData)` and
+`AuthenticodeVerifier.verify(PEData)` do the same without caching.
+
+**Integrity only.** `AuthenticodeVerifier` checks that the image digest
+matches the file, that the messageDigest attribute matches the signed content,
+the signer signature, the signature of each embedded certificate by its
+embedded issuer, and the timestamps. `VerificationStatus.VALID` means the file
+was not modified after signing and the signature is consistent. It does not
+mean that the signer is trusted: PortEx knows no trusted roots and checks no
+revocation or expiry policy.
+
+**The image digest** is computed over the whole file without the checksum, the
+certificate table entry and the certificate table. For files with contiguous
+sections this is the same as the per-section algorithm of the Authenticode
+specification, and it does not depend on section headers, so malformed headers
+can not lead to out-of-bounds reads.
+
+**Robustness.** The parser uses its own ASN.1 reader with an explicit stack, so
+deep nesting can not overflow the call stack, and every length is checked
+against the available bytes before it is used. Sizes and counts are limited by
+the constants of `CertificateTable`, e.g. `MAX_TABLE_READ_SIZE` (4 MiB),
+`MAX_DER_DEPTH` (64), `MAX_CERTIFICATES` (64 per signature) and
+`MAX_NESTING_DEPTH` (4). Malformed data never throws, it is reported as
+`CertificateIssue` by `getIssues()` of the table, the signatures and the
+verification.
+
+**Anomalies.** The issues are anomalies with the prefix `CERT_`, typed like the
+other anomalies of PortEx:
+
+* data directory entry (`DataDirAnomaly`): `CERT_DIR_NOT_ALIGNED`,
+  `CERT_DIR_SIZE_EXCEEDS_FILE`, `CERT_DIR_TOO_SMALL`
+* WIN_CERTIFICATE header fields (`FieldAnomaly`): `CERT_INVALID_LENGTH`,
+  `CERT_INVALID_REVISION`, `CERT_INVALID_TYPE` (wrong),
+  `CERT_DEPRECATED_REVISION` (deprecated), `CERT_RESERVED_TYPE` (reserved),
+  `CERT_UNSUPPORTED_TYPE` (non-default)
+* structural malformations (`StructureAnomaly`, key
+  `PEStructureKey.CERTIFICATE_TABLE`), e.g. `CERT_TABLE_TRUNCATED`,
+  `CERT_TABLE_IN_SECTION`, `CERT_TABLE_NOT_LAST`, `CERT_TABLE_MISPLACED`,
+  `CERT_MULTIPLE_ENTRIES`, `CERT_DATA_AFTER_PKCS7` (CVE-2013-3900),
+  `CERT_MALFORMED_PKCS7`, `CERT_LARGE_UNAUTH_ATTRIBUTE`
+* fields of the signature (`AuthenticodeAnomaly`, key `AuthenticodeFieldKey`),
+  e.g. `CERT_IMAGE_DIGEST_MISMATCH` (modified file or copied signature),
+  `CERT_EXPLICIT_EC_PARAMETERS` (CurveBall, CVE-2020-0601),
+  `CERT_INVALID_ECDSA_VALUE` (Psychic Signatures, CVE-2022-21449),
+  `CERT_WEAK_DIGEST` and `CERT_SHA1_DIGEST` (deprecated),
+  `CERT_SELF_SIGNED_SIGNER` and `CERT_UNKNOWN_UNAUTH_ATTRIBUTE` (non-default)
+
+A table that starts outside of the file is reported as `INVALID_DATA_DIR`,
+exceeded limits as `EXHAUSTIVE_DATA`.
+
+**Structure map and visualizer.** The certificate table is no longer a
+declared-only region: it has the children `WIN_CERTIFICATE`,
+`PKCS7_SIGNED_DATA`, `CERTIFICATE` and `CERTIFICATE_PADDING`, and in
+`Detail.FINE` the header fields and `SIGNER_INFO`.
+`RegionType.CERTIFICATE_TABLE.isDeclaredDirectory()` is false now.
+
+**Overlay.** The certificate table usually lies at the end of the file. It
+stays part of the overlay, as before and as in other tools.
+
+**PortexAnalyzer.** `--dump certificates` writes each signature as `.p7b` file
+and each embedded certificate as `.cer` file; `--dump all` includes them.
 
 ## Scala
 

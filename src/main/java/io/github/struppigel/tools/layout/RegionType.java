@@ -111,8 +111,18 @@ public enum RegionType {
     ARCHITECTURE("Architecture", null, NONE, 0),
     /** the global pointer data directory */
     GLOBAL_PTR("Global Pointer", null, NONE, 0),
-    /** the certificate table, its address is a file offset */
+
+    /* Certificate table, its address is a file offset */
+    /** the certificate table with the Authenticode signatures */
     CERTIFICATE_TABLE("Certificate Table", ColorableItem.CERTIFICATE_TABLE, FILL, 2),
+    /** one WIN_CERTIFICATE entry of the certificate table */
+    WIN_CERTIFICATE("WIN_CERTIFICATE", ColorableItem.CERTIFICATE_TABLE, NONE, 3),
+    /** a PKCS#7 SignedData structure, an Authenticode signature */
+    PKCS7_SIGNED_DATA("PKCS#7 Signed Data", ColorableItem.CERTIFICATE_TABLE, NONE, 3),
+    /** an X.509 certificate embedded in a signature */
+    CERTIFICATE("Certificate", ColorableItem.CERTIFICATE_TABLE, INSET, 3),
+    /** padding or other data after a signature that the signature does not cover */
+    CERTIFICATE_PADDING("Certificate Padding", ColorableItem.CERTIFICATE_TABLE, NONE, 3),
 
     /* Fine detail, see Detail.FINE; never drawn */
     /** one field of a header */
@@ -145,6 +155,8 @@ public enum RegionType {
     RESOURCE_NAME("Resource Name", ColorableItem.RESOURCE_SECTION, NONE, 3),
     /** a table of the #~ stream */
     CLR_TABLE("Metadata Table", ColorableItem.NET_STREAMS, NONE, 3),
+    /** the SignerInfo of a signature */
+    SIGNER_INFO("Signer Info", ColorableItem.CERTIFICATE_TABLE, NONE, 4),
 
     /* Other */
     /** the overlay */
@@ -220,7 +232,6 @@ public enum RegionType {
             case IAT_DIRECTORY:
             case ARCHITECTURE:
             case GLOBAL_PTR:
-            case CERTIFICATE_TABLE:
                 return true;
             default:
                 return false;

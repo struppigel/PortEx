@@ -181,6 +181,22 @@ case class ClrStreamAnomaly(private val metadataRoot : MetadataRoot,
   }
 }
 
+/**
+ * A malformed or unusual field of an Authenticode signature, e.g. a digest
+ * mismatch or a weak algorithm. The key is the affected signature field.
+ */
+case class AuthenticodeAnomaly(
+  field: FieldOrStructureKey,
+  override val description: String,
+  override val subtype: AnomalySubType,
+  slocations: java.util.List[PhysicalLocation]) extends Anomaly {
+  require(subtype.getSuperType != AnomalyType.STRUCTURE,
+    subtype + " must not have anomaly type STRUCTURE!")
+
+  override def locations: java.util.List[PhysicalLocation] = slocations
+  override def key: FieldOrStructureKey = field
+}
+
 case class OverlayAnomaly(val overlay: Overlay,
                            override val description: String,
                            override val subtype: AnomalySubType) extends Anomaly {

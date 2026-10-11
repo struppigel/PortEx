@@ -17,6 +17,13 @@ package io.github.struppigel;
 
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
+import io.github.struppigel.parser.sections.cert.AuthenticodeCertificate;
+import io.github.struppigel.parser.sections.cert.AuthenticodeSignature;
+import io.github.struppigel.parser.sections.cert.AuthenticodeVerification;
+import io.github.struppigel.parser.sections.cert.CertificateIssue;
+import io.github.struppigel.parser.sections.cert.CertificateTable;
+import io.github.struppigel.parser.sections.cert.SignerInfo;
+import io.github.struppigel.parser.sections.cert.VerificationStatus;
 import io.github.struppigel.parser.sections.rsrc.Resource;
 import io.github.struppigel.tools.sigscanner.*;
 
@@ -27,6 +34,7 @@ import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The code examples of docs/MIGRATION-6.md. They are compiled with the tests
@@ -123,6 +131,28 @@ public class MigrationExampleCodes {
             read = Math.max(0, raf.read(window));
         }
         List<SignatureMatch> types = FileTypeScanner.scan(Arrays.copyOf(window, read));
+    }
+
+    public static void authenticode(File file) throws IOException {
+        PEData data = PELoader.loadPE(file);
+        Optional<CertificateTable> table = data.loadCertificateTable();
+        if (!table.isPresent()) {
+            System.out.println("not signed");
+            return;
+        }
+        for (AuthenticodeSignature signature : table.get().getAllSignatures()) {
+            Optional<AuthenticodeCertificate> signer = signature.getSigner()
+                    .flatMap(SignerInfo::getSignerCertificate);
+            System.out.println(signature.getLabel() + " by "
+                    + signer.map(AuthenticodeCertificate::getSubjectName).orElse("unknown"));
+        }
+        // integrity only: the file was not modified and the signature is consistent
+        Optional<AuthenticodeVerification> verification = data.loadAuthenticodeVerification();
+        VerificationStatus status = verification.map(AuthenticodeVerification::getStatus)
+                .orElse(VerificationStatus.NOT_CHECKED);
+        for (CertificateIssue issue : table.get().getIssues()) {
+            System.out.println(issue.getType() + ": " + issue.getDescription());
+        }
     }
 
     public static void javaWrappers(File file) {

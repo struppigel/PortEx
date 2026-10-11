@@ -23,9 +23,10 @@ import io.github.struppigel.parser.sections.clr.CLIHeaderKey.FLAGS
 import ReportCreator.{pad, title}
 import io.github.struppigel.parser.{ByteArrayUtil, PEData, PELoader, StandardField}
 import io.github.struppigel.parser.coffheader.COFFHeaderKey
-import io.github.struppigel.parser.optheader.{StandardFieldEntryKey, WindowsEntryKey}
+import io.github.struppigel.parser.optheader.{DataDirectoryKey, StandardFieldEntryKey, WindowsEntryKey}
 import io.github.struppigel.parser.sections.clr.{CLRTableKey, CLRTableType, ComImageFlag}
 import io.github.struppigel.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
+import io.github.struppigel.parser.sections.cert.{AuthenticodeSignature, VerificationResult}
 import io.github.struppigel.parser.sections.debug.DebugType
 import io.github.struppigel.parser.sections.clr.{CLRCodedIndexField, CLRTableEntry, OptimizedStream}
 import io.github.struppigel.parser.sections.rsrc.Resource
@@ -83,7 +84,7 @@ class ReportCreator(private val data: PEData) {
    */
   def specialSectionReports(): String = importsReport +
     { if (showAll) boundImportsReport() else "" } +
-    delayImportsReport + exportsReport + resourcesReport + clrReport + debugReport +
+    delayImportsReport + exportsReport + resourcesReport + clrReport + debugReport + authenticodeReport +
     { if (showAll) relocReport() else "" }
 
   /**
@@ -412,6 +413,97 @@ class ReportCreator(private val data: PEData) {
       }
       buf.toString
     } else ""
+  }
+
+  /**
+   * Generate report for the Authenticode signatures of the certificate table.
+   * The status describes integrity only: whether the file was modified after
+   * signing and whether signature and certificates are consistent. It does
+   * not say whether the signer is trusted.
+   *
+   * @return description of the signatures, empty string if the file has no
+   *         certificate table
+   */
+  def authenticodeReport(): String = {
+    val maybeTable = data.loadCertificateTable()
+    if (!maybeTable.isPresent) return ""
+    val table = maybeTable.get
+    val verification = data.loadAuthenticodeVerification()
+    val results: Map[AuthenticodeSignature, VerificationResult] =
+      if (verification.isPresent) verification.get.getResults.asScala.map(r => r.getSignature -> r).toMap
+      else Map()
+    val buf = new StringBuilder()
+    buf.append(title("Authenticode Signatures") + NL)
+    buf.append("Certificate table offset: " + hexString(table.getOffset) + NL)
+    buf.append("Certificate table size:   " + hexString(table.getDeclaredSize) + NL)
+    buf.append("Entries:                  " + table.getEntries.size + NL)
+    if (verification.isPresent) {
+      buf.append("Integrity:                " + verification.get.getStatus +
+        " (integrity only, no trust decision)" + NL)
+    }
+    for (entry <- table.getEntries.asScala) {
+      val certType = if (entry.getCertificateType.isPresent) entry.getCertificateType.get.name
+        else hexString(entry.getCertificateTypeValue)
+      buf.append(NL + "WIN_CERTIFICATE " + entry.getIndex + " at " + hexString(entry.getOffset) +
+        ", length " + hexString(entry.getLength) + ", revision " + hexString(entry.getRevisionValue) +
+        ", type " + certType + NL)
+      if (entry.getSignature.isPresent) appendSignature(buf, entry.getSignature.get, "", results)
+    }
+    val issues = table.getIssues.asScala.toList ++
+      (if (verification.isPresent) verification.get.getIssues.asScala.toList else Nil)
+    if (issues.nonEmpty) {
+      buf.append(NL + "Issues:" + NL)
+      for (issue <- issues) buf.append("* " + issue.getDescription + NL)
+    }
+    buf.toString + NL
+  }
+
+  private def appendSignature(buf: StringBuilder, s: AuthenticodeSignature, indent: String,
+                              results: Map[AuthenticodeSignature, VerificationResult]): Unit = {
+    def opt[T](o: java.util.Optional[T]): Option[T] = if (o.isPresent) Some(o.get) else None
+    val in = indent + "  "
+    val result = results.get(s)
+    buf.append(NL + indent + s.getLabel + result.map(r => ": " + r.getStatus).getOrElse("") + NL)
+    for (alg <- opt(s.getImageDigestAlgorithm); digest <- opt(s.getImageDigest)) {
+      buf.append(in + "Image digest (" + alg + "): " + ByteArrayUtil.byteToHex(digest, "") + NL)
+    }
+    for (r <- result) {
+      buf.append(in + "Computed digest:    " + opt(r.getComputedImageDigest).getOrElse("n.a.") +
+        " (" + r.getImageDigestStatus + ")" + NL)
+      buf.append(in + "Message digest:     " + r.getMessageDigestStatus + NL)
+      buf.append(in + "Signer signature:   " + r.getSignerSignatureStatus + NL)
+      buf.append(in + "Certificate chain:  " + r.getSignerChain + NL)
+    }
+    for (pageHashes <- opt(s.getPageHashes)) buf.append(in + "Page hashes:        " + pageHashes + NL)
+    for (signer <- s.getSigners.asScala) {
+      val cert = opt(signer.getSignerCertificate)
+      buf.append(in + "Signer:             " + cert.map(_.getSubjectName).getOrElse("not embedded") + NL)
+      buf.append(in + "Signer issuer:      " + signer.getIssuerName + NL)
+      for (serial <- opt(signer.getSerialNumberHex)) buf.append(in + "Signer serial:      " + serial + NL)
+      buf.append(in + "Algorithms:         " + signer.getDigestAlgorithm + ", " + signer.getSignatureAlgorithm + NL)
+      for (name <- opt(signer.getProgramName)) buf.append(in + "Program name:       " + name + NL)
+      for (url <- opt(signer.getMoreInfoUrl)) buf.append(in + "More info URL:      " + url + NL)
+      for (time <- opt(signer.getEffectiveSigningTime)) buf.append(in + "Signing time:       " + time + NL)
+    }
+    val timestampResults = result.map(_.getTimestampVerifications.asScala.toList).getOrElse(Nil)
+    for (signer <- s.getSigners.asScala.headOption; t <- signer.getTimestamps.asScala) {
+      val status = timestampResults.find(_.getTimestamp eq t).map(v => " (" + v.getStatus + ")").getOrElse("")
+      buf.append(in + "Timestamp:          " + t + status + NL)
+    }
+    val certificateResults = result.map(_.getCertificateVerifications.asScala.toList).getOrElse(Nil)
+    for (c <- s.getCertificates.asScala) {
+      val status = certificateResults.find(_.getCertificate eq c).map(_.getStatus.toString).getOrElse("-")
+      buf.append(in + "Certificate:        " + c.getSubjectName + NL)
+      buf.append(in + "  Issuer:           " + c.getIssuerName + NL)
+      buf.append(in + "  Serial:           " + c.getSerialNumberHex + NL)
+      buf.append(in + "  Valid:            " + opt(c.getNotBefore).map(_.toString).getOrElse("?") + " to " +
+        opt(c.getNotAfter).map(_.toString).getOrElse("?") + NL)
+      buf.append(in + "  Key:              " + c.getPublicKeyAlgorithm +
+        { if (c.getPublicKeySize > 0) " " + c.getPublicKeySize + " bits" else "" } + NL)
+      buf.append(in + "  Signature:        " + c.getSignatureAlgorithm + " (" + status + ")" + NL)
+      buf.append(in + "  SHA-256:          " + c.getSha256Thumbprint + NL)
+    }
+    for (nested <- s.getNestedSignatures.asScala) appendSignature(buf, nested, in, results)
   }
 
   /**
@@ -765,12 +857,19 @@ class ReportCreator(private val data: PEData) {
       val description = entry.getKey.toString
       val maybeHeader = secLoader.maybeGetSectionHeader(entry.getKey)
       val dataVA = entry.getVirtualAddress
-      val dataOffset = new SectionLoader(data).maybeGetFileOffset(entry.getVirtualAddress)
+      val isCertificateTable = entry.getKey == DataDirectoryKey.CERTIFICATE_TABLE
+      val dataOffset =
+        if (isCertificateTable) secLoader.maybeGetFileOffsetFor(entry.getKey)
+        else secLoader.maybeGetFileOffset(entry.getVirtualAddress)
       val dataOffsetStr = if (dataOffset.isPresent) hexString(dataOffset.get()) else "n.a."
       val inSection = if (maybeHeader.isPresent) maybeHeader.get.getNumber + " " + maybeHeader.get.getName else "-"
-      buf.append(pad(description, padLengthDataDir, " ") + pad(hexString(dataVA), colWidth, " ") +
+      val rvaStr = hexString(dataVA) + { if (isCertificateTable) "*" else "" }
+      buf.append(pad(description, padLengthDataDir, " ") + pad(rvaStr, colWidth, " ") +
         pad(dataOffsetStr, colWidth, " ") + pad(hexString(entry.getDirectorySize), colWidth, " ") +
         pad(inSection, colWidth, " ") + pad(hexString(entry.getTableEntryOffset), colWidth, " ") + NL)
+    }
+    if (dataDirs.exists(_.getKey == DataDirectoryKey.CERTIFICATE_TABLE)) {
+      buf.append("* the certificate table address is a file offset" + NL)
     }
     buf.toString + NL
   }

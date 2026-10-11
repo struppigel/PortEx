@@ -58,6 +58,12 @@ public final class FileRegion {
     public static final String ATTR_DEBUG_TYPE = "Debug Type";
     /** attribute key for the data directory entry a range is declared by */
     public static final String ATTR_DATA_DIRECTORY = "Data Directory";
+    /** attribute key for the type of a WIN_CERTIFICATE entry */
+    public static final String ATTR_CERTIFICATE_TYPE = "Certificate Type";
+    /** attribute key for the subject of a certificate */
+    public static final String ATTR_CERTIFICATE_SUBJECT = "Subject";
+    /** attribute key for the issuer of a certificate */
+    public static final String ATTR_CERTIFICATE_ISSUER = "Issuer";
     /** attribute key for the name of a matched signature */
     public static final String ATTR_SIGNATURE_NAME = "Signature";
     /** attribute key for where a signature matched, e.g. overlay */

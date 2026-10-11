@@ -6,6 +6,13 @@ import org.testng.annotations.Test;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -141,6 +148,53 @@ public class PortExAnalyzerCliTest {
         assertTrue(output.contains("Headers [0x0,0x400)"), output);
         assertTrue(output.contains("  PE Signature [0x200,0x204)"), output);
         assertTrue(output.contains("Overlay [0x18600,0x12516a)"), output);
+    }
+
+    @Test
+    public void dumpCertificatesWritesSignatureAndCertificates() throws Exception {
+        Path dir = Files.createTempDirectory("portex-dump-test");
+        Path copy = dir.resolve("strings.exe");
+        Files.copy(new File(TestreportsReader.RESOURCE_DIR + "/testfiles/strings.exe").toPath(), copy);
+        try {
+            String output = assertExitCode(0, "--dump", "certificates", copy.toString());
+            File dumps = dir.resolve("portex.dumps").toFile();
+            File p7b = new File(dumps, "0.signature.p7b");
+            assertTrue(p7b.exists(), output);
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            try (InputStream in = new FileInputStream(p7b)) {
+                assertEquals(factory.generateCertificates(in).size(), 2);
+            }
+            File[] certificates = dumps.listFiles((d, name) -> name.endsWith(".cer"));
+            assertEquals(certificates.length, 2, output);
+            for (File cer : certificates) {
+                try (InputStream in = new FileInputStream(cer)) {
+                    assertTrue(factory.generateCertificate(in) instanceof X509Certificate);
+                }
+            }
+        } finally {
+            try (Stream<Path> files = Files.walk(dir)) {
+                for (Path p : files.sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                    Files.deleteIfExists(p);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void dumpCertificatesOfUnsignedFile() throws Exception {
+        Path dir = Files.createTempDirectory("portex-dump-test");
+        Path copy = dir.resolve("HelloWorld.exe");
+        Files.copy(new File(TestreportsReader.RESOURCE_DIR + "/testfiles/HelloWorld.exe").toPath(), copy);
+        try {
+            String output = assertExitCode(0, "--dump", "certificates", copy.toString());
+            assertTrue(output.contains("No certificate table found."), output);
+        } finally {
+            try (Stream<Path> files = Files.walk(dir)) {
+                for (Path p : files.sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                    Files.deleteIfExists(p);
+                }
+            }
+        }
     }
 
     @Test

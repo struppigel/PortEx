@@ -7,6 +7,8 @@ import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PhysRange;
 import io.github.struppigel.parser.VirtRange;
+import io.github.struppigel.parser.sections.cert.AuthenticodeVerifier;
+import io.github.struppigel.parser.sections.cert.CertificateTable;
 import io.github.struppigel.tools.ChiSquared;
 import io.github.struppigel.tools.ShannonEntropy;
 import io.github.struppigel.tools.StringExtractor;
@@ -78,6 +80,31 @@ public class InterruptionTest {
         } finally {
             Thread.interrupted();
         }
+    }
+
+    @Test
+    public void certificateParsingAndVerificationAbort() throws IOException {
+        File strings = new File(TestreportsReader.RESOURCE_DIR + "/testfiles/strings.exe");
+        PEData data = PELoader.loadPE(strings);
+        assertAbortsWhenInterrupted(() -> {
+            try {
+                CertificateTable.load(data);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+        CertificateTable table = CertificateTable.load(data);
+        assertAbortsWhenInterrupted(() -> {
+            try {
+                AuthenticodeVerifier.verify(data, table);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+        PEData fresh = PELoader.loadPE(strings);
+        assertAbortsWhenInterrupted(fresh::loadAuthenticodeVerification);
+        // nothing was cached by the aborted call
+        assertTrue(fresh.loadAuthenticodeVerification().get().isValid());
     }
 
     @Test

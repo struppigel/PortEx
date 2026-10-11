@@ -55,7 +55,7 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar -l <offset1,offset2,offset3,...> <PEfile>
     | java -jar PortexAnalyzer.jar --layout <PEfile>
     | java -jar PortexAnalyzer.jar --rawep <PEfile>
-    | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico> <imagefile>
+    | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico|certificates> <imagefile>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
     | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>] [--visoverlay <textfile>]] [-i <folder>] <PEfile>
     | java -jar PortexAnalyzer.jar -p <imagefile> --from <offset> --to <offset> [-bps <bytes>] <file>
@@ -70,7 +70,7 @@ object PortExAnalyzer {
     | -l,--loc           show location for specified offset
     | --layout           show all structures with their file ranges
     | --rawep            print file offset of entry point (decimal)
-    | --dump             dump resources, overlay, sections, icons
+    | --dump             dump resources, overlay, sections, icons, certificates
     | --pdiff            create a diff visualization
     | -i,--ico           extract icons from the resource section as .ico file
     """.stripMargin
@@ -308,6 +308,8 @@ object PortExAnalyzer {
             dumper.dumpOverlay()
             dumper.dumpSections()
             dumper.dumpIcons()
+            dumper.dumpCertificates()
+          case "certificates" => dumper.dumpCertificates()
           case "pe"        => dumper.dumpPEFiles()
           case "resources" => dumper.dumpResources()
           case "overlay"   => dumper.dumpOverlay()

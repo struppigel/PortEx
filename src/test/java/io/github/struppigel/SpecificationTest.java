@@ -23,6 +23,7 @@ import io.github.struppigel.parser.optheader.DataDirectoryKey;
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey;
 import io.github.struppigel.parser.optheader.WindowsEntryKey;
 import io.github.struppigel.parser.sections.SectionHeaderKey;
+import io.github.struppigel.parser.sections.cert.WinCertificateKey;
 import io.github.struppigel.parser.sections.debug.DebugDirectoryKey;
 import io.github.struppigel.parser.sections.edata.ExportDirectoryKey;
 import io.github.struppigel.parser.sections.idata.DirectoryEntryKey;
@@ -65,6 +66,7 @@ public class SpecificationTest {
 		headerspecs.put(ResourceDataEntryKey.values(), "resourcedataentryspec");
 		headerspecs.put(ResourceDirectoryKey.values(), "rsrcdirspec");
 		headerspecs.put(SectionHeaderKey.values(), "sectiontablespec");
+		headerspecs.put(WinCertificateKey.values(), "wincertificatespec");
 		// TODO resourcetype, machinetype (covered by MachineTypeTest so far), debugtypes
 	}
 

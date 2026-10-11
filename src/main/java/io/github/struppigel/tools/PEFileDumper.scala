@@ -5,9 +5,10 @@ import io.github.struppigel.parser.ScalaIOUtil.nonExistingFileFor
 import io.github.struppigel.parser.sections.SectionLoader
 import io.github.struppigel.parser.PhysicalLocation
 import io.github.struppigel.parser.sections.rsrc.icon.IconParser
+import io.github.struppigel.parser.sections.cert.AuthenticodeSignature
 
 import java.io.{File, IOException}
-import java.nio.file.Paths
+import java.nio.file.{Files, Paths}
 import scala.collection.JavaConverters._
 
 /**
@@ -46,6 +47,57 @@ class PEFileDumper(val pedata: PEData, val outFolder: File) {
     } else {
       println("No resources found.")
     }
+  }
+
+  /**
+   * Writes each PKCS#7 signature of the certificate table to a .p7b file and
+   * each embedded certificate to a .cer file (DER). Entries of other types
+   * are written as raw .bin files.
+   */
+  def dumpCertificates(): Unit = {
+    println("Dumping certificates ...")
+    val maybeTable = pedata.loadCertificateTable()
+    if (!maybeTable.isPresent || maybeTable.get.isEmpty) {
+      println("No certificate table found.")
+      return
+    }
+    for (entry <- maybeTable.get.getEntries.asScala) {
+      val nr = entry.getIndex
+      if (entry.getSignature.isPresent) {
+        val signature = entry.getSignature.get
+        val p7b = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + ".signature.p7b").toFile)
+        writeBytes(p7b, signature.getEncoded, "signature")
+        val all = signature :: allNested(signature)
+        var m = 0
+        for (s <- all; cert <- s.getCertificates.asScala) {
+          val name = sanitize(cert.getSubjectCommonName.orElse("certificate"))
+          val cer = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + "." + m + "." + name + ".cer").toFile)
+          writeBytes(cer, cert.getEncoded, "certificate")
+          m += 1
+        }
+      } else if (entry.getX509Certificate.isPresent) {
+        val cert = entry.getX509Certificate.get
+        val name = sanitize(cert.getSubjectCommonName.orElse("certificate"))
+        val cer = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + ".0." + name + ".cer").toFile)
+        writeBytes(cer, cert.getEncoded, "certificate")
+      } else {
+        val bin = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, nr + ".wincertificate.bin").toFile)
+        writeBytes(bin, entry.getContent, "WIN_CERTIFICATE content")
+      }
+    }
+  }
+
+  private def allNested(s: AuthenticodeSignature): List[AuthenticodeSignature] =
+    s.getNestedSignatures.asScala.toList.flatMap(n => n :: allNested(n))
+
+  private def sanitize(name: String): String = {
+    val cleaned = name.replaceAll("[^A-Za-z0-9._-]", "_")
+    if (cleaned.length > 64) cleaned.substring(0, 64) else cleaned
+  }
+
+  private def writeBytes(outFile: File, bytes: Array[Byte], what: String): Unit = {
+    Files.write(outFile.toPath, bytes)
+    println("Writing " + what + " to " + outFile.getAbsolutePath)
   }
 
   def dumpPEFiles(): Unit = {

@@ -12,12 +12,13 @@ PortEx is written in Java and Scala, and targeted at Java applications.
 
 * Reading header information from: MSDOS Header, COFF File Header, Optional Header, Section Table
 * Reading PE structures: Imports, Resources, Exports, Debug Directory, Relocations, Delay Load Imports, Bound Imports
-* Dumping of sections, resources, overlay, embedded ZIP, JAR or .class files
+* Dumping of sections, resources, overlay, certificates, embedded ZIP, JAR or .class files
 * Scanning for file format anomalies, including structural anomalies, deprecated, reserved, wrong or non-default values.
 * Visualize PE file structure, local entropies and byteplot of the file with variable colors and sizes
 * Calculate Shannon Entropy and Chi Squared for files and sections
 * Calculate ImpHash and Rich and RichPV hash values for files and sections
 * Parse RichHeader and verify checksum
+* Parse Authenticode signatures (certificate table, PKCS#7, X.509 certificates, timestamps, nested signatures) and verify their integrity: image digest, message digest, signer and certificate signatures (no trust or revocation checks); malformed and manipulated signatures are reported as anomalies
 * Calculate and verify Optional Header checksum
 * Scan for packer, installer and file type signatures or your own signature database, with patterns tied to locations like the entry point, overlay, resources, sections or .NET streams (see [Signatures](docs/SIGNATURES.md)), and import PEiD databases
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)

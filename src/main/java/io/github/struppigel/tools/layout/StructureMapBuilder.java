@@ -33,6 +33,13 @@ import io.github.struppigel.parser.sections.SectionCharacteristic;
 import io.github.struppigel.parser.sections.SectionHeader;
 import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionTable;
+import io.github.struppigel.parser.sections.cert.AuthenticodeCertificate;
+import io.github.struppigel.parser.sections.cert.AuthenticodeSignature;
+import io.github.struppigel.parser.sections.cert.CertificateIssue;
+import io.github.struppigel.parser.sections.cert.CertificateIssueType;
+import io.github.struppigel.parser.sections.cert.CertificateTable;
+import io.github.struppigel.parser.sections.cert.SignerInfo;
+import io.github.struppigel.parser.sections.cert.WinCertificate;
 import io.github.struppigel.parser.sections.clr.CLIHeaderKey;
 import io.github.struppigel.parser.sections.clr.CLRSection;
 import io.github.struppigel.parser.sections.clr.CLRTable;
@@ -230,6 +237,7 @@ public final class StructureMapBuilder {
         private final int[] typeCounts = new int[RegionType.values().length];
         private final Map<RegionType, Dropped> dropped = new EnumMap<>(RegionType.class);
         private boolean truncated = false;
+        private boolean certificateTableMapped = false;
 
         StructureMap run() {
             group("headers", this::mapHeaders);
@@ -243,6 +251,7 @@ public final class StructureMapBuilder {
             group("debug directory", this::mapDebug);
             group("resources", this::mapResources);
             group(".NET metadata", this::mapClr);
+            group("certificates", this::mapCertificates);
             group("data directories", this::mapDeclaredDirectories);
             group("unmapped gaps", this::mapUnmapped);
             group("entry point", this::mapEntryPoint);
@@ -769,6 +778,80 @@ public final class StructureMapBuilder {
         }
 
         /* ---------------------------------------------------------------- */
+        /* certificate table                                                */
+        /* ---------------------------------------------------------------- */
+
+        private void mapCertificates() {
+            java.util.Optional<CertificateTable> maybe = data.loadCertificateTable();
+            if (!maybe.isPresent() || maybe.get().getPhysicalLocations().isEmpty()) {
+                return;
+            }
+            CertificateTable table = maybe.get();
+            FileRegion root = addRegion(null, RegionType.CERTIFICATE_TABLE, RegionType.CERTIFICATE_TABLE.getDescription(),
+                    table.getPhysicalLocations(),
+                    attributes(FileRegion.ATTR_DATA_DIRECTORY, DataDirectoryKey.CERTIFICATE_TABLE.toString()), false);
+            if (root == null) {
+                return;
+            }
+            certificateTableMapped = true;
+            int i = 0;
+            for (WinCertificate entry : table.getEntries()) {
+                checkInterrupt(i++);
+                String type = entry.getCertificateType().isPresent() ? entry.getCertificateType().get().name()
+                        : StructureMap.hex(entry.getCertificateTypeValue());
+                FileRegion region = add(root, RegionType.WIN_CERTIFICATE, "WIN_CERTIFICATE " + entry.getIndex(),
+                        Collections.singletonList(entry.getPhysicalLocation()),
+                        attributes(FileRegion.ATTR_CERTIFICATE_TYPE, type));
+                if (fine()) {
+                    mapFields(region, entry.getHeaderFields().values(), 0);
+                }
+                if (entry.getSignature().isPresent()) {
+                    mapSignature(region != null ? region : root, entry.getSignature().get());
+                }
+                if (entry.getX509Certificate().isPresent()) {
+                    mapCertificate(region != null ? region : root, entry.getX509Certificate().get());
+                }
+                if (entry.getPaddingLocation().isPresent()) {
+                    add(region != null ? region : root, RegionType.CERTIFICATE_PADDING, "Padding",
+                            Collections.singletonList(entry.getPaddingLocation().get()));
+                }
+            }
+            for (CertificateIssue issue : table.getIssues()) {
+                if (issue.getType() == CertificateIssueType.DATA_AFTER_PKCS7
+                        || issue.getType() == CertificateIssueType.TABLE_EXTRA_DATA) {
+                    add(root, RegionType.CERTIFICATE_PADDING, issue.getType().getDescription(), issue.getLocations());
+                }
+            }
+        }
+
+        private void mapSignature(FileRegion parent, AuthenticodeSignature signature) {
+            String name = (signature.getNestingLevel() > 0 ? "Nested Signature " : "Signature ") + signature.getNumber();
+            FileRegion region = add(parent, RegionType.PKCS7_SIGNED_DATA, name,
+                    Collections.singletonList(signature.getLocation()));
+            FileRegion owner = region != null ? region : parent;
+            int i = 0;
+            for (AuthenticodeCertificate certificate : signature.getCertificates()) {
+                checkInterrupt(i++);
+                mapCertificate(owner, certificate);
+            }
+            if (fine()) {
+                for (SignerInfo signer : signature.getSigners()) {
+                    add(owner, RegionType.SIGNER_INFO, "Signer Info", Collections.singletonList(signer.getLocation()));
+                }
+            }
+            for (AuthenticodeSignature nested : signature.getNestedSignatures()) {
+                mapSignature(owner, nested);
+            }
+        }
+
+        private void mapCertificate(FileRegion parent, AuthenticodeCertificate certificate) {
+            Map<String, String> attributes = attributes(FileRegion.ATTR_CERTIFICATE_SUBJECT, certificate.getSubjectName());
+            attributes.put(FileRegion.ATTR_CERTIFICATE_ISSUER, certificate.getIssuerName());
+            add(parent, RegionType.CERTIFICATE, certificate.getSubjectCommonName().orElse(certificate.getSubjectName()),
+                    Collections.singletonList(certificate.getLocation()), attributes);
+        }
+
+        /* ---------------------------------------------------------------- */
         /* data directories without parser                                  */
         /* ---------------------------------------------------------------- */
 
@@ -783,6 +866,9 @@ public final class StructureMapBuilder {
             declared.put(DataDirectoryKey.IAT, RegionType.IAT_DIRECTORY);
             OptionalHeader opt = data.getOptionalHeader();
             for (Map.Entry<DataDirectoryKey, RegionType> e : declared.entrySet()) {
+                if (e.getKey() == DataDirectoryKey.CERTIFICATE_TABLE && certificateTableMapped) {
+                    continue;
+                }
                 Optional<DataDirEntry> entry = opt.maybeGetDataDirEntry(e.getKey());
                 if (!entry.isPresent()) {
                     continue;

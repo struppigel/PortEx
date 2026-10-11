@@ -306,7 +306,7 @@ Properties of `requires`:
 | `driver` | subsystem native, used by drivers |
 | `console`, `gui` | subsystem Windows console or Windows GUI |
 | `overlay` | has an overlay |
-| `signed` | has an Authenticode certificate table |
+| `signed` | has an Authenticode certificate table entry; the signature is not verified |
 | `rich` | has a Rich header |
 | `tls` | has a TLS directory |
 

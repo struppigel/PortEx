@@ -502,7 +502,212 @@ public enum AnomalySubType {
     /**
      * There was a signature match in the overlay
      */
-    OVERLAY_HAS_SIGNATURE(NON_DEFAULT);
+    OVERLAY_HAS_SIGNATURE(NON_DEFAULT),
+
+    /**************************** Certificate Table ******************************/
+    /*
+     * The certificate table holds the Authenticode signatures. Its address is a
+     * file offset. Anomalies of the data directory entry are DataDirAnomalies,
+     * those of WIN_CERTIFICATE header fields FieldAnomalies, structural ones
+     * StructureAnomalies with the key CERTIFICATE_TABLE, and those of fields of
+     * the PKCS#7 signature AuthenticodeAnomalies. A table that starts outside
+     * of the file is reported as INVALID_DATA_DIR, exceeded parser limits as
+     * EXHAUSTIVE_DATA.
+     */
+
+    /**
+     * The certificate table offset is not a multiple of 8
+     */
+    CERT_DIR_NOT_ALIGNED(WRONG),
+    /**
+     * The certificate table size is larger than the file or the end of the
+     * table exceeds the 32-bit address range
+     */
+    CERT_DIR_SIZE_EXCEEDS_FILE(WRONG),
+    /**
+     * The certificate table size is smaller than a WIN_CERTIFICATE header
+     */
+    CERT_DIR_TOO_SMALL(WRONG),
+    /**
+     * dwLength of a WIN_CERTIFICATE is smaller than its header or larger than
+     * the table
+     */
+    CERT_INVALID_LENGTH(WRONG),
+    /**
+     * wRevision of a WIN_CERTIFICATE is neither 0x0100 nor 0x0200
+     */
+    CERT_INVALID_REVISION(WRONG),
+    /**
+     * wRevision of a WIN_CERTIFICATE is the legacy 0x0100
+     */
+    CERT_DEPRECATED_REVISION(DEPRECATED),
+    /**
+     * wCertificateType is the reserved WIN_CERT_TYPE_RESERVED_1
+     */
+    CERT_RESERVED_TYPE(RESERVED),
+    /**
+     * wCertificateType is X509 or TS_STACK_SIGNED. The specification defines
+     * them, but Windows does not support them for Authenticode.
+     */
+    CERT_UNSUPPORTED_TYPE(NON_DEFAULT),
+    /**
+     * wCertificateType is not defined
+     */
+    CERT_INVALID_TYPE(WRONG),
+    /**
+     * The certificate table is cut off by the end of the file
+     */
+    CERT_TABLE_TRUNCATED(STRUCTURE),
+    /**
+     * The certificate table overlaps the headers
+     */
+    CERT_TABLE_IN_HEADERS(STRUCTURE),
+    /**
+     * The certificate table overlaps the raw data of a section
+     */
+    CERT_TABLE_IN_SECTION(STRUCTURE),
+    /**
+     * Data follows the certificate table, which should be the last data of
+     * the file
+     */
+    CERT_TABLE_NOT_LAST(STRUCTURE),
+    /**
+     * The certificate table pointer is shifted, a WIN_CERTIFICATE exists
+     * nearby
+     */
+    CERT_TABLE_MISPLACED(STRUCTURE),
+    /**
+     * The certificate table has more than one WIN_CERTIFICATE, Windows only
+     * uses the first one
+     */
+    CERT_MULTIPLE_ENTRIES(STRUCTURE),
+    /**
+     * The certificate table is larger than its entries
+     */
+    CERT_TABLE_EXTRA_DATA(STRUCTURE),
+    /**
+     * A WIN_CERTIFICATE has data after the PKCS#7 signature, which the
+     * signature does not cover (CVE-2013-3900)
+     */
+    CERT_DATA_AFTER_PKCS7(STRUCTURE),
+    /**
+     * The PKCS#7 signature can not be parsed (truncated or collapsed ASN.1)
+     */
+    CERT_MALFORMED_PKCS7(STRUCTURE),
+    /**
+     * Signatures are nested deeply or a signer has many nested signatures
+     */
+    CERT_UNUSUAL_NESTING(STRUCTURE),
+    /**
+     * A signature has not exactly one signer
+     */
+    CERT_UNUSUAL_SIGNER_COUNT(STRUCTURE),
+    /**
+     * The certificate of a signer is not embedded
+     */
+    CERT_MISSING_SIGNER_CERTIFICATE(STRUCTURE),
+    /**
+     * An unauthenticated attribute is larger than 64 KiB, data that the
+     * signature does not cover
+     */
+    CERT_LARGE_UNAUTH_ATTRIBUTE(STRUCTURE),
+    /**
+     * An embedded certificate is unrelated to the signers and the other
+     * certificates
+     */
+    CERT_ISOLATED_CERTIFICATE(STRUCTURE),
+    /**
+     * The computed image digest differs from the signed digest: the file was
+     * modified after signing or the signature was copied from another file
+     */
+    CERT_IMAGE_DIGEST_MISMATCH(WRONG),
+    /**
+     * The messageDigest attribute differs from the digest of the signed
+     * content
+     */
+    CERT_MESSAGE_DIGEST_MISMATCH(WRONG),
+    /**
+     * The signature of a signer is invalid
+     */
+    CERT_INVALID_SIGNER_SIGNATURE(WRONG),
+    /**
+     * The signature of an embedded certificate is invalid
+     */
+    CERT_INVALID_CERTIFICATE_SIGNATURE(WRONG),
+    /**
+     * A timestamp does not cover the signature or its signature is invalid
+     */
+    CERT_INVALID_TIMESTAMP(WRONG),
+    /**
+     * An EC key uses explicit curve parameters instead of a named curve
+     * (CurveBall, CVE-2020-0601), which RFC 5480 forbids
+     */
+    CERT_EXPLICIT_EC_PARAMETERS(WRONG),
+    /**
+     * An ECDSA signature value r or s is zero or not smaller than the curve
+     * order (Psychic Signatures, CVE-2022-21449)
+     */
+    CERT_INVALID_ECDSA_VALUE(WRONG),
+    /**
+     * A content type of the signature is not the expected one
+     */
+    CERT_WRONG_CONTENT_TYPE(WRONG),
+    /**
+     * The digest algorithms of a signature contradict each other
+     */
+    CERT_DIGEST_ALGORITHM_MISMATCH(WRONG),
+    /**
+     * A mandatory signed attribute is missing
+     */
+    CERT_MISSING_SIGNED_ATTRIBUTE(WRONG),
+    /**
+     * The padding of a WIN_CERTIFICATE is not zero
+     */
+    CERT_NONZERO_PADDING(WRONG),
+    /**
+     * A certificate serial number is longer than 20 bytes (RFC 5280)
+     */
+    CERT_OVERSIZED_SERIAL(WRONG),
+    /**
+     * An object identifier is too long
+     */
+    CERT_OVERSIZED_OID(WRONG),
+    /**
+     * The page hashes are malformed
+     */
+    CERT_INVALID_PAGE_HASHES(WRONG),
+    /**
+     * MD2 or MD5 is used, which allow collisions (e.g. Flame)
+     */
+    CERT_WEAK_DIGEST(DEPRECATED),
+    /**
+     * SHA-1 is used
+     */
+    CERT_SHA1_DIGEST(DEPRECATED),
+    /**
+     * The signature uses BER instead of DER encoding
+     */
+    CERT_BER_ENCODING(NON_DEFAULT),
+    /**
+     * The signer certificate is self-signed
+     */
+    CERT_SELF_SIGNED_SIGNER(NON_DEFAULT),
+    /**
+     * The signer certificate was not valid at the signing time
+     */
+    CERT_SIGNER_NOT_VALID_AT_SIGNING_TIME(NON_DEFAULT),
+    /**
+     * An unauthenticated attribute has an unknown type
+     */
+    CERT_UNKNOWN_UNAUTH_ATTRIBUTE(NON_DEFAULT),
+    /**
+     * The SpcRelaxedPEMarkerCheck attribute is present
+     */
+    CERT_RELAXED_PE_MARKER_CHECK(NON_DEFAULT),
+    /**
+     * An algorithm of the signature is not supported
+     */
+    CERT_UNSUPPORTED_ALGORITHM(NON_DEFAULT);
 
     private final AnomalyType superType;
 

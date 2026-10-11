@@ -1,0 +1,3 @@
+LENGTH;Length of the certificate entry (dwLength);0;4
+REVISION;Certificate revision (wRevision);4;2
+CERTIFICATE_TYPE;Certificate type (wCertificateType);6;2

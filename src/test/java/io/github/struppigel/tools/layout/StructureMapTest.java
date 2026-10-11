@@ -383,6 +383,56 @@ public class StructureMapTest {
         }
     }
 
+    private static FileRegion child(FileRegion parent, RegionType type) {
+        for (FileRegion c : parent.getChildren()) {
+            if (c.getType() == type) {
+                return c;
+            }
+        }
+        throw new AssertionError(parent + " has no " + type);
+    }
+
+    @Test
+    public void certificateRegions() throws IOException {
+        StructureMap map = new StructureMapBuilder(load("strings.exe")).withDetail(Detail.FINE).build();
+        List<FileRegion> tables = map.getRegions(RegionType.CERTIFICATE_TABLE);
+        assertEquals(tables.size(), 1);
+        FileRegion table = tables.get(0);
+        assertEquals(table.getStart(), 0x52800);
+        assertEquals(table.getEnd(), 0x54b88);
+        assertFalse(table.isDeclaredOnly());
+        assertFalse(RegionType.CERTIFICATE_TABLE.isDeclaredDirectory());
+        FileRegion entry = child(table, RegionType.WIN_CERTIFICATE);
+        assertEquals(entry.getAttributes().get(FileRegion.ATTR_CERTIFICATE_TYPE), "PKCS_SIGNED_DATA");
+        assertTrue(entry.getChildren().stream().filter(c -> c.getType() == RegionType.HEADER_FIELD).count() == 3);
+        FileRegion signature = child(entry, RegionType.PKCS7_SIGNED_DATA);
+        List<FileRegion> certificates = new ArrayList<>();
+        for (FileRegion c : signature.getChildren()) {
+            if (c.getType() == RegionType.CERTIFICATE) {
+                certificates.add(c);
+            }
+        }
+        assertEquals(certificates.size(), 2);
+        assertTrue(certificates.stream().anyMatch(c -> c.getName().equals("Microsoft Corporation")));
+        assertTrue(certificates.get(0).getAttributes().containsKey(FileRegion.ATTR_CERTIFICATE_ISSUER));
+        child(signature, RegionType.SIGNER_INFO);
+        child(entry, RegionType.CERTIFICATE_PADDING);
+        // the regions at an offset inside a certificate, innermost first
+        List<FileRegion> at = map.regionsAt(certificates.get(0).getStart() + 4);
+        assertTrue(at.stream().anyMatch(r -> r.getType() == RegionType.CERTIFICATE_TABLE));
+        assertTrue(at.stream().anyMatch(r -> r.getType() == RegionType.CERTIFICATE));
+    }
+
+    @Test
+    public void brokenCertificateTablesGiveCleanMaps() throws IOException {
+        for (String path : new String[]{"Haus/DRWUI.exe", "Haus/cff-chrome_elf.dll", "corkami/maxvals.exe", "ose",
+                "Haus/pidgin_manipulated_Icons.exe"}) {
+            PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/" + path));
+            assertClean(StructureMap.of(data), path);
+            assertClean(new StructureMapBuilder(data).withDetail(Detail.FINE).build(), path);
+        }
+    }
+
     /** checks the invariants every map must satisfy */
     public static void assertClean(StructureMap map, String name) {
         long length = map.getFileLength();

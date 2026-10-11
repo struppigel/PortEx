@@ -81,6 +81,7 @@ private[sigscanner] final class PEFacts(pe: PEData, resolver: RegionResolver, so
     case "console" => subsystem == Subsystem.IMAGE_SUBSYSTEM_WINDOWS_CUI
     case "gui" => subsystem == Subsystem.IMAGE_SUBSYSTEM_WINDOWS_GUI
     case "overlay" => hasOverlay
+    // the certificate table entry is present, the signature is not verified
     case "signed" => dataDirectoryPresent(DataDirectoryKey.CERTIFICATE_TABLE)
     case "rich" => hasRich
     case "tls" => dataDirectoryPresent(DataDirectoryKey.TLS_TABLE)

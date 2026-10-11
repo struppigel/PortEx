@@ -30,6 +30,10 @@ import java.util.List;
 
 /**
  * Detects and dumps overlay of PE files.
+ * <p>
+ * The overlay starts after the raw data of the last section. The certificate
+ * table with the Authenticode signatures is not mapped into memory and usually
+ * lies at the end of the file, so it is part of the overlay.
  * 
  * @author Karsten Philipp Boris Hahn
  * 

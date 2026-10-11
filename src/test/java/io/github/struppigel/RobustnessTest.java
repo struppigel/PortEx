@@ -4,6 +4,8 @@ import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.optheader.OptionalHeaderTest;
 import io.github.struppigel.parser.sections.SectionLoader;
+import io.github.struppigel.parser.sections.cert.AuthenticodeVerifier;
+import io.github.struppigel.parser.sections.cert.CertificateTable;
 import io.github.struppigel.parser.sections.idata.ImportDLL;
 import io.github.struppigel.parser.sections.rsrc.icon.IconParser;
 import io.github.struppigel.tools.anomalies.PEAnomalyScannerTest;
@@ -58,9 +60,39 @@ public class RobustnessTest {
             loader.maybeLoadExportSection();
             loader.maybeLoadImportSection();
             loader.maybeLoadResourceSection();
+            loader.maybeLoadCertificateTable();
+            data.loadAuthenticodeVerification();
             data.maybeGetRichHeader();
             IconParser.extractIcons(data);
         }
+    }
+
+    @Test
+    public void certificateTablesWithinTimeBudget() throws IOException {
+        String[] folders = {PROBLEMFILES_DIR, TestreportsReader.RESOURCE_DIR + "/BinaryCorpus_v2_oldCorkami/corkami",
+                TestreportsReader.RESOURCE_DIR + "/Haus"};
+        long total = System.nanoTime();
+        for (String name : folders) {
+            for (File file : new File(name).listFiles()) {
+                if (!file.isFile()) {
+                    continue;
+                }
+                PEData data;
+                try {
+                    data = PELoader.loadPE(file);
+                } catch (IOException e) {
+                    continue; // no PE file
+                }
+                long start = System.nanoTime();
+                java.util.Optional<CertificateTable> table = data.loadCertificateTable();
+                if (table.isPresent()) {
+                    table.get().getInfo();
+                    AuthenticodeVerifier.verify(data, table.get());
+                }
+                assertTrue(System.nanoTime() - start < 5_000_000_000L, file + " took too long");
+            }
+        }
+        assertTrue(System.nanoTime() - total < 120_000_000_000L, "certificate parsing took too long");
     }
 
     @Test

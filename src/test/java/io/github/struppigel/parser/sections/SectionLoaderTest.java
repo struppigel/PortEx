@@ -152,6 +152,31 @@ public class SectionLoaderTest {
     }
 
     @Test
+    public void certificateTableAddressIsAFileOffset() throws IOException {
+        PEData strings = pedata.get("strings.exe");
+        SectionLoader loader = new SectionLoader(strings);
+        DataDirEntry entry = strings.getOptionalHeader()
+                .maybeGetDataDirEntry(DataDirectoryKey.CERTIFICATE_TABLE).get();
+        assertEquals(entry.getFileOffset(strings.getSectionTable()), 0x52800);
+        assertFalse(entry.maybeGetSectionTableEntry(strings.getSectionTable()).isPresent());
+        assertEquals((long) loader.maybeGetFileOffsetFor(DataDirectoryKey.CERTIFICATE_TABLE).get(), 0x52800L);
+        assertFalse(loader.maybeGetSectionHeader(DataDirectoryKey.CERTIFICATE_TABLE).isPresent());
+        assertTrue(loader.hasValidPointer(DataDirectoryKey.CERTIFICATE_TABLE));
+
+        PEData cff = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/Haus/cff-chrome_elf.dll"));
+        assertEquals(new SectionLoader(cff).maybeGetSectionHeader(DataDirectoryKey.CERTIFICATE_TABLE).get()
+                .getName(), ".NewIT");
+
+        PEData ose = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/ose"));
+        SectionLoader oseLoader = new SectionLoader(ose);
+        assertFalse(oseLoader.maybeGetFileOffsetFor(DataDirectoryKey.CERTIFICATE_TABLE).isPresent());
+        assertFalse(oseLoader.maybeGetSectionHeader(DataDirectoryKey.CERTIFICATE_TABLE).isPresent());
+        assertFalse(oseLoader.hasValidPointer(DataDirectoryKey.CERTIFICATE_TABLE));
+        // the table is loaded, but empty: it starts at the end of the file
+        assertTrue(oseLoader.maybeLoadCertificateTable().get().isEmpty());
+    }
+
+    @Test
     public void loadSectionByNumber() throws IOException {
         for (PEData datum : pedata.values()) {
             SectionLoader loader = new SectionLoader(datum);

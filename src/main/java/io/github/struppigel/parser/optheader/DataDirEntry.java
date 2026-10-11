@@ -17,6 +17,7 @@ package io.github.struppigel.parser.optheader;
 
 import io.github.struppigel.parser.VirtualLocation;
 import io.github.struppigel.parser.sections.SectionHeader;
+import io.github.struppigel.parser.sections.SectionHeaderKey;
 import io.github.struppigel.parser.sections.SectionTable;
 import io.github.struppigel.parser.IOUtil;
 import com.google.common.base.Optional;
@@ -123,12 +124,18 @@ public class DataDirEntry {
      * Calculates the file offset of the data directory based on the virtual
      * address and the entries in the section table.
      * This method is subject to change.
+     * <p>
+     * The address of the {@link DataDirectoryKey#CERTIFICATE_TABLE} is a file
+     * offset, not an RVA, so it is returned as it is.
      * @Beta
      * @param table
      * @return file offset of data directory
      */
     public long getFileOffset(SectionTable table) {
         checkArgument(table != null, "section table must not be null");
+        if (isFileOffset()) {
+            return virtualAddress;
+        }
         Optional<SectionHeader> section = maybeGetSectionTableEntry(table);
         if (section.isPresent()) {
             long sectionRVA = section.get().getAlignedVirtualAddress(isLowAlignmentMode);
@@ -171,6 +178,9 @@ public class DataDirEntry {
     public Optional<SectionHeader> maybeGetSectionTableEntry(SectionTable table) {
         checkArgument(table != null, "table must not be null");
         List<SectionHeader> sections = table.getSectionHeaders();
+        if (isFileOffset()) {
+            return maybeGetSectionByFileOffset(sections);
+        }
         // loop through all section headers to check if entry is within section
         for (SectionHeader header : sections) {
             long vSize = header.getAlignedVirtualSize(isLowAlignmentMode);
@@ -191,6 +201,39 @@ public class DataDirEntry {
         logger.warn("there is no entry that matches data dir entry RVA "
                 + virtualAddress);
         return Optional.absent();
+    }
+
+    /**
+     * The address of the certificate table is a file offset, all other data
+     * directory addresses are RVAs.
+     *
+     * @return true iff the address of this entry is a file offset
+     */
+    private boolean isFileOffset() {
+        return key == DataDirectoryKey.CERTIFICATE_TABLE;
+    }
+
+    /**
+     * Returns the section whose raw data contains the address of this entry,
+     * interpreted as file offset. If several do, the one that starts closest
+     * to the address.
+     *
+     * @param sections the section headers
+     * @return the section that physically contains the address, absent if none
+     */
+    private Optional<SectionHeader> maybeGetSectionByFileOffset(List<SectionHeader> sections) {
+        SectionHeader result = null;
+        for (SectionHeader header : sections) {
+            long start = header.getAlignedPointerToRaw(isLowAlignmentMode);
+            long end = header.get(SectionHeaderKey.POINTER_TO_RAW_DATA)
+                    + header.get(SectionHeaderKey.SIZE_OF_RAW_DATA);
+            boolean contains = virtualAddress >= start && virtualAddress < end;
+            // prefer the section that starts closest to the address
+            if (contains && (result == null || start > result.getAlignedPointerToRaw(isLowAlignmentMode))) {
+                result = header;
+            }
+        }
+        return Optional.fromNullable(result);
     }
 
     /**
@@ -263,9 +306,11 @@ public class DataDirEntry {
 
     /**
      * Returns the virtual address of the entry.
+     * <p>
+     * For the {@link DataDirectoryKey#CERTIFICATE_TABLE} this is a file offset.
      * 
      * @return the virtual address to the data directory (relative to the image
-     *         base)
+     *         base), or the file offset for the certificate table
      */
     public long getVirtualAddress() {
         return virtualAddress;

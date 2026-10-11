@@ -19,9 +19,14 @@ package io.github.struppigel.parser;
 import io.github.struppigel.parser.coffheader.COFFFileHeader;
 import io.github.struppigel.parser.msdos.MSDOSHeader;
 import io.github.struppigel.parser.msdos.MSDOSLoadModule;
+import io.github.struppigel.parser.optheader.DataDirectoryKey;
 import io.github.struppigel.parser.optheader.OptionalHeader;
 import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionTable;
+import io.github.struppigel.parser.sections.cert.AuthenticodeSignature;
+import io.github.struppigel.parser.sections.cert.AuthenticodeVerification;
+import io.github.struppigel.parser.sections.cert.AuthenticodeVerifier;
+import io.github.struppigel.parser.sections.cert.CertificateTable;
 import io.github.struppigel.parser.sections.clr.*;
 import io.github.struppigel.parser.sections.debug.*;
 import io.github.struppigel.parser.sections.clr.*;
@@ -208,6 +213,10 @@ public class PEData {
 
     private Optional<CLRSection> clrSection;
 
+    private Optional<CertificateTable> certificateTable;
+
+    private Optional<AuthenticodeVerification> authenticodeVerification;
+
     private HashMap<Long, String> stringTable;
 
     private static final int MAX_MANIFEST_SIZE_DEFAULT = 0x5000;
@@ -222,6 +231,8 @@ public class PEData {
      */
     public void loadAll() {
         // alphabethically sorted
+        loadAuthenticodeVerification();
+        loadCertificateTable();
         loadClrSection();
         loadCodeViewInfo();
         loadExports();
@@ -256,6 +267,67 @@ public class PEData {
         }
         clrSection = Optional.empty();
         return clrSection;
+    }
+
+    /**
+     * Loads the attribute certificate table, which holds the Authenticode signatures. Reads the PE file to do so
+     * unless already loaded.
+     *
+     * @return the certificate table, empty if the file has no certificate table entry or it can not be read. The
+     * table is present, but has no entries, if its data directory entry points outside of the file.
+     */
+    public synchronized Optional<CertificateTable> loadCertificateTable() {
+        if (certificateTable != null) {
+            return certificateTable;
+        }
+        if (!opt.maybeGetDataDirEntry(DataDirectoryKey.CERTIFICATE_TABLE).isPresent()) {
+            certificateTable = Optional.empty();
+            return certificateTable;
+        }
+        try {
+            certificateTable = Optional.of(CertificateTable.load(this));
+        } catch (IOException e) {
+            logger.error(e);
+            certificateTable = Optional.empty();
+        }
+        return certificateTable;
+    }
+
+    /**
+     * Loads all Authenticode signatures, including nested signatures, in depth-first order. Reads the PE file to do
+     * so unless already loaded.
+     *
+     * @return the signatures, empty list if the file is not signed or the signatures can not be parsed
+     */
+    public List<AuthenticodeSignature> loadAuthenticodeSignatures() {
+        Optional<CertificateTable> table = loadCertificateTable();
+        return table.isPresent() ? table.get().getAllSignatures() : new ArrayList<>();
+    }
+
+    /**
+     * Checks the integrity of the Authenticode signatures: the image digest, the message digest and the signatures
+     * of signers, embedded certificates and timestamps. Hashes the whole file unless already done.
+     * <p>
+     * VALID means integrity only: no trust, revocation or expiry policy is applied.
+     *
+     * @return the verification, empty if the file has no Authenticode signature or it can not be read
+     */
+    public synchronized Optional<AuthenticodeVerification> loadAuthenticodeVerification() {
+        if (authenticodeVerification != null) {
+            return authenticodeVerification;
+        }
+        Optional<CertificateTable> table = loadCertificateTable();
+        if (!table.isPresent() || table.get().getAllSignatures().isEmpty()) {
+            authenticodeVerification = Optional.empty();
+            return authenticodeVerification;
+        }
+        try {
+            authenticodeVerification = Optional.of(AuthenticodeVerifier.verify(this, table.get()));
+        } catch (IOException e) {
+            logger.error(e);
+            authenticodeVerification = Optional.empty();
+        }
+        return authenticodeVerification;
     }
 
     /**

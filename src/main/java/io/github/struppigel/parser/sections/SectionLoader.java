@@ -22,6 +22,7 @@ import io.github.struppigel.parser.Location;
 import io.github.struppigel.parser.MemoryMappedPE;
 import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.VirtualLocation;
+import io.github.struppigel.parser.sections.cert.CertificateTable;
 import io.github.struppigel.parser.sections.clr.CLRSection;
 import io.github.struppigel.parser.sections.clr.CLRTable;
 import io.github.struppigel.parser.sections.clr.OptimizedStream;
@@ -275,10 +276,34 @@ public class SectionLoader {
         Optional<DataDirEntry> dataDir = optHeader
                 .maybeGetDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
+            if (dataDirKey == DataDirectoryKey.CERTIFICATE_TABLE) {
+                return maybeGetSectionHeaderByFileOffset(dataDir.get().getVirtualAddress());
+            }
             return dataDir.get().maybeGetSectionTableEntry(table);
         }
         logger.warn("data dir entry " + dataDirKey + " doesn't exist");
         return Optional.absent();
+    }
+
+    /**
+     * Returns the section whose raw data, as it is read, contains the file
+     * offset. If several do, the one that starts closest to the offset.
+     *
+     * @param fileOffset the file offset
+     * @return the section that contains the offset, absent if none
+     */
+    private Optional<SectionHeader> maybeGetSectionHeaderByFileOffset(long fileOffset) {
+        boolean lowAlign = optHeader.isLowAlignmentMode();
+        SectionHeader result = null;
+        for (SectionHeader header : table.getSectionHeaders()) {
+            long start = header.getAlignedPointerToRaw(lowAlign);
+            long size = getReadSize(header);
+            boolean contains = size > 0 && fileOffset >= start && fileOffset < start + size;
+            if (contains && (result == null || start > result.getAlignedPointerToRaw(lowAlign))) {
+                result = header;
+            }
+        }
+        return Optional.fromNullable(result);
     }
 
     /**
@@ -297,9 +322,21 @@ public class SectionLoader {
                 .maybeGetDataDirEntry(dataDirKey);
         if (dataDir.isPresent()) {
             long rva = dataDir.get().getVirtualAddress();
+            if (dataDirKey == DataDirectoryKey.CERTIFICATE_TABLE) {
+                // the address of the certificate table is a file offset
+                return isWithinFile(rva) ? Optional.of(rva) : Optional.<Long>absent();
+            }
             return Optional.of(getFileOffset(rva));
         }
         return Optional.absent();
+    }
+
+    /**
+     * @param offset file offset
+     * @return true iff the offset points to a byte of the file
+     */
+    private boolean isWithinFile(long offset) {
+        return offset >= 0 && offset < file.length();
     }
 
     /**
@@ -471,6 +508,9 @@ public class SectionLoader {
                 case CLR_RUNTIME_HEADER:
                     section = CLRSection.newInstance(loadInfo);
                     break;
+                case CERTIFICATE_TABLE:
+                    section = CertificateTable.newInstance(loadInfo);
+                    break;
                 default:
                     return Optional.absent();
                 }
@@ -532,6 +572,37 @@ public class SectionLoader {
     public Optional<BoundImportSection> maybeLoadBoundImportSection()
             throws IOException {
         return (Optional<BoundImportSection>) maybeLoadSpecialSection(DataDirectoryKey.BOUND_IMPORT);
+    }
+
+    /**
+     * Loads the attribute certificate table, which holds the Authenticode
+     * signatures. The address of the table is a file offset.
+     * <p>
+     * The file on disk is read to fetch the information.
+     *
+     * @return the certificate table, absent if the file has no certificate
+     *         table entry. The table is present but empty if it lies outside
+     *         of the file, its issues describe why.
+     * @throws IOException if unable to read the file
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<CertificateTable> maybeLoadCertificateTable() throws IOException {
+        return (Optional<CertificateTable>) maybeLoadSpecialSection(DataDirectoryKey.CERTIFICATE_TABLE);
+    }
+
+    /**
+     * Loads the attribute certificate table, which holds the Authenticode
+     * signatures.
+     * <p>
+     * The file on disk is read to fetch the information.
+     *
+     * @return the certificate table
+     * @throws IOException if unable to read the file
+     * @throws IllegalStateException if the file has no certificate table
+     */
+    public CertificateTable loadCertificateTable() throws IOException {
+        return (CertificateTable) getOrThrow(maybeLoadCertificateTable(),
+                "unable to load certificate table");
     }
 
     /**
@@ -879,6 +950,10 @@ public class SectionLoader {
     public boolean hasValidPointer(DataDirectoryKey dataDirKey) {
         DataDirEntry dataDir = optHeader.getDataDirectory().get(dataDirKey);
         long rva = dataDir.getVirtualAddress();
+        if (dataDirKey == DataDirectoryKey.CERTIFICATE_TABLE) {
+            // the address of the certificate table is a file offset
+            return isWithinFile(rva);
+        }
         long offset = getFileOffset(rva);
         return offset <= file.length() && offset >= 0;
     }

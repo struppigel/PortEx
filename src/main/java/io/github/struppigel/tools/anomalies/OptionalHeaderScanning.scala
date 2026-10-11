@@ -446,9 +446,13 @@ trait OptionalHeaderScanning extends AnomalyScanner {
         val fileOffset = datadir.getFileOffset(secTable)
         fileOffset >= 0 && fileOffset < data.getFile.length
       }
-      val loader = new SectionLoader(data)
       if (!isValid) {
-        val description = s"Optional Header: invalid data directory entry for ${datadir.getKey}, its entry points outside of the file"
+        val description =
+          if (datadir.getKey == DataDirectoryKey.CERTIFICATE_TABLE)
+            s"Optional Header: invalid data directory entry for ${datadir.getKey}, the certificate table starts at " +
+              s"file offset ${hexString(datadir.getVirtualAddress)} outside of the file " +
+              s"(${hexString(data.getFile.length)} bytes); the signature was probably stripped or the file truncated"
+          else s"Optional Header: invalid data directory entry for ${datadir.getKey}, its entry points outside of the file"
         anomalyList += DataDirAnomaly(datadir, description,INVALID_DATA_DIR)
       }
     }
