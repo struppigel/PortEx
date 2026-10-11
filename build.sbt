@@ -1,6 +1,6 @@
 name := "PortEx"
 
-version := "5.0.7-SNAPSHOT"
+version := "5.0.7"
 
 scalaVersion := "2.12.20"
 
@@ -76,10 +76,10 @@ resolvers := {
     resolvers.value.filterNot(_.name.startsWith("GitHub Package Registry"))
 }
 
-credentials := Option(System.getenv("GITHUB_TOKEN")).filter(_.nonEmpty).map { token =>
+credentials ++= Option(System.getenv("GITHUB_TOKEN")).filter(_.nonEmpty).map { token =>
   Credentials(
-    "Sonatype Package Registry",
-    "central.sonatype.com",
+    "GitHub Package Registry",
+    "maven.pkg.github.com",
     "struppigel",
     token
   )

@@ -48,7 +48,7 @@ You can include PortEx to your project by adding the following Maven dependency:
 <dependency>
    <groupId>io.github.struppigel</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>5.0.6</version>
+   <version>5.0.7</version>
 </dependency> 
 ```
 
@@ -58,9 +58,9 @@ To use a local build, add the library as follows:
 <dependency>
    <groupId>io.github.struppigel</groupId>
    <artifactId>portex_2.12</artifactId>
-   <version>5.0.6</version>
+   <version>5.0.7</version>
    <scope>system</scope>
-   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-5.0.6.jar</systemPath>
+   <systemPath>$PORTEXDIR/target/scala-2.12/portex_2.12-5.0.7.jar</systemPath>
 </dependency> 
 ```
 
@@ -69,7 +69,7 @@ To use a local build, add the library as follows:
 Add the dependency as follows in your build.sbt
 
 ```
-libraryDependencies += "io.github.struppigel" % "portex_2.12" % "5.0.6"
+libraryDependencies += "io.github.struppigel" % "portex_2.12" % "5.0.7"
 ```
 
 ## Building PortEx
