@@ -1,8 +1,10 @@
 name := "PortEx"
 
-version := "5.0.7"
+version := "5.0.8"
 
 scalaVersion := "2.12.20"
+
+Compile / javacOptions ++= Seq("--release", "8")
 
 assembly / assemblyJarName := "PortexAnalyzer.jar"
 
