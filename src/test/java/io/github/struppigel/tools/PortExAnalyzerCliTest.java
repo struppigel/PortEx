@@ -160,6 +160,10 @@ public class PortExAnalyzerCliTest {
             File dumps = dir.resolve("portex.dumps").toFile();
             File p7b = new File(dumps, "0.signature.p7b");
             assertTrue(p7b.exists(), output);
+            // the raw table holds the WIN_CERTIFICATE header, the signature and the padding
+            File table = new File(dumps, "certificate_table.bin");
+            assertTrue(table.exists(), output);
+            assertTrue(table.length() >= p7b.length() + 8, table.length() + " " + p7b.length());
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
             try (InputStream in = new FileInputStream(p7b)) {
                 assertEquals(factory.generateCertificates(in).size(), 2);

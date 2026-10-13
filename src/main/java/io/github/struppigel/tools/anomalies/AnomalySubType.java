@@ -591,6 +591,12 @@ public enum AnomalySubType {
      */
     CERT_DATA_AFTER_PKCS7(STRUCTURE),
     /**
+     * The PKCS#7 signature has an element that its format does not define,
+     * e.g. after the values of an attribute or after the unauthenticated
+     * attributes of a signer, data that the signature does not cover
+     */
+    CERT_EXTRA_SIGNATURE_ELEMENT(STRUCTURE),
+    /**
      * The PKCS#7 signature can not be parsed (truncated or collapsed ASN.1)
      */
     CERT_MALFORMED_PKCS7(STRUCTURE),
@@ -700,6 +706,12 @@ public enum AnomalySubType {
      * An unauthenticated attribute has an unknown type
      */
     CERT_UNKNOWN_UNAUTH_ATTRIBUTE(NON_DEFAULT),
+    /**
+     * An unauthenticated attribute has a type that Authenticode does not use
+     * there, e.g. any unauthenticated attribute of a timestamp signer or a
+     * signed attribute type, data that the signature does not cover
+     */
+    CERT_UNEXPECTED_UNAUTH_ATTRIBUTE(NON_DEFAULT),
     /**
      * The SpcRelaxedPEMarkerCheck attribute is present
      */

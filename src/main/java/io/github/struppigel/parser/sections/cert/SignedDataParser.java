@@ -187,6 +187,8 @@ final class SignedDataParser {
         if (!wrapper.isContext(0)) {
             throw new DerException("expected [0] content but found " + wrapper.tagName(), wrapper.fileOffset());
         }
+        extraElements(contentInfo, 2, label + ": the ContentInfo", sink);
+        extraElements(wrapper, 1, label + ": the content of the ContentInfo", sink);
         DerElement sd = wrapper.explicitContent().expectSequence();
         Content content = new Content();
         content.version = sd.child(0).asSmallInteger();
@@ -203,7 +205,9 @@ final class SignedDataParser {
         Optional<DerElement> eContent = encap.optChild(1);
         if (eContent.isPresent() && eContent.get().isContext(0)) {
             content.eContent = eContent.get().explicitContent();
+            extraElements(eContent.get(), 1, label + ": the content of the EncapsulatedContentInfo", sink);
         }
+        extraElements(encap, 2, label + ": the EncapsulatedContentInfo", sink);
         for (int i = 3; i < sd.childCount(); i++) {
             DerElement c = sd.child(i);
             if (c.isContext(0) && c.isConstructed()) {
@@ -215,6 +219,22 @@ final class SignedDataParser {
         if (content.signerInfos == null) {
             throw new DerException("SignedData has no SignerInfos", sd.fileOffset());
         }
+        // after the certificates [0] and CRLs [1] the SignerInfos are the last element (RFC 5652)
+        List<DerElement> extra = new ArrayList<>();
+        int expected = 0; // 0: certificates may follow, 1: CRLs may follow, 2: only the SignerInfos
+        for (int i = 3; i < sd.childCount(); i++) {
+            DerElement c = sd.child(i);
+            if (c == content.signerInfos) {
+                expected = 3;
+            } else if (expected == 0 && c.isContext(0) && c.isConstructed()) {
+                expected = 1;
+            } else if (expected <= 1 && c.isContext(1) && c.isConstructed()) {
+                expected = 2;
+            } else {
+                extra.add(c);
+            }
+        }
+        extraElements(extra, label + ": the SignedData", sink);
         if (expectedContentType != null && !expectedContentType.equals(content.eContentType)) {
             sink.add(CertificateIssueType.WRONG_CONTENT_TYPE, label + ": the signed content type is "
                             + Oids.nameOrOid(content.eContentType) + " instead of "
@@ -284,17 +304,18 @@ final class SignedDataParser {
         if (signatureValue.isConstructed()) {
             throw new DerException("constructed signature value", signatureValue.fileOffset());
         }
+        String who = role == Role.AUTHENTICODE ? label + ": signer"
+                : role == Role.COUNTERSIGNER ? label + ": countersigner" : label + ": timestamp signer";
         DerElement unauthenticated = null;
         if (i < si.childCount() && si.child(i).isContext(1)) {
-            unauthenticated = si.child(i);
+            unauthenticated = si.child(i++);
         }
+        extraElements(si, i, who + " (SignerInfo)", sink);
         String jdkSignature = Algorithms.signatureJdkName(rawSignatureAlgorithm.getOid(),
                 digestAlgorithm.getOid()).orElse(null);
         AlgorithmId signatureAlgorithm = new AlgorithmId(rawSignatureAlgorithm.getOid(), jdkSignature,
                 rawSignatureAlgorithm.parameters(), rawSignatureAlgorithm.getLocation());
 
-        String who = role == Role.AUTHENTICODE ? label + ": signer"
-                : role == Role.COUNTERSIGNER ? label + ": countersigner" : label + ": timestamp signer";
         AuthenticodeCertificate certificate = findCertificate(bag, issuer, serial, ski)
                 .orElse(findCertificate(fallbackBag, issuer, serial, ski).orElse(null));
         if (certificate == null) {
@@ -355,6 +376,10 @@ final class SignedDataParser {
         /* unauthenticated attributes */
         List<SignatureAttribute> unauthList = parseAttributes(unauthenticated, false, sink, who);
         List<Timestamp> timestamps = new ArrayList<>();
+        boolean intentToSeal = false;
+        for (SignatureAttribute attribute : signedList) {
+            intentToSeal |= Oids.INTENT_TO_SEAL.equals(attribute.getOid());
+        }
         for (SignatureAttribute attribute : unauthList) {
             if (attribute.getSize() > CertificateTable.LARGE_UNAUTHENTICATED_ATTRIBUTE_SIZE) {
                 sink.add(CertificateIssueType.LARGE_UNAUTH_ATTRIBUTE, who + ": unauthenticated attribute "
@@ -363,11 +388,12 @@ final class SignedDataParser {
                         attribute.getLocation(), AuthenticodeFieldKey.UNAUTHENTICATED_ATTRIBUTES);
             }
             if (role != Role.AUTHENTICODE) {
+                notUsedByRole(attribute, sink, who);
                 continue;
             }
             try {
                 interpretUnauthenticated(attribute, bag, sink, who, label, entryIndex, nestingLevel, number,
-                        timestamps, nestedOut);
+                        timestamps, nestedOut, intentToSeal);
             } catch (DerException e) {
                 sink.addDerException(who + " attribute " + Oids.nameOrOid(attribute.getOid()), e);
             }
@@ -380,7 +406,8 @@ final class SignedDataParser {
     private void interpretUnauthenticated(SignatureAttribute attribute, List<AuthenticodeCertificate> bag,
                                           IssueSink sink, String who, String label, int entryIndex,
                                           int nestingLevel, int number, List<Timestamp> timestamps,
-                                          List<AuthenticodeSignature> nestedOut) throws DerException {
+                                          List<AuthenticodeSignature> nestedOut, boolean intentToSeal)
+            throws DerException {
         DerElement values = attribute.valueSet();
         if (values == null) {
             throw new DerException("attribute without value set", attribute.element().fileOffset());
@@ -441,12 +468,28 @@ final class SignedDataParser {
                 break;
             case Oids.SPC_RELAXED_PE_MARKER_CHECK:
                 relaxedMarker(attribute, sink, who);
+                signedAttributeType(attribute, sink, who);
                 break;
             case Oids.INTENT_TO_SEAL:
+            case Oids.PLATFORM_MANIFEST_BINARY_ID:
+                signedAttributeType(attribute, sink, who);
+                break;
             case Oids.SEALING_SIGNATURE:
             case Oids.SEALING_TIMESTAMP:
-            case Oids.PLATFORM_MANIFEST_BINARY_ID:
+                // signtool seals a signature in a second step if the signer has the signed attribute intent to seal
+                if (!intentToSeal) {
+                    sink.add(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE, who + " has the unauthenticated"
+                                    + " attribute " + Oids.nameOrOid(attribute.getOid())
+                                    + " without the signed attribute intent to seal",
+                            attribute.getLocation(), AuthenticodeFieldKey.UNAUTHENTICATED_ATTRIBUTES);
+                }
+                extraElements(values, 1, who + " attribute " + Oids.nameOrOid(attribute.getOid()), sink);
+                break;
             case Oids.SPC_ENCRYPTED_DIGEST_RETRY_COUNT:
+                extraElements(values, 1, who + " attribute " + Oids.nameOrOid(attribute.getOid()), sink);
+                if (values.childCount() > 0) {
+                    values.child(0).asSmallInteger();
+                }
                 break;
             default:
                 sink.add(CertificateIssueType.UNKNOWN_UNAUTH_ATTRIBUTE, who + " has the unknown unauthenticated"
@@ -469,6 +512,53 @@ final class SignedDataParser {
         sink.add(CertificateIssueType.RELAXED_PE_MARKER_CHECK, who + " has the SpcRelaxedPEMarkerCheck attribute",
                 attribute.getLocation(), attribute.isAuthenticated() ? AuthenticodeFieldKey.SIGNED_ATTRIBUTES
                         : AuthenticodeFieldKey.UNAUTHENTICATED_ATTRIBUTES);
+    }
+
+    /** reports an attribute that signers have as signed attribute, but that is unauthenticated here */
+    private static void signedAttributeType(SignatureAttribute attribute, IssueSink sink, String who) {
+        sink.add(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE, who + " has " + Oids.nameOrOid(attribute.getOid())
+                        + " as unauthenticated attribute, it is a signed attribute and here the signature does"
+                        + " not cover it",
+                attribute.getLocation(), AuthenticodeFieldKey.UNAUTHENTICATED_ATTRIBUTES);
+    }
+
+    /** countersigners and timestamp signers of Authenticode signatures have no unauthenticated attributes */
+    private static void notUsedByRole(SignatureAttribute attribute, IssueSink sink, String who) {
+        if (Oids.name(attribute.getOid()).isPresent()) {
+            sink.add(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE, who + " has the unauthenticated attribute "
+                            + Oids.nameOrOid(attribute.getOid()) + ", Authenticode does not use unauthenticated"
+                            + " attributes there and its content is not parsed",
+                    attribute.getLocation(), AuthenticodeFieldKey.UNAUTHENTICATED_ATTRIBUTES);
+        } else {
+            sink.add(CertificateIssueType.UNKNOWN_UNAUTH_ATTRIBUTE, who + " has the unknown unauthenticated"
+                            + " attribute " + attribute.getOid() + ", which is not covered by the signature",
+                    attribute.getLocation(), AuthenticodeFieldKey.UNAUTHENTICATED_ATTRIBUTES);
+        }
+    }
+
+    /** reports the children of the parent from the index on, which its format does not define */
+    private static void extraElements(DerElement parent, int from, String what, IssueSink sink) {
+        List<DerElement> children = parent.children();
+        if (children.size() > from) {
+            extraElements(children.subList(from, children.size()), what, sink);
+        }
+    }
+
+    /** reports elements that the format of a structure does not define, e.g. hidden data */
+    private static void extraElements(List<DerElement> extra, String what, IssueSink sink) {
+        if (extra.isEmpty()) {
+            return;
+        }
+        List<PhysicalLocation> locations = new ArrayList<>();
+        long bytes = 0;
+        for (DerElement e : extra) {
+            locations.add(e.location());
+            bytes += e.encodedLength();
+        }
+        sink.add(CertificateIssueType.EXTRA_SIGNATURE_ELEMENT, what + " has " + extra.size() + " element(s) with "
+                        + bytes + " bytes at " + Hex.offset(extra.get(0).fileOffset())
+                        + " that its format does not define",
+                locations, null, AuthenticodeFieldKey.SIGNATURE_ENCODING);
     }
 
     private static void checkRequiredAttributes(Role role, DerElement signedAttributes, String contentType,
@@ -514,6 +604,8 @@ final class SignedDataParser {
                 attribute.expectSequence();
                 String oid = sink.oid(attribute.child(0));
                 attribute.child(1).expectSet();
+                extraElements(attribute, 2, who + (authenticated ? " signed" : " unauthenticated") + " attribute "
+                        + Oids.nameOrOid(oid), sink);
                 result.add(new SignatureAttribute(oid, authenticated, attribute));
             } catch (DerException e) {
                 sink.addDerException(who + " attribute " + n, e);

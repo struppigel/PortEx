@@ -26,7 +26,7 @@ import io.github.struppigel.parser.coffheader.COFFHeaderKey
 import io.github.struppigel.parser.optheader.{DataDirectoryKey, StandardFieldEntryKey, WindowsEntryKey}
 import io.github.struppigel.parser.sections.clr.{CLRTableKey, CLRTableType, ComImageFlag}
 import io.github.struppigel.parser.sections.{SectionCharacteristic, SectionHeader, SectionLoader}
-import io.github.struppigel.parser.sections.cert.{AuthenticodeSignature, VerificationResult}
+import io.github.struppigel.parser.sections.cert.{AlgorithmId, AuthenticodeSignature, Timestamp, VerificationResult, VerificationStatus}
 import io.github.struppigel.parser.sections.debug.DebugType
 import io.github.struppigel.parser.sections.clr.{CLRCodedIndexField, CLRTableEntry, OptimizedStream}
 import io.github.struppigel.parser.sections.rsrc.Resource
@@ -116,17 +116,20 @@ class ReportCreator(private val data: PEData) {
     val buf = new StringBuffer()
     val sha256 = MessageDigest.getInstance("SHA-256")
     val md5 = MessageDigest.getInstance("MD5")
+    def line(label: String, value: String): Unit = buf.append(pad(label + ":", "Authentihash: ".length, " ") + value + NL)
     buf.append(title("Hashes") + NL)
-    buf.append("MD5:     " + hash(hasher.fileHash(md5)) + NL)
-    buf.append("SHA256:  " + hash(hasher.fileHash(sha256)) + NL)
-    buf.append("ImpHash: " + ImpHash.createString(data.getFile) + NL)
+    line("MD5", hash(hasher.fileHash(md5)))
+    line("SHA256", hash(hasher.fileHash(sha256)))
+    // the Authenticode image digest with SHA-256, also for files that are not signed
+    line("Authentihash", hash(hasher.authentihash(MessageDigest.getInstance("SHA-256"))))
+    line("ImpHash", ImpHash.createString(data.getFile))
     val maybeRich = hasher.maybeRichHash()
     if (maybeRich.isPresent) {
-      buf.append("Rich:    " + hash(maybeRich.get()) + NL)
+      line("Rich", hash(maybeRich.get()))
     }
     val maybePVRich = hasher.maybeRichPVHash()
     if (maybePVRich.isPresent) {
-      buf.append("RichPV:  " + hash(maybePVRich.get()) + NL)
+      line("RichPV", hash(maybePVRich.get()))
     }
     buf.append(NL)
     val colWidth = 10
@@ -437,23 +440,20 @@ class ReportCreator(private val data: PEData) {
     buf.append("Certificate table offset: " + hexString(table.getOffset) + NL)
     buf.append("Certificate table size:   " + hexString(table.getDeclaredSize) + NL)
     buf.append("Entries:                  " + table.getEntries.size + NL)
-    if (verification.isPresent) {
-      buf.append("Integrity:                " + verification.get.getStatus +
-        " (integrity only, no trust decision)" + NL)
+    // Windows only verifies the signature of the first entry
+    if (!table.getPrimarySignature.isPresent) {
+      buf.append("Integrity:                INVALID (the signature can not be parsed)" + NL)
+    } else if (verification.isPresent) {
+      buf.append("Integrity:                " + verification.get.getStatus + NL)
     }
     for (entry <- table.getEntries.asScala) {
       val certType = if (entry.getCertificateType.isPresent) entry.getCertificateType.get.name
         else hexString(entry.getCertificateTypeValue)
+      val parsed = entry.getSignature.isPresent || entry.getX509Certificate.isPresent
       buf.append(NL + "WIN_CERTIFICATE " + entry.getIndex + " at " + hexString(entry.getOffset) +
         ", length " + hexString(entry.getLength) + ", revision " + hexString(entry.getRevisionValue) +
-        ", type " + certType + NL)
+        ", type " + certType + { if (parsed) "" else ": invalid" } + NL)
       if (entry.getSignature.isPresent) appendSignature(buf, entry.getSignature.get, "", results)
-    }
-    val issues = table.getIssues.asScala.toList ++
-      (if (verification.isPresent) verification.get.getIssues.asScala.toList else Nil)
-    if (issues.nonEmpty) {
-      buf.append(NL + "Issues:" + NL)
-      for (issue <- issues) buf.append("* " + issue.getDescription + NL)
     }
     buf.toString + NL
   }
@@ -462,15 +462,25 @@ class ReportCreator(private val data: PEData) {
                               results: Map[AuthenticodeSignature, VerificationResult]): Unit = {
     def opt[T](o: java.util.Optional[T]): Option[T] = if (o.isPresent) Some(o.get) else None
     val in = indent + "  "
+    val column = in.length + 20
+    // the signed digest and, if verified, the computed digest with the result of the comparison
+    def appendDigest(at: String, label: String, algorithm: Option[AlgorithmId], signed: Option[Array[Byte]],
+                     check: Option[(java.util.Optional[String], VerificationStatus)]): Unit =
+      if (signed.isDefined || check.isDefined) {
+        buf.append((at + label + ":").padTo(column, ' ') + signed.map(ByteArrayUtil.byteToHex(_, "")).getOrElse("n.a.") +
+          algorithm.map(" (" + _ + ")").getOrElse("") + NL)
+        for ((computed, status) <- check) {
+          buf.append((at + "  computed:").padTo(column, ' ') + opt(computed).getOrElse("n.a.") + " (" + status + ")" + NL)
+        }
+      }
     val result = results.get(s)
     buf.append(NL + indent + s.getLabel + result.map(r => ": " + r.getStatus).getOrElse("") + NL)
-    for (alg <- opt(s.getImageDigestAlgorithm); digest <- opt(s.getImageDigest)) {
-      buf.append(in + "Image digest (" + alg + "): " + ByteArrayUtil.byteToHex(digest, "") + NL)
-    }
+    appendDigest(in, "Image digest", opt(s.getImageDigestAlgorithm), opt(s.getImageDigest),
+      result.map(r => (r.getComputedImageDigest, r.getImageDigestStatus)))
+    val firstSigner = opt(s.getSigner)
+    appendDigest(in, "Message digest", firstSigner.map(_.getDigestAlgorithm), firstSigner.flatMap(si => opt(si.getMessageDigest)),
+      result.map(r => (r.getComputedMessageDigest, r.getMessageDigestStatus)))
     for (r <- result) {
-      buf.append(in + "Computed digest:    " + opt(r.getComputedImageDigest).getOrElse("n.a.") +
-        " (" + r.getImageDigestStatus + ")" + NL)
-      buf.append(in + "Message digest:     " + r.getMessageDigestStatus + NL)
       buf.append(in + "Signer signature:   " + r.getSignerSignatureStatus + NL)
       buf.append(in + "Certificate chain:  " + r.getSignerChain + NL)
     }
@@ -487,8 +497,17 @@ class ReportCreator(private val data: PEData) {
     }
     val timestampResults = result.map(_.getTimestampVerifications.asScala.toList).getOrElse(Nil)
     for (signer <- s.getSigners.asScala.headOption; t <- signer.getTimestamps.asScala) {
-      val status = timestampResults.find(_.getTimestamp eq t).map(v => " (" + v.getStatus + ")").getOrElse("")
-      buf.append(in + "Timestamp:          " + t + status + NL)
+      val verification = timestampResults.find(_.getTimestamp eq t)
+      buf.append(in + "Timestamp:          " + t + verification.map(v => " (" + v.getStatus + ")").getOrElse("") + NL)
+      // the messageDigest attribute of a countersignature is the imprint
+      if (t.getKind == Timestamp.Kind.RFC3161) {
+        appendDigest(in + "  ", "Imprint", opt(t.getImprintAlgorithm), opt(t.getImprint),
+          verification.map(v => (v.getComputedImprint, v.getImprintStatus)))
+      }
+      val tsSigner = opt(t.getSigner)
+      appendDigest(in + "  ", "Message digest", tsSigner.map(_.getDigestAlgorithm),
+        tsSigner.flatMap(si => opt(si.getMessageDigest)),
+        verification.map(v => (v.getComputedMessageDigest, v.getMessageDigestStatus)))
     }
     val certificateResults = result.map(_.getCertificateVerifications.asScala.toList).getOrElse(Nil)
     for (c <- s.getCertificates.asScala) {

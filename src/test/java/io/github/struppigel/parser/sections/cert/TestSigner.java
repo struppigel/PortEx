@@ -75,6 +75,16 @@ final class TestSigner {
     int nestingDepth;
     String unauthenticatedOid;
     int unauthenticatedSize;
+    /** adds a countersignature whose SignerInfo has an unauthenticated attribute of this type */
+    String countersignerUnauthenticatedOid;
+    /** adds the signed attribute intent to seal */
+    boolean intentToSeal;
+    /** adds an unauthenticated attribute with an element after its values */
+    boolean extraAttributeElement;
+    /** adds an element after the unauthenticated attributes of the SignerInfo */
+    boolean extraSignerInfoElement;
+    /** adds an element before the SignerInfos of the SignedData */
+    boolean extraSignedDataElement;
 
     private static synchronized void initKeys() throws GeneralSecurityException {
         if (rsaCa != null) {
@@ -154,6 +164,9 @@ final class TestSigner {
         if (relaxedMarker) {
             signed.add(attribute(Oids.SPC_RELAXED_PE_MARKER_CHECK, integer(0)));
         }
+        if (intentToSeal) {
+            signed.add(attribute(Oids.INTENT_TO_SEAL, integer(1)));
+        }
         signed.sort(TestSigner::compareBytes);
         byte[] signedSet = set(signed.toArray(new byte[0][]));
         byte[] signedImplicit = Arrays.copyOf(signedSet, signedSet.length);
@@ -168,6 +181,7 @@ final class TestSigner {
         byte[] signatureAlgorithm = keyType == KeyType.RSA ? algorithm(Oids.RSA_ENCRYPTION)
                 : algorithmNoParams(ecdsaOid(digest));
 
+        byte[] leafSerial = longSerial ? concat(new byte[]{0x01}, new byte[20]) : BigInteger.valueOf(0x2002).toByteArray();
         List<byte[]> unauthenticated = new ArrayList<>();
         if (level < nestingDepth) {
             unauthenticated.add(attribute(Oids.NESTED_SIGNATURE, signature(imageDigest, level + 1)));
@@ -175,10 +189,17 @@ final class TestSigner {
         if (unauthenticatedOid != null && level == 0) {
             unauthenticated.add(attribute(unauthenticatedOid, octets(new byte[unauthenticatedSize])));
         }
-        byte[] leafSerial = longSerial ? concat(new byte[]{0x01}, new byte[20]) : BigInteger.valueOf(0x2002).toByteArray();
+        if (countersignerUnauthenticatedOid != null && level == 0) {
+            unauthenticated.add(attribute(Oids.COUNTER_SIGNATURE,
+                    countersigner(signatureValue, leafSerial, leaf.getPrivate(), signatureAlgorithm)));
+        }
+        if (extraAttributeElement && level == 0) {
+            unauthenticated.add(seq(oid(Oids.SPC_ENCRYPTED_DIGEST_RETRY_COUNT), set(integer(1)), octets(new byte[16])));
+        }
         byte[] signerInfo = seq(integer(1), seq(CA_NAME, integerBytes(leafSerial)), algorithm(digestOid),
                 signedImplicit, signatureAlgorithm, octets(signatureValue),
-                unauthenticated.isEmpty() ? new byte[0] : tlv(0xa1, unauthenticated.toArray(new byte[0][])));
+                unauthenticated.isEmpty() ? new byte[0] : tlv(0xa1, unauthenticated.toArray(new byte[0][])),
+                extraSignerInfoElement && level == 0 ? octets(new byte[16]) : new byte[0]);
 
         List<byte[]> certificates = new ArrayList<>();
         if (!omitSignerCertificate) {
@@ -193,8 +214,24 @@ final class TestSigner {
         byte[] signedData = seq(integer(1), set(algorithm(digestMismatch ? Oids.SHA1 : digestOid)),
                 seq(oid(Oids.SPC_INDIRECT_DATA), ctx(0, indirect)),
                 ctx(0, certificates.toArray(new byte[0][])),
+                extraSignedDataElement && level == 0 ? octets(new byte[16]) : new byte[0],
                 twoSigners ? set(signerInfo, signerInfo) : set(signerInfo));
         return seq(oid(Oids.SIGNED_DATA), ctx(0, signedData));
+    }
+
+    /** a countersignature of the signature value by the leaf certificate, with an unauthenticated attribute */
+    private byte[] countersigner(byte[] signatureValue, byte[] leafSerial, PrivateKey key, byte[] signatureAlgorithm)
+            throws GeneralSecurityException {
+        List<byte[]> signed = new ArrayList<>();
+        signed.add(attribute(Oids.MESSAGE_DIGEST, octets(MessageDigest.getInstance(digest).digest(signatureValue))));
+        signed.add(attribute(Oids.SIGNING_TIME, utcTime(NOT_BEFORE.plusSeconds(86400))));
+        signed.sort(TestSigner::compareBytes);
+        byte[] signedSet = set(signed.toArray(new byte[0][]));
+        byte[] signedImplicit = Arrays.copyOf(signedSet, signedSet.length);
+        signedImplicit[0] = (byte) 0xa0;
+        return seq(integer(1), seq(CA_NAME, integerBytes(leafSerial)), algorithm(digestOid(digest)), signedImplicit,
+                signatureAlgorithm, octets(sign(signedSet, key, digest)),
+                tlv(0xa1, attribute(countersignerUnauthenticatedOid, octets(new byte[16]))));
     }
 
     private byte[] spki(PublicKey key) {

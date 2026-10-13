@@ -72,6 +72,8 @@ public enum CertificateIssueType {
     TABLE_EXTRA_DATA("certificate table has data after its entries"),
     /** a WIN_CERTIFICATE has data after the PKCS#7 structure (CVE-2013-3900) */
     DATA_AFTER_PKCS7("data after the PKCS#7 signature"),
+    /** the PKCS#7 structure has an element that its format does not define */
+    EXTRA_SIGNATURE_ELEMENT("element that the signature format does not define"),
     /** the PKCS#7 structure can not be parsed */
     MALFORMED_PKCS7("malformed PKCS#7 signature"),
     /** nested signatures are nested deeply or occur often */
@@ -129,6 +131,8 @@ public enum CertificateIssueType {
     SIGNER_NOT_VALID_AT_SIGNING_TIME("signer certificate not valid at signing time"),
     /** an unauthenticated attribute has an unknown type */
     UNKNOWN_UNAUTH_ATTRIBUTE("unknown unauthenticated attribute"),
+    /** an unauthenticated attribute has a type that Authenticode does not use there */
+    UNEXPECTED_UNAUTH_ATTRIBUTE("unexpected unauthenticated attribute"),
     /** the SpcRelaxedPEMarkerCheck attribute is present */
     RELAXED_PE_MARKER_CHECK("relaxed PE marker check"),
     /** an algorithm is not supported */

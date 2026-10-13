@@ -32,7 +32,10 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
  * Compares the speed of the signature scanner with the PortEx 5 scanner.
- * The new scanner must not be slower in any scenario.
+ * The new scanner must not be slower in any scenario. Scenarios of single
+ * locations and of loading compare the same databases, the ones converted
+ * from PortEx 5; the time with the Detect It Easy signatures is reported in
+ * addition. The end to end scenarios use all bundled databases.
  * <p>
  * Excluded from the default test run, run with: test.ps1 -Perf
  */
@@ -94,16 +97,21 @@ class SignatureScannerPerfTest {
   }
 
   @Test(groups = Array("performance"))
-  def coldDatabaseLoad(): Unit =
-    assertNotSlower(coldCompare("1a load and compile all databases, fresh JVM", Seq("legacy"), Seq("new")), MaxFreshJvmRatio)
+  def coldDatabaseLoad(): Unit = {
+    assertNotSlower(coldCompare("1a load and compile the databases of PortEx 5, fresh JVM", Seq("legacy"), Seq("new")), MaxFreshJvmRatio)
+    // the Detect It Easy signatures have no counterpart in PortEx 5, their time is only reported
+    coldCompare("1e load and compile all databases incl. Detect It Easy, fresh JVM", Seq("legacy"), Seq("new-all"))
+  }
 
   @Test(groups = Array("performance"))
   def coldSingleFile(): Unit = {
     // a single file analysis in a fresh JVM, as with one PortexAnalyzer call per file
     val file = corpusPEs.find(_.getName == "WinRar.exe").getOrElse(corpusPEs.head)
     val path = file.getAbsolutePath
-    assertNotSlower(coldCompare(s"1d all PEData signatures of ${file.getName}, fresh JVM",
+    assertNotSlower(coldCompare(s"1d PE signatures of PortEx 5 of ${file.getName}, fresh JVM",
       Seq("legacy-e2e", path), Seq("new-e2e", path)), MaxFreshJvmRatio)
+    coldCompare(s"1f all PEData signatures incl. Detect It Easy of ${file.getName}, fresh JVM",
+      Seq("legacy-e2e", path), Seq("new-all-e2e", path))
   }
 
   private def readAll(in: java.io.InputStream): Array[Byte] =
@@ -140,24 +148,37 @@ class SignatureScannerPerfTest {
   def entryPointScanSynthetic(): Unit = {
     val file = files.pe("upx_like.exe", upxEntryPoint, 0x10000, Array.emptyByteArray)
     val legacy = LegacySignatureScanner().prebuild()
-    val m = DefaultSignatures.peScanner._scan(PELoader.loadPE(file), Set(LocationKind.ENTRY_POINT))
+    val scanner = ColdLoadProbe.portex5Scanner
+    val m = scanner._scan(PELoader.loadPE(file), Set(LocationKind.ENTRY_POINT))
     assertTrue(m.exists(_.getName.startsWith("UPX")), m.mkString(", "))
     assertNotSlower(compareSimple("2  entry point scan, synthetic PE incl. PE parsing") {
       legacy._findAllEPMatches(file)
     } {
-      DefaultSignatures.peScanner._scan(PELoader.loadPE(file), Set(LocationKind.ENTRY_POINT))
+      scanner._scan(PELoader.loadPE(file), Set(LocationKind.ENTRY_POINT))
     })
+    compareSimple("2c entry point scan incl. Detect It Easy, synthetic PE incl. PE parsing") {
+      legacy._findAllEPMatches(file)
+    } {
+      DefaultSignatures.peScanner._scan(PELoader.loadPE(file), Set(LocationKind.ENTRY_POINT))
+    }
   }
 
   @Test(groups = Array("performance"))
   def entryPointScanCorpus(): Unit = {
     val pes = corpusPEs
     val legacy = LegacySignatureScanner().prebuild()
+    val scanner = ColdLoadProbe.portex5Scanner
     assertNotSlower(compareSimple(s"2  entry point scan, ${pes.size} corpus files incl. PE parsing", warmups = 2, runs = 7) {
       pes.map(legacy._findAllEPMatches(_).size).sum
     } {
-      pes.map(f => DefaultSignatures.peScanner._scan(PELoader.loadPE(f), Set(LocationKind.ENTRY_POINT)).size).sum
+      pes.map(f => scanner._scan(PELoader.loadPE(f), Set(LocationKind.ENTRY_POINT)).size).sum
     })
+    // signatures with conditions on resources or version information parse them, which a full scan does anyway
+    compareSimple(s"2d entry point scan incl. Detect It Easy, ${pes.size} corpus files incl. PE parsing", warmups = 2, runs = 7) {
+      pes.map(legacy._findAllEPMatches(_).size).sum
+    } {
+      pes.map(f => DefaultSignatures.peScanner._scan(PELoader.loadPE(f), Set(LocationKind.ENTRY_POINT)).size).sum
+    }
   }
 
   @Test(groups = Array("performance"))
@@ -167,11 +188,15 @@ class SignatureScannerPerfTest {
     System.arraycopy(ascii("Inno"), 0, overlay, 0x34, 4)
     val file = files.pe("installer.exe", upxEntryPoint, 0x10000, overlay)
     val legacy = new LegacyScans(asShipped = false)
-    val m = DefaultSignatures.peScanner._scan(PELoader.loadPE(file), Set(LocationKind.OVERLAY))
+    val scanner = ColdLoadProbe.portex5Scanner
+    val m = scanner._scan(PELoader.loadPE(file), Set(LocationKind.OVERLAY))
     assertTrue(m.exists(_.getName == "Inno Setup Installer with Stub"), m.mkString(", "))
     assertNotSlower(compare("3  overlay scan, 8 MB overlay")(
       () => PELoader.loadPE(file), (pe: PEData) => legacy.overlayMatches(pe))(
-      () => PELoader.loadPE(file), (pe: PEData) => DefaultSignatures.peScanner._scan(pe, Set(LocationKind.OVERLAY))))
+      () => PELoader.loadPE(file), (pe: PEData) => scanner._scan(pe, Set(LocationKind.OVERLAY))))
+    compare("3b overlay scan incl. Detect It Easy, 8 MB overlay")(
+      () => PELoader.loadPE(file), (pe: PEData) => legacy.overlayMatches(pe))(
+      () => PELoader.loadPE(file), (pe: PEData) => DefaultSignatures.peScanner._scan(pe, Set(LocationKind.OVERLAY)))
   }
 
   @Test(groups = Array("performance"))
@@ -179,12 +204,16 @@ class SignatureScannerPerfTest {
     val (file, count) = corpusPEs.map(f => (f, scala.util.Try(PELoader.loadPE(f).loadResources().size).getOrElse(0))).maxBy(_._2)
     val asShipped = new LegacyScans(asShipped = true)
     val prebuilt = new LegacyScans(asShipped = false)
+    val scanner = ColdLoadProbe.portex5Scanner
     assertNotSlower(compare(s"4a resource scan, ${file.getName} ($count resources), legacy as shipped", warmups = 2, runs = 7)(
       () => PELoader.loadPE(file), (pe: PEData) => asShipped.resourceMatches(pe))(
-      () => PELoader.loadPE(file), (pe: PEData) => DefaultSignatures.peScanner._scan(pe, Set(LocationKind.RESOURCE))))
+      () => PELoader.loadPE(file), (pe: PEData) => scanner._scan(pe, Set(LocationKind.RESOURCE))))
     assertNotSlower(compare(s"4b resource scan, ${file.getName} ($count resources), legacy prebuilt")(
       () => PELoader.loadPE(file), (pe: PEData) => prebuilt.resourceMatches(pe))(
-      () => PELoader.loadPE(file), (pe: PEData) => DefaultSignatures.peScanner._scan(pe, Set(LocationKind.RESOURCE))))
+      () => PELoader.loadPE(file), (pe: PEData) => scanner._scan(pe, Set(LocationKind.RESOURCE))))
+    compare(s"4c resource scan incl. Detect It Easy, ${file.getName} ($count resources), legacy prebuilt")(
+      () => PELoader.loadPE(file), (pe: PEData) => prebuilt.resourceMatches(pe))(
+      () => PELoader.loadPE(file), (pe: PEData) => DefaultSignatures.peScanner._scan(pe, Set(LocationKind.RESOURCE)))
   }
 
   @Test(groups = Array("performance"))

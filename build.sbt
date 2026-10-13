@@ -4,6 +4,8 @@ version := "6.0.0-SNAPSHOT"
 
 scalaVersion := "2.12.20"
 
+Compile / javacOptions ++= Seq("--release", "17")
+
 assembly / assemblyJarName := "PortexAnalyzer.jar"
 
 assembly / mainClass := Some("io.github.struppigel.tools.PortExAnalyzer")

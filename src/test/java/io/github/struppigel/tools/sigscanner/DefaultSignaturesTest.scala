@@ -32,8 +32,10 @@ class DefaultSignaturesTest {
     assertEquals(DefaultSignatures.installers.size, 88)
     assertEquals(DefaultSignatures.fileTypes.size, 407)
     assertEquals(DefaultSignatures.javaWrappers.size, 11)
-    assertEquals(DefaultSignatures.pe.size, 1517 + 88 + 407)
-    for (db <- List(DefaultSignatures.packers, DefaultSignatures.installers, DefaultSignatures.fileTypes, DefaultSignatures.javaWrappers))
+    assertEquals(DefaultSignatures.die.size, 1705)
+    assertEquals(DefaultSignatures.pe.size, 1517 + 88 + 407 + 1705)
+    for (db <- List(DefaultSignatures.packers, DefaultSignatures.installers, DefaultSignatures.fileTypes,
+      DefaultSignatures.javaWrappers, DefaultSignatures.die))
       assertTrue(db.warnings.isEmpty, db.warnings.mkString("\n"))
   }
 
@@ -45,7 +47,7 @@ class DefaultSignaturesTest {
 
   @Test
   def databaseFilesReferToTheHelpFile(): Unit = {
-    for (name <- List("packers.sig", "installers.sig", "filetypes.sig", "javawrappers.sig")) {
+    for (name <- List("packers.sig", "installers.sig", "filetypes.sig", "javawrappers.sig", "die.sig")) {
       val in = getClass.getResourceAsStream("/data/signatures/" + name)
       val head = try Source.fromInputStream(in, "UTF-8").getLines().take(5).mkString("\n") finally in.close()
       assertTrue(head.contains("docs/SIGNATURES.md"), name)

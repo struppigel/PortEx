@@ -19,7 +19,10 @@ import io.github.struppigel.parser.Interruption;
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.StandardField;
+import io.github.struppigel.parser.optheader.DataDirEntry;
 import io.github.struppigel.parser.optheader.DataDirectoryKey;
+import io.github.struppigel.parser.optheader.OptionalHeader;
+import io.github.struppigel.parser.optheader.OptionalHeader.MagicNumber;
 import io.github.struppigel.parser.optheader.WindowsEntryKey;
 import io.github.struppigel.parser.sections.SectionHeader;
 import io.github.struppigel.parser.sections.SectionLoader;
@@ -65,6 +68,11 @@ import java.util.Set;
  */
 public final class AuthenticodeVerifier {
 
+    private static final int DATA_DIR_ENTRY_SIZE = 8;
+    /** offsets of the certificate table entry relative to the optional header */
+    private static final int PE32_CERTIFICATE_ENTRY = 128;
+    private static final int PE32_PLUS_CERTIFICATE_ENTRY = 144;
+
     private AuthenticodeVerifier() {
     }
 
@@ -99,7 +107,7 @@ public final class AuthenticodeVerifier {
             s.getImageDigestAlgorithm().flatMap(AlgorithmId::getJdkName).ifPresent(digestNames::add);
         }
         Map<String, byte[]> computed = digestNames.isEmpty() ? Collections.<String, byte[]>emptyMap()
-                : ImageHasher.hash(data.getFile(), excludedRanges(data, table), digestNames);
+                : ImageHasher.hash(data.getFile(), excludedRanges(data), digestNames);
         Run run = new Run(sectionLayoutIrregular(data));
         List<VerificationResult> results = new ArrayList<>();
         for (AuthenticodeSignature s : signatures) {
@@ -113,15 +121,46 @@ public final class AuthenticodeVerifier {
     }
 
     /**
-     * @return the ranges {start, length} that are not hashed: the checksum,
-     *         the certificate table entry and the certificate table
+     * Computes the Authenticode image digest ("authentihash") of a PE file,
+     * signed or not: the digest of the whole file without the checksum field,
+     * the certificate table data directory entry and the certificate table.
+     * <p>
+     * For signed files this equals the computed digest of verification. The
+     * certificate table is not parsed, ranges outside of the file are clamped,
+     * so broken tables do not cause exceptions. The file is read in one
+     * streaming pass that can be interrupted with {@link Thread#interrupt()}.
+     *
+     * @param data   the PE data
+     * @param digest the digest to compute, it is reset afterwards
+     * @return the authentihash
+     * @throws IOException if the file can not be read
      */
-    static List<long[]> excludedRanges(PEData data, CertificateTable table) {
+    public static byte[] authentihash(PEData data, MessageDigest digest) throws IOException {
+        ImageHasher.update(data.getFile(), excludedRanges(data), Collections.singletonList(digest));
+        return digest.digest();
+    }
+
+    /**
+     * @return the ranges {start, length} that are not hashed: the checksum,
+     *         the certificate table entry and the certificate table as
+     *         declared in that entry
+     */
+    static List<long[]> excludedRanges(PEData data) {
+        OptionalHeader header = data.getOptionalHeader();
         List<long[]> excluded = new ArrayList<>();
-        StandardField checksum = data.getOptionalHeader().getField(WindowsEntryKey.CHECKSUM);
+        StandardField checksum = header.getField(WindowsEntryKey.CHECKSUM);
         excluded.add(new long[]{checksum.getOffset(), checksum.getSize()});
-        excluded.add(new long[]{table.getTableEntryOffset(), 8});
-        excluded.add(new long[]{table.getOffset(), table.getDeclaredSize()});
+        // like Windows, also if NumberOfRvaAndSizes is too small to have the entry
+        MagicNumber magic = header.getMagicNumber();
+        if (magic == MagicNumber.PE32 || magic == MagicNumber.PE32_PLUS) {
+            long relative = magic == MagicNumber.PE32 ? PE32_CERTIFICATE_ENTRY : PE32_PLUS_CERTIFICATE_ENTRY;
+            excluded.add(new long[]{header.getOffset() + relative, DATA_DIR_ENTRY_SIZE});
+        }
+        com.google.common.base.Optional<DataDirEntry> entry =
+                header.maybeGetDataDirEntry(DataDirectoryKey.CERTIFICATE_TABLE);
+        if (entry.isPresent()) {
+            excluded.add(new long[]{entry.get().getVirtualAddress(), entry.get().getDirectorySize()});
+        }
         return excluded;
     }
 
@@ -176,12 +215,11 @@ public final class AuthenticodeVerifier {
                     imageStatus = MessageDigest.isEqual(digest, stored.get())
                             ? VerificationStatus.VALID : VerificationStatus.INVALID;
                     if (imageStatus == VerificationStatus.INVALID) {
-                        sink.add(CertificateIssueType.IMAGE_DIGEST_MISMATCH, label + ": the computed "
-                                        + algorithm.get() + " image digest " + computedHex + " differs from the signed"
-                                        + " digest " + Hex.of(stored.get()) + ", the file was modified after signing"
-                                        + " or the signature belongs to another file"
-                                        + (irregularLayout ? "; the sections have gaps or overlaps, other"
-                                        + " implementations may hash them differently" : ""),
+                        sink.add(CertificateIssueType.IMAGE_DIGEST_MISMATCH, label + ": the " + algorithm.get()
+                                        + " image digest does not match, the file was modified or the signature"
+                                        + " is from another file"
+                                        + (irregularLayout ? "; the sections have gaps or overlaps, other tools"
+                                        + " may hash them differently" : ""),
                                 s.imageDigestElement().location(), AuthenticodeFieldKey.IMAGE_DIGEST);
                     }
                 }
@@ -190,6 +228,7 @@ public final class AuthenticodeVerifier {
             List<CertificateVerification> bagVerifications = verifyBag(s.getCertificates(), sink, label);
             Map<AuthenticodeCertificate, CertificateVerification> byCertificate = index(bagVerifications);
             VerificationStatus messageStatus = VerificationStatus.UNVERIFIABLE;
+            byte[] messageDigest = null;
             VerificationStatus signerStatus = VerificationStatus.UNVERIFIABLE;
             CertificateChain chain = new CertificateChain(Collections.<AuthenticodeCertificate>emptyList(),
                     VerificationStatus.UNVERIFIABLE);
@@ -197,7 +236,8 @@ public final class AuthenticodeVerifier {
             Optional<SignerInfo> signer = s.getSigner();
             if (signer.isPresent()) {
                 SignerInfo si = signer.get();
-                messageStatus = checkMessageDigest(si, s.indirectDataElement(),
+                messageDigest = contentDigest(si, s.indirectDataElement());
+                messageStatus = checkMessageDigest(si, messageDigest,
                         CertificateIssueType.MESSAGE_DIGEST_MISMATCH, sink, label + ": signer");
                 signerStatus = checkSignerSignature(si, s.indirectDataElement(),
                         CertificateIssueType.INVALID_SIGNER_SIGNATURE, sink, label + ": signer");
@@ -206,28 +246,38 @@ public final class AuthenticodeVerifier {
                     timestamps.add(verifyTimestamp(t, si, byCertificate, sink, label));
                 }
             }
-            return new VerificationResult(s, imageStatus, computedHex, messageStatus, signerStatus, chain,
-                    bagVerifications, timestamps, sink.issues());
+            return new VerificationResult(s, imageStatus, computedHex, messageStatus, hexOrNull(messageDigest),
+                    signerStatus, chain, bagVerifications, timestamps, sink.issues());
         }
 
-        private VerificationStatus checkMessageDigest(SignerInfo si, DerElement content,
+        /**
+         * @return the digest of the content with the digest algorithm of the
+         *         signer, null if the signer has no messageDigest attribute or
+         *         the algorithm is not supported
+         */
+        private static byte[] contentDigest(SignerInfo si, DerElement content) {
+            Optional<String> jdkName = si.getDigestAlgorithm().getJdkName();
+            if (content == null || si.messageDigestElement() == null || !jdkName.isPresent()) {
+                return null;
+            }
+            return digest(jdkName.get(), content, true);
+        }
+
+        /**
+         * @param digest the result of {@link #contentDigest}
+         */
+        private VerificationStatus checkMessageDigest(SignerInfo si, byte[] digest,
                                                       CertificateIssueType mismatchType, IssueSink sink,
                                                       String who) {
-            DerElement attribute = si.messageDigestElement();
-            Optional<String> jdkName = si.getDigestAlgorithm().getJdkName();
-            if (content == null || attribute == null || !jdkName.isPresent()) {
-                return VerificationStatus.UNVERIFIABLE;
-            }
-            byte[] digest = digest(jdkName.get(), content, true);
             if (digest == null) {
                 return VerificationStatus.UNVERIFIABLE;
             }
+            DerElement attribute = si.messageDigestElement();
             if (MessageDigest.isEqual(digest, attribute.content())) {
                 return VerificationStatus.VALID;
             }
-            sink.add(mismatchType, who + ": the messageDigest attribute " + Hex.of(attribute.content())
-                            + " differs from the " + si.getDigestAlgorithm() + " digest " + Hex.of(digest)
-                            + " of the signed content", attribute.location(),
+            sink.add(mismatchType, who + ": the messageDigest attribute does not match the "
+                            + si.getDigestAlgorithm() + " digest of the signed content", attribute.location(),
                     mismatchType == CertificateIssueType.INVALID_TIMESTAMP ? AuthenticodeFieldKey.TIMESTAMP
                             : AuthenticodeFieldKey.MESSAGE_DIGEST);
             return VerificationStatus.INVALID;
@@ -385,49 +435,69 @@ public final class AuthenticodeVerifier {
             Interruption.checkInterrupt();
             String who = label + ": " + (t.getKind() == Timestamp.Kind.RFC3161 ? "RFC 3161 timestamp"
                     : "countersignature");
-            VerificationStatus imprintStatus = checkImprint(t, outerSigner, sink, who);
+            byte[] imprintDigest = imprintDigest(t, outerSigner);
+            VerificationStatus imprintStatus = checkImprint(t, imprintDigest, sink, who);
+            boolean rfc3161 = t.getKind() == Timestamp.Kind.RFC3161;
+            // the messageDigest attribute of a countersignature is the imprint
+            VerificationStatus messageStatus = rfc3161 ? VerificationStatus.UNVERIFIABLE : imprintStatus;
+            byte[] messageDigest = rfc3161 ? null : imprintDigest;
             VerificationStatus signatureStatus = VerificationStatus.UNVERIFIABLE;
             CertificateChain chain = new CertificateChain(Collections.<AuthenticodeCertificate>emptyList(),
                     VerificationStatus.UNVERIFIABLE);
             Optional<SignerInfo> tsSigner = t.getSigner();
             if (tsSigner.isPresent()) {
                 Map<AuthenticodeCertificate, CertificateVerification> verifications = new IdentityHashMap<>(outer);
-                if (t.getKind() == Timestamp.Kind.RFC3161) {
+                if (rfc3161) {
                     verifications.putAll(index(verifyBag(t.getCertificates(), sink, who)));
-                    VerificationStatus md = checkMessageDigest(tsSigner.get(), t.tstInfoElement(),
+                    messageDigest = contentDigest(tsSigner.get(), t.tstInfoElement());
+                    messageStatus = checkMessageDigest(tsSigner.get(), messageDigest,
                             CertificateIssueType.INVALID_TIMESTAMP, sink, who + " signer");
                     VerificationStatus sig = checkSignerSignature(tsSigner.get(), t.tstInfoElement(),
                             CertificateIssueType.INVALID_TIMESTAMP, sink, who + " signer");
-                    signatureStatus = combine(md, sig);
+                    signatureStatus = combine(messageStatus, sig);
                 } else {
                     signatureStatus = checkSignerSignature(tsSigner.get(), null,
                             CertificateIssueType.INVALID_TIMESTAMP, sink, who + " signer");
                 }
                 chain = buildChain(tsSigner.get().getSignerCertificate(), verifications);
             }
-            return new TimestampVerification(t, imprintStatus, signatureStatus, chain);
+            return new TimestampVerification(t, imprintStatus, hexOrNull(imprintDigest), messageStatus,
+                    hexOrNull(messageDigest), signatureStatus, chain);
+        }
+
+        /**
+         * @return the digest of the signature value of the outer signer with
+         *         the imprint algorithm, null if the timestamp has no imprint
+         *         or the algorithm is not supported
+         */
+        private static byte[] imprintDigest(Timestamp t, SignerInfo outerSigner) {
+            Optional<AlgorithmId> algorithm = t.getImprintAlgorithm();
+            if (!algorithm.isPresent() || t.imprintElement() == null || !algorithm.get().getJdkName().isPresent()) {
+                return null;
+            }
+            return digest(algorithm.get().getJdkName().get(), outerSigner.signatureValueElement(), true);
         }
 
         /**
          * The timestamp must cover the signature value of the outer signer.
+         *
+         * @param digest the result of {@link #imprintDigest}
          */
-        private VerificationStatus checkImprint(Timestamp t, SignerInfo outerSigner, IssueSink sink, String who) {
-            Optional<AlgorithmId> algorithm = t.getImprintAlgorithm();
-            DerElement imprint = t.imprintElement();
-            if (!algorithm.isPresent() || imprint == null || !algorithm.get().getJdkName().isPresent()) {
-                return VerificationStatus.UNVERIFIABLE;
-            }
-            byte[] digest = digest(algorithm.get().getJdkName().get(), outerSigner.signatureValueElement(), true);
+        private VerificationStatus checkImprint(Timestamp t, byte[] digest, IssueSink sink, String who) {
             if (digest == null) {
                 return VerificationStatus.UNVERIFIABLE;
             }
-            if (MessageDigest.isEqual(digest, imprint.content())) {
+            if (MessageDigest.isEqual(digest, t.imprintElement().content())) {
                 return VerificationStatus.VALID;
             }
-            sink.add(CertificateIssueType.INVALID_TIMESTAMP, who + " does not cover the signature value: the"
-                            + " timestamped digest " + Hex.of(imprint.content()) + " differs from " + Hex.of(digest),
+            sink.add(CertificateIssueType.INVALID_TIMESTAMP, who + " does not cover the signature value, the"
+                            + " timestamped " + t.getImprintAlgorithm().get() + " digest does not match",
                     t.getLocation(), AuthenticodeFieldKey.TIMESTAMP);
             return VerificationStatus.INVALID;
+        }
+
+        private static String hexOrNull(byte[] bytes) {
+            return bytes == null ? null : Hex.of(bytes);
         }
 
         private static byte[] digest(String jdkName, DerElement element, boolean contentOnly) {

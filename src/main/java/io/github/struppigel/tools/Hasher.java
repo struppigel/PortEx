@@ -21,6 +21,7 @@ import io.github.struppigel.parser.RichHeader;
 import io.github.struppigel.parser.sections.SectionHeader;
 import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionTable;
+import io.github.struppigel.parser.sections.cert.AuthenticodeVerifier;
 import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +64,19 @@ public class Hasher {
      */
     public byte[] fileHash(MessageDigest messageDigest) throws IOException {
         return fileHash(data.getFile(), messageDigest);
+    }
+
+    /**
+     * Returns the Authenticode image digest ("authentihash") of the file,
+     * signed or not. See {@link AuthenticodeVerifier#authentihash}.
+     *
+     * @param messageDigest the message digest algorithm
+     * @return the digest of the whole file without the checksum field, the
+     *         certificate table data directory entry and the certificate table
+     * @throws IOException if the file can not be read
+     */
+    public byte[] authentihash(MessageDigest messageDigest) throws IOException {
+        return AuthenticodeVerifier.authentihash(data, messageDigest);
     }
 
     /**

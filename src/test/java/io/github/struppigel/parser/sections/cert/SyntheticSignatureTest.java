@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -213,6 +215,62 @@ public class SyntheticSignatureTest {
         assertTrue(large.issues.contains(CertificateIssueType.LARGE_UNAUTH_ATTRIBUTE));
         assertFalse(large.issues.contains(CertificateIssueType.UNKNOWN_UNAUTH_ATTRIBUTE));
         assertEquals(large.verification.getStatus(), VerificationStatus.VALID);
+    }
+
+    @Test
+    public void unauthenticatedAttributesOfCountersigners() throws Exception {
+        Signed unknown = sign(o -> o.countersignerUnauthenticatedOid = "1.2.3.4.5");
+        assertEquals(unknown.table.getPrimarySignature().get().getSigner().get().getTimestamps().size(), 1);
+        assertTrue(unknown.issues.contains(CertificateIssueType.UNKNOWN_UNAUTH_ATTRIBUTE), unknown.issues.toString());
+        assertFalse(unknown.issues.contains(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE));
+        // a known type that Authenticode does not use for countersigners, its content is not parsed
+        Signed nested = sign(o -> o.countersignerUnauthenticatedOid = Oids.NESTED_SIGNATURE);
+        assertTrue(nested.issues.contains(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE), nested.issues.toString());
+        assertFalse(nested.issues.contains(CertificateIssueType.UNKNOWN_UNAUTH_ATTRIBUTE));
+        assertEquals(nested.verification.getPrimaryResult().get().getImageDigestStatus(), VerificationStatus.VALID);
+    }
+
+    @Test
+    public void signedAttributeTypesAsUnauthenticated() throws Exception {
+        for (String oid : new String[]{Oids.INTENT_TO_SEAL, Oids.PLATFORM_MANIFEST_BINARY_ID}) {
+            Signed s = sign(o -> o.unauthenticatedOid = oid);
+            assertTrue(s.issues.contains(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE), oid + " " + s.issues);
+            assertEquals(s.verification.getStatus(), VerificationStatus.VALID);
+        }
+    }
+
+    @Test
+    public void sealing() throws Exception {
+        Signed unsealed = sign(o -> o.unauthenticatedOid = Oids.SEALING_SIGNATURE);
+        assertTrue(unsealed.issues.contains(CertificateIssueType.UNEXPECTED_UNAUTH_ATTRIBUTE), unsealed.issues.toString());
+        Signed sealed = sign(o -> {
+            o.unauthenticatedOid = Oids.SEALING_SIGNATURE;
+            o.intentToSeal = true;
+        });
+        assertTrue(sealed.issues.isEmpty(), sealed.issues.toString());
+        assertEquals(sealed.verification.getStatus(), VerificationStatus.VALID);
+    }
+
+    @Test
+    public void malformedRetryCount() throws Exception {
+        // the retry count is an INTEGER, not an OCTET STRING
+        Signed s = sign(o -> {
+            o.unauthenticatedOid = Oids.SPC_ENCRYPTED_DIGEST_RETRY_COUNT;
+            o.unauthenticatedSize = 16;
+        });
+        assertTrue(s.issues.contains(CertificateIssueType.MALFORMED_PKCS7), s.issues.toString());
+        assertEquals(s.verification.getStatus(), VerificationStatus.VALID);
+    }
+
+    @Test
+    public void extraElements() throws Exception {
+        List<Consumer<TestSigner>> options = Arrays.asList(o -> o.extraAttributeElement = true,
+                o -> o.extraSignerInfoElement = true, o -> o.extraSignedDataElement = true);
+        for (Consumer<TestSigner> option : options) {
+            Signed s = sign(option);
+            assertEquals(s.issues, Collections.singleton(CertificateIssueType.EXTRA_SIGNATURE_ELEMENT));
+            assertEquals(s.verification.getStatus(), VerificationStatus.VALID);
+        }
     }
 
     @Test

@@ -16,18 +16,28 @@
 package io.github.struppigel.tools.rehints;
 
 
+import io.github.struppigel.TestreportsReader;
 import io.github.struppigel.parser.PEData;
+import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PELoaderTest;
+import io.github.struppigel.parser.optheader.DataDirEntry;
+import io.github.struppigel.parser.optheader.DataDirectoryKey;
 import io.github.struppigel.tools.ReportCreator;
 import io.github.struppigel.tools.anomalies.PEAnomalyScanner;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class PEReHintScannerTest  {
@@ -152,6 +162,44 @@ public class PEReHintScannerTest  {
     @Test
     public void dotNetCoreAppBundle() {
         assertHasReHintWithTypeAndReason("DotNetBundle.exe", ReHintType.DOT_NET_CORE_APP_BUNDLE_HINT, "apphost.pdb");
+    }
+
+    @Test
+    public void certificateDataTest() throws IOException {
+        File strings = new File(TestreportsReader.RESOURCE_DIR + "/testfiles/strings.exe");
+        assertFalse(hintsOf(PELoader.loadPE(strings)).stream()
+                .anyMatch(h -> h.reType() == ReHintType.CERTIFICATE_DATA_RE_HINT));
+        // data appended to the PKCS#7 signature inside the WIN_CERTIFICATE, the table is at the end of the file
+        DataDirEntry entry = PELoader.loadPE(strings).getOptionalHeader()
+                .maybeGetDataDirEntry(DataDirectoryKey.CERTIFICATE_TABLE).get();
+        byte[] original = Files.readAllBytes(strings.toPath());
+        byte[] bytes = Arrays.copyOf(original, original.length + 64);
+        Arrays.fill(bytes, original.length, bytes.length, (byte) 0x41);
+        long newSize = entry.getDirectorySize() + 64;
+        putLe32(bytes, (int) entry.getVirtualAddress(), newSize);
+        putLe32(bytes, (int) entry.getTableEntryOffset() + 4, newSize);
+        Path stuffed = Files.createTempFile("portex-stuffed-certificate", ".exe");
+        try {
+            Files.write(stuffed, bytes);
+            List<ReHint> hints = hintsOf(PELoader.loadPE(stuffed.toFile())).stream()
+                    .filter(h -> h.reType() == ReHintType.CERTIFICATE_DATA_RE_HINT).collect(Collectors.toList());
+            assertEquals(hints.size(), 1);
+            assertTrue(hints.get(0).reasons().stream().anyMatch(r -> r.contains("bytes after the signature structure")),
+                    hints.get(0).reasons().toString());
+            assertTrue(hints.get(0).description().contains("--dump certificates"));
+        } finally {
+            Files.deleteIfExists(stuffed);
+        }
+    }
+
+    private static List<ReHint> hintsOf(PEData pe) {
+        return PEReHintScanner.newInstance(pe, PEAnomalyScanner.newInstance(pe).getAnomalies()).getReHints();
+    }
+
+    private static void putLe32(byte[] b, int p, long value) {
+        for (int i = 0; i < 4; i++) {
+            b[p + i] = (byte) (value >>> (8 * i));
+        }
     }
 
     private void assertHasReHint(String testfile, ReHintType rhType){

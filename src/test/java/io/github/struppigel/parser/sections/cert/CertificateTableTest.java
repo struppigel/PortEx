@@ -16,6 +16,7 @@
 package io.github.struppigel.parser.sections.cert;
 
 import io.github.struppigel.TestreportsReader;
+import io.github.struppigel.parser.IOUtil;
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PhysicalLocation;
@@ -109,6 +110,12 @@ public class CertificateTableTest {
         assertEquals(result.getSignerChain().getCertificates().size(), 2);
         assertEquals(result.getTimestampVerifications().get(0).getStatus(), VerificationStatus.VALID);
         assertTrue(verification.getIssues().isEmpty());
+        assertEquals(result.getComputedMessageDigest().get(), Hex.of(signer.getMessageDigest().get()));
+        TimestampVerification t = result.getTimestampVerifications().get(0);
+        assertEquals(t.getComputedImprint().get(), Hex.of(timestamp.getImprint().get()));
+        assertEquals(t.getMessageDigestStatus(), VerificationStatus.VALID);
+        assertEquals(t.getComputedMessageDigest().get(),
+                Hex.of(timestamp.getSigner().get().getMessageDigest().get()));
     }
 
     @Test
@@ -183,6 +190,9 @@ public class CertificateTableTest {
         assertEquals(t.getTimestamp().getKind(), Timestamp.Kind.COUNTERSIGNATURE);
         assertEquals(t.getSignatureStatus(), VerificationStatus.VALID);
         assertEquals(t.getImprintStatus(), VerificationStatus.VALID);
+        // the messageDigest attribute of a countersignature is the imprint
+        assertEquals(t.getMessageDigestStatus(), VerificationStatus.VALID);
+        assertEquals(t.getComputedMessageDigest().get(), t.getComputedImprint().get());
     }
 
     @Test
@@ -196,7 +206,10 @@ public class CertificateTableTest {
         }
         AuthenticodeVerification manipulated = load("Haus/firefox_x64_manipulated.exe")
                 .loadAuthenticodeVerification().get();
-        assertEquals(manipulated.getPrimaryResult().get().getMessageDigestStatus(), VerificationStatus.INVALID);
+        VerificationResult result = manipulated.getPrimaryResult().get();
+        assertEquals(result.getMessageDigestStatus(), VerificationStatus.INVALID);
+        assertNotEquals(result.getComputedMessageDigest().get(),
+                Hex.of(result.getSignature().getSigner().get().getMessageDigest().get()));
         assertTrue(issueTypes(manipulated.getIssues()).contains(CertificateIssueType.MESSAGE_DIGEST_MISMATCH));
     }
 
@@ -257,14 +270,27 @@ public class CertificateTableTest {
         String report = reporter.authenticodeReport();
         assertTrue(report.contains("Authenticode Signatures"), report);
         assertTrue(report.contains("Microsoft Corporation"), report);
-        assertTrue(report.contains("VALID (integrity only, no trust decision)"), report);
+        assertTrue(report.contains("Integrity:                VALID" + IOUtil.NL), report);
         assertTrue(report.contains("RFC 3161 timestamp"), report);
+        assertTrue(report.contains("    Imprint:          "), report);
+        assertTrue(report.contains("    Message digest:   "), report);
+        String invalid = new ReportCreator(load("Haus/firefox_invalid_x64.exe")).authenticodeReport();
+        assertTrue(invalid.contains("  Image digest:       e51fed3f2ef8c6c099c5f9f9bd1789c33de64680 (SHA-1)"), invalid);
+        assertTrue(invalid.contains("    computed:         79da1b80964d0ef4e661b74d09e4d01dfb71fa95 (INVALID)"), invalid);
         assertTrue(reporter.specialSectionReports().contains("Authenticode Signatures"));
         String header = reporter.optHeaderReport();
         assertTrue(header.contains("the certificate table address is a file offset"), header);
         assertEquals(new ReportCreator(load("testfiles/HelloWorld.exe")).authenticodeReport(), "");
+        // the issues are part of the anomaly report, not repeated here
         String broken = new ReportCreator(load("Haus/DRWUI.exe")).authenticodeReport();
-        assertTrue(broken.contains("pointer 0x82c200 is shifted"), broken);
+        assertTrue(broken.contains("WIN_CERTIFICATE 0 at 0x82c200"), broken);
+        assertTrue(broken.contains("type 0x202: invalid"), broken);
+        assertTrue(broken.contains("Integrity:                INVALID (the signature can not be parsed)"), broken);
+        assertFalse(broken.contains("shifted"), broken);
+        String stripped = new ReportCreator(load("ose")).authenticodeReport();
+        assertTrue(stripped.contains("Entries:                  0"), stripped);
+        assertTrue(stripped.contains("INVALID (the signature can not be parsed)"), stripped);
+        assertFalse(report.contains(": invalid"), report);
     }
 
     @Test

@@ -68,6 +68,23 @@ final class ImageHasher {
         if (digests.isEmpty()) {
             return result;
         }
+        update(file, excluded, digests.values());
+        for (Map.Entry<String, MessageDigest> e : digests.entrySet()) {
+            result.put(e.getKey(), e.getValue().digest());
+        }
+        return result;
+    }
+
+    /**
+     * Updates the digests with the hashed bytes of the file in one pass.
+     *
+     * @param file     the PE file
+     * @param excluded ranges {start, length} that are not hashed, they are
+     *                 clamped to the file
+     * @param digests  the digests to update
+     * @throws IOException if the file can not be read
+     */
+    static void update(File file, List<long[]> excluded, Collection<MessageDigest> digests) throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             long length = raf.length();
             List<long[]> ranges = included(excluded, length);
@@ -79,17 +96,13 @@ final class ImageHasher {
                     Interruption.checkInterrupt();
                     int n = (int) Math.min(buffer.length, range[1] - pos);
                     raf.readFully(buffer, 0, n);
-                    for (MessageDigest md : digests.values()) {
+                    for (MessageDigest md : digests) {
                         md.update(buffer, 0, n);
                     }
                     pos += n;
                 }
             }
         }
-        for (Map.Entry<String, MessageDigest> e : digests.entrySet()) {
-            result.put(e.getKey(), e.getValue().digest());
-        }
-        return result;
     }
 
     /**

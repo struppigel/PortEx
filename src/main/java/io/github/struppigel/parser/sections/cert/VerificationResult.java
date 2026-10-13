@@ -35,6 +35,7 @@ public final class VerificationResult {
     private final VerificationStatus imageDigestStatus;
     private final String computedImageDigest;
     private final VerificationStatus messageDigestStatus;
+    private final String computedMessageDigest;
     private final VerificationStatus signerSignatureStatus;
     private final CertificateChain signerChain;
     private final List<CertificateVerification> certificateVerifications;
@@ -43,13 +44,14 @@ public final class VerificationResult {
 
     VerificationResult(AuthenticodeSignature signature, VerificationStatus imageDigestStatus,
                        String computedImageDigest, VerificationStatus messageDigestStatus,
-                       VerificationStatus signerSignatureStatus, CertificateChain signerChain,
-                       List<CertificateVerification> certificateVerifications,
+                       String computedMessageDigest, VerificationStatus signerSignatureStatus,
+                       CertificateChain signerChain, List<CertificateVerification> certificateVerifications,
                        List<TimestampVerification> timestampVerifications, List<CertificateIssue> issues) {
         this.signature = signature;
         this.imageDigestStatus = imageDigestStatus;
         this.computedImageDigest = computedImageDigest;
         this.messageDigestStatus = messageDigestStatus;
+        this.computedMessageDigest = computedMessageDigest;
         this.signerSignatureStatus = signerSignatureStatus;
         this.signerChain = signerChain;
         this.certificateVerifications = Collections.unmodifiableList(new ArrayList<>(certificateVerifications));
@@ -85,6 +87,15 @@ public final class VerificationResult {
      */
     public VerificationStatus getMessageDigestStatus() {
         return messageDigestStatus;
+    }
+
+    /**
+     * @return the computed digest of the signed content as hex string, empty
+     *         if the signer has no messageDigest attribute or the algorithm is
+     *         not supported
+     */
+    public Optional<String> getComputedMessageDigest() {
+        return Optional.ofNullable(computedMessageDigest);
     }
 
     /**

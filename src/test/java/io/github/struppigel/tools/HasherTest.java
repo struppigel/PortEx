@@ -17,17 +17,24 @@
  */
 package io.github.struppigel.tools;
 
+import io.github.struppigel.TestreportsReader;
 import io.github.struppigel.parser.ByteArrayUtil;
 import io.github.struppigel.parser.PEData;
+import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PELoaderTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 public class HasherTest {
 
@@ -87,5 +94,59 @@ public class HasherTest {
             hash = hasher.sectionHash(i, sha256);
             assertEquals(ByteArrayUtil.byteToHex(hash, ""), actualHashes[i-1].toLowerCase());
         }
+    }
+
+    @Test
+    public void authentihashEqualsVerification() throws Exception {
+        for (String path : new String[]{"testfiles/strings.exe", "testfiles/invalidCodeView"}) {
+            PEData data = load(path);
+            Map<String, String> computed = data.loadAuthenticodeVerification().get().getComputedImageDigests();
+            assertFalse(computed.isEmpty(), path);
+            for (Map.Entry<String, String> e : computed.entrySet()) {
+                assertEquals(authentihash(data, e.getKey()), e.getValue(), path + " " + e.getKey());
+            }
+        }
+        // the nested signature uses SHA-256, the outer one SHA-1
+        assertEquals(load("testfiles/invalidCodeView").loadAuthenticodeVerification().get()
+                .getComputedImageDigests().keySet(), new HashSet<>(Arrays.asList("SHA-1", "SHA-256")));
+    }
+
+    @Test
+    public void authentihashMatchesWindows() throws Exception {
+        // computed by Windows with CryptCATAdminCalcHashFromFileHandle2 (wintrust.dll)
+        String[][] expected = {
+                // unsigned
+                {"Haus/TLSCallback_x86.exe", "SHA-1", "4546c11743b919ce740d40de71369493ae1dde46"},
+                {"Haus/TLSCallback_x86.exe", "SHA-256", "e19d66374999571c4ebc83d955c8e7f9eee29bc0a81691f24ade29abb50c6b89"},
+                // signed with SHA-1 only
+                {"Haus/firefox_x64.exe", "SHA-256", "a93a93d09327cd14b17adc0e622abbb0654508839a459b900b07acbf115f3d1f"},
+                {"testfiles/strings.exe", "SHA-1", "21d20aa697faf24d3a9d37f9540de5fdce6f25fa"},
+                {"testfiles/strings.exe", "SHA-256", "0c2ed54fb700c468e7f8f90f3cb4221561913143195b0fae877277558ff7f38a"},
+                // fewer than 5 data directories: Windows still excludes the bytes of the certificate table entry
+                {"corkami/no_dd.exe", "SHA-256", "a52bb1ba33452dd347f21b610eaa825a6caf46fa7951f058301f697be1deaae8"},
+                {"corkami/no_dd64.exe", "SHA-256", "0af8a88dea405256a2e2fef348275cd02ddbc4dae63091387be561a19bea4011"},
+                {"corkami/lowaldiff.exe", "SHA-256", "d8104a8bb5e18ac127a82c09ac1bfa7a03703d8a0f05431bc44de3a7a3ac6e28"},
+        };
+        for (String[] e : expected) {
+            assertEquals(authentihash(load(e[0]), e[1]), e[2], e[0] + " " + e[1]);
+        }
+    }
+
+    @Test
+    public void authentihashOfBrokenTables() throws Exception {
+        for (String path : new String[]{"ose", "Haus/cff-chrome_elf.dll", "corkami/maxvals.exe"}) {
+            PEData data = load(path);
+            String hash = authentihash(data, "SHA-256");
+            assertEquals(hash.length(), 64, path);
+            assertEquals(authentihash(data, "SHA-256"), hash, path);
+        }
+    }
+
+    private static PEData load(String path) throws IOException {
+        return PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/" + path));
+    }
+
+    private static String authentihash(PEData data, String algorithm) throws Exception {
+        return ByteArrayUtil.byteToHex(new Hasher(data).authentihash(MessageDigest.getInstance(algorithm)), "");
     }
 }

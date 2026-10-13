@@ -329,12 +329,32 @@ private[sigscanner] object RegionResolver {
 
 /**
  * Maps addresses of a PE file the same way the SectionLoader does.
+ * <p>
+ * The results are cached, because the lookups of the SectionLoader are not
+ * cheap and the follow tokens of many signatures map the same addresses, e.g.
+ * the target of a call at the entry point.
  */
 private[sigscanner] final class PEAddressMapper(pe: PEData, loader: SectionLoader, fileLength: Long) extends AddressMapper {
 
   override val imageBase: Long = pe.getOptionalHeader.get(WindowsEntryKey.IMAGE_BASE)
 
-  override def offsetToRva(offset: Long): Long = {
+  private val rvas = mutable.LongMap.empty[Long]
+  private val offsets = mutable.LongMap.empty[Long]
+
+  private def cached(cache: mutable.LongMap[Long], key: Long)(compute: => Long): Long =
+    cache.getOrElse(key, {
+      // searches with follow tokens may map an address per position, so the caches are bounded
+      if (cache.size >= PEAddressMapper.MaxCached) cache.clear()
+      val value = compute
+      cache.update(key, value)
+      value
+    })
+
+  override def offsetToRva(offset: Long): Long = cached(rvas, offset)(computeOffsetToRva(offset))
+
+  override def rvaToOffset(rva: Long): Long = cached(offsets, rva)(computeRvaToOffset(rva))
+
+  private def computeOffsetToRva(offset: Long): Long = {
     if (offset < 0 || offset >= fileLength) return -1
     val header = loader.maybeGetSectionHeaderByOffset(offset)
     if (header.isPresent) {
@@ -343,9 +363,13 @@ private[sigscanner] final class PEAddressMapper(pe: PEData, loader: SectionLoade
     } else offset
   }
 
-  override def rvaToOffset(rva: Long): Long = {
+  private def computeRvaToOffset(rva: Long): Long = {
     if (rva < 0) return -1
     val offset = loader.maybeGetFileOffset(rva)
     if (offset.isPresent && offset.get < fileLength) offset.get else -1
   }
+}
+
+private[sigscanner] object PEAddressMapper {
+  val MaxCached = 4096
 }

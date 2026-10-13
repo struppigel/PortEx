@@ -15,6 +15,8 @@
  ******************************************************************************/
 package io.github.struppigel.parser.sections.cert;
 
+import java.util.Optional;
+
 /**
  * The result of verifying a timestamp.
  *
@@ -24,13 +26,20 @@ public final class TimestampVerification {
 
     private final Timestamp timestamp;
     private final VerificationStatus imprintStatus;
+    private final String computedImprint;
+    private final VerificationStatus messageDigestStatus;
+    private final String computedMessageDigest;
     private final VerificationStatus signatureStatus;
     private final CertificateChain chain;
 
-    TimestampVerification(Timestamp timestamp, VerificationStatus imprintStatus,
+    TimestampVerification(Timestamp timestamp, VerificationStatus imprintStatus, String computedImprint,
+                          VerificationStatus messageDigestStatus, String computedMessageDigest,
                           VerificationStatus signatureStatus, CertificateChain chain) {
         this.timestamp = timestamp;
         this.imprintStatus = imprintStatus;
+        this.computedImprint = computedImprint;
+        this.messageDigestStatus = messageDigestStatus;
+        this.computedMessageDigest = computedMessageDigest;
         this.signatureStatus = signatureStatus;
         this.chain = chain;
     }
@@ -47,6 +56,35 @@ public final class TimestampVerification {
      */
     public VerificationStatus getImprintStatus() {
         return imprintStatus;
+    }
+
+    /**
+     * @return the computed digest of the signature value as hex string, empty
+     *         if the algorithm is not supported
+     */
+    public Optional<String> getComputedImprint() {
+        return Optional.ofNullable(computedImprint);
+    }
+
+    /**
+     * The messageDigest attribute of a countersignature is the imprint, so
+     * this equals {@link #getImprintStatus()} for countersignatures.
+     *
+     * @return whether the messageDigest attribute of the timestamp signer
+     *         equals the digest of the signed content
+     */
+    public VerificationStatus getMessageDigestStatus() {
+        return messageDigestStatus;
+    }
+
+    /**
+     * @return the computed digest of the content signed by the timestamp
+     *         signer as hex string: the TSTInfo of RFC 3161 tokens, the
+     *         signature value for countersignatures; empty if the signer has
+     *         no messageDigest attribute or the algorithm is not supported
+     */
+    public Optional<String> getComputedMessageDigest() {
+        return Optional.ofNullable(computedMessageDigest);
     }
 
     /**

@@ -29,6 +29,8 @@ public enum ReHintType {
 
     AUTOIT_RE_HINT("The file is an AutoIt script executable, use AutoIt-Ripper to unpack the script"),
 
+    CERTIFICATE_DATA_RE_HINT("The certificate table contains data outside of the signature structures, which might be a hidden payload or configuration. Dump the certificate table with PortexAnalyzer --dump certificates <file> and inspect certificate_table.bin and the .p7b signatures"),
+
     COMPRESSOR_PACKER_RE_HINT("This file has been packed by a simple compressor, step over the next pushad, set hardware breakpoint on ESP address on access, run until the breakpoint, then find a jump that hops the section. That is the OEP."),
 
     DOT_NET_CORE_APP_BUNDLE_HINT("The file is a .NET Core App Bundle, it carries the whole .NET Core execution environment in the overlay. Use ILSpy to extract files. The main code is in a DLL"),

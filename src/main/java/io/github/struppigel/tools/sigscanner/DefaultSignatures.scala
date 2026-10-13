@@ -37,8 +37,11 @@ object DefaultSignatures {
   /** Java wrappers, searched in the whole file */
   lazy val javaWrappers: SignatureDatabase = SignatureDatabase.loadResource(folder + "javawrappers.sig")
 
-  /** the signatures PEData scans: packers, installers and file types */
-  lazy val pe: SignatureDatabase = SignatureDatabase.merge(packers, installers, fileTypes)
+  /** packers, protectors, cryptors, installers and SFX converted from Detect It Easy */
+  lazy val die: SignatureDatabase = SignatureDatabase.loadResource(folder + "die.sig")
+
+  /** the signatures PEData scans: packers, installers, file types and the Detect It Easy signatures */
+  lazy val pe: SignatureDatabase = SignatureDatabase.merge(packers, installers, fileTypes, die)
 
   lazy val peScanner: SignatureScanner = new SignatureScanner(pe)
 
@@ -53,6 +56,8 @@ object DefaultSignatures {
   def getFileTypes: SignatureDatabase = fileTypes
 
   def getJavaWrappers: SignatureDatabase = javaWrappers
+
+  def getDie: SignatureDatabase = die
 
   def getPE: SignatureDatabase = pe
 

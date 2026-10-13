@@ -37,6 +37,10 @@ class SignatureDifferentialTest {
 
   private val corpus = new File("portextestfiles")
 
+  /** the databases converted from PortEx 5, without the Detect It Easy signatures */
+  private lazy val legacyScanner = new SignatureScanner(SignatureDatabase.merge(
+    DefaultSignatures.packers, DefaultSignatures.installers, DefaultSignatures.fileTypes))
+
   private case class GoldenRow(path: String, sha: String, group: String, name: String, address: Long)
 
   /** a match in the terms of the golden file */
@@ -88,7 +92,7 @@ class SignatureDifferentialTest {
       val pe = PELoader.loadPE(file)
       val kinds = Set(LocationKind.ENTRY_POINT, LocationKind.SECTION, LocationKind.OVERLAY,
         LocationKind.RESOURCE, LocationKind.MSDOS_HEADER)
-      for (m <- DefaultSignatures.peScanner._scan(pe, kinds)) {
+      for (m <- legacyScanner._scan(pe, kinds)) {
         // InnoSetup and the PyInstaller string were hard coded in PortEx 5
         val group = groupOf(m.getLocationKind)
         if (groups.contains(group)) found += Found(group, normalize(m.getName), m.getOffset, m.getRegionStart)

@@ -19,7 +19,7 @@ import io.github.struppigel.parser.IOUtil._
 import io.github.struppigel.parser.{PEData, PELoader}
 import io.github.struppigel.tools.rehints.scanning._
 import io.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
-import io.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, CompressorScanning, DotNetCoreAppBundleScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, InnoSetupScanning, NullsoftScanning, ProcessInjectionScanning, PyInstallerScanning, ScriptToExeScanning, Sfx7zipScanning}
+import io.github.struppigel.tools.rehints.scanning.{AHKScanning, AutoItScanning, CertificateDataScanning, CompressorScanning, DotNetCoreAppBundleScanning, ElectronScanning, EmbeddedFileScanning, FakeVMPScanning, InnoSetupScanning, NullsoftScanning, ProcessInjectionScanning, PyInstallerScanning, ScriptToExeScanning, Sfx7zipScanning}
 
 import java.io.File
 import scala.collection.JavaConverters._
@@ -92,6 +92,7 @@ object PEReHintScanner {
     new PEReHintScanner(data, anomalies)
       with AHKScanning
       with AutoItScanning
+      with CertificateDataScanning
       with CompressorScanning
       with DotNetCoreAppBundleScanning
       with ElectronScanning

@@ -50,18 +50,24 @@ class PEFileDumper(val pedata: PEData, val outFolder: File) {
   }
 
   /**
-   * Writes each PKCS#7 signature of the certificate table to a .p7b file and
-   * each embedded certificate to a .cer file (DER). Entries of other types
-   * are written as raw .bin files.
+   * Writes the raw certificate table to certificate_table.bin, each PKCS#7
+   * signature of the table to a .p7b file and each embedded certificate to a
+   * .cer file (DER). Entries of other types are written as raw .bin files.
+   * The raw table also contains the data outside of the signatures, e.g.
+   * after the PKCS#7 structure, in the padding or after the last entry.
    */
   def dumpCertificates(): Unit = {
     println("Dumping certificates ...")
     val maybeTable = pedata.loadCertificateTable()
-    if (!maybeTable.isPresent || maybeTable.get.isEmpty) {
+    if (!maybeTable.isPresent || maybeTable.get.getReadSize <= 0) {
       println("No certificate table found.")
       return
     }
-    for (entry <- maybeTable.get.getEntries.asScala) {
+    val table = maybeTable.get
+    val raw = nonExistingFileFor(Paths.get(outFolder.getAbsolutePath, "certificate_table.bin").toFile)
+    println("Writing certificate table to " + raw.getAbsolutePath)
+    IOUtil.dumpLocationToFile(new PhysicalLocation(table.getOffset, table.getReadSize), pedata.getFile, raw)
+    for (entry <- table.getEntries.asScala) {
       val nr = entry.getIndex
       if (entry.getSignature.isPresent) {
         val signature = entry.getSignature.get
