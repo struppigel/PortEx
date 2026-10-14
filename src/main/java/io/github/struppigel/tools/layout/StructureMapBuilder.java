@@ -325,8 +325,7 @@ public final class StructureMapBuilder {
                                 + header.getNumber() + nameSuffix(header.getName()),
                         range(offset, offset + SECTION_HEADER_SIZE), sectionAttributes(header));
                 if (fine()) {
-                    // the field offsets of all section headers are those of the first one
-                    mapFields(headerRegion, header.getEntryMap().values(), header.getOffset());
+                    mapFields(headerRegion, header.getEntryMap().values(), 0);
                 }
             }
         }

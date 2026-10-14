@@ -218,6 +218,14 @@ object ImportSection {
     new String(mmbytes.slice(offset, nullindex))
   }
 
+  /** The file location of the zero terminated name, None if there is no terminator or the name is not in the file. */
+  private def getASCIINameLocation(nameRVA: Int, mmbytes: MemoryMappedPE): Option[PhysicalLocation] = {
+    val nullindex = mmbytes.indexWhere(_ == 0, nameRVA)
+    if (nullindex < nameRVA) None
+    else mmbytes._virtToPhysAddresses(nameRVA).headOption.map(raw =>
+      new PhysicalLocation(raw, nullindex - nameRVA + 1L))
+  }
+
   /**
    * Parses the directory table entry at the given nr.
    *
@@ -245,6 +253,7 @@ object ImportSection {
 
     val entry = DirectoryEntry(entrybytes, fileOffset + (nr * ENTRY_SIZE))
     entry.name = getASCIIName(entry(NAME_RVA).toInt, virtualAddress, mmbytes)
+    entry.nameLocation = getASCIINameLocation(entry(NAME_RVA).toInt, mmbytes)
     logger.debug("entry name: " + entry.name)
     if (entry(FORWARDER_CHAIN) != 0) {
       entry.forwarderString = getASCIIName(entry(FORWARDER_CHAIN).toInt, virtualAddress, mmbytes)

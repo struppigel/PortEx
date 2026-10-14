@@ -5,6 +5,7 @@ import io.github.struppigel.parser.FileFormatException;
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PELoaderTest;
+import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.optheader.WindowsEntryKey;
 import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionLoaderTest;
@@ -23,7 +24,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class ImportSectionTest {
 
@@ -46,6 +49,33 @@ public class ImportSectionTest {
         ImportSection idata = new SectionLoader(data).loadImportSection();
         List<ImportDLL> imports = idata.getImports();
         assertEquals(imports.size(), 2);
+    }
+
+    @Test
+    public void locationsCoverTheDllNames() throws IOException {
+        for (String file : new String[]{"testfiles/HelloWorld.exe", "testfiles/WinRar.exe"}) {
+            PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/" + file));
+            SectionLoader loader = new SectionLoader(data);
+            ImportSection idata = loader.loadImportSection();
+            List<ImportDLL> dlls = idata.getImports();
+            int i = 0;
+            for (DirectoryEntry entry : idata.getDirectory()) {
+                long start = loader.getFileOffset(entry.get(DirectoryEntryKey.NAME_RVA));
+                String name = entry.name();
+                assertFalse(name.isEmpty(), file);
+                // the characters and the zero terminator
+                for (long position = start; position <= start + name.length(); position++) {
+                    assertCovered(idata.getPhysicalLocations(), position, file + " section " + name);
+                    assertCovered(dlls.get(i).getLocations(), position, file + " dll " + name);
+                }
+                i++;
+            }
+        }
+    }
+
+    private static void assertCovered(List<PhysicalLocation> locations, long position, String message) {
+        assertTrue(locations.stream().anyMatch(l -> l.from() <= position && position < l.from() + l.size()),
+                message + " byte at " + position);
     }
 
     @Test

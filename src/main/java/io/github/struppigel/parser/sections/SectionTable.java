@@ -108,10 +108,9 @@ public class SectionTable implements PEModule {
             IOUtil.SpecificationFormat format = new IOUtil.SpecificationFormat(0, 1, 2, 3);
             Map<SectionHeaderKey, StandardField> entries = IOUtil
                     .readHeaderEntries(SectionHeaderKey.class, format,
-                            SECTION_TABLE_SPEC, headerbytes, getOffset());
+                            SECTION_TABLE_SPEC, headerbytes, getOffset() + sectionOffset);
 
-            // TODO is this calculation correct? make unit tests
-            long nameOffset = getOffset() + getRelativeNameOffset(headerbytes);
+            long nameOffset = getOffset() + sectionOffset + getRelativeNameOffset(headerbytes);
             SectionHeader sectionEntry = new SectionHeader(entries,
                     sectionNumber, sectionOffset, getUTF8String(headerbytes),
                     nameOffset);
@@ -260,9 +259,9 @@ public class SectionTable implements PEModule {
             IOUtil.SpecificationFormat format = new IOUtil.SpecificationFormat(0, 1, 2, 3);
             Map<SectionHeaderKey, StandardField> entries = IOUtil
                     .readHeaderEntries(SectionHeaderKey.class, format,
-                            SECTION_TABLE_SPEC, headerbytes, getOffset());
+                            SECTION_TABLE_SPEC, headerbytes, getOffset() + sectionOffset);
 
-            long nameOffset = getOffset() + getRelativeNameOffset(headerbytes);
+            long nameOffset = getOffset() + sectionOffset + getRelativeNameOffset(headerbytes);
             SectionHeader sectionEntry = new SectionHeader(entries,
                     sectionNumber, sectionOffset, getUTF8String(headerbytes),
                     nameOffset);

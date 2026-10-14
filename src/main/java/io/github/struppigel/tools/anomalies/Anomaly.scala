@@ -133,8 +133,11 @@ case class SectionNameAnomaly(val header: SectionHeader,
   override val description: String,
   override val subtype: AnomalySubType) extends Anomaly {
 
-  override def locations: java.util.List[PhysicalLocation] = List(new PhysicalLocation(header.getNameOffset,
-    header.getNameSize)).asJava
+  // the whole 8 byte name field, also if the name is shorter, empty or has control symbols
+  override def locations: java.util.List[PhysicalLocation] = {
+    val name = header.getField(SectionHeaderKey.NAME)
+    List(new PhysicalLocation(name.getOffset, name.getSize)).asJava
+  }
   override def key = SectionHeaderKey.NAME
 }
 

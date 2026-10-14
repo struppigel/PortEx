@@ -25,9 +25,12 @@ import org.apache.logging.log4j.LogManager
 import scala.collection.mutable.ListBuffer
 
 class ExportNamePointerTable private (val pointerNameList: List[(Address, String)],
-  val fileOffset: Long) {
+  val fileOffset: Long, nameSizes: List[Long]) {
 
   def size(): Long = pointerNameList.length * ExportNamePointerTable.entryLength
+
+  /** Size in bytes of each name including its zero terminator, in the order of pointerNameList. */
+  def getNameSizes(): List[Long] = nameSizes
 
   def getMap(): Map[Address, String] = pointerNameList.toMap
 
@@ -58,15 +61,23 @@ object ExportNamePointerTable {
     virtualAddress: Long, fileOffset: Long, maxNameEntries: Int): ExportNamePointerTable = {
     val initialOffset = (rva - virtualAddress).toInt
     val addresses = new ListBuffer[(Address, String)]
+    val sizes = new ListBuffer[Long]
     val end = initialOffset + entries * entryLength
     val limitedEnd = Math.min(maxNameEntries * 4 + initialOffset, end)
     for (offset <- initialOffset until limitedEnd by entryLength) {
       val address = mmBytes.getBytesLongValue(offset + virtualAddress, entryLength)
       val name = getName(mmBytes, address)
       addresses += ((address, name))
+      sizes += nameSize(mmBytes, address)
     }
 
-    new ExportNamePointerTable(addresses.toList, fileOffset)
+    new ExportNamePointerTable(addresses.toList, fileOffset, sizes.toList)
+  }
+
+  /** Bytes of the name and its zero terminator, also for names that are too long to be read, 1 if there is no end. */
+  private def nameSize(mmBytes: MemoryMappedPE, address: Long): Long = {
+    val end = mmBytes.indexOf('\0'.toByte, address)
+    if (end >= address) end - address + 1 else 1
   }
 
   private def getName(mmBytes: MemoryMappedPE, address: Long): String = {

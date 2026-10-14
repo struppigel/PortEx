@@ -56,6 +56,11 @@ public class ImportDLL {
 	private final long timedateStamp;
 
 	/**
+	 * Location of the name of the DLL with its zero terminator, null if it is unknown
+	 */
+	private final PhysicalLocation nameLocation;
+
+	/**
 	 * Creates an ImportDLL instance
 	 * 
 	 * @param name
@@ -67,11 +72,24 @@ public class ImportDLL {
 	 */
 	public ImportDLL(String name, List<NameImport> nameImports,
 			List<OrdinalImport> ordinalImports, List<Import> allImports, long timedateStamp) {
+		this(name, nameImports, ordinalImports, allImports, timedateStamp, null);
+	}
+
+	/**
+	 * Creates an ImportDLL instance
+	 *
+	 * @param nameLocation
+	 *            the location of the DLL's name in the file, null if unknown
+	 */
+	public ImportDLL(String name, List<NameImport> nameImports,
+			List<OrdinalImport> ordinalImports, List<Import> allImports, long timedateStamp,
+			PhysicalLocation nameLocation) {
 		this.name = name;
 		this.nameImports = new ArrayList<>(nameImports);
 		this.ordinalImports = new ArrayList<>(ordinalImports);
 		this.allImports = new ArrayList<>(allImports);
 		this.timedateStamp = timedateStamp;
+		this.nameLocation = nameLocation;
 	}
 
 	/**
@@ -89,8 +107,14 @@ public class ImportDLL {
 		this(name, nameImports, ordinalImports, new ArrayList<>(), timedateStamp);
 	}
 
+	/**
+	 * @return the locations of the DLL name and of the data of all imports
+	 */
 	public List<PhysicalLocation> getLocations() {
 		List<PhysicalLocation> locs = new ArrayList<>();
+		if (nameLocation != null) {
+			locs.add(nameLocation);
+		}
 		for (NameImport i : nameImports) {
 			locs.addAll(i.getLocations());
 		}
@@ -116,6 +140,7 @@ public class ImportDLL {
 		this.ordinalImports = new ArrayList<>();
 		this.allImports = new ArrayList<>();
 		this.timedateStamp = timedateStamp;
+		this.nameLocation = null;
 	}
 
 	/**

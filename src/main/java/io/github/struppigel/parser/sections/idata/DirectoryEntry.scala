@@ -63,6 +63,8 @@ class DirectoryEntry (
   private var lookupTableEntries: List[LookupTableEntry] = Nil
   var name: String = _
   var forwarderString: String = _
+  /** location of the DLL name with its zero terminator */
+  var nameLocation: Option[PhysicalLocation] = None
 
   /**
    * adds a lookup table entry to the directory entry
@@ -75,6 +77,7 @@ class DirectoryEntry (
    * Returns a list of all file locations where directory entries are found
    */
   def getPhysicalLocations(): List[PhysicalLocation] = new PhysicalLocation(offset, size) ::
+    nameLocation.toList :::
     //collect lookupTableEntry locations
     (for (entry <- lookupTableEntries) yield new PhysicalLocation(entry.offset, entry.size)) :::
     //collect HintNameEntry locations
@@ -93,7 +96,8 @@ class DirectoryEntry (
     val ordImports = lookupTableEntries collect { case i: OrdinalEntry => i.toImport.asInstanceOf[OrdinalImport] }
     val allImports = lookupTableEntries.map(_.toImport)
     val timedateStamp = entries.get(DirectoryEntryKey.TIME_DATE_STAMP).get.getValue
-    new ImportDLL(name, nameImports.asJava, ordImports.asJava, allImports.asJava, timedateStamp)
+    new ImportDLL(name, nameImports.asJava, ordImports.asJava, allImports.asJava, timedateStamp,
+      nameLocation.orNull)
   }
 
   def get(key: HeaderKey): java.lang.Long = apply(key.asInstanceOf[DirectoryEntryKey])

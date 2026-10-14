@@ -69,8 +69,9 @@ class ExportSection private (
    * @return physical location of all ASCII strings with export names
    */
   private def nameLocations(): List[PhysicalLocation] = {
-    namePointerTable.pointerNameList.map(p =>
-      new PhysicalLocation(secLoader.getFileOffset(p._1), ExportNamePointerTable.entryLength))
+    namePointerTable.pointerNameList.zip(namePointerTable.getNameSizes()).map { case (pointerName, size) =>
+      new PhysicalLocation(secLoader.getFileOffset(pointerName._1), size)
+    }
   }
 
   /**

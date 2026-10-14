@@ -4,6 +4,7 @@ import io.github.struppigel.TestreportsReader;
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.parser.PELoaderTest;
+import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.optheader.WindowsEntryKey;
 import io.github.struppigel.parser.sections.SectionLoader;
 import java.util.Optional;
@@ -77,6 +78,29 @@ public class ExportSectionTest {
     private void assertHasExportByName(List<ExportEntry> exportEntries, String exportName) {
         Stream<ExportEntry> result = exportEntries.stream().filter(e -> e instanceof ExportNameEntry && ((ExportNameEntry) e).name().equals(exportName));
         assertTrue(result.count() > 0);
+    }
+
+    @Test
+    public void physicalLocationsCoverTheWholeExportNames() throws IOException {
+        for (String file : new String[]{"corkami/ownexports2.exe", "corkami/exports_order.exe", "corkami/dllfw.dll"}) {
+            PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/" + file));
+            SectionLoader loader = new SectionLoader(data);
+            ExportSection edata = loader.loadExportSection();
+            List<PhysicalLocation> locations = edata.getPhysicalLocations();
+            int longNames = 0;
+            for (Entry<?, String> name : edata.getPointerNameMap().entrySet()) {
+                // a Scala map of Long keys, which Java sees as Object
+                long start = loader.getFileOffset(((Number) name.getKey()).longValue());
+                // the characters and the zero terminator
+                for (long position = start; position <= start + name.getValue().length(); position++) {
+                    final long p = position;
+                    assertTrue(locations.stream().anyMatch(l -> l.from() <= p && p < l.from() + l.size()),
+                            file + " " + name.getValue() + " byte " + (p - start));
+                }
+                longNames += name.getValue().length() >= 4 ? 1 : 0;
+            }
+            assertTrue(longNames > 0, file + " has no name with 4 or more characters");
+        }
     }
 
     @Test
