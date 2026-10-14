@@ -311,6 +311,19 @@ public class SyntheticSignatureTest {
     }
 
     @Test
+    public void nonPositiveSerialNumber() throws Exception {
+        // RFC 5280 4.1.2.2: the serial number MUST be a positive integer
+        for (byte[] serial : new byte[][]{{0x00}, {(byte) 0x80}, {(byte) 0xff}}) {
+            Signed s = sign(o -> o.customSerial = serial);
+            assertTrue(s.issues.contains(CertificateIssueType.NON_POSITIVE_SERIAL), Arrays.toString(serial));
+            assertEquals(s.verification.getStatus(), VerificationStatus.VALID);
+        }
+        Signed positive = sign(o -> o.customSerial = new byte[]{0x01});
+        assertFalse(positive.issues.contains(CertificateIssueType.NON_POSITIVE_SERIAL));
+        assertFalse(sign(o -> { }).issues.contains(CertificateIssueType.NON_POSITIVE_SERIAL));
+    }
+
+    @Test
     public void berEncodingIsReportedAndStillValid() throws Exception {
         Signed s = sign(o -> o.nonMinimalLength = true);
         assertTrue(s.issues.contains(CertificateIssueType.BER_ENCODING));

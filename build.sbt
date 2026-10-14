@@ -6,6 +6,8 @@ scalaVersion := "2.12.20"
 
 Compile / javacOptions ++= Seq("--release", "17")
 
+Compile / scalacOptions += "-release:17"
+
 assembly / assemblyJarName := "PortexAnalyzer.jar"
 
 assembly / mainClass := Some("io.github.struppigel.tools.PortExAnalyzer")
@@ -51,8 +53,6 @@ lazy val javadocSettings = inConfig(JavaDoc)(Defaults.configSettings) ++ Seq(
 lazy val root = project.in(file(".")).configs(JavaDoc).settings(javadocSettings: _*)
 
 libraryDependencies += "org.testng" % "testng" % "6.14.3" % "test"
-
-libraryDependencies += "com.google.guava" % "guava" % "33.4.8-jre"
 
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2" % "provided"
 

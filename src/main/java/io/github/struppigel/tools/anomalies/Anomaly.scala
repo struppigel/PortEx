@@ -149,9 +149,13 @@ case class ResourceAnomaly(val resource: Resource,
 case class ImportAnomaly(val imports: List[ImportDLL],
   override val description: String,
   override val subtype: AnomalySubType,
-  override val key: FieldOrStructureKey) extends Anomaly {
+  override val key: FieldOrStructureKey,
+  val functionLocations: List[PhysicalLocation] = Nil) extends Anomaly {
 
-  override def locations: java.util.List[PhysicalLocation] = imports.flatMap(i => i.getLocations().asScala).asJava
+  // the data of one import function if the anomaly is about it, otherwise the data of the whole DLLs
+  override def locations: java.util.List[PhysicalLocation] =
+    if (functionLocations.nonEmpty) functionLocations.asJava
+    else imports.flatMap(i => i.getLocations().asScala).asJava
 }
 
 case class RichHeaderAnomaly(private val rich : RichHeader,

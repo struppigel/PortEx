@@ -84,6 +84,11 @@ final class CertificateParser {
                     serialElement.location(), AuthenticodeFieldKey.CERTIFICATE_SERIAL_NUMBER);
         }
 
+        if (new java.math.BigInteger(serial).signum() <= 0) {
+            sink.add(CertificateIssueType.NON_POSITIVE_SERIAL, label + ": the serial number is not positive",
+                    serialElement.location(), AuthenticodeFieldKey.CERTIFICATE_SERIAL_NUMBER);
+        }
+
         Instant notBefore = validity.optChild(0).flatMap(DerElement::asTime).orElse(null);
         Instant notAfter = validity.optChild(1).flatMap(DerElement::asTime).orElse(null);
 

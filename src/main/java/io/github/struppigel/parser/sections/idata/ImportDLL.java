@@ -17,7 +17,6 @@ package io.github.struppigel.parser.sections.idata;
 
 import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.IOUtil;
-import com.google.common.base.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -201,7 +200,7 @@ public class ImportDLL {
 		if (name.endsWith("W") || name.endsWith("A")) {
 			return findSymbolByName(list, name.substring(0, name.length() - 1));
 		}
-		return Optional.absent();
+		return Optional.empty();
 	}
 
 	/**
@@ -233,7 +232,7 @@ public class ImportDLL {
 				Optional<SymbolDescription> symbol = findSymbolByName(
 						symbolDescriptions, nameImport.getName());
 				if (symbol.isPresent()) {
-					String category = symbol.get().getCategory() + " " + symbol.get().getSubCategory().or("");
+					String category = symbol.get().getCategory() + " " + symbol.get().getSubCategory().orElse("");
 					if (categories.containsKey(category)) {
 						categories.get(category).add(nameImport);
 					} else {
@@ -261,7 +260,7 @@ public class ImportDLL {
 				if (symbol.isPresent()) {
 					buffer.append(" -> "
 							+ symbol.get().getDescription()
-									.or("no description"));
+									.orElse("no description"));
 				}
 				buffer.append(IOUtil.NL);
 			}

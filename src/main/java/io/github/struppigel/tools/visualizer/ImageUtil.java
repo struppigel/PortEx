@@ -15,7 +15,7 @@
  ******************************************************************************/
 package io.github.struppigel.tools.visualizer;
 
-import com.google.common.base.Preconditions;
+import io.github.struppigel.parser.Preconditions;
 
 import java.awt.image.BufferedImage;
 

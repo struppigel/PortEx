@@ -20,7 +20,7 @@ import io.github.struppigel.parser.MemoryMappedPE;
 import io.github.struppigel.parser.StandardField;
 import io.github.struppigel.parser.IOUtil;
 import io.github.struppigel.parser.PEModule;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -233,7 +233,7 @@ public class SectionTable implements PEModule {
                 return Optional.of(header);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

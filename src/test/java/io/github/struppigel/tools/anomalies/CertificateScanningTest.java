@@ -68,12 +68,12 @@ public class CertificateScanningTest {
     }
 
     @Test
-    public void invalidRevision() throws IOException {
+    public void unknownRevision() throws IOException {
         List<Anomaly> anomalies = anomalies("corkami/signature.exe");
-        Anomaly revision = first(anomalies, CERT_INVALID_REVISION);
+        Anomaly revision = first(anomalies, CERT_UNKNOWN_REVISION);
         assertTrue(revision instanceof FieldAnomaly);
         assertEquals(revision.key(), WinCertificateKey.REVISION);
-        assertEquals(revision.getType(), AnomalyType.WRONG);
+        assertEquals(revision.getType(), AnomalyType.NON_DEFAULT);
         assertEquals(revision.locations().get(0).from(), 0x404);
         assertEquals(revision.locations().get(0).size(), 2);
         assertTrue(revision.description().startsWith("Certificate Table: "));
@@ -84,7 +84,7 @@ public class CertificateScanningTest {
     @Test
     public void tableOverwrittenBySection() throws IOException {
         // CFF Explorer added the section .NewIT on top of the table
-        assertSubtypes("Haus/cff-chrome_elf.dll", CERT_INVALID_LENGTH, CERT_INVALID_REVISION, CERT_INVALID_TYPE,
+        assertSubtypes("Haus/cff-chrome_elf.dll", CERT_INVALID_LENGTH, CERT_UNKNOWN_REVISION, CERT_UNKNOWN_TYPE,
                 CERT_TABLE_IN_SECTION, CERT_TABLE_NOT_LAST);
         Anomaly inSection = first(anomalies("Haus/cff-chrome_elf.dll"), CERT_TABLE_IN_SECTION);
         assertTrue(inSection instanceof StructureAnomaly);
@@ -94,8 +94,8 @@ public class CertificateScanningTest {
 
     @Test
     public void shiftedPointer() throws IOException {
-        assertSubtypes("Haus/DRWUI.exe", CERT_TABLE_TRUNCATED, CERT_INVALID_LENGTH, CERT_INVALID_REVISION,
-                CERT_INVALID_TYPE, CERT_TABLE_MISPLACED);
+        assertSubtypes("Haus/DRWUI.exe", CERT_TABLE_TRUNCATED, CERT_INVALID_LENGTH, CERT_UNKNOWN_REVISION,
+                CERT_UNKNOWN_TYPE, CERT_TABLE_MISPLACED);
         Anomaly misplaced = first(anomalies("Haus/DRWUI.exe"), CERT_TABLE_MISPLACED);
         assertEquals(misplaced.locations().get(0).from(), 0x82be00);
     }
@@ -117,13 +117,13 @@ public class CertificateScanningTest {
     @Test
     public void tablesCutOffByTheEndOfTheFile() throws IOException {
         assertSubtypes("Haus/pidgin_manipulated_Icons.exe", CERT_TABLE_TRUNCATED, CERT_TABLE_IN_SECTION,
-                CERT_INVALID_REVISION, CERT_INVALID_TYPE);
+                CERT_UNKNOWN_REVISION, CERT_UNKNOWN_TYPE);
         assertSubtypes("Haus/pidgin_manipulated_GroupIconDirectory_withNullIcon.exe", CERT_TABLE_TRUNCATED,
-                CERT_TABLE_IN_SECTION, CERT_INVALID_LENGTH, CERT_INVALID_REVISION, CERT_INVALID_TYPE);
+                CERT_TABLE_IN_SECTION, CERT_INVALID_LENGTH, CERT_UNKNOWN_REVISION, CERT_UNKNOWN_TYPE);
         assertSubtypes("Haus/pidgin_two_icons_with_same_id.exe", CERT_TABLE_TRUNCATED, CERT_INVALID_LENGTH,
-                CERT_INVALID_REVISION, CERT_INVALID_TYPE);
+                CERT_UNKNOWN_REVISION, CERT_UNKNOWN_TYPE);
         assertSubtypes("Haus/pidgin_with_one_icon_without_IconGroupDirectoryEntry.exe", CERT_TABLE_TRUNCATED,
-                CERT_INVALID_LENGTH, CERT_INVALID_REVISION, CERT_INVALID_TYPE);
+                CERT_INVALID_LENGTH, CERT_UNKNOWN_REVISION, CERT_UNKNOWN_TYPE);
     }
 
     @Test
@@ -184,11 +184,12 @@ public class CertificateScanningTest {
     public void subtypesAreTypedAsInTheThesis() {
         Map<AnomalySubType, AnomalyType> expected = new EnumMap<>(AnomalySubType.class);
         for (AnomalySubType s : new AnomalySubType[]{CERT_DIR_NOT_ALIGNED, CERT_DIR_SIZE_EXCEEDS_FILE,
-                CERT_DIR_TOO_SMALL, CERT_INVALID_LENGTH, CERT_INVALID_REVISION, CERT_INVALID_TYPE,
+                CERT_DIR_TOO_SMALL, CERT_INVALID_LENGTH, CERT_SIGNER_NOT_VALID_AT_SIGNING_TIME,
                 CERT_IMAGE_DIGEST_MISMATCH, CERT_MESSAGE_DIGEST_MISMATCH, CERT_INVALID_SIGNER_SIGNATURE,
                 CERT_INVALID_CERTIFICATE_SIGNATURE, CERT_INVALID_TIMESTAMP, CERT_EXPLICIT_EC_PARAMETERS,
                 CERT_INVALID_ECDSA_VALUE, CERT_WRONG_CONTENT_TYPE, CERT_DIGEST_ALGORITHM_MISMATCH,
                 CERT_MISSING_SIGNED_ATTRIBUTE, CERT_NONZERO_PADDING, CERT_OVERSIZED_SERIAL, CERT_OVERSIZED_OID,
+                CERT_NON_POSITIVE_SERIAL, CERT_UNEXPECTED_UNAUTH_ATTRIBUTE,
                 CERT_INVALID_PAGE_HASHES}) {
             expected.put(s, AnomalyType.WRONG);
         }
@@ -199,9 +200,10 @@ public class CertificateScanningTest {
                 CERT_LARGE_UNAUTH_ATTRIBUTE, CERT_ISOLATED_CERTIFICATE}) {
             expected.put(s, AnomalyType.STRUCTURE);
         }
-        for (AnomalySubType s : new AnomalySubType[]{CERT_UNSUPPORTED_TYPE, CERT_BER_ENCODING,
-                CERT_SELF_SIGNED_SIGNER, CERT_SIGNER_NOT_VALID_AT_SIGNING_TIME, CERT_UNKNOWN_UNAUTH_ATTRIBUTE,
-                CERT_UNEXPECTED_UNAUTH_ATTRIBUTE, CERT_RELAXED_PE_MARKER_CHECK, CERT_UNSUPPORTED_ALGORITHM}) {
+        for (AnomalySubType s : new AnomalySubType[]{CERT_UNKNOWN_REVISION, CERT_UNKNOWN_TYPE,
+                CERT_UNSUPPORTED_TYPE, CERT_BER_ENCODING,
+                CERT_SELF_SIGNED_SIGNER, CERT_UNKNOWN_UNAUTH_ATTRIBUTE,
+                CERT_RELAXED_PE_MARKER_CHECK, CERT_UNSUPPORTED_ALGORITHM}) {
             expected.put(s, AnomalyType.NON_DEFAULT);
         }
         expected.put(CERT_DEPRECATED_REVISION, AnomalyType.DEPRECATED);

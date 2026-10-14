@@ -2,8 +2,8 @@ package io.github.struppigel.tools.anomalies
 
 import io.github.struppigel.parser.IOUtil._
 import io.github.struppigel.parser.sections.SectionLoader
-import io.github.struppigel.parser.sections.idata.{ImportDLL}
-import io.github.struppigel.parser.Location
+import io.github.struppigel.parser.sections.idata.{ImportDLL, ImportFunctionLocations}
+import io.github.struppigel.parser.{Location, PhysicalLocation}
 import io.github.struppigel.parser.sections.idata.ImportSection
 
 import scala.collection.JavaConverters._
@@ -30,6 +30,7 @@ trait ImportSectionScanning extends AnomalyScanner {
   
   private def checkProcessInjectionImports(idata: ImportSection): List[Anomaly] = {
     val imports = idata.getImports.asScala
+    val loader = new SectionLoader(data)
     val anomalyList = ListBuffer[Anomaly]()
     val injectionMap = HashMap(
       // Misc
@@ -120,8 +121,11 @@ trait ImportSectionScanning extends AnomalyScanner {
     )
     for(imp <- imports) {
       val pinvokes = data.getPInvokes.asScala
-      val names = imp.getNameImports.asScala.map(_.getName) ++ pinvokes
-      for(name <- names) {
+      // the data of the function is marked, not the whole DLL; pinvokes have no entry in the import table
+      val functions = imp.getNameImports.asScala.map(i =>
+        (i.getName, ImportFunctionLocations.of(loader, i).asScala.toList)) ++
+        pinvokes.map(p => (p, List[PhysicalLocation]()))
+      for((name, functionLocations) <- functions) {
         val strippedName = {
           var stripped = name
           if(name.endsWith("A") || name.endsWith("W")) {
@@ -137,8 +141,8 @@ trait ImportSectionScanning extends AnomalyScanner {
         }
         if(injectionMap.contains(strippedName)) {
           val description = "Import function typical for injection/unpacking: " + name + " " + injectionMap(strippedName)
-          anomalyList += ImportAnomaly(List(imp), description, 
-              AnomalySubType.PROCESS_INJECTION_OR_UNPACKING_IMPORT, PEStructureKey.IMPORT_SECTION)
+          anomalyList += ImportAnomaly(List(imp), description,
+              AnomalySubType.PROCESS_INJECTION_OR_UNPACKING_IMPORT, PEStructureKey.IMPORT_SECTION, functionLocations)
         }
       }
     }

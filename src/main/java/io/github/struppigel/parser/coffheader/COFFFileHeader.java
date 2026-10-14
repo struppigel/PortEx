@@ -30,8 +30,8 @@ import java.util.Map;
 
 import static io.github.struppigel.parser.IOUtil.NL;
 import static io.github.struppigel.parser.coffheader.COFFHeaderKey.*;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static io.github.struppigel.parser.Preconditions.checkArgument;
+import static io.github.struppigel.parser.Preconditions.checkNotNull;
 
 /**
  * Represents the COFF File Header.

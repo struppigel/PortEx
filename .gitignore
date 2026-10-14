@@ -75,3 +75,5 @@ arbeit/dia1
 /.cache-main
 /.cache-tests
 /.bsp/sbt.json
+/build-rt/*.exe
+/build-rt/fixtures/

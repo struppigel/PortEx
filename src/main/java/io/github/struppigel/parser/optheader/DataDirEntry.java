@@ -20,15 +20,16 @@ import io.github.struppigel.parser.sections.SectionHeader;
 import io.github.struppigel.parser.sections.SectionHeaderKey;
 import io.github.struppigel.parser.sections.SectionTable;
 import io.github.struppigel.parser.IOUtil;
-import com.google.common.base.Optional;
+import io.github.struppigel.parser.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.github.struppigel.parser.IOUtil.NL;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static io.github.struppigel.parser.Preconditions.checkArgument;
+import static io.github.struppigel.parser.Preconditions.checkNotNull;
 
 /**
  * Represents an entry of the data directory table. It is used like a struct.
@@ -200,7 +201,7 @@ public class DataDirEntry {
         }
         logger.warn("there is no entry that matches data dir entry RVA "
                 + virtualAddress);
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -233,7 +234,7 @@ public class DataDirEntry {
                 result = header;
             }
         }
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     /**

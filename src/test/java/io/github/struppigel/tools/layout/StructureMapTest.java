@@ -23,6 +23,9 @@ import io.github.struppigel.parser.PhysicalLocation;
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey;
 import io.github.struppigel.parser.sections.SectionHeader;
 import io.github.struppigel.parser.sections.SectionLoader;
+import io.github.struppigel.parser.sections.idata.Import;
+import io.github.struppigel.parser.sections.idata.ImportFunctionExpectations;
+import io.github.struppigel.parser.sections.idata.NameImport;
 import io.github.struppigel.parser.sections.rsrc.Resource;
 import io.github.struppigel.tools.Overlay;
 import io.github.struppigel.tools.anomalies.PEAnomalyScanner;
@@ -116,7 +119,7 @@ public class StructureMapTest {
             }
             assertNotNull(iat, "no IAT for " + dll);
             assertTrue(iat.isDeclaredOnly());
-            assertEquals(iat.getPath(), "Imports > " + dll.getName() + " > IAT");
+            assertEquals(iat.getPath(), "Imports > " + dll.getName() + " > IAT (" + dll.getName() + ")");
             io.github.struppigel.parser.sections.idata.ImportDLL importDll = null;
             for (io.github.struppigel.parser.sections.idata.ImportDLL candidate : data.loadImports()) {
                 if (candidate.getName().equals(dll.getName())) {
@@ -131,9 +134,72 @@ public class StructureMapTest {
                     == io.github.struppigel.parser.optheader.OptionalHeader.MagicNumber.PE32_PLUS ? 8 : 4;
             assertEquals(iat.getEnd() - iat.getStart(), (importDll.getAllImports().size() + 1L) * entrySize);
         }
-        // hint/name entries are the innermost regions of their bytes
-        FileRegion hintName = map.getRegions(RegionType.IMPORT_HINT_NAME).get(0);
-        assertEquals(map.innermostAt(hintName.getStart() + 2).get(), hintName);
+    }
+
+    @Test
+    public void importStructuresAreNotListedTwice() throws IOException {
+        PEData data = load("WinRar.exe");
+        StructureMap map = new StructureMapBuilder(data).withDetail(Detail.FINE).build();
+        // the hint/name is part of the import function, not a structure of its own
+        assertTrue(map.getRegions(RegionType.IMPORT_HINT_NAME).isEmpty());
+        assertFalse(map.getRegions(RegionType.IMPORT_FUNCTION).isEmpty());
+        for (FileRegion iat : map.getRegions(RegionType.IMPORT_ADDRESS_TABLE)) {
+            for (FileRegion directory : map.getRegions(RegionType.IAT_DIRECTORY)) {
+                assertFalse(directory.getStart() == iat.getStart() && directory.getEnd() == iat.getEnd(),
+                        directory + " repeats " + iat);
+            }
+        }
+    }
+
+    @Test
+    public void importFunctionsAreRegionsOfTheirOwn() throws IOException {
+        PEData data = load("WinRar.exe");
+        StructureMap map = new StructureMapBuilder(data).withDetail(Detail.FINE).build();
+        SectionLoader loader = new SectionLoader(data);
+        int checked = 0;
+        for (io.github.struppigel.parser.sections.idata.ImportDLL dll : data.loadImports()) {
+            for (Import function : dll.getAllImports()) {
+                long entryOffset = function.getLocations().get(0).from();
+                FileRegion region = map.bestRegionStartingAt(entryOffset).get();
+                String what = dll.getName() + " " + function;
+                // lookup table entry, hint and name, address table slot, not the whole lookup table of the DLL
+                assertEquals(ImportFunctionExpectations.keys(region.getLocations()),
+                        ImportFunctionExpectations.locations(loader, function), what);
+                assertEquals(map.innermostAt(entryOffset).get(), region, what);
+                if (function instanceof NameImport) {
+                    assertEquals(region.getAttributes().get(FileRegion.ATTR_FUNCTION),
+                            ((NameImport) function).getName(), what);
+                }
+                checked++;
+            }
+        }
+        assertTrue(checked > 50, "checked " + checked);
+    }
+
+    @Test
+    public void delayImportFunctionsAreRegionsOfTheirOwn() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/corkami/delay_imports.exe"));
+        StructureMap map = new StructureMapBuilder(data).withDetail(Detail.FINE).build();
+        SectionLoader loader = new SectionLoader(data);
+        List<io.github.struppigel.parser.sections.idata.ImportDLL> dlls = data.loadDelayLoadImports();
+        assertFalse(dlls.isEmpty());
+        int checked = 0;
+        for (io.github.struppigel.parser.sections.idata.ImportDLL dll : dlls) {
+            for (NameImport function : dll.getNameImports()) {
+                PhysicalLocation entry = function.getLocations().get(0);
+                FileRegion region = map.bestRegionStartingAt(entry.from()).get();
+                String what = dll.getName() + " " + function;
+                Set<String> locations = ImportFunctionExpectations.keys(region.getLocations());
+                // not the whole delay import section: the lookup table entry and the hint and name of the function
+                assertTrue(locations.size() <= 3, what + " " + locations);
+                assertTrue(locations.contains(ImportFunctionExpectations.key(entry.from(), entry.size())), what);
+                long nameOffset = loader.maybeGetFileOffset(function.getNameRVA()).get();
+                assertTrue(locations.contains(ImportFunctionExpectations.key(nameOffset,
+                        2 + function.getName().length() + 1)), what + " " + locations);
+                checked++;
+            }
+        }
+        assertTrue(checked > 0);
     }
 
     @Test
@@ -153,6 +219,47 @@ public class StructureMapTest {
             assertTrue(name.getStart() >= rootTable.getStart(), name.toString());
             assertTrue(name.getStart() < map.getRegions(RegionType.RESOURCE_DIRECTORY).get(0).getEnd());
         }
+    }
+
+    @Test
+    public void resourceTreeIsInsideTheResourceDirectory() throws IOException {
+        int names = 0;
+        for (String sample : new String[]{"autoit", "batch2exe", "WinRar.exe", "HelloWorld.exe"}) {
+            StructureMap map = new StructureMapBuilder(load(sample)).withDetail(Detail.FINE).build();
+            for (FileRegion directory : map.getRegions(RegionType.RESOURCE_DIRECTORY)) {
+                for (FileRegion child : directory.getChildren()) {
+                    if (child.getType() == RegionType.RESOURCE) {
+                        continue;
+                    }
+                    for (PhysicalLocation loc : child.getLocations()) {
+                        for (long offset : new long[]{loc.from(), loc.from() + loc.size() - 1}) {
+                            assertTrue(directory.contains(offset), sample + " " + child + " at " + offset);
+                        }
+                    }
+                    names += child.getType() == RegionType.RESOURCE_NAME ? 1 : 0;
+                }
+            }
+        }
+        assertTrue(names > 0, "no named resource entries in the samples");
+    }
+
+    @Test
+    public void resourceNamesAreLimitedToTheMaximumLength() throws IOException {
+        PEData data = load("batch2exe");
+        byte[] bytes = java.nio.file.Files.readAllBytes(data.getFile().toPath());
+        StructureMap map = new StructureMapBuilder(data).withDetail(Detail.FINE).build();
+        List<FileRegion> names = map.getRegions(RegionType.RESOURCE_NAME);
+        assertFalse(names.isEmpty());
+        int max = io.github.struppigel.parser.sections.rsrc.ResourceDirectoryEntry.maxNameLength();
+        boolean longer = false;
+        for (FileRegion name : names) {
+            int start = (int) name.getStart();
+            int characters = (bytes[start] & 0xff) | (bytes[start + 1] & 0xff) << 8;
+            longer |= characters > max;
+            // the 2 byte length and at most max characters, longer names are cut off and reported as anomaly
+            assertEquals(name.getEnd() - name.getStart(), 2 + 2L * Math.min(characters, max), name.toString());
+        }
+        assertTrue(longer, "batch2exe has names longer than the maximum");
     }
 
     @Test
@@ -520,8 +627,20 @@ public class StructureMapTest {
     private static void assertSortedBySpecificity(StructureMap map, List<FileRegion> regions) {
         for (int k = 1; k < regions.size(); k++) {
             assertTrue(map.getSpecificityRank(regions.get(k - 1)) < map.getSpecificityRank(regions.get(k)));
-            assertTrue(regions.get(k - 1).getCoveredBytes() <= regions.get(k).getCoveredBytes());
+            // a region comes before the regions around it, however many bytes it covers
+            FileRegion first = regions.get(k - 1);
+            FileRegion later = regions.get(k);
+            assertFalse(isAncestor(first, later), first + " is an ancestor of " + later);
         }
+    }
+
+    private static boolean isAncestor(FileRegion ancestor, FileRegion region) {
+        for (FileRegion r = region; r.getParent().isPresent(); r = r.getParent().get()) {
+            if (r.getParent().get().equals(ancestor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Test

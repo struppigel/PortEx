@@ -15,7 +15,7 @@
  ******************************************************************************/
 package io.github.struppigel.tools.layout;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import io.github.struppigel.parser.AnalysisInterruptedException;
 import io.github.struppigel.parser.Interruption;
 import io.github.struppigel.parser.Location;
@@ -57,10 +57,15 @@ import io.github.struppigel.parser.sections.idata.BoundImportSection;
 import io.github.struppigel.parser.sections.idata.DelayLoadSection;
 import io.github.struppigel.parser.sections.idata.DirectoryEntry;
 import io.github.struppigel.parser.sections.idata.DirectoryEntryKey;
+import io.github.struppigel.parser.sections.idata.Import;
+import io.github.struppigel.parser.sections.idata.ImportDLL;
+import io.github.struppigel.parser.sections.idata.ImportFunctionLocations;
 import io.github.struppigel.parser.sections.idata.ImportSection;
 import io.github.struppigel.parser.sections.idata.LookupTableEntry;
 import io.github.struppigel.parser.sections.idata.NameEntry;
+import io.github.struppigel.parser.sections.idata.NameImport;
 import io.github.struppigel.parser.sections.idata.NullEntry;
+import io.github.struppigel.parser.sections.idata.OrdinalImport;
 import io.github.struppigel.parser.sections.reloc.BaseRelocBlock;
 import io.github.struppigel.parser.sections.reloc.RelocationSection;
 import io.github.struppigel.parser.sections.rsrc.DataEntry;
@@ -478,42 +483,62 @@ public final class StructureMapBuilder {
                 entrySize = lookup.size();
             }
             long iltRva = entry.get(DirectoryEntryKey.I_LOOKUP_TABLE_RVA);
+            FileRegion lookupTable = null;
             if (iltRva != 0) {
                 // without lookup table RVA the entries were read from the address table
-                add(dll, RegionType.IMPORT_LOOKUP_TABLE, "ILT", lookupLocations);
+                lookupTable = add(dll, RegionType.IMPORT_LOOKUP_TABLE, "ILT (" + name + ")", lookupLocations);
             }
             long iatRva = entry.get(DirectoryEntryKey.I_ADDR_TABLE_RVA);
-            Optional<Long> iat = iatRva == 0 ? Optional.<Long>absent() : loader.maybeGetFileOffset(iatRva);
-            if (iat.isPresent()) {
+            Optional<Long> iat = iatRva == 0 ? Optional.<Long>empty() : loader.maybeGetFileOffset(iatRva);
+            if (iat.isPresent() && !isIatDirectory(iat.get(), iat.get() + (functions + 1L) * entrySize)) {
                 // the address table has one entry per import plus the terminating zero entry
                 long size = (functions + 1L) * entrySize;
-                addRegion(dll, RegionType.IMPORT_ADDRESS_TABLE, "IAT", range(iat.get(), iat.get() + size),
+                addRegion(dll, RegionType.IMPORT_ADDRESS_TABLE, "IAT (" + name + ")", range(iat.get(), iat.get() + size),
                         Collections.<String, String>emptyMap(), true);
             }
             long nameRva = entry.get(DirectoryEntryKey.NAME_RVA);
-            Optional<Long> nameOffset = nameRva == 0 ? Optional.<Long>absent() : loader.maybeGetFileOffset(nameRva);
+            Optional<Long> nameOffset = nameRva == 0 ? Optional.<Long>empty() : loader.maybeGetFileOffset(nameRva);
             if (nameOffset.isPresent() && entry.name() != null) {
                 add(dll, RegionType.IMPORT_DLL_NAME, "DLL Name",
                         range(nameOffset.get(), nameOffset.get() + name.length() + 1));
             }
             int k = 0;
             for (LookupTableEntry lookup : lookups) {
-                checkInterrupt(k++);
-                if (lookup instanceof NameEntry) {
-                    NameEntry nameEntry = (NameEntry) lookup;
-                    String function = nameEntry.hintNameEntry().name();
-                    long offset = nameEntry.hintNameEntry().fileOffset();
-                    // two byte hint, the name and its terminating zero
-                    add(dll, RegionType.IMPORT_HINT_NAME, function, range(offset, offset + 2 + function.length() + 1),
-                            attributes(FileRegion.ATTR_FUNCTION, function));
+                Import imported = lookup.toImport();
+                if (imported != null) {
+                    addImportFunction(lookupTable != null ? lookupTable : dll, imported, name);
                 }
+                checkInterrupt(k++);
             }
+        }
+
+        /** the lookup table entry, hint and name and address table slot of one imported function */
+        private void addImportFunction(FileRegion parent, Import function, String dllName) {
+            String name = function instanceof NameImport ? ((NameImport) function).getName()
+                    : "#" + ((OrdinalImport) function).getOrdinal();
+            Map<String, String> attributes = attributes(FileRegion.ATTR_FUNCTION, name);
+            attributes.put(FileRegion.ATTR_DLL_NAME, dllName);
+            add(parent, RegionType.IMPORT_FUNCTION, name, ImportFunctionLocations.of(loader, function), attributes);
         }
 
         private void mapDelayImports() throws Exception {
             Optional<DelayLoadSection> maybe = loader.maybeLoadDelayLoadSection();
             if (maybe.isPresent() && !maybe.get().isEmpty()) {
-                add(null, RegionType.DELAY_IMPORT_SECTION, "Delay Imports", maybe.get().getPhysicalLocations());
+                FileRegion delay = add(null, RegionType.DELAY_IMPORT_SECTION, "Delay Imports",
+                        maybe.get().getPhysicalLocations());
+                if (fine() && delay != null) {
+                    int i = 0;
+                    for (ImportDLL dll : maybe.get().getImports()) {
+                        for (NameImport function : dll.getNameImports()) {
+                            checkInterrupt(i++);
+                            addImportFunction(delay, function, dll.getName());
+                        }
+                        for (OrdinalImport function : dll.getOrdinalImports()) {
+                            checkInterrupt(i++);
+                            addImportFunction(delay, function, dll.getName());
+                        }
+                    }
+                }
             }
         }
 
@@ -687,11 +712,9 @@ public final class StructureMapBuilder {
                 String idString = idString(id, level.equals(Level.typeLevel()));
                 String entryPath = depth == 0 ? idString : path + "/" + idString;
                 if (id instanceof Name) {
-                    // the name RVA has the high bit set, the string starts with a 2 byte length
                     Name name = (Name) id;
-                    long offset = (name.rva() & 0x7FFFFFFFL) + rsrcOffset;
                     add(parent, RegionType.RESOURCE_NAME, "Name " + name.name(),
-                            range(offset, offset + 2 + 2L * name.name().length()));
+                            Collections.singletonList(ResourceDirectoryEntry.nameLocation(name, rsrcOffset)));
                 }
                 if (entry instanceof SubDirEntry) {
                     mapResourceTree(parent, ((SubDirEntry) entry).table(), entryPath, depth + 1);
@@ -892,6 +915,16 @@ public final class StructureMapBuilder {
                 addRegion(null, e.getValue(), e.getValue().getDescription(), range(offset, offset + size),
                         attributes(FileRegion.ATTR_DATA_DIRECTORY, e.getKey().toString()), true);
             }
+        }
+
+        /** whether the IAT data directory is exactly this range, so that a table of one DLL would repeat it */
+        private boolean isIatDirectory(long start, long end) {
+            Optional<DataDirEntry> entry = data.getOptionalHeader().maybeGetDataDirEntry(DataDirectoryKey.IAT);
+            if (!entry.isPresent() || entry.get().getVirtualAddress() == 0) {
+                return false;
+            }
+            Optional<Long> offset = loader.maybeGetFileOffset(entry.get().getVirtualAddress());
+            return offset.isPresent() && offset.get() == start && offset.get() + entry.get().getDirectorySize() == end;
         }
 
         /* ---------------------------------------------------------------- */

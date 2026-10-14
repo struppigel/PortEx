@@ -299,8 +299,8 @@ final class CertificateTableParser {
             headerField(sink, CertificateIssueType.DEPRECATED_REVISION, who
                     + ": wRevision 0x100 is the legacy WIN_CERT_REVISION_1_0", revisionField);
         } else if (revision != WinCertRevision.REVISION_2_0.getValue()) {
-            headerField(sink, CertificateIssueType.INVALID_REVISION, who + ": wRevision " + Hex.offset(revision)
-                    + " is invalid, it must be 0x200 (or 0x100)", revisionField);
+            headerField(sink, CertificateIssueType.UNKNOWN_REVISION, who + ": wRevision " + Hex.offset(revision)
+                    + " is unknown, the known values are 0x200 and the legacy 0x100", revisionField);
             invalid = true;
         }
         StandardField typeField = fields.get(WinCertificateKey.CERTIFICATE_TYPE);
@@ -311,8 +311,8 @@ final class CertificateTableParser {
             headerField(sink, CertificateIssueType.UNSUPPORTED_TYPE, who + ": wCertificateType " + type + " ("
                     + WinCertType.forValue(type).get().name() + ") is not supported by Authenticode", typeField);
         } else if (type != WinCertType.PKCS_SIGNED_DATA.getValue()) {
-            headerField(sink, CertificateIssueType.INVALID_TYPE, who + ": wCertificateType " + Hex.offset(type)
-                    + " is invalid", typeField);
+            headerField(sink, CertificateIssueType.UNKNOWN_TYPE, who + ": wCertificateType " + Hex.offset(type)
+                    + " is unknown", typeField);
             invalid = true;
         }
         return invalid;

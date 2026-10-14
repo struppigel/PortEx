@@ -16,12 +16,12 @@
 package io.github.struppigel.parser.sections;
 
 import io.github.struppigel.parser.IOUtil;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import io.github.struppigel.parser.Preconditions;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Optional;
 
 /**
  * Holds header, size, offset and bytes of a PESection.
@@ -33,7 +33,7 @@ import java.io.RandomAccessFile;
  */
 public class PESection {
 
-    private Optional<byte[]> sectionbytes = Optional.absent();
+    private Optional<byte[]> sectionbytes = Optional.empty();
     private final SectionHeader header;
     private final long offset;
     private final long size;

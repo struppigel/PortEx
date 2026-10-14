@@ -49,7 +49,6 @@ import io.github.struppigel.tools.ReportCreator;
 import io.github.struppigel.tools.sigscanner.LocationKind;
 import io.github.struppigel.tools.sigscanner.PESignatureMatches;
 import io.github.struppigel.tools.sigscanner.SignatureMatch;
-import com.google.common.annotations.Beta;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -159,8 +158,8 @@ public class PEData {
      *
      * @return msdos load module
      * @throws IOException if load module can not be read.
+     * @Beta
      */
-    @Beta
     // TODO maybe load with PELoader
     public MSDOSLoadModule readMSDOSLoadModule() throws IOException {
         MSDOSLoadModule module = new MSDOSLoadModule(msdos, file);
@@ -256,7 +255,7 @@ public class PEData {
 
         SectionLoader loader = new SectionLoader(this);
         try {
-            com.google.common.base.Optional<CLRSection> maybeClr = loader.maybeLoadCLRSection();
+            Optional<CLRSection> maybeClr = loader.maybeLoadCLRSection();
             if (maybeClr.isPresent() && !maybeClr.get().isEmpty()) {
                 this.clrSection = Optional.of(maybeClr.get());
                 return clrSection;
@@ -461,7 +460,7 @@ public class PEData {
             return codeviewInfo;
         }
         try {
-            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
+            Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
             if (sec.isPresent()) {
                 DebugSection d = sec.get();
                 if (d.getCodeView().isPresent()) {
@@ -489,7 +488,7 @@ public class PEData {
         }
         SectionLoader loader = new SectionLoader(this);
         try {
-            com.google.common.base.Optional<DelayLoadSection> maybeDelayLoadImports = loader.maybeLoadDelayLoadSection();
+            Optional<DelayLoadSection> maybeDelayLoadImports = loader.maybeLoadDelayLoadSection();
             if (maybeDelayLoadImports.isPresent() && !maybeDelayLoadImports.get().isEmpty()) {
                 DelayLoadSection delayLoadSection = maybeDelayLoadImports.get();
                 this.delayLoadImports = delayLoadSection.getImports();
@@ -527,7 +526,7 @@ public class PEData {
             return exports;
         }
         try {
-            com.google.common.base.Optional<ExportSection> maybeEdata = new SectionLoader(this).maybeLoadExportSection();
+            Optional<ExportSection> maybeEdata = new SectionLoader(this).maybeLoadExportSection();
             if (maybeEdata.isPresent()) {
                 ExportSection edata = maybeEdata.get();
                 exports = edata.getExportEntries();
@@ -554,7 +553,7 @@ public class PEData {
             return extendedDLLCharacteristics;
         }
         try {
-            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
+            Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
             if (sec.isPresent()) {
                 extendedDLLCharacteristics = sec.get().getExtendedDllCharacteristics();
                 return extendedDLLCharacteristics;
@@ -601,7 +600,7 @@ public class PEData {
         }
         SectionLoader loader = new SectionLoader(this);
         try {
-            com.google.common.base.Optional<ImportSection> maybeImports = loader.maybeLoadImportSection();
+            Optional<ImportSection> maybeImports = loader.maybeLoadImportSection();
             if (maybeImports.isPresent() && !maybeImports.get().isEmpty()) {
                 ImportSection importSection = maybeImports.get();
                 this.imports = importSection.getImports();
@@ -665,7 +664,7 @@ public class PEData {
      */
     public boolean isReproBuild() {
         try {
-            com.google.common.base.Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
+            Optional<DebugSection> sec = new SectionLoader(this).maybeLoadDebugSection();
             if (sec.isPresent() && !sec.get().isEmpty()) {
                 return sec.get().isReproBuild();
             }
@@ -685,7 +684,7 @@ public class PEData {
             return resources;
         }
         try {
-            com.google.common.base.Optional<ResourceSection> res = new SectionLoader(this).maybeLoadResourceSection();
+            Optional<ResourceSection> res = new SectionLoader(this).maybeLoadResourceSection();
             if (res.isPresent() && !res.get().isEmpty()) {
                 this.resources = res.get().getResources();
                 return resources;

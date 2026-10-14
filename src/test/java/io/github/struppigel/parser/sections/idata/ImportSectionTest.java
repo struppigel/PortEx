@@ -8,7 +8,7 @@ import io.github.struppigel.parser.PELoaderTest;
 import io.github.struppigel.parser.optheader.WindowsEntryKey;
 import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionLoaderTest;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;

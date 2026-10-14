@@ -47,6 +47,17 @@ class StringsHeap(private val indexSize : Int,
   def getArray() : Array[String] =
     ScalaIOUtil.filteredString(new String(bytes, "UTF-8")).split("\0")
 
+  /**
+   * The bytes of the entry at the index up to its zero terminator, unfiltered.
+   * @return None if the index is outside of the heap
+   */
+  def rawAt(index : Long): Option[Array[Byte]] = {
+    if (index < 0 || index >= bytes.length) return None
+    var end = index.toInt
+    while (end < bytes.length && bytes(end) != 0) end += 1
+    Some(java.util.Arrays.copyOfRange(bytes, index.toInt, end))
+  }
+
   def getIndexSize() : Int = indexSize
 
   def getSizeInBytes() : Long = size

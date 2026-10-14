@@ -21,7 +21,7 @@ import io.github.struppigel.parser.IOUtil;
 import io.github.struppigel.parser.IOUtil.SpecificationFormat;
 import io.github.struppigel.parser.StandardField;
 import io.github.struppigel.parser.*;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -232,7 +232,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 	 *         doesn't exist.
 	 */
 	public Optional<DataDirEntry> maybeGetDataDirEntry(DataDirectoryKey key) {
-		return Optional.fromNullable(dataDirectory.get(key));
+		return Optional.ofNullable(dataDirectory.get(key));
 	}
 
 	/**
@@ -266,7 +266,7 @@ public class OptionalHeader extends Header<OptionalHeaderKey> {
 	 */
 	public Optional<StandardField> maybeGetStandardFieldEntry(
 			StandardFieldEntryKey key) {
-		return Optional.fromNullable(standardFields.get(key));
+		return Optional.ofNullable(standardFields.get(key));
 	}
 
 	/**

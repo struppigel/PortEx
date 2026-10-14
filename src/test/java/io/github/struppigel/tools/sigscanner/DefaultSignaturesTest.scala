@@ -30,10 +30,10 @@ class DefaultSignaturesTest {
   def bundledDatabasesLoadWithoutWarnings(): Unit = {
     assertEquals(DefaultSignatures.packers.size, 1517)
     assertEquals(DefaultSignatures.installers.size, 88)
-    assertEquals(DefaultSignatures.fileTypes.size, 407)
+    assertEquals(DefaultSignatures.fileTypes.size, 391)
     assertEquals(DefaultSignatures.javaWrappers.size, 11)
     assertEquals(DefaultSignatures.die.size, 1705)
-    assertEquals(DefaultSignatures.pe.size, 1517 + 88 + 407 + 1705)
+    assertEquals(DefaultSignatures.pe.size, 1517 + 88 + 391 + 1705)
     for (db <- List(DefaultSignatures.packers, DefaultSignatures.installers, DefaultSignatures.fileTypes,
       DefaultSignatures.javaWrappers, DefaultSignatures.die))
       assertTrue(db.warnings.isEmpty, db.warnings.mkString("\n"))

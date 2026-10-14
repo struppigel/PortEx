@@ -52,7 +52,13 @@ class ResourceDirectory private (private val level: Level,
 
   private val headerLoc = new PhysicalLocation(fileOffset, resourceDirSize)
 
-  def locations(): List[PhysicalLocation] = headerLoc :: entries.flatMap(e => e.locations)
+  /** the 8 byte records of the entries that were read, they follow the header, entryNr starts at 1 */
+  private lazy val entryLocs = entries.map {
+    case s: SubDirEntry => s.entryNr
+    case d: DataEntry   => d.entryNr
+  }.map(nr => new PhysicalLocation(fileOffset + resourceDirSize + entrySize * (nr - 1), entrySize))
+
+  def locations(): List[PhysicalLocation] = headerLoc :: entryLocs ::: entries.flatMap(e => e.locations)
 
   /**
    * Returns the location of this directory table: the 16 byte header and the

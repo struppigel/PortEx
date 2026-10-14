@@ -17,7 +17,7 @@
 package io.github.struppigel.tools.visualizer;
 
 import io.github.struppigel.parser.PhysicalLocation;
-import com.google.common.base.Preconditions;
+import io.github.struppigel.parser.Preconditions;
 
 import java.awt.*;
 import java.util.EnumMap;

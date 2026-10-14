@@ -16,7 +16,6 @@
 package io.github.struppigel.parser
 
 import RichHeader.{buildMap, knownXORKeys, prodIdMap, richMagic}
-import com.google.common.primitives.Bytes
 import org.apache.logging.log4j.LogManager
 
 import java.math.BigInteger
@@ -163,7 +162,7 @@ object RichHeader {
   private val wordLen = 4
 
   def apply(bytesUntilPE: Array[Byte]) : RichHeader = {
-    val richOffset = Bytes.indexOf(bytesUntilPE, richMagic)
+    val richOffset = bytesUntilPE.indexOfSlice(richMagic)
     if(richOffset == -1) throw new FileFormatException("No Rich Header found")
     if(bytesUntilPE.length < richOffset + 8) throw new FileFormatException("Rich Header malformed or truncated")
     val xorKey = bytesUntilPE.slice(richOffset + 4, richOffset + 8)

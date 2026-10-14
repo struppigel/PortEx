@@ -15,13 +15,17 @@
  ******************************************************************************/
 package io.github.struppigel.tools.visualizer.render;
 
+import io.github.struppigel.tools.layout.FileRegion;
+import io.github.struppigel.tools.layout.RegionType;
 import io.github.struppigel.tools.layout.StructureMap;
 import io.github.struppigel.tools.visualizer.engine.FileVisualization;
 import org.testng.annotations.Test;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import static io.github.struppigel.tools.visualizer.render.RenderTestSupport.visualization;
 import static org.testng.Assert.*;
@@ -70,6 +74,50 @@ public class LegendRendererTest {
             if (entry.getLabel().equals(".text")) {
                 assertEquals(entry.getColor(), vis.getColorScheme().colorOf(
                         vis.getStructureMap().getRegions(io.github.struppigel.tools.layout.RegionType.SECTION).get(0)));
+            }
+        }
+    }
+
+    @Test
+    public void entriesKnowTheirStructures() throws Exception {
+        FileVisualization vis = visualization("HelloWorld.exe", false);
+        StructureMap map = vis.getStructureMap();
+        List<LegendEntry> entries = LegendRenderer.entries(map, vis.getColorScheme(), true, true);
+        for (LegendEntry entry : entries) {
+            if (entry.isTitle() || entry.getLabel().equals("0xFF") || entry.getLabel().contains("ASCII")
+                    || entry.getLabel().contains("(")) {
+                assertTrue(entry.getRegions().isEmpty(), entry.toString());
+            }
+            if (entry.getLabel().equals(".text")) {
+                assertEquals(entry.getRegions().size(), 1);
+                assertEquals(entry.getRegions().get(0).getType(), RegionType.SECTION);
+            }
+            if (entry.getLabel().equals("RT_VERSION")) {
+                assertFalse(entry.getRegions().isEmpty());
+                for (FileRegion region : entry.getRegions()) {
+                    assertEquals(region.getType(), RegionType.RESOURCE);
+                    assertEquals(region.getAttributes().get(FileRegion.ATTR_RESOURCE_TYPE), "RT_VERSION");
+                }
+            }
+            if (entry.getLabel().equals("#~")) {
+                assertFalse(entry.getRegions().isEmpty());
+                for (FileRegion region : entry.getRegions()) {
+                    assertEquals(region.getName(), "#~");
+                }
+            }
+            if (entry.getLabel().equals("PE Signature")) {
+                assertEquals(entry.getRegions().size(), map.getRegions(RegionType.PE_SIGNATURE).size());
+            }
+        }
+    }
+
+    @Test
+    public void everyStructureEntryHasStructures() throws Exception {
+        FileVisualization vis = visualization("WinRar.exe", false);
+        for (LegendEntry entry : LegendRenderer.entries(vis.getStructureMap(), vis.getColorScheme(), false, false,
+                EnumSet.allOf(RegionType.class))) {
+            if (!entry.isTitle()) {
+                assertFalse(entry.getRegions().isEmpty(), entry.toString());
             }
         }
     }

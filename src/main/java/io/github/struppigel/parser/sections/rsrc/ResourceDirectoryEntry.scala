@@ -53,7 +53,7 @@ abstract class ResourceDirectoryEntry {
 case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsrcOffset: Long) extends ResourceDirectoryEntry {
 
   private lazy val idLoc = id match {
-    case Name(rva, name) => List(new PhysicalLocation(rva + rsrcOffset, name.length * 2))
+    case n: Name => List(ResourceDirectoryEntry.nameLocation(n, rsrcOffset))
     case _               => Nil
   }
 
@@ -85,7 +85,7 @@ case class SubDirEntry(id: IDOrName, table: ResourceDirectory, entryNr: Int, rsr
 case class DataEntry(id: IDOrName, data: ResourceDataEntry, entryNr: Int, rsrcOffset: Long) extends ResourceDirectoryEntry {
 
   private lazy val idLoc = id match {
-    case Name(rva, name) => List(new PhysicalLocation(rva + rsrcOffset, name.length * 2))
+    case n: Name => List(ResourceDirectoryEntry.nameLocation(n, rsrcOffset))
     case _               => Nil
   }
 
@@ -141,6 +141,13 @@ case class Name(rva: Long, name: String) extends IDOrName {
 object ResourceDirectoryEntry {
 
   val maxNameLength = 30
+
+  /**
+   * The bytes of a name string: the two byte length and the UTF-16 characters, at most maxNameLength of them.
+   * The highest bit of the rva marks the entry as name entry and is not part of the address.
+   */
+  def nameLocation(name: Name, rsrcOffset: Long): PhysicalLocation =
+    new PhysicalLocation((name.rva & 0x7FFFFFFFL) + rsrcOffset, 2L + name.name.length * 2L)
 
   private val logger = LogManager.getLogger(ResourceDirectoryEntry.getClass().getName())
 

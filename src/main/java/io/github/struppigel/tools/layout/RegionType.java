@@ -133,6 +133,8 @@ public enum RegionType {
     IMPORT_LOOKUP_TABLE("Import Lookup Table", ColorableItem.IMPORT_SECTION, NONE, 3),
     /** the import address table of a DLL, derived from its RVA and the number of imports */
     IMPORT_ADDRESS_TABLE("Import Address Table", ColorableItem.IMPORT_SECTION, NONE, 3),
+    /** the data of one imported function: lookup table entry, hint and name, address table slot */
+    IMPORT_FUNCTION("Import Function", ColorableItem.IMPORT_SECTION, NONE, 4),
     /** the name of an imported DLL */
     IMPORT_DLL_NAME("DLL Name", ColorableItem.IMPORT_SECTION, NONE, 3),
     /** the hint and name of an imported function */

@@ -10,7 +10,7 @@ import io.github.struppigel.parser.optheader.DataDirectoryKey;
 import io.github.struppigel.parser.sections.edata.ExportSection;
 import io.github.struppigel.parser.sections.idata.ImportSection;
 import io.github.struppigel.parser.sections.rsrc.ResourceSection;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeClass;

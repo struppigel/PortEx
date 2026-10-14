@@ -35,15 +35,13 @@ import io.github.struppigel.parser.sections.pdata.ExceptionSection;
 import io.github.struppigel.parser.sections.reloc.RelocationSection;
 import io.github.struppigel.parser.sections.rsrc.ResourceSection;
 import io.github.struppigel.parser.*;
-import com.google.common.annotations.Beta;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Responsible for computing section related values that are necessary for
@@ -65,7 +63,7 @@ public class SectionLoader {
     private final File file;
     private final OptionalHeader optHeader;
     private final PEData data;
-    private Optional<MemoryMappedPE> memoryMapped = Optional.absent();
+    private Optional<MemoryMappedPE> memoryMapped = Optional.empty();
     
     /**
      * Creates a SectionLoader instance taking all information from the given
@@ -111,16 +109,16 @@ public class SectionLoader {
      *         contained in file
      * @throws IOException
      *             if unable to read the file
+     * @Beta
      */
-    @Beta
     // TODO remove? This seems not necessary
     public Optional<PESection> maybeLoadSection(String name) throws IOException {
         Optional<SectionHeader> section = table.getSectionHeaderByName(name);
         if (section.isPresent()) {
             int sectionNr = section.get().getNumber();
-            return Optional.fromNullable(loadSection(sectionNr));
+            return Optional.ofNullable(loadSection(sectionNr));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -282,7 +280,7 @@ public class SectionLoader {
             return dataDir.get().maybeGetSectionTableEntry(table);
         }
         logger.warn("data dir entry " + dataDirKey + " doesn't exist");
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -303,7 +301,7 @@ public class SectionLoader {
                 result = header;
             }
         }
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -324,11 +322,11 @@ public class SectionLoader {
             long rva = dataDir.get().getVirtualAddress();
             if (dataDirKey == DataDirectoryKey.CERTIFICATE_TABLE) {
                 // the address of the certificate table is a file offset
-                return isWithinFile(rva) ? Optional.of(rva) : Optional.<Long>absent();
+                return isWithinFile(rva) ? Optional.of(rva) : Optional.<Long>empty();
             }
             return Optional.of(getFileOffset(rva));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -391,7 +389,7 @@ public class SectionLoader {
                     + Long.toHexString(fileOffset) + " for file: "
                     + file.getName() + " with length 0x"
                     + Long.toHexString(file.length()));
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(fileOffset);
     }
@@ -411,7 +409,7 @@ public class SectionLoader {
                 return Optional.of(header);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -431,7 +429,7 @@ public class SectionLoader {
                 return Optional.of(header);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private PhysicalLocation getPhysicalSectionLocation(SectionHeader header) {
@@ -512,17 +510,17 @@ public class SectionLoader {
                     section = CertificateTable.newInstance(loadInfo);
                     break;
                 default:
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 if (section != null && section.isEmpty()) {
                     logger.warn("empty data directory: " + key);
                 }
-                return Optional.fromNullable(section);
+                return Optional.ofNullable(section);
             }
         } catch (FileFormatException e) {
             logger.warn(e);
         } 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -884,12 +882,12 @@ public class SectionLoader {
             if (!maybeOffset.isPresent()) {
                 logger.info("unable to get file offset for " + dataDirKey);
             }
-            long offset = maybeOffset.or(-1L);
+            long offset = maybeOffset.orElse(-1L);
             return Optional.of(new LoadInfo(offset, virtualAddress,
                     getMemoryMappedPE(), data, this));
 
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -945,8 +943,8 @@ public class SectionLoader {
      * 
      * @param dataDirKey
      * @return true iff virtual address is valid
+     * @Beta
      */
-    @Beta
     public boolean hasValidPointer(DataDirectoryKey dataDirKey) {
         DataDirEntry dataDir = optHeader.getDataDirectory().get(dataDirKey);
         long rva = dataDir.getVirtualAddress();
@@ -968,8 +966,8 @@ public class SectionLoader {
      * @param header
      *            the section's header
      * @return true iff section is valid
+     * @Beta
      */
-    @Beta
     public boolean isValidSection(SectionHeader header) {
         // sidenote: the readsize should never be > 0 if the section starts
         // outside the file
@@ -986,8 +984,8 @@ public class SectionLoader {
      * @param header
      *            the header of the section that may contain the entry point.
      * @return true if entry point is within the section, false otherwise
+     * @Beta
      */
-    @Beta
     public boolean containsEntryPoint(SectionHeader header) {
         long ep = data.getOptionalHeader().get(
                 StandardFieldEntryKey.ADDR_OF_ENTRY_POINT);

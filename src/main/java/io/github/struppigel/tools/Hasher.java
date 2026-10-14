@@ -17,12 +17,12 @@ package io.github.struppigel.tools;
 
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
+import io.github.struppigel.parser.Preconditions;
 import io.github.struppigel.parser.RichHeader;
 import io.github.struppigel.parser.sections.SectionHeader;
 import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionTable;
 import io.github.struppigel.parser.sections.cert.AuthenticodeVerifier;
-import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

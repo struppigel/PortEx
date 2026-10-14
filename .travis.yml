@@ -2,6 +2,6 @@ language: scala
 scala:
   - 2.12.13
 jdk:
-  - openjdk8
+  - openjdk17
 sudo: false
 script: "sbt ++$TRAVIS_SCALA_VERSION compile test"

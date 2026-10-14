@@ -15,7 +15,7 @@
  ******************************************************************************/
 package io.github.struppigel.parser;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +55,7 @@ public class PESignature {
 	 * The file offset for the PE signature read at PE_OFFSET_LOCATION Absent,
 	 * if not yet read.
 	 */
-	private Optional<Long> peOffset = Optional.absent();
+	private Optional<Long> peOffset = Optional.empty();
 	private final File file;
 
 	/**
@@ -205,7 +205,7 @@ public class PESignature {
 	 */
 	private void throwIf(boolean b) throws FileFormatException {
 		if (b) {
-			peOffset = Optional.absent();
+			peOffset = Optional.empty();
 			throw new FileFormatException("given file is no PE file");
 		}
 	}

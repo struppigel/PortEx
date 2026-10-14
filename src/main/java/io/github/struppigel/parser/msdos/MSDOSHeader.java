@@ -18,7 +18,7 @@ package io.github.struppigel.parser.msdos;
 import io.github.struppigel.parser.Header;
 import io.github.struppigel.parser.IOUtil;
 import io.github.struppigel.parser.StandardField;
-import com.google.common.base.Preconditions;
+import io.github.struppigel.parser.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -34,7 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.github.struppigel.parser.Preconditions.checkState;
 
 /**
  * Loads PEData of a file. Spares the user of the library to collect every

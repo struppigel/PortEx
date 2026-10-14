@@ -17,8 +17,6 @@ package io.github.struppigel.parser;
 
 import io.github.struppigel.parser.sections.idata.SymbolDescription;
 import io.github.struppigel.parser.sections.rsrc.Resource;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -78,8 +76,8 @@ public final class IOUtil {
 	 */
 	public static void dumpLocationToFile(PhysicalLocation loc, File inFile,
 			File outFile) throws IOException {
-		Preconditions.checkArgument(!outFile.exists());
-		Preconditions.checkArgument(inFile.exists(), inFile.isFile());
+		Preconditions.checkArgument(!outFile.exists(), "outFile must not exist");
+		Preconditions.checkArgument(inFile.exists(), "inFile must exist");
 
 		final int BUFFER_SIZE = 2048;
 
@@ -431,8 +429,8 @@ public final class IOUtil {
 						description = array[1];
 					}
 					list.add(new SymbolDescription(mainItem, Optional
-							.fromNullable(description), category, Optional
-							.fromNullable(subCategory)));
+							.ofNullable(description), category, Optional
+							.ofNullable(subCategory)));
 				}
 			}
 		}

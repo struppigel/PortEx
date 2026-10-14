@@ -1,6 +1,6 @@
 package io.github.struppigel.parser.sections.idata
 
-import com.google.common.base.Optional
+import java.util.Optional
 
 class SymbolDescription(
     symbolName: String, 

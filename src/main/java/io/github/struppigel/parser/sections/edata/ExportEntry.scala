@@ -17,7 +17,7 @@
  */
 package io.github.struppigel.parser.sections.edata
 
-import com.google.common.base.Optional
+import java.util.Optional
 
 /**
  * Represents one entry of the export section.
@@ -70,7 +70,7 @@ class ExportEntry(
    */
   def maybeGetForwarder(): Optional[String] =
     forwarder match {
-      case None => Optional.absent()
+      case None => Optional.empty()
       case Some(str) => Optional.of(str)
     }
 

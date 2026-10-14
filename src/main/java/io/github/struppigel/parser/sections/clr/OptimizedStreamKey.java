@@ -7,6 +7,7 @@ public enum OptimizedStreamKey implements HeaderKey {
     MAJOR_VERSION,
     MINOR_VERSION,
     HEAP_SIZES,
+    RESERVED_ONE,
     VALID,
     SORTED;
 }

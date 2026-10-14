@@ -72,6 +72,8 @@ final class TestSigner {
     boolean explicitEcParameters;
     boolean isolatedCertificate;
     boolean longSerial;
+    /** overrides the serial number of the signer certificate with these INTEGER content bytes */
+    byte[] customSerial;
     int nestingDepth;
     String unauthenticatedOid;
     int unauthenticatedSize;
@@ -181,7 +183,8 @@ final class TestSigner {
         byte[] signatureAlgorithm = keyType == KeyType.RSA ? algorithm(Oids.RSA_ENCRYPTION)
                 : algorithmNoParams(ecdsaOid(digest));
 
-        byte[] leafSerial = longSerial ? concat(new byte[]{0x01}, new byte[20]) : BigInteger.valueOf(0x2002).toByteArray();
+        byte[] leafSerial = customSerial != null ? customSerial
+                : longSerial ? concat(new byte[]{0x01}, new byte[20]) : BigInteger.valueOf(0x2002).toByteArray();
         List<byte[]> unauthenticated = new ArrayList<>();
         if (level < nestingDepth) {
             unauthenticated.add(attribute(Oids.NESTED_SIGNATURE, signature(imageDigest, level + 1)));

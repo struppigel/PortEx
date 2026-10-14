@@ -157,7 +157,7 @@ public final class CertificateTable implements SpecialSection {
      * @throws IllegalStateException if the file has no certificate table entry
      */
     public static CertificateTable load(PEData data) throws IOException {
-        com.google.common.base.Optional<DataDirEntry> entry = data.getOptionalHeader()
+        java.util.Optional<DataDirEntry> entry = data.getOptionalHeader()
                 .maybeGetDataDirEntry(DataDirectoryKey.CERTIFICATE_TABLE);
         if (!entry.isPresent()) {
             throw new IllegalStateException("the file has no certificate table entry");

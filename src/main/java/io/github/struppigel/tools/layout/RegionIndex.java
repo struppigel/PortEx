@@ -57,7 +57,7 @@ final class RegionIndex {
         int regionCount = regions.size();
         // specificity rank
         FileRegion[] sorted = regions.toArray(new FileRegion[0]);
-        Arrays.sort(sorted, SPECIFICITY);
+        Arrays.sort(sorted, specificity(specificSizes(regions)));
         this.byRank = sorted;
         this.rank = new int[regionCount];
         for (int r = 0; r < sorted.length; r++) {
@@ -106,20 +106,46 @@ final class RegionIndex {
 
     /**
      * Smaller regions first, then deeper ones, then higher type priority,
-     * then build order.
+     * then build order. The size of a region is its covered bytes, but at
+     * most one less than the size of its parent, so that a region with
+     * several locations is never less specific than the region around it.
      */
-    static final Comparator<FileRegion> SPECIFICITY = new Comparator<FileRegion>() {
-        @Override
-        public int compare(FileRegion a, FileRegion b) {
-            int c = Long.compare(a.getCoveredBytes(), b.getCoveredBytes());
-            if (c != 0) return c;
-            c = Integer.compare(b.getDepth(), a.getDepth());
-            if (c != 0) return c;
-            c = Integer.compare(b.getType().getPriority(), a.getType().getPriority());
-            if (c != 0) return c;
-            return Integer.compare(a.getId(), b.getId());
+    private static Comparator<FileRegion> specificity(final long[] size) {
+        return new Comparator<FileRegion>() {
+            @Override
+            public int compare(FileRegion a, FileRegion b) {
+                int c = Long.compare(size[a.getId()], size[b.getId()]);
+                if (c != 0) return c;
+                c = Integer.compare(b.getDepth(), a.getDepth());
+                if (c != 0) return c;
+                c = Integer.compare(b.getType().getPriority(), a.getType().getPriority());
+                if (c != 0) return c;
+                return Integer.compare(a.getId(), b.getId());
+            }
+        };
+    }
+
+    private static long[] specificSizes(List<FileRegion> regions) {
+        long[] size = new long[regions.size()];
+        boolean[] done = new boolean[regions.size()];
+        for (FileRegion region : regions) {
+            specificSize(region, size, done);
         }
-    };
+        return size;
+    }
+
+    private static long specificSize(FileRegion region, long[] size, boolean[] done) {
+        int id = region.getId();
+        if (!done[id]) {
+            long result = region.getCoveredBytes();
+            if (region.getParent().isPresent()) {
+                result = Math.min(result, specificSize(region.getParent().get(), size, done) - 1);
+            }
+            size[id] = result;
+            done[id] = true;
+        }
+        return size[id];
+    }
 
     /**
      * @param region a region of this index

@@ -15,7 +15,12 @@
  ******************************************************************************/
 package io.github.struppigel.tools.visualizer.render;
 
+import io.github.struppigel.tools.layout.FileRegion;
+
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,12 +34,14 @@ public final class LegendEntry {
     private final Color color;
     private final boolean title;
     private final boolean outlined;
+    private final List<FileRegion> regions;
 
-    private LegendEntry(String label, Color color, boolean title, boolean outlined) {
+    private LegendEntry(String label, Color color, boolean title, boolean outlined, List<FileRegion> regions) {
         this.label = Objects.requireNonNull(label);
         this.color = Objects.requireNonNull(color);
         this.title = title;
         this.outlined = outlined;
+        this.regions = Collections.unmodifiableList(new ArrayList<>(regions));
     }
 
     /**
@@ -42,7 +49,7 @@ public final class LegendEntry {
      * @return a title entry
      */
     public static LegendEntry title(String label) {
-        return new LegendEntry(label, Color.lightGray, true, false);
+        return new LegendEntry(label, Color.lightGray, true, false, Collections.<FileRegion>emptyList());
     }
 
     /**
@@ -50,10 +57,30 @@ public final class LegendEntry {
      * @param color the color sample
      * @param outlined true if the sample has an outline, which marks structures
      *            that are drawn inset
-     * @return a legend entry
+     * @return a legend entry without structures
      */
     public static LegendEntry entry(String label, Color color, boolean outlined) {
-        return new LegendEntry(label, color, false, outlined);
+        return new LegendEntry(label, color, false, outlined, Collections.<FileRegion>emptyList());
+    }
+
+    /**
+     * @param label the label
+     * @param color the color sample
+     * @param outlined true if the sample has an outline, which marks structures
+     *            that are drawn inset
+     * @param regions the structures that the entry stands for
+     * @return a legend entry
+     */
+    public static LegendEntry entry(String label, Color color, boolean outlined, List<FileRegion> regions) {
+        return new LegendEntry(label, color, false, outlined, regions);
+    }
+
+    /**
+     * @return the structures that the entry stands for, empty for titles and for entries of the byte plot and the
+     *         entropy
+     */
+    public List<FileRegion> getRegions() {
+        return regions;
     }
 
     /**

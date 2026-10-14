@@ -43,16 +43,16 @@ public enum CertificateIssueType {
 
     /** dwLength is smaller than 8 or larger than the table */
     INVALID_LENGTH("invalid WIN_CERTIFICATE length"),
-    /** wRevision is neither 0x0100 nor 0x0200 */
-    INVALID_REVISION("invalid WIN_CERTIFICATE revision"),
+    /** wRevision is neither 0x0100 nor 0x0200, the PE format permits other values */
+    UNKNOWN_REVISION("unknown WIN_CERTIFICATE revision"),
     /** wRevision is the legacy 0x0100 */
     DEPRECATED_REVISION("deprecated WIN_CERTIFICATE revision 1.0"),
     /** wCertificateType is WIN_CERT_TYPE_RESERVED_1 */
     RESERVED_TYPE("reserved WIN_CERTIFICATE type"),
     /** wCertificateType is X509 or TS_STACK_SIGNED, which Windows does not support */
     UNSUPPORTED_TYPE("WIN_CERTIFICATE type is not supported by Authenticode"),
-    /** wCertificateType is not defined */
-    INVALID_TYPE("invalid WIN_CERTIFICATE type"),
+    /** wCertificateType is not one of the defined values, the PE format permits other values */
+    UNKNOWN_TYPE("unknown WIN_CERTIFICATE type"),
 
     /* structure */
 
@@ -115,6 +115,8 @@ public enum CertificateIssueType {
     NONZERO_PADDING("non-zero padding"),
     /** a serial number is longer than 20 bytes */
     OVERSIZED_SERIAL("oversized serial number"),
+    /** a serial number is zero or negative */
+    NON_POSITIVE_SERIAL("non-positive serial number"),
     /** an object identifier is too long */
     OVERSIZED_OID("oversized object identifier"),
     /** the page hashes are malformed */

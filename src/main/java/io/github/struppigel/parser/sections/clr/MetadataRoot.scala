@@ -130,37 +130,47 @@ object MetadataRoot {
     new MetadataRoot(metaRootEntries, metadataFileOffset, versionString, streamHeaders, None, None, None, None, nonZeroTerminatedHeaders)
   }
 
+  // slicing allocates the requested size, so a size from the file is limited to the mapped bytes
+  private def mappedSize(va: Long, size: Long, mmbytes: MemoryMappedPE): Long =
+    Math.max(0L, Math.min(size, mmbytes.length() - va))
+
   private def maybeLoadOptimizedStream( streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE,
                                         stringsHeap : Option[StringsHeap], guidHeap : Option[GuidHeap], blobHeap : Option[BlobHeap]): Option[OptimizedStream] = {
     streamHeaders.find(_.name == "#~") match {
-      case Some(header) => Some(OptimizedStream(header.size, metadataVA + header.offset, mmbytes, stringsHeap, guidHeap, blobHeap))
+      case Some(header) =>
+        try Some(OptimizedStream(mappedSize(metadataVA + header.offset, header.size, mmbytes), metadataVA + header.offset, mmbytes, stringsHeap, guidHeap, blobHeap))
+        catch {
+          case e: FileFormatException =>
+            logger.warn("Could not read the #~ stream: " + e.getMessage)
+            None
+        }
       case None => None
     }
   }
 
   private def maybeLoadStringHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[StringsHeap] = {
     streamHeaders.find(_.name == "#Strings") match {
-      case Some(header) => Some(StringsHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
+      case Some(header) => Some(StringsHeap(mappedSize(metadataVA + header.offset, header.size, mmbytes), metadataVA + header.offset, mmbytes, indexSize))
       case None => None
     }
   }
 
   private def maybeLoadGuidHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[GuidHeap] = {
     streamHeaders.find(_.name == "#GUID") match {
-      case Some(header) => Some(GuidHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
+      case Some(header) => Some(GuidHeap(mappedSize(metadataVA + header.offset, header.size, mmbytes), metadataVA + header.offset, mmbytes, indexSize))
       case None => None
     }
   }
 
   private def maybeLoadBlobHeap(streamHeaders : List[StreamHeader], metadataVA : Long, mmbytes: MemoryMappedPE, indexSize : Int) : Option[BlobHeap] = {
     streamHeaders.find(_.name == "#Blob") match {
-      case Some(header) => Some(BlobHeap(header.size, metadataVA + header.offset, mmbytes, indexSize))
+      case Some(header) => Some(BlobHeap(mappedSize(metadataVA + header.offset, header.size, mmbytes), metadataVA + header.offset, mmbytes, indexSize))
       case None => None
     }
   }
 
   private def loadMetaRootEntriesFirstPart(mmbytes: MemoryMappedPE, metadataVA: Long, metadataSize: Long, metadataFileOffset: Long) = {
-    val metaBytes = mmbytes.slice(metadataVA, metadataVA + metadataSize)
+    val metaBytes = mmbytes.slice(metadataVA, metadataVA + mappedSize(metadataVA, metadataSize, mmbytes))
     val metaRootEntriesPart = IOUtil.readHeaderEntries(classOf[MetadataRootKey],
       formatMeta, metaRootSpec, metaBytes, metadataFileOffset).asScala.toMap
     metaRootEntriesPart
@@ -249,5 +259,5 @@ class StreamHeader(val offset: Long, val size : Long, val name: String) {
    * Size of the header
    * @return size of header in bytes
    */
-  def getHeaderSize: Long = 8 + alignToFourBytes(name.length)
+  def getHeaderSize: Long = 8 + alignToFourBytes(name.length + 1)
 }

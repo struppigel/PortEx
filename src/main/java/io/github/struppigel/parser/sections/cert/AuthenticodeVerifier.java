@@ -156,7 +156,7 @@ public final class AuthenticodeVerifier {
             long relative = magic == MagicNumber.PE32 ? PE32_CERTIFICATE_ENTRY : PE32_PLUS_CERTIFICATE_ENTRY;
             excluded.add(new long[]{header.getOffset() + relative, DATA_DIR_ENTRY_SIZE});
         }
-        com.google.common.base.Optional<DataDirEntry> entry =
+        java.util.Optional<DataDirEntry> entry =
                 header.maybeGetDataDirEntry(DataDirectoryKey.CERTIFICATE_TABLE);
         if (entry.isPresent()) {
             excluded.add(new long[]{entry.get().getVirtualAddress(), entry.get().getDirectorySize()});

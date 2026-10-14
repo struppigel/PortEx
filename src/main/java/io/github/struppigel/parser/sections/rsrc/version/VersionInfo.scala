@@ -21,7 +21,7 @@ import io.github.struppigel.parser.IOUtil._
 import io.github.struppigel.parser.ScalaIOUtil.using
 import io.github.struppigel.parser.sections.SectionLoader
 import io.github.struppigel.parser.{ByteArrayUtil}
-import com.google.common.base.Optional
+import java.util.Optional
 import io.github.struppigel.parser.PhysicalLocation
 import io.github.struppigel.parser.sections.rsrc.Resource
 
@@ -41,7 +41,7 @@ class VsVersionInfo(
   def getStringFileInfo(): Optional[StringFileInfo] = {
     children.find(child => child.isInstanceOf[StringFileInfo]) match {
       case Some(f) => Optional.of(f.asInstanceOf[StringFileInfo])
-      case None => Optional.absent()
+      case None => Optional.empty()
     }
   }
   
@@ -81,8 +81,7 @@ class EmptyVersionInfo extends VersionInfo {
     Map[String,String]().asJava
   
   def getStringFileInfo(): Optional[StringFileInfo] = 
-    Optional.absent()
-  
+    Optional.empty()
   def getChildren(): java.util.List[FileInfo] = 
     List[FileInfo]().asJava
   

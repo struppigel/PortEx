@@ -33,7 +33,7 @@ import io.github.struppigel.tools.anomalies.Anomaly;
 import io.github.struppigel.tools.anomalies.PEAnomalyScanner;
 import io.github.struppigel.tools.visualizer.VisualizerBuilder.VisualizerSettings;
 import io.github.struppigel.parser.*;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -598,7 +598,7 @@ public class LegacyVisualizerReference {
 					- section.get().get(SectionHeaderKey.POINTER_TO_RAW_DATA);
 			return Optional.of(rva - phystovirt);
 		}
-		return Optional.absent();
+		return Optional.empty();
 	}
 
 	/**

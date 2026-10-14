@@ -138,21 +138,37 @@ public final class LegendRenderer {
                 for (FileRegion section : regions) {
                     String name = section.getAttributes().get(FileRegion.ATTR_SECTION_NAME);
                     entries.add(LegendEntry.entry(name == null || name.isEmpty() ? section.getName() : name,
-                            scheme.colorOf(section), false));
+                            scheme.colorOf(section), false, Collections.singletonList(section)));
                 }
             } else if (type == RegionType.RESOURCE) {
+                Map<String, List<FileRegion>> byType = new LinkedHashMap<>();
+                for (FileRegion resource : regions) {
+                    String resourceType = resource.getAttributes().get(FileRegion.ATTR_RESOURCE_TYPE);
+                    String key = resourceType == null ? "" : resourceType;
+                    List<FileRegion> sameType = byType.get(key);
+                    if (sameType == null) {
+                        sameType = new ArrayList<>();
+                        byType.put(key, sameType);
+                    }
+                    sameType.add(resource);
+                }
                 for (Map.Entry<String, Color> e : scheme.getResourceTypeColors().entrySet()) {
-                    entries.add(LegendEntry.entry(e.getKey(), e.getValue(), outlined));
+                    List<FileRegion> sameType = byType.get(e.getKey());
+                    entries.add(LegendEntry.entry(e.getKey(), e.getValue(), outlined,
+                            sameType == null ? Collections.<FileRegion>emptyList() : sameType));
                 }
             } else if (type == RegionType.CLR_STREAM) {
                 Map<String, Color> streams = new LinkedHashMap<>();
+                Map<String, List<FileRegion>> streamRegions = new LinkedHashMap<>();
                 for (FileRegion stream : regions) {
                     if (!streams.containsKey(stream.getName())) {
                         streams.put(stream.getName(), scheme.colorOf(stream));
+                        streamRegions.put(stream.getName(), new ArrayList<FileRegion>());
                     }
+                    streamRegions.get(stream.getName()).add(stream);
                 }
                 for (Map.Entry<String, Color> e : streams.entrySet()) {
-                    entries.add(LegendEntry.entry(e.getKey(), e.getValue(), outlined));
+                    entries.add(LegendEntry.entry(e.getKey(), e.getValue(), outlined, streamRegions.get(e.getKey())));
                 }
             } else {
                 ColorableItem item = type.getColorableItem();
@@ -160,10 +176,28 @@ public final class LegendRenderer {
                     continue;
                 }
                 listed.add(item);
-                entries.add(LegendEntry.entry(item.getLegendDescription(), scheme.colorOf(item), outlined));
+                entries.add(LegendEntry.entry(item.getLegendDescription(), scheme.colorOf(item), outlined,
+                        regionsOfItem(map, item, paintedTypes)));
             }
         }
         return entries;
+    }
+
+    /**
+     * @return the structures of all painted types that share the color of the item, except the types that have
+     *         entries of their own
+     */
+    private static List<FileRegion> regionsOfItem(StructureMap map, ColorableItem item, Set<RegionType> paintedTypes) {
+        List<FileRegion> result = new ArrayList<>();
+        for (RegionType type : RegionType.values()) {
+            if (type == RegionType.SECTION || type == RegionType.RESOURCE || type == RegionType.CLR_STREAM
+                    || type.getPaintMode() == PaintMode.NONE || !paintedTypes.contains(type)
+                    || type.getColorableItem() != item) {
+                continue;
+            }
+            result.addAll(map.getRegions(type));
+        }
+        return result;
     }
 
     /**
