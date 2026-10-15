@@ -123,6 +123,37 @@ public class PortExAnalyzerCliTest {
     }
 
     @Test
+    public void pictureOfTheWholeFileUsesTheNewVisualizer() throws Exception {
+        Path image = Files.createTempFile("portex-picture", ".png");
+        try {
+            assertExitCode(0, "-p", image.toString(), WINRAR);
+            BufferedImage picture = ImageIO.read(image.toFile());
+            // 64 columns of 4 pixels for each of the 3 tracks, the offset ruler and the legend
+            assertTrue(picture.getWidth() >= 90 + 3 * (4 + 64 * 4) + 4 + 220, "width " + picture.getWidth());
+            assertTrue(picture.getHeight() <= 1000 && picture.getHeight() > 400, "height " + picture.getHeight());
+            // the dark background of the offset ruler is only drawn by the new visualizer
+            assertEquals(picture.getRGB(1, 1) & 0xFFFFFF, 0x202020);
+            assertExitCode(0, "-p", image.toString(), "-bps", "4096", WINRAR);
+        } finally {
+            Files.deleteIfExists(image);
+        }
+    }
+
+    @Test
+    public void pictureWithVisOverlayIsWritten() throws Exception {
+        Path image = Files.createTempFile("portex-picture-overlay", ".png");
+        Path overlay = Files.createTempFile("portex-overlay", ".txt");
+        try {
+            Files.write(overlay, "{\n  \"offset\": \"0x400\",\n  \"size\": \"0x100\"\n}\n".getBytes());
+            assertExitCode(0, "-p", image.toString(), "--visoverlay", overlay.toString(), WINRAR);
+            assertTrue(Files.size(image) > 0);
+        } finally {
+            Files.deleteIfExists(image);
+            Files.deleteIfExists(overlay);
+        }
+    }
+
+    @Test
     public void zoomedPictureIsWritten() throws Exception {
         Path hexImage = Files.createTempFile("portex-zoomed-hex", ".png");
         Path largeImage = Files.createTempFile("portex-zoomed", ".png");

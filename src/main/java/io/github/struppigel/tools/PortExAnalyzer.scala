@@ -22,7 +22,8 @@ import io.github.struppigel.parser.ScalaIOUtil.using
 import io.github.struppigel.parser.{PELoader, PESignature}
 import io.github.struppigel.parser.optheader.StandardFieldEntryKey
 import io.github.struppigel.parser.sections.SectionLoader
-import io.github.struppigel.tools.layout.{FileRegion, RegionType, StructureMap}
+import io.github.struppigel.tools.anomalies.PEAnomalyScanner
+import io.github.struppigel.tools.layout.{FileRegion, RegionType, StructureMap, StructureMapBuilder}
 import io.github.struppigel.tools.visualizer.engine.{ByteStatistics, CachedByteSource, FileVisualization, ProgressListener, ViewMapping}
 import io.github.struppigel.tools.visualizer.render.{RegionColorScheme, RenderStyle, Track, VisualizationRenderer}
 import io.github.struppigel.tools.visualizer.{ColorableItem, ImageUtil, VisualizerBuilder}
@@ -378,7 +379,7 @@ object PortExAnalyzer {
     if (file.exists()) {  
       var offset: Option[Int] = None
       var size: Option[Int] = None
-      for (line <- using(scala.io.Source.fromFile(file)){_.getLines}) {
+      for (line <- using(scala.io.Source.fromFile(file)){_.getLines.toList}) {
         if (line.contains("offset")) {
           offset = readVisFileValue(line)
         } else if (line.contains("size")) {
@@ -414,23 +415,44 @@ object PortExAnalyzer {
   }
 
   /**
+   * Structures of a PE file with its anomalies and the regions of an optional
+   * visualization overlay file. Other files have no structures.
+   */
+  private def structureMapOf(file: File, visFile: Option[File]): StructureMap =
+    if (isPEFile(file)) {
+      val pe = PELoader.loadPE(file)
+      val builder = new StructureMapBuilder(pe).withAnomalies(PEAnomalyScanner.newInstance(pe).getAnomalies)
+      visFile.foreach(f => builder.withCustomRegions("Visualization overlay", readVisOverlay(f)))
+      builder.build()
+    } else StructureMap.empty(file.length)
+
+  private def writePicture(file: File, imageFile: File, bps: Option[Int] = None,
+                           visFile: Option[File] = None): Unit =
+    writeVisualization(file, imageFile, 0, file.length, bps.map(_.toLong), visFile, allowHex = false)
+
+  private def writeZoomedPicture(file: File, imageFile: File, from: Long, to: Long, bps: Option[Long]): Unit =
+    writeVisualization(file, imageFile, from, to, bps, None, allowHex = true)
+
+  /**
    * Writes byte plot, entropy and structure of an offset range with an offset
    * ruler and a legend. Ranges of up to 4 KB get hex and ASCII tracks with
-   * one byte per cell, larger ones are fitted to about 1000 pixels height
-   * unless bytes per square are given.
+   * one byte per cell if allowed, larger ones are fitted to about 1000 pixels
+   * height unless bytes per square are given.
    */
-  private def writeZoomedPicture(file: File, imageFile: File, from: Long, to: Long, bps: Option[Long]): Unit = {
+  private def writeVisualization(file: File, imageFile: File, from: Long, to: Long, bps: Option[Long],
+                                 visFile: Option[File], allowHex: Boolean): Unit = {
     val length = file.length
+    if (length == 0) throw new IOException("Cannot create a picture of an empty file")
     val end = math.min(to, length)
     val range = end - from
-    val hex = range <= 0x1000 && bps.forall(_ == 1)
+    val hex = allowHex && range <= 0x1000 && bps.forall(_ == 1)
     val columns = if (hex) 16 else 64
     val (cellWidth, cellHeight) = if (hex) (8, 14) else (4, 4)
     val bytesPerCell = bps.getOrElse(
       if (hex) 1L else ViewMapping.fitBytesPerCell(range, columns, 1000 / cellHeight, true))
     val mapping = new ViewMapping(length, from, math.max(1L, bytesPerCell), columns)
     val rows = ((range + mapping.getBytesPerRow - 1) / mapping.getBytesPerRow).toInt
-    val map = if (isPEFile(file)) StructureMap.of(PELoader.loadPE(file)) else StructureMap.empty(length)
+    val map = structureMapOf(file, visFile)
     val stats = new ByteStatistics(file)
     // only cells of at least one block use the statistics of the whole file
     if (mapping.getBytesPerCell >= stats.getBlockSize) stats.compute(ProgressListener.NONE)
@@ -441,53 +463,6 @@ object PortExAnalyzer {
       val image = VisualizationRenderer.renderComposite(vis, mapping, 0, math.max(1, rows), tracks.asJava,
         cellWidth, cellHeight, RenderStyle.defaults(), true)
       ImageIO.write(image, "png", imageFile)
-    }
-  }
-
-  private def writePicture(file: File, imageFile: File, bps: Option[Int] = None,
-                           visFile: Option[File] = None): Unit = {
-    val pixelSize = 4
-    val fileWidth = 256
-    val MAX_HEIGHT = 1000
-    def height(bytes: Int): Int = {
-      val nrOfPixels = file.length / bytes.toDouble
-      val pixelsPerRow = fileWidth / pixelSize.toDouble
-      val pixelsPerCol = nrOfPixels / pixelsPerRow
-      Math.ceil(pixelsPerCol * pixelSize).toInt
-    }
-    val bytesPerPixel = {
-      if (bps.isDefined) bps.get else {
-        var res = 1
-        while (height(res) > MAX_HEIGHT) res *= 2
-        res
-      }
-    }
-    val bytePlotPixelSize = if (fileWidth * height(bytesPerPixel) > file.length()) pixelSize else 1
-    val viBuilder = new VisualizerBuilder().setFileWidth(fileWidth).setPixelSize(pixelSize).setBytesPerPixel(bytesPerPixel, file.length).setColor(ColorableItem.ENTROPY, Color.cyan)
-    if (visFile.isDefined) viBuilder.setVisOverlay(readVisOverlay(visFile.get))
-    val vi = viBuilder.build()
-    val vi2Builder = new VisualizerBuilder().setPixelSize(bytePlotPixelSize).setFileWidth(fileWidth).setHeight(height(bytesPerPixel))
-    if (visFile.isDefined) vi2Builder.setVisOverlay(readVisOverlay(visFile.get))
-    val vi2 = vi2Builder.build()
-    if (isPEFile(file)) {
-      // parse once for all images
-      val pe = PELoader.loadPE(file)
-      val entropyImage = vi.createEntropyImage(pe)
-      //more fine grained bytePlot image, thus another visualizer
-      val bytePlot = vi2.createBytePlot(pe)
-      val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
-      val structureImage = vi.createImage(pe)
-      val appendedImage1 = ImageUtil.appendImages(appendedImage, structureImage)
-      val legendImage = vi.createLegendImage(true, true, true)
-      val appendedImage2 = ImageUtil.appendImages(appendedImage1, legendImage)
-      ImageIO.write(appendedImage2, "png", imageFile)
-    } else {
-      val entropyImage = vi.createEntropyImage(file)
-      val bytePlot = vi2.createBytePlot(file)
-      val appendedImage = ImageUtil.appendImages(bytePlot, entropyImage)
-      val legendImage = vi.createLegendImage(true, true, false)
-      val appendedImage2 = ImageUtil.appendImages(appendedImage, legendImage)
-      ImageIO.write(appendedImage2, "png", imageFile)
     }
   }
 
