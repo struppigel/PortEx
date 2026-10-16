@@ -25,6 +25,7 @@ import org.testng.annotations.Test
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
@@ -150,6 +151,42 @@ class SignatureScannerTest {
   }
 
   @Test
+  def warningsNameCostlyPatterns(): Unit = {
+    val scanner = new SignatureScanner(db(
+      """[none]
+        |pattern = 4D ?? 5A
+        |in = file
+        |
+        |[wide]
+        |pattern = ?? [0-1000] 'longliteral'
+        |in = file
+        |
+        |[weak]
+        |pattern = 'This program'
+        |in = file
+        |pattern.2 = 'MZ'
+        |in.2 = file
+        |
+        |[windowed]
+        |pattern = 'MZ'
+        |in = file[0-0x100]
+        |
+        |[fine]
+        |pattern = 'kernel32' [0-100] 'dll'
+        |in = file
+        |""".stripMargin))
+    val warnings = scanner.getWarnings.asScala
+    assertEquals(warnings.size, 3, warnings.mkString("\n"))
+    assertTrue(warnings(0).startsWith("test:1: [none] pattern has no literal that is selective enough to search for in file"),
+      warnings(0))
+    assertTrue(warnings(0).endsWith("it is checked at every position, consider a search window"), warnings(0))
+    assertEquals(warnings(1), "test:5: [wide] pattern is searched in file by a literal up to 1001 bytes after its start, " +
+      "every occurrence costs up to 1001 checks, start the pattern with a literal or narrow the jump")
+    assertEquals(warnings(2), "test:9: [weak] pattern.2 is searched in file by the short literal 'MZ', which is frequent, " +
+      "use a longer literal or a search window")
+  }
+
+  @Test
   def furtherClauseSearch(): Unit = {
     val sigs = "[s]\npattern = 'MZ'\nat = file\npattern.2 = w'Setup'\nin.2 = file[2-]"
     assertEquals(scan(sigs, "MZ..".getBytes(StandardCharsets.ISO_8859_1) ++ "Setup".getBytes(StandardCharsets.UTF_16LE)).size, 1)
@@ -235,26 +272,35 @@ class SignatureScannerTest {
   @Test
   def ahoCorasickDenseEqualsSparse(): Unit = {
     val rnd = new Random(99)
-    val keys = (0 until 200).map(_ => Array.fill(2 + rnd.nextInt(5))((rnd.nextInt(3) + 1).toByte))
-    val input = Array.fill(5000)((rnd.nextInt(3) + 1).toByte)
-    def hits(ac: AhoCorasick): List[(Int, Int)] = {
-      val found = ListBuffer[(Int, Int)]()
-      // feed in two parts to test the carried state
-      val s = ac.feed(0, input, 0, 2500)((k, i) => found += ((k, i)))
-      ac.feed(s, input, 2500, input.length)((k, i) => found += ((k, i)))
-      found.toList.sorted
+    for ((alphabet, keyCount) <- Seq((3, 200), (40, 3000), (256, 2000))) {
+      val keys = (0 until keyCount).map(_ => Array.fill(1 + rnd.nextInt(8))(rnd.nextInt(alphabet).toByte))
+      val input = Array.fill(20000)(rnd.nextInt(alphabet).toByte)
+      def hits(ac: AhoCorasick): List[(Int, Int)] = {
+        val found = ListBuffer[(Int, Int)]()
+        // feed in two parts to test the carried state
+        val s = ac.feed(0, input, 0, 9999)((k, i) => found += ((k, i)))
+        ac.feed(s, input, 9999, input.length)((k, i) => found += ((k, i)))
+        found.toList
+      }
+      val dense = new AhoCorasick(keys, denseLimit = Int.MaxValue)
+      val sparse = new AhoCorasick(keys, denseLimit = 0)
+      assertTrue(dense.isDense)
+      assertFalse(sparse.isDense)
+      val expected = (for {
+        (k, ki) <- keys.zipWithIndex
+        end <- k.length - 1 until input.length
+        if java.util.Arrays.equals(java.util.Arrays.copyOfRange(input, end - k.length + 1, end + 1), k)
+      } yield (ki, end)).toList.sorted
+      val denseHits = hits(dense)
+      assertEquals(denseHits.sorted, expected)
+      // the same hits in the same order, also with dense rows only for the states near the root
+      assertEquals(hits(sparse), denseHits)
+      for (limit <- Seq(1, 7, 300, dense.stateCount - 1)) {
+        val hybrid = new AhoCorasick(keys, denseLimit = limit)
+        assertFalse(hybrid.isDense)
+        assertEquals(hits(hybrid), denseHits, s"dense limit $limit")
+      }
     }
-    val dense = new AhoCorasick(keys)
-    val sparse = new AhoCorasick(keys, denseLimit = 0)
-    assertTrue(dense.isDense)
-    assertFalse(sparse.isDense)
-    val expected = (for {
-      (k, ki) <- keys.zipWithIndex
-      end <- k.length - 1 until input.length
-      if java.util.Arrays.equals(java.util.Arrays.copyOfRange(input, end - k.length + 1, end + 1), k)
-    } yield (ki, end)).toList.sorted
-    assertEquals(hits(dense), expected)
-    assertEquals(hits(sparse), expected)
   }
 
   @Test

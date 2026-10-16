@@ -61,6 +61,18 @@ public class HasherTest {
                 "EB1079BDD96BC9CC19C38B76342113A09666AAD47518FF1A7536EEBFF8AADB4A".toLowerCase());
         assertEquals(Hasher.fileHash(pe.getFile(), sha256), hash);
     }
+
+    @Test
+    public void fileHashOfAnEmptyFile() throws IOException {
+        File empty = File.createTempFile("portex-hasher-empty", ".bin");
+        try {
+            assertEquals(ByteArrayUtil.byteToHex(Hasher.fileHash(empty, md5), ""),
+                    "d41d8cd98f00b204e9800998ecf8427e");
+        } finally {
+            empty.delete();
+        }
+    }
+
     @Test
     public void sectionMD5Hashes() throws IOException {
         String[] actualHashes = {

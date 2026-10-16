@@ -289,6 +289,37 @@ class SignatureScannerPerfTest {
   }
 
   @Test(groups = Array("performance"))
+  def yaraLikeDatabase(): Unit = {
+    // like databases converted from YARA: many signatures with several patterns that search the whole file
+    val rnd = new scala.util.Random(11)
+    val words = (0 until 3000).map(i => Seq("Invoke", "Get", "Set", "Load", "Crypt", "Http")(i % 6) + "%04d".format(i))
+    def word = words(rnd.nextInt(words.size))
+    val text = (0 until 10000).map { i =>
+      val clauses = (1 to 1 + rnd.nextInt(10)).map { n =>
+        val p = rnd.nextInt(6) match {
+          case 0 => s"i'$word'"
+          case 1 => s"awi'$word'"
+          case 2 => s"'$word' [0-${1 + rnd.nextInt(2000)}] '$word'"
+          case 3 => s"w'$word'"
+          case _ => s"'$word'"
+        }
+        val suffix = if (n == 1) "" else "." + n
+        s"pattern$suffix = $p\nin$suffix = file"
+      }
+      s"[yara$i]\n${clauses.mkString("\n")}\n"
+    }.mkString("\n")
+    val scanner = new SignatureScanner(SignatureDatabase.parse(text, "yara-like.sig"))
+    // the first patterns of many signatures match, so that their further patterns are needed
+    val planted = (0 until 4000).map(i => (i * 8000L + 17) -> ascii(words(i % words.size)))
+    val file = files.random("yara-like.bin", 32L << 20, 12, planted)
+    val matches = scanner._scanFile(file).size
+    val nanos = median((0 until 3).map(_ => sample(() => (), (_: Unit) => scanner._scanFile(file), 0)))
+    reportOnly(f"10 YARA-like database, 10000 signatures with 1 to 10 patterns in the whole file, 32 MB, " +
+      f"new only: ${nanos / 1e6}%.0f ms, $matches matches")
+    assertTrue(nanos < 30e9, f"YARA-like database took ${nanos / 1e9}%.1f s")
+  }
+
+  @Test(groups = Array("performance"))
   def conditionOverhead(): Unit = {
     val pes = corpusPEs.take(20)
     val text = (0 until 1000).map { i =>

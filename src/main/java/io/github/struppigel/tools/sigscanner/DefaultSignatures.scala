@@ -17,6 +17,9 @@
  */
 package io.github.struppigel.tools.sigscanner
 
+import java.io.File
+import scala.collection.JavaConverters._
+
 /**
  * The signature databases that come with PortEx. They are loaded and compiled
  * once on first use and shared by all callers.
@@ -48,6 +51,19 @@ object DefaultSignatures {
   lazy val fileTypeScanner: SignatureScanner = new SignatureScanner(fileTypes)
 
   lazy val javaWrapperScanner: SignatureScanner = new SignatureScanner(javaWrappers)
+
+  /**
+   * Scans a file that is no PE file or cannot be parsed as one with the
+   * signatures PEData scans. Only the locations file and eof are scanned, so
+   * the matches are mostly file types. For PE files use
+   * PEData.getSignatureMatches().
+   *
+   * @param file the file
+   * @return matched signatures
+   */
+  def scanFile(file: File): java.util.List[SignatureMatch] = _scanFile(file).asJava
+
+  def _scanFile(file: File): IndexedSeq[SignatureMatch] = peScanner._scanFile(file)
 
   def getPackers: SignatureDatabase = packers
 

@@ -355,6 +355,28 @@ public class PatternLanguageTest {
     }
 
     @Test
+    public void atomsBeforeWideJumpsArePreferred() {
+        // every start in the range of the jump has to be checked for an atom behind it
+        Atom[] before = Pattern.parse("'abcd' [0-30000] 'wxyz'").compiled().atoms();
+        assertEquals(before.length, 1);
+        assertEquals(before[0].bytes(), ascii("abcd"));
+        assertEquals(before[0].offMax(), 0);
+        // unless the atom behind it is much more selective
+        Atom[] behind = Pattern.parse("'AB' [0-30000] 'longer literal'").compiled().atoms();
+        assertEquals(behind.length, 1);
+        assertEquals(behind[0].bytes(), ascii("longer l"));
+        assertEquals(behind[0].offMin(), 2);
+        assertEquals(behind[0].offMax(), 30002);
+    }
+
+    @Test
+    public void caseInsensitiveAsciiOrWideTextHasAtoms() {
+        // 16 case variants of 4 letters for each branch, as often written in YARA rules
+        assertEquals(Pattern.parse("awi'password'").compiled().atoms().length, 32);
+        assertEquals(Pattern.parse("(55 8B EC | 53 56 57)").compiled().atoms().length, 2);
+    }
+
+    @Test
     public void firstBytes() {
         CompiledPattern p = Pattern.parse("(55 | 6?) 8B").compiled();
         assertFalse(p.anyFirst());

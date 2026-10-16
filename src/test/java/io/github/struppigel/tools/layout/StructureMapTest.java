@@ -29,10 +29,12 @@ import io.github.struppigel.parser.sections.idata.NameImport;
 import io.github.struppigel.parser.sections.rsrc.Resource;
 import io.github.struppigel.tools.Overlay;
 import io.github.struppigel.tools.anomalies.PEAnomalyScanner;
+import io.github.struppigel.tools.sigscanner.DefaultSignatures;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -729,6 +731,94 @@ public class StructureMapTest {
         assertTrue(map.getRoots().isEmpty());
         assertFalse(map.isTruncated());
         assertTrue(map.getReport().contains("0 regions"));
+    }
+
+    @Test
+    public void unparsedFileHasOnlyTheGivenRegions() throws IOException {
+        File file = File.createTempFile("portex-structuremap-unparsed", ".bin");
+        try {
+            Files.write(file.toPath(), new byte[0x100]);
+            List<SignatureHit> hits = new ArrayList<>();
+            hits.add(new SignatureHit("inside", 0x10, 4));
+            hits.add(new SignatureHit("outside", 0x200, 4));
+            hits.add(new SignatureHit("past the end", 0xF0, 0x20));
+            StructureMap map = StructureMapBuilder.forUnparsedFile(file)
+                    .withDetail(Detail.FINE)
+                    .withSignatureMatches(hits)
+                    .withCustomRegions("Read Chunks", Collections.singletonList(new PhysicalLocation(0x40, 0x10)))
+                    .build();
+            assertEquals(map.getFileLength(), 0x100);
+            assertFalse(map.isTruncated());
+            for (FileRegion region : map.getRegions()) {
+                assertTrue(region.getType() == RegionType.SIGNATURE_MATCH || region.getType() == RegionType.CUSTOM,
+                        region.toString());
+            }
+            List<FileRegion> matches = map.getRegions(RegionType.SIGNATURE_MATCH);
+            assertEquals(matches.size(), 2);
+            assertEquals(map.innermostAt(0x10).get().getName(), "inside");
+            FileRegion clipped = map.innermostAt(0xF0).get();
+            assertEquals(clipped.getName(), "past the end");
+            assertTrue(clipped.isClipped());
+            assertEquals(clipped.getEnd(), 0x100);
+            assertEquals(map.innermostAt(0x40).get().getType(), RegionType.CUSTOM);
+            assertFalse(map.innermostAt(0x80).isPresent());
+            assertClean(map, "unparsed");
+        } finally {
+            file.delete();
+        }
+    }
+
+    @Test
+    public void unparsedFileIsTruncatedAtTheRegionLimit() throws IOException {
+        File file = File.createTempFile("portex-structuremap-truncated", ".bin");
+        try {
+            Files.write(file.toPath(), new byte[0x100]);
+            List<SignatureHit> hits = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                hits.add(new SignatureHit("hit " + i, i * 0x10, 4));
+            }
+            StructureMap map = StructureMapBuilder.forUnparsedFile(file).withSignatureMatches(hits)
+                    .withMaxRegions(2).build();
+            assertTrue(map.isTruncated());
+            List<FileRegion> regions = map.getRegions(RegionType.SIGNATURE_MATCH);
+            assertEquals(regions.size(), 3);
+            assertEquals(regions.get(2).getAttributes().get(FileRegion.ATTR_TRUNCATED), "3");
+        } finally {
+            file.delete();
+        }
+    }
+
+    @Test
+    public void unparsedEmptyFileHasNoRegions() throws IOException {
+        File file = File.createTempFile("portex-structuremap-empty", ".bin");
+        try {
+            StructureMap map = StructureMapBuilder.forUnparsedFile(file)
+                    .withSignatureMatches(Collections.singletonList(new SignatureHit("none", 0, 4))).build();
+            assertEquals(map.getFileLength(), 0);
+            assertTrue(map.getRegions().isEmpty());
+        } finally {
+            file.delete();
+        }
+    }
+
+    @Test
+    public void signaturesOfANonPEFileBecomeMarkers() throws IOException {
+        File file = File.createTempFile("portex-structuremap-zip", ".zip");
+        try {
+            byte[] bytes = new byte[0x40];
+            bytes[0] = 0x50;
+            bytes[1] = 0x4B;
+            bytes[2] = 0x03;
+            bytes[3] = 0x04;
+            Files.write(file.toPath(), bytes);
+            StructureMap map = StructureMapBuilder.forUnparsedFile(file)
+                    .withSignatureMatches(SignatureHit.fromMatches(DefaultSignatures.scanFile(file))).build();
+            FileRegion marker = map.innermostAt(0).get();
+            assertEquals(marker.getType(), RegionType.SIGNATURE_MATCH);
+            assertEquals(marker.getName(), "PKZIP archive_1");
+        } finally {
+            file.delete();
+        }
     }
 
     @Test

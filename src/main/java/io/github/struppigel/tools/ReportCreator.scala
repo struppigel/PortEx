@@ -33,7 +33,7 @@ import io.github.struppigel.parser.sections.rsrc.Resource
 import io.github.struppigel.parser.sections.rsrc.version.VersionInfo
 import io.github.struppigel.tools.anomalies.{Anomaly, PEAnomalyScanner}
 import io.github.struppigel.tools.rehints.{PEReHintScanner, ReHint}
-import io.github.struppigel.tools.sigscanner.{Jar2ExeScanner, LocationKind}
+import io.github.struppigel.tools.sigscanner.{Jar2ExeScanner, LocationKind, SignatureMatch, SignatureScanner}
 
 import java.io.File
 import java.security.MessageDigest
@@ -42,9 +42,18 @@ import scala.collection.JavaConverters._
 /**
  * Utility for easy creation of PE file reports.
  *
+ * @param data the PE file
+ * @param userSignatures further signatures, e.g. your own, whose matches are
+ *                       listed after the matches of the bundled signatures
+ *                       with the name of their database; null for none.
+ *                       They are scanned in all locations and are not used
+ *                       for anomalies and reversing hints.
  * @author Karsten Hahn
  */
-class ReportCreator(private val data: PEData) {
+class ReportCreator(private val data: PEData, userSignatures: SignatureScanner) {
+
+  /** creates reports with the bundled signatures only */
+  def this(data: PEData) = this(data, null)
 
   /**
    * Maximum number of sections displayed in one table
@@ -61,6 +70,14 @@ class ReportCreator(private val data: PEData) {
 
   // created here to not scan for them several times
   private val anomalies : List[Anomaly] = PEAnomalyScanner.newInstance(data).getAnomalies.asScala.toList
+
+  // scanned once on first use
+  private lazy val userMatches: IndexedSeq[SignatureMatch] =
+    if (userSignatures == null) IndexedSeq.empty
+    else userSignatures._scan(data, LocationKind.values().toSet)
+
+  private def userMatchesIn(kind: LocationKind): IndexedSeq[SignatureMatch] =
+    userMatches.filter(_.getLocationKind == kind)
 
   /**
    * If all is set to true, every report will be created, even unstable and
@@ -592,6 +609,7 @@ class ReportCreator(private val data: PEData) {
     val loader = new SectionLoader(data)
     val maybeRSRC = loader.maybeLoadResourceSection()
     val sigs = data.getSignatureMatches(LocationKind.RESOURCE)
+    val userSigs = userMatchesIn(LocationKind.RESOURCE)
     if (maybeRSRC.isPresent && !maybeRSRC.get.isEmpty) {
       val rsrc = maybeRSRC.get
       val buf = new StringBuffer()
@@ -601,7 +619,9 @@ class ReportCreator(private val data: PEData) {
         val offset = resource.rawBytesLocation.from
         val fileTypes = sigs.asScala.filter(_.getRegionStart == offset).toList
         val longTypes = fileTypes.
-          map(t => t.getName + " (" + t.getLength + " bytes)")
+          map(t => t.getName + " (" + t.getLength + " bytes)") ++
+          userSigs.filter(_.getRegionStart == offset).
+            map(t => t.getName + " (" + t.getLength + " bytes, from " + t.getSignature.getDatabaseName + ")")
         buf.append(resource)
         if (longTypes.nonEmpty) {
           buf.append(", signatures: " + longTypes.mkString(", "))
@@ -670,7 +690,8 @@ class ReportCreator(private val data: PEData) {
       val chi = ChiSquared.calculate(data.getFile, overlay.getOffset, overlay.getSize)
       val entropy = ShannonEntropy.entropy(data.getFile, overlay.getOffset, overlay.getSize)
       val overlayOffset = overlay.getOffset
-      val sigresults = data.getSignatureMatches(LocationKind.OVERLAY).asScala
+      val sigresults = data.getSignatureMatches(LocationKind.OVERLAY).asScala.map(_.toString) ++
+        userMatchesIn(LocationKind.OVERLAY).map(ReportCreator.describeWithSource)
       val signatures = NL + { if (sigresults.isEmpty) "none" else sigresults.mkString(NL) }
       title("Overlay") + NL + "Offset: " +
         hexString(overlayOffset) + NL + "Size: " +
@@ -685,8 +706,10 @@ class ReportCreator(private val data: PEData) {
    * resources, which are part of the overlay and resource reports.
    */
   def signatureReport(): String = {
-    val signatures = data.getSignatureMatches().asScala.filterNot(m =>
-      m.getLocationKind == LocationKind.OVERLAY || m.getLocationKind == LocationKind.RESOURCE)
+    def elsewhere(m: SignatureMatch): Boolean =
+      m.getLocationKind != LocationKind.OVERLAY && m.getLocationKind != LocationKind.RESOURCE
+    val signatures = data.getSignatureMatches().asScala.filter(elsewhere).map(_.toString) ++
+      userMatches.filter(elsewhere).map(ReportCreator.describeWithSource)
     if (signatures.isEmpty) ""
     else title("Signatures") + NL + signatures.mkString(NL) + NL + NL
   }
@@ -988,6 +1011,21 @@ object ReportCreator {
 
   def newInstance(file: File): ReportCreator =
     apply(file)
+
+  /**
+   * @param userSignatures further signatures, see the constructor, null for none
+   */
+  def apply(file: File, userSignatures: SignatureScanner): ReportCreator =
+    new ReportCreator(PELoader.loadPE(file), userSignatures)
+
+  /**
+   * @param userSignatures further signatures, see the constructor, null for none
+   */
+  def newInstance(file: File, userSignatures: SignatureScanner): ReportCreator =
+    apply(file, userSignatures)
+
+  /** the match and the name of the database of its signature, e.g. "... from mysignatures.sig" */
+  def describeWithSource(m: SignatureMatch): String = s"$m from ${m.getSignature.getDatabaseName}"
 
   def title(str: String, padStr : String = "*"): String = str + NL + pad("", str.length, padStr) + NL
 

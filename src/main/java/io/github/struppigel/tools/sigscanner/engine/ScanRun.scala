@@ -44,6 +44,14 @@ private[sigscanner] final class ScanRun(
   private val conditionResults = mutable.HashMap[(Int, Boolean), Boolean]()
   private val secondaryResults = mutable.HashMap[(Int, Int), Option[ClauseMatch]]()
 
+  // per entry id: the lowest match of a further clause that was searched in a pass of first clauses
+  private val inPassMatches = new Array[ClauseMatch](plan.entryCount)
+  // per entry id: true if the entry was searched in a pass of first clauses, so inPassMatches is its result
+  private val inPassSearched = new Array[Boolean](plan.entryCount)
+
+  /** number of region passes of search groups, for tests */
+  private[sigscanner] var searchPasses = 0
+
   // per signature: 0 not checked yet, 1 excluded by a cheap condition check, 2 not excluded
   private val exclusion = new Array[Byte](plan.signatures.size)
 
@@ -56,6 +64,8 @@ private[sigscanner] final class ScanRun(
 
   /** scans the location kinds and returns the matches in a deterministic order */
   def run(kinds: Set[LocationKind]): IndexedSeq[SignatureMatch] = {
+    // first clause matches of all groups, confirmed after all passes, when the further clauses searched in them are known
+    val pending = ArrayBuffer[(SigEntry, ClauseMatch)]()
     for (kind <- LocationKind.values() if kinds.contains(kind)) {
       if (kind == LocationKind.METADATA) matchConditionOnly()
       else for (group <- plan.groupsByKind.getOrElse(kind, IndexedSeq.empty)) {
@@ -63,21 +73,24 @@ private[sigscanner] final class ScanRun(
         // skips groups like the .NET protectors in executable sections of native files without resolving them
         val anyActive = !group.allMayBeExcludedCheaply || group.entries.exists(isActive)
         if (anyActive) {
-          val pending = ArrayBuffer[(SigEntry, ClauseMatch)]()
-          scanGroup(group, firstOnly = false) { (e, m) => pending += ((e, m)) }
-          pending.foreach { case (e, m) => confirm(e, m) }
+          scanGroup(group, furtherOnly = false) { (e, m) => pending += ((e, m)) }
+          for (e <- group.entries if e.inPass && isActive(e)) inPassSearched(e.id) = true
         }
       }
     }
+    pending.foreach { case (e, m) => confirm(e, m) }
     results.sortBy { case (idx, m) => (m.getLocationKind.ordinal, m.getRegionStart, m.getOffset, idx) }.map(_._2).toIndexedSeq
   }
 
-  private def scanGroup(group: Group, firstOnly: Boolean)(emit: (SigEntry, ClauseMatch) => Unit): Unit = {
+  /**
+   * @param furtherOnly true if the group checks a further clause, which only needs its first match
+   */
+  private def scanGroup(group: Group, furtherOnly: Boolean)(emit: (SigEntry, ClauseMatch) => Unit): Unit = {
     val regions = resolver.resolve(group.spec).sortBy(_.start)
     group match {
-      case g: AnchoredGroup => scanAnchored(g, regions, firstOnly, emit)
-      case g: EndAnchoredGroup => scanEnd(g, regions, firstOnly, emit)
-      case g: SearchGroup => scanSearch(g, regions, firstOnly, emit)
+      case g: AnchoredGroup => scanAnchored(g, regions, furtherOnly, emit)
+      case g: EndAnchoredGroup => scanEnd(g, regions, furtherOnly, emit)
+      case g: SearchGroup => scanSearch(g, regions, furtherOnly, emit)
     }
   }
 
@@ -141,22 +154,42 @@ private[sigscanner] final class ScanRun(
     }
   }
 
-  private def scanSearch(g: SearchGroup, regions: IndexedSeq[Region], firstOnly: Boolean,
+  /**
+   * Searches the regions for the entries of the group. First clauses report
+   * all matches. Further clauses need only one match: the one with the lowest
+   * start in the first region that has a match. Those searched in a pass of
+   * first clauses are recorded in inPassMatches; if furtherOnly, all entries
+   * are further clauses and their match is reported.
+   */
+  private def scanSearch(g: SearchGroup, regions: IndexedSeq[Region], furtherOnly: Boolean,
       emit: (SigEntry, ClauseMatch) => Unit): Unit = {
     val entries = g.entries
     val winStart = new Array[Long](entries.length)
     val winEnd = new Array[Long](entries.length)
     val ownerLocal = g.ownerLocal
     val bruteLocal = g.bruteLocal
-    var found = false
+    // per entry: the lowest match in the current region of a further clause, and true after a region with a match
+    val lowest = new Array[ClauseMatch](entries.length)
+    val done = new Array[Boolean](entries.length)
+    var doneCount = 0
 
-    for (r0 <- regions if !(firstOnly && found)) {
+    def keepsLowest(local: Int): Boolean = furtherOnly || entries(local).inPass
+
+    // true if no start before the end of the window can be found after pos
+    def settled(local: Int, pos: Long): Boolean =
+      winEnd(local) <= winStart(local) || (lowest(local) != null && pos > winEnd(local) + g.maxAtomReach)
+
+    var ri = 0
+    while (ri < regions.size && !(furtherOnly && doneCount == entries.length)) {
       Interruption.checkInterrupt()
-      val r = r0
+      val r = regions(ri)
+      ri += 1
       var scanStart = Long.MaxValue
       var scanEnd = Long.MinValue
       var anyWindow = false
-      for ((e, i) <- entries.zipWithIndex) {
+      var i = 0
+      while (i < entries.length) {
+        val e = entries(i)
         val (ws, we) = e.spec.mode match {
           case Search(from, _) if g.kind == LocationKind.EOF => (math.max(r.start, r.end - from), r.end)
           case Search(from, until) => (r.start + from, if (until < 0) r.end else math.min(r.end, r.start + until))
@@ -165,34 +198,42 @@ private[sigscanner] final class ScanRun(
         // the match must end within the region
         val we2 = math.min(we, r.end - e.compiled.minLength + 1)
         winStart(i) = ws
-        winEnd(i) = if (isActive(e)) we2 else ws
+        winEnd(i) = if (!done(i) && isActive(e)) we2 else ws
         if (winStart(i) < winEnd(i)) {
           anyWindow = true
           scanStart = math.min(scanStart, ws)
           val reach = if (e.compiled.atoms.isEmpty) we2 else math.min(r.end, we2 + g.maxAtomReach)
           scanEnd = math.max(scanEnd, reach)
         }
+        i += 1
       }
       if (anyWindow) {
-        val tried = mutable.HashSet[Long]()
+        searchPasses += 1
+        // starts that were checked already, for entries whose atom hits may repeat a start
+        val tried = new LongHashSet()
+        val entryCount = entries.length.toLong
         def verify(local: Int, start: Long): Unit = {
-          if (firstOnly && found) return
+          // further clauses after a match only look for lower starts
+          if (start >= winEnd(local)) return
           val e = entries(local)
           if (counts(e.sigIndex) >= options.maxMatchesPerSignature) return
-          if (!tried.add((start << 20) | local)) return
+          if (g.mayRepeatStarts(local) && !tried.add(start * entryCount + local)) return
           val end = matcher.matchAt(e.compiled, start, r.end)
           if (end >= 0) {
             // report the searched end of the file as region of eof matches
             val region = if (g.kind == LocationKind.EOF) Region(LocationKind.EOF, "eof", winStart(local), r.end) else r
-            emit(e, new ClauseMatch(e.clause, e.spec, region, start, (matcher.lastSegmentEnd - start).toInt))
-            found = true
+            val m = new ClauseMatch(e.clause, e.spec, region, start, (matcher.lastSegmentEnd - start).toInt)
+            if (keepsLowest(local)) {
+              lowest(local) = m
+              winEnd(local) = start
+            } else emit(e, m)
           } else warnBudget(e)
         }
         val hasAtoms = g.owners.nonEmpty && ownerLocal.exists(l => winStart(l) < winEnd(l))
         val automaton = if (hasAtoms) g.automaton else null
         var state = 0
         var pos = scanStart
-        while (pos < scanEnd && !(firstOnly && found)) {
+        while (pos < scanEnd && !(furtherOnly && entries.indices.forall(settled(_, pos)))) {
           Interruption.checkInterrupt()
           val len = math.min(options.chunkSize.toLong, scanEnd - pos).toInt
           // no read ahead, small windows like overlay[0-0x100] read only what they need
@@ -208,10 +249,20 @@ private[sigscanner] final class ScanRun(
                 val hitStart = bufStart + idx - atom.bytes.length + 1
                 val from = math.max(winStart(local), hitStart - atom.offMax)
                 val until = math.min(winEnd(local) - 1, hitStart - atom.offMin)
-                var s = from
-                while (s <= until) {
-                  verify(local, s)
-                  s += 1
+                if (from == until) verify(local, from)
+                else if (from < until) {
+                  // an atom behind a jump: only starts with a possible first byte
+                  val compiled = entries(local).compiled
+                  val first = compiled.firstBytes
+                  var s = from
+                  while (s <= until) {
+                    if (compiled.anyFirst) verify(local, s)
+                    else {
+                      val b = source.byteAt(s)
+                      if (b >= 0 && first(b)) verify(local, s)
+                    }
+                    s += 1
+                  }
                 }
               }
             }
@@ -234,6 +285,17 @@ private[sigscanner] final class ScanRun(
           pos += len
         }
       }
+      // the region decides the match of further clauses that matched in it
+      i = 0
+      while (i < entries.length) {
+        if (lowest(i) != null) {
+          if (furtherOnly) emit(entries(i), lowest(i)) else inPassMatches(entries(i).id) = lowest(i)
+          lowest(i) = null
+          done(i) = true
+          doneCount += 1
+        }
+        i += 1
+      }
     }
   }
 
@@ -241,12 +303,21 @@ private[sigscanner] final class ScanRun(
     conditionResults.getOrElseUpdate((e.sigIndex, cheap),
       e.conditions.filter(c => (PEFacts.cost(c) <= 2) == cheap).forall(facts.holds))
 
-  /** the first match of a further clause, cached per run */
+  /**
+   * The match of a further clause, cached per run: the match of its first
+   * location in database order that has one.
+   */
   private def findClause(sigIndex: Int, clause: Clause): Option[ClauseMatch] =
     secondaryResults.getOrElseUpdate((sigIndex, clause.number), {
       var result: Option[ClauseMatch] = None
-      for (group <- plan.secondaryGroups.getOrElse((sigIndex, clause.number), IndexedSeq.empty) if result.isEmpty) {
-        scanGroup(group, firstOnly = true) { (_, m) => if (result.isEmpty) result = Some(m) }
+      val locations = plan.furtherLocations.getOrElse((sigIndex, clause.number), IndexedSeq.empty)
+      var i = 0
+      while (result.isEmpty && i < locations.size) {
+        val location = locations(i)
+        val e = location.entry
+        if (e.inPass && inPassSearched(e.id)) result = Option(inPassMatches(e.id))
+        else scanGroup(location.group, furtherOnly = true) { (_, m) => if (result.isEmpty) result = Some(m) }
+        i += 1
       }
       result
     })
@@ -258,12 +329,21 @@ private[sigscanner] final class ScanRun(
     val key = (idx, m.offset, m.region.kind)
     if (seen.contains(key)) return
     if (!conditionsHold(e, cheap = true)) return
-    val further = e.signature.clauses.drop(1).map(c => findClause(idx, c))
-    if (further.exists(_.isEmpty)) return
+    val clauses = e.signature.clauses
+    val further = new Array[ClauseMatch](clauses.size - 1)
+    var i = 1
+    while (i < clauses.size) {
+      // the remaining clauses are not needed if one is missing
+      findClause(idx, clauses(i)) match {
+        case Some(c) => further(i - 1) = c
+        case None => return
+      }
+      i += 1
+    }
     if (!conditionsHold(e, cheap = false)) return
     seen += key
     counts(idx) += 1
-    results += ((idx, new SignatureMatch(e.signature, m +: further.flatten)))
+    results += ((idx, new SignatureMatch(e.signature, m +: further.toIndexedSeq)))
   }
 
   private def matchConditionOnly(): Unit = {

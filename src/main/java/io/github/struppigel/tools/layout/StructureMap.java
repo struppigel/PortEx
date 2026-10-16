@@ -95,7 +95,9 @@ public final class StructureMap {
     }
 
     /**
-     * Creates a map without regions, e.g. for files that are not PE files.
+     * Creates a map without regions, e.g. for files that are not PE files. To
+     * show signature matches or custom regions of such files, use
+     * {@link StructureMapBuilder#forUnparsedFile(java.io.File)}.
      *
      * @param fileLength the length of the file
      * @return a structure map without regions

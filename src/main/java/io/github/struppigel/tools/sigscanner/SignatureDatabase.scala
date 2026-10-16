@@ -17,12 +17,15 @@
  */
 package io.github.struppigel.tools.sigscanner
 
+import io.github.struppigel.parser.{AnalysisInterruptedException, Interruption}
 import io.github.struppigel.tools.sigscanner.pattern.{Pattern, PatternSyntaxException}
 import org.apache.logging.log4j.LogManager
 
-import java.io.{File, InputStream}
+import java.io.{File, IOException, InputStream}
+import java.nio.channels.ClosedByInterruptException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.Locale
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
@@ -69,6 +72,7 @@ object SignatureDatabase {
   /**
    * Loads a database file. Malformed entries cause an exception.
    */
+  @throws(classOf[IOException])
   def load(file: File): SignatureDatabase = load(file, lenient = false)
 
   /**
@@ -76,8 +80,84 @@ object SignatureDatabase {
    *
    * @param lenient if true, malformed entries are skipped and reported as warnings
    */
+  @throws(classOf[IOException])
   def load(file: File, lenient: Boolean): SignatureDatabase =
     parse(new String(Files.readAllBytes(file.toPath), StandardCharsets.UTF_8), file.getName, lenient)
+
+  /**
+   * The database files of a folder that loadFolder loads: the files with the
+   * extension .sig in any case, sorted by name. Subfolders and files whose
+   * name starts with a dot are skipped.
+   *
+   * @throws IOException if the folder does not exist, is no folder or cannot be read
+   */
+  @throws(classOf[IOException])
+  def listFolder(folder: File): java.util.List[File] = _listFolder(folder).asJava
+
+  @throws(classOf[IOException])
+  def _listFolder(folder: File): IndexedSeq[File] = {
+    val stream = Files.newDirectoryStream(folder.toPath)
+    try {
+      stream.asScala.toVector
+        .filter { p =>
+          val name = p.getFileName.toString
+          !name.startsWith(".") && name.toLowerCase(Locale.ROOT).endsWith(".sig") && Files.isRegularFile(p)
+        }
+        .map(_.toFile)
+        .sortBy(f => (f.getName.toLowerCase(Locale.ROOT), f.getName))
+    } finally stream.close()
+  }
+
+  /**
+   * Loads all database files of a folder, see listFolder. Malformed entries
+   * cause an exception.
+   *
+   * @throws IOException if the folder or one of its database files cannot be read
+   */
+  @throws(classOf[IOException])
+  def loadFolder(folder: File): SignatureDatabase = loadFolder(folder, lenient = false)
+
+  /**
+   * Loads all database files of a folder, see listFolder, and merges them in
+   * the order of their names. The sources of the signatures are the file
+   * names, e.g. "mysignatures.sig:12". Signatures that are exact duplicates of
+   * a signature in an earlier file are skipped with a warning.
+   *
+   * @param lenient if true, malformed entries and files that cannot be read
+   *                are skipped and reported as warnings
+   * @throws IOException if the folder cannot be read, or if a database file
+   *                     cannot be read and lenient is false
+   */
+  @throws(classOf[IOException])
+  def loadFolder(folder: File, lenient: Boolean): SignatureDatabase = {
+    val signatures = Vector.newBuilder[Signature]
+    val warnings = Vector.newBuilder[String]
+    // signatures by name to find exact duplicates in different files
+    val byName = mutable.Map[String, List[Signature]]()
+    for (file <- _listFolder(folder)) {
+      Interruption.checkInterrupt()
+      val db = try Some(load(file, lenient)) catch {
+        case _: ClosedByInterruptException => throw new AnalysisInterruptedException()
+        case e: IOException if lenient =>
+          warnings += s"${file.getName}: could not be read (${e.getMessage}), file skipped"
+          None
+      }
+      for (d <- db) {
+        warnings ++= d.warnings
+        for (sig <- d.signatures) {
+          val sameName = byName.getOrElse(sig.name, Nil)
+          sameName.find(_.sameAs(sig)) match {
+            case Some(earlier) =>
+              warnings += s"${sig.source}: duplicate of the signature [${sig.name}] in ${earlier.source}, skipped"
+            case None =>
+              signatures += sig
+              byName(sig.name) = sig :: sameName
+          }
+        }
+      }
+    }
+    new SignatureDatabase(signatures.result(), warnings.result())
+  }
 
   /**
    * Loads a database from the class path, malformed entries cause an exception.

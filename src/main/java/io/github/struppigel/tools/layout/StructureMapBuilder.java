@@ -83,6 +83,7 @@ import io.github.struppigel.tools.anomalies.Anomaly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -101,6 +102,10 @@ import java.util.Objects;
  * locations that exceed the file are cut and flagged as clipped, and the
  * locations of each region are sorted and merged. Failures while mapping one
  * group of structures are logged and only drop that group.
+ * <p>
+ * Files that are no PE files or cannot be parsed as one get a builder from
+ * {@link #forUnparsedFile(File)}. Their map has no PE structures, only the
+ * signature matches, anomalies and custom regions that are added to the builder.
  * <p>
  * Building is not thread-safe because PEData caches are not. Build the map on
  * the thread that owns the PEData; the built map can be shared.
@@ -129,7 +134,9 @@ public final class StructureMapBuilder {
     private static final int RELOC_BLOCK_HEADER_SIZE = 8;
     private static final int RESOURCE_DATA_ENTRY_SIZE = 16;
 
+    /** null for files that are not parsed as PE files */
     private final PEData data;
+    private final File file;
     private Detail detail = Detail.COARSE;
     private List<Anomaly> anomalies = Collections.emptyList();
     private List<SignatureHit> signatureHits = Collections.emptyList();
@@ -143,10 +150,30 @@ public final class StructureMapBuilder {
      */
     public StructureMapBuilder(PEData data) {
         this.data = Objects.requireNonNull(data);
+        this.file = data.getFile();
+    }
+
+    private StructureMapBuilder(File file) {
+        this.data = null;
+        this.file = Objects.requireNonNull(file);
     }
 
     /**
-     * Sets the level of detail, default is {@link Detail#COARSE}.
+     * Creates a builder for a file that is not parsed as PE file, e.g. because
+     * it is no PE file or a broken one. The map only has the regions that are
+     * added to the builder: signature matches, anomalies and custom regions.
+     * There are no PE structures and no unmapped regions.
+     *
+     * @param file the file
+     * @return the builder
+     */
+    public static StructureMapBuilder forUnparsedFile(File file) {
+        return new StructureMapBuilder(file);
+    }
+
+    /**
+     * Sets the level of detail, default is {@link Detail#COARSE}. Has no effect
+     * for files that are not parsed, see {@link #forUnparsedFile(File)}.
      *
      * @param detail the level of detail
      * @return this builder
@@ -236,8 +263,8 @@ public final class StructureMapBuilder {
     /** state of one build */
     private final class Build {
 
-        private final long fileLength = data.getFile().length();
-        private final SectionLoader loader = new SectionLoader(data);
+        private final long fileLength = file.length();
+        private final SectionLoader loader = data == null ? null : new SectionLoader(data);
         private final List<FileRegion> regions = new ArrayList<>();
         private final int[] typeCounts = new int[RegionType.values().length];
         private final Map<RegionType, Dropped> dropped = new EnumMap<>(RegionType.class);
@@ -245,21 +272,23 @@ public final class StructureMapBuilder {
         private boolean certificateTableMapped = false;
 
         StructureMap run() {
-            group("headers", this::mapHeaders);
-            group("sections", this::mapSections);
-            group("overlay", this::mapOverlay);
-            group("imports", this::mapImports);
-            group("delay-load imports", this::mapDelayImports);
-            group("bound imports", this::mapBoundImports);
-            group("exports", this::mapExports);
-            group("relocations", this::mapRelocations);
-            group("debug directory", this::mapDebug);
-            group("resources", this::mapResources);
-            group(".NET metadata", this::mapClr);
-            group("certificates", this::mapCertificates);
-            group("data directories", this::mapDeclaredDirectories);
-            group("unmapped gaps", this::mapUnmapped);
-            group("entry point", this::mapEntryPoint);
+            if (data != null) {
+                group("headers", this::mapHeaders);
+                group("sections", this::mapSections);
+                group("overlay", this::mapOverlay);
+                group("imports", this::mapImports);
+                group("delay-load imports", this::mapDelayImports);
+                group("bound imports", this::mapBoundImports);
+                group("exports", this::mapExports);
+                group("relocations", this::mapRelocations);
+                group("debug directory", this::mapDebug);
+                group("resources", this::mapResources);
+                group(".NET metadata", this::mapClr);
+                group("certificates", this::mapCertificates);
+                group("data directories", this::mapDeclaredDirectories);
+                group("unmapped gaps", this::mapUnmapped);
+                group("entry point", this::mapEntryPoint);
+            }
             group("signature matches", this::mapSignatureHits);
             group("anomalies", this::mapAnomalies);
             group("custom regions", this::mapCustomRegions);
@@ -275,7 +304,7 @@ public final class StructureMapBuilder {
             } catch (AnalysisInterruptedException e) {
                 throw e;
             } catch (Exception e) {
-                logger.warn("could not map " + name + " of " + data.getFile().getName() + ": " + e);
+                logger.warn("could not map " + name + " of " + file.getName() + ": " + e);
             }
         }
 

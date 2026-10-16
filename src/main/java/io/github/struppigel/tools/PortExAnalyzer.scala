@@ -28,7 +28,7 @@ import io.github.struppigel.tools.visualizer.engine.{ByteStatistics, CachedByteS
 import io.github.struppigel.tools.visualizer.render.{RegionColorScheme, RenderStyle, Track, VisualizationRenderer}
 import io.github.struppigel.tools.visualizer.{ColorableItem, ImageUtil, VisualizerBuilder}
 import io.github.struppigel.parser.{MemoryMappedPE, PhysicalLocation}
-import io.github.struppigel.tools.sigscanner.FileTypeScanner
+import io.github.struppigel.tools.sigscanner.{FileTypeScanner, SignatureDatabase, SignatureScanner}
 
 import java.awt.Color
 import java.io.{File, FileWriter, IOException}
@@ -58,7 +58,7 @@ object PortExAnalyzer {
     | java -jar PortexAnalyzer.jar --rawep <PEfile>
     | java -jar PortexAnalyzer.jar --dump <all|resources|overlay|sections|ico|certificates> <imagefile>
     | java -jar PortexAnalyzer.jar --pdiff <file1> <file2> <imagefile>
-    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [-p <imagefile> [-bps <bytes>] [--visoverlay <textfile>]] [-i <folder>] <PEfile>
+    | java -jar PortexAnalyzer.jar [-a] [-o <outfile>] [--sigs <folder>] [-p <imagefile> [-bps <bytes>] [--visoverlay <textfile>]] [-i <folder>] <PEfile>
     | java -jar PortexAnalyzer.jar -p <imagefile> --from <offset> --to <offset> [-bps <bytes>] <file>
     |
     | -h,--help          show help
@@ -74,6 +74,7 @@ object PortExAnalyzer {
     | --dump             dump resources, overlay, sections, icons, certificates
     | --pdiff            create a diff visualization
     | -i,--ico           extract icons from the resource section as .ico file
+    | --sigs             also scan with the signatures of the *.sig files in the folder, see docs/SIGNATURES.md
     """.stripMargin
 
   private type OptionMap = scala.collection.mutable.Map[Symbol, String]
@@ -116,9 +117,13 @@ object PortExAnalyzer {
           exitCode = 1
         }
       }
-      if (options.contains('inputfile)) {
+      if (options.contains('sigs) && !new File(options('sigs)).isDirectory) {
+        System.err.println("Signature folder not found: " + new File(options('sigs)).getAbsolutePath)
+        exitCode = 1
+      } else if (options.contains('inputfile)) {
         try {
           val file = new File(options('inputfile))
+          lazy val userSignatures = loadUserSignatures(options)
           if (file.exists && file.isFile) {
             if (isPEFile(file)) {
               if (options.contains('location)){
@@ -139,7 +144,7 @@ object PortExAnalyzer {
                 val dumpOption = options('dump)
                 dumpStuff(file, dumpOption)
               } else {
-                val reporter = ReportCreator.newInstance(file)
+                val reporter = ReportCreator.newInstance(file, userSignatures.orNull)
                 val all = options.contains('all)
                 reporter.setShowAll(all)
                 if (options.contains('output)) {
@@ -163,11 +168,11 @@ object PortExAnalyzer {
             } else {
               exitCode = 1
               if (options.contains('output)) {
-                writeFileTypeReport(file, new File(options('output)))
+                writeFileTypeReport(file, new File(options('output)), userSignatures)
               } else {
                 println("The given file is no PE file!" + NL + file.getAbsolutePath + NL +
                   "Try '--repair' option if you think it is a broken PE." + NL)
-                printFileTypeReport(file)
+                print(fileTypeReport(file, userSignatures))
               }
             }
             if (options.contains('picture) && (options.contains('from) || options.contains('to))) {
@@ -466,19 +471,44 @@ object PortExAnalyzer {
     }
   }
 
-  private def printFileTypeReport(file: File): Unit = {
+  /**
+   * Loads the signatures of the folder of the option --sigs and prints their
+   * warnings.
+   *
+   * @return a scanner for the signatures, None without the option
+   */
+  private def loadUserSignatures(options: OptionMap): Option[SignatureScanner] =
+    options.get('sigs).map { folder =>
+      val db = SignatureDatabase.loadFolder(new File(folder), true)
+      val scanner = new SignatureScanner(db)
+      (db.warnings ++ scanner.getWarnings.asScala).foreach(w => System.err.println("Warning: " + w))
+      scanner
+    }
+
+  /**
+   * The file types of a file that is no PE file, and the matches of the
+   * signatures of the option --sigs.
+   */
+  private def fileTypeReport(file: File, userSignatures: Option[SignatureScanner]): String = {
+    val buf = new StringBuilder
     val results = FileTypeScanner._scan(file)
-    if (results.isEmpty) println("No matching file-type signatures found")
+    if (results.isEmpty) buf ++= "No matching file-type signatures found" + NL
     else if (results.size == 1)
-      println("The file could be of the following type: ")
+      buf ++= "The file could be of the following type: " + NL
     else
-      println("The file could be of one of the following types: ")
-    println()
+      buf ++= "The file could be of one of the following types: " + NL
+    buf ++= NL
     results.foreach(result =>
-      println(s"* ${result.getName}, ${result.getLength} bytes matched"))
+      buf ++= s"* ${result.getName}, ${result.getLength} bytes matched" + NL)
+    val userMatches = userSignatures.map(_._scanFile(file)).getOrElse(IndexedSeq.empty)
+    if (userMatches.nonEmpty) {
+      buf ++= NL + "Matches of your signatures:" + NL + NL
+      userMatches.foreach(m => buf ++= "* " + ReportCreator.describeWithSource(m) + NL)
+    }
+    buf.toString
   }
 
-  private def writeFileTypeReport(file: File, outFile: File): Unit = {
+  private def writeFileTypeReport(file: File, outFile: File, userSignatures: Option[SignatureScanner]): Unit = {
     if (outFile.getName.isEmpty) {
       throw new IOException("File name for output file is empty")
     }
@@ -489,15 +519,7 @@ object PortExAnalyzer {
     using(new FileWriter(outFile, true)) { fw =>
       fw.write("The given file is no PE file!" + NL +
         "Try '--repair' option if you think it is a broken PE." + NL)
-      val results = FileTypeScanner._scan(file)
-      if (results.isEmpty) fw.write("No matching file-type signatures found" + NL)
-      else if (results.size == 1)
-        fw.write("The file could be of the following type: " + NL)
-      else
-        fw.write("The file could be of one of the following types: " + NL)
-      fw.write(NL)
-      results.foreach(result =>
-        fw.write(s"* ${result.getName}, ${result.getLength} bytes matched" + NL))
+      fw.write(fileTypeReport(file, userSignatures))
     }
   }
 
@@ -575,6 +597,8 @@ object PortExAnalyzer {
         nextOption(map += ('visoverlay -> value), tail)
       case "-i" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
+      case "--sigs" :: value :: tail =>
+        nextOption(map += ('sigs -> value), tail)
       case "--ico" :: value :: tail =>
         nextOption(map += ('icons -> value), tail)
       case "--diff" :: value :: _ =>

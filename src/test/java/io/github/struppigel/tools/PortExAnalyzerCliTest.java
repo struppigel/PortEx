@@ -237,6 +237,38 @@ public class PortExAnalyzerCliTest {
         assertExitCode(1, "--unknown-option");
     }
 
+    @Test
+    public void missingSignatureFolderReturnsFailure() throws Exception {
+        Path missing = Files.createTempDirectory("portex-missing-sigs");
+        Files.delete(missing);
+        String output = assertExitCode(1, "--sigs", missing.toString(), WINRAR);
+        assertTrue(output.contains("Signature folder not found: " + missing.toAbsolutePath()), output);
+    }
+
+    @Test
+    public void userSignaturesMatchFilesThatAreNoPEFiles() throws Exception {
+        Path sigs = Files.createTempDirectory("portex-sigs");
+        Path input = Files.createTempFile("portex-rar", ".bin");
+        try {
+            Files.write(sigs.resolve("mine.sig"),
+                    "[My RAR]\npattern = 'Rar!' 1A 07\nat = file\n".getBytes(StandardCharsets.UTF_8));
+            Files.write(sigs.resolve("broken.sig"),
+                    "[Broken]\npattern = 0G\nat = file\n".getBytes(StandardCharsets.UTF_8));
+            Files.write(input, new byte[] {'R', 'a', 'r', '!', 0x1A, 0x07, 0, 0});
+            String output = assertExitCode(1, "--sigs", sigs.toString(), input.toString());
+            assertTrue(output.contains("Matches of your signatures:"), output);
+            assertTrue(output.contains("* My RAR at file+0x0 (file offset 0x0, 6 bytes) from mine.sig"), output);
+            assertTrue(output.contains("Warning: broken.sig:2:"), output);
+        } finally {
+            Files.deleteIfExists(input);
+            try (Stream<Path> files = Files.walk(sigs)) {
+                for (Path p : files.sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                    Files.deleteIfExists(p);
+                }
+            }
+        }
+    }
+
     private String assertExitCode(int expected, String... arguments) throws Exception {
         File outputFile = File.createTempFile("portex-cli-output", ".log");
         List<String> command = new ArrayList<>();

@@ -19,53 +19,69 @@ package io.github.struppigel.tools.sigscanner.engine
 
 /**
  * Aho-Corasick automaton that finds all occurrences of a set of byte strings
- * in one pass. Small automata use a dense transition table, large ones the
- * trie with failure links.
+ * in one pass.
+ * <p>
+ * States are numbered in breadth first order. The first denseLimit states,
+ * which are the ones near the root where a search spends most of its time,
+ * have a dense transition table with the failure transitions resolved. Small
+ * automata are dense completely. The children of the other states are sorted
+ * arrays that are searched with binary search, missing children follow the
+ * failure links until a dense state answers.
  * <p>
  * The automaton is immutable. A scan keeps its state in an Int, so that
  * inputs can be fed in chunks.
  *
  * @param keys the byte strings, their index is reported on matches
- * @param denseLimit maximum number of states for the dense table
+ * @param denseLimit number of states with a dense transition table
  */
 private[sigscanner] final class AhoCorasick(keys: IndexedSeq[Array[Byte]], denseLimit: Int = AhoCorasick.DenseLimit) {
 
   require(keys.forall(_.nonEmpty), "empty key")
 
-  // the trie is built with plain arrays: children of a state form a list sorted by byte
-  private val maxStates = keys.map(_.length).sum + 1
-  private val label = new Array[Int](maxStates)
-  private val firstChild = Array.fill(maxStates)(-1)
-  private val nextSibling = Array.fill(maxStates)(-1)
-  private var states = 1
+  /** number of states, the root is state 0 */
+  val stateCount: Int = AhoCorasick.trieSize(keys)
 
-  private def child(state: Int, b: Int): Int = {
-    var c = firstChild(state)
-    while (c >= 0 && label(c) < b) c = nextSibling(c)
-    if (c >= 0 && label(c) == b) c else -1
-  }
-
-  private def addChild(state: Int, b: Int): Int = {
-    val s = states
-    states += 1
-    label(s) = b
-    // insert sorted
-    var prev = -1
-    var c = firstChild(state)
-    while (c >= 0 && label(c) < b) {
-      prev = c
-      c = nextSibling(c)
-    }
-    nextSibling(s) = c
-    if (prev < 0) firstChild(state) = s else nextSibling(prev) = s
-    s
-  }
-
-  // keys that end in a state, as linked lists over key indices
-  private val ownFirst = Array.fill(maxStates)(-1)
-  private val ownNext = Array.fill(keys.length)(-1)
+  // byte of the edge into each state
+  private val label = new Array[Byte](stateCount)
+  // the children of state s are the states childStart(s) until childStart(s + 1), sorted by label
+  private val childStart = new Array[Int](stateCount + 1)
+  private val fail = new Array[Int](stateCount)
+  // the keys that end in state s, including those of its failure chain, are outKeys(outStart(s) until outStart(s + 1))
+  private val outStart = new Array[Int](stateCount + 1)
+  private var outKeys: Array[Int] = _
 
   locally {
+    // trie with children as sorted linked lists, numbered in insertion order
+    val maxStates = stateCount
+    val tLabel = new Array[Int](maxStates)
+    val firstChild = Array.fill(maxStates)(-1)
+    val nextSibling = Array.fill(maxStates)(-1)
+    // keys that end in a state as linked lists over key indices, the last added key first
+    val ownFirst = Array.fill(maxStates)(-1)
+    val ownNext = Array.fill(keys.length)(-1)
+    var states = 1
+
+    def child(state: Int, b: Int): Int = {
+      var c = firstChild(state)
+      while (c >= 0 && tLabel(c) < b) c = nextSibling(c)
+      if (c >= 0 && tLabel(c) == b) c else -1
+    }
+
+    def addChild(state: Int, b: Int): Int = {
+      val s = states
+      states += 1
+      tLabel(s) = b
+      var prev = -1
+      var c = firstChild(state)
+      while (c >= 0 && tLabel(c) < b) {
+        prev = c
+        c = nextSibling(c)
+      }
+      nextSibling(s) = c
+      if (prev < 0) firstChild(state) = s else nextSibling(prev) = s
+      s
+    }
+
     var k = 0
     while (k < keys.length) {
       val key = keys(k)
@@ -81,126 +97,134 @@ private[sigscanner] final class AhoCorasick(keys: IndexedSeq[Array[Byte]], dense
       ownFirst(state) = k
       k += 1
     }
-  }
 
-  val stateCount: Int = states
-
-  /** length of each key */
-  val keyLengths: Array[Int] = keys.map(_.length).toArray
-
-  private val fail = new Array[Int](stateCount)
-
-  /** breadth first order of the states, failure states come before their users */
-  private val order: Array[Int] = {
-    val queue = new Array[Int](stateCount)
-    var head = 0
+    // breadth first numbering: the children of a state get consecutive numbers in label order
+    val order = new Array[Int](stateCount) // new number -> trie state, the root stays 0
     var tail = 1
-    queue(0) = 0
+    var head = 0
     while (head < tail) {
-      val s = queue(head)
-      head += 1
+      val s = order(head)
+      childStart(head) = tail
       var c = firstChild(s)
       while (c >= 0) {
-        queue(tail) = c
+        order(tail) = c
         tail += 1
         c = nextSibling(c)
       }
+      head += 1
     }
-    queue
-  }
+    childStart(stateCount) = tail
+    var n = 0
+    while (n < stateCount) {
+      label(n) = tLabel(order(n)).toByte
+      n += 1
+    }
 
-  /** keys that end in a state, including those of the failure chain */
-  private val outputs: Array[Array[Int]] = {
-    val out = new Array[Array[Int]](stateCount)
-    out(0) = Array.emptyIntArray
-    // failure links: for each state in breadth first order, compute the links of its children
-    var i = 0
-    while (i < stateCount) {
-      val s = order(i)
-      var c = firstChild(s)
-      while (c >= 0) {
-        val b = label(c)
-        if (s == 0) fail(c) = 0
+    // failure links in breadth first order, the failure state is computed before its users
+    n = 0
+    while (n < stateCount) {
+      var c = childStart(n)
+      while (c < childStart(n + 1)) {
+        val b = label(c) & 0xFF
+        if (n == 0) fail(c) = 0
         else {
-          var f = fail(s)
-          var target = child(f, b)
+          var f = fail(n)
+          var target = sortedChild(f, b)
           while (target < 0 && f != 0) {
             f = fail(f)
-            target = child(f, b)
+            target = sortedChild(f, b)
           }
           fail(c) = if (target >= 0 && target != c) target else 0
         }
-        c = nextSibling(c)
+        c += 1
       }
-      i += 1
+      n += 1
     }
-    // outputs in breadth first order, the failure state's outputs are complete before they are used
-    i = 1
-    while (i < stateCount) {
-      val s = order(i)
+
+    // outputs: the own keys of a state, then those of its failure state
+    n = 0
+    var total = 0
+    val counts = new Array[Int](stateCount)
+    while (n < stateCount) {
       var own = 0
-      var k = ownFirst(s)
-      while (k >= 0) {
+      var key = ownFirst(order(n))
+      while (key >= 0) {
         own += 1
-        k = ownNext(k)
+        key = ownNext(key)
       }
-      val inherited = out(fail(s))
-      val merged = new Array[Int](own + inherited.length)
-      var n = 0
-      k = ownFirst(s)
-      while (k >= 0) {
-        merged(n) = k
-        n += 1
-        k = ownNext(k)
-      }
-      System.arraycopy(inherited, 0, merged, n, inherited.length)
-      out(s) = merged
-      i += 1
+      counts(n) = own + (if (n == 0) 0 else counts(fail(n)))
+      outStart(n) = total
+      total += counts(n)
+      n += 1
     }
-    out
+    outStart(stateCount) = total
+    outKeys = new Array[Int](total)
+    n = 0
+    while (n < stateCount) {
+      var pos = outStart(n)
+      var key = ownFirst(order(n))
+      while (key >= 0) {
+        outKeys(pos) = key
+        pos += 1
+        key = ownNext(key)
+      }
+      if (n != 0) {
+        val f = fail(n)
+        System.arraycopy(outKeys, outStart(f), outKeys, pos, counts(f))
+      }
+      n += 1
+    }
   }
 
-  val isDense: Boolean = stateCount <= denseLimit
+  /** number of states with a dense transition table */
+  private val denseCount: Int = math.max(0, math.min(stateCount, denseLimit))
 
-  /** dense transition table: delta(state * 256 + byte) */
-  private val delta: Array[Int] = if (!isDense) null else {
-    val d = new Array[Int](stateCount * 256)
-    var i = 0
-    while (i < stateCount) {
-      val s = order(i)
+  val isDense: Boolean = denseCount == stateCount
+
+  /** dense transition table of the first states: delta(state * 256 + byte) */
+  private val delta: Array[Int] = {
+    val d = new Array[Int](denseCount * 256)
+    var s = 0
+    while (s < denseCount) {
       val row = s * 256
       // inherit the transitions of the failure state, whose row is complete already
       if (s != 0) System.arraycopy(d, fail(s) * 256, d, row, 256)
-      var c = firstChild(s)
-      while (c >= 0) {
-        d(row + label(c)) = c
-        c = nextSibling(c)
+      var c = childStart(s)
+      while (c < childStart(s + 1)) {
+        d(row + (label(c) & 0xFF)) = c
+        c += 1
       }
-      i += 1
+      s += 1
     }
     d
   }
 
-  /** the state after reading the byte */
-  def next(state: Int, b: Int): Int = {
-    if (isDense) delta(state * 256 + b)
-    else {
-      var s = state
-      while (true) {
-        val c = child(s, b)
-        if (c >= 0) return c
-        if (s == 0) return 0
-        s = fail(s)
-      }
-      0
+  /** the child of the state for the byte, -1 if there is none */
+  private def sortedChild(state: Int, b: Int): Int = {
+    var lo = childStart(state)
+    var hi = childStart(state + 1) - 1
+    while (lo <= hi) {
+      val mid = (lo + hi) >>> 1
+      val l = label(mid) & 0xFF
+      if (l < b) lo = mid + 1
+      else if (l > b) hi = mid - 1
+      else return mid
     }
+    -1
   }
 
-  /** keys that end in the state */
-  def outputsOf(state: Int): Array[Int] = outputs(state)
-
-  /** true if keys end in the state */
-  def hasOutput(state: Int): Boolean = outputs(state).length > 0
+  /** the state after reading the byte */
+  def next(state: Int, b: Int): Int = {
+    var s = state
+    while (true) {
+      if (s < denseCount) return delta(s * 256 + b)
+      val c = sortedChild(s, b)
+      if (c >= 0) return c
+      if (s == 0) return 0
+      s = fail(s)
+    }
+    0
+  }
 
   /**
    * Feeds bytes to the automaton.
@@ -213,41 +237,53 @@ private[sigscanner] final class AhoCorasick(keys: IndexedSeq[Array[Byte]], dense
    * @return the state after the bytes
    */
   def feed(state: Int, bytes: Array[Byte], from: Int, until: Int)(onMatch: (Int, Int) => Unit): Int = {
+    val d = delta
+    val dense = denseCount
+    val starts = outStart
+    val out = outKeys
     var s = state
     var i = from
-    if (isDense) {
-      val d = delta
-      while (i < until) {
-        s = d(s * 256 + (bytes(i) & 0xFF))
-        if (outputs(s).length > 0) {
-          val out = outputs(s)
-          var k = 0
-          while (k < out.length) {
-            onMatch(out(k), i)
-            k += 1
-          }
-        }
-        i += 1
+    while (i < until) {
+      val b = bytes(i) & 0xFF
+      s = if (s < dense) d(s * 256 + b) else next(s, b)
+      var k = starts(s)
+      val end = starts(s + 1)
+      while (k < end) {
+        onMatch(out(k), i)
+        k += 1
       }
-    } else {
-      while (i < until) {
-        s = next(s, bytes(i) & 0xFF)
-        if (outputs(s).length > 0) {
-          val out = outputs(s)
-          var k = 0
-          while (k < out.length) {
-            onMatch(out(k), i)
-            k += 1
-          }
-        }
-        i += 1
-      }
+      i += 1
     }
     s
   }
 }
 
 private[sigscanner] object AhoCorasick {
-  /** 4096 states take 4 MiB as dense table */
+  /** states with a dense transition table, 4096 states take 4 MiB */
   val DenseLimit: Int = 4096
+
+  /** number of states of the trie of the keys */
+  private def trieSize(keys: IndexedSeq[Array[Byte]]): Int = {
+    // counts the distinct prefixes, sorting keeps shared prefixes adjacent
+    val sorted = keys.sortWith((a, b) => compare(a, b) < 0)
+    var count = 1
+    var prev: Array[Byte] = Array.emptyByteArray
+    for (key <- sorted) {
+      var common = 0
+      while (common < prev.length && common < key.length && prev(common) == key(common)) common += 1
+      count += key.length - common
+      prev = key
+    }
+    count
+  }
+
+  private def compare(a: Array[Byte], b: Array[Byte]): Int = {
+    var i = 0
+    while (i < a.length && i < b.length) {
+      val c = (a(i) & 0xFF) - (b(i) & 0xFF)
+      if (c != 0) return c
+      i += 1
+    }
+    a.length - b.length
+  }
 }

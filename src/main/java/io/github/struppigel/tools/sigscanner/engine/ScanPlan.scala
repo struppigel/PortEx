@@ -29,13 +29,17 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @param id index of the entry within the plan
  * @param sigIndex index of the signature within the database
+ * @param inPass true for a further clause that is searched in the same pass
+ *               as the first clauses of its location; it keeps only its
+ *               lowest match instead of reporting all
  */
 private[sigscanner] final class SigEntry(
     val id: Int,
     val sigIndex: Int,
     val signature: Signature,
     val clause: Clause,
-    val spec: LocationSpec) {
+    val spec: LocationSpec,
+    val inPass: Boolean) {
 
   val compiled: CompiledPattern = clause.pattern.compiled
 
@@ -124,6 +128,15 @@ private[sigscanner] final class SearchGroup(kind: LocationKind, selector: Select
   /** indices within entries of the brute force entries */
   val bruteLocal: Array[Int] = bruteForce.map(e => localIndex(e.id))
 
+  /**
+   * per entry: true if atom hits may yield the same start more than once, i.e.
+   * the entry has several atoms or an atom with an offset range
+   */
+  val mayRepeatStarts: Array[Boolean] = entries.map { e =>
+    val atoms = e.compiled.atoms
+    atoms.length > 1 || (atoms.length == 1 && atoms(0).offMin != atoms(0).offMax)
+  }
+
   lazy val automaton: AhoCorasick = new AhoCorasick(owners.map(_._2.bytes).toIndexedSeq)
 
   /** longest distance from a match start to the end of one of its atoms */
@@ -131,8 +144,21 @@ private[sigscanner] final class SearchGroup(kind: LocationKind, selector: Select
 }
 
 /**
+ * One location of a further clause: its entry and a group that searches the
+ * entry alone, for scans in which the entry is not searched in a pass of the
+ * first clauses.
+ */
+private[sigscanner] final class FurtherLocation(val entry: SigEntry, val group: Group)
+
+/**
  * The compiled form of a signature database: the first clauses of all
  * signatures grouped by location, so that each region is read once.
+ * <p>
+ * Like YARA-X, a search reads a region once for many clauses: further clauses
+ * that search the same location as first clauses are searched in the same
+ * pass, if the first clause of their signature is searched too and they have
+ * atoms. The other further clauses are checked only for signatures whose
+ * first clause matched.
  */
 private[sigscanner] final class ScanPlan(val database: SignatureDatabase) {
 
@@ -142,11 +168,13 @@ private[sigscanner] final class ScanPlan(val database: SignatureDatabase) {
 
   private val entries = ArrayBuffer[SigEntry]()
 
-  private def entry(sigIndex: Int, clause: Clause, spec: LocationSpec): SigEntry = {
-    val e = new SigEntry(entries.size, sigIndex, signatures(sigIndex), clause, spec)
+  private def entry(sigIndex: Int, clause: Clause, spec: LocationSpec, inPass: Boolean = false): SigEntry = {
+    val e = new SigEntry(entries.size, sigIndex, signatures(sigIndex), clause, spec, inPass)
     entries += e
     e
   }
+
+  private def isSearch(spec: LocationSpec): Boolean = spec.mode.isInstanceOf[Search]
 
   private sealed trait GroupKey
   private case class AnchorKey(kind: LocationKind, selector: Selector, offset: Long) extends GroupKey
@@ -171,7 +199,6 @@ private[sigscanner] final class ScanPlan(val database: SignatureDatabase) {
 
   // plain loops, the plan is built while the first file waits for its scan
   private val primaryEntries = ArrayBuffer[SigEntry]()
-  private val secondary = mutable.HashMap[(Int, Int), IndexedSeq[Group]]()
   private val conditionOnlyBuffer = ArrayBuffer[(Int, Signature)]()
   locally {
     var i = 0
@@ -181,38 +208,75 @@ private[sigscanner] final class ScanPlan(val database: SignatureDatabase) {
       else {
         val first = sig.clauses.head
         for (spec <- first.locations) primaryEntries += entry(i, first, spec)
+      }
+      i += 1
+    }
+  }
+
+  // locations that a pass of first clauses searches anyway
+  private val searchedKeys: Set[GroupKey] = primaryEntries.filter(e => isSearch(e.spec)).map(e => keyOf(e.spec)).toSet
+
+  private val inPassEntries = ArrayBuffer[SigEntry]()
+  private val further = mutable.HashMap[(Int, Int), IndexedSeq[FurtherLocation]]()
+  locally {
+    var i = 0
+    while (i < signatures.size) {
+      val sig = signatures(i)
+      if (sig.clauses.nonEmpty) {
+        val firstIsSearched = sig.clauses.head.locations.exists(isSearch)
         for (clause <- sig.clauses.drop(1)) {
-          val groups = ArrayBuffer[Group]()
-          for (spec <- clause.locations) groups ++= buildGroups(Seq(entry(i, clause, spec)))
-          secondary((i, clause.number)) = groups.toIndexedSeq
+          // clauses without atoms are checked at every position, so only if the first clause matched
+          val inPassClause = firstIsSearched && clause.pattern.compiled.atoms.nonEmpty
+          further((i, clause.number)) = clause.locations.map { spec =>
+            val e = entry(i, clause, spec, inPassClause && isSearch(spec) && searchedKeys.contains(keyOf(spec)))
+            if (e.inPass) inPassEntries += e
+            new FurtherLocation(e, buildGroups(Seq(e)).head)
+          }.toIndexedSeq
         }
       }
       i += 1
     }
   }
 
-  /** groups of first clauses per location kind */
+  /** groups of first clauses and of the further clauses searched with them, per location kind */
   val groupsByKind: Map[LocationKind, IndexedSeq[Group]] = {
     val byKind = mutable.LinkedHashMap[LocationKind, ArrayBuffer[Group]]()
-    for (g <- buildGroups(primaryEntries)) byKind.getOrElseUpdate(g.kind, ArrayBuffer()) += g
+    // the further clauses join the groups of the first clauses, they create no groups
+    for (g <- buildGroups(primaryEntries ++ inPassEntries)) byKind.getOrElseUpdate(g.kind, ArrayBuffer()) += g
     byKind.map { case (kind, groups) => kind -> groups.toIndexedSeq }.toMap
   }
 
-  /** groups of the further clauses, per signature index and clause number */
-  val secondaryGroups: Map[(Int, Int), IndexedSeq[Group]] = secondary.toMap
+  /** the locations of the further clauses in database order, per signature index and clause number */
+  val furtherLocations: Map[(Int, Int), IndexedSeq[FurtherLocation]] = further.toMap
 
   /** signatures that only have conditions */
   val conditionOnly: IndexedSeq[(Int, Signature)] = conditionOnlyBuffer.toIndexedSeq
 
   val entryCount: Int = entries.size
 
-  /** warnings about signatures that will be slow to scan */
+  /** warnings about signatures that will be slow to scan, searches without window end only */
   val warnings: IndexedSeq[String] = {
     val result = mutable.LinkedHashSet[String]()
-    for (e <- entries) e.spec.mode match {
-      case Search(_, until) if until < 0 && e.spec.kind != LocationKind.EOF && e.compiled.atoms.isEmpty =>
-        result += s"${e.signature.source}: [${e.signature.name}] has no literal of at least two bytes to search for " +
-          s"in ${e.spec.source}, it is checked at every position, consider a search window"
+    // in database order, the entries of further clauses were created after all first clauses
+    for (e <- entries.sortBy(e => (e.sigIndex, e.clause.number))) e.spec.mode match {
+      case Search(_, until) if until < 0 && e.spec.kind != LocationKind.EOF =>
+        val c = e.compiled
+        val key = if (e.clause.number == 1) "pattern" else "pattern." + e.clause.number
+        val what = s"${e.signature.source}: [${e.signature.name}] $key"
+        val where = e.spec.source
+        if (c.atoms.isEmpty)
+          result += s"$what has no literal that is selective enough to search for in $where " +
+            "(only wildcards, common bytes, short case insensitive text, or literals behind an open jump), " +
+            "it is checked at every position, consider a search window"
+        else {
+          val width = c.atoms.map(a => a.offMax - a.offMin).max
+          if (width >= ScanPlan.WideAtomRange)
+            result += s"$what is searched in $where by a literal up to ${c.atoms.map(_.offMax).max} bytes after its " +
+              s"start, every occurrence costs up to ${width + 1} checks, start the pattern with a literal or narrow the jump"
+          else if (c.atomScore < ScanPlan.WeakAtomScore)
+            result += s"$what is searched in $where by the short literal ${ScanPlan.describe(c.atoms(0).bytes)}, " +
+              "which is frequent, use a longer literal or a search window"
+        }
       case _ =>
     }
     result.toIndexedSeq
@@ -226,6 +290,16 @@ private[sigscanner] final class ScanPlan(val database: SignatureDatabase) {
 private[sigscanner] object ScanPlan {
   val NoEntries: Array[SigEntry] = Array.empty
 
+  /** offset range of an atom from which a warning says that each hit costs many checks */
+  val WideAtomRange: Int = 256
+
+  /** atom score below which a warning says that the atom is frequent, e.g. two bytes like 'MZ' */
+  val WeakAtomScore: Double = 3.0
+
+  /** bytes as 'text' if they are printable ASCII, otherwise as hex bytes */
+  def describe(bytes: Array[Byte]): String =
+    if (bytes.forall(b => b >= 0x20 && b < 0x7F && b != '\'' && b != '\\')) "'" + new String(bytes, "US-ASCII") + "'"
+    else bytes.map(b => "%02X".format(b & 0xFF)).mkString(" ")
 
   /** read size for anchored patterns with open jumps */
   val UnboundedRead: Int = 4096

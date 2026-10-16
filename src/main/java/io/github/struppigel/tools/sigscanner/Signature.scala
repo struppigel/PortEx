@@ -143,6 +143,14 @@ final class Signature(
 
   def getSource: String = source
 
+  /** the source without the line number, e.g. "mysignatures.sig" for the source "mysignatures.sig:12" */
+  def getDatabaseName: String = {
+    val colon = source.lastIndexOf(':')
+    if (colon > 0 && colon < source.length - 1 && source.substring(colon + 1).forall(Character.isDigit))
+      source.substring(0, colon)
+    else source
+  }
+
   def hasPattern: Boolean = clauses.nonEmpty
 
   /** the comma separated values of the metadata key 'type' */

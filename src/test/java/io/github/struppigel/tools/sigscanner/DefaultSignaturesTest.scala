@@ -21,7 +21,10 @@ import io.github.struppigel.parser.sections.clr.UserStringsHeap
 import org.testng.Assert._
 import org.testng.annotations.Test
 
+import java.io.File
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import scala.collection.JavaConverters._
 import scala.io.Source
 
 class DefaultSignaturesTest {
@@ -41,8 +44,13 @@ class DefaultSignaturesTest {
 
   @Test
   def bundledSignaturesAreNotSlow(): Unit = {
-    for (scanner <- List(DefaultSignatures.peScanner, DefaultSignatures.fileTypeScanner, DefaultSignatures.javaWrapperScanner))
+    for (scanner <- List(DefaultSignatures.fileTypeScanner, DefaultSignatures.javaWrapperScanner))
       assertTrue(scanner.plan.warnings.isEmpty, scanner.plan.warnings.mkString("\n"))
+    // the IL patterns of these Detect It Easy rules search short literals in the first section of .NET files
+    val weak = DefaultSignatures.peScanner.plan.warnings
+    assertTrue(weak.forall(_.contains("by the short literal")), weak.mkString("\n"))
+    assertEquals(weak.map(w => w.substring(w.indexOf('[') + 1, w.lastIndexOf("] pattern"))).toSet,
+      Set("ArmDot", "EazFuscator", ".NET Reactor 6.X [Control Flow]", "Robust Obfuscator"), weak.mkString("\n"))
   }
 
   @Test
@@ -67,5 +75,26 @@ class DefaultSignaturesTest {
     assertEquals(UserStringsHeap(bytes).strings, IndexedSeq("Hello World!", long, "é"))
     // a truncated entry ends the parsing
     assertEquals(UserStringsHeap(bytes.dropRight(2)).strings, IndexedSeq("Hello World!", long))
+  }
+
+  @Test
+  def scanFileFindsTheFileTypeOfNonPEFiles(): Unit = {
+    val file = File.createTempFile("portex-defaultsignatures-zip", ".zip")
+    try {
+      Files.write(file.toPath, Array[Byte](0x50, 0x4B, 0x03, 0x04) ++ new Array[Byte](0x40))
+      val matches = DefaultSignatures.scanFile(file).asScala
+      assertTrue(matches.exists(_.getName == "PKZIP archive_1"), matches.mkString("\n"))
+      for (m <- matches)
+        assertTrue(m.getLocationKind == LocationKind.FILE || m.getLocationKind == LocationKind.EOF, m.toString)
+      val fileTypes = FileTypeScanner.scan(file).asScala.map(_.getName).toSet
+      assertTrue(fileTypes.subsetOf(matches.map(_.getName).toSet))
+    } finally file.delete()
+  }
+
+  @Test
+  def scanFileOfAnEmptyFileFindsNothing(): Unit = {
+    val file = File.createTempFile("portex-defaultsignatures-empty", ".bin")
+    try assertTrue(DefaultSignatures.scanFile(file).isEmpty)
+    finally file.delete()
   }
 }

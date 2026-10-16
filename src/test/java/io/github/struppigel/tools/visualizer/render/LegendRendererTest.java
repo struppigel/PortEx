@@ -17,12 +17,18 @@ package io.github.struppigel.tools.visualizer.render;
 
 import io.github.struppigel.tools.layout.FileRegion;
 import io.github.struppigel.tools.layout.RegionType;
+import io.github.struppigel.tools.layout.SignatureHit;
 import io.github.struppigel.tools.layout.StructureMap;
+import io.github.struppigel.tools.layout.StructureMapBuilder;
+import io.github.struppigel.tools.visualizer.ColorableItem;
 import io.github.struppigel.tools.visualizer.engine.FileVisualization;
 import org.testng.annotations.Test;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -127,7 +133,33 @@ public class LegendRendererTest {
         StructureMap map = StructureMap.empty(100);
         List<LegendEntry> entries = LegendRenderer.entries(map, RegionColorScheme.of(map), true, true);
         assertEquals(entries.size(), 10);
-        assertFalse(labels(entries).contains("PE Structure"));
+        assertFalse(labels(entries).contains(LegendRenderer.STRUCTURE_TITLE));
+    }
+
+    @Test
+    public void structureTitleIsTheSameForAllFiles() throws Exception {
+        FileVisualization vis = visualization("HelloWorld.exe", false);
+        List<String> labels = labels(LegendRenderer.entries(vis.getStructureMap(), vis.getColorScheme(), true, true));
+        assertTrue(labels.contains(LegendRenderer.STRUCTURE_TITLE), labels.toString());
+        assertFalse(labels.contains("PE Structure"), labels.toString());
+    }
+
+    @Test
+    public void markersOfAnUnparsedFileAreListedUnderStructure() throws Exception {
+        File file = File.createTempFile("portex-legend-unparsed", ".bin");
+        try {
+            Files.write(file.toPath(), new byte[0x100]);
+            StructureMap map = StructureMapBuilder.forUnparsedFile(file)
+                    .withSignatureMatches(Collections.singletonList(new SignatureHit("match", 0x10, 4))).build();
+            List<LegendEntry> entries = LegendRenderer.entries(map, RegionColorScheme.of(map), true, true);
+            List<String> labels = labels(entries);
+            assertEquals(entries.size(), 12, labels.toString());
+            assertEquals(labels.get(10), LegendRenderer.STRUCTURE_TITLE);
+            assertEquals(labels.get(11), ColorableItem.SIGNATURE_MATCH.getLegendDescription());
+            assertEquals(entries.get(11).getRegions(), map.getRegions(RegionType.SIGNATURE_MATCH));
+        } finally {
+            file.delete();
+        }
     }
 
     @Test

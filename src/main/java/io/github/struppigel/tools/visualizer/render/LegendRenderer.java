@@ -40,6 +40,12 @@ import java.util.Set;
  */
 public final class LegendRenderer {
 
+    /**
+     * title of the structure entries, also used for files that are no PE
+     * files, whose structures are signature matches and custom regions
+     */
+    public static final String STRUCTURE_TITLE = "Structure";
+
     private static final int SAMPLE_SIZE = 10;
     private static final int GAP = 10;
     private static final int ENTRY_HEIGHT = 20;
@@ -87,7 +93,7 @@ public final class LegendRenderer {
         }
         List<LegendEntry> structure = structureEntries(map, scheme, paintedTypes);
         if (!structure.isEmpty()) {
-            entries.add(LegendEntry.title("PE Structure"));
+            entries.add(LegendEntry.title(STRUCTURE_TITLE));
             entries.addAll(structure);
         }
         return Collections.unmodifiableList(entries);

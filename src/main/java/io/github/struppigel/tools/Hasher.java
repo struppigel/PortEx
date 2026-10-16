@@ -163,6 +163,9 @@ public class Hasher {
      */
     public static byte[] fileHash(File file, MessageDigest messageDigest)
             throws IOException {
+        if (file.length() == 0) {
+            return messageDigest.digest(); // the hash of no bytes
+        }
         return computeHash(file, messageDigest, 0L, file.length());
     }
 

@@ -107,6 +107,8 @@ private[sigscanner] object PatternCompiler {
   /** atoms below this score are not selective enough for the atom search */
   val MinAtomScore = 2.0
 
+  private val Log256 = math.log(256)
+
   def compile(nodes: Vector[PNode]): CompiledPattern = {
     if (nodes.length == 1 && nodes(0).isInstanceOf[PBytes]) compileFlat(nodes)
     else compileGeneral(nodes)
@@ -228,10 +230,26 @@ private[sigscanner] object PatternCompiler {
     def shift(min: Int, max: Int): AtomSet =
       AtomSet(atoms.map(a => new Atom(a.bytes, a.offMin + min, a.offMax + max)), score)
 
+    def usable: Boolean = score >= MinAtomScore
+
+    /**
+     * The score minus the cost of checking every start in the offset range of
+     * an atom hit: an atom behind a jump of 255 bytes is worth one byte less.
+     * So atoms before wide jumps are preferred, unless the atom behind is much
+     * more selective.
+     */
+    def effectiveScore: Double = score - math.log(width + 1.0) / Log256
+
     def betterThan(other: AtomSet): Boolean =
       if (score != other.score) score > other.score
       else if (width != other.width) width < other.width
       else atoms.map(_.offMin).min < other.atoms.map(_.offMin).min
+
+    /** like betterThan, but usable sets and narrow offset ranges first, see effectiveScore */
+    def betterNarrow(other: AtomSet): Boolean =
+      if (usable != other.usable) usable
+      else if (effectiveScore != other.effectiveScore) effectiveScore > other.effectiveScore
+      else betterThan(other)
   }
 
   private def isCommon(b: Int): Boolean = b == 0x00 || b == 0xFF || b == 0x90 || b == 0xCC
@@ -239,17 +257,26 @@ private[sigscanner] object PatternCompiler {
   private def byteScore(value: Int, mask: Int): Double =
     if (mask == 0xDF) 0.9 else if (isCommon(value)) 0.25 else 1.0
 
+  /**
+   * The atoms that are searched for the pattern. Atoms with a narrow offset
+   * range are preferred; if that yields no usable atoms, the atoms are chosen
+   * as by former versions, so that no pattern is checked at every position
+   * because of the preference.
+   */
   private[pattern] def bestAtoms(nodes: Seq[PNode]): Option[AtomSet] =
-    atomsOf(nodes).filter(_.score >= MinAtomScore)
+    atomsOf(nodes, narrow = true).filter(_.usable).orElse(atomsOf(nodes, narrow = false).filter(_.usable))
 
   /**
    * Determines the best atom set of the sequence, with offsets relative to the
    * start of the sequence. Stops at follow tokens and unbounded jumps.
+   *
+   * @param narrow if true, prefer atoms with narrow offset ranges and score
+   *               alternatives by their expected number of hits
    */
-  private def atomsOf(nodes: Seq[PNode]): Option[AtomSet] = {
+  private def atomsOf(nodes: Seq[PNode], narrow: Boolean): Option[AtomSet] = {
     var best: Option[AtomSet] = None
     def consider(candidate: Option[AtomSet]): Unit = candidate.foreach { c =>
-      if (best.forall(c.betterThan)) best = Some(c)
+      if (best.forall(b => if (narrow) c.betterNarrow(b) else c.betterThan(b))) best = Some(c)
     }
     var offMin = 0
     var offMax = 0
@@ -272,11 +299,16 @@ private[sigscanner] object PatternCompiler {
           }
         case PFollow(_, _) => stop = true
         case PAlt(branches) =>
-          val sets = branches.map(atomsOf)
+          val sets = branches.map(atomsOf(_, narrow))
           if (sets.forall(_.isDefined)) {
             val all = sets.flatten
             // every additional atom adds work for the search
-            val score = all.map(_.score).min - 0.1 * (all.map(_.atoms.size).sum - 1)
+            val score =
+              if (narrow) {
+                // the score of a single atom with as many expected hits as all atoms together, an atom of score s
+                // hits about every 256^s bytes; case variants of letters do not make letters-only strings unusable
+                -math.log(all.map(s => s.atoms.size * math.pow(256, -s.score)).sum) / Log256
+              } else all.map(_.score).min - 0.1 * (all.map(_.atoms.size).sum - 1)
             consider(Some(AtomSet(all.flatMap(_.atoms), score).shift(offMin, offMax)))
           }
           val bs = branches.map(segmentBounds)
