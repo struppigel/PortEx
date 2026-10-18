@@ -58,6 +58,7 @@ src/main/target/*
 # Package Files #
 *.war
 *.ear
+/progs/
 /target
 /bin
 vtapikey
