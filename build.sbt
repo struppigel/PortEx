@@ -1,6 +1,6 @@
 name := "PortEx"
 
-version := "6.0.0-SNAPSHOT"
+version := "6.0.0"
 
 scalaVersion := "2.12.20"
 
