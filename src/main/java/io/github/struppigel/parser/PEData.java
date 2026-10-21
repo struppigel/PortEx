@@ -25,6 +25,8 @@ import io.github.struppigel.parser.sections.SectionLoader;
 import io.github.struppigel.parser.sections.SectionTable;
 import io.github.struppigel.parser.sections.cert.AuthenticodeSignature;
 import io.github.struppigel.parser.sections.cert.AuthenticodeVerification;
+import io.github.struppigel.tools.ChecksumCheck;
+import io.github.struppigel.tools.ChecksumVerifier;
 import io.github.struppigel.parser.sections.cert.AuthenticodeVerifier;
 import io.github.struppigel.parser.sections.cert.CertificateTable;
 import io.github.struppigel.parser.sections.clr.*;
@@ -200,6 +202,7 @@ public class PEData {
     /**************************************************************************************************************/
 
     private List<ExportEntry> exports;
+    private String exportDllName;
     private List<Resource> resources;
     private List<ImportDLL> imports;
     private List<ImportDLL> delayLoadImports;
@@ -215,6 +218,8 @@ public class PEData {
     private Optional<CertificateTable> certificateTable;
 
     private Optional<AuthenticodeVerification> authenticodeVerification;
+
+    private Optional<ChecksumCheck> checksumCheck;
 
     private HashMap<Long, String> stringTable;
 
@@ -232,6 +237,7 @@ public class PEData {
         // alphabethically sorted
         loadAuthenticodeVerification();
         loadCertificateTable();
+        loadChecksumCheck();
         loadClrSection();
         loadCodeViewInfo();
         loadExports();
@@ -327,6 +333,29 @@ public class PEData {
             authenticodeVerification = Optional.empty();
         }
         return authenticodeVerification;
+    }
+
+    /**
+     * Computes the checksum of the file and compares it with the checksum field of the Optional Header. Reads the
+     * whole file unless already done.
+     *
+     * @return the check, empty if the file can not be read
+     */
+    public synchronized Optional<ChecksumCheck> loadChecksumCheck() {
+        if (checksumCheck != null) {
+            return checksumCheck;
+        }
+        try {
+            checksumCheck = Optional.of(ChecksumVerifier.check(this));
+        } catch (AnalysisInterruptedException e) {
+            // nothing is cached, so that the next call computes it
+            throw e;
+        } catch (Exception e) {
+            // the Scala code does not declare its IOException
+            logger.error("could not compute the checksum", e);
+            checksumCheck = Optional.empty();
+        }
+        return checksumCheck;
     }
 
     /**
@@ -529,6 +558,7 @@ public class PEData {
             Optional<ExportSection> maybeEdata = new SectionLoader(this).maybeLoadExportSection();
             if (maybeEdata.isPresent()) {
                 ExportSection edata = maybeEdata.get();
+                exportDllName = edata.getDllName();
                 exports = edata.getExportEntries();
                 return exports;
             }
@@ -537,6 +567,19 @@ public class PEData {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Loads and returns the name of the DLL that the export directory points to, e.g., kernel32.dll. Reads the PE
+     * file to do so unless the exports are already loaded.
+     * Returns an empty string if there are no exports, the export directory points to no name or something goes
+     * wrong.
+     *
+     * @return the name of the DLL in the export directory
+     */
+    public String loadExportDllName() {
+        loadExports();
+        return exportDllName == null ? "" : exportDllName;
     }
 
     /**

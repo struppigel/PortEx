@@ -1,6 +1,7 @@
 package io.github.struppigel.tools;
 
 import io.github.struppigel.TestreportsReader;
+import io.github.struppigel.parser.IOUtil;
 import io.github.struppigel.parser.PEData;
 import io.github.struppigel.parser.PELoader;
 import io.github.struppigel.tools.sigscanner.SignatureDatabase;
@@ -45,6 +46,17 @@ public class ReportCreatorTest {
         assertEquals(user.overlayReport(), bundled.overlayReport());
         assertEquals(user.signatureReport(), bundled.signatureReport());
         assertEquals(user.resourcesReport(), bundled.resourcesReport());
+    }
+
+    @Test
+    public void theExportsShowTheNameOfTheDll() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/CVE_2013_3900/CVE_2013_3900"));
+        String exports = new ReportCreator(data).exportsReport();
+        assertTrue(exports.contains("Exports" + IOUtil.NL + "*******" + IOUtil.NL + IOUtil.NL + "DLL name: winfw.dll"
+                + IOUtil.NL + IOUtil.NL), exports);
+
+        assertEquals(new ReportCreator(PELoader.loadPE(new File(TESTFILES + "/WinRar.exe"))).exportsReport(), "",
+                "no exports, no DLL name");
     }
 
     @Test

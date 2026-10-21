@@ -50,6 +50,10 @@ import scala.collection.mutable.ListBuffer
  * @param offset to the beginning of the export section
  * @param secLoader the section loader instance
  * @param invalidExportCount the number of invalid export entries
+ * @param dllName the name of the DLL that the export directory points to
+ * @param dllNameLocation the location of the name of the DLL with its zero terminator
+ * @param forwarderLocations the locations of the forwarder strings with their zero
+ *        terminators by the RVA of the string
  */
 class ExportSection private (
   private val edataTable: ExportDirectory,
@@ -59,11 +63,43 @@ class ExportSection private (
   val exportEntries: List[ExportEntry],
   val offset: Long,
   val secLoader: SectionLoader,
-  val invalidExportCount: Integer) extends SpecialSection {
+  val invalidExportCount: Integer,
+  private val dllName: String,
+  private val dllNameLocation: Option[PhysicalLocation],
+  private val forwarderLocations: Map[Long, PhysicalLocation]) extends SpecialSection {
 
   override def getOffset(): Long = offset
 
   override def isEmpty(): Boolean = exportEntries.isEmpty
+
+  /**
+   * @return the name of the DLL that the export directory points to, empty if
+   *         it points to none or the name is too long to be read
+   */
+  def getDllName(): String = dllName
+
+  /**
+   * @return the location of the name of the DLL including its zero terminator,
+   *         empty if the export directory points to no name in the file
+   */
+  def maybeGetDllNameLocation(): java.util.Optional[PhysicalLocation] = toOptional(dllNameLocation)
+
+  /**
+   * Returns the location of the forwarder string of an export, e.g.
+   * NTDLL.RtlAllocateHeap. The string itself is {@link ExportEntry#maybeGetForwarder}.
+   *
+   * @param entry an export of this section
+   * @return the location of the forwarder string including its zero terminator,
+   *         empty if the export is not forwarded or the string is not in the file
+   */
+  def maybeGetForwarderLocation(entry: ExportEntry): java.util.Optional[PhysicalLocation] =
+    toOptional(if (entry.forwarded) forwarderLocations.get(entry.symbolRVA) else None)
+
+  private def toOptional(location: Option[PhysicalLocation]): java.util.Optional[PhysicalLocation] =
+    location match {
+      case Some(l) => java.util.Optional.of(l)
+      case None => java.util.Optional.empty()
+    }
 
   /**
    * @return physical location of all ASCII strings with export names
@@ -81,15 +117,18 @@ class ExportSection private (
     List(new PhysicalLocation(ordinalTable.fileOffset, ordinalTable.size)).asJava
 
   /**
-   * @return all physical export locations including tables and ASCII strings with export names
+   * @return all physical export locations including tables, ASCII strings with export names, the name of the DLL and
+   *         the forwarder strings, ordered by offset
    */
   def getPhysicalLocations(): java.util.List[PhysicalLocation] = if (isEmpty) List[PhysicalLocation]().asJava else
     Location.mergeContinuous(
-      List(new PhysicalLocation(edataTable.fileOffset, edataTable.size),
+      (List(new PhysicalLocation(edataTable.fileOffset, edataTable.size),
         new PhysicalLocation(exportAddressTable.fileOffset, exportAddressTable.getSize),
         new PhysicalLocation(namePointerTable.fileOffset, namePointerTable.size),
         new PhysicalLocation(ordinalTable.fileOffset, ordinalTable.size))
-        ::: nameLocations).asJava
+        ::: dllNameLocation.toList ::: nameLocations ::: forwarderLocations.values.toList)
+        // only neighbors are merged, and linkers put the forwarder strings between the export names
+        .sortBy(l => (l.from, l.size))).asJava
 
   /**
    * Returns the export directory table which contains general information and
@@ -214,8 +253,50 @@ object ExportSection {
     val ordinalTable = loadOrdinalTable(edataTable, mmBytes, li.va, offset)
     val exportEntries = loadExportEntries(li, namePointerTable, ordinalTable,
       exportAddressTable, edataTable)
+    val (dllName, dllNameLocation) = loadDllName(edataTable, mmBytes)
+    val forwarderLocations = loadForwarderLocations(exportEntries, mmBytes)
     new ExportSection(edataTable, exportAddressTable, namePointerTable,
-      ordinalTable, exportEntries, offset, li.loader, invalidExportCount)
+      ordinalTable, exportEntries, offset, li.loader, invalidExportCount, dllName, dllNameLocation,
+      forwarderLocations)
+  }
+
+  /**
+   * Reads the name of the DLL that the export directory points to.
+   *
+   * @return the name, empty if there is none or it is too long to be read, and
+   *         the location of the name with its zero terminator if it is in the file
+   */
+  private def loadDllName(edataTable: ExportDirectory,
+    mmBytes: MemoryMappedPE): (String, Option[PhysicalLocation]) = {
+    val nameRVA = edataTable(NAME_RVA)
+    if (nameRVA == 0) {
+      ("", None)
+    } else {
+      val nullindex = mmBytes.indexWhere(_ == 0, nameRVA)
+      val name = if (nullindex < nameRVA || nullindex - nameRVA > ExportNamePointerTable.maxNameLength) ""
+        else new String(mmBytes.slice(nameRVA, nullindex))
+      (name, stringLocation(nameRVA, mmBytes))
+    }
+  }
+
+  /**
+   * @return the locations of the forwarder strings with their zero terminators
+   *         by the RVA of the string, for the strings that are in the file
+   */
+  private def loadForwarderLocations(entries: List[ExportEntry],
+    mmBytes: MemoryMappedPE): Map[Long, PhysicalLocation] =
+    entries.filter(_.forwarded).map(_.symbolRVA).distinct.flatMap(rva =>
+      stringLocation(rva, mmBytes).map(rva -> _)).toMap
+
+  /**
+   * @return the file location of the zero terminated string at the RVA, None if
+   *         it has no terminator or is not in the file
+   */
+  private def stringLocation(rva: Long, mmBytes: MemoryMappedPE): Option[PhysicalLocation] = {
+    val nullindex = mmBytes.indexWhere(_ == 0, rva)
+    if (nullindex < rva) None
+    else mmBytes._virtToPhysAddresses(rva).headOption.map(raw =>
+      new PhysicalLocation(raw, nullindex - rva + 1L))
   }
 
   /**

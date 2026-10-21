@@ -149,6 +149,10 @@ public enum RegionType {
     EXPORT_ORDINAL_TABLE("Export Ordinal Table", ColorableItem.EXPORT_SECTION, NONE, 2),
     /** the name of an exported function */
     EXPORT_NAME("Export Name", ColorableItem.EXPORT_SECTION, NONE, 3),
+    /** the name of the DLL that the export directory points to */
+    EXPORT_DLL_NAME("Export DLL Name", ColorableItem.EXPORT_SECTION, NONE, 3),
+    /** the forwarder string of a forwarded export, e.g. NTDLL.RtlAllocateHeap */
+    EXPORT_FORWARDER("Export Forwarder", ColorableItem.EXPORT_SECTION, NONE, 3),
     /** a resource directory table with its entries */
     RESOURCE_DIRECTORY_TABLE("Resource Directory Table", ColorableItem.RESOURCE_SECTION, NONE, 2),
     /** a 16 byte resource data entry */

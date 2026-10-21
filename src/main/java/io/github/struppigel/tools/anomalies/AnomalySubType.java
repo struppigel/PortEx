@@ -183,6 +183,12 @@ public enum AnomalySubType {
      */
     NOT_SEC_ALIGNED_SIZE_OF_IMAGE(WRONG),
     /**
+     * The checksum is set, but differs from the checksum of the file, e.g. because the file was modified after
+     * linking. A checksum of 0 means it is not set. The loader checks it for drivers, DLLs loaded at boot time and
+     * DLLs loaded into critical processes.
+     */
+    INVALID_CHECKSUM(WRONG),
+    /**
      * Unusual number of data directories.
      */
     UNUSUAL_DATA_DIR_NR(NON_DEFAULT),
@@ -501,8 +507,8 @@ public enum AnomalySubType {
     /*
      * The following subtypes of the CLI header, the metadata root and the #~ stream header follow one rule: a value
      * the runtime rejects is WRONG (or RESERVED/STRUCTURE by kind of field), one it accepts is NON_DEFAULT unless
-     * ECMA-335 forbids it. Runtime = .NET Framework 4.8.1 on Windows 10.0.26200, one property changed in a clean
-     * executable, rows in src/test/resources/runtime-acceptance/clr-runtime-acceptance.tsv.
+     * ECMA-335 forbids it. Runtime = .NET Framework 4.8.1 on Windows 10.0.26200, tested by changing one property of a
+     * clean executable.
      */
 
     /**

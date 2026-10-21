@@ -39,7 +39,9 @@ public class PortExAnalyzerCliTest {
         Path inputFile = Files.createTempFile("portex-non-pe-input", ".bin");
         try {
             Files.write(inputFile, new byte[] {1, 2, 3, 4});
-            assertExitCode(1, inputFile.toString());
+            String output = assertExitCode(1, inputFile.toString());
+            assertTrue(output.contains("The given file is no PE file!"), output);
+            assertFalse(output.contains("--repair"), output);
         } finally {
             Files.deleteIfExists(inputFile);
         }
@@ -235,6 +237,12 @@ public class PortExAnalyzerCliTest {
     @Test
     public void unknownOptionReturnsFailure() throws Exception {
         assertExitCode(1, "--unknown-option");
+    }
+
+    @Test
+    public void repairOptionWasRemoved() throws Exception {
+        String output = assertExitCode(1, "--repair", WINRAR);
+        assertTrue(output.contains("Unknown option --repair"), output);
     }
 
     @Test

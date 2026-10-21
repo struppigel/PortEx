@@ -79,6 +79,12 @@ public class PEDataTest {
     }
 
     @Test
+    public void loadExportDllName() {
+        assertEquals(pedata.get("Lab17-02dll").loadExportDllName(), "xdll.dll");
+        assertEquals(pedata.get("smallest-pe.exe").loadExportDllName(), "", "no exports");
+    }
+
+    @Test
     public void hasGroupIcon(){
         assertTrue(pedata.get("WMIX.exe").hasGroupIcon());
         assertFalse(pedata.get("smallest-pe.exe").hasGroupIcon());

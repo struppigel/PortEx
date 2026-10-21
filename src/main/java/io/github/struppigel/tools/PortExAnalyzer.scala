@@ -107,16 +107,6 @@ object PortExAnalyzer {
           exitCode = 1
         }
       }
-      if (options.contains('repair)) {
-        val inFile = new File(options('repair))
-        val outFile = new File(options('repair) + ".repaired")
-        if (inFile.exists) {
-          PEAutoRepair.apply(inFile, outFile).repair()
-        } else {
-          System.err.println("file doesn't exist")
-          exitCode = 1
-        }
-      }
       if (options.contains('sigs) && !new File(options('sigs)).isDirectory) {
         System.err.println("Signature folder not found: " + new File(options('sigs)).getAbsolutePath)
         exitCode = 1
@@ -170,8 +160,7 @@ object PortExAnalyzer {
               if (options.contains('output)) {
                 writeFileTypeReport(file, new File(options('output)), userSignatures)
               } else {
-                println("The given file is no PE file!" + NL + file.getAbsolutePath + NL +
-                  "Try '--repair' option if you think it is a broken PE." + NL)
+                println("The given file is no PE file!" + NL + file.getAbsolutePath + NL)
                 print(fileTypeReport(file, userSignatures))
               }
             }
@@ -517,8 +506,7 @@ object PortExAnalyzer {
     }
 
     using(new FileWriter(outFile, true)) { fw =>
-      fw.write("The given file is no PE file!" + NL +
-        "Try '--repair' option if you think it is a broken PE." + NL)
+      fw.write("The given file is no PE file!" + NL)
       fw.write(fileTypeReport(file, userSignatures))
     }
   }
@@ -565,8 +553,6 @@ object PortExAnalyzer {
         nextOption(map += ('all -> ""), tail)
       case "--all" :: tail =>
         nextOption(map += ('all -> ""), tail)
-      case "--repair" :: value :: tail =>
-        nextOption(map += ('repair -> value), tail)
       case "--dump" :: value :: tail =>
         nextOption(map += ('dump -> value), tail)
       case "-o" :: value :: tail =>

@@ -272,6 +272,28 @@ public class StructureMapTest {
         assertEquals(map.getRegions(RegionType.EXPORT_NAME_POINTER_TABLE).size(), 1);
         assertEquals(map.getRegions(RegionType.EXPORT_ORDINAL_TABLE).size(), 1);
         assertEquals(map.getRegions(RegionType.EXPORT_NAME).get(0).getName(), "installer");
+        List<FileRegion> dllNames = map.getRegions(RegionType.EXPORT_DLL_NAME);
+        assertEquals(dllNames.size(), 1);
+        FileRegion dllName = dllNames.get(0);
+        String name = dllName.getAttributes().get(FileRegion.ATTR_DLL_NAME);
+        assertEquals(dllName.getEnd() - dllName.getStart(), name.length() + 1L, name);
+        assertEquals(dllName.getParent().get().getType(), RegionType.EXPORT_SECTION);
+        assertTrue(dllName.getParent().get().contains(dllName.getStart()), "the exports cover the name");
+    }
+
+    @Test
+    public void forwardedExportsInFineDetail() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/corkami/dllfw.dll"));
+        StructureMap map = new StructureMapBuilder(data).withDetail(Detail.FINE).build();
+
+        List<FileRegion> forwarders = map.getRegions(RegionType.EXPORT_FORWARDER);
+        assertEquals(forwarders.size(), 1);
+        FileRegion forwarder = forwarders.get(0);
+        assertEquals(forwarder.getName(), "msvcrt.printf", "named by the forwarder string");
+        assertEquals(forwarder.getEnd() - forwarder.getStart(), "msvcrt.printf".length() + 1L);
+        assertNotNull(forwarder.getAttributes().get(FileRegion.ATTR_ORDINAL), forwarder.getAttributes().toString());
+        assertEquals(forwarder.getParent().get().getType(), RegionType.EXPORT_SECTION);
+        assertTrue(forwarder.getParent().get().contains(forwarder.getStart()), "the exports cover the string");
     }
 
     @Test

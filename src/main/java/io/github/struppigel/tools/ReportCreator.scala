@@ -64,8 +64,6 @@ class ReportCreator(private val data: PEData, userSignatures: SignatureScanner) 
     s"file size ${hexString(data.getFile.length)}" + NL +
     s"full path ${data.getFile.getAbsolutePath}" + NL + NL
 
-  private var checksumDescription = ""
-
   private var showAll = false
 
   // created here to not scan for them several times
@@ -598,7 +596,9 @@ class ReportCreator(private val data: PEData, userSignatures: SignatureScanner) 
   def exportsReport(): String = {
     val exports = data.loadExports().asScala
     if(exports.isEmpty) return ""
-    NL + title("Exports") + NL + exports.mkString(NL) + NL
+    val dllName = data.loadExportDllName()
+    val dllNameLine = if (dllName.isEmpty) "" else "DLL name: " + dllName + NL + NL
+    NL + title("Exports") + NL + dllNameLine + exports.mkString(NL) + NL
   }
 
   /**
@@ -719,7 +719,6 @@ class ReportCreator(private val data: PEData, userSignatures: SignatureScanner) 
     if (descriptions.isEmpty) ""
     else title("Anomalies") + NL +
       "Total anomalies: " + anomalies.size + NL + NL +
-      (if (showAll && checksumDescription != "") "* " + checksumDescription + NL else "") +
       ("* " + descriptions.mkString(NL + "* ")) + NL + NL
   }
 
@@ -860,12 +859,9 @@ class ReportCreator(private val data: PEData, userSignatures: SignatureScanner) 
       else "entry point is not in a section"
     }
 
-    if (showAll) checksumDescription = {
-      val actualChecksum = ChecksumVerifier.computeChecksum(data)
-      val headerChecksum = data.getOptionalHeader.get(WindowsEntryKey.CHECKSUM)
-      if (actualChecksum == headerChecksum) "Checksum is valid!" else
-        "Checksum is invalid. Actual checksum is " + hexString(actualChecksum)
-    }
+    // computed by the anomaly scan already
+    val checksum = data.loadChecksumCheck()
+    val checksumDescription = if (checksum.isPresent) checksum.get.getDescription else "Checksum could not be computed"
 
     val linkerversion = opt.getLinkerVersionDescription
 

@@ -80,6 +80,8 @@ public final class FileRegion {
     public static final String ATTR_VALUE = "Value";
     /** attribute key for the name of an imported or exported function */
     public static final String ATTR_FUNCTION = "Function";
+    /** attribute key for the ordinal of an exported function */
+    public static final String ATTR_ORDINAL = "Ordinal";
     /** attribute key for the number of rows of a .NET metadata table */
     public static final String ATTR_ROWS = "Rows";
 

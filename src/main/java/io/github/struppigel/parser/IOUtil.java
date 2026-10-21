@@ -527,8 +527,10 @@ public final class IOUtil {
 	 * @throws IOException
 	 */
 	public static byte[] loadBytesOfResource(Resource resource, PEData pedata) throws IOException {
-		return IOUtil.loadBytesSafely(resource.rawBytesLocation().from(), (int) resource.rawBytesLocation().size(),
-				new RandomAccessFile(pedata.getFile(), "r"));
+		try (RandomAccessFile raf = new RandomAccessFile(pedata.getFile(), "r")) {
+			return IOUtil.loadBytesSafely(resource.rawBytesLocation().from(), (int) resource.rawBytesLocation().size(),
+					raf);
+		}
 	}
 
 	/**

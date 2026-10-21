@@ -35,6 +35,13 @@ assembly / assemblyMergeStrategy := {
     (assembly / assemblyMergeStrategy).value(x)
 }
 
+// ship the third-party notices of the bundled signatures in the jar and in PortexAnalyzer.jar
+Compile / resourceGenerators += Def.task {
+  val notices = (Compile / resourceManaged).value / "META-INF" / "THIRD-PARTY-NOTICES.md"
+  IO.copyFile(baseDirectory.value / "THIRD-PARTY-NOTICES.md", notices)
+  Seq(notices)
+}.taskValue
+
 
 lazy val JavaDoc = config("genjavadoc") extend Compile
 

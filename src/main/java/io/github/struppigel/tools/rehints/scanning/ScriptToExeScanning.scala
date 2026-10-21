@@ -16,6 +16,7 @@
 package io.github.struppigel.tools.rehints.scanning
 
 import io.github.struppigel.tools.rehints.{ReHintType}
+import io.github.struppigel.tools.rehints.ReHintScannerUtils.constructAnomaliesForAnySignature
 
 import scala.collection.mutable.ListBuffer
 import io.github.struppigel.parser.IOUtil.NL
@@ -32,7 +33,14 @@ trait ScriptToExeScanning extends ReHintScanner {
   abstract override def scan(): List[ReHint] = {
     val reList = ListBuffer[ReHint]()
     reList ++= _scan()
+    reList ++= scanPS2EXE()
     super.scan ::: reList.toList
+  }
+
+  private def scanPS2EXE(): List[ReHint] = {
+    val anoms = constructAnomaliesForAnySignature(data, "PS2EXE")
+    if (anoms.nonEmpty) StandardReHint(anoms.asJava, ReHintType.PS2EXE_RE_HINT) :: Nil
+    else Nil
   }
 
   private def _scan(): List[ReHint] = {

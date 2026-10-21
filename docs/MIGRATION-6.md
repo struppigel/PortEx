@@ -4,8 +4,13 @@ PortEx 6 replaces the signature scanner. The new scanner is faster, matches
 patterns at locations like the entry point, the overlay, resources, sections or
 .NET streams, and reads all bundled signatures from one database format.
 
-All breaking changes of PortEx 6 are in signature scanning. If your code does
-not use signatures, upgrading only needs the new version number. Otherwise,
+PortEx 6 requires Java 17 and no longer depends on Guava. The Java 17
+requirement needs no code changes. Methods that returned the Guava `Optional`
+return `java.util.Optional` now, see [Java 17 and Guava](#java-17-and-guava).
+
+The other breaking changes of PortEx 6 are in signature scanning. If your code
+does not use signatures, upgrading only needs the new version number and the
+changes for `Optional`. Otherwise,
 this guide shows the replacement for every removed class and method. The
 signature format itself is described in [SIGNATURES.md](SIGNATURES.md).
 
@@ -15,6 +20,7 @@ report section for signed files.
 
 * [Quick reference](#quick-reference)
 * [Dependency](#dependency)
+* [Java 17 and Guava](#java-17-and-guava)
 * [Signatures of a PEData](#signatures-of-a-pedata)
 * [MatchedSignature becomes SignatureMatch](#matchedsignature-becomes-signaturematch)
 * [Signature names](#signature-names)
@@ -34,6 +40,8 @@ report section for signed files.
 
 | PortEx 5 | PortEx 6 |
 |---|---|
+| Java 8 or higher | Java 17 or higher |
+| `com.google.common.base.Optional` as return type of `maybe...` methods | `java.util.Optional` |
 | `PEData.getSignatures()` | `PEData.getSignatureMatches()` |
 | `PEData.getPEIDSignatures()` | `PEData.getSignatureMatches(LocationKind.ENTRY_POINT, LocationKind.SECTION)` |
 | `PEData.getOverlaySignatures()` | `PEData.getSignatureMatches(LocationKind.OVERLAY)` |
@@ -67,6 +75,71 @@ sbt:
 ```scala
 libraryDependencies += "io.github.struppigel" % "portex_2.12" % "6.0.0"
 ```
+
+## Java 17 and Guava
+
+### Java 17
+
+The Java classes of PortEx 6 are compiled for Java 17, so PortEx needs a
+runtime of Java 17 or higher. PortEx 5 ran on Java 8. The Scala classes keep
+the bytecode level of Scala 2.12, but use only the Java 17 API.
+
+### Guava is removed
+
+PortEx 5 depended on Guava, and its public API returned the Guava `Optional`.
+PortEx 6 has no dependency on Guava anymore and uses `java.util.Optional`.
+Guava is no longer a transitive dependency of PortEx. If your project used Guava
+through PortEx, declare the dependency yourself.
+
+Change the import and adapt the methods of `Optional` that Guava named
+differently:
+
+| Guava `Optional` | `java.util.Optional` |
+|---|---|
+| `import com.google.common.base.Optional;` | `import java.util.Optional;` |
+| `Optional.absent()` | `Optional.empty()` |
+| `Optional.fromNullable(x)` | `Optional.ofNullable(x)` |
+| `opt.or(default)` | `opt.orElse(default)` |
+| `opt.orNull()` | `opt.orElse(null)` |
+| `opt.transform(f)` | `opt.map(f)` |
+| `opt.asSet()` | `opt.map(Collections::singleton).orElse(Collections.emptySet())` |
+| `isPresent()`, `get()`, `of(x)`, `equals`, `hashCode` | unchanged |
+
+Before:
+
+```java
+import com.google.common.base.Optional;
+
+Optional<ImportSection> imports = new SectionLoader(data).maybeLoadImportSection();
+String description = ImportDLL.getSymbolDescriptionForName(name).get().getDescription().or("");
+```
+
+After:
+
+```java
+import java.util.Optional;
+
+Optional<ImportSection> imports = new SectionLoader(data).maybeLoadImportSection();
+String description = ImportDLL.getSymbolDescriptionForName(name).get().getDescription().orElse("");
+```
+
+These methods changed their return type:
+
+* `SectionLoader`: `maybeLoadSection`, `maybeGetSectionHeader`,
+  `maybeGetFileOffsetFor`, `maybeGetFileOffset`, `maybeGetSectionHeaderByRVA`,
+  `maybeGetSectionHeaderByOffset`, `maybeLoadSpecialSection` and all
+  `maybeLoad...Section` methods, e.g. `maybeLoadImportSection` and
+  `maybeLoadResourceSection`
+* `SectionTable.getSectionHeaderByName`
+* `DataDirEntry.maybeGetSectionTableEntry`
+* `OptionalHeader.maybeGetDataDirEntry` and `maybeGetStandardFieldEntry`
+* `ImportDLL.getSymbolDescriptionForName`, and `SymbolDescription.getDescription`
+  and `getSubCategory`
+* `ExportEntry.maybeGetForwarder`
+* `VersionInfo.getStringFileInfo`
+
+The Guava `@Beta` annotation is removed from the few methods that had it. They
+are still marked as `@Beta` in their Javadoc and may change.
 
 ## Signatures of a PEData
 
@@ -391,6 +464,47 @@ with these intended differences:
 * **Hashing of signed files.** `PEData.loadAll()` and the anomaly scanner now
   verify the signatures of signed files, which reads the whole file once. Both
   can be cancelled with `Thread.interrupt()`.
+* **Checksum of the Optional Header.** The anomaly scanner reports
+  `INVALID_CHECKSUM` (wrong) if the checksum field is set, but differs from the
+  checksum of the file. A checksum of 0 is not set and no anomaly.
+  `PEData.loadChecksumCheck()` computes the checksum once per file, which reads
+  the whole file in chunks. `ReportCreator` shows the result in the Optional
+  Header report, before only with `setShowAll(true)`, and no longer lists it
+  among the anomalies without counting it.
+* **More anomalies for .NET files.** `ClrScanning` checks the fields that
+  ECMA-335 fixes or reserves: CLI header (`CLR_*`), metadata root
+  (`METADATA_ROOT_*`), `#~` header (`TABLES_STREAM_*`), stream headers and heaps,
+  data directories, the import table of IL-only images, method headers and the
+  [ERROR] rules of the tables that need no other table (row counts of Module and
+  Assembly, empty names, Mvid, duplicate and looping TypeDef rows, list indices
+  and Extends of TypeDef, MethodDef flags and duplicate methods).
+  The types follow the thesis definitions: a value the runtime rejects is wrong,
+  one it accepts is non-default unless the specification forbids it. Evidence is
+  in the Javadoc of each subtype. Genuine Microsoft assemblies trigger a few of
+  them (`CLR_UNUSUAL_ILONLY_CLEARED` for ReadyToRun and mixed mode images,
+  `TABLES_STREAM_RESERVED_SET` for the second reserved byte), so treat them as
+  hints. `FileScoring` ignores subtypes without a probability entry.
+* **Malformed .NET metadata.** An undefined table bit in `#~`, a truncated
+  `#~` header or huge stream sizes no longer throw or allocate gigabytes, the
+  `#~` stream is `Optional.empty()` if its header cannot be read.
+  `OptimizedStreamKey.RESERVED_ONE` is the new key for the second reserved byte
+  and `StreamHeader.getHeaderSize` includes the zero terminator of the name.
+  The offsets of the fields of a table row (`CLRTableEntry`) were those of the
+  first row for every row, they are the offsets of the row itself now.
+* **Locations of section names and export names.** The offsets of the fields of
+  every `SectionHeader` and `SectionHeader.getNameOffset()` were those of the
+  first section header, they are those of the header itself now.
+  `SectionNameAnomaly` marks the 8 byte name field of its section.
+  `ExportSection.getPhysicalLocations()` covers the whole export names including
+  the zero terminator, before it covered the first 4 bytes of each name. It also
+  covers the name of the DLL that the export directory points to, which
+  `ExportSection.getDllName()` and `maybeGetDllNameLocation()` return, and the
+  forwarder strings of forwarded exports, see
+  `ExportSection.maybeGetForwarderLocation(ExportEntry)`. The locations are
+  ordered by offset now.
+  `ImportSection.getPhysicalLocations()`, `DirectoryEntry.getPhysicalLocations()`
+  and `ImportDLL.getLocations()` include the name of the imported DLL, before
+  they did not.
 
 ## Removed classes and methods
 
@@ -472,6 +586,22 @@ for (FileRegion region : map.regionsAt(0x80)) {
 }
 ```
 
+Files that are no PE files, or cannot be parsed as one, can still be
+visualized. `StructureMapBuilder.forUnparsedFile(file)` creates a map that only
+has the signature matches, anomalies and custom regions you add, and
+`StructureMap.empty(length)` one without regions:
+
+```java
+List<SignatureMatch> matches = DefaultSignatures.scanFile(file); // file and eof locations
+StructureMap map = StructureMapBuilder.forUnparsedFile(file)
+        .withSignatureMatches(SignatureHit.fromMatches(matches))
+        .build();
+```
+
+The legend of the new renderers titles the structures "Structure" instead of
+"PE Structure", because they may belong to files that are no PE files. The
+legend of the legacy style still reads "PE Structure (right)".
+
 ### PortexAnalyzer
 
 * `-l`, `--loc` and `--location` print all structures at an offset, innermost
@@ -482,6 +612,14 @@ for (FileRegion region : map.regionsAt(0x80)) {
 * `--layout` prints all structures of the file with their ranges.
 * `-p <imagefile> --from <offset> --to <offset>` draws a range of the file;
   ranges of up to 4 KB show hex bytes.
+* `-p <imagefile>` draws the whole file with the new visualizer: byte plot,
+  entropy and structures with offset ruler, legend and anomalies. The picture
+  is fitted to about 1000 pixels height, `-bps` sets the bytes per cell and
+  `--visoverlay` marks the given regions. Pictures differ from those of former
+  versions. `--visoverlay` failed with an error before and works now.
+* `--sigs <folder>` scans with the signatures of the `.sig` files in the folder
+  in addition to the bundled signatures, see
+  [SIGNATURES.md](SIGNATURES.md#a-folder-of-signatures).
 
 ## Authenticode signatures
 
@@ -534,10 +672,10 @@ other anomalies of PortEx:
 
 * data directory entry (`DataDirAnomaly`): `CERT_DIR_NOT_ALIGNED`,
   `CERT_DIR_SIZE_EXCEEDS_FILE`, `CERT_DIR_TOO_SMALL`
-* WIN_CERTIFICATE header fields (`FieldAnomaly`): `CERT_INVALID_LENGTH`,
-  `CERT_INVALID_REVISION`, `CERT_INVALID_TYPE` (wrong),
+* WIN_CERTIFICATE header fields (`FieldAnomaly`): `CERT_INVALID_LENGTH` (wrong),
   `CERT_DEPRECATED_REVISION` (deprecated), `CERT_RESERVED_TYPE` (reserved),
-  `CERT_UNSUPPORTED_TYPE` (non-default)
+  `CERT_UNKNOWN_REVISION`, `CERT_UNKNOWN_TYPE` and `CERT_UNSUPPORTED_TYPE`
+  (non-default)
 * structural malformations (`StructureAnomaly`, key
   `PEStructureKey.CERTIFICATE_TABLE`), e.g. `CERT_TABLE_TRUNCATED`,
   `CERT_TABLE_IN_SECTION`, `CERT_TABLE_NOT_LAST`, `CERT_TABLE_MISPLACED`,

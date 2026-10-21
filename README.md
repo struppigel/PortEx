@@ -20,7 +20,7 @@ PortEx is written in Java and Scala, and targeted at Java applications.
 * Parse RichHeader and verify checksum
 * Parse Authenticode signatures (certificate table, PKCS#7, X.509 certificates, timestamps, nested signatures) and verify their integrity: image digest, message digest, signer and certificate signatures (no trust or revocation checks); malformed and manipulated signatures are reported as anomalies
 * Calculate and verify Optional Header checksum
-* Scan for packer, installer and file type signatures or your own signature database, with patterns tied to locations like the entry point, overlay, resources, sections or .NET streams (see [Signatures](docs/SIGNATURES.md)), and import PEiD databases
+* Scan for packer, protector, cryptor, installer and file type signatures or your own signature database, with patterns tied to locations like the entry point, overlay, resources, sections or .NET streams (see [Signatures](docs/SIGNATURES.md)), and import PEiD databases. The bundled signatures include rules converted from [Detect It Easy](https://github.com/horsicq/Detect-It-Easy)
 * Scan for Jar to EXE wrapper (e.g. exe4j, jsmooth, jar2exe, launch4j)
 * Extract Unicode and ASCII strings contained in the file
 * Extraction and conversion of .ICO files from icons in the resource section
@@ -134,3 +134,5 @@ Youtube: [MalwareAnalysisForHedgehogs](https://www.youtube.com/c/MalwareAnalysis
 
 ## License
 [Apache License, Version 2.0](https://github.com/katjahahn/PortEx/blob/master/LICENSE)
+
+The signature database `die.sig` is converted from the rules of Detect It Easy and is licensed under the MIT License, see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

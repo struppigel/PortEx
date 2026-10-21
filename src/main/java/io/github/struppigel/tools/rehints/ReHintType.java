@@ -51,6 +51,8 @@ public enum ReHintType {
 
     PROCESS_DOPPELGAENGING_INJECTION_HINT("The sample has imports which can be abused for Process Doppelgänging"),
 
+    PS2EXE_RE_HINT("Extract the Powershell script from the .NET resources"),
+
     PYINSTALLER_RE_HINT("This file is a PyInstaller executable. Use pyinstxtractor to extract the python bytecode, then apply a decompiler to the main .pyc"),
 
     SCRIPT_TO_EXE_WRAPPED_RE_HINT("This might be a Script-to-Exe wrapped file, check the resources for a compressed or plain script."),

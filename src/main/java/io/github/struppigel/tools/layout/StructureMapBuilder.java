@@ -52,6 +52,8 @@ import io.github.struppigel.parser.sections.debug.DebugDirectoryKey;
 import io.github.struppigel.parser.sections.debug.DebugSection;
 import io.github.struppigel.parser.sections.edata.ExportDirectory;
 import io.github.struppigel.parser.sections.edata.ExportDirectoryKey;
+import io.github.struppigel.parser.sections.edata.ExportEntry;
+import io.github.struppigel.parser.sections.edata.ExportNameEntry;
 import io.github.struppigel.parser.sections.edata.ExportSection;
 import io.github.struppigel.parser.sections.idata.BoundImportSection;
 import io.github.struppigel.parser.sections.idata.DelayLoadSection;
@@ -89,10 +91,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Builds a {@link StructureMap} of a PE file.
@@ -588,11 +592,19 @@ public final class StructureMapBuilder {
             }
         }
 
-        /** directory, address table, name pointer table, ordinal table and names */
+        /** directory, address table, name pointer table, ordinal table, names, the name of the DLL and forwarders */
         private void mapExportDetails(FileRegion exports, ExportSection section) {
             ExportDirectory directory = section.getExportDirectory();
             long offset = section.getOffset();
             add(exports, RegionType.EXPORT_DIRECTORY, "Export Directory", range(offset, offset + directory.size()));
+            Optional<PhysicalLocation> dllName = section.maybeGetDllNameLocation();
+            if (dllName.isPresent()) {
+                // a name too long to be read is still marked, but has no attribute
+                String name = section.getDllName();
+                add(exports, RegionType.EXPORT_DLL_NAME, "DLL Name", Collections.singletonList(dllName.get()),
+                        name.isEmpty() ? Collections.<String, String>emptyMap()
+                                : attributes(FileRegion.ATTR_DLL_NAME, name));
+            }
             addTable(exports, RegionType.EXPORT_ADDRESS_TABLE, "EAT",
                     directory.get(ExportDirectoryKey.EXPORT_ADDR_TABLE_RVA),
                     directory.get(ExportDirectoryKey.ADDR_TABLE_ENTRIES) * 4);
@@ -612,6 +624,22 @@ public final class StructureMapBuilder {
                     add(exports, RegionType.EXPORT_NAME, function,
                             range(nameOffset.get(), nameOffset.get() + function.length() + 1),
                             attributes(FileRegion.ATTR_FUNCTION, function));
+                }
+            }
+            // several exports can be forwarded with the same string, it is one structure
+            Set<Long> forwarderRvas = new HashSet<>();
+            for (ExportEntry entry : section.getExportEntries()) {
+                checkInterrupt(k++);
+                Optional<PhysicalLocation> location = section.maybeGetForwarderLocation(entry);
+                if (location.isPresent() && forwarderRvas.add(entry.symbolRVA())) {
+                    String forwarder = entry.maybeGetForwarder().get();
+                    Map<String, String> attributes = new LinkedHashMap<>();
+                    if (entry instanceof ExportNameEntry) {
+                        attributes.put(FileRegion.ATTR_FUNCTION, ((ExportNameEntry) entry).name());
+                    }
+                    attributes.put(FileRegion.ATTR_ORDINAL, String.valueOf(entry.ordinal()));
+                    add(exports, RegionType.EXPORT_FORWARDER, forwarder.isEmpty() ? "Forwarder" : forwarder,
+                            Collections.singletonList(location.get()), attributes);
                 }
             }
         }

@@ -104,6 +104,68 @@ public class ExportSectionTest {
     }
 
     @Test
+    public void physicalLocationsCoverTheNameOfTheDll() throws IOException {
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/CVE_2013_3900/CVE_2013_3900"));
+        SectionLoader loader = new SectionLoader(data);
+        ExportSection edata = loader.loadExportSection();
+        long start = loader.getFileOffset(edata.getExportDirectory().get(ExportDirectoryKey.NAME_RVA));
+
+        assertEquals(edata.getDllName(), "winfw.dll");
+        PhysicalLocation name = edata.maybeGetDllNameLocation().get();
+        assertEquals(name.from(), start);
+        assertEquals(name.size(), "winfw.dll".length() + 1, "the name and its zero terminator");
+        List<PhysicalLocation> locations = edata.getPhysicalLocations();
+        for (long position = start; position < start + name.size(); position++) {
+            final long p = position;
+            assertTrue(locations.stream().anyMatch(l -> l.from() <= p && p < l.from() + l.size()),
+                    "byte " + (p - start) + " of the name");
+        }
+    }
+
+    @Test
+    public void physicalLocationsCoverTheForwarderStrings() throws IOException {
+        // exports_doc.exe has an empty forwarder string
+        for (String file : new String[]{"corkami/dllfw.dll", "corkami/dllfwloop.dll", "corkami/exports_doc.exe",
+                "Haus/win_test.dll"}) {
+            PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/" + file));
+            SectionLoader loader = new SectionLoader(data);
+            ExportSection edata = loader.loadExportSection();
+            List<PhysicalLocation> locations = edata.getPhysicalLocations();
+            int forwarders = 0;
+            for (ExportEntry entry : edata.getExportEntries()) {
+                Optional<PhysicalLocation> location = edata.maybeGetForwarderLocation(entry);
+                assertEquals(location.isPresent(), entry.forwarded(), file + " " + entry);
+                if (!location.isPresent()) {
+                    continue;
+                }
+                forwarders++;
+                String forwarder = entry.maybeGetForwarder().get();
+                long start = loader.getFileOffset(entry.symbolRVA());
+                assertEquals(location.get().from(), start, file + " " + forwarder);
+                assertEquals(location.get().size(), forwarder.length() + 1L, file + " " + forwarder);
+                for (long position = start; position < start + location.get().size(); position++) {
+                    final long p = position;
+                    assertTrue(locations.stream().anyMatch(l -> l.from() <= p && p < l.from() + l.size()),
+                            file + " " + forwarder + " byte " + (p - start));
+                }
+            }
+            assertTrue(forwarders > 0, file + " has forwarded exports");
+        }
+    }
+
+    @Test
+    public void physicalLocationsAreOrderedAndMerged() throws IOException {
+        // the forwarder strings are between the export names
+        PEData data = PELoader.loadPE(new File(TestreportsReader.RESOURCE_DIR + "/Haus/win_test.dll"));
+        List<PhysicalLocation> locations = new SectionLoader(data).loadExportSection().getPhysicalLocations();
+        for (int i = 1; i < locations.size(); i++) {
+            PhysicalLocation previous = locations.get(i - 1);
+            assertTrue(previous.from() + previous.size() < locations.get(i).from(), previous + " before "
+                    + locations.get(i));
+        }
+    }
+
+    @Test
     public void forwarderLoopTest() throws IOException {
         File file = new File(TestreportsReader.RESOURCE_DIR
                 + "/corkami/dllfwloop.dll");

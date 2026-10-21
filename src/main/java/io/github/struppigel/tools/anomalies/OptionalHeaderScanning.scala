@@ -68,7 +68,18 @@ trait OptionalHeaderScanning extends AnomalyScanner {
   private def windowsFieldScan(opt: OptionalHeader): List[Anomaly] = {
     checkImageBase(opt) ::: checkSectionAlignment(opt) :::
       checkFileAlignment(opt) ::: checkLowAlignment(opt) :::
-      checkReservedAndDeprecated(opt) ::: checkSizes(opt)
+      checkReservedAndDeprecated(opt) ::: checkSizes(opt) ::: checkChecksum(opt)
+  }
+
+  /** a checksum of 0 is not set, which is the default of linkers */
+  private def checkChecksum(opt: OptionalHeader): List[Anomaly] = {
+    val check = data.loadChecksumCheck()
+    if (check.isPresent && check.get.isInvalid) {
+      val entry = opt.getWindowsFieldEntry(WindowsEntryKey.CHECKSUM)
+      val description = s"Optional Header: checksum is invalid (${hexString(check.get.headerChecksum)}), " +
+        s"the actual checksum is ${hexString(check.get.actualChecksum)}"
+      List(FieldAnomaly(entry, description, INVALID_CHECKSUM))
+    } else Nil
   }
 
   /**
